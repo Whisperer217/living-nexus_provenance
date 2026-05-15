@@ -412,12 +412,12 @@ function TrackCardUI({
 
               {/* AI Disclosure */}
               <div>
-                <label className="text-[10px] font-heading tracking-widest uppercase mb-2 block" style={{ color: "var(--ln-parchment)" }}>AI Disclosure</label>
+                <label className="text-[10px] font-heading tracking-widest uppercase mb-2 block" style={{ color: "var(--ln-parchment)" }}>Creation Disclosure</label>
                 <div className="flex flex-col gap-1.5">
                   {([
                     { value: "original", label: "Original" },
                     { value: "human_authored_ai_instrument", label: "HAAI" },
-                    { value: "ai_assisted", label: "AI Assisted" },
+                    { value: "ai_assisted", label: "Assisted Manifestation" },
                     { value: "ai_generated", label: "AI-Assisted Manifestation" },
                   ] as const).map(opt => (
                     <label key={opt.value} className="flex items-center gap-2 cursor-pointer">
@@ -438,7 +438,7 @@ function TrackCardUI({
               {/* AI Tool Toggles */}
               {(card.aiDisclosure === "ai_assisted" || card.aiDisclosure === "human_authored_ai_instrument" || card.aiDisclosure === "ai_generated") && (
                 <div>
-                  <label className="text-[10px] font-heading tracking-widest uppercase mb-2 block" style={{ color: "var(--ln-parchment)" }}>AI Tools Used</label>
+                  <label className="text-[10px] font-heading tracking-widest uppercase mb-2 block" style={{ color: "var(--ln-parchment)" }}>Tools Used</label>
                   <div className="flex flex-col gap-1.5">
                     {([
                       { key: "aiToolSuno" as const, label: "Suno 5+" },
@@ -583,7 +583,7 @@ export default function BatchUploadPage() {
   if (!authLoading && !isAuthenticated) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
-        <p style={{ color: "var(--ln-smoke)" }}>Sign in to upload music</p>
+        <p style={{ color: "var(--ln-smoke)" }}>Sign in to register music</p>
         <Button
           onClick={() => { window.location.href = getLoginUrl("/batch-upload"); }}
           style={{ background: "var(--ln-gold)", color: "var(--ln-coal)" }}
@@ -905,7 +905,7 @@ export default function BatchUploadPage() {
         <div className="flex items-center gap-3 mb-1">
           <Layers size={20} style={{ color: "var(--ln-gold)" }} />
           <h1 className="text-xl font-bold" style={{ fontFamily: "'Cinzel', serif", color: "#FFFFFF" }}>
-            Batch Upload
+            Batch Register
           </h1>
           <Badge
             className="text-[9px] font-mono"
@@ -1092,7 +1092,7 @@ export default function BatchUploadPage() {
                 </Select>
               </div>
               <div>
-                <p className="text-[10px] mb-1 font-heading tracking-widest uppercase" style={{ color: "var(--ln-parchment)" }}>AI Consent</p>
+                <p className="text-[10px] mb-1 font-heading tracking-widest uppercase" style={{ color: "var(--ln-parchment)" }}>Training Consent</p>
                 <Select value={batchAiConsent} onValueChange={v => setBatchAiConsent(v as TrackCard["aiConsent"])}>
                   <SelectTrigger
                     className="h-9 text-xs"
@@ -1110,14 +1110,14 @@ export default function BatchUploadPage() {
                 </Select>
               </div>
             </div>
-            {/* AI Disclosure batch */}
+            {/* Creation Disclosure batch */}
             <div className="border-t pt-3" style={{ borderColor: "rgba(196,154,40,0.2)" }}>
-              <p className="text-[10px] mb-2 font-heading tracking-widest uppercase" style={{ color: "var(--ln-parchment)" }}>AI Disclosure (Repeat Across Tracks)</p>
+              <p className="text-[10px] mb-2 font-heading tracking-widest uppercase" style={{ color: "var(--ln-parchment)" }}>Creation Disclosure (Repeat Across Tracks)</p>
               <div className="grid grid-cols-2 gap-2 mb-2">
                 {([
                   { value: "original", label: "Original" },
                   { value: "human_authored_ai_instrument", label: "HAAI" },
-                  { value: "ai_assisted", label: "AI Assisted" },
+                  { value: "ai_assisted", label: "Assisted Manifestation" },
                   { value: "ai_generated", label: "AI-Assisted Manifestation" },
                 ] as const).map(opt => (
                   <label key={opt.value} className="flex items-center gap-2 cursor-pointer">

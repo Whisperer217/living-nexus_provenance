@@ -997,7 +997,7 @@ export default function HomePage() {
               </p>
 
               <p className="text-[13px] font-body leading-relaxed mb-4" style={{ color: "#A09880" }}>
-                In an era where AI systems train on uncredited work and platforms routinely strip creator
+                In an era where automated systems train on uncredited work and platforms routinely strip creator
                 metadata, a Founder's Era WID is a timestamped declaration of origin. It says:{" "}
                 <em style={{ color: "#C49A28" }}>
                   "I was here. This is mine. The record proves it."
@@ -1478,10 +1478,10 @@ export default function HomePage() {
               <Sparkles className="w-7 h-7" style={{ color: "#A78BFA" }} />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[10px] font-mono tracking-widest uppercase mb-1" style={{ color: "rgba(167,139,250,0.6)" }}>AI Tool</p>
+              <p className="text-[10px] font-mono tracking-widest uppercase mb-1" style={{ color: "rgba(167,139,250,0.6)" }}>Creator Tool</p>
               <h3 className="font-heading text-[18px] font-bold text-white mb-1">Prompt Studio</h3>
               <p className="text-sm leading-relaxed" style={{ color: "rgba(229,231,235,0.75)" }}>
-                Turn your lyrics into a production-ready AI music prompt. The generator builds a lyric sheet &rarr; instrumentation cue &rarr; timing map pipeline — then pre-fills your upload form so you can register the work immediately.
+                Turn your lyrics into a production-ready music prompt. The generator builds a lyric sheet &rarr; instrumentation cue &rarr; timing map pipeline — then pre-fills your registration form so you can witness the work immediately.
               </p>
             </div>
             <Link href={(user as any)?.id ? `/creator/${(user as any).id}?openPromptStudio=1` : getLoginUrl()}>
@@ -1531,7 +1531,7 @@ export default function HomePage() {
                   ["Cryptographic WID provenance", "✗", "✗", "✓"],
                   ["Creator owns the timestamp", "✗", "Partial", "✓"],
                   ["Multi-medium registry (music, lyrics, manuscript, comic)", "✗", "✗", "✓"],
-                  ["AI Prompt Studio (lyric → production prompt)", "✗", "✗", "✓"],
+                  ["Prompt Studio (lyric → production prompt)", "✗", "✗", "✓"],
                   ["Direct tipping / creator commerce", "✗", "Partial", "✓"],
                   ["OG-optimized share pipeline (Discord / X)", "✓", "Partial", "✓"],
                   ["Platform takes revenue cut", "Yes (30%+)", "Yes (15%+)", "10% tip fee only"],
@@ -1557,9 +1557,9 @@ export default function HomePage() {
           {/* Three value pillars */}
           <div className="museum-grid mt-6">
             {[
-              { icon: Fingerprint, color: "#F5C451", bg: "rgba(245,196,81,0.08)", border: "rgba(245,196,81,0.2)", title: "Your Work, Witnessed", body: "Every upload receives a Witness ID — a cryptographic timestamp that proves you created it first. Not a certificate. A deed." },
+              { icon: Fingerprint, color: "#F5C451", bg: "rgba(245,196,81,0.08)", border: "rgba(245,196,81,0.2)", title: "Your Work, Witnessed", body: "Every registration receives a Witness ID — a cryptographic timestamp that proves you created it first. Not a certificate. A deed." },
               { icon: ShieldCheck, color: "#4ade80", bg: "rgba(74,222,128,0.06)", border: "rgba(74,222,128,0.18)", title: "Creator-First Commerce", body: "Direct tipping and Living Archive subscriptions. The platform takes 10% on tips only. Everything else is yours." },
-              { icon: Sparkles, color: "#A78BFA", bg: "rgba(167,139,250,0.06)", border: "rgba(167,139,250,0.18)", title: "AI Tools That Serve You", body: "Prompt Studio turns your lyrics into a production-ready AI music prompt. The WID goes on the output — you stay the origin." },
+              { icon: Sparkles, color: "#A78BFA", bg: "rgba(167,139,250,0.06)", border: "rgba(167,139,250,0.18)", title: "Creator Tools That Serve You", body: "Prompt Studio turns your lyrics into a production-ready music prompt. The WID goes on the output — you stay the origin." },
             ].map(({ icon: Icon, color, bg, border, title, body }) => (
               <div
                 key={title}

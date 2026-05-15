@@ -1180,7 +1180,7 @@ export default function ExplorePage() {
                 <div className="text-5xl mb-4">🔮</div>
                 <div className="font-heading text-[17px] text-white/50 mb-2">No tracks found</div>
                 <div className="text-[13px] font-body">
-                  {query || activeGenre !== "All" ? "Try a different search term or genre" : "No songs uploaded yet — be the first!"}
+                  {query || activeGenre !== "All" ? "Try a different search term or genre" : "No songs registered yet — be the first!"}
                 </div>
               </>
             )}

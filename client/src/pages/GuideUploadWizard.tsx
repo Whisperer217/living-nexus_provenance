@@ -80,7 +80,7 @@ const DEFAULT_FORM: GuideFormData = {
 // ─── Step Indicator ───────────────────────────────────────────────────────────
 
 const STEPS = [
-  { num: 1, label: "UPLOAD SHEET", sub: "Upload provenance sheet & artwork" },
+  { num: 1, label: "SUBMIT SHEET", sub: "Submit provenance sheet & artwork" },
   { num: 2, label: "EXTRACT & PREVIEW", sub: "We extract the key details" },
   { num: 3, label: "REVIEW & CONFIRM", sub: "Confirm extracted information" },
   { num: 4, label: "RIGHTS & PERMISSIONS", sub: "Set usage rights & preferences" },
@@ -183,8 +183,8 @@ function Step1Upload({
       <div className="panel-header">
         <span className="step-badge">1</span>
         <div>
-          <h2 className="panel-title">UPLOAD PROVENANCE SHEET</h2>
-          <p className="panel-sub">Upload your provenance sheet and character artwork.</p>
+          <h2 className="panel-title">SUBMIT PROVENANCE SHEET</h2>
+          <p className="panel-sub">Submit your provenance sheet and character artwork.</p>
         </div>
       </div>
 
@@ -318,7 +318,7 @@ function Step2Extract({
       {!extracted ? (
         <div className="text-center py-12">
           <div className="text-5xl mb-4">⚙️</div>
-          <p className="text-[#C9A84C]/80 mb-2">AI extraction engine ready</p>
+          <p className="text-[#C9A84C]/80 mb-2">Extraction engine ready</p>
           <p className="text-[#6b5f3e] text-sm mb-6">Click below to analyze your provenance sheet and extract guide details automatically.</p>
           <Button className="btn-gold" onClick={handleExtract} disabled={extracting}>
             {extracting ? (
@@ -1002,8 +1002,8 @@ export default function GuideUploadWizard() {
               <h3 className="text-[#C9A84C] text-xs font-bold tracking-wider uppercase mb-4">HOW THE SYSTEM WORKS</h3>
               <div className="flex items-start gap-2 flex-wrap">
                 {[
-                  { icon: "📄", label: "Upload Provenance Sheet\nYou upload your sheet and artwork" },
-                  { icon: "⚙️", label: "AI Extracts Information\nWe extract key data and imagery" },
+                  { icon: "📄", label: "Submit Provenance Sheet\nYou submit your sheet and artwork" },
+                  { icon: "⚙️", label: "System Extracts Information\nWe extract key data and imagery" },
                   { icon: "✓", label: "You Review & Confirm\nYou choose how to confirm the extracted data" },
                   { icon: "⚖️", label: "Set Rights & Permissions\nYou choose how your guide can be used" },
                   { icon: "💳", label: "Connect Stripe\nSecure payouts for you automatically" },

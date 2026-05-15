@@ -251,7 +251,7 @@ export default function DashboardPage() {
             },
             {
               num: 3,
-              label: "Upload your first work and receive your WID",
+              label: "Register your first work and receive your WID",
               done: false,
               cta: (
                 <Link href="/upload">
@@ -668,10 +668,10 @@ export default function DashboardPage() {
             ) : !songs?.length ? (
               <div className="text-center py-16 rounded-xl" style={{ background: "var(--ln-coal)", border: "1px dashed #C3AB7D" }}>
                 <Music className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "var(--ln-gold)" }} />
-                <p className="text-sm mb-2" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>Upload your first piece and get your WID</p>
+                <p className="text-sm mb-2" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>Register your first work and receive your WID</p>
                 <p className="text-xs mb-4" style={{ color: "var(--ln-smoke)" }}>Every work you upload receives a cryptographic Witness ID — your permanent proof of origin.</p>
                 <Link href="/upload">
-                  <Button style={{ background: "var(--ln-gold)", color: "var(--ln-parchment)" }}>Upload &amp; Witness Your Work</Button>
+                  <Button style={{ background: "var(--ln-gold)", color: "var(--ln-parchment)" }}>Register &amp; Witness Your Work</Button>
                 </Link>
               </div>
             ) : (
@@ -899,7 +899,7 @@ export default function DashboardPage() {
                     className="px-4 py-2 rounded-lg text-sm font-semibold"
                     style={{ background: "var(--ln-gold)", color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}
                   >
-                    Upload Your First Collection
+                    Register Your First Collection
                   </button>
                 </Link>
               </div>

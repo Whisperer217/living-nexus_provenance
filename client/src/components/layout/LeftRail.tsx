@@ -24,7 +24,7 @@ const RAIL_ITEMS: Array<{ id: NavMode; icon: React.ElementType; label: string; p
   { id: "home",    icon: Home,    label: "Home",    path: "/"        },
   { id: "explore", icon: Compass, label: "Explore", path: "/explore" },
   { id: "profile", icon: User,    label: "Profile", path: "/profile" },
-  { id: "upload",  icon: Upload,  label: "Upload",  path: "/upload"  },
+  { id: "upload",  icon: Upload,  label: "Register",  path: "/upload"  },
   { id: "archive", icon: Archive, label: "Archive", path: "/archive" },
 ];
 

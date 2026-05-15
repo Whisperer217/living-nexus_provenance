@@ -33,9 +33,9 @@ import {
 } from "@shared/contentTypes";
 
 const AI_CONSENT_OPTIONS = [
-  { value: "prohibited" as const, label: "AI Training PROHIBITED", color: "var(--ln-ember)", activeColor: "rgba(239,68,68,0.12)", activeBorder: "rgba(239,68,68,0.4)", desc: "No AI system may train on this work" },
-  { value: "permitted_attribution" as const, label: "Permitted with Attribution", color: "var(--ln-gold)", activeColor: "rgba(196,154,40,0.08)", activeBorder: "rgba(196,154,40,0.4)", desc: "AI training allowed only with full credit" },
-  { value: "permitted" as const, label: "Freely Permitted", color: "var(--ln-gold)", activeColor: "rgba(196,154,40,0.06)", activeBorder: "rgba(196,154,40,0.3)", desc: "Open for AI training and derivative use" },
+  { value: "prohibited" as const, label: "Training PROHIBITED", color: "var(--ln-ember)", activeColor: "rgba(239,68,68,0.12)", activeBorder: "rgba(239,68,68,0.4)", desc: "No system may train on this work" },
+  { value: "permitted_attribution" as const, label: "Permitted with Attribution", color: "var(--ln-gold)", activeColor: "rgba(196,154,40,0.08)", activeBorder: "rgba(196,154,40,0.4)", desc: "Training allowed only with full attribution" },
+  { value: "permitted" as const, label: "Freely Permitted", color: "var(--ln-gold)", activeColor: "rgba(196,154,40,0.06)", activeBorder: "rgba(196,154,40,0.3)", desc: "Open for training and derivative use" },
 ];
 
 async function sha256Hex(buffer: ArrayBuffer): Promise<string> {
@@ -478,7 +478,7 @@ export default function UploadPage() {
 <body><div class="cert"><div class="header"><div class="org">COMMAND DOMAINS LLC / BDDT PUBLISHING — SOVEREIGN SHUTTER™ FRAMEWORK</div><div class="title">MUSIC WITNESS CERTIFICATE</div></div>
 <div class="body"><div class="wid-box"><div class="wid-label">WITNESS ID</div><div class="wid-value">${witnessData.wid}</div></div>
 <div class="grid"><div class="field"><div class="field-label">CREATOR</div><div class="field-value">${user?.name || "—"}</div></div><div class="field"><div class="field-label">SONG TITLE</div><div class="field-value">${title || "—"}</div></div><div class="field"><div class="field-label">ALBUM</div><div class="field-value">${albumName || "—"}</div></div><div class="field"><div class="field-label">GENRE</div><div class="field-value">${genre || "—"}</div></div><div class="field"><div class="field-label">BPM / KEY</div><div class="field-value">${bpm || "—"} / ${keySignature || "—"}</div></div><div class="field"><div class="field-label">RELEASE DATE</div><div class="field-value">${releaseDate || "—"}</div></div><div class="field"><div class="field-label">BMI MEMBER #</div><div class="field-value">${bmiNumber || "—"}</div></div><div class="field"><div class="field-label">ISRC CODE</div><div class="field-value">${isrc || "—"}</div></div></div>
-<div class="consent-box"><div class="consent-label">⚡ AI CONSENT: ${consentLabel}</div></div>
+<div class="consent-box"><div class="consent-label">⚡ CREATION CONSENT: ${consentLabel}</div></div>
 <div class="section-title">HARMONIC FREQUENCY SIGNATURE</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px">${freqChips}</div>
 <div class="section-title">SHA-256 FILE HASH</div><div class="mono-block">${witnessData.fileHash}</div>
 <div class="section-title">ECDSA P-256 PUBLIC KEY (JWK)</div><div class="mono-block">${witnessData.publicKeyJWK}</div>
@@ -774,10 +774,10 @@ export default function UploadPage() {
           <div className="flex items-start justify-between gap-4">
             <div>
               <h1 className="text-2xl md:text-3xl font-bold mb-1" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>
-                {uploadMode === "audio" ? "Upload Track" : uploadMode === "lyrics" ? "Upload Lyrics" : uploadMode === "manuscript" ? "Upload Manuscript" : "Upload Comic / Novel"}
+                {uploadMode === "audio" ? "Register Track" : uploadMode === "lyrics" ? "Register Lyrics" : uploadMode === "manuscript" ? "Register Manuscript" : "Register Comic / Novel"}
               </h1>
               <p className="text-sm" style={{ color: "#E2E8F0" }}>
-                {uploadMode === "audio" ? "Publish your music with cryptographic provenance — BDDT Publishing / Command Domains LLC" : uploadMode === "lyrics" ? "Register your lyrics with a cryptographic Witness ID — authorship sealed at creation" : uploadMode === "manuscript" ? "Seal your manuscript with provenance — every word, dated and verified" : "Register your comic or novel — art and story, sealed with a Witness ID"}
+                {uploadMode === "audio" ? "Register your music with cryptographic provenance — BDDT Publishing / Command Domains LLC" : uploadMode === "lyrics" ? "Register your lyrics with a cryptographic Witness ID — authorship sealed at creation" : uploadMode === "manuscript" ? "Seal your manuscript with provenance — every word, dated and verified" : "Register your comic or novel — art and story, sealed with a Witness ID"}
               </p>
             </div>
             <button
@@ -870,7 +870,7 @@ export default function UploadPage() {
                   audio: {
                     icon: "🎵",
                     color: "var(--ln-gold)",
-                    title: "Before You Upload Music",
+                    title: "Before You Register Music",
                     items: [
                       { label: "Audio file (MP3, WAV, FLAC, M4A, OGG)", note: "Up to 375 MB", required: true },
                       { label: "Cover art image (JPG, PNG, WebP)", note: "Square preferred — 1:1 or 4:5", required: true },
@@ -883,7 +883,7 @@ export default function UploadPage() {
                   lyrics: {
                     icon: "📝",
                     color: "#A78BFA",
-                    title: "Before You Upload Lyrics",
+                    title: "Before You Register Lyrics",
                     items: [
                       { label: "Lyrics text or .txt / .pdf file", required: true },
                       { label: "Song title", required: true },
@@ -895,7 +895,7 @@ export default function UploadPage() {
                   manuscript: {
                     icon: "📖",
                     color: "var(--ln-seal-bright)",
-                    title: "Before You Upload a Manuscript",
+                    title: "Before You Register a Manuscript",
                     items: [
                       { label: "Document file (PDF, DOCX, TXT, EPUB)", note: "PDF strongly recommended for best display", required: true },
                       { label: "Cover art / book cover image", note: "Portrait 3:4 ratio recommended", required: true },
@@ -909,7 +909,7 @@ export default function UploadPage() {
                   comic: {
                     icon: "🎨",
                     color: "var(--ln-ember)",
-                    title: "Before You Upload a Comic / Novel",
+                    title: "Before You Register a Comic / Novel",
                     items: [
                       { label: "Document file (PDF preferred)", note: "All pages in a single PDF for best inline preview", required: true },
                       { label: "Cover art image", note: "Portrait 3:4 ratio — the cover page of your comic", required: true },
@@ -1439,7 +1439,7 @@ export default function UploadPage() {
                 </div>
               </div>
               <div>
-                <label className="text-xs mb-2 block font-medium" style={{ color: "#B8A88A" }}>AI Training Consent</label>
+                <label className="text-xs mb-2 block font-medium" style={{ color: "#B8A88A" }}>TRAINING CONSENT</label>
                 <div className="space-y-2">
                   {AI_CONSENT_OPTIONS.map(opt => (
                     <button type="button" key={opt.value} onClick={() => setAiConsent(opt.value)} className="w-full flex items-start gap-3 p-3 rounded-xl text-left transition-all"
@@ -1454,15 +1454,15 @@ export default function UploadPage() {
                   ))}
                 </div>
               </div>
-              {/* AI Authorship Disclosure */}
+              {/* Creation Disclosure */}
               <div>
-                <label className="text-xs mb-2 block font-medium" style={{ color: "#B8A88A" }}>AI AUTHORSHIP DISCLOSURE</label>
+                <label className="text-xs mb-2 block font-medium" style={{ color: "#B8A88A" }}>CREATION DISCLOSURE</label>
                 <div className="space-y-2">
                   {([
-                    { value: "original" as const, label: "Human Original", color: "var(--ln-gold)", activeColor: "rgba(196,154,40,0.08)", activeBorder: "rgba(196,154,40,0.4)", desc: "Entirely human-made. No AI tools used in creation." },
-                    { value: "ai_assisted" as const, label: "AI-Assisted", color: "var(--ln-gold)", activeColor: "rgba(196,154,40,0.09)", activeBorder: "rgba(196,154,40,0.34)", desc: "AI used as a production aid. Human vision, human direction." },
+                    { value: "original" as const, label: "Human-Made Original", color: "var(--ln-gold)", activeColor: "rgba(196,154,40,0.08)", activeBorder: "rgba(196,154,40,0.4)", desc: "Entirely human-made. No AI tools used in creation." },
+                    { value: "ai_assisted" as const, label: "Assisted Manifestation", color: "var(--ln-gold)", activeColor: "rgba(196,154,40,0.09)", activeBorder: "rgba(196,154,40,0.34)", desc: "AI used as a production tool. Human vision, human direction." },
                     { value: "human_authored_ai_instrument" as const, label: "Human-Authored via AI Instrument (HAAI)", color: "var(--ln-gold)", activeColor: "rgba(196,154,40,0.09)", activeBorder: "rgba(196,154,40,0.34)", desc: "You authored the intent and directed the work. AI was the instrument, not the author." },
-                    { value: "ai_generated" as const, label: "AI-Assisted Manifestation", color: "var(--ln-ember)", activeColor: "rgba(239,68,68,0.1)", activeBorder: "rgba(239,68,68,0.38)", desc: "AI generated the primary content." },
+                    { value: "ai_generated" as const, label: "AI-Assisted Manifestation", color: "var(--ln-ember)", activeColor: "rgba(239,68,68,0.1)", activeBorder: "rgba(239,68,68,0.38)", desc: "The primary content was manifested through AI tools." },
                   ] as const).map(opt => (
                     <button type="button" key={opt.value} onClick={() => setAiDisclosure(opt.value)} className="w-full flex items-start gap-3 p-3 rounded-xl text-left transition-all"
                       style={{ background: aiDisclosure === opt.value ? opt.activeColor : "var(--ln-coal)", border: `1px solid ${aiDisclosure === opt.value ? opt.activeBorder : "rgba(196,154,40,0.12)"}` }}>
@@ -1486,10 +1486,10 @@ export default function UploadPage() {
                     />
                   </div>
                 )}
-                {/* AI Tool Disclosure — shown when not "original" */}
+                {/* Tool Disclosure — shown when not "original" */}
                 {aiDisclosure !== "original" && (
                   <div className="mt-4 p-4 rounded-xl" style={{ background: "rgba(196,154,40,0.04)", border: "1px solid rgba(196,154,40,0.14)" }}>
-                    <p className="text-xs font-semibold mb-3" style={{ color: "#B8A88A", letterSpacing: "0.08em" }}>WHICH AI TOOLS WERE USED?</p>
+                    <p className="text-xs font-semibold mb-3" style={{ color: "#B8A88A", letterSpacing: "0.08em" }}>WHICH TOOLS WERE USED?</p>
                     <div className="space-y-2">
                       {([
                         { key: "suno" as const, label: "Suno 5+", state: aiToolSuno, set: setAiToolSuno },
@@ -1698,7 +1698,7 @@ export default function UploadPage() {
                     </div>
                   </div>
                   <div className="p-3 rounded-lg" style={{ background: "var(--ln-coal)", border: "1px solid #C49A28" }}>
-                    <p className="text-xs mb-2" style={{ color: "#E2E8F0", letterSpacing: "0.1em" }}>AI CONSENT DECLARATION</p>
+                    <p className="text-xs mb-2" style={{ color: "#E2E8F0", letterSpacing: "0.1em" }}>CREATION CONSENT DECLARATION</p>
                     <Badge style={{ background: aiConsent === "prohibited" ? "rgba(239,68,68,0.2)" : aiConsent === "permitted_attribution" ? "rgba(196,154,40,0.15)" : "rgba(74,222,128,0.18)", color: aiConsent === "prohibited" ? "var(--ln-ember)" : aiConsent === "permitted_attribution" ? "var(--ln-gold)" : "var(--ln-seal-bright)" }}>
                       {aiConsent === "prohibited" ? "AI TRAINING PROHIBITED" : aiConsent === "permitted_attribution" ? "PERMITTED WITH ATTRIBUTION" : "FREELY PERMITTED"}
                     </Badge>
@@ -1835,7 +1835,7 @@ export default function UploadPage() {
                   { label: "ISRC", value: isrc || "Not specified" },
                   { label: "Mood Tags", value: selectedMoods.length ? selectedMoods.join(", ") : "None" },
                   { label: "Witness ID", value: witnessData?.wid || "Not generated", wid: !!witnessData },
-                  { label: "AI Consent", value: aiConsent.replace(/_/g, " ").toUpperCase() },
+                  { label: "Creation Consent", value: aiConsent.replace(/_/g, " ").toUpperCase() },
                   { label: "Download", value: "Off — Change in Archive after publish" },
                 ].map(({ label, value, highlight, wid }, i) => (
                   <div key={label} className="flex justify-between items-center px-4 py-2.5 text-sm"

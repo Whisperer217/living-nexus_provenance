@@ -35,7 +35,7 @@ const TENETS = [
   {
     icon: Lock,
     title: "Provenance is protection.",
-    body: "The creative industry has spent decades separating creators from the proof of their creation. Contracts strip rights. Platforms strip metadata. AI companies strip context. Living Nexus does the opposite. Every work carries a chain of custody from the moment it enters the registry. If your music, manuscript, or artwork is ever used without permission — in a film, an ad, a training dataset — the Witness ID is the timestamp that proves you were first.",
+    body: "The creative industry has spent decades separating creators from the proof of their creation. Contracts strip rights. Platforms strip metadata. Automated systems strip context. Living Nexus does the opposite. Every work carries a chain of custody from the moment it enters the registry. If your music, manuscript, or artwork is ever used without permission — in a film, an ad, a training dataset — the Witness ID is the timestamp that proves you were first.",
   },
   {
     icon: Music,
@@ -50,7 +50,7 @@ const TENETS = [
 ];
 
 const TIMELINE = [
-  { date: "July 2025", event: "BDDT Publishing established — born from a personal reckoning. A combat medic watched his own testimony get trapped in the artificial realm and moved to protect it. The mission: help creators protect their work, AI-generated or straight real, on the way out." },
+  { date: "July 2025", event: "BDDT Publishing established — born from a personal reckoning. A combat medic watched his own testimony get trapped in the digital realm and moved to protect it. The mission: help creators protect their work — manifested through any means — on the way out." },
   { date: "December 2025", event: "Witness Identification born — first as a moral witness engine, then refined into a Witness ID system for creators. The core principle: protect the witness behind the system, not just the file." },
   { date: "December 2025", event: "Testimonial Completion doctrine published on Figshare — a combat medic's framework for healing thirteen-year wounds. This doctrine spawned the Sacred Witness Authority engine and the Epistemic Shock Index." },
   { date: "Early 2026", event: "Living Nexus activated — born directly from the Testimonial Completion doctrine. What began as a GitHub repository became a sovereign creative archive: upload, witness, protect, get paid. Zero VC funding. Zero label partnerships. Creator-owned from day one." },
@@ -278,7 +278,7 @@ export default function ManifestoPage() {
               </p>
               <ul className="space-y-2.5">
                 {[
-                  "Upload your music. Get your WID.",
+                  "Register your work. Get your WID.",
                   "Keep 90% of every gift received.",
                   "Own your catalog. No label. No contract.",
                   "Collective Certificates for albums.",
@@ -335,7 +335,7 @@ export default function ManifestoPage() {
                 color: "var(--ln-coal)",
               }}
             >
-              <Music size={14} /> Upload Your Music
+              <Music size={14} /> Register Your Work
             </a>
           </Link>
           <Link href="/verify">

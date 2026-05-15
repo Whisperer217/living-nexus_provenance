@@ -714,7 +714,7 @@ export const appRouter = router({
     checkDuplicate: protectedProcedure
       .input(z.object({ fileHash: z.string().length(64) }))
       .query(async ({ ctx, input }) => {
-        const db = getDb();
+        const db = await getDb();
         const { songs } = await import("../drizzle/schema");
         const { eq } = await import("drizzle-orm");
         const existing = await db.select({

@@ -166,7 +166,7 @@ export default function DiscoverPage() {
             <div className="flex flex-wrap gap-3">
               <Link href="/upload">
                 <Button size="lg" className="btn-gold-glow" style={{ background: "var(--ln-gold)", color: "var(--ln-coal)", fontFamily: "'Cinzel', serif", fontWeight: 700 }}>
-                  Upload Your Music
+                  Register Your Work
                 </Button>
               </Link>
               <Link href="/explore">
@@ -203,7 +203,7 @@ export default function DiscoverPage() {
           <div className="rounded-xl border p-5" style={{ background: "var(--ln-coal)", borderColor: "rgba(196,154,40,0.15)" }}>
             <p className="text-xs font-mono tracking-[0.2em] uppercase mb-4" style={{ color: "var(--ln-gold)" }}>For Creators</p>
             <ul className="space-y-2">
-              {["Upload your music. Get your WID.", "Keep 90% of every gift received.", "Own your catalog. Always.", "Batch upload entire albums at once."].map(t => (
+              {["Register your work. Get your WID.", "Keep 90% of every gift received.", "Own your catalog. Always.", "Batch register entire albums at once."].map(t => (
                 <li key={t} className="flex items-start gap-2">
                   <Shield size={12} className="flex-shrink-0 mt-0.5" style={{ color: "rgba(196,154,40,0.5)" }} />
                   <span className="text-[13px]" style={{ color: "#E2E8F0" }}>{t}</span>
@@ -618,7 +618,7 @@ export default function DiscoverPage() {
               Explore All Tracks
             </Link>
             <Link href="/upload" className="text-sm opacity-50 hover:opacity-80 transition-all" style={{ color: "#E2E8F0" }}>
-              Upload Your Music
+              Register Your Work
             </Link>
           </div>
           <p className="text-xs" style={{ color: "var(--ln-iron)" }}>

@@ -4590,3 +4590,33 @@
 - [x] Fix single upload title persistence bug — Remove button now clears title + witnessData
 - [x] Fix SearchResultsPage not auto-firing query on mount (wouter useSearch() fix)
 - [x] Add TopBar autocomplete dropdown with avatars/cover art and alphabetical sort
+
+## Language Shift — Manifestation Vocabulary (Phase 154)
+- [x] LeftRail nav: Upload → Register
+- [x] ContextDrawer: Upload → Register, AI music prompt → music prompt
+- [x] UploadPage h1: Upload Track/Lyrics/Manuscript/Comic → Register Work/Lyrics/Manuscript/Comic
+- [x] UploadPage: Before You Upload → Before You Register
+- [x] UploadPage: AI Consent → Creation Consent throughout
+- [x] UploadPage: AI Authorship Disclosure → Authorship Disclosure
+- [x] UploadPage: AI CONSENT DECLARATION → CREATION CONSENT DECLARATION
+- [x] BatchUploadPage: Batch Upload → Batch Register
+- [x] BatchUploadPage: AI Consent → Creation Consent, AI Disclosure → Authorship Disclosure
+- [x] BatchUploadPage: sign-in text upload → register
+- [x] HomePage: AI Tool → Creator Tool, AI music prompt → music prompt
+- [x] HomePage: AI Prompt Studio → Prompt Studio in comparison table
+- [x] HomePage: AI Tools That Serve You → Creator Tools That Serve You
+- [x] HomePage: Every upload → Every registration
+- [x] ManifestoPage: Upload your music → Register your work
+- [x] DiscoverPage: Upload Your Music → Register Your Work (2 locations)
+- [x] DiscoverPage: Upload your music → Register your work in feature list
+- [x] DashboardPage: Upload your first work → Register your first work (3 locations)
+- [x] CreatorProfilePage: Upload Your First Track → Register Your First Work
+- [x] CreatorProfilePage: AI Music Generation → Music Production
+- [x] ArchivePage: Upload Your First Track → Register Your First Work
+- [x] ProfilePage: Upload your first track → Register your first work
+- [x] ProfilePage: AI-Assisted — Human + AI Tools → AI-Assisted — Human + Tools
+- [x] MusicWitnessIDPage: AI CONSENT FLAG → CREATION CONSENT (3 locations)
+- [x] VerifyPage: AI Consent → Creation Consent, AI Training Consent → Creation Consent
+- [x] PrivacyPage: AI Consent Revocation → Creation Consent Revocation
+- [x] LearnPage/Lexicon: Upload → Register / Witness with expanded meaning
+- [x] GuideUploadWizard: Upload Sheet → Submit Sheet, Upload your → Submit your

@@ -67,7 +67,7 @@ const LEXICON: LexiconEntry[] = [
   { standard: "Username / Handle", nexus: "WID Handle", meaning: "Your artist name tied to your Witness ID. The name that appears on every record you create.", category: "identity" },
   { standard: "Verified Badge", nexus: "WITNESSED", meaning: "Status shown when your work has been formally acknowledged by the network.", category: "identity" },
   { standard: "Bio", nexus: "Origin Statement", meaning: "Where you came from and what you carry. Not a marketing blurb — a declaration of origin.", category: "identity" },
-  { standard: "Upload", nexus: "Witness", meaning: "The act of submitting your work to the Living Nexus system for permanent provenance registration.", category: "action" },
+  { standard: "Upload", nexus: "Register / Witness", meaning: "The act of submitting your work to the Living Nexus system for permanent provenance registration. We say 'register' because it's more than an upload — it's a declaration of origin.", category: "action" },
   { standard: "Like", nexus: "Acknowledge", meaning: "To formally recognize a work. Acknowledgment is a provenance signal, not a popularity metric.", category: "action" },
   { standard: "Share", nexus: "Propagate", meaning: "To extend the reach of a witnessed record. Every propagation carries the original WID.", category: "action" },
   { standard: "Comment", nexus: "Signal", meaning: "A time-stamped response attached to a specific work record. Signals are part of the provenance trail.", category: "action" },

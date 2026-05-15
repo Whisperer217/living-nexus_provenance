@@ -776,7 +776,7 @@ export default function ProfilePage() {
                 style={{ background: "var(--ln-coal)" }}
               >
                 <option value="original">Human-Made — No AI Used</option>
-                <option value="ai_assisted">AI-Assisted — Human + AI Tools</option>
+                <option value="ai_assisted">AI-Assisted — Human + Tools</option>
                 <option value="human_authored_ai_instrument">HAAI — Human-Authored via AI Instrument</option>
                 <option value="ai_generated">AI-Assisted Manifestation — AI-Created</option>
               </select>
@@ -1086,7 +1086,7 @@ export default function ProfilePage() {
             ) : dbSongs.length === 0 ? (
               <div className="text-center py-12 text-white/40 font-body text-[13px]">
                 No tracks yet.{" "}
-                <button type="button" onClick={() => navigate("/upload")} className="text-[#A78BFA] hover:underline">Upload your first track</button>
+                <button type="button" onClick={() => navigate("/upload")} className="text-[#A78BFA] hover:underline">Register your first work</button>
               </div>
             ) : (
               (dbSongs as any[]).map((song) => (

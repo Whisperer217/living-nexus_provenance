@@ -385,7 +385,7 @@ export default function PrivacyPage() {
             { right: "Correction", detail: "Request correction of inaccurate personal data. You can update most profile data directly from your settings page." },
             { right: "Deletion", detail: "Request deletion of your account and associated personal data. WID provenance records (hash + timestamp) are retained as part of the registry integrity, but your personal association is removed." },
             { right: "Data Portability", detail: "Request an export of your data in a machine-readable format (JSON). Includes your profile, song metadata, WID records, and HAAI declarations." },
-            { right: "AI Consent Revocation", detail: "Revoke AI training consent for any or all of your works at any time from your creator dashboard. Changes take effect within 30 days." },
+            { right: "Creation Consent Revocation", detail: "Revoke creation consent declarations for any or all of your works at any time from your creator dashboard. Changes take effect within 30 days." },
             { right: "Objection", detail: "Object to any processing of your data that you believe is not covered by this policy or your consent. We will investigate and respond within 30 days." },
           ].map(item => (
             <div key={item.right} className="p-3" style={{ background: "var(--ln-coal)", border: "1px solid rgba(230,205,174,0.06)" }}>

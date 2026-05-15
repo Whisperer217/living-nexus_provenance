@@ -126,22 +126,22 @@ const PANELS: Record<NavMode, ModePanel> = {
 
   upload: {
     icon: <Upload size={17} />,
-    title: "Upload",
+    title: "Register",
     subtitle: "Register your creative work",
     sections: [
       {
         links: [
           { icon: <Shield size={14} />, label: "Register Work", path: "/upload", description: "Issue a Witness ID", authOnly: true, gold: true },
           { icon: <Users size={14} />, label: "Guide Directory", path: "/guides", description: "Browse guide characters" },
-          { icon: <Shield size={14} />, label: "Upload Guide Character", path: "/guides/upload", description: "Register a guide entity", authOnly: true, gold: true },
-          { icon: <Sparkles size={14} />, label: "Prompt Studio", path: "/prompt-studio", description: "Lyrics → AI music prompt" },
+          { icon: <Shield size={14} />, label: "Register Guide Character", path: "/guides/upload", description: "Register a guide entity", authOnly: true, gold: true },
+          { icon: <Sparkles size={14} />, label: "Prompt Studio", path: "/prompt-studio", description: "Lyrics → music prompt" },
         ],
       },
       {
-        heading: "Your Uploads",
+        heading: "Your Registrations",
         links: [
           { icon: <PenTool size={14} />, label: "Draft Works", path: "/upload/drafts", description: "Unfinished registrations", authOnly: true },
-          { icon: <History size={14} />, label: "Upload History", path: "/upload/history", description: "All past submissions", authOnly: true },
+          { icon: <History size={14} />, label: "Registration History", path: "/upload/history", description: "All past submissions", authOnly: true },
           { icon: <LayoutDashboard size={14} />, label: "Dashboard", path: "/dashboard", description: "Creator analytics", authOnly: true },
         ],
       },

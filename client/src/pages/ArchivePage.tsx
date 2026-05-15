@@ -520,7 +520,7 @@ export default function ArchivePage() {
             </p>
             <Link href="/upload">
               <Button style={{ background: "var(--ln-gold)", color: "var(--ln-parchment)" }}>
-                Upload Your First Track
+                Register Your First Work
               </Button>
             </Link>
           </div>

@@ -455,7 +455,7 @@ export default function MusicWitnessIDPage() {
   
   <hr class="divider">
   
-  <div class="label">AI CONSENT FLAG</div>
+  <div class="label">CREATION CONSENT</div>
   <div class="consent">${meta.aiConsent.replace(/_/g, " ")}</div>
   
   <hr class="divider">
@@ -622,8 +622,8 @@ export default function MusicWitnessIDPage() {
           </Field>
         </Section>
 
-        {/* ── Section 3: AI Consent ── */}
-        <Section title="AI CONSENT FLAG" icon={<Shield size={16} />}>
+        {/* ── Section 3: Creation Consent ── */}
+        <Section title="CREATION CONSENT" icon={<Shield size={16} />}>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {AI_CONSENT_OPTIONS.map(opt => (
               <button

@@ -1687,7 +1687,7 @@ export default function CreatorProfilePage() {
             {isOwner && (
               <Link href="/upload">
                 <Button className="mt-4" style={{ background: "var(--ln-gold)", color: "var(--ln-parchment)" }}>
-                  Upload Your First Track
+                  Register Your First Work
                 </Button>
               </Link>
             )}
@@ -2012,7 +2012,7 @@ export default function CreatorProfilePage() {
               <select value={psPromptType} onChange={(e) => { setPsPromptType(e.target.value as typeof psPromptType); setPsResult(null); }}
                 className="w-full rounded-lg px-3 py-2 text-sm font-semibold appearance-none cursor-pointer"
                 style={{ background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.3)", color: "#a78bfa", outline: "none" }}>
-                <option value="style_prompt">🎵  Style Prompt — AI Music Generation</option>
+                <option value="style_prompt">🎵  Style Prompt — Music Production</option>
                 <option value="lyric_brief">✍️  Lyric Writing Brief</option>
                 <option value="composer_blueprint">🎛️  Composer's Workflow Blueprint</option>
                 <option value="visual_direction">🎨  Visual / Cover Art Direction</option>

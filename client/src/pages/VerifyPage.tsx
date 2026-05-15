@@ -602,8 +602,8 @@ function TrackVerifyView({
         </Field>
       )}
 
-      {/* ── AI Consent ── */}
-      <Field icon={ShieldCheck} label="AI Training Consent">
+      {/* ── Creation Consent ── */}
+      <Field icon={ShieldCheck} label="Creation Consent">
         <Badge style={{ background: `${consent.color}22`, color: consent.color, border: `1px solid ${consent.color}55` }}>
           {consent.text}
         </Badge>
