@@ -170,16 +170,28 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
       {/* ── Background: full artwork — clear, vibrant, no blur ── */}
       <div className="absolute inset-0 overflow-hidden rounded-xl">
         {track.artUrl && track.artType !== "video" ? (
-          <img
-            src={track.artUrl}
-            alt=""
-            aria-hidden="true"
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
-            style={{
-              filter: "brightness(0.88)",
-              objectPosition: coverPos,
-            }}
-          />
+          <>
+            <img
+              src={track.artUrl}
+              alt=""
+              aria-hidden="true"
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+              style={{
+                filter: "brightness(0.88)",
+                objectPosition: coverPos,
+              }}
+              onError={(e) => {
+                // Hide broken image and show gradient fallback
+                (e.currentTarget as HTMLImageElement).style.display = "none";
+                const fallback = e.currentTarget.nextElementSibling as HTMLElement | null;
+                if (fallback) fallback.style.display = "block";
+              }}
+            />
+            <div
+              className="w-full h-full hidden absolute inset-0"
+              style={{ background: "linear-gradient(135deg, #1a1409 0%, #0d0b07 50%, #111009 100%)" }}
+            />
+          </>
         ) : track.artUrl && track.artType === "video" ? (
           <video
             src={track.artUrl}

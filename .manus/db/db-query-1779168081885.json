@@ -1,0 +1,25 @@
+{
+  "query": "SELECT id, name, artistHandle FROM users WHERE id IN (1, 6330001, 2490448) LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4ArHJRmPMKBQTkw.2e571ac7914f --database 7kHkqvMBX9Ci3pQfWTqqQr --execute SELECT id, name, artistHandle FROM users WHERE id IN (1, 6330001, 2490448) LIMIT 5;",
+  "rows": [
+    {
+      "id": "1",
+      "name": "Doc Seraph Mercer",
+      "artistHandle": ""
+    },
+    {
+      "id": "2490448",
+      "name": "Jacob Ross",
+      "artistHandle": "NULL"
+    },
+    {
+      "id": "6330001",
+      "name": "MAKER & THE MaiTRIX",
+      "artistHandle": "NULL"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\tartistHandle\n1\tDoc Seraph Mercer\t\n2490448\tJacob Ross\tNULL\n6330001\tMAKER & THE MaiTRIX\tNULL\n",
+  "stderr": "",
+  "execution_time_ms": 319
+}

@@ -1,0 +1,59 @@
+{
+  "query": "SELECT id, name, artistHandle, profilePhotoUrl, bannerUrl FROM users WHERE profilePhotoUrl IS NOT NULL LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4ArHJRmPMKBQTkw.2e571ac7914f --database 7kHkqvMBX9Ci3pQfWTqqQr --execute SELECT id, name, artistHandle, profilePhotoUrl, bannerUrl FROM users WHERE profilePhotoUrl IS NOT NULL LIMIT 10;",
+  "rows": [
+    {
+      "id": "1",
+      "name": "Doc Seraph Mercer",
+      "artistHandle": "",
+      "profilePhotoUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/avatars/1-1777117570683.jpg",
+      "bannerUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/banners/1-1777117107961.jpg"
+    },
+    {
+      "id": "180001",
+      "name": "Mannon The Conquerer",
+      "artistHandle": "HlkngMniacNrdWrmngr",
+      "profilePhotoUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/avatars/180001-1774321155794.jpg",
+      "bannerUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/banners/180001-1774846120434.jpg"
+    },
+    {
+      "id": "330007",
+      "name": "MaxSpeed",
+      "artistHandle": "maxspeed",
+      "profilePhotoUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/avatars/330007-1774051725869.jpg",
+      "bannerUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/banners/330007-1774051829519.jpg"
+    },
+    {
+      "id": "780095",
+      "name": "Slimdoggy",
+      "artistHandle": "slimdoggyAIMusic",
+      "profilePhotoUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/avatars/780095-1775667850673.jpg",
+      "bannerUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/banners/780095-1777947024018.jpg"
+    },
+    {
+      "id": "1320247",
+      "name": "Randall Smith",
+      "artistHandle": "Nero's Shadow",
+      "profilePhotoUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/avatars/1320247-1777525737638.jpg",
+      "bannerUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/banners/1320247-1775011798273.jpg"
+    },
+    {
+      "id": "4260006",
+      "name": "HolyWay",
+      "artistHandle": "cRAYz",
+      "profilePhotoUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/avatars/4260006-1774708271685.jpg",
+      "bannerUrl": "NULL"
+    },
+    {
+      "id": "6330001",
+      "name": "MAKER & THE MaiTRIX",
+      "artistHandle": "NULL",
+      "profilePhotoUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/avatars/6330001-1777065303889.jpg",
+      "bannerUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/banners/6330001-1777065498299.jpg"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\tartistHandle\tprofilePhotoUrl\tbannerUrl\n1\tDoc Seraph Mercer\t\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/avatars/1-1777117570683.jpg\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/banners/1-1777117107961.jpg\n180001\tMannon The Conquerer\tHlkngMniacNrdWrmngr\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/avatars/180001-1774321155794.jpg\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/banners/180001-1774846120434.jpg\n330007\tMaxSpeed\tmaxspeed\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/avatars/330007-1774051725869.jpg\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/banners/330007-1774051829519.jpg\n780095\tSlimdoggy\tslimdoggyAIMusic\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/avatars/780095-1775667850673.jpg\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/banners/780095-1777947024018.jpg\n1320247\tRandall Smith\tNero's Shadow\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/avatars/1320247-1777525737638.jpg\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/banners/1320247-1775011798273.jpg\n4260006\tHolyWay\tcRAYz\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/avatars/4260006-1774708271685.jpg\tNULL\n6330001\tMAKER & THE MaiTRIX\tNULL\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/avatars/6330001-1777065303889.jpg\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/banners/6330001-1777065498299.jpg\n",
+  "stderr": "",
+  "execution_time_ms": 377
+}

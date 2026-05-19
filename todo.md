@@ -4626,3 +4626,9 @@
 - [x] Add H2 headings to homepage sections (sr-only H2 after HeroCarousel)
 - [x] Set document.title to 30-60 characters (47 chars via react-helmet-async)
 - [x] Add meta description (160 chars via react-helmet-async + index.html)
+
+## Full Site Audit (Phase 156)
+- [x] Fix 414 Request-URI Too Large — getPrefetch now always returns defaults so individual getLikeStatus/getLikeCount queries never fire
+- [x] Add image onError fallback handlers to TrackCard and StoreCreatorCard to prevent broken image icons on mobile
+- [x] Fix artistHandle literal "NULL" string in DB — updated to actual SQL NULL
+- [x] Fix "Creator X" fallback display — StoreCreatorCard now uses `name` field and filters NULL strings

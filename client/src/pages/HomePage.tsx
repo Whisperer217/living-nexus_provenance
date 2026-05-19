@@ -490,12 +490,13 @@ function HorizontalTrackGrid({
   const row1 = tracks.slice(0, 12);
   const row2 = tracks.slice(12, 24);
 
+  // Always return prefetched values to suppress individual getLikeStatus/getLikeCount queries.
+  // Before bulkLikes loads, we pass defaults (false/0) so cards never fire their own queries.
+  // This prevents the HTTP 414 URI Too Long error from 48+ individual queries batched in one GET.
   const getPrefetch = (track: any) => {
-    if (!likeMap) return {};
     const n = typeof track.id === "string" ? parseInt(track.id, 10) : track.id;
-    const entry = likeMap[n];
-    if (!entry) return {};
-    return { prefetchedLiked: entry.liked, prefetchedLikeCount: entry.count };
+    const entry = likeMap?.[n];
+    return { prefetchedLiked: entry?.liked ?? false, prefetchedLikeCount: entry?.count ?? 0 };
   };
 
   return (
@@ -567,12 +568,11 @@ function TrendingHorizontalGrid({
   const row1 = tracks.slice(0, 12);
   const row2 = tracks.slice(12, 24);
 
+  // Always return prefetched values to suppress individual queries (prevents 414 URI Too Long)
   const getPrefetch = (track: any) => {
-    if (!likeMap) return {};
     const n = typeof track.id === "string" ? parseInt(track.id, 10) : track.id;
-    const entry = likeMap[n];
-    if (!entry) return {};
-    return { prefetchedLiked: entry.liked, prefetchedLikeCount: entry.count };
+    const entry = likeMap?.[n];
+    return { prefetchedLiked: entry?.liked ?? false, prefetchedLikeCount: entry?.count ?? 0 };
   };
 
   return (

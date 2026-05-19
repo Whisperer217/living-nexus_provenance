@@ -1,0 +1,70 @@
+{
+  "query": "SELECT id, title, coverArtUrl, fileUrl FROM songs WHERE coverArtUrl IS NOT NULL LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4ArHJRmPMKBQTkw.2e571ac7914f --database 7kHkqvMBX9Ci3pQfWTqqQr --execute SELECT id, title, coverArtUrl, fileUrl FROM songs WHERE coverArtUrl IS NOT NULL LIMIT 10;",
+  "rows": [
+    {
+      "id": "1",
+      "title": "Fix DA Server",
+      "coverArtUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/covers/1/1773721443451.jpg",
+      "fileUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/audio/1/1773721443170-Fix DA Server.mp3"
+    },
+    {
+      "id": "30001",
+      "title": "Ave,Ave!!! Christus Rex!!!👑",
+      "coverArtUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/covers/180001/1773790094527.jpg",
+      "fileUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/audio/180001/1773790093579-Ave,Ave!!! Christus Rex!!!👑.mp3"
+    },
+    {
+      "id": "60001",
+      "title": "PUSH FORWARD",
+      "coverArtUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/covers/1/1773951402070.jpg",
+      "fileUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/audio/1/1773951401271-REMIXED WITH MY VOICE PUSH FORWARD.mp3"
+    },
+    {
+      "id": "60002",
+      "title": "Anchor In The Dark",
+      "coverArtUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/covers/1/1773952178487.jpg",
+      "fileUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/audio/1/1773952177770-Anchor In The Dark.mp3"
+    },
+    {
+      "id": "90001",
+      "title": "Jah Heal Me",
+      "coverArtUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/covers/330007/1774053845697-edit.jpg",
+      "fileUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/audio/330007/1773969276686-Jah Heal Me.mp3"
+    },
+    {
+      "id": "120001",
+      "title": "Creator (Poetry of Creation Mix) ",
+      "coverArtUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/covers/180001/1773976224465.jpg",
+      "fileUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/audio/180001/1773976223835-Creator (Poetry of Creation Mix) .mp3"
+    },
+    {
+      "id": "150001",
+      "title": "Wounds Become Witnesses - The Sovereign Sky",
+      "coverArtUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/covers/1/1773979952624.jpg",
+      "fileUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/audio/1/1773979952058-Wounds Become Witnesses - The Sovereign Sky - Sonauto.mp3"
+    },
+    {
+      "id": "150002",
+      "title": "Wounds Become Witnesses - The Sovereign Sky (Remix)",
+      "coverArtUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/covers/1/1773980282386.jpg",
+      "fileUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/audio/1/1773980282034-Wounds Become Witnesses - The Sovereign Sky (Remix).mp3"
+    },
+    {
+      "id": "180001",
+      "title": "Lesson Learned",
+      "coverArtUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/covers/180001/1774018139391.jpg",
+      "fileUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/audio/180001/1774018138783-Lesson_Learned.mp3"
+    },
+    {
+      "id": "180002",
+      "title": "Obedience",
+      "coverArtUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/covers/180001/1774018713244.jpg",
+      "fileUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/audio/180001/1774018712733-Obedience.mp3"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\tcoverArtUrl\tfileUrl\n1\tFix DA Server\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/covers/1/1773721443451.jpg\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/audio/1/1773721443170-Fix DA Server.mp3\n30001\tAve,Ave!!! Christus Rex!!!👑\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/covers/180001/1773790094527.jpg\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/audio/180001/1773790093579-Ave,Ave!!! Christus Rex!!!👑.mp3\n60001\tPUSH FORWARD\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/covers/1/1773951402070.jpg\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/audio/1/1773951401271-REMIXED WITH MY VOICE PUSH FORWARD.mp3\n60002\tAnchor In The Dark\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/covers/1/1773952178487.jpg\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/audio/1/1773952177770-Anchor In The Dark.mp3\n90001\tJah Heal Me\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/covers/330007/1774053845697-edit.jpg\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/audio/330007/1773969276686-Jah Heal Me.mp3\n120001\tCreator (Poetry of Creation Mix) \thttps://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/covers/180001/1773976224465.jpg\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/audio/180001/1773976223835-Creator (Poetry of Creation Mix) .mp3\n150001\tWounds Become Witnesses - The Sovereign Sky\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/covers/1/1773979952624.jpg\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/audio/1/1773979952058-Wounds Become Witnesses - The Sovereign Sky - Sonauto.mp3\n150002\tWounds Become Witnesses - The Sovereign Sky (Remix)\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/covers/1/1773980282386.jpg\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/audio/1/1773980282034-Wounds Become Witnesses - The Sovereign Sky (Remix).mp3\n180001\tLesson Learned\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/covers/180001/1774018139391.jpg\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/audio/180001/1774018138783-Lesson_Learned.mp3\n180002\tObedience\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/covers/180001/1774018713244.jpg\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/audio/180001/1774018712733-Obedience.mp3\n",
+  "stderr": "",
+  "execution_time_ms": 297
+}
