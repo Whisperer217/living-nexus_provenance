@@ -24,6 +24,8 @@ import FormData from "form-data";
 import { ENV } from "./_core/env";
 import { sdk } from "./_core/sdk";
 import { generateRef, safeErrorResponse } from "./_core/errorHandler";
+import { micronize, type ImagePreset } from "./imageProcessing";
+import { storagePut } from "./storage";
 
 const router = Router();
 
@@ -88,54 +90,78 @@ router.post("/api/upload-file", async (req: Request, res: Response) => {
       fileType === "cover" ? "covers" :
       fileType === "video" ? "videos" :
       "audio";
-    const key = `${prefix}/${user!.id}/${Date.now()}-${safeFileName}`;
 
-    // Build a FormData that wraps the live stream — no buffering
-    const form = new FormData();
-    form.append("file", fileStream, {
-      filename: safeFileName,
-      contentType: mimeType,
-      knownLength: undefined, // unknown — streaming
-    });
+    // Determine if this file type should be micronized
+    const imagePreset: ImagePreset | null =
+      fileType === "cover" ? "coverArt" : null;
 
-    const forgeUrl = `${ENV.forgeApiUrl.replace(/\/+$/, "")}/v1/storage/upload?path=${encodeURIComponent(key)}`;
+    if (imagePreset) {
+      // IMAGE PATH: buffer the stream, micronize, then upload processed WebP
+      const chunks: Buffer[] = [];
+      fileStream.on("data", (chunk: Buffer) => chunks.push(chunk));
+      uploadPromise = new Promise<{ url: string; key: string }>((resolve, reject) => {
+        fileStream.on("end", async () => {
+          try {
+            const rawBuffer = Buffer.concat(chunks);
+            const { buffer, mimeType: processedMime } = await micronize(rawBuffer, imagePreset);
+            const webpFileName = safeFileName.replace(/\.[^.]+$/, ".webp");
+            const key = `${prefix}/${user!.id}/${Date.now()}-${webpFileName}`;
+            const { url } = await storagePut(key, buffer, processedMime);
+            resolve({ url, key });
+          } catch (err) {
+            reject(err);
+          }
+        });
+        fileStream.on("error", reject);
+      });
+    } else {
+      // STREAMING PATH: pipe directly to Forge (audio/video — no processing)
+      const key = `${prefix}/${user!.id}/${Date.now()}-${safeFileName}`;
+      const form = new FormData();
+      form.append("file", fileStream, {
+        filename: safeFileName,
+        contentType: mimeType,
+        knownLength: undefined, // unknown — streaming
+      });
 
-    uploadPromise = new Promise<{ url: string; key: string }>((resolve, reject) => {
-      form.submit(
-        {
-          protocol: forgeUrl.startsWith("https") ? "https:" : "http:",
-          host: new URL(forgeUrl).hostname,
-          port: new URL(forgeUrl).port || undefined,
-          path: new URL(forgeUrl).pathname + new URL(forgeUrl).search,
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${ENV.forgeApiKey}`,
+      const forgeUrl = `${ENV.forgeApiUrl.replace(/\/+$/, "")}/v1/storage/upload?path=${encodeURIComponent(key)}`;
+
+      uploadPromise = new Promise<{ url: string; key: string }>((resolve, reject) => {
+        form.submit(
+          {
+            protocol: forgeUrl.startsWith("https") ? "https:" : "http:",
+            host: new URL(forgeUrl).hostname,
+            port: new URL(forgeUrl).port || undefined,
+            path: new URL(forgeUrl).pathname + new URL(forgeUrl).search,
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${ENV.forgeApiKey}`,
+            },
           },
-        },
-        (err, forgeRes) => {
-          if (err) { reject(err); return; }
-          let body = "";
-          forgeRes.on("data", (chunk: Buffer) => { body += chunk.toString(); });
-          forgeRes.on("end", () => {
-            if (forgeRes.statusCode && forgeRes.statusCode >= 400) {
-              // Log the full Forge error internally; never forward it to the client
-              const ref = generateRef("UPL");
-              console.error(`[upload-file] Forge API error [${ref}] status=${forgeRes.statusCode} body=${body}`);
-              reject(Object.assign(new Error("Forge API rejected the upload"), { ref }));
-              return;
-            }
-            try {
-              const parsed = JSON.parse(body);
-              resolve({ url: parsed.url, key });
-            } catch (parseErr) {
-              const ref = generateRef("UPL");
-              console.error(`[upload-file] Forge response parse error [${ref}]`, parseErr, "body:", body);
-              reject(Object.assign(new Error("Invalid storage response"), { ref }));
-            }
-          });
-        }
-      );
-    });
+          (err, forgeRes) => {
+            if (err) { reject(err); return; }
+            let body = "";
+            forgeRes.on("data", (chunk: Buffer) => { body += chunk.toString(); });
+            forgeRes.on("end", () => {
+              if (forgeRes.statusCode && forgeRes.statusCode >= 400) {
+                const ref = generateRef("UPL");
+                console.error(`[upload-file] Forge API error [${ref}] status=${forgeRes.statusCode} body=${body}`);
+                reject(Object.assign(new Error("Forge API rejected the upload"), { ref }));
+                return;
+              }
+              try {
+                const parsed = JSON.parse(body);
+                resolve({ url: parsed.url, key });
+              } catch (parseErr) {
+                const ref = generateRef("UPL");
+                console.error(`[upload-file] Forge response parse error [${ref}]`, parseErr, "body:", body);
+                reject(Object.assign(new Error("Invalid storage response"), { ref }));
+              }
+            });
+          }
+        );
+      });
+    }
   });
 
   bb.on("finish", async () => {
@@ -197,28 +223,24 @@ router.post("/api/upload-gallery-image", async (req: Request, res: Response) => 
     if (info.filename) originalName = info.filename;
     if (info.mimeType) mimeType = info.mimeType;
     const safeFileName = originalName.replace(/[^a-zA-Z0-9._-]/g, "_");
-    const key = `gallery/${user!.id}/${Date.now()}-${safeFileName}`;
-    const form = new FormData();
-    form.append("file", fileStream, { filename: safeFileName, contentType: mimeType, knownLength: undefined });
-    const forgeUrl = `${ENV.forgeApiUrl.replace(/\/+$/, "")}/v1/storage/upload?path=${encodeURIComponent(key)}`;
+
+    // Buffer the stream, micronize as gallery preset, then upload WebP
+    const chunks: Buffer[] = [];
+    fileStream.on("data", (chunk: Buffer) => chunks.push(chunk));
     uploadPromise = new Promise<{ url: string; key: string }>((resolve, reject) => {
-      form.submit(
-        { protocol: forgeUrl.startsWith("https") ? "https:" : "http:", host: new URL(forgeUrl).hostname, port: new URL(forgeUrl).port || undefined, path: new URL(forgeUrl).pathname + new URL(forgeUrl).search, method: "POST", headers: { Authorization: `Bearer ${ENV.forgeApiKey}` } },
-        (err, forgeRes) => {
-          if (err) { reject(err); return; }
-          let body = "";
-          forgeRes.on("data", (chunk: Buffer) => { body += chunk.toString(); });
-          forgeRes.on("end", () => {
-            if (forgeRes.statusCode && forgeRes.statusCode >= 400) {
-              const ref = generateRef("GAL");
-              console.error(`[upload-gallery] Forge error [${ref}] status=${forgeRes.statusCode}`);
-              reject(Object.assign(new Error("Storage rejected the upload"), { ref })); return;
-            }
-            try { const parsed = JSON.parse(body); resolve({ url: parsed.url, key }); }
-            catch (parseErr) { const ref = generateRef("GAL"); console.error(`[upload-gallery] Parse error [${ref}]`, parseErr); reject(Object.assign(new Error("Invalid storage response"), { ref })); }
-          });
+      fileStream.on("end", async () => {
+        try {
+          const rawBuffer = Buffer.concat(chunks);
+          const { buffer, mimeType: processedMime } = await micronize(rawBuffer, "gallery");
+          const webpFileName = safeFileName.replace(/\.[^.]+$/, ".webp");
+          const key = `gallery/${user!.id}/${Date.now()}-${webpFileName}`;
+          const { url } = await storagePut(key, buffer, processedMime);
+          resolve({ url, key });
+        } catch (err) {
+          reject(err);
         }
-      );
+      });
+      fileStream.on("error", reject);
     });
   });
 

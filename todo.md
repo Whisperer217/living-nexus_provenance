@@ -4632,3 +4632,16 @@
 - [x] Add image onError fallback handlers to TrackCard and StoreCreatorCard to prevent broken image icons on mobile
 - [x] Fix artistHandle literal "NULL" string in DB — updated to actual SQL NULL
 - [x] Fix "Creator X" fallback display — StoreCreatorCard now uses `name` field and filters NULL strings
+
+## Image Micronization Pipeline (Phase 157)
+- [x] Create server/imageProcessing.ts with sharp-based processing (trim, crop, resize, WebP, sharpen)
+- [x] Define presets: avatar (400×400 crop q82), banner (1600×600 q80), coverArt (1200×1200 q85), gallery (1400w q80), thumbnail (200×200 q70)
+- [x] Integrate micronize into uploadAvatar procedure
+- [x] Integrate micronize into uploadBanner procedure (preserving focal point detection)
+- [x] Integrate micronize into song upload legacy base64 cover path
+- [x] Integrate micronize into uploadCoverArt procedure
+- [x] Integrate micronize into batchUpload album cover path
+- [x] Integrate micronize into /api/upload-file for cover type (buffer → process → upload)
+- [x] Integrate micronize into /api/upload-gallery-image (buffer → process → upload)
+- [x] Add vitest test suite (15 tests) for imageProcessing module
+- [x] All 216 tests passing, 0 TypeScript errors

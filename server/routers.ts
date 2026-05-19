@@ -9,6 +9,7 @@ import { qrRouter } from "./routers/qr";
 import { TRPCError } from "@trpc/server";
 import { adminProcedure, protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { storagePut } from "./storage";
+import { micronize } from "./imageProcessing";
 import { invokeLLM } from "./_core/llm";
 import {
   addComment, createSong, deleteSong, getAllCreators,
@@ -579,14 +580,18 @@ export const appRouter = router({
       return { success: true };
     }),
     uploadAvatar: protectedProcedure.input(z.object({ base64: z.string(), mimeType: z.string() })).mutation(async ({ ctx, input }) => {
-      const buffer = Buffer.from(input.base64, "base64");
-      const { url } = await storagePut(`avatars/${ctx.user.id}-${Date.now()}.jpg`, buffer, input.mimeType);
+      const rawBuffer = Buffer.from(input.base64, "base64");
+      // Micronize: trim, center-crop 400×400, WebP quality 82
+      const { buffer, mimeType } = await micronize(rawBuffer, "avatar");
+      const { url } = await storagePut(`avatars/${ctx.user.id}-${Date.now()}.webp`, buffer, mimeType);
       await updateUserProfile(ctx.user.id, { profilePhotoUrl: url });
       return { url };
     }),
     uploadBanner: protectedProcedure.input(z.object({ base64: z.string(), mimeType: z.string() })).mutation(async ({ ctx, input }) => {
-      const buffer = Buffer.from(input.base64, "base64");
-      const { url } = await storagePut(`banners/${ctx.user.id}-${Date.now()}.jpg`, buffer, input.mimeType);
+      const rawBuffer = Buffer.from(input.base64, "base64");
+      // Micronize: resize to max 1600×600, WebP quality 80
+      const { buffer } = await micronize(rawBuffer, "banner");
+      const { url } = await storagePut(`banners/${ctx.user.id}-${Date.now()}.webp`, buffer, "image/webp");
       await updateUserProfile(ctx.user.id, { bannerUrl: url });
 
       // ── AI Focal Point Detection ─────────────────────────────────────
@@ -1001,10 +1006,11 @@ export const appRouter = router({
         fileUrl = url;
       }
       let coverArtUrl: string | undefined = input.coverArtUrl;
-      // Fallback: legacy base64 cover path
+      // Fallback: legacy base64 cover path — micronize before upload
       if (!coverArtUrl && input.coverBase64 && input.coverMimeType) {
-        const coverBuffer = Buffer.from(input.coverBase64, "base64");
-        const { url } = await storagePut(`covers/${ctx.user.id}/${Date.now()}.jpg`, coverBuffer, input.coverMimeType);
+        const rawCover = Buffer.from(input.coverBase64, "base64");
+        const { buffer: processedCover, mimeType: coverMime } = await micronize(rawCover, "coverArt");
+        const { url } = await storagePut(`covers/${ctx.user.id}/${Date.now()}.webp`, processedCover, coverMime);
         coverArtUrl = url;
       }
       // Determine HAAI declared timestamp if all 6 fields are provided
@@ -1043,9 +1049,10 @@ export const appRouter = router({
       coverBase64: z.string(),
       coverMimeType: z.string(),
     })).mutation(async ({ ctx, input }) => {
-      const coverBuffer = Buffer.from(input.coverBase64, "base64");
-      const ext = input.coverMimeType.includes("png") ? "png" : "jpg";
-      const { url } = await storagePut(`covers/${ctx.user.id}/${Date.now()}-edit.${ext}`, coverBuffer, input.coverMimeType);
+      const rawBuffer = Buffer.from(input.coverBase64, "base64");
+      // Micronize: trim, resize to max 1200×1200, WebP quality 85
+      const { buffer, mimeType } = await micronize(rawBuffer, "coverArt");
+      const { url } = await storagePut(`covers/${ctx.user.id}/${Date.now()}-edit.webp`, buffer, mimeType);
       // Immediately persist the new cover URL
       await updateSongMetadata(input.songId, ctx.user.id, { coverArtUrl: url });
       return { url };
@@ -1102,8 +1109,9 @@ export const appRouter = router({
       // Resolve cover art URL (prefer pre-uploaded, fallback to base64)
       let coverArtUrl: string | undefined = input.coverArtUrl;
       if (!coverArtUrl && input.coverBase64 && input.coverMimeType) {
-        const coverBuffer = Buffer.from(input.coverBase64, "base64");
-        const { url } = await storagePut(`covers/${ctx.user.id}/${Date.now()}-album.jpg`, coverBuffer, input.coverMimeType);
+        const rawCover = Buffer.from(input.coverBase64, "base64");
+        const { buffer: processedCover, mimeType: coverMime } = await micronize(rawCover, "coverArt");
+        const { url } = await storagePut(`covers/${ctx.user.id}/${Date.now()}-album.webp`, processedCover, coverMime);
         coverArtUrl = url;
       }
       // Create song records (files already uploaded via /api/upload-file)
