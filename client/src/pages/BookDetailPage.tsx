@@ -23,6 +23,7 @@ import { CinematicComicReader, type BookPage } from "@/components/reader/Cinemat
 import { ChildrensBookReader } from "@/components/reader/ChildrensBookReader";
 import { ManuscriptReader } from "@/components/reader/ManuscriptReader";
 import { StoryboardBuilder, type StoryboardPage } from "@/components/reader/StoryboardBuilder";
+import { ManifestationReader } from "@/components/manifestation-reader";
 
 const REACTIONS = ["🔥", "😍", "😱", "🙌", "👍", "👎", "🤯", "+"];
 
@@ -718,14 +719,25 @@ export default function BookDetailPage() {
         )}
         {/* ── Full-screen Reader Portal — auto-routed by Narrative Format ── */}
         {readerOpen && hasStoryboard && narrativeFormat === "comic" && (
-          <CinematicComicReader
-            pages={readAccess === "open" || isOwner ? storyboardPages : visiblePages}
+          <ManifestationReader
+            pages={(readAccess === "open" || isOwner ? storyboardPages : visiblePages).map((p: any) => ({
+              pageNumber: p.pageNumber,
+              imageUrl: p.imageUrl,
+              caption: p.caption,
+              narration: p.narration,
+            }))}
             title={song.title}
+            medium="comic"
             onClose={() => setReaderOpen(false)}
             panelData={(() => { try { return JSON.parse((song as any)?.panelRegionsJson ?? "[]"); } catch { return []; } })()}
             soundtrackCues={(() => { try { return JSON.parse((song as any)?.soundtrackCuesJson ?? "[]"); } catch { return []; } })()}
             hasWitnessAccess={true}
             previewPageCount={previewPageCount}
+            provenance={{
+              witnessId: song.witnessId ?? undefined,
+              creator: artistName,
+              createdAt: song.createdAt ? new Date(song.createdAt).toLocaleDateString() : undefined,
+            }}
           />
         )}
         {readerOpen && hasStoryboard && narrativeFormat === "childrens" && (

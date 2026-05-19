@@ -4645,3 +4645,18 @@
 - [x] Integrate micronize into /api/upload-gallery-image (buffer → process → upload)
 - [x] Add vitest test suite (15 tests) for imageProcessing module
 - [x] All 216 tests passing, 0 TypeScript errors
+
+## Manifestation Reader Architecture (Phase 158)
+- [x] Create ManifestationReader shell component with modular layout (left nav + center canvas + right panel)
+- [x] Create useManifestationReader context/hook for shared state (mode, page, panel, settings)
+- [x] Implement Standard Mode — single centered page, dark immersive background, minimal chrome
+- [x] Implement Spread Mode — two-page reading, landscape spread, comic-first layout
+- [x] Implement Guided Mode — sequential panel focus, cinematic transitions, commentary overlays
+- [x] Implement Overview Mode — grid/map visualization, chapter navigation, manifestation discovery
+- [x] Build persistent left navigation (page thumbnails, chapter markers, mode switcher)
+- [x] Build expandable right-side contextual panel (provenance, commentary, metadata, WID info)
+- [x] Add cinematic transitions between pages/panels (fade, zoom, pan, cut, cinematic)
+- [x] Add keyboard navigation and minimal UI chrome with auto-hide
+- [x] Cross-medium support (comics, books, manuscripts, lore archives, videos) — type system ready
+- [x] Wire ManifestationReader into BookDetailPage replacing CinematicComicReader for comic format
+- [x] Write tests and verify TypeScript compilation — 216/216 passing, 0 TS errors
