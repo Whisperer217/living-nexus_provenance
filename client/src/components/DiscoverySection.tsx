@@ -92,9 +92,9 @@ function mapToManifestation(raw: any): ManifestationData {
 }
 
 export function DiscoverySection() {
-  // Fetch featured/curated works (trending algorithm)
+  // Fetch featured/curated works (top played — up to 6)
   const { data: featuredRaw } = trpc.songs.trending.useQuery(
-    { limit: 4 },
+    { limit: 6 },
     { staleTime: 60_000, refetchOnWindowFocus: false }
   );
 
@@ -140,10 +140,10 @@ export function DiscoverySection() {
               />
             ))}
           </div>
-          {/* Secondary featured — smaller row */}
+          {/* Secondary featured — fill remaining slots (up to 4 more) */}
           {featured.length > 2 && (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3">
-              {featured.slice(2, 4).map((item: ManifestationData, i: number) => (
+              {featured.slice(2, 6).map((item: ManifestationData, i: number) => (
                 <MediumManifestationCard
                   key={item.id}
                   data={item}

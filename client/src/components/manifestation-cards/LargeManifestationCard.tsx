@@ -82,6 +82,7 @@ export function LargeManifestationCard({ data, allData, dataIndex, onPlay, onTip
             style={{
               filter: "brightness(0.85)",
               transform: hovered ? "scale(1.03)" : "scale(1)",
+              objectPosition: "center 20%",
             }}
             onError={() => setImgError(true)}
             draggable={false}

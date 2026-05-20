@@ -4674,3 +4674,8 @@
 - [x] Atmospheric transitions and polish — soft gradient fades, subtle animation, cinematic feel
 - [x] Replace ShowcaseSection with DiscoverySection on homepage
 - [x] Write tests — 224/224 passing, 0 TS errors
+
+## Homepage Card Fixes (Phase 158)
+- [x] Featured Realms: populate with top 6 played tracks (limit increased from 4 to 6, grid shows 2 large + 4 medium)
+- [x] Cover art face centering: added objectPosition "center 20%" to Large and Medium card cover art
+- [x] Hidden Realms: fixed CosmicMediumIcon micro mode (size <= 12 renders SVG only, no label/button wrapper)

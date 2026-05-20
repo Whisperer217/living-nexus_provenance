@@ -177,6 +177,15 @@ export function CosmicMediumIcon({
   const Glyph = GLYPHS[medium];
   const displayLabel = label ?? MEDIUM_LABELS[medium];
 
+  // Micro mode — tiny badge, no label, no wrapper (for card thumbnails)
+  if (!card && size <= 12) {
+    return (
+      <span className="inline-flex items-center justify-center" style={{ width: size + 4, height: size + 4 }}>
+        <Glyph color={colors.primary} size={size} />
+      </span>
+    );
+  }
+
   if (!card) {
     // Icon-only mode (upload selector button)
     return (

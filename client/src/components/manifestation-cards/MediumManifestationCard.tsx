@@ -79,6 +79,7 @@ export function MediumManifestationCard({ data, allData, dataIndex, onPlay }: Pr
             style={{
               filter: "brightness(0.88)",
               transform: hovered ? "scale(1.04)" : "scale(1)",
+              objectPosition: "center 20%",
             }}
             onError={() => setImgError(true)}
             draggable={false}
