@@ -4721,3 +4721,11 @@
 - [x] Gate access properly (admin-only auth check on both backend and frontend)
 - [x] Update frontend to reflect limits and per-track documentation
 - [x] Fix and pass all tests (237 tests passing, 0 TypeScript errors)
+
+## Phase 163: Right Nav Cleanup + Mobile Track Images
+- [ ] Remove PlaylistDrawer vertical tab bar (NEW, TREND, LIKED, BUILD, SHOP, LIVE, PLAYING, TIPS) from desktop
+- [ ] Keep only the collapsible RightRail (Signals, Connected Manifestations, Witness Registry) as the right panel
+- [ ] Only the RightRail should shift the main content left when expanded
+- [x] Fix mobile track images/cards to properly fit mobile viewport width (responsive CSS variable --card-pan-w)
+- [x] Ensure reduced information density on mobile per design preference
+- [x] Fix GlobalPlayer expanded view empty space on mobile (reduced height cap from 92% to 82%, smaller artwork)

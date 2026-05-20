@@ -29,11 +29,10 @@ import { useRightRail } from "@/contexts/RightRailContext";
 import GlobalPlayer from "@/components/player/GlobalPlayer";
 import WitnessSurfacePlayer from "@/components/player/WitnessSurfacePlayer";
 import TheaterPlayer from "@/components/player/TheaterPlayer";
-import PlaylistDrawer from "@/components/player/PlaylistDrawer";
 import MarketplaceDrawer from "@/components/MarketplaceDrawer";
 import ScrollToTopButton from "@/components/layout/ScrollToTopButton";
 import TopBar from "@/components/layout/TopBar";
-import LiveActivityPanel from "@/components/layout/LiveActivityPanel";
+
 import { WhatsNewModal } from "@/components/WhatsNewModal";
 import { trpc } from "@/lib/trpc";
 import { useLightsMode } from "@/contexts/LightsModeContext";
@@ -134,8 +133,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       {/* ── TopBar -- desktop only (hidden on mobile) ── */}
       <TopBar archiveSongCount={archiveSongCount} unreadCount={unreadCount as number} />
 
-      {/* ── LiveActivityPanel -- desktop only, self-contained ── */}
-      <LiveActivityPanel />
+
 
       {/* ==============================================
           MOBILE HEADER (< lg)
@@ -263,9 +261,6 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       {/* ============================================
           DRAWER LAYER -- portal-based, isolated
       ============================================ */}
-      {/* Playlist Drawer */}
-      <PlaylistDrawer />
-
       {/* Marketplace Drawer */}
       <MarketplaceDrawer />
 

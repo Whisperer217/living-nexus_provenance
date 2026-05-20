@@ -282,6 +282,13 @@
     --nav-total: calc(var(--nav-height) + var(--nav-safe)); /* full nav footprint */
     --player-height: 64px;                 /* MiniBar height */
     --bottom-stack: calc(var(--nav-total) + var(--player-height)); /* total reserved bottom */
+    --card-pan-w: 160px;                   /* Pan-row card width — desktop default */
+  }
+  /* Mobile: wider cards that fill viewport better (~2.3 cards visible per row) */
+  @media (max-width: 639px) {
+    :root {
+      --card-pan-w: clamp(140px, 42vw, 170px);
+    }
   }
 
   #root {
@@ -672,6 +679,12 @@ html body[data-scroll-locked] {
     /* Hide scrollbar — all browsers */
     scrollbar-width: none;
     -ms-overflow-style: none;
+  }
+  /* Mobile: add inline padding so first/last cards aren't flush with screen edge */
+  @media (max-width: 639px) {
+    .museum-pan-row {
+      padding-inline: 0.75rem;
+    }
   }
   .museum-pan-row::-webkit-scrollbar {
     display: none;

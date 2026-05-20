@@ -10,7 +10,7 @@
 import { useRef } from "react";
 import { Link } from "wouter";
 import { Fingerprint, Cpu, DollarSign, Heart, Sparkles } from "lucide-react";
-import { CARD_PAN_W } from "@/lib/cardTokens";
+// Card width is responsive via CSS variable --card-pan-w
 
 const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
 
@@ -64,7 +64,7 @@ export default function FeaturedProjectsCarousel({ projects, isAuthenticated }: 
               <div
                 className="flex-shrink-0 flex flex-col items-center justify-center gap-2 rounded-2xl cursor-pointer transition-all hover:brightness-110 active:scale-[0.97]"
                 style={{
-                  width: CARD_PAN_W,
+                  width: "var(--card-pan-w)",
                   height: 200,
                   scrollSnapAlign: "start",
                   background: "transparent",
@@ -108,7 +108,7 @@ export default function FeaturedProjectsCarousel({ projects, isAuthenticated }: 
           <div
             key={project.id}
             className="flex-shrink-0 snap-start"
-            style={{ width: CARD_PAN_W }}
+            style={{ width: "var(--card-pan-w)" }}
           >
             <Link href={`/project/${project.slug}`}>
               <div

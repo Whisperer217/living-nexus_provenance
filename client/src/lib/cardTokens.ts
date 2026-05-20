@@ -9,12 +9,31 @@
  *  Grid cards     → fluid (museum-grid handles columns), same image cap
  *
  * Usage:
- *   import { CARD_PAN_W, CARD_IMG_MAX_H, CARD_ASPECT } from "@/lib/cardTokens";
+ *   import { CARD_PAN_W, CARD_IMG_MAX_H, CARD_ASPECT, getResponsiveCardWidth } from "@/lib/cardTokens";
  *   <div style={{ width: CARD_PAN_W }}>…</div>
  */
 
-/** Fixed pixel width for cards inside horizontal pan-row carousels */
+/** Fixed pixel width for cards inside horizontal pan-row carousels (desktop default) */
 export const CARD_PAN_W = 160;
+
+/**
+ * Responsive card width for mobile viewports.
+ * On screens < 640px: shows ~2.3 cards per row (fills viewport better)
+ * On screens >= 640px: uses the standard 160px
+ *
+ * Formula: (viewport - 2 * padding - gap) / 2.3
+ * With 24px padding each side and 12px gap: (vw - 60) / 2.3 ≈ 42vw capped at 160px
+ */
+export const CARD_PAN_W_MOBILE = "clamp(140px, 42vw, 160px)";
+
+/**
+ * Returns the appropriate card width based on viewport.
+ * Use this in components that need responsive card sizing.
+ */
+export function getResponsiveCardWidth(): string {
+  if (typeof window === "undefined") return `${CARD_PAN_W}px`;
+  return window.innerWidth < 640 ? CARD_PAN_W_MOBILE : `${CARD_PAN_W}px`;
+}
 
 /** Maximum pixel height of the cover-art image zone */
 export const CARD_IMG_MAX_H = 200;

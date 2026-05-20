@@ -9,7 +9,7 @@
 import { useRef } from "react";
 import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
-import { CARD_PAN_W } from "@/lib/cardTokens";
+// Card width is responsive via CSS variable --card-pan-w
 import { Play, Pause, FileText, BookOpen, Layers, Music, ChevronRight } from "lucide-react";
 import { MediaAsset } from "@/components/MediaAsset";
 import { usePlayer } from "@/contexts/PlayerContext";
@@ -135,7 +135,7 @@ export function WorkCarousel({ type, title, limit = 12, viewAllHref, onOpenReade
       {isLoading ? (
         <div className="flex gap-3 overflow-hidden">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="flex-shrink-0 rounded-xl animate-pulse" style={{ width: CARD_PAN_W, height: 200, background: "var(--ln-coal)" }} />
+            <div key={i} className="flex-shrink-0 rounded-xl animate-pulse" style={{ width: "var(--card-pan-w)", height: 200, background: "var(--ln-coal)" }} />
           ))}
         </div>
       ) : (
@@ -154,7 +154,7 @@ export function WorkCarousel({ type, title, limit = 12, viewAllHref, onOpenReade
                 className={`flex-shrink-0 snap-start museum-card parchment-grain cursor-pointer group ${
                   isActive ? "museum-card--active" : ""
                 }`}
-                style={{ width: CARD_PAN_W }}
+                style={{ width: "var(--card-pan-w)" }}
                 onClick={() => {
                   if (type === "audio") { handlePlay(item); return; }
                   if ((type === "comic" || type === "manuscript") && onOpenReader) { onOpenReader(item.song); return; }

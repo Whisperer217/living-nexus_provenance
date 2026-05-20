@@ -19,7 +19,7 @@ import TipModal from "@/components/TipModal";
 import FeaturedProjectsCarousel from "@/components/FeaturedProjectsCarousel";
 import { getContentTypeColors } from "@/lib/contentTypeColors";
 import TrackCard from "@/components/TrackCard";
-import { CARD_PAN_W } from "@/lib/cardTokens";
+// Card width is responsive via CSS variable --card-pan-w
 import { ShowcaseRow } from "@/components/ShowcaseRow";
 import { StoreTrackCard } from "@/components/StoreTrackCard";
 import { StoreCreatorCard } from "@/components/StoreCreatorCard";
@@ -886,7 +886,7 @@ export default function ExplorePage() {
                 </div>
                 <div className="museum-pan-row -mx-6 px-6">
                   {Array.from({ length: 8 }).map((_, i) => (
-                    <div key={i} className="flex-shrink-0 rounded-xl overflow-hidden border border-white/[0.06] bg-[#111009] animate-pulse" style={{ width: CARD_PAN_W }}>
+                    <div key={i} className="flex-shrink-0 rounded-xl overflow-hidden border border-white/[0.06] bg-[#111009] animate-pulse" style={{ width: "var(--card-pan-w)" }}>
                       <div className="bg-white/[0.04]" style={{ height: "200px" }} />
                       <div className="p-3 space-y-2">
                         <div className="h-3 bg-white/[0.06] rounded w-3/4" />
@@ -1022,7 +1022,7 @@ export default function ExplorePage() {
                       const likeEntry = (likeMap as any)[item.song.id];
                       const track = itemToTrack(item);
                       return (
-                        <div key={item.song.id} className="flex-shrink-0" style={{ width: CARD_PAN_W }}>
+                        <div key={item.song.id} className="flex-shrink-0" style={{ width: "var(--card-pan-w)" }}>
                           <TrackCard
                             track={track}
                             index={idx}
@@ -1049,7 +1049,7 @@ export default function ExplorePage() {
           <div
             className="grid gap-4"
             style={{
-              gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))",
+              gridTemplateColumns: "repeat(auto-fill, minmax(min(var(--card-pan-w), 100%), 1fr))",
               opacity: isShuffling ? 0.5 : 1,
               transition: "opacity 0.3s",
             }}

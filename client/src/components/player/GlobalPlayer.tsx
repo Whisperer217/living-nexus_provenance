@@ -417,7 +417,9 @@ function GlobalPlayerInner() {
 
   /* ── Computed player height ── */
   const viewportH = typeof window !== "undefined" ? window.innerHeight : 800;
-  const expandedH = Math.min(viewportH * 0.92, 820);
+  // Mobile: use 85% of viewport as max — prevents large empty void below Up Next
+  // Desktop modal uses a larger cap (820px) since it's a centered overlay
+  const expandedH = isDesktop ? Math.min(viewportH * 0.85, 820) : Math.min(viewportH * 0.82, 700);
 
   function getSnapHeight(z: SnapZone): number {
     if (z === "MINI") return SNAP.MINI;
@@ -829,15 +831,15 @@ function GlobalPlayerInner() {
           style={{ scrollbarWidth: "thin", scrollbarColor: `${GOLD} transparent` }}
           onPointerDown={e => e.stopPropagation()} // prevent drag from scroll area
         >
-          <div className="px-4 pb-6 space-y-5">
+          <div className="px-4 pb-4 space-y-4" style={{ paddingBottom: "max(16px, env(safe-area-inset-bottom, 16px))" }}>
 
             {/* Large artwork — with swipe gesture + cinematic tap */}
             <div className="flex justify-center pt-2">
               <div
                 className="relative rounded-2xl overflow-hidden select-none"
                 style={{
-                  width: "min(280px, 72vw)",
-                  height: "min(280px, 72vw)",
+                  width: "min(260px, 65vw)",
+                  height: "min(260px, 65vw)",
                   background: visTrack?.bg || "#111009",
                   boxShadow: swipeDir
                     ? `0 8px 40px ${GOLD_GLOW}, ${swipeDir === "left" ? "-6px" : "6px"} 0 24px rgba(212,175,55,0.4), 0 0 0 1px rgba(212,175,55,0.3)`

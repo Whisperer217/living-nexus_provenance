@@ -10,7 +10,7 @@ import { Helmet } from "react-helmet-async";
 import { useParams, Link, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { CARD_PAN_W } from "@/lib/cardTokens";
+// Card width is responsive via CSS variable --card-pan-w
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -1396,7 +1396,7 @@ export default function CreatorProfilePage() {
                   <Link key={project.id} href={`/project/${project.slug}`}>
                     <div
                       className="prov-card-img-wrap cursor-pointer group flex-shrink-0"
-                      style={{ width: CARD_PAN_W }}
+                      style={{ width: "var(--card-pan-w)" }}
                     >
                       {project.bannerUrl ? (
                         <img src={project.bannerUrl} alt={project.title} className="absolute inset-0 w-full h-full object-cover object-center" />
