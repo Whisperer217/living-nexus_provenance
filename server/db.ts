@@ -4691,3 +4691,52 @@ export async function globalSearch(query: string, limit = 8): Promise<SearchResu
     widMatch,
   };
 }
+
+// ─── Physical Distribution Export ─────────────────────────────────────────────
+/**
+ * Fetch songs by IDs (with creator info) for physical export.
+ * When songIds is empty and includeAll is true, returns all published songs (with optional search).
+ */
+export async function getSongsByIds(
+  songIds: number[],
+  opts?: { search?: string; limit?: number; offset?: number; includeAll?: boolean }
+) {
+  const db = await getDb();
+  if (!db) return [];
+
+  const limit = opts?.limit ?? 100;
+  const offset = opts?.offset ?? 0;
+
+  const conditions: any[] = [];
+
+  if (songIds.length > 0) {
+    conditions.push(inArray(songs.id, songIds));
+  } else if (opts?.includeAll) {
+    conditions.push(ne(songs.status, "Deleted"));
+  } else {
+    return [];
+  }
+
+  if (opts?.search) {
+    conditions.push(or(
+      like(songs.title, `%${opts.search}%`),
+      like(songs.witnessId, `%${opts.search}%`),
+    ));
+  }
+
+  return db.select({
+    song: songs,
+    creator: {
+      id: users.id,
+      name: users.name,
+      artistHandle: users.artistHandle,
+      profilePhotoUrl: users.profilePhotoUrl,
+    },
+  })
+    .from(songs)
+    .leftJoin(users, eq(songs.userId, users.id))
+    .where(and(...conditions))
+    .orderBy(desc(songs.createdAt))
+    .limit(limit)
+    .offset(offset);
+}

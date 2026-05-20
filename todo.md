@@ -4706,3 +4706,10 @@
 - [x] Fix PlaylistDrawer — hidden tab handles and panel on mobile (hidden md:block / hidden md:flex)
 - [x] Fix overflow-x: hidden on html/body to prevent horizontal scroll revealing right-side drawers
 - [x] Verify fix on both mobile and desktop viewports — TypeScript 0 errors, 228/228 tests passing
+
+## Phase 161: Physical Distribution (USB Export)
+- [x] Backend: Express route POST /api/admin/physical-export (admin-only, ZIP with ID3 tags, cover art, WID certs, README)
+- [x] Frontend: Admin page at /admin/physical with song selection checkboxes and Export button
+- [x] Branded folder structure and README.txt with provenance manifest
+- [x] Vitest coverage — 8 tests for the export route (auth, validation, ZIP generation)
+- [x] All 236 tests passing, 0 TypeScript errors
