@@ -1,6 +1,7 @@
 /**
  * Physical Distribution Export — Unit Tests
  * Tests the admin-only physical export endpoint behavior.
+ * Enforces 10-track limit per export.
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
@@ -82,7 +83,7 @@ describe("Physical Export Route", () => {
       expect(res.body.error).toContain("songIds");
     });
 
-    it("rejects more than 200 songs", async () => {
+    it("rejects more than 10 songs (enforces limit)", async () => {
       const { physicalExportRouter } = await import("./physicalExport");
       const express = await import("express");
       const request = (await import("supertest")).default;
@@ -93,13 +94,13 @@ describe("Physical Export Route", () => {
 
       (sdk.authenticateRequest as any).mockResolvedValue({ id: 1, role: "admin", name: "Admin" });
 
-      const ids = Array.from({ length: 201 }, (_, i) => i + 1);
+      const ids = Array.from({ length: 11 }, (_, i) => i + 1);
       const res = await request(app)
         .post("/api/admin/physical-export")
         .send({ songIds: ids });
 
       expect(res.status).toBe(400);
-      expect(res.body.error).toContain("200");
+      expect(res.body.error).toContain("10");
     });
 
     it("returns 404 when no songs found for given IDs", async () => {
@@ -140,12 +141,15 @@ describe("Physical Export Route", () => {
             genre: "Rock",
             fileUrl: null, // No audio — won't crash, just skips
             coverArtUrl: null,
+            lyricsText: "These are the lyrics\nVerse 1\nChorus",
             durationSeconds: 180,
             createdAt: new Date("2024-01-01"),
             albumName: null,
             aiConsent: "prohibited",
             aiDisclosure: "original",
             certificateUrl: null,
+            ecdsaPublicKey: "04abc123",
+            ecdsaSignature: "sig_test_123",
           },
           creator: {
             id: 2,
@@ -166,6 +170,48 @@ describe("Physical Export Route", () => {
       // ZIP binary content returned — check content-length header
       const contentLength = parseInt(res.headers["content-length"] || "0", 10);
       expect(contentLength).toBeGreaterThan(0);
+    });
+
+    it("accepts exactly 10 songs (at the limit)", async () => {
+      const { physicalExportRouter } = await import("./physicalExport");
+      const express = await import("express");
+      const request = (await import("supertest")).default;
+
+      const app = express.default();
+      app.use(express.default.json());
+      app.use(physicalExportRouter);
+
+      (sdk.authenticateRequest as any).mockResolvedValue({ id: 1, role: "admin", name: "Admin" });
+      
+      const mockSongs = Array.from({ length: 10 }, (_, i) => ({
+        song: {
+          id: i + 1,
+          title: `Song ${i + 1}`,
+          witnessId: `WID-MUS-TEST${i}`,
+          genre: "Rock",
+          fileUrl: null,
+          coverArtUrl: null,
+          lyricsText: null,
+          durationSeconds: 180,
+          createdAt: new Date("2024-01-01"),
+          albumName: null,
+          aiConsent: "prohibited",
+          aiDisclosure: "original",
+          certificateUrl: null,
+          ecdsaPublicKey: null,
+          ecdsaSignature: null,
+        },
+        creator: { id: 2, name: "Artist", artistHandle: "artist", profilePhotoUrl: null },
+      }));
+      (getSongsByIds as any).mockResolvedValue(mockSongs);
+
+      const ids = Array.from({ length: 10 }, (_, i) => i + 1);
+      const res = await request(app)
+        .post("/api/admin/physical-export")
+        .send({ songIds: ids });
+
+      expect(res.status).toBe(200);
+      expect(res.headers["content-type"]).toBe("application/zip");
     });
   });
 

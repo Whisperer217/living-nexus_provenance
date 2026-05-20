@@ -4713,3 +4713,11 @@
 - [x] Branded folder structure and README.txt with provenance manifest
 - [x] Vitest coverage — 8 tests for the export route (auth, validation, ZIP generation)
 - [x] All 236 tests passing, 0 TypeScript errors
+
+## Phase 162: Physical Distribution — Fixes & Enhancements
+- [x] Fix database/wiring test failure on the physical export page
+- [x] Enforce 10-file limit per export (backend MAX_TRACKS_PER_EXPORT=10 + frontend MAX_EXPORT=10)
+- [x] Include full documentation per track: audio, cover art, lyrics sheet, WID provenance
+- [x] Gate access properly (admin-only auth check on both backend and frontend)
+- [x] Update frontend to reflect limits and per-track documentation
+- [x] Fix and pass all tests (237 tests passing, 0 TypeScript errors)
