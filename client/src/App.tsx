@@ -28,6 +28,7 @@ function QrScanLogger() {
 const HomePage = lazy(() => import("./pages/HomePage"));
 const ExplorePage = lazy(() => import("./pages/ExplorePage"));
 const UploadPage = lazy(() => import("./pages/UploadPage"));
+const ManifestationStudio = lazy(() => import("./pages/manifestation-studio/ManifestationStudio"));
 const BatchUploadPage = lazy(() => import("./pages/BatchUploadPage"));
 const LikedPage = lazy(() => import("./pages/LikedPage"));
 const ArchivePage = lazy(() => import("./pages/ArchivePage"));
@@ -169,6 +170,7 @@ function Router() {
                 <Route path="/explore" component={ExplorePage} />
                 <Route path="/search" component={SearchResultsPage} />
                 <Route path="/upload" component={UploadPage} />
+                <Route path="/manifest" component={ManifestationStudio} />
                 <Route path="/batch-upload" component={BatchUploadPage} />
                 <Route path="/liked" component={LikedPage} />
                 <Route path="/archive" component={ArchivePage} />
