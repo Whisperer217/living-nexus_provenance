@@ -30,6 +30,7 @@ import { ShowcaseRow } from "@/components/ShowcaseRow";
 import { StoreTrackCard } from "@/components/StoreTrackCard";
 import { StoreCreatorCard } from "@/components/StoreCreatorCard";
 import { CinematicComicReader } from "@/components/reader/CinematicComicReader";
+import { DiscoverySection } from "@/components/DiscoverySection";
 
 /** Animated counter that counts up from 0 to `target` over ~1.2 s */
 function AnimatedCounter({ target }: { target: number }) {
@@ -967,9 +968,9 @@ export default function HomePage() {
       <h2 className="sr-only">Discover and Register Creative Works on Living Nexus</h2>
 
       {/* ══════════════════════════════════════════════════════════════
-          MS STORE SHOWCASE ROWS
+          MANIFESTATION DISCOVERY ARCHITECTURE
       ══════════════════════════════════════════════════════════════ */}
-      <ShowcaseSection />
+      <DiscoverySection />
 
       {/* ══════════════════════════════════════════════════════════════
           FOUNDER'S ERA BLOCK

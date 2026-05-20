@@ -2151,3 +2151,49 @@ h1, h2, h3, h4, h5, h6,
 .btn-gold {
   @apply bg-[#C9A84C] hover:bg-[#b8973b] text-black font-bold;
 }
+
+
+/* ═══════════════════════════════════════════════════════════════
+   MANIFESTATION CARD SYSTEM — Atmospheric Transitions
+═══════════════════════════════════════════════════════════════ */
+
+@keyframes manifestation-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(196,154,40,0); }
+  50% { box-shadow: 0 0 20px 2px rgba(196,154,40,0.08); }
+}
+
+@keyframes manifestation-reveal {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes manifestation-breathe {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+.manifestation-card-enter {
+  animation: manifestation-reveal 0.4s ease-out forwards;
+}
+
+.manifestation-resonance-glow {
+  animation: manifestation-pulse 3s ease-in-out infinite;
+}
+
+.manifestation-sigil-breathe {
+  animation: manifestation-breathe 4s ease-in-out infinite;
+}
+
+/* Stagger animation for grid children */
+.manifestation-grid > *:nth-child(1) { animation-delay: 0ms; }
+.manifestation-grid > *:nth-child(2) { animation-delay: 60ms; }
+.manifestation-grid > *:nth-child(3) { animation-delay: 60ms; }
+.manifestation-grid > *:nth-child(4) { animation-delay: 120ms; }
+.manifestation-grid > *:nth-child(5) { animation-delay: 150ms; }
+.manifestation-grid > *:nth-child(6) { animation-delay: 180ms; }
+.manifestation-grid > *:nth-child(7) { animation-delay: 210ms; }
+.manifestation-grid > *:nth-child(8) { animation-delay: 240ms; }
+.manifestation-grid > *:nth-child(9) { animation-delay: 270ms; }
+.manifestation-grid > *:nth-child(10) { animation-delay: 300ms; }
+.manifestation-grid > *:nth-child(11) { animation-delay: 330ms; }
+.manifestation-grid > *:nth-child(12) { animation-delay: 360ms; }

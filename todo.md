@@ -4660,3 +4660,17 @@
 - [x] Cross-medium support (comics, books, manuscripts, lore archives, videos) — type system ready
 - [x] Wire ManifestationReader into BookDetailPage replacing CinematicComicReader for comic format
 - [x] Write tests and verify TypeScript compilation — 216/216 passing, 0 TS errors
+
+## Homepage Discovery Architecture Redesign (Phase 159)
+- [x] Build new variable card ecosystem — LargeManifestationCard, MediumManifestationCard, MicroManifestationCard
+- [x] Implement hover/tap metadata reveal with atmospheric transitions (title, creator, resonance emerge on interaction)
+- [x] Default card state: artwork-first, minimal chrome (creator sigil, medium icon, resonance glow only)
+- [x] Build medium-specific card variants (Music waveform, Comic cover/issue, Manuscript typography, Guide portrait, Lore archive)
+- [x] Redesign homepage section flow: Hero → Featured Realms → New Arrivals → Trending → Active Collaborations → Hidden Realms
+- [x] Implement Manifestation Bundles (soundtrack + comic + testimony grouped as one discovery unit)
+- [x] Creator identity continuity — persistent small sigil/avatar on all cards
+- [x] Interaction hierarchy enforcement: Play > Expand/Open > Identity > Provenance
+- [x] Variable card sizing creates rhythm and scanability (large cinematic, medium discovery, micro rapid)
+- [x] Atmospheric transitions and polish — soft gradient fades, subtle animation, cinematic feel
+- [x] Replace ShowcaseSection with DiscoverySection on homepage
+- [x] Write tests — 224/224 passing, 0 TS errors
