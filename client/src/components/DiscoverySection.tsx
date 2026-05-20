@@ -56,9 +56,15 @@ function SectionDivider() {
   );
 }
 
-/** Map raw API song data to ManifestationData */
-function mapToManifestation(song: any): ManifestationData {
-  const creator = song.creator || {};
+/** Map raw API song data to ManifestationData.
+ *  The API returns { song: {...}, creator: {...}, likeCount } for trending,
+ *  and flat song objects for discover. Handle both shapes.
+ */
+function mapToManifestation(raw: any): ManifestationData {
+  // Detect nested vs flat structure
+  const song = raw.song ?? raw;
+  const creator = raw.creator ?? song.creator ?? {};
+  const topLikeCount = raw.likeCount ?? song.likeCount;
   return {
     id: song.id,
     title: song.title || "Untitled",
@@ -71,16 +77,16 @@ function mapToManifestation(song: any): ManifestationData {
     wid: song.witnessId || song.wid,
     widShort: song.widShort,
     playCount: song.playCount,
-    likeCount: song.likeCount,
+    likeCount: topLikeCount,
     fileUrl: song.fileUrl,
-    duration: song.duration,
+    duration: song.durationSeconds || song.duration,
     aiDisclosure: song.aiDisclosure,
     contentType: song.contentType,
     description: song.description,
     lyricsText: song.lyricsText,
     totalFundingCents: song.totalFundingCents,
     tipCount: song.tipCount,
-    medium: song.contentType as any,
+    medium: (song.contentType || "audio") as any,
     isCollaborative: (song.contributors?.length ?? 0) > 0,
   };
 }
