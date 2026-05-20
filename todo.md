@@ -4699,3 +4699,10 @@
 - [x] Priority order: immersion > readability > emotional pacing > discoverability > extensibility
 - [x] Wire refactored system into BookDetailPage for all narrative formats (comic, childrens, manuscript)
 - [x] Write tests and verify TypeScript compilation — 224/224 passing, 0 TS errors
+
+## Phase 160: Mobile Layout Fix — Backend Content Exposure
+- [x] Investigate mobile rendering issues (console errors, visual bugs)
+- [x] Fix MarketplaceDrawer — added mobile guard (returns null on mobile, navigates to /marketplace instead)
+- [x] Fix PlaylistDrawer — hidden tab handles and panel on mobile (hidden md:block / hidden md:flex)
+- [x] Fix overflow-x: hidden on html/body to prevent horizontal scroll revealing right-side drawers
+- [x] Verify fix on both mobile and desktop viewports — TypeScript 0 errors, 228/228 tests passing

@@ -124,9 +124,29 @@ export default function MarketplaceDrawer() {
   const [location] = useLocation();
   useEffect(() => { setIsOpen(false); }, [location]);
 
-  // Listen for external open trigger (e.g. from PlaylistDrawer SHOP tab)
+  // ── Mobile guard: never open on mobile ─────────────────────────────────
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== "undefined" ? window.innerWidth < 768 : false
+  );
   useEffect(() => {
-    const handler = () => setIsOpen(true);
+    const mql = window.matchMedia("(max-width: 767px)");
+    const onChange = () => setIsMobile(mql.matches);
+    mql.addEventListener("change", onChange);
+    setIsMobile(mql.matches);
+    return () => mql.removeEventListener("change", onChange);
+  }, []);
+
+  // Listen for external open trigger (e.g. from PlaylistDrawer SHOP tab)
+  // On mobile, navigate to /marketplace instead of opening the drawer
+  useEffect(() => {
+    const handler = () => {
+      if (window.innerWidth < 768) {
+        // On mobile, navigate to the full marketplace page instead
+        window.location.href = "/marketplace";
+        return;
+      }
+      setIsOpen(true);
+    };
     window.addEventListener("ln:open-shop", handler);
     return () => window.removeEventListener("ln:open-shop", handler);
   }, []);
@@ -299,6 +319,9 @@ export default function MarketplaceDrawer() {
       </div>
     </>
   );
+
+  // Don't render the drawer on mobile at all
+  if (isMobile) return null;
 
   return createPortal(content, document.body);
 }

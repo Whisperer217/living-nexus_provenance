@@ -768,8 +768,8 @@ export default function PlaylistDrawer() {
         />
       )}
 
-      {/* Individual stacked tab handles */}
-      <div data-playlist-tab-handle>
+      {/* Individual stacked tab handles — hidden on mobile */}
+      <div className="hidden md:block" data-playlist-tab-handle>
         {TABS.map((t, i) => (
           <TabHandle
             key={t.id}
@@ -783,9 +783,10 @@ export default function PlaylistDrawer() {
         ))}
       </div>
 
-      {/* Drawer panel */}
+      {/* Drawer panel — hidden on mobile to prevent bleed-through */}
       <div
         ref={drawerRef}
+        className="hidden md:flex"
         style={{
           position: "fixed",
           top: 0,
@@ -795,7 +796,6 @@ export default function PlaylistDrawer() {
           background: "var(--ln-panel)",
           borderLeft: "1px solid var(--ln-panel-border)",
           zIndex: 55,
-          display: "flex",
           flexDirection: "column",
           transition: "right 0.3s cubic-bezier(0.4,0,0.2,1)",
           overflowX: "hidden",

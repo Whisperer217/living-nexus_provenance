@@ -262,6 +262,7 @@
     height: 100%;
     overscroll-behavior: none; /* seal the viewport floor — no bounce void on mobile */
     background-color: #111009; /* Near-black — match app bg */
+    overflow-x: hidden; /* prevent horizontal scroll from revealing right-side drawers on mobile */
     /* overflow-y is NOT locked here — panels lock body.overflow via JS when needed */
   }
   /* NOTE: html overflow:hidden was removed — it breaks Radix Dialog portals by clipping
