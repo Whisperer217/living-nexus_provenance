@@ -146,16 +146,9 @@ function GlobalPlayerInner() {
   useEffect(() => { if (cinematic) showCinematicOverlay(); }, [cinematic]);
   useEffect(() => () => { if (cinematicHideTimer.current) clearTimeout(cinematicHideTimer.current); }, []);
 
-  /* ── Visual persistence: auto-elevate to EXPANDED when playback starts from MINI (mobile only) ── */
-  // On mobile: bottom sheet auto-expands when a track starts playing.
-  // On desktop: TopBar is the persistent mini player — user explicitly clicks expand.
-  useEffect(() => {
-    if (!isDesktop && state.isPlaying && zone === 'MINI') {
-      setZone('EXPANDED');
-      setDragHeight(null);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.isPlaying, isDesktop]);
+  /* ── Phase 164: Auto-expand DISABLED — player stays as mini bar until user taps expand ── */
+  // Previously auto-expanded on mobile when playback started. Now the user must tap the
+  // expand chevron to open the full player. This prevents the jarring auto-expand behavior.
 
   /* ── ln:player-collapse / ln:player-expand event wiring ── */
   // KeeperComposePage dispatches these when the textarea is focused/blurred.
@@ -815,6 +808,8 @@ function GlobalPlayerInner() {
               {state.isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
             </button>
             <button onClick={e => { e.stopPropagation(); toggleGlow(); }} className="p-1.5 transition-all rounded" style={{ color: glowEnabled ? "#C084FC" : "rgba(212,175,55,0.4)", background: glowEnabled ? "rgba(192,132,252,0.08)" : "transparent" }} title={glowEnabled ? "Glow: ON" : "Glow: OFF"}><Waves size={14} /></button>
+            {/* Phase 164: Cinematic mode — deliberate button, not triggered by artwork tap */}
+            <button onClick={e => { e.stopPropagation(); setCinematic(true); }} className="p-1.5 transition-all rounded" style={{ color: cinematic ? GOLD : "rgba(212,175,55,0.65)", background: cinematic ? "rgba(212,175,55,0.08)" : "transparent" }} title="Cinematic View"><Maximize2 size={14} /></button>
             <button ref={contextMenuBtnRef} onClick={e => { e.stopPropagation(); openContextMenu(); }} className="p-1.5 transition-colors" style={{ color: "rgba(212,175,55,0.65)" }}><MoreHorizontal size={16} /></button>
             {/* Collapse button: EXPANDED → MINI (FLOAT zone removed) */}
             <button onClick={e => { e.stopPropagation(); setZone(z => z === "EXPANDED" ? "MINI" : "EXPANDED"); setDragHeight(null); }} className="p-1.5 transition-colors" style={{ color: GOLD, filter: `drop-shadow(0 0 6px rgba(212,175,55,0.5))` }} title={isExpanded ? "Collapse" : "Expand player"}>
@@ -852,7 +847,7 @@ function GlobalPlayerInner() {
                 onPointerMove={onArtPointerMove}
                 onPointerUp={onArtPointerUp}
                 onPointerCancel={onArtPointerUp}
-                onClick={e => { if (Math.abs(swipeDelta) < 5) { e.stopPropagation(); setCinematic(true); } }}
+                /* Phase 164: Cinematic no longer triggered by artwork tap — swipe changes tracks only */
               >
                 {visTrack?.artUrl
                   ? <img
@@ -873,12 +868,7 @@ function GlobalPlayerInner() {
                     </span>
                   </div>
                 )}
-                {/* Tap hint overlay */}
-                {!swipeDir && (
-                  <div className="absolute bottom-2 right-2 flex items-center gap-1 px-2 py-1 rounded-full text-[9px]" style={{ background: "rgba(0,0,0,0.5)", color: "rgba(255,255,255,0.5)" }}>
-                    <Maximize2 size={9} /> Cinematic
-                  </div>
-                )}
+                {/* Phase 164: Cinematic hint removed — cinematic is now a deliberate button action */}
                 {/* WID badge overlay */}
                 {visTrack?.witnessId && (
                   <div className="absolute top-2 right-2">

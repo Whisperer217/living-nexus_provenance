@@ -4729,3 +4729,8 @@
 - [x] Fix mobile track images/cards to properly fit mobile viewport width (responsive CSS variable --card-pan-w)
 - [x] Ensure reduced information density on mobile per design preference
 - [x] Fix GlobalPlayer expanded view empty space on mobile (reduced height cap from 92% to 82%, smaller artwork)
+## Phase 164: Mobile Player Deduplication + Cinematic Separation
+- [x] Fix player duplication on mobile — single bottom-sheet player only (WSP surface bar + expanded panel disabled)
+- [x] Mobile player expands from bottom with clear collapse button (auto-expand disabled, user taps chevron)
+- [x] Remove auto-cinematic trigger from artwork swipe gesture (swipe = track change only)
+- [x] Make cinematic view a separate deliberate button action (Maximize2 icon in expanded controls row)
