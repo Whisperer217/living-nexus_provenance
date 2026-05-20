@@ -4679,3 +4679,23 @@
 - [x] Featured Realms: populate with top 6 played tracks (limit increased from 4 to 6, grid shows 2 large + 4 medium)
 - [x] Cover art face centering: added objectPosition "center 20%" to Large and Medium card cover art
 - [x] Hidden Realms: fixed CosmicMediumIcon micro mode (size <= 12 renders SVG only, no label/button wrapper)
+
+## ManifestationReader → Universal Manifestation Operating System (Phase 159)
+- [x] Refactor core into medium-agnostic shell with shared system layer
+- [x] Build AtmosphereSystem — ambient lighting, background gradients, mood transitions
+- [x] Build ProvenanceSystem — progressive reveal (WID → contributors → lineage → transformation history)
+- [x] Build SyncSystem — subtle optional soundtrack synchronization (atmospheric, not forced cinematic)
+- [x] Build IdentitySystem — creator sigils, contributor badges, persistent across all views
+- [x] Build NavigationSystem — shared nav architecture adaptable per medium type
+- [x] Build MediumAdapterRegistry — pluggable rendering engines per medium type
+- [x] Create ComicAdapter — panel layout, spread behavior, guided panel focus
+- [x] Create ManuscriptAdapter — typography-first, scroll pacing, chapter flow
+- [x] Create LoreAdapter — archive-style, expandable entries, cross-reference links
+- [x] Create VideoAdapter — cinematic viewport, chapter markers, commentary overlay
+- [x] Create AudioAdapter — waveform visualization, lyric sync, album art immersion
+- [x] Each adapter inherits shared systems but configures: layout, interaction density, default mode, pacing
+- [x] Progressive Archive Mode — layered provenance reveal via ArchiveCanvas (surface → depth on demand)
+- [x] Atmospheric soundtrack sync — optional, subtle, enhancement not enforcement
+- [x] Priority order: immersion > readability > emotional pacing > discoverability > extensibility
+- [x] Wire refactored system into BookDetailPage for all narrative formats (comic, childrens, manuscript)
+- [x] Write tests and verify TypeScript compilation — 224/224 passing, 0 TS errors

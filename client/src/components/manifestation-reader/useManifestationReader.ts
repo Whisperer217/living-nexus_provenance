@@ -4,12 +4,13 @@
  * cross-medium support.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { getAdapter, type MediumAdapter } from "./adapters";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 export type ViewingMode = "standard" | "spread" | "guided" | "overview" | "archive";
 
-export type MediumType = "comic" | "book" | "manuscript" | "lore" | "video" | "storyboard";
+export type MediumType = "comic" | "book" | "manuscript" | "lore" | "video" | "storyboard" | "childrens" | "guide" | string;
 
 export type TransitionType = "fade" | "zoom" | "pan" | "cut" | "cinematic";
 
@@ -63,12 +64,16 @@ export interface Chapter {
 }
 
 export interface ProvenanceData {
+  wid?: string;
   witnessId?: string;
   createdAt?: string;
   creator?: string;
+  consentType?: string;
   contributors?: { name: string; role: string }[];
-  transformations?: { type: string; date: string; from?: string }[];
+  transformations?: { type: string; date: string; from?: string; description?: string }[];
   derivatives?: { title: string; id: string; type: string }[];
+  parentWid?: string;
+  relatedWorks?: { title: string; medium: string; relationship: string }[];
 }
 
 export interface ReaderSettings {
@@ -124,6 +129,9 @@ export interface ManifestationReaderState {
   pageLabel: string;
   spreadRight: number | null;
   shouldLoadPage: (idx: number) => boolean;
+
+  // Adapter (medium-specific configuration)
+  adapter: MediumAdapter;
 
   // Settings
   settings: ReaderSettings;
@@ -189,12 +197,17 @@ export function useManifestationReader(config: ManifestationReaderConfig): Manif
 
   const totalPages = pages.length;
 
+  // ── Adapter Resolution (medium-agnostic) ──────────────────────────────────
+  const adapter = useMemo(() => getAdapter(medium), [medium]);
+
   // ── Core state ────────────────────────────────────────────────────────────
   const [mode, setModeRaw] = useState<ViewingMode>(() => {
+    // Adapter determines default mode; override for guided if panel data exists
     const hasPanels = panelData.length > 0;
-    if (hasPanels && hasWitnessAccess && medium === "comic") return "guided";
-    if (medium === "manuscript" || medium === "book") return "standard";
-    return "standard";
+    if (hasPanels && hasWitnessAccess && adapter.hasPanelData) {
+      return adapter.supportedModes.includes("guided") ? "guided" : adapter.defaultMode;
+    }
+    return adapter.defaultMode;
   });
 
   const [pageIdx, setPageIdx] = useState(clamp(startPage, 0, totalPages - 1));
@@ -386,6 +399,7 @@ export function useManifestationReader(config: ManifestationReaderConfig): Manif
     pageLabel,
     spreadRight,
     shouldLoadPage,
+    adapter,
     settings,
     setMode,
     goNext,

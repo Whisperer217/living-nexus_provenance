@@ -741,7 +741,7 @@ export default function BookDetailPage() {
           />
         )}
         {readerOpen && hasStoryboard && narrativeFormat === "childrens" && (
-          <ChildrensBookReader
+          <ManifestationReader
             pages={(readAccess === "open" || isOwner ? storyboardPages : visiblePages).map((p: any) => ({
               pageNumber: p.pageNumber,
               imageUrl: p.imageUrl,
@@ -749,19 +749,35 @@ export default function BookDetailPage() {
               narration: p.narration,
             }))}
             title={song.title}
+            medium="childrens"
             onClose={() => setReaderOpen(false)}
+            hasWitnessAccess={true}
+            previewPageCount={previewPageCount}
+            provenance={{
+              witnessId: song.witnessId ?? undefined,
+              creator: artistName,
+              createdAt: song.createdAt ? new Date(song.createdAt).toLocaleDateString() : undefined,
+            }}
           />
         )}
         {readerOpen && (narrativeFormat === "manuscript" || (!hasStoryboard && (song as any)?.lyricsText)) && (
-          <ManuscriptReader
-            workId={String(song.id)}
+          <ManifestationReader
+            pages={[
+              {
+                pageNumber: 1,
+                imageUrl: song.coverArtUrl ?? "",
+                caption: (song as any)?.lyricsText ?? storyboardPages.map((p: any, i: number) => p.caption ?? `Page ${i + 1}`).join("\n\n"),
+              },
+            ]}
             title={song.title}
-            author={artistName}
-            content={{
-              text: (song as any)?.lyricsText ?? storyboardPages.map((p: any, i: number) => p.caption ?? `Page ${i + 1}`).join("\n\n"),
-              coverImageUrl: song.coverArtUrl ?? undefined,
-            }}
+            medium="manuscript"
             onClose={() => setReaderOpen(false)}
+            hasWitnessAccess={true}
+            provenance={{
+              witnessId: song.witnessId ?? undefined,
+              creator: artistName,
+              createdAt: song.createdAt ? new Date(song.createdAt).toLocaleDateString() : undefined,
+            }}
           />
         )}
 

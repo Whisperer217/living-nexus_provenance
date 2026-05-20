@@ -13,6 +13,8 @@ interface Props {
 export function OverviewCanvas({ state, config }: Props) {
   const { chapters = [] } = config;
   const hasChapters = chapters.length > 0;
+  const { adapter } = state;
+  const unitLabel = adapter.primaryUnit;
 
   return (
     <div className="w-full h-full overflow-y-auto p-4 md:p-6">
@@ -86,7 +88,7 @@ export function OverviewCanvas({ state, config }: Props) {
                   color: isCurrent ? "#C9A84C" : "#666",
                 }}
               >
-                {isGated ? <Lock size={8} style={{ display: "inline" }} /> : p.pageNumber}
+                {isGated ? <Lock size={8} style={{ display: "inline" }} /> : `${unitLabel} ${p.pageNumber}`}
               </div>
               {/* Chapter start marker */}
               {isChapterStart && (

@@ -1,5 +1,6 @@
 /**
  * SpreadCanvas — Two-page spread reading mode.
+ * Adapts layout from the medium adapter.
  * Landscape spread support, comic-first layout behavior.
  */
 import type { ManifestationReaderState, ManifestationReaderConfig } from "../useManifestationReader";
@@ -15,11 +16,14 @@ export function SpreadCanvas({ state, config }: Props) {
 
   if (!leftPage) return null;
 
+  const { layout } = state.adapter;
+  const pageMaxWidth = `${Math.round((layout.maxWidthFraction * 100) / 2)}vw`;
+
   return (
     <div
       className={`flex items-center justify-center gap-1 h-full w-full
         ${state.transDir === "forward" ? "mr-page-forward" : state.transDir === "back" ? "mr-page-back" : ""}`}
-      style={{ padding: "52px 60px" }}
+      style={{ padding: `52px ${layout.padding * 16}px` }}
     >
       {/* Left page */}
       {state.shouldLoadPage(state.pageIdx) && (
@@ -28,7 +32,8 @@ export function SpreadCanvas({ state, config }: Props) {
           alt={`Page ${leftPage.pageNumber}`}
           className="max-h-full object-contain"
           style={{
-            maxWidth: "540px",
+            maxWidth: pageMaxWidth,
+            aspectRatio: layout.aspectRatio ?? undefined,
             transform: `scale(${state.zoom})`,
             transformOrigin: "center right",
             transition: "transform 0.2s ease",
@@ -51,7 +56,8 @@ export function SpreadCanvas({ state, config }: Props) {
           alt={`Page ${rightPage.pageNumber}`}
           className="max-h-full object-contain"
           style={{
-            maxWidth: "540px",
+            maxWidth: pageMaxWidth,
+            aspectRatio: layout.aspectRatio ?? undefined,
             transform: `scale(${state.zoom})`,
             transformOrigin: "center left",
             transition: "transform 0.2s ease",

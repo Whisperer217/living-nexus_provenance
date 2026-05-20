@@ -1,5 +1,6 @@
 /**
  * GuidedCanvas — Sequential panel focus with cinematic transitions.
+ * Adapts pacing and transition style from the medium adapter.
  * GPU-accelerated panel zoom, creator commentary overlays, emotional beats.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -16,6 +17,8 @@ export function GuidedCanvas({ state, config }: Props) {
   const imgRef = useRef<HTMLImageElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [guidedStyle, setGuidedStyle] = useState<React.CSSProperties>({});
+
+  const { pacing, layout } = state.adapter;
 
   // Compute GPU-accelerated transform for panel zoom
   const computeGuidedTransform = useCallback(() => {
@@ -49,15 +52,17 @@ export function GuidedCanvas({ state, config }: Props) {
     const tx = vw / 2 - panelCenterX * displayRatioX * scale;
     const ty = vh / 2 - panelCenterY * displayRatioY * scale;
 
-    // Choose transition based on panel's declared transitionType
+    // Adapter-driven transition duration; panel-level type overrides adapter default
+    const duration = pacing.transitionDuration;
     const transitionMap: Record<TransitionType, string> = {
-      fade: "opacity 0.4s ease, transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)",
-      zoom: "transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1)",
-      pan: "transform 0.65s cubic-bezier(0.4, 0, 0.2, 1)",
+      fade: `opacity 0.4s ease, transform ${duration}ms cubic-bezier(0.4, 0, 0.2, 1)`,
+      zoom: `transform ${duration}ms cubic-bezier(0.34, 1.56, 0.64, 1)`,
+      pan: `transform ${duration}ms cubic-bezier(0.4, 0, 0.2, 1)`,
       cut: "transform 0s",
-      cinematic: "transform 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+      cinematic: `transform ${Math.round(duration * 1.5)}ms cubic-bezier(0.25, 0.46, 0.45, 0.94)`,
     };
-    const transition = transitionMap[panel.transitionType ?? "zoom"];
+    const panelTransition = panel.transitionType ?? (pacing.transitionStyle as TransitionType) ?? "zoom";
+    const transition = transitionMap[panelTransition] ?? transitionMap.zoom;
 
     setGuidedStyle({
       transform: `translate3d(${tx}px, ${ty}px, 0) scale(${scale})`,
@@ -65,7 +70,7 @@ export function GuidedCanvas({ state, config }: Props) {
       transition,
       willChange: "transform",
     });
-  }, [state.currentPanels, state.panelIdx]);
+  }, [state.currentPanels, state.panelIdx, pacing.transitionDuration, pacing.transitionStyle]);
 
   useEffect(() => {
     computeGuidedTransform();
@@ -74,6 +79,7 @@ export function GuidedCanvas({ state, config }: Props) {
   if (!page) return null;
 
   const currentPanel = state.currentPanel;
+  const maxWidth = `${Math.round(layout.maxWidthFraction * 100)}vw`;
 
   return (
     <div ref={containerRef} className="relative w-full h-full flex items-center justify-center overflow-hidden">
@@ -85,7 +91,7 @@ export function GuidedCanvas({ state, config }: Props) {
           alt={`Page ${page.pageNumber}`}
           className="absolute max-h-full object-contain"
           style={{
-            maxWidth: "1100px",
+            maxWidth,
             ...guidedStyle,
           }}
           onLoad={computeGuidedTransform}

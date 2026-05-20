@@ -34,6 +34,7 @@ import { StandardCanvas } from "./canvases/StandardCanvas";
 import { SpreadCanvas } from "./canvases/SpreadCanvas";
 import { GuidedCanvas } from "./canvases/GuidedCanvas";
 import { OverviewCanvas } from "./canvases/OverviewCanvas";
+import { ArchiveCanvas } from "./canvases/ArchiveCanvas";
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
@@ -380,6 +381,8 @@ function CanvasRouter({ state, config }: { state: ManifestationReaderState; conf
       return <GuidedCanvas state={state} config={config} />;
     case "spread":
       return <SpreadCanvas state={state} config={config} />;
+    case "archive":
+      return <ArchiveCanvas state={state} config={config} />;
     case "standard":
     default:
       return <StandardCanvas state={state} config={config} />;
