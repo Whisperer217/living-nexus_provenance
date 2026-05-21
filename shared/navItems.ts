@@ -16,6 +16,7 @@ export type NavMode =
   | "EXPLORE"
   | "PROJECTS"
   | "MARKETPLACE"
+  | "DISTRIBUTE"
   | "UPLOAD"
   | "DASHBOARD"
   | "ARCHIVE"
@@ -83,12 +84,23 @@ export const NAV_ITEMS: NavItem[] = [
     ],
   },
   {
+    id: "DISTRIBUTE",
+    label: "Distribute",
+    iconName: "Send",
+    subItems: [
+      { label: "Distribution Hub",  path: "/distribute",    description: "Sovereign distribution pipeline" },
+      { label: "Physical Formats",  path: "/distribute#physical", description: "USB, CD, Vinyl, Books, Comics" },
+      { label: "Interest Form",     path: "/distribute#form",     description: "Register your distribution interest" },
+    ],
+  },
+  {
     id: "UPLOAD",
     label: "Upload",
     iconName: "Upload",
     authOnly: true,
     subItems: [
       { label: "Upload Work",      path: "/upload",        description: "Register a new creative work" },
+      { label: "Manifest",         path: "/manifest",      description: "Guided manifestation studio" },
       { label: "Prompt Generator", path: "/prompt-gen",    description: "AI-assisted creation prompts" },
     ],
   },

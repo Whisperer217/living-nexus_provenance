@@ -4742,3 +4742,13 @@
 - [x] Implement Manuscript/Book manifestation environment (chapter org, formatting)
 - [x] Implement Video manifestation environment (cinematic preview, frame extraction)
 - [x] Add progress milestones, provenance indicators, and creator reassurance messaging
+## Phase 166: Distribution Vision Integration
+- [x] Build Distribution Hub page (/distribute) — sovereign pipeline, eMastered as DSP tool, physical formats
+- [x] Add physical artifacts section (USB, CD, Vinyl, Books, Comics) with interactive selection
+- [x] Build creator distribution interest form with notifyOwner integration
+- [x] Update homepage hero slide 1 to "Creator Owned. Provenance Powered. Built to Preserve. Built to Last."
+- [x] Add hero slide 4 "We Are Distributing — Beyond the Cloud" with distribution vision image
+- [x] Add distribution teaser section on homepage before ContributorsStrip
+- [x] Add DISTRIBUTE nav item in shared navItems with sub-items
+- [x] Add storage proxy for manus-storage asset serving
+- [x] Wire /distribute route in App.tsx

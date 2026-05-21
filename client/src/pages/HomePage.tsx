@@ -18,7 +18,7 @@ import TrackCard from "@/components/TrackCard";
 import BookCard from "@/components/BookCard";
 import TipModal from "@/components/TipModal";
 // Card width is now responsive via CSS variable --card-pan-w (see index.css)
-import { Sparkles, ShieldCheck, Upload, Compass, Star, Lock, Fingerprint, Shield, Users, Play, Heart, DollarSign, Cpu, CheckCircle2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Sparkles, ShieldCheck, Upload, Compass, Star, Lock, Fingerprint, Shield, Users, Play, Heart, DollarSign, Cpu, CheckCircle2, ChevronLeft, ChevronRight, Send } from "lucide-react";
 import { Link } from "wouter";
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
@@ -680,10 +680,10 @@ const HERO_SLIDES = [
   {
     id: 1,
     img: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663123503966/CikRjojXDGlVnusc.png",
-    tag: "Creative Provenance Platform",
-    headline: "Your work deserves to be",
-    accent: "witnessed.",
-    body: "Every work — music, lyrics, manuscripts, comics — carries a Witness ID. Cryptographic proof of origin that belongs to you before it belongs to anyone else.",
+    tag: "Creator Owned. Provenance Powered.",
+    headline: "Built to preserve.",
+    accent: "Built to last.",
+    body: "A creator-owned manifestation archive and provenance platform designed to preserve, package, and distribute creative works across digital and physical formats.",
     cta1: { label: "Register Your Work", href: "/upload", icon: "upload" as const },
     cta2: { label: "Explore Works", href: "/explore", icon: "compass" as const },
   },
@@ -706,6 +706,16 @@ const HERO_SLIDES = [
     body: "Founder's Era creators establish the first anchors of a cryptographically-verified creative record. A timestamped declaration that cannot be altered, disputed, or erased.",
     cta1: { label: "Claim Your WID", href: "/upload", icon: "upload" as const },
     cta2: { label: "Learn More", href: "/founder-era", icon: "star" as const },
+  },
+  {
+    id: 4,
+    img: "/manus-storage/living-nexus-distribution-vision_a5bf3eb4.png",
+    tag: "We Are Distributing",
+    headline: "Beyond the cloud —",
+    accent: "into physical reality.",
+    body: "USB archives. CDs. Vinyl. Books. Comics. Real artifacts for real creators. The sovereign distribution pipeline is being built.",
+    cta1: { label: "Distribution Hub", href: "/distribute", icon: "compass" as const },
+    cta2: { label: "Register Interest", href: "/distribute#form", icon: "star" as const },
   },
 ];
 
@@ -1617,6 +1627,33 @@ export default function HomePage() {
       </div>
 
       {/* ── Contributors Strip ──────────────────────────────────────────── */}
+      {/* ── Distribution Teaser ── */}
+      <section className="px-4 md:px-8 py-12 md:py-16">
+        <div className="max-w-4xl mx-auto rounded-2xl p-8 md:p-10 text-center" style={{
+          background: "rgba(20,14,30,0.5)",
+          border: "1px solid rgba(196,154,40,0.10)",
+        }}>
+          <span className="font-heading text-[10px] tracking-[0.25em] uppercase" style={{ color: "#8B6914" }}>
+            We Are Distributing
+          </span>
+          <h2 className="font-display text-lg md:text-xl mt-3 mb-3" style={{ color: "#E8DFC8" }}>
+            Beyond the Cloud — Into Physical Reality.
+          </h2>
+          <p className="font-body text-[13px] leading-relaxed max-w-xl mx-auto mb-6" style={{ color: "#A09880" }}>
+            USB archives. CDs. Vinyl. Books. Comics. The sovereign distribution pipeline is being built for Living Nexus creators.
+          </p>
+          <Link href="/distribute">
+            <button
+              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg font-heading font-bold text-[11px] tracking-wider uppercase transition-all hover:brightness-110"
+              style={{ background: "rgba(196,154,40,0.15)", border: "1px solid rgba(196,154,40,0.3)", color: "#C49A28" }}
+            >
+              <Send size={13} />
+              Explore Distribution
+            </button>
+          </Link>
+        </div>
+      </section>
+
       <ContributorsStrip />
 
       {/* Tip modal */}

@@ -6,6 +6,7 @@ import { createServer } from "http";
 import net from "net";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
+import { registerStorageProxy } from "./storageProxy";
 import { registerOgRoutes } from "../og";
 import { registerEmbedRoutes } from "../embedRoute";
 import { registerSseRoutes } from "../sse";
@@ -115,6 +116,7 @@ async function startServer() {
   app.use("/api/trpc/songs.download", publicWriteLimit);
   app.use("/api/trpc/songs.recordPlay", publicWriteLimit);
   // OAuth callback under /api/oauth/callback
+  registerStorageProxy(app);
   registerOAuthRoutes(app);
   // Server-Sent Events for real-time community notifications
   registerSseRoutes(app);
