@@ -19,6 +19,7 @@ import { useState, useRef, useEffect } from "react";
 import { Link } from "wouter";
 import { Play, Pause, Shield, MoreVertical, FolderPlus, ExternalLink, Copy, SkipForward, Flame, Heart, Zap } from "lucide-react";
 import { AddToCollectionButton } from "@/components/AddToCollectionModal";
+import { CreatorHandle } from "@/components/CreatorHandle";
 import { createPortal } from "react-dom";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { toast } from "sonner";
@@ -44,6 +45,7 @@ interface SongData {
   lyricsText?: string | null;
   totalFundingCents?: number | null;
   tipCount?: number | null;
+  creatorRole?: string | null;
 }
 
 interface StoreTrackCardProps {
@@ -315,27 +317,15 @@ export function StoreTrackCard({ song, size = "md", allSongs, songIndex }: Store
             {/* LAYER 5 + 6: Attribution (left) + Resonance (right) */}
             <div className="flex items-center justify-between gap-2">
 
-              {/* Layer 5: Attribution — creator + WID */}
+              {/* Layer 5: Attribution — creator + WID (with witness identity popup) */}
               <div className="flex items-center gap-1.5 min-w-0">
-                {song.profilePhotoUrl ? (
-                  <img
-                    src={song.profilePhotoUrl}
-                    alt={song.artistName || ""}
-                    className="w-5 h-5 rounded-full object-cover flex-shrink-0"
-                    style={{ border: "1px solid rgba(196,154,40,0.3)" }}
-                  />
-                ) : (
-                  <div
-                    className="w-5 h-5 rounded-full flex-shrink-0"
-                    style={{ background: "rgba(196,154,40,0.12)", border: "1px solid rgba(196,154,40,0.2)" }}
-                  />
-                )}
-                <span
-                  className="text-[10px] truncate"
-                  style={{ color: "rgba(200,169,106,0.85)", fontFamily: "'Cinzel', serif", letterSpacing: "0.02em" }}
-                >
-                  {song.artistName || "Unknown"}
-                </span>
+                <CreatorHandle
+                  userId={song.userId || undefined}
+                  handle={song.artistHandle}
+                  displayName={song.artistName}
+                  role={song.creatorRole}
+                  size="sm"
+                />
                 {(song.wid || song.widShort) && (
                   <div className="flex items-center gap-0.5 flex-shrink-0">
                     <Shield className="w-2.5 h-2.5" style={{ color: "rgba(196,154,40,0.6)" }} />

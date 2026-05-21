@@ -117,6 +117,8 @@ import {
   deleteGuide,
   globalSearch,
   type SearchResults,
+  submitDistributionInterest,
+  getDistributionInterests,
 } from "./db";
 import { FOUNDER_PRICE_EARLY_CENTS, FOUNDER_PRICE_LATE_CENTS, FOUNDER_THRESHOLD, LICENSE_PRICE_CENTS, LICENSE_SLOTS, SLOT_PACKAGES, getSlotPackage, type SlotPackageId } from "./livingArchiveProducts";
 import { ENV } from "./_core/env";
@@ -608,6 +610,14 @@ export const appRouter = router({
       const { buffer, mimeType } = await micronize(rawBuffer, "avatar");
       const { url } = await storagePut(`avatars/${ctx.user.id}-${Date.now()}.webp`, buffer, mimeType);
       await updateUserProfile(ctx.user.id, { profilePhotoUrl: url });
+      return { url };
+    }),
+    uploadSigil: protectedProcedure.input(z.object({ base64: z.string(), mimeType: z.string() })).mutation(async ({ ctx, input }) => {
+      const rawBuffer = Buffer.from(input.base64, "base64");
+      // Micronize: trim, max 400×400, WebP quality 85
+      const { buffer, mimeType } = await micronize(rawBuffer, "sigil");
+      const { url } = await storagePut(`sigils/${ctx.user.id}-${Date.now()}.webp`, buffer, mimeType);
+      await updateUserProfile(ctx.user.id, { sigilUrl: url });
       return { url };
     }),
     uploadBanner: protectedProcedure.input(z.object({ base64: z.string(), mimeType: z.string() })).mutation(async ({ ctx, input }) => {
@@ -6780,6 +6790,31 @@ If a field cannot be determined from the document, use an empty string. For symb
   }),
 
   // ─── Global Search ─────────────────────────────────────────────────────────
+  distribution: router({
+    submitInterest: publicProcedure
+      .input(z.object({
+        formats: z.array(z.string()),
+        mediaTypes: z.array(z.string()),
+        notes: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const user = ctx.user;
+        const result = await submitDistributionInterest({
+          userId: user?.id ?? null,
+          userName: user?.name ?? null,
+          userEmail: user?.email ?? null,
+          mediaTypes: input.mediaTypes,
+          formats: input.formats,
+          notes: input.notes ?? null,
+        });
+        return result;
+      }),
+    listInterests: adminProcedure
+      .input(z.object({ limit: z.number().min(1).max(100).default(50), offset: z.number().min(0).default(0) }))
+      .query(async ({ input }) => {
+        return getDistributionInterests(input.limit, input.offset);
+      }),
+  }),
   search: router({
     global: publicProcedure
       .input(z.object({ q: z.string().min(1).max(200) }))

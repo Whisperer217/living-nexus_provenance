@@ -4760,3 +4760,13 @@
 - [x] Add 13 identity columns to users schema (witnessPhilosophy, witnessEpitaph, witnessOriginStory, witnessDoctrine, sigilUrl, activeMediums, archiveContinuity, officialArtistName, localizedName, dspSpotifyUrl, dspAppleMusicUrl, dspTikTokHandle, producerCredits, labelName)
 - [x] Extend profile.update and getCreatorMini with identity fields
 - [x] TypeScript: 0 errors | Vitest: 237 tests passing
+
+## Phase 168: CreatorCard in TrackCards, Sigil Upload, Distribution Interest Persistence
+- [x] Wire CreatorCard into TrackCard — show witness identity popup on creator name hover
+- [x] Wire CreatorHandle into StoreTrackCard (HomePage + ExplorePage) with creatorRole
+- [x] Replace Sigil URL text field in IdentityEditor with proper S3 image upload
+- [x] Add uploadSigil procedure (micronize → 400×400 WebP → S3)
+- [x] Add distribution_interest table to schema (userId, userName, userEmail, mediaTypes, formats, notes, createdAt)
+- [x] Add tRPC procedures: distribution.submitInterest (public) + distribution.listInterests (admin)
+- [x] Wire DistributionPage interest form to new tRPC procedure (persists + notifies owner)
+- [x] TypeScript: 0 errors | Vitest: 237 tests passing (24 files)

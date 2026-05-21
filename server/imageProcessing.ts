@@ -87,6 +87,15 @@ const PRESETS = {
     trim: false,
     sharpen: true,
   },
+  sigil: {
+    maxWidth: 400,
+    maxHeight: 400,
+    quality: 85,
+    effort: 4,
+    crop: false,
+    trim: true,
+    sharpen: true,
+  },
 } as const satisfies Record<string, ProcessOptions>;
 
 export type ImagePreset = keyof typeof PRESETS;

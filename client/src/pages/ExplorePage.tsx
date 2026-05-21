@@ -76,6 +76,7 @@ function exploreMapToSongData(row: any) {
     profilePhotoUrl: creator?.profilePhotoUrl ?? null,
     aiDisclosure: song.aiDisclosure ?? null,
     contentType: (song.contentType ?? "audio") as "audio" | "lyrics" | "manuscript" | "comic",
+    creatorRole: creator?.role ?? null,
   };
 }
 const PAGE_SIZE = 24;

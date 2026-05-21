@@ -4,10 +4,12 @@
    Used in ProfilePage's Identity tab
 ═══════════════════════════════════════════════════════════════════ */
 
-import { useState } from "react";
-import { Fingerprint, Globe, Eye } from "lucide-react";
+import { useState, useRef } from "react";
+import { Fingerprint, Globe, Eye, Upload, X, Image as ImageIcon } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
+
+const MAX_SIGIL_SIZE = 4 * 1024 * 1024; // 4MB
 
 export function IdentityEditor({ profile }: { profile: any }) {
   const utils = trpc.useUtils();
@@ -15,12 +17,20 @@ export function IdentityEditor({ profile }: { profile: any }) {
     onSuccess: () => { utils.profile.me.invalidate(); toast.success("Identity updated"); },
     onError: (e: any) => toast.error(e.message),
   });
+  const uploadSigilMutation = trpc.profile.uploadSigil.useMutation({
+    onSuccess: (data) => {
+      setSigilPreview(data.url);
+      utils.profile.me.invalidate();
+      toast.success("Sigil uploaded");
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
 
   const [witnessPhilosophy, setWitnessPhilosophy] = useState(profile?.creativePhilosophy || profile?.witnessPhilosophy || "");
   const [witnessOriginStory, setWitnessOriginStory] = useState(profile?.originStatement || profile?.witnessOriginStory || "");
   const [witnessDoctrine, setWitnessDoctrine] = useState(profile?.creativeDoctrine || profile?.witnessDoctrine || "");
   const [witnessEpitaph, setWitnessEpitaph] = useState(profile?.witnessEpitaph || "");
-  const [witnessSigil, setWitnessSigil] = useState(profile?.sigilUrl || "");
+  const [sigilPreview, setSigilPreview] = useState<string | null>(profile?.sigilUrl || null);
   const [distributionArtistName, setDistributionArtistName] = useState(profile?.officialArtistName || "");
   const [distributionLabel, setDistributionLabel] = useState(profile?.labelName || "");
   const [distributionIsni, setDistributionIsni] = useState(profile?.distributionIsni || "");
@@ -30,12 +40,40 @@ export function IdentityEditor({ profile }: { profile: any }) {
   const [distributionYoutubeMusicUrl, setDistributionYoutubeMusicUrl] = useState(profile?.dspTikTokHandle || "");
   const [distributionDspOther, setDistributionDspOther] = useState(profile?.producerCredits || "");
 
+  const sigilInputRef = useRef<HTMLInputElement>(null);
+
+  const handleSigilUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > MAX_SIGIL_SIZE) {
+      toast.error("Sigil image must be under 4MB");
+      return;
+    }
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select an image file");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result as string;
+      const base64 = dataUrl.split(",")[1];
+      uploadSigilMutation.mutate({ base64, mimeType: file.type });
+    };
+    reader.readAsDataURL(file);
+    // Reset input so re-selecting same file triggers change
+    e.target.value = "";
+  };
+
+  const removeSigil = () => {
+    setSigilPreview(null);
+    updateProfile.mutate({ sigilUrl: "" });
+  };
+
   const saveWitness = () => {
     updateProfile.mutate({
       creativePhilosophy: witnessPhilosophy,
       originStatement: witnessOriginStory,
       creativeDoctrine: witnessDoctrine,
-      sigilUrl: witnessSigil || undefined,
     });
   };
   const saveDistribution = () => {
@@ -89,9 +127,51 @@ export function IdentityEditor({ profile }: { profile: any }) {
                 placeholder="One line. Your legacy statement." className={fieldClass} />
             </div>
             <div>
-              <label className={labelClass}>SIGIL / SYMBOL URL</label>
-              <input value={witnessSigil} onChange={e => setWitnessSigil(e.target.value)}
-                placeholder="https://... (your creator mark)" className={fieldClass} />
+              <label className={labelClass}>SIGIL / CREATOR MARK</label>
+              <input type="file" ref={sigilInputRef} accept="image/*" onChange={handleSigilUpload} className="hidden" />
+              {sigilPreview ? (
+                <div className="relative group w-full h-[100px] rounded-xl overflow-hidden border border-white/[0.08]"
+                  style={{ background: "#111009" }}>
+                  <img src={sigilPreview} alt="Sigil" className="w-full h-full object-contain p-2" />
+                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                    <button
+                      onClick={() => sigilInputRef.current?.click()}
+                      className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
+                      title="Replace sigil"
+                    >
+                      <Upload size={14} className="text-white" />
+                    </button>
+                    <button
+                      onClick={removeSigil}
+                      className="p-2 rounded-lg bg-red-500/20 hover:bg-red-500/40 transition-colors"
+                      title="Remove sigil"
+                    >
+                      <X size={14} className="text-red-300" />
+                    </button>
+                  </div>
+                  {uploadSigilMutation.isPending && (
+                    <div className="absolute inset-0 bg-black/70 flex items-center justify-center">
+                      <div className="w-5 h-5 border-2 border-[#C49A28] border-t-transparent rounded-full animate-spin" />
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <button
+                  onClick={() => sigilInputRef.current?.click()}
+                  disabled={uploadSigilMutation.isPending}
+                  className="w-full h-[100px] rounded-xl border border-dashed border-white/[0.15] hover:border-[#C49A28]/40 transition-colors flex flex-col items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                  style={{ background: "#111009" }}
+                >
+                  {uploadSigilMutation.isPending ? (
+                    <div className="w-5 h-5 border-2 border-[#C49A28] border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <>
+                      <ImageIcon size={18} className="text-white/30" />
+                      <span className="text-[10px] font-body text-white/30">Upload sigil image (max 4MB)</span>
+                    </>
+                  )}
+                </button>
+              )}
             </div>
           </div>
         </div>
