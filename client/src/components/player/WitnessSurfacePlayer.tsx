@@ -307,6 +307,60 @@ function ExpandedPanel() {
   return null;
 }
 
+/* ── Manifestation CTA button — content-type aware ── */
+function ManifestationCTA({
+  contentType,
+  trackId,
+  size = "sm",
+}: {
+  contentType?: string;
+  trackId: string;
+  size?: "sm" | "xs";
+}) {
+  const [, navigate] = useLocation();
+  if (contentType === "comic" || contentType === "manuscript") {
+    return (
+      <button
+        onClick={(e) => { e.stopPropagation(); navigate(`/book/${trackId}`); }}
+        className="flex items-center gap-1 rounded-full font-semibold transition-all hover:scale-105 active:scale-95 shrink-0"
+        style={{
+          padding: size === "xs" ? "3px 10px" : "4px 12px",
+          fontSize: size === "xs" ? 10 : 11,
+          background: "rgba(255,215,0,0.18)",
+          border: "1px solid rgba(255,215,0,0.4)",
+          color: "rgba(255,215,0,0.95)",
+          letterSpacing: "0.04em",
+        }}
+        aria-label="Read Now"
+      >
+        <BookOpen size={size === "xs" ? 9 : 10} />
+        READ NOW
+      </button>
+    );
+  }
+  if (contentType === "guide") {
+    return (
+      <button
+        onClick={(e) => { e.stopPropagation(); navigate(`/guide/${trackId}`); }}
+        className="flex items-center gap-1 rounded-full font-semibold transition-all hover:scale-105 active:scale-95 shrink-0"
+        style={{
+          padding: size === "xs" ? "3px 10px" : "4px 12px",
+          fontSize: size === "xs" ? 10 : 11,
+          background: "rgba(255,215,0,0.18)",
+          border: "1px solid rgba(255,215,0,0.4)",
+          color: "rgba(255,215,0,0.95)",
+          letterSpacing: "0.04em",
+        }}
+        aria-label="Enter Guide"
+      >
+        <Map size={size === "xs" ? 9 : 10} />
+        ENTER GUIDE
+      </button>
+    );
+  }
+  return null;
+}
+
 /* ── Floating Widget (detached, draggable) ── */
 function FloatingWidget() {
   const { state, togglePlay } = usePlayer();

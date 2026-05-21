@@ -709,7 +709,7 @@ const HERO_SLIDES = [
   },
   {
     id: 4,
-    img: "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/distribution-hub-banner-CfqSAQPuQTJUgzbkcA5DoB.webp",
+    img: "/manus-storage/distribution-vision_ffed3ea8.png",
     tag: "We Are Distributing",
     headline: "Beyond the cloud —",
     accent: "into physical reality.",

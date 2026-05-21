@@ -1836,6 +1836,10 @@ ${workType === "manuscript" || workType === "comic" ? "Category" : "Genre"}: ${i
       await updateCollectionCover(input.collectionId, ctx.user.id, { coverArtUrl: url });
       return { url };
     }),
+    /* Stub: worker stats for MissionControlPage (backend worker not yet deployed) */
+    getWorkerStats: protectedProcedure.query(async () => {
+      return { stats: { pending: 0, claimed: 0, completed: 0, failed: 0 }, recent: [] as any[] };
+    }),
   }),
   comments: router({
     list: publicProcedure.input(z.object({ songId: z.number() })).query(async ({ input }) => getCommentsBySong(input.songId)),

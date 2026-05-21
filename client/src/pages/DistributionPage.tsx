@@ -162,7 +162,7 @@ export default function DistributionPage() {
             {/* Distribution Vision Banner */}
             <div className="relative rounded-xl overflow-hidden border border-[#C49A28]/15 shadow-2xl">
               <img
-                src="https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/distribution-hub-banner-CfqSAQPuQTJUgzbkcA5DoB.webp"
+                src="/manus-storage/distribution-vision_ffed3ea8.png"
                 alt="Living Nexus Distribution Vision — DSP Delivery Infrastructure and Physical Formats"
                 className="w-full h-auto"
               />
