@@ -149,6 +149,15 @@ export async function updateUserProfile(userId: number, data: {
   avatarObjectPosition?: string;
   bannerPositionX?: number;
   bannerPositionY?: number;
+  // Creator economy
+  cashAppHandle?: string; paypalUsername?: string; venmoHandle?: string;
+  // Witness Identity Layer
+  originStatement?: string; creativePhilosophy?: string; creativeDoctrine?: string;
+  sigilUrl?: string; activeMediums?: string[]; archiveContinuity?: string;
+  // Distribution Identity Layer
+  officialArtistName?: string; localizedName?: string;
+  dspSpotifyUrl?: string; dspAppleMusicUrl?: string; dspTikTokHandle?: string;
+  producerCredits?: string; labelName?: string;
 }) {
   const db = await getDb();
   if (!db) return;

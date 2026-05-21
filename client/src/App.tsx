@@ -87,6 +87,7 @@ const GuideDirectoryPage = lazy(() => import("./pages/GuideDirectoryPage"));
 const GuideDetailPage = lazy(() => import("./pages/GuideDetailPage"));
 const SearchResultsPage = lazy(() => import("./pages/SearchResultsPage"));
 const DistributionPage = lazy(() => import("./pages/DistributionPage"));
+const CreatorIdentityPage = lazy(() => import("./pages/CreatorIdentityPage"));
 
 // Minimal fallback shown while a page chunk loads (typically <200ms on CDN)
 function PageLoader() {
@@ -228,6 +229,7 @@ function Router() {
                 <Route path="/first-witness" component={FirstWitnessPage} />
                 <Route path="/marketplace" component={MarketplacePage} />
                 <Route path="/distribute" component={DistributionPage} />
+                <Route path="/identity/:id" component={CreatorIdentityPage} />
                 <Route path="/creator-surface" component={CreatorSurface} />
                 <Route path="/guides" component={GuideDirectoryPage} />
                 <Route path="/guides/upload" component={GuideUploadWizard} />

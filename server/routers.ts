@@ -544,6 +544,15 @@ export const appRouter = router({
         role: user.role,
         primaryGenre: user.primaryGenre,
         songSlotsUsed: user.songSlotsUsed,
+        // Witness Identity fields for creator card
+        originStatement: user.originStatement,
+        activeMediums: user.activeMediums as string[] | null,
+        sigilUrl: user.sigilUrl,
+        founderWid: user.founderWid,
+        witnessPhilosophy: user.witnessPhilosophy,
+        witnessEpitaph: user.witnessEpitaph,
+        witnessOriginStory: user.witnessOriginStory,
+        witnessDoctrine: user.witnessDoctrine,
       };
     }),
     update: protectedProcedure.input(z.object({
@@ -567,6 +576,21 @@ export const appRouter = router({
       cashAppHandle: z.string().max(64).optional(),
       paypalUsername: z.string().max(128).optional(),
       venmoHandle: z.string().max(64).optional(),
+      // Witness Identity Layer
+      originStatement: z.string().max(5000).optional(),
+      creativePhilosophy: z.string().max(5000).optional(),
+      creativeDoctrine: z.string().max(5000).optional(),
+      sigilUrl: z.string().url().optional().or(z.literal('')),
+      activeMediums: z.array(z.string()).optional(),
+      archiveContinuity: z.string().max(5000).optional(),
+      // Distribution Identity Layer
+      officialArtistName: z.string().max(128).optional(),
+      localizedName: z.string().max(128).optional(),
+      dspSpotifyUrl: z.string().url().optional().or(z.literal('')),
+      dspAppleMusicUrl: z.string().url().optional().or(z.literal('')),
+      dspTikTokHandle: z.string().max(64).optional(),
+      producerCredits: z.string().max(2000).optional(),
+      labelName: z.string().max(128).optional(),
     })).mutation(async ({ ctx, input }) => {
       if (input.name !== undefined) {
         const current = await getUserById(ctx.user.id);
@@ -896,6 +920,16 @@ export const appRouter = router({
         countFor("comic"),
       ]);
       return { audio, lyrics, manuscript, comic };
+    }),
+    countByCreator: publicProcedure.input(z.object({ creatorId: z.number().int() })).query(async ({ input }) => {
+      const { getDb } = await import("./db");
+      const { songs: songsTable } = await import("../drizzle/schema");
+      const { count, eq: eqOp, and: andOp } = await import("drizzle-orm");
+      const db = await getDb();
+      const [row] = await db.select({ total: count() }).from(songsTable).where(
+        andOp(eqOp(songsTable.userId, input.creatorId), eqOp(songsTable.isPublic, true), eqOp(songsTable.status, "Published"))
+      );
+      return { count: row?.total ?? 0 };
     }),
     getWitnessedVoices: publicProcedure.query(async () => {
       const { getDb } = await import("./db");

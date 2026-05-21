@@ -67,6 +67,23 @@ export const users = mysqlTable("users", {
   tempoRange: varchar("tempoRange", { length: 64 }),                 // e.g. "80-120 BPM"
   energyProfile: varchar("energyProfile", { length: 128 }),          // e.g. "Epic, Triumphant, Meditative"
 
+  // ─── Witness Identity Layer (human provenance layer) ───────────────────────
+  originStatement: text("originStatement"),           // "Why I create" — origin story
+  creativePhilosophy: text("creativePhilosophy"),     // Manifestation philosophy
+  creativeDoctrine: text("creativeDoctrine"),         // Personal doctrine/methodology
+  sigilUrl: text("sigilUrl"),                         // Personal sigil/mark image
+  activeMediums: json("activeMediums"),               // ["music","books","comics","manuscripts","video"]
+  archiveContinuity: text("archiveContinuity"),       // Statement about archive direction/legacy
+
+  // ─── Distribution Identity Layer (industry-facing metadata) ────────────────
+  officialArtistName: varchar("officialArtistName", { length: 128 }),  // Industry-facing artist/band name
+  localizedName: varchar("localizedName", { length: 128 }),            // Localized/alternate name
+  dspSpotifyUrl: text("dspSpotifyUrl"),               // Existing Spotify artist profile URL
+  dspAppleMusicUrl: text("dspAppleMusicUrl"),         // Existing Apple Music profile URL
+  dspTikTokHandle: varchar("dspTikTokHandle", { length: 64 }),  // TikTok handle
+  producerCredits: text("producerCredits"),           // Producer/engineer credits
+  labelName: varchar("labelName", { length: 128 }),  // Label name or "Independent"
+
   // Onboarding
   hasSeenWelcome: boolean("hasSeenWelcome").default(false).notNull(),
 

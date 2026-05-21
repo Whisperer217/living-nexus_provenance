@@ -24,7 +24,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { Link, useLocation } from "wouter";
-import { Crown, Music, ExternalLink } from "lucide-react";
+import { Crown, Music, ExternalLink, Fingerprint } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 
 interface CreatorHandleProps {
@@ -192,6 +192,33 @@ function CreatorMiniCard({
               >
                 {data.bio}
               </p>
+            </div>
+          )}
+
+          {/* Witness Identity glimpse */}
+          {(data.witnessEpitaph || data.witnessPhilosophy) && (
+            <div className="mx-3 mb-2 p-2 rounded-lg" style={{ background: "rgba(196,154,40,0.06)", border: "1px solid rgba(196,154,40,0.12)" }}>
+              <div className="flex items-center gap-1 mb-1">
+                <Fingerprint className="w-2.5 h-2.5" style={{ color: "var(--ln-gold)" }} />
+                <span className="text-[8px] font-bold tracking-widest" style={{ color: "var(--ln-gold)" }}>WITNESS IDENTITY</span>
+              </div>
+              <p className="text-[10px] leading-relaxed line-clamp-2 italic" style={{ color: "rgba(196,154,40,0.7)" }}>
+                {data.witnessEpitaph ? `"${data.witnessEpitaph}"` : data.witnessPhilosophy}
+              </p>
+            </div>
+          )}
+
+          {/* View Identity Page link */}
+          {(data.witnessPhilosophy || data.witnessOriginStory || data.witnessDoctrine) && (
+            <div className="px-3 pb-1">
+              <button
+                onPointerDown={e => e.stopPropagation()}
+                onClick={e => { e.stopPropagation(); navigate(`/identity/${data.id ?? userId}`); onClose(); }}
+                className="flex items-center gap-1 text-[9px] font-semibold tracking-wider transition-all hover:opacity-80"
+                style={{ color: "var(--ln-gold)" }}
+              >
+                <Fingerprint className="w-2.5 h-2.5" /> VIEW FULL IDENTITY
+              </button>
             </div>
           )}
 

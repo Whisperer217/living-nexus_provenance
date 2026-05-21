@@ -25,6 +25,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { useLightsMode } from "@/contexts/LightsModeContext";
 import { ImagePositioner } from "@/components/ImagePositioner";
 import SupporterBadge from "@/components/SupporterBadge";
+import { IdentityEditor } from "@/components/IdentityEditor";
 import { usePlayer, Track } from "@/contexts/PlayerContext";
 
 import { EDIT_GENRES } from "@shared/contentTypes";
@@ -184,11 +185,11 @@ export default function ProfilePage() {
   // Read ?tab= URL param for deep-links from ContextDrawer and other navigation sources
   const search = useSearch();
   const tabFromUrl = new URLSearchParams(search).get("tab") as
-    | "overview" | "works" | "collections" | "liked" | "signals" | "field-notes" | "testimony"
+    | "overview" | "works" | "collections" | "liked" | "signals" | "field-notes" | "testimony" | "identity"
     | null;
-  const validTabs = ["overview", "works", "collections", "liked", "signals", "field-notes", "testimony"] as const;
+  const validTabs = ["overview", "works", "collections", "liked", "signals", "field-notes", "testimony", "identity"] as const;
   const initialTab = tabFromUrl && (validTabs as readonly string[]).includes(tabFromUrl) ? tabFromUrl : "overview";
-  const [activeTab, setActiveTab] = useState<"overview" | "works" | "collections" | "liked" | "signals" | "field-notes" | "testimony">(initialTab);
+  const [activeTab, setActiveTab] = useState<"overview" | "works" | "collections" | "liked" | "signals" | "field-notes" | "testimony" | "identity">(initialTab);
   // Sync tab when URL search changes (handles same-page navigation e.g. /profile → /profile?tab=works)
   useEffect(() => {
     const t = new URLSearchParams(search).get("tab") as typeof activeTab | null;
@@ -918,6 +919,7 @@ export default function ProfilePage() {
             { id: "signals",      label: "Signals", badge: (unreadCount as number) > 0 ? String(unreadCount) : null },
             { id: "field-notes",  label: "Field Notes" },
             { id: "testimony",     label: "Testimony" },
+            { id: "identity",      label: "Identity" },
           ];
           return (
             <div className="flex gap-0 mb-5 border-b border-white/[0.07] overflow-x-auto scrollbar-none">
@@ -1702,6 +1704,11 @@ export default function ProfilePage() {
               </div>
             )}
           </div>
+        )}
+
+        {/* ── Identity Tab ── */}
+        {activeTab === "identity" && (
+          <IdentityEditor profile={profile} />
         )}
 
         {/* ── Settings utility bar ── */}

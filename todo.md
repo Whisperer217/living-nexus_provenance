@@ -4747,3 +4747,16 @@
 - [x] Add DISTRIBUTE nav item in shared navItems with sub-items
 - [x] Add storage proxy for manus-storage asset serving
 - [x] Wire /distribute route in App.tsx
+
+## Phase 167: Bio Page / Creator Identity System
+- [x] Audit existing creator profile schema and page (CreatorProfilePage)
+- [x] Build Witness Identity Layer — bio page with testimony, philosophy, sigil, doctrine, origin statement
+- [x] Build Distribution Identity Layer — industry-facing metadata (DSP profiles, credits, genre, artwork)
+- [x] Build Creator Card component — hover/tap identity cards (avatar, name, testimony blurb, mediums, WID status, manifestation count)
+- [x] Integrate creator cards into track cards, discover feed, and archive surfaces
+- [x] Add /identity/:id route and CreatorIdentityPage with dual-layer architecture
+- [x] Build IdentityEditor component for ProfilePage Identity tab
+- [x] Enhance CreatorHandle with witness identity glimpse popup
+- [x] Add 13 identity columns to users schema (witnessPhilosophy, witnessEpitaph, witnessOriginStory, witnessDoctrine, sigilUrl, activeMediums, archiveContinuity, officialArtistName, localizedName, dspSpotifyUrl, dspAppleMusicUrl, dspTikTokHandle, producerCredits, labelName)
+- [x] Extend profile.update and getCreatorMini with identity fields
+- [x] TypeScript: 0 errors | Vitest: 237 tests passing
