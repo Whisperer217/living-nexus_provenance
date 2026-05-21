@@ -42,12 +42,42 @@ function SignalIcon({ type }: { type: string }) {
   return <Zap size={12} style={style} />;
 }
 
+/** Routes where the RightRail should be suppressed (Creator Focus Mode + Transactional Focus State) */
+const CREATOR_FOCUS_ROUTES = [
+  "/upload",
+  "/batch-upload",
+  "/dashboard",
+  "/settings",
+  "/profile",
+  "/keeper-compose",
+  "/admin",
+  "/guides/upload",
+  // Transactional Focus State — conversion-critical routes
+  "/redeem",
+  "/pricing",
+  "/checkout",
+  "/stripe-connect",
+  "/payouts",
+  "/creator-payouts",
+];
+
+function useIsCreatorFocusMode(): boolean {
+  const [location] = useLocation();
+  return CREATOR_FOCUS_ROUTES.some(
+    (r) => location === r || location.startsWith(r + "/") || location.startsWith(r + "?")
+  ) || location.includes("/studio");
+}
+
 export default function RightRail() {
   const { user } = useAuth();
   const [, navigate] = useLocation();
   const { addAndPlay } = usePlayer();
   const { isOpen, toggle } = useRightRail();
+  const isCreatorFocus = useIsCreatorFocusMode();
   useNow(); // refresh time labels every 30s
+
+  // Suppress on creator/editing routes
+  if (isCreatorFocus) return null;
 
   // Personal Signals — user's notification inbox (5 most recent, poll every 45s)
   const { data: signals, isLoading: signalsLoading } = trpc.notifications.list.useQuery(

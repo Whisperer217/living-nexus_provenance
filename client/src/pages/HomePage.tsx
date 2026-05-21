@@ -709,7 +709,7 @@ const HERO_SLIDES = [
   },
   {
     id: 4,
-    img: "/manus-storage/living-nexus-distribution-vision_a5bf3eb4.png",
+    img: "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/distribution-hub-banner-CfqSAQPuQTJUgzbkcA5DoB.webp",
     tag: "We Are Distributing",
     headline: "Beyond the cloud —",
     accent: "into physical reality.",

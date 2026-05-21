@@ -230,12 +230,14 @@ export default function UploadPage() {
   }, [creatorProfile?.primaryGenre]);
 
   // Pre-fill from Prompt Studio query params (?title=&genre=&mood=&tags=)
+  // Phase 148G: also supports ?type= for Archive intelligent CTA preselection
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const qTitle = params.get("title");
     const qGenre = params.get("genre");
     const qMood = params.get("mood");
     const qTags = params.get("tags");
+    const qType = params.get("type") as "audio" | "lyrics" | "manuscript" | "comic" | null;
     if (qTitle) setTitle(qTitle);
     if (qGenre) setGenre(qGenre);
     if (qMood) {
@@ -247,8 +249,12 @@ export default function UploadPage() {
       // style tags go into caption field as a starting point
       setCaption(qTags);
     }
+    // ?type= preselects the manifestation upload mode (from Archive CTA)
+    if (qType && ["audio", "lyrics", "manuscript", "comic"].includes(qType)) {
+      setUploadMode(qType);
+    }
     // Clean the URL so refreshing doesn't re-apply
-    if (qTitle || qGenre || qMood || qTags) {
+    if (qTitle || qGenre || qMood || qTags || qType) {
       window.history.replaceState({}, "", window.location.pathname);
     }
   }, []);

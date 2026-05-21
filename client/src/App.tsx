@@ -175,6 +175,9 @@ function Router() {
                 <Route path="/batch-upload" component={BatchUploadPage} />
                 <Route path="/liked" component={LikedPage} />
                 <Route path="/archive" component={ArchivePage} />
+                {/* Archive sub-routes — prevent 404 on ContextDrawer/MobileNavDrawer links */}
+                <Route path="/archive/mine"><Redirect to="/archive" /></Route>
+                <Route path="/archive/ledger"><Redirect to="/witness-registry" /></Route>
                 <Route path="/song/:id" component={SongDetailPage} />
                 <Route path="/book/:id" component={BookDetailPage} />
                 <Route path="/book/:id/studio" component={CreatorStudioPage} />

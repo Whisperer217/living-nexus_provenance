@@ -4013,7 +4013,6 @@ export async function getUserCollections(userId: number) {
 export async function createUserCollection(userId: number, name: string, description?: string) {
   const db = await getDb();
   if (!db) throw new Error("Database unavailable");
-  const { userCollections } = await import("../drizzle/schema");
   // Get next sortOrder
   const existing = await db
     .select({ sortOrder: userCollections.sortOrder })
@@ -4162,7 +4161,7 @@ export async function getGlobalActivityFeed(limit = 10): Promise<Array<{
   const perType = Math.ceil(limit / 3);
   try {
     // Tips (join users for tipper name, join songs for title)
-    const [tipRows] = await (db as any).execute(sql`
+    const [tipRows] = (await db.execute(sql`
       SELECT 'tip' AS type, CONCAT('tip-', t.id) AS id,
              COALESCE(u.name, 'A fan') AS actorName,
              s.title AS songTitle, s.id AS songId, s.coverArtUrl,
@@ -4172,9 +4171,9 @@ export async function getGlobalActivityFeed(limit = 10): Promise<Array<{
       LEFT JOIN songs s ON t.songId = s.id
       LEFT JOIN users u ON t.tipperUserId = u.id
       ORDER BY t.createdAt DESC LIMIT ${sql.raw(String(perType))}
-    `);
+    `)) as [any[], any];
     // Comments (DB column is 'text', no authorName — use userId join)
-    const [commentRows] = await (db as any).execute(sql`
+    const [commentRows] = (await db.execute(sql`
       SELECT 'comment' AS type, CONCAT('comment-', c.id) AS id,
              COALESCE(u.name, 'A listener') AS actorName,
              s.title AS songTitle, s.id AS songId, s.coverArtUrl,
@@ -4184,9 +4183,9 @@ export async function getGlobalActivityFeed(limit = 10): Promise<Array<{
       LEFT JOIN songs s ON c.songId = s.id
       LEFT JOIN users u ON c.userId = u.id
       ORDER BY c.createdAt DESC LIMIT ${sql.raw(String(perType))}
-    `);
+    `)) as [any[], any];
     // Likes
-    const [likeRows] = await (db as any).execute(sql`
+    const [likeRows] = (await db.execute(sql`
       SELECT 'like' AS type, CONCAT('like-', l.id) AS id,
              'Someone' AS actorName,
              s.title AS songTitle, s.id AS songId, s.coverArtUrl,
@@ -4195,7 +4194,7 @@ export async function getGlobalActivityFeed(limit = 10): Promise<Array<{
       FROM likes l
       LEFT JOIN songs s ON l.songId = s.id
       ORDER BY l.createdAt DESC LIMIT ${sql.raw(String(perType))}
-    `);
+    `)) as [any[], any];
     const merged = [
       ...(Array.isArray(tipRows) ? tipRows : []),
       ...(Array.isArray(commentRows) ? commentRows : []),
@@ -4440,21 +4439,21 @@ export async function createGuide(data: Omit<InsertGuide, "id" | "createdAt" | "
 
 export async function getGuideById(id: number): Promise<Guide | null> {
   const db = await getDb();
-  if (!db) return null;
+  if (!db) throw new Error("Database unavailable");
   const [row] = await db.select().from(guides).where(eq(guides.id, id));
   return (row as Guide) ?? null;
 }
 
 export async function getGuideByWid(widCode: string): Promise<Guide | null> {
   const db = await getDb();
-  if (!db) return null;
+  if (!db) throw new Error("Database unavailable");
   const [row] = await db.select().from(guides).where(eq(guides.widCode, widCode));
   return (row as Guide) ?? null;
 }
 
 export async function getGuidesByCreator(creatorId: number): Promise<Guide[]> {
   const db = await getDb();
-  if (!db) return [];
+  if (!db) throw new Error("Database unavailable");
   const rows = await db.select().from(guides)
     .where(eq(guides.creatorId, creatorId))
     .orderBy(desc(guides.createdAt));
@@ -4463,7 +4462,7 @@ export async function getGuidesByCreator(creatorId: number): Promise<Guide[]> {
 
 export async function getPublishedGuides(limit = 20): Promise<Guide[]> {
   const db = await getDb();
-  if (!db) return [];
+  if (!db) throw new Error("Database unavailable");
   const rows = await db.select().from(guides)
     .where(eq(guides.canonicalStatus, "published"))
     .orderBy(desc(guides.publishedAt))
@@ -4473,14 +4472,14 @@ export async function getPublishedGuides(limit = 20): Promise<Guide[]> {
 
 export async function updateGuide(id: number, creatorId: number, data: Partial<Omit<InsertGuide, "id" | "creatorId" | "createdAt">>): Promise<Guide | null> {
   const db = await getDb();
-  if (!db) return null;
+  if (!db) throw new Error("Database unavailable");
   await db.update(guides).set(data).where(and(eq(guides.id, id), eq(guides.creatorId, creatorId)));
   return getGuideById(id);
 }
 
 export async function publishGuide(id: number, creatorId: number): Promise<Guide | null> {
   const db = await getDb();
-  if (!db) return null;
+  if (!db) throw new Error("Database unavailable");
   // Generate WID if not already set
   const existing = await getGuideById(id);
   if (!existing || existing.creatorId !== creatorId) return null;
@@ -4495,7 +4494,7 @@ export async function publishGuide(id: number, creatorId: number): Promise<Guide
 
 export async function deleteGuide(id: number, creatorId: number): Promise<boolean> {
   const db = await getDb();
-  if (!db) return false;
+  if (!db) throw new Error("Database unavailable");
   const [result] = await db.delete(guides).where(and(eq(guides.id, id), eq(guides.creatorId, creatorId)));
   return (result as { affectedRows: number }).affectedRows > 0;
 }

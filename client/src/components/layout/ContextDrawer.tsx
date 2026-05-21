@@ -72,7 +72,7 @@ const PANELS: Record<NavMode, ModePanel> = {
         heading: "Founder's Era",
         links: [
           { icon: <Shield size={14} />, label: "Founder's Era", path: "/#founders-era", description: "Earliest provenance anchors" },
-          { icon: <Users size={14} />, label: "Founding Creators", path: "/creators?filter=founders", description: "View the founding registry" },
+          { icon: <Users size={14} />, label: "Founding Creators", path: "/founders", description: "View the founding registry" },
         ],
       },
     ],
@@ -95,8 +95,8 @@ const PANELS: Record<NavMode, ModePanel> = {
       {
         heading: "By Creator",
         links: [
-          { icon: <Users size={14} />, label: "All Creators", path: "/creators" },
-          { icon: <Star size={14} />, label: "Featured Creators", path: "/creators?filter=featured" },
+          { icon: <Users size={14} />, label: "All Creators", path: "/explore?filter=creators" },
+          { icon: <Star size={14} />, label: "Featured Creators", path: "/founders" },
         ],
       },
     ],
@@ -117,7 +117,7 @@ const PANELS: Record<NavMode, ModePanel> = {
       {
         heading: "Account",
         links: [
-          { icon: <Settings size={14} />, label: "Settings", path: "/settings", authOnly: true },
+          { icon: <Settings size={14} />, label: "Settings", path: "/settings/billing", authOnly: true },
           { icon: <LogOut size={14} />, label: "Log Out", path: "__logout__", authOnly: true, danger: true },
         ],
       },
@@ -135,6 +135,8 @@ const PANELS: Record<NavMode, ModePanel> = {
           { icon: <Users size={14} />, label: "Guide Directory", path: "/guides", description: "Browse guide characters" },
           { icon: <Shield size={14} />, label: "Register Guide Character", path: "/guides/upload", description: "Register a guide entity", authOnly: true, gold: true },
           { icon: <Sparkles size={14} />, label: "Prompt Studio", path: "/prompt-studio", description: "Lyrics → music prompt" },
+          { icon: <Shield size={14} />, label: "Upload Guide Character", path: "/guides/upload", description: "Register a guide entity", authOnly: true, gold: true },
+          { icon: <Sparkles size={14} />, label: "Prompt Studio", path: "/keeper-compose", description: "Lyrics → AI music prompt" },
         ],
       },
       {
@@ -142,6 +144,8 @@ const PANELS: Record<NavMode, ModePanel> = {
         links: [
           { icon: <PenTool size={14} />, label: "Draft Works", path: "/upload/drafts", description: "Unfinished registrations", authOnly: true },
           { icon: <History size={14} />, label: "Registration History", path: "/upload/history", description: "All past submissions", authOnly: true },
+          { icon: <PenTool size={14} />, label: "Draft Works", path: "/archive", description: "Unfinished registrations", authOnly: true },
+          { icon: <History size={14} />, label: "Upload History", path: "/archive", description: "All past submissions", authOnly: true },
           { icon: <LayoutDashboard size={14} />, label: "Dashboard", path: "/dashboard", description: "Creator analytics", authOnly: true },
         ],
       },
@@ -155,15 +159,15 @@ const PANELS: Record<NavMode, ModePanel> = {
     sections: [
       {
         links: [
-          { icon: <BookMarked size={14} />, label: "Witness Registry", path: "/archive", description: "Public ledger of all registered works", gold: true },
-          { icon: <Archive size={14} />, label: "My Works", path: "/archive/mine", description: "Your personally registered works", authOnly: true },
+          { icon: <BookMarked size={14} />, label: "Witness Registry", path: "/witness-registry", description: "Public ledger of all registered works", gold: true },
+          { icon: <Archive size={14} />, label: "My Works", path: "/archive", description: "Your personally registered works", authOnly: true },
         ],
       },
       {
         heading: "Registry",
         links: [
-          { icon: <Shield size={14} />, label: "Verified Works", path: "/archive?filter=witnessed", description: "Content hash recorded at registration" },
-          { icon: <Clock size={14} />, label: "Provenance Ledger", path: "/archive/ledger", description: "Timestamped creation record" },
+          { icon: <Shield size={14} />, label: "Verified Works", path: "/witness-registry", description: "Content hash recorded at registration" },
+          { icon: <Clock size={14} />, label: "Provenance Ledger", path: "/witness-registry", description: "Timestamped creation record" },
         ],
       },
     ],

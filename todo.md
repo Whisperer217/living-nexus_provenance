@@ -4464,33 +4464,28 @@
 - [ ] Navigation: Add Upload Guide entry to creator nav
 - [ ] Tests: guides.create, guides.extractFromSheet, guides.publish vitest coverage
 
-## Phase 150 — Guide Entity Upload Pipeline (Integration)
-
-- [x] Merge commit 1a2f6ad (Phase 150) from GitHub
-- [x] Fix z.record() calls in routers.ts (two-argument form)
-- [x] Add userCollections to static import in db.ts
-- [x] Fix guide helper functions to use await getDb() with null guards
-- [x] Rewrite GuideDetailPage.tsx to use correct schema field names (widCode, rightsJson, etc.)
-- [x] Fix CinematicComicReader onClose?.() optional chain
-- [x] Fix CreatorStudioPage: p.url → p.imageUrl, moodTags string → string[]
-- [x] Add moodTags to updateMetadata procedure schema
-- [x] Fix pageNumber missing in DiscoverPage/ExplorePage/HomePage pages arrays
-- [x] Fix isAuthenticated → !authLoading in KeeperComposePage
-- [x] Fix isOwn undefined in ProfilePage (const isOwn = true)
-- [x] Fix 4 pre-existing db.ts errors (execute<any[]> + implicit any)
-- [x] tsc --noEmit exits 0 (fully clean build)
+## Phase 151 — Manifestation-First Floating Dock
+- [x] WitnessSurfacePlayer SurfaceBar: transform from top-anchored full-width strip to bottom-floating glass capsule (bottom: 72px above mobile nav, width: min(360px, calc(100vw - 24px)), borderRadius: 32, glass morphism, gold border)
+- [x] WitnessSurfacePlayer ExpandedPanel: change top from calc(var(--wsp-top) + 60px) to top: 0 for true full-viewport atmospheric takeover
+- [x] WitnessSurfacePlayer ExpandedPanel: add testimony excerpt above artwork for manifestation-first hierarchy
+- [x] WitnessSurfacePlayer ExpandedPanel: add prominent manifestation CTA (READ NOW / ENTER GUIDE) below song identity
+- [x] WitnessSurfacePlayer SurfaceBar: add compact manifestation CTA (READ NOW / ENTER GUIDE) in capsule row
+- [x] MainLayout: change mobile top padding from pt-[116px] to pt-[56px] (SurfaceBar no longer top-anchored)
+- [x] MainLayout: restore GlobalPlayer rendering in player layer
+- [x] GlobalPlayer MINI bar: add READ NOW CTA for comic/manuscript contentType
+- [x] GlobalPlayer MINI bar: add ENTER GUIDE CTA for guide contentType
+- [x] PlayerContext Track interface: add testimony field for manifestation-first display
 - [x] 201/201 tests passing
 
-## Phase Layer3-P3 — HMAC Worker Authentication
-- [x] Add LN_WORKER_SECRET to backend env via webdev_request_secrets
-- [x] server/_core/env.ts: workerSecret + cloudWorkerUrl fields
-- [x] server/workerAuth.ts: signPayload(), requireWorkerAuth() middleware, dispatchWorkerJob() helper
-- [x] server/workerCallbackRoute.ts: /api/worker/health, /api/worker/comic-processed, /api/worker/guide-extracted routes
-- [x] server/_core/index.ts: workerCallbackRouter registered before tRPC
-- [x] Cloud worker worker.js: HMAC signPayload() + callbackToBackend() with X-LN-Timestamp / X-LN-Signature headers
-- [x] Systemd ln-worker.service: LN_WORKER_SECRET + LN_API_URL env vars injected
-- [x] Worker health confirmed: http://127.0.0.1:3001/health returns ok
-- [x] tsc --noEmit exits 0
+## Phase 151 — Manifestation-First Floating Dock
+- [x] WitnessSurfacePlayer SurfaceBar: transform from top-anchored strip to bottom-floating glass capsule (bottom: 72px, width: min(360px, calc(100vw - 24px)), borderRadius: 32, glass morphism)
+- [x] WitnessSurfacePlayer ExpandedPanel: top: 0 for true full-viewport atmospheric takeover
+- [x] WitnessSurfacePlayer ExpandedPanel: testimony excerpt above artwork, manifestation CTA below identity
+- [x] WitnessSurfacePlayer SurfaceBar: compact READ NOW / ENTER GUIDE CTA in capsule row
+- [x] MainLayout: mobile top padding pt-[116px] -> pt-[56px] (SurfaceBar no longer top-anchored)
+- [x] MainLayout: GlobalPlayer restored to player layer
+- [x] GlobalPlayer MINI bar: READ NOW CTA for comic/manuscript, ENTER GUIDE for guide contentType
+- [x] PlayerContext Track interface: testimony field added
 - [x] 201/201 tests passing
 
 ## Phase Layer3-P1 — Comic Processing Pipeline (Pending)

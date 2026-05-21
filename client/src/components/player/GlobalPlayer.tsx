@@ -18,6 +18,7 @@ import {
   MoreHorizontal, ExternalLink, List, Waves,
   FolderPlus, Shield, GripHorizontal, Music2,
   DollarSign, MessageCircle, Send, Maximize2, X, Flag,
+  BookOpen, Map,
 } from "lucide-react";
 import { AddToCollectionModal } from "@/components/AddToCollectionModal";
 import { useLocation } from "wouter";
@@ -678,6 +679,42 @@ function GlobalPlayerInner() {
 
         {/* Mini controls */}
         <div className="flex items-center gap-1 flex-shrink-0">
+          {/* Manifestation CTA — content-type specific */}
+          {visTrack?.contentType === "comic" || visTrack?.contentType === "manuscript" ? (
+            <button
+              onClick={e => { e.stopPropagation(); navigate(`/book/${visTrack.id}`); }}
+              className="flex items-center gap-1 rounded-full font-semibold transition-all hover:scale-105 active:scale-95"
+              style={{
+                padding: "3px 10px",
+                fontSize: 10,
+                background: "rgba(212,175,55,0.18)",
+                border: "1px solid rgba(212,175,55,0.4)",
+                color: "rgba(212,175,55,0.95)",
+                letterSpacing: "0.04em",
+              }}
+              aria-label="Read Now"
+            >
+              <BookOpen size={9} />
+              READ NOW
+            </button>
+          ) : visTrack?.contentType === "guide" ? (
+            <button
+              onClick={e => { e.stopPropagation(); navigate(`/guide/${visTrack.id}`); }}
+              className="flex items-center gap-1 rounded-full font-semibold transition-all hover:scale-105 active:scale-95"
+              style={{
+                padding: "3px 10px",
+                fontSize: 10,
+                background: "rgba(212,175,55,0.18)",
+                border: "1px solid rgba(212,175,55,0.4)",
+                color: "rgba(212,175,55,0.95)",
+                letterSpacing: "0.04em",
+              }}
+              aria-label="Enter Guide"
+            >
+              <Map size={9} />
+              ENTER GUIDE
+            </button>
+          ) : null}
           {/* Like */}
           {user && currentSongId && (
             <button

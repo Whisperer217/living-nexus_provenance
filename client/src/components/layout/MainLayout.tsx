@@ -1,4 +1,3 @@
-/* ===================================================================
    LIVING NEXUS -- MainLayout v6 (Render Layer Separation + Isomorphic Nav)
 
    Render Layer Ownership (no shared layout dependencies):
@@ -15,7 +14,6 @@
    - Mobile:  Hamburger → MobileNavDrawer → navigate
    - TopBar:  NO navigation links (search + actions only)
    - Single NAV_ITEMS source of truth (shared/navItems.ts)
-=================================================================== */
 import { useState, useCallback, useEffect, useRef } from "react";
 import LeftRail from "@/components/layout/LeftRail";
 import type { NavMode } from "@/components/layout/LeftRail";
@@ -42,9 +40,32 @@ import { Z } from "@/lib/viewportLayers";
 
 const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/HMNMkWUWAfVdTbRj3YmPCF/ln-navbar-icon-180_b914f927.png";
 
+/** Routes where the RightRail is suppressed — must match RightRail.tsx CREATOR_FOCUS_ROUTES */
+const CREATOR_FOCUS_ROUTES = [
+  "/upload",
+  "/batch-upload",
+  "/dashboard",
+  "/settings",
+  "/profile",
+  "/keeper-compose",
+  "/admin",
+  "/guides/upload",
+  // Transactional Focus State — conversion-critical routes
+  "/redeem",
+  "/pricing",
+  "/checkout",
+  "/stripe-connect",
+  "/payouts",
+  "/creator-payouts",
+];
+
 export default function MainLayout({ children }: { children: React.ReactNode }) {
-  const [, navigate] = useLocation();
+  const [location, navigate] = useLocation();
   const { state } = usePlayer();
+  // Creator Focus Mode: right rail is hidden, content expands to full-width
+  const isCreatorFocus = CREATOR_FOCUS_ROUTES.some(
+    (r) => location === r || location.startsWith(r + "/") || location.startsWith(r + "?")
+  ) || location.includes("/studio");
   const { user, loading: authLoading, logout } = useAuth();
   const { isOpen: rightRailOpen } = useRightRail();
 
@@ -135,10 +156,8 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
 
 
-      {/* ==============================================
           MOBILE HEADER (< lg)
           Hamburger + Logo + Bell
-      ============================================== */}
       <div
         className="lg:hidden fixed top-0 left-0 right-0 flex items-center gap-3 px-4 py-3"
         style={{
@@ -190,16 +209,15 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         onOpenWhatsNew={() => setWhatsNewOpen(true)}
       />
 
-      {/* ── WSP (Witness Surface Player) -- top-anchored, under navbar ── */}
+      {/* ── WSP (Witness Surface Player) -- bottom-floating glass capsule, mobile only ── */}
       <WitnessSurfacePlayer />
 
-      {/* ==============================================
           PAGE CONTENT
           Desktop: lg:pl-[72px] to clear LeftRail
-          Mobile:  pt-14 + 60px WSP to clear mobile header + surface bar
-      ============================================== */}
+          Mobile:  pt-[56px] to clear mobile header only (WSP is now bottom-floating)
       <div
         className={`flex-1 flex overflow-hidden pt-14 lg:pt-[56px] ${drawerOpen ? "lg:pl-[372px]" : "lg:pl-[72px]"}`}
+        className={`flex-1 flex overflow-hidden pt-[56px] lg:pt-[56px] ${drawerOpen ? "lg:pl-[372px]" : "lg:pl-[72px]"}`}
         style={{
           overscrollBehavior: "none",
           transition: "padding-left 220ms cubic-bezier(0.22,1,0.36,1)",
@@ -215,9 +233,11 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
             @media (max-width: 767px) { .player-scroll-area { padding-bottom: var(--bottom-stack) !important; } }
           `}</style>
 
-          {/* MainColumn -- fluid, scrollable. lg:pr-[300px] reserves space for the fixed RightRail */}
+          {/* MainColumn -- fluid, scrollable. lg:pr-[300px] reserves space for the fixed RightRail.
+               On creator-focus routes the RightRail is hidden so we remove the right padding. */}
           <div
             className={`flex-1 overflow-y-auto player-scroll-area ${rightRailOpen ? "lg:pr-[300px]" : ""}`}
+            className={`flex-1 overflow-y-auto player-scroll-area${isCreatorFocus ? "" : " lg:pr-[300px]"}`}
             style={{ overscrollBehaviorX: "none", overscrollBehaviorY: "none", touchAction: "pan-y" }}
           >
             {children}
@@ -225,12 +245,13 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         </main>
       </div>
 
-      {/* ==============================================
           PLAYER LAYER -- isolated, no layout dependency
           GlobalPlayer: desktop floating card + expanded modal (createPortal to body)
           WitnessSurfacePlayer (WSP): mobile surface bar + expanded panel
           TheaterPlayer: desktop cinematic theater mode
-      ============================================== */}
+          GlobalPlayer: desktop floating glass card (bottom-right)
+          WitnessSurfacePlayer (WSP): mobile bottom-floating capsule dock
+          TheaterPlayer: desktop theater mode overlay
       <div
         style={{
           position: "fixed",
@@ -242,6 +263,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         }}
       >
         {/* GlobalPlayer — desktop floating card + expanded modal (uses createPortal internally, z-9000) */}
+        {/* Desktop player */}
         <div style={{ pointerEvents: "auto" }}>
           <GlobalPlayer />
         </div>
@@ -251,16 +273,12 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         </div>
       </div>
 
-       {/* ============================================
           RIGHT RAIL -- fixed, right: 0, z-index: 80
           Anchored independently so ContextDrawer (z:300) always wins.
           Content area has lg:pr-[300px] to prevent overlap.
-      ============================================ */}
       <RightRail />
 
-      {/* ============================================
           DRAWER LAYER -- portal-based, isolated
-      ============================================ */}
       {/* Marketplace Drawer */}
       <MarketplaceDrawer />
 

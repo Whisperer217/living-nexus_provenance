@@ -155,9 +155,18 @@ export default function DistributionPage() {
               This is not rented visibility. This is not disposable feeds. This is real archives, real creators, real manifestations — preserved, packaged, and distributed across digital and physical formats.
             </p>
 
-            <p className="font-body text-[13px] leading-relaxed max-w-xl mx-auto" style={{ color: "#7A7060" }}>
+            <p className="font-body text-[13px] leading-relaxed max-w-xl mx-auto mb-8" style={{ color: "#7A7060" }}>
               Creators retain ownership. Manifestations remain exportable. Archives remain portable.
             </p>
+
+            {/* Distribution Vision Banner */}
+            <div className="relative rounded-xl overflow-hidden border border-[#C49A28]/15 shadow-2xl">
+              <img
+                src="https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/distribution-hub-banner-CfqSAQPuQTJUgzbkcA5DoB.webp"
+                alt="Living Nexus Distribution Vision — DSP Delivery Infrastructure and Physical Formats"
+                className="w-full h-auto"
+              />
+            </div>
           </div>
         </section>
 
