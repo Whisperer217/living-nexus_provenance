@@ -4770,3 +4770,9 @@
 - [x] Add tRPC procedures: distribution.submitInterest (public) + distribution.listInterests (admin)
 - [x] Wire DistributionPage interest form to new tRPC procedure (persists + notifies owner)
 - [x] TypeScript: 0 errors | Vitest: 237 tests passing (24 files)
+## Phase 169: Discord Bug Fixes (Slimdoggy + thiiirdgenkill)
+- [x] Fix download links not triggering browser download (was 302 redirect to S3 → now streams directly with Content-Disposition: attachment)
+- [x] Fix lyrics-only works unable to attach audio (slot check incorrectly blocked first audio attach → now skips slot check for isLyricsOnly songs)
+- [x] Update replaceAudioFile to set isLyricsOnly=false and contentType=audio when audio is attached
+- [x] Remove unused storagePut import from downloadRoute.ts
+- [x] TypeScript: 0 errors | Vitest: 237 tests passing (24 files)

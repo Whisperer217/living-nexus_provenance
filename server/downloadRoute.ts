@@ -24,7 +24,7 @@ import JSZip from "jszip";
 import { getSongWithCreator, getUserTipTotalForSong, recordDownload, getSongsByUser } from "./db";
 import { ENV } from "./_core/env";
 import { sdk } from "./_core/sdk";
-import { storagePut } from "./storage";
+// storagePut no longer needed — we stream directly to client
 import type { Song } from "../drizzle/schema";
 
 export const downloadRouter = Router();
@@ -153,12 +153,9 @@ downloadRouter.get("/api/download/:songId", async (req: Request, res: Response) 
   const safeArtist = sanitizeFilename(creatorName.replace(/^@/, ""));
   const filename = `${safeTitle} - ${safeArtist} [${widShort}].mp3`;
 
-  // 8. Upload tagged file to S3 and redirect — avoids CDN response-body size limits
-  //    The tagged file is stored under a short-lived key (24h TTL by convention).
+  // 8. Stream tagged file directly to client with Content-Disposition: attachment
+  //    This forces the browser to download the file instead of navigating/playing inline.
   try {
-    const s3Key = `downloads/${songId}-${Date.now()}-${sanitizeFilename(filename)}`;
-    const { url: taggedUrl } = await storagePut(s3Key, taggedBuffer, "audio/mpeg");
-
     // Record download in DB (non-fatal)
     try {
       let userId: number | undefined;
@@ -169,16 +166,14 @@ downloadRouter.get("/api/download/:songId", async (req: Request, res: Response) 
       await recordDownload({ songId, userId });
     } catch { /* non-fatal */ }
 
-    // Redirect browser directly to the S3 URL — bypasses CDN proxy size limit
-    res.redirect(302, taggedUrl);
-  } catch (uploadErr) {
-    console.error("[Download] S3 upload failed, falling back to direct stream:", uploadErr);
-    // Fallback: stream directly (may fail on CDN for large files, but better than nothing)
     res.setHeader("Content-Type", "audio/mpeg");
     res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
     res.setHeader("Content-Length", taggedBuffer.length.toString());
     res.setHeader("Cache-Control", "no-store");
     res.end(taggedBuffer);
+  } catch (streamErr) {
+    console.error("[Download] Stream failed:", streamErr);
+    res.status(500).json({ error: "Download failed. Please try again." });
   }
 });
 
