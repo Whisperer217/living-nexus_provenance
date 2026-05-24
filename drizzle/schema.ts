@@ -1617,21 +1617,3 @@ export const workerJobs = mysqlTable("workerJobs", {
 }));
 export type WorkerJob = typeof workerJobs.$inferSelect;
 export type InsertWorkerJob = typeof workerJobs.$inferInsert;
-
-// ─── Distribution Interest Form Submissions ──────────────────────────────────
-// Persists interest form submissions from /distribute page
-export const distributionInterests = mysqlTable("distributionInterests", {
-  id: int("id").autoincrement().primaryKey(),
-  userId: int("userId"),                          // null if anonymous submission
-  userName: varchar("userName", { length: 256 }),
-  userEmail: varchar("userEmail", { length: 320 }),
-  mediaTypes: json("mediaTypes").$type<string[]>().notNull(),   // ["music", "books", ...]
-  formats: json("formats").$type<string[]>().notNull(),         // ["usb", "cd", "vinyl", ...]
-  notes: text("notes"),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-}, (t) => ({
-  userIdx: index("distInterest_userId_idx").on(t.userId),
-  createdIdx: index("distInterest_createdAt_idx").on(t.createdAt),
-}));
-export type DistributionInterest = typeof distributionInterests.$inferSelect;
-export type InsertDistributionInterest = typeof distributionInterests.$inferInsert;

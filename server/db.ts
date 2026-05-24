@@ -41,7 +41,6 @@ import {
   guides,
   type Guide,
   type InsertGuide,
-  distributionInterests,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 import type { SearchResults } from "../shared/searchTypes";
@@ -844,10 +843,8 @@ export async function replaceAudioFile(
 ) {
   const db = await getDb();
   if (!db) return;
-  // When audio is attached, always clear isLyricsOnly and set contentType to audio.
-  // This handles the lyrics-only → audio upgrade path seamlessly.
   await db.update(songs)
-    .set({ ...fields, isLyricsOnly: false, contentType: "audio", updatedAt: new Date() })
+    .set({ ...fields, updatedAt: new Date() })
     .where(and(eq(songs.id, songId), eq(songs.userId, userId)));
 }
 
@@ -4750,31 +4747,4 @@ export async function getSongsByIds(
     .orderBy(desc(songs.createdAt))
     .limit(limit)
     .offset(offset);
-}
-
-
-// ── Distribution Interest ──────────────────────────────────────────────────────
-export async function submitDistributionInterest(data: {
-  userId?: number | null;
-  userName?: string | null;
-  userEmail?: string | null;
-  mediaTypes: string[];
-  formats: string[];
-  notes?: string | null;
-}) {
-  const db = await getDb();
-  const [result] = await db.insert(distributionInterests).values({
-    userId: data.userId ?? null,
-    userName: data.userName ?? null,
-    userEmail: data.userEmail ?? null,
-    mediaTypes: data.mediaTypes,
-    formats: data.formats,
-    notes: data.notes ?? null,
-  });
-  return { id: result.insertId };
-}
-
-export async function getDistributionInterests(limit = 50, offset = 0) {
-  const db = await getDb();
-  return db.select().from(distributionInterests).orderBy(desc(distributionInterests.createdAt)).limit(limit).offset(offset);
 }

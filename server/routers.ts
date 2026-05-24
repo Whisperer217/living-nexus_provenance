@@ -117,8 +117,6 @@ import {
   deleteGuide,
   globalSearch,
   type SearchResults,
-  submitDistributionInterest,
-  getDistributionInterests,
 } from "./db";
 import { FOUNDER_PRICE_EARLY_CENTS, FOUNDER_PRICE_LATE_CENTS, FOUNDER_THRESHOLD, LICENSE_PRICE_CENTS, LICENSE_SLOTS, SLOT_PACKAGES, getSlotPackage, type SlotPackageId } from "./livingArchiveProducts";
 import { ENV } from "./_core/env";
@@ -610,14 +608,6 @@ export const appRouter = router({
       const { buffer, mimeType } = await micronize(rawBuffer, "avatar");
       const { url } = await storagePut(`avatars/${ctx.user.id}-${Date.now()}.webp`, buffer, mimeType);
       await updateUserProfile(ctx.user.id, { profilePhotoUrl: url });
-      return { url };
-    }),
-    uploadSigil: protectedProcedure.input(z.object({ base64: z.string(), mimeType: z.string() })).mutation(async ({ ctx, input }) => {
-      const rawBuffer = Buffer.from(input.base64, "base64");
-      // Micronize: trim, max 400×400, WebP quality 85
-      const { buffer, mimeType } = await micronize(rawBuffer, "sigil");
-      const { url } = await storagePut(`sigils/${ctx.user.id}-${Date.now()}.webp`, buffer, mimeType);
-      await updateUserProfile(ctx.user.id, { sigilUrl: url });
       return { url };
     }),
     uploadBanner: protectedProcedure.input(z.object({ base64: z.string(), mimeType: z.string() })).mutation(async ({ ctx, input }) => {
@@ -1467,21 +1457,16 @@ export const appRouter = router({
       const song = await getSongById(input.songId);
       if (!song || song.userId !== ctx.user.id) throw new TRPCError({ code: "FORBIDDEN", message: "Not your song" });
       // 0. Check slot availability — audio replacement generates a new WID and consumes a slot
-      //    EXCEPTION: If the song is lyrics-only (no audio yet), attaching audio for the first time
-      //    does NOT consume an additional slot — the lyrics work already used one when created.
-      const isFirstAudioAttach = song.isLyricsOnly === true;
-      if (!isFirstAudioAttach) {
-        const userForSlots = await getUserById(ctx.user.id);
-        if (!userForSlots) throw new TRPCError({ code: "UNAUTHORIZED" });
-        const slotsUsed = userForSlots.songSlotsUsed ?? 0;
-        const slotsTotal = userForSlots.songSlotsTotal ?? 0;
-        const isFounderReplace = userForSlots.role === "founder" || userForSlots.slotLimit === null;
-        if (!isFounderReplace && slotsUsed >= slotsTotal) {
-          throw new TRPCError({
-            code: "FORBIDDEN",
-            message: "You have used all your upload slots. Audio replacement generates a new WID and requires an available slot. Upgrade your Living Archive to continue.",
-          });
-        }
+      const userForSlots = await getUserById(ctx.user.id);
+      if (!userForSlots) throw new TRPCError({ code: "UNAUTHORIZED" });
+      const slotsUsed = userForSlots.songSlotsUsed ?? 0;
+      const slotsTotal = userForSlots.songSlotsTotal ?? 0;
+      const isFounderReplace = userForSlots.role === "founder" || userForSlots.slotLimit === null;
+      if (!isFounderReplace && slotsUsed >= slotsTotal) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "You have used all your upload slots. Audio replacement generates a new WID and requires an available slot. Upgrade your Living Archive to continue.",
+        });
       }
       // 1. Archive the current audio as a historical version
       if (song.fileUrl && song.witnessId) {
@@ -6795,31 +6780,6 @@ If a field cannot be determined from the document, use an empty string. For symb
   }),
 
   // ─── Global Search ─────────────────────────────────────────────────────────
-  distribution: router({
-    submitInterest: publicProcedure
-      .input(z.object({
-        formats: z.array(z.string()),
-        mediaTypes: z.array(z.string()),
-        notes: z.string().optional(),
-      }))
-      .mutation(async ({ ctx, input }) => {
-        const user = ctx.user;
-        const result = await submitDistributionInterest({
-          userId: user?.id ?? null,
-          userName: user?.name ?? null,
-          userEmail: user?.email ?? null,
-          mediaTypes: input.mediaTypes,
-          formats: input.formats,
-          notes: input.notes ?? null,
-        });
-        return result;
-      }),
-    listInterests: adminProcedure
-      .input(z.object({ limit: z.number().min(1).max(100).default(50), offset: z.number().min(0).default(0) }))
-      .query(async ({ input }) => {
-        return getDistributionInterests(input.limit, input.offset);
-      }),
-  }),
   search: router({
     global: publicProcedure
       .input(z.object({ q: z.string().min(1).max(200) }))

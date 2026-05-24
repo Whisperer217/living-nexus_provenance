@@ -84,7 +84,6 @@ export default function DistributionPage() {
   const [submitted, setSubmitted] = useState(false);
 
   const notifyMutation = trpc.system.notifyOwner.useMutation();
-  const submitInterestMutation = trpc.distribution.submitInterest.useMutation();
 
   const toggleFormat = (id: string) => {
     setFormData(prev => ({
@@ -110,13 +109,6 @@ export default function DistributionPage() {
       return;
     }
     try {
-      // Persist to database
-      await submitInterestMutation.mutateAsync({
-        formats: formData.formats,
-        mediaTypes: formData.mediaTypes,
-        notes: formData.notes || undefined,
-      });
-      // Also notify owner
       await notifyMutation.mutateAsync({
         title: `Distribution Interest: ${user?.name || "Anonymous"}`,
         content: `Creator: ${user?.name || "Unknown"} (${user?.email || "no email"})\nFormats: ${formData.formats.join(", ") || "None selected"}\nMedia Types: ${formData.mediaTypes.join(", ") || "None selected"}\nNotes: ${formData.notes || "—"}`,

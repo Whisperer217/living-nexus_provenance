@@ -864,7 +864,6 @@ function mapToSongData(row: any) {
     lyricsText: song.lyricsText ?? null,
     totalFundingCents: song.totalFundingCents ?? null,
     tipCount: song.tipCount ?? null,
-    creatorRole: creator?.role ?? null,
   };
 }
 
