@@ -14,6 +14,43 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) conventi
 
 ---
 
+## [Mobile 1.0.0] — 2026-05-26 · Mobile Phase 1: App Shell — All 5 Screens
+
+### Platform
+Native mobile app (`living-nexus-mobile`) — Expo SDK 54 / React Native 0.81 / NativeWind 4
+
+### Added
+- **5-tab navigation** — Discover, Profile, Witness, Studio, You with gold active tint and haptic tab press.
+- **Discover screen** — Light divine theme. Featured Creator card (cover gradient, WID, stats, tags), New Witnesses horizontal scroll (5 work cards with medium badge), Trending Works list, search bar scaffold, hamburger menu, quick-reference slider.
+- **Creator Profile screen** — Dark sanctuary theme. Avatar, bio, verified badge, stats row, tabbed content (Works / Witnesses / About), mini audio player for featured track.
+- **Witness screen** — Dark sanctuary theme. 3-step ceremony flow UI (Intake → Processing → Discharge), recent witness feed, WID badge display. Backend wiring deferred to Phase 2.
+- **Studio screen** — Dark sanctuary theme. Creator identity summary, Quick Actions grid (Register, Witness, Share, Analytics), stats card, LAMININ Doctrine Arms grid (4 arms with counts), My Works list with color bar and WID.
+- **You screen** — Dark sanctuary theme. Identity card with avatar and bio, WID identity section with Share/Copy actions, notification toggles, appearance settings, LAMININ Doctrine arm links, danger zone.
+- **WID Badge component** — 3 size variants (sm/md/lg), verified checkmark state, gold-on-dark styling.
+- **Creator Card component** — Featured (full hero card), compact (horizontal scroll), and row (list) variants.
+- **Hamburger Menu component** — Slide-out drawer with LAMININ arm navigation (Registry, Community, Commerce, Doctrine) and creator identity header.
+- **Quick Reference Slider component** — Left-side collapsible page summary present on all screens, 6 doctrine reference items.
+- **Mini Audio Player component** — Play/pause, seek bar, track title and artist, duration display.
+- **Mock data** — 5 creators, 5 works, 5 witness entries, 6 quick-reference items. All typed and contract-tested.
+- **Dual divine theme** — Light palette for public entry (Discover), dark sanctuary palette for authenticated screens.
+- **Unit tests** — 13 tests covering all mock data contracts. All passing.
+
+### Technical
+- TypeScript: 0 errors
+- All tab icons mapped in `icon-symbol.tsx` before use
+- `ScreenContainer` used on all screens for safe area handling
+- `StyleSheet.create()` used throughout (no inline style objects)
+- Mock data isolated in `lib/mock-data.ts` — drop-in replacement with tRPC calls in Phase 2
+
+### Deferred to Phase 2
+- Database wiring (replace mock data with live tRPC calls)
+- Authentication (Manus OAuth via `expo-web-browser`)
+- WID Registration ceremony (backend call to `wids.create`)
+- Theme toggle wired to `ThemeProvider`
+- Haptic feedback pass on all primary actions
+
+---
+
 ## [2.40.0] — 2026-04-25 · Phase 59: TypeScript Cleanup + Engine Repo Features
 
 ### Added
