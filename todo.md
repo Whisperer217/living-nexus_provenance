@@ -4488,275 +4488,105 @@
 - [x] PlayerContext Track interface: testimony field added
 - [x] 201/201 tests passing
 
-## Phase Layer3-P1 — Comic Processing Pipeline (Pending)
-- [ ] Add ioredis dependency to backend for direct Redis dispatch
-- [ ] server/workerQueue.ts: dispatchComicJob() helper (pushes Bull job to Redis)
-- [ ] songs.dispatchComicProcessing tRPC procedure: protectedProcedure, dispatches job per page
-- [ ] CreatorStudioPage: call dispatchComicProcessing after page upload success
-- [ ] Mission Control page (/mission-control): worker health, queue depths, recent jobs
+## Phase 148 — Archive Routing Fix + Contextual Right Pane Suppression
+- [ ] Fix: Register /archive/mine as alias to /archive (ArchivePage) in App.tsx
+- [ ] Fix: Register /archive/ledger as alias to /witness-registry in App.tsx
+- [ ] Fix: Register /archive?filter=witnessed as handled by ArchivePage with filter param
+- [ ] Fix: Update ContextDrawer archive section links to use correct registered routes
+- [ ] Fix: Update MobileNavDrawer archive section links to use correct registered routes
+- [ ] Improve: ArchivePage empty state — atmospheric message (No manifestations archived yet. Begin witnessing creation.)
+- [ ] Phase 148A: RightRail contextual suppression — hide on /upload, /batch-upload, /dashboard, /profile, /settings, /book/:id/studio, /keeper-compose, /admin/*
+- [ ] Phase 148A: MainLayout — remove lg:pr-[300px] on editing routes (no right rail = full-width content)
+- [ ] Phase 148B: RightRail responsive — already hidden on mobile (hidden lg:flex), verify tablet behavior
 
+## Mobile Phase 1 — App Shell (COMPLETE — 2026-05-26)
+- [x] 5-tab navigation (Discover, Profile, Witness, Studio, You)
+- [x] Discover screen — light divine theme, featured creator, new witnesses, trending works
+- [x] Creator Profile screen — dark sanctuary theme, tabs, mini audio player
+- [x] Witness screen — dark sanctuary theme, 3-step ceremony flow UI
+- [x] Studio screen — dark sanctuary theme, LAMININ arms, works list, quick actions
+- [x] You screen — dark sanctuary theme, WID identity, settings, doctrine arms
+- [x] WID Badge component (sm/md/lg, verified state)
+- [x] Creator Card component (featured, compact, row variants)
+- [x] Hamburger Menu drawer with LAMININ arm navigation
+- [x] Quick Reference Slider (left-side, all screens)
+- [x] Mini Audio Player component
+- [x] Mock data file (5 creators, 5 works, 5 witnesses, 6 quick-ref items)
+- [x] Dual divine theme (light public / dark sanctuary)
+- [x] TypeScript: 0 errors
+- [x] Unit tests: 13 passing
 
-## Phase Layer3-P1 — Comic Processing Pipeline + Mission Control
+## Mobile Phase 2 — Database Wiring
+- [ ] Configure EXPO_PUBLIC_API_URL env var (production API endpoint)
+- [ ] Replace MOCK_CREATORS on Discover with trpc.profile.discover
+- [ ] Replace MOCK_WORKS on Discover with trpc.songs.discover
+- [ ] Replace MOCK_WITNESSES on Witness with trpc.wids.getByCreator
+- [ ] Wire Creator Profile to trpc.profile.getByHandle
+- [ ] Wire Studio works list to trpc.songs.getMine
+- [ ] Wire You screen identity to trpc.auth.me
+- [ ] Add loading states and error boundaries to all screens
+- [ ] Add pull-to-refresh on Discover and Witness screens
 
-- [x] Add `workerJobs` table to schema (migration 0099)
-- [x] Create `server/workerQueue.ts` — enqueue, claim, complete, fail helpers
-- [x] Add poll endpoint `GET /api/worker/jobs/poll` (HMAC-signed)
-- [x] Add complete endpoint `POST /api/worker/jobs/:id/complete` (HMAC-signed)
-- [x] Add stats endpoint `GET /api/worker/stats` (public, for ops dashboard)
-- [x] Add `songs.dispatchComicProcessing` tRPC procedure (protected, ownership-gated)
-- [x] Add `songs.dispatchGuideExtraction` tRPC procedure (protected, ownership-gated)
-- [x] Add `songs.getWorkerStats` tRPC procedure (admin-only)
-- [x] Rewrite cloud worker to poll-based architecture (10s interval, HMAC-signed)
-- [x] Worker restarts cleanly and reports `mode: poll` in /health
-- [x] Create `MissionControlPage.tsx` at `/admin/mission-control`
-- [x] Add Mission Control route to App.tsx
-- [x] Add Mission Control button to AdminUsersPage nav
-- [x] TypeScript clean (0 errors)
-- [x] All 201 tests passing
+## Mobile Phase 3 — WID Registration Ceremony
+- [ ] WID Registration modal/sheet (triggered from Witness screen)
+- [ ] Step 1 — Intake: title, medium selector, description, optional file
+- [ ] Step 2 — Processing: animated machine state (hashing → signing → minting)
+- [ ] Step 3 — Discharge: WID result card, share sheet, Claim Your WID CTA
+- [ ] Wire to trpc.wids.create backend procedure
+- [ ] Generate and display WID certificate (shareable image)
+- [ ] Add WID to Studio works list after registration (optimistic update)
+- [ ] Haptic feedback at each ceremony step (Medium on sign, Success on mint)
 
-## Phase RED — Stability Pass (2026-05-09)
-- [ ] Issue 1: Add /prompt-studio → /keeper-compose redirect in App.tsx
-- [ ] Issue 2: Fix ContextDrawer/MobileNavDrawer left pane profile sub-route links
-- [ ] Issue 3: Restore <GlobalPlayer /> to MainLayout player layer (desktop expansion dead)
-- [ ] Issue 4: Re-add /archive/mine, /archive/favorites, /archive/history, /archive/collections redirects
-- [ ] Issue 5: Wrap EditTrackPanel in createPortal to escape overflow:hidden parent
-- [ ] Phase 148: Implement Global Viewport Manager (z-index registry, layer hierarchy)
+## Mobile Phase 4 — Authentication
+- [ ] Manus OAuth login flow via expo-web-browser
+- [ ] Persist auth token with expo-secure-store
+- [ ] Gate Studio and You screens behind auth
+- [ ] Show public-only Discover and Profile without auth
+- [ ] Add Sign In CTA to Discover screen for unauthenticated users
+- [ ] Wire theme toggle (Sanctuary Mode) to ThemeProvider
 
-## Phase RED — Stability Pass (Platform sync)
-- [x] Fix /prompt-studio → /keeper-compose redirect in App.tsx
-- [x] Fix /archive/mine and /archive/ledger redirects in App.tsx
-- [x] Fix ProfilePage tab sync — useEffect to re-read ?tab= on URL changes
-- [x] Restore GlobalPlayer to MainLayout player layer (desktop expansion was dead)
-- [x] Wrap EditTrackPanel in createPortal to escape overflow:hidden parent
-- [x] Create Global Viewport Layer Registry (client/src/lib/viewportLayers.ts)
-- [x] Apply Z.MOBILE_HEADER to MainLayout mobile header
+## Mobile Phase 5 — Community Features
+- [ ] Witness feed — real-time new WID registrations (polling or WebSocket)
+- [ ] Follow / unfollow creators (trpc.profile.follow)
+- [ ] Creator search by name, handle, WID
+- [ ] Signals feed — creator activity stream
+- [ ] Guild membership display on Creator Profile
+- [ ] Listen Together — join a room from mobile
 
-## Infinite Loop Fixes — /book/:id
-- [x] CinematicComicReader: memoize currentPanels with useMemo to stabilize computeGuidedTransform deps
-- [x] FloatingAvatar useNowPlaying: add prev-value ref guard to prevent redundant setNowPlaying calls every 3s
+## Mobile Phase 6 — Commerce Layer
+- [ ] Fan gift / tip flow (Stripe Payment Sheet via @stripe/stripe-react-native)
+- [ ] Sync license purchase from work detail screen
+- [ ] Creator earnings summary on Studio screen (trpc.stripe.getEarnings)
+- [ ] Stripe Connect onboarding from mobile (expo-web-browser)
+- [ ] Gift-to-download flow
 
-## Player Unification + Edit Panel Fix
-- [x] Bridge WSPContext expand/collapse to GlobalPlayer ln:player-expand/collapse events
-- [x] GlobalPlayer: only renders on desktop when EXPANDED (centered modal) — TopBar is the mini player
-- [x] GlobalPlayer: auto-elevate to EXPANDED only on mobile (not desktop)
-- [x] GlobalPlayer: ln:player-expand always expands to EXPANDED zone (not just restores previous)
-- [x] EditTrackPanel: centered modal on desktop (720px wide), right-side sheet on mobile
-- [x] EditTrackPanel: useIsMobile hook moved to top of function (hooks rules compliance)
+## Mobile Phase 7 — Keeper AI Agent
+- [ ] Floating Keeper orb on Studio and Profile screens
+- [ ] Keeper chat panel (slide-up sheet)
+- [ ] Voice input via expo-audio microphone (push-to-talk, Whisper)
+- [ ] Now Playing context passed to Keeper
+- [ ] Keeper mode ring (Guide / Conductor / Critic / Custodian)
+- [ ] Keeper skin slot (creator-customizable avatar)
 
-## Collapsible Right Rail
-- [x] Create RightRailContext (isOpen, toggle, open, close) persisted to localStorage
-- [x] Add RightRailProvider to main.tsx provider tree
-- [x] Add collapse/expand tab button to RightRail (gold chevron, slides with panel)
-- [x] RightRail slides off-screen (right: -300px) with 0.3s ease transition when collapsed
-- [x] MainLayout removes lg:pr-[300px] when rail is collapsed (content fills full width)
+## Mobile Phase 8 — Native Polish
+- [ ] Push notifications for new witnesses (expo-notifications)
+- [ ] Offline mode — cache last-seen Discover feed
+- [ ] Deep links — ln://wid/:widId opens work detail
+- [ ] Share sheet — share WID as image card (expo-sharing)
+- [ ] Haptic feedback audit — all primary actions covered
+- [ ] Animated tab transitions (react-native-reanimated)
+- [ ] Biometric lock for Studio screen (expo-local-authentication)
 
-## Batch Upload Fixes (Slimdoggy report)
-- [x] Fix genre picker clipping — add position="popper" side="bottom" to SelectContent
-- [x] Brighten genre/date labels to #E8DFC8
-- [x] Add multiple attribute to per-card audio file input
-- [x] Add batchReleaseDate (Original Creation Date) to BatchFill panel
-- [x] Merge applyBatchFill + repeatDisclosureAcrossAll so HAAI/AI tools apply with one click
+## Mobile Phase 9 — Guide Entity
+- [ ] Guide upload intake — file picker + metadata (expo-document-picker)
+- [ ] Guide detail view — page-by-page comic/manuscript reader
+- [ ] Cinematic reader mode — full-screen immersive
+- [ ] Guide WID display and share
 
-## Search System (Phase 152)
-- [ ] Add globalSearch tRPC procedure — creator-aware, WID-aware, artifact-aware
-- [ ] Add searchGlobal DB helper (users, songs, guides, collections by title/name/handle/WID)
-- [ ] Build SearchResultsPage at /search?q= with grouped sections (Creators, Audio, Comics, Manuscripts, Guides, Collections)
-- [ ] Wire TopBar search to navigate to /search?q= and add instant WID redirect
-- [ ] Wire MobileNavDrawer search to same /search?q= route
-- [ ] Add /search route to App.tsx
-- [ ] TypeScript: 0 errors | Tests: 201/201 passing
-
-## Search System (Phase 153)
-- [x] globalSearch DB helper — creator-aware, WID-aware, artifact-aware (songs/guides/collections)
-- [x] tRPC search.global procedure (public, no auth required)
-- [x] SearchResultsPage — grouped sections: Creators, Audio, Comics, Manuscripts, Lyrics, Guides, Collections
-- [x] WID direct match → instant redirect to artifact page
-- [x] TopBar search wired to /search?q= instead of /explore
-- [x] Mobile QuickRefSlider search wired to /search?q=
-- [x] /search route registered in App.tsx
-
-## Phase A Stabilization (Phase 154)
-- [x] Fix Guide upload failure — GuideUploadWizard was calling /api/upload (non-existent), changed to /api/upload-file
-- [x] Add pre-upload duplicate detection (songs.checkDuplicate tRPC procedure + fileHash lookup)
-- [x] Wire duplicate check into UploadPage (single upload) — non-blocking warning toast
-- [x] Wire duplicate check into BatchUploadPage — non-blocking warning toast per card
-- [x] Remove redundant "Repeat Across Tracks" button from BatchUploadPage
-- [x] Strip leading track-number prefix from filename-derived titles in batch upload
-- [x] Fix single upload title persistence bug — Remove button now clears title + witnessData
-- [x] Fix SearchResultsPage not auto-firing query on mount (wouter useSearch() fix)
-- [x] Add TopBar autocomplete dropdown with avatars/cover art and alphabetical sort
-
-## Language Shift — Manifestation Vocabulary (Phase 154)
-- [x] LeftRail nav: Upload → Register
-- [x] ContextDrawer: Upload → Register, AI music prompt → music prompt
-- [x] UploadPage h1: Upload Track/Lyrics/Manuscript/Comic → Register Work/Lyrics/Manuscript/Comic
-- [x] UploadPage: Before You Upload → Before You Register
-- [x] UploadPage: AI Consent → Creation Consent throughout
-- [x] UploadPage: AI Authorship Disclosure → Authorship Disclosure
-- [x] UploadPage: AI CONSENT DECLARATION → CREATION CONSENT DECLARATION
-- [x] BatchUploadPage: Batch Upload → Batch Register
-- [x] BatchUploadPage: AI Consent → Creation Consent, AI Disclosure → Authorship Disclosure
-- [x] BatchUploadPage: sign-in text upload → register
-- [x] HomePage: AI Tool → Creator Tool, AI music prompt → music prompt
-- [x] HomePage: AI Prompt Studio → Prompt Studio in comparison table
-- [x] HomePage: AI Tools That Serve You → Creator Tools That Serve You
-- [x] HomePage: Every upload → Every registration
-- [x] ManifestoPage: Upload your music → Register your work
-- [x] DiscoverPage: Upload Your Music → Register Your Work (2 locations)
-- [x] DiscoverPage: Upload your music → Register your work in feature list
-- [x] DashboardPage: Upload your first work → Register your first work (3 locations)
-- [x] CreatorProfilePage: Upload Your First Track → Register Your First Work
-- [x] CreatorProfilePage: AI Music Generation → Music Production
-- [x] ArchivePage: Upload Your First Track → Register Your First Work
-- [x] ProfilePage: Upload your first track → Register your first work
-- [x] ProfilePage: AI-Assisted — Human + AI Tools → AI-Assisted — Human + Tools
-- [x] MusicWitnessIDPage: AI CONSENT FLAG → CREATION CONSENT (3 locations)
-- [x] VerifyPage: AI Consent → Creation Consent, AI Training Consent → Creation Consent
-- [x] PrivacyPage: AI Consent Revocation → Creation Consent Revocation
-- [x] LearnPage/Lexicon: Upload → Register / Witness with expanded meaning
-- [x] GuideUploadWizard: Upload Sheet → Submit Sheet, Upload your → Submit your
-
-## SEO Fixes — Homepage (Phase 155)
-- [x] Add keywords meta tag to homepage
-- [x] Add H2 headings to homepage sections (sr-only H2 after HeroCarousel)
-- [x] Set document.title to 30-60 characters (47 chars via react-helmet-async)
-- [x] Add meta description (160 chars via react-helmet-async + index.html)
-
-## Full Site Audit (Phase 156)
-- [x] Fix 414 Request-URI Too Large — getPrefetch now always returns defaults so individual getLikeStatus/getLikeCount queries never fire
-- [x] Add image onError fallback handlers to TrackCard and StoreCreatorCard to prevent broken image icons on mobile
-- [x] Fix artistHandle literal "NULL" string in DB — updated to actual SQL NULL
-- [x] Fix "Creator X" fallback display — StoreCreatorCard now uses `name` field and filters NULL strings
-
-## Image Micronization Pipeline (Phase 157)
-- [x] Create server/imageProcessing.ts with sharp-based processing (trim, crop, resize, WebP, sharpen)
-- [x] Define presets: avatar (400×400 crop q82), banner (1600×600 q80), coverArt (1200×1200 q85), gallery (1400w q80), thumbnail (200×200 q70)
-- [x] Integrate micronize into uploadAvatar procedure
-- [x] Integrate micronize into uploadBanner procedure (preserving focal point detection)
-- [x] Integrate micronize into song upload legacy base64 cover path
-- [x] Integrate micronize into uploadCoverArt procedure
-- [x] Integrate micronize into batchUpload album cover path
-- [x] Integrate micronize into /api/upload-file for cover type (buffer → process → upload)
-- [x] Integrate micronize into /api/upload-gallery-image (buffer → process → upload)
-- [x] Add vitest test suite (15 tests) for imageProcessing module
-- [x] All 216 tests passing, 0 TypeScript errors
-
-## Manifestation Reader Architecture (Phase 158)
-- [x] Create ManifestationReader shell component with modular layout (left nav + center canvas + right panel)
-- [x] Create useManifestationReader context/hook for shared state (mode, page, panel, settings)
-- [x] Implement Standard Mode — single centered page, dark immersive background, minimal chrome
-- [x] Implement Spread Mode — two-page reading, landscape spread, comic-first layout
-- [x] Implement Guided Mode — sequential panel focus, cinematic transitions, commentary overlays
-- [x] Implement Overview Mode — grid/map visualization, chapter navigation, manifestation discovery
-- [x] Build persistent left navigation (page thumbnails, chapter markers, mode switcher)
-- [x] Build expandable right-side contextual panel (provenance, commentary, metadata, WID info)
-- [x] Add cinematic transitions between pages/panels (fade, zoom, pan, cut, cinematic)
-- [x] Add keyboard navigation and minimal UI chrome with auto-hide
-- [x] Cross-medium support (comics, books, manuscripts, lore archives, videos) — type system ready
-- [x] Wire ManifestationReader into BookDetailPage replacing CinematicComicReader for comic format
-- [x] Write tests and verify TypeScript compilation — 216/216 passing, 0 TS errors
-
-## Homepage Discovery Architecture Redesign (Phase 159)
-- [x] Build new variable card ecosystem — LargeManifestationCard, MediumManifestationCard, MicroManifestationCard
-- [x] Implement hover/tap metadata reveal with atmospheric transitions (title, creator, resonance emerge on interaction)
-- [x] Default card state: artwork-first, minimal chrome (creator sigil, medium icon, resonance glow only)
-- [x] Build medium-specific card variants (Music waveform, Comic cover/issue, Manuscript typography, Guide portrait, Lore archive)
-- [x] Redesign homepage section flow: Hero → Featured Realms → New Arrivals → Trending → Active Collaborations → Hidden Realms
-- [x] Implement Manifestation Bundles (soundtrack + comic + testimony grouped as one discovery unit)
-- [x] Creator identity continuity — persistent small sigil/avatar on all cards
-- [x] Interaction hierarchy enforcement: Play > Expand/Open > Identity > Provenance
-- [x] Variable card sizing creates rhythm and scanability (large cinematic, medium discovery, micro rapid)
-- [x] Atmospheric transitions and polish — soft gradient fades, subtle animation, cinematic feel
-- [x] Replace ShowcaseSection with DiscoverySection on homepage
-- [x] Write tests — 224/224 passing, 0 TS errors
-
-## Homepage Card Fixes (Phase 158)
-- [x] Featured Realms: populate with top 6 played tracks (limit increased from 4 to 6, grid shows 2 large + 4 medium)
-- [x] Cover art face centering: added objectPosition "center 20%" to Large and Medium card cover art
-- [x] Hidden Realms: fixed CosmicMediumIcon micro mode (size <= 12 renders SVG only, no label/button wrapper)
-
-## ManifestationReader → Universal Manifestation Operating System (Phase 159)
-- [x] Refactor core into medium-agnostic shell with shared system layer
-- [x] Build AtmosphereSystem — ambient lighting, background gradients, mood transitions
-- [x] Build ProvenanceSystem — progressive reveal (WID → contributors → lineage → transformation history)
-- [x] Build SyncSystem — subtle optional soundtrack synchronization (atmospheric, not forced cinematic)
-- [x] Build IdentitySystem — creator sigils, contributor badges, persistent across all views
-- [x] Build NavigationSystem — shared nav architecture adaptable per medium type
-- [x] Build MediumAdapterRegistry — pluggable rendering engines per medium type
-- [x] Create ComicAdapter — panel layout, spread behavior, guided panel focus
-- [x] Create ManuscriptAdapter — typography-first, scroll pacing, chapter flow
-- [x] Create LoreAdapter — archive-style, expandable entries, cross-reference links
-- [x] Create VideoAdapter — cinematic viewport, chapter markers, commentary overlay
-- [x] Create AudioAdapter — waveform visualization, lyric sync, album art immersion
-- [x] Each adapter inherits shared systems but configures: layout, interaction density, default mode, pacing
-- [x] Progressive Archive Mode — layered provenance reveal via ArchiveCanvas (surface → depth on demand)
-- [x] Atmospheric soundtrack sync — optional, subtle, enhancement not enforcement
-- [x] Priority order: immersion > readability > emotional pacing > discoverability > extensibility
-- [x] Wire refactored system into BookDetailPage for all narrative formats (comic, childrens, manuscript)
-- [x] Write tests and verify TypeScript compilation — 224/224 passing, 0 TS errors
-
-## Phase 160: Mobile Layout Fix — Backend Content Exposure
-- [x] Investigate mobile rendering issues (console errors, visual bugs)
-- [x] Fix MarketplaceDrawer — added mobile guard (returns null on mobile, navigates to /marketplace instead)
-- [x] Fix PlaylistDrawer — hidden tab handles and panel on mobile (hidden md:block / hidden md:flex)
-- [x] Fix overflow-x: hidden on html/body to prevent horizontal scroll revealing right-side drawers
-- [x] Verify fix on both mobile and desktop viewports — TypeScript 0 errors, 228/228 tests passing
-
-## Phase 161: Physical Distribution (USB Export)
-- [x] Backend: Express route POST /api/admin/physical-export (admin-only, ZIP with ID3 tags, cover art, WID certs, README)
-- [x] Frontend: Admin page at /admin/physical with song selection checkboxes and Export button
-- [x] Branded folder structure and README.txt with provenance manifest
-- [x] Vitest coverage — 8 tests for the export route (auth, validation, ZIP generation)
-- [x] All 236 tests passing, 0 TypeScript errors
-
-## Phase 162: Physical Distribution — Fixes & Enhancements
-- [x] Fix database/wiring test failure on the physical export page
-- [x] Enforce 10-file limit per export (backend MAX_TRACKS_PER_EXPORT=10 + frontend MAX_EXPORT=10)
-- [x] Include full documentation per track: audio, cover art, lyrics sheet, WID provenance
-- [x] Gate access properly (admin-only auth check on both backend and frontend)
-- [x] Update frontend to reflect limits and per-track documentation
-- [x] Fix and pass all tests (237 tests passing, 0 TypeScript errors)
-
-## Phase 163: Right Nav Cleanup + Mobile Track Images
-- [ ] Remove PlaylistDrawer vertical tab bar (NEW, TREND, LIKED, BUILD, SHOP, LIVE, PLAYING, TIPS) from desktop
-- [ ] Keep only the collapsible RightRail (Signals, Connected Manifestations, Witness Registry) as the right panel
-- [ ] Only the RightRail should shift the main content left when expanded
-- [x] Fix mobile track images/cards to properly fit mobile viewport width (responsive CSS variable --card-pan-w)
-- [x] Ensure reduced information density on mobile per design preference
-- [x] Fix GlobalPlayer expanded view empty space on mobile (reduced height cap from 92% to 82%, smaller artwork)
-## Phase 164: Mobile Player Deduplication + Cinematic Separation
-- [x] Fix player duplication on mobile — single bottom-sheet player only (WSP surface bar + expanded panel disabled)
-- [x] Mobile player expands from bottom with clear collapse button (auto-expand disabled, user taps chevron)
-- [x] Remove auto-cinematic trigger from artwork swipe gesture (swipe = track change only)
-- [x] Make cinematic view a separate deliberate button action (Maximize2 icon in expanded controls row)
-## Phase 165: Manifestation Studio — Guided Publishing Environment
-- [x] Build ManifestationStudio shell (split-layout, type gateway, adaptive routing)
-- [x] Implement Music manifestation environment (waveform, resonance language, live preview)
-- [x] Implement Lyrics manifestation environment (archival typography, verse preview)
-- [x] Implement Comics manifestation environment (page spread, panel sequencing)
-- [x] Implement Manuscript/Book manifestation environment (chapter org, formatting)
-- [x] Implement Video manifestation environment (cinematic preview, frame extraction)
-- [x] Add progress milestones, provenance indicators, and creator reassurance messaging
-## Phase 166: Distribution Vision Integration
-- [x] Build Distribution Hub page (/distribute) — sovereign pipeline, eMastered as DSP tool, physical formats
-- [x] Add physical artifacts section (USB, CD, Vinyl, Books, Comics) with interactive selection
-- [x] Build creator distribution interest form with notifyOwner integration
-- [x] Update homepage hero slide 1 to "Creator Owned. Provenance Powered. Built to Preserve. Built to Last."
-- [x] Add hero slide 4 "We Are Distributing — Beyond the Cloud" with distribution vision image
-- [x] Add distribution teaser section on homepage before ContributorsStrip
-- [x] Add DISTRIBUTE nav item in shared navItems with sub-items
-- [x] Add storage proxy for manus-storage asset serving
-- [x] Wire /distribute route in App.tsx
-
-## Phase 167: Bio Page / Creator Identity System
-- [x] Audit existing creator profile schema and page (CreatorProfilePage)
-- [x] Build Witness Identity Layer — bio page with testimony, philosophy, sigil, doctrine, origin statement
-- [x] Build Distribution Identity Layer — industry-facing metadata (DSP profiles, credits, genre, artwork)
-- [x] Build Creator Card component — hover/tap identity cards (avatar, name, testimony blurb, mediums, WID status, manifestation count)
-- [x] Integrate creator cards into track cards, discover feed, and archive surfaces
-- [x] Add /identity/:id route and CreatorIdentityPage with dual-layer architecture
-- [x] Build IdentityEditor component for ProfilePage Identity tab
-- [x] Enhance CreatorHandle with witness identity glimpse popup
-- [x] Add 13 identity columns to users schema (witnessPhilosophy, witnessEpitaph, witnessOriginStory, witnessDoctrine, sigilUrl, activeMediums, archiveContinuity, officialArtistName, localizedName, dspSpotifyUrl, dspAppleMusicUrl, dspTikTokHandle, producerCredits, labelName)
-- [x] Extend profile.update and getCreatorMini with identity fields
-- [x] TypeScript: 0 errors | Vitest: 237 tests passing
+## Mobile Phase 10 — App Store Submission
+- [ ] Generate production APK / IPA via Expo EAS Build (use Publish button in Manus UI)
+- [ ] App Store Connect submission (iOS) — requires Apple Developer account
+- [ ] Google Play Console submission (Android)
+- [ ] App Store screenshots (6.5" iPhone, 12.9" iPad — 5 screens minimum)
+- [ ] Privacy policy URL
+- [ ] App Store description copy (doctrine-aligned, creator-focused)
