@@ -4595,3 +4595,12 @@
 - [x] Diagnose 301 redirect to dead Cloud Run URL (bkcyijvkio-vken4u2oeq-ue.a.run.app)
 - [x] Root cause: www redirect in server/_core/index.ts applied to ALL domains including *.manus.space
 - [x] Fix: Only enforce www redirect for livingnexus.org and bddtpublishing.com canonical domains
+
+## Phase 171: Re-apply Fixes Lost in Rollback (Phases 168+169)
+- [x] Download route: stream with Content-Disposition attachment instead of S3 redirect
+- [x] Lyrics-only audio attach: skip slot check when upgrading lyrics-only work to audio
+- [x] replaceAudioFile: also set isLyricsOnly=false and contentType=audio on attach
+- [x] Creator handles in StoreTrackCard: show @handle when available
+- [x] Creator handles in LargeManifestationCard: show @handle when available
+- [x] Creator handles in MediumManifestationCard: show @handle when available
+- [x] Creator handles in MicroManifestationCard: show @handle when available

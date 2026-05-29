@@ -1457,16 +1457,21 @@ export const appRouter = router({
       const song = await getSongById(input.songId);
       if (!song || song.userId !== ctx.user.id) throw new TRPCError({ code: "FORBIDDEN", message: "Not your song" });
       // 0. Check slot availability — audio replacement generates a new WID and consumes a slot
-      const userForSlots = await getUserById(ctx.user.id);
-      if (!userForSlots) throw new TRPCError({ code: "UNAUTHORIZED" });
-      const slotsUsed = userForSlots.songSlotsUsed ?? 0;
-      const slotsTotal = userForSlots.songSlotsTotal ?? 0;
-      const isFounderReplace = userForSlots.role === "founder" || userForSlots.slotLimit === null;
-      if (!isFounderReplace && slotsUsed >= slotsTotal) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "You have used all your upload slots. Audio replacement generates a new WID and requires an available slot. Upgrade your Living Archive to continue.",
-        });
+      //    EXCEPTION: If the song is lyrics-only, attaching audio for the first time does NOT
+      //    consume an extra slot — the slot was already consumed when the lyrics work was created.
+      const isLyricsOnlyUpgrade = song.isLyricsOnly === true;
+      if (!isLyricsOnlyUpgrade) {
+        const userForSlots = await getUserById(ctx.user.id);
+        if (!userForSlots) throw new TRPCError({ code: "UNAUTHORIZED" });
+        const slotsUsed = userForSlots.songSlotsUsed ?? 0;
+        const slotsTotal = userForSlots.songSlotsTotal ?? 0;
+        const isFounderReplace = userForSlots.role === "founder" || userForSlots.slotLimit === null;
+        if (!isFounderReplace && slotsUsed >= slotsTotal) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "You have used all your upload slots. Audio replacement generates a new WID and requires an available slot. Upgrade your Living Archive to continue.",
+          });
+        }
       }
       // 1. Archive the current audio as a historical version
       if (song.fileUrl && song.witnessId) {

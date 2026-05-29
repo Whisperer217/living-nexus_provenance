@@ -181,7 +181,7 @@ export function LargeManifestationCard({ data, allData, dataIndex, onPlay, onTip
         <Link href={`/creator/${data.userId}`}>
           <p className="text-xs hover:underline decoration-[rgba(196,154,40,0.3)]"
             style={{ color: "rgba(196,154,40,0.8)" }}>
-            {data.artistName || "Unknown Creator"}
+            {data.artistHandle ? `@${data.artistHandle}` : (data.artistName || "Unknown Creator")}
           </p>
         </Link>
         {/* Metadata row */}

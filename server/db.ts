@@ -844,7 +844,7 @@ export async function replaceAudioFile(
   const db = await getDb();
   if (!db) return;
   await db.update(songs)
-    .set({ ...fields, updatedAt: new Date() })
+    .set({ ...fields, isLyricsOnly: false, contentType: "audio", updatedAt: new Date() })
     .where(and(eq(songs.id, songId), eq(songs.userId, userId)));
 }
 

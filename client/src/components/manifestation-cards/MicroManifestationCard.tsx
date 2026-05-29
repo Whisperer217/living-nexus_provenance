@@ -115,7 +115,7 @@ export function MicroManifestationCard({ data, allData, dataIndex, onPlay }: Pro
         <Link href={`/creator/${data.userId}`}>
           <p className="text-[9px] truncate mt-0.5 hover:underline decoration-[rgba(196,154,40,0.2)]"
             style={{ color: "rgba(196,154,40,0.55)" }}>
-            {data.artistName || "Unknown"}
+            {data.artistHandle ? `@${data.artistHandle}` : (data.artistName || "Unknown")}
           </p>
         </Link>
       </div>

@@ -157,7 +157,7 @@ export function MediumManifestationCard({ data, allData, dataIndex, onPlay }: Pr
         <Link href={`/creator/${data.userId}`}>
           <p className="text-[10px] truncate mt-0.5 hover:underline decoration-[rgba(196,154,40,0.2)]"
             style={{ color: "rgba(196,154,40,0.7)" }}>
-            {data.artistName || "Unknown"}
+            {data.artistHandle ? `@${data.artistHandle}` : (data.artistName || "Unknown")}
           </p>
         </Link>
         <div className="flex items-center gap-2 mt-1.5">

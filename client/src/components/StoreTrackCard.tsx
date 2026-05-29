@@ -334,7 +334,7 @@ export function StoreTrackCard({ song, size = "md", allSongs, songIndex }: Store
                   className="text-[10px] truncate"
                   style={{ color: "rgba(200,169,106,0.85)", fontFamily: "'Cinzel', serif", letterSpacing: "0.02em" }}
                 >
-                  {song.artistName || "Unknown"}
+                  {song.artistHandle ? `@${song.artistHandle}` : (song.artistName || "Unknown")}
                 </span>
                 {(song.wid || song.widShort) && (
                   <div className="flex items-center gap-0.5 flex-shrink-0">
