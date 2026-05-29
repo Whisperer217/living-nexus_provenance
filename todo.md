@@ -4590,3 +4590,8 @@
 - [ ] App Store screenshots (6.5" iPhone, 12.9" iPad — 5 screens minimum)
 - [ ] Privacy policy URL
 - [ ] App Store description copy (doctrine-aligned, creator-focused)
+
+## Phase 170: Fix 301 Redirect Loop on manus.space Domains
+- [x] Diagnose 301 redirect to dead Cloud Run URL (bkcyijvkio-vken4u2oeq-ue.a.run.app)
+- [x] Root cause: www redirect in server/_core/index.ts applied to ALL domains including *.manus.space
+- [x] Fix: Only enforce www redirect for livingnexus.org and bddtpublishing.com canonical domains

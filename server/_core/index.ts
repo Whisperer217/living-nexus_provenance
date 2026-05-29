@@ -71,7 +71,10 @@ async function startServer() {
       const proto = (req.headers["x-forwarded-proto"] as string || req.protocol || "http").split(",")[0].trim();
       const isHttps = proto === "https";
       const isWww = host.startsWith("www.");
-      if (!isHttps || !isWww) {
+      // Only enforce www redirect for livingnexus.org — NOT for *.manus.space or other domains
+      // Redirecting manus.space to www.manus.space creates a dead DNS loop
+      const isCanonicalDomain = host.endsWith("livingnexus.org") || host.endsWith("bddtpublishing.com");
+      if (isCanonicalDomain && (!isHttps || !isWww)) {
         const wwwHost = isWww ? host : `www.${host.replace(/^www\./, "")}`;
         return res.redirect(301, `https://${wwwHost}${req.originalUrl}`);
       }
