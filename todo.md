@@ -4641,3 +4641,14 @@
 - [x] Track artist/subtitle/provenance: crystal/nebula purple on mobile
 - [x] Action row, provenance strip, speed button, Up Next: crystal/nebula on mobile
 - [x] TypeScript: 0 errors | Tests: 237/237 pass
+
+## Phase 176: Playback Continuity — Immutable Queue Snapshot
+- [x] Add queueId (UUID), sourceType, sourceRef fields to PlayerState
+- [x] prevTrack: if currentTime > 3s restart current track; else go to previous
+- [x] playQueueAt: freeze queue as immutable snapshot, rotate queueId on each call
+- [x] addAndPlay: start a new single-track session (rotate queueId), do NOT merge into existing queue
+- [x] setQueue: guard by queueId not just tracks.length to prevent overwrite
+- [x] Expose queueId in PlayerContextValue
+- [x] nextTrack/onEnded: navigate strictly within the frozen snapshot (no re-fetch)
+- [x] Persist queueId to sessionStorage alongside tracks
+- [x] TypeScript: 0 errors | Tests: 237/237 pass

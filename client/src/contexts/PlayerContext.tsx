@@ -1,6 +1,15 @@
 /* ═══════════════════════════════════════════════════════════════════
    LIVING NEXUS — PlayerContext
    Global audio player state shared across all pages
+
+   Phase 176: Playback Continuity
+   ─────────────────────────────
+   The queue is now an IMMUTABLE SNAPSHOT frozen at play-time.
+   • playQueueAt() / addAndPlay() each rotate a new queueId (UUID).
+   • prev/next/onEnded navigate ONLY within that frozen snapshot.
+   • Pages are views only — they cannot mutate the active queue.
+   • prevTrack: if currentTime > 3 s → restart; else → go to previous.
+   • setQueue (DB seed): only seeds when queueId is null (first load).
 ═══════════════════════════════════════════════════════════════════ */
 
 import React, { createContext, useContext, useRef, useState, useCallback, useEffect } from "react";
@@ -8,8 +17,8 @@ import { safeAudioUrl } from "@shared/const";
 import { getCache, setCache, CACHE_KEYS, TTL } from "@/lib/lnxCache";
 import { trpc } from "@/lib/trpc";
 
-/** Generate a stable UUID v4 for this listening session */
-function generateSessionId(): string {
+/** Generate a stable UUID v4 */
+function generateId(): string {
   if (typeof crypto !== "undefined" && crypto.randomUUID) return crypto.randomUUID();
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
 }
@@ -43,28 +52,28 @@ export interface Track {
   shareCount?: number;
   witnessId?: string;
   aiDisclosure?: "original" | "ai_assisted" | "ai_generated";
-  creatorHandle?: string; // used for background creator page routing on queue advance
-  tipsEnabled?: boolean; // true when creator has Stripe tips enabled
-  creatorId?: number; // numeric user ID for Zone 3 artist link
-  coverPositionX?: number; // objectPosition X (0-100)
-  coverPositionY?: number; // objectPosition Y (0-100)
-  visualReady?: boolean; // true once auto-video MP4 is generated and stored
-  autoVideoUrl?: string; // S3 CDN URL of the looping MP4 visual
-  creatorRole?: string; // user role of the creator (e.g. "founder", "admin", "user")
-  contentType?: "audio" | "lyrics" | "manuscript" | "comic" | "guide"; // used to hide player controls for non-audio works
-  testimony?: string; // creator's testimony/description for manifestation-first display
+  creatorHandle?: string;
+  tipsEnabled?: boolean;
+  creatorId?: number;
+  coverPositionX?: number;
+  coverPositionY?: number;
+  visualReady?: boolean;
+  autoVideoUrl?: string;
+  creatorRole?: string;
+  contentType?: "audio" | "lyrics" | "manuscript" | "comic" | "guide";
+  testimony?: string;
 }
 
-/** Describes WHERE the current queue was built from — controls shuffle/repeat scope */
+/** Describes WHERE the current queue was built from */
 export type QueueContext =
-  | "CREATOR_PAGE"   // creator's published songs only
-  | "EXPLORE"        // all published songs on platform
-  | "HOME"           // latest releases
-  | "SEARCH"         // search results
-  | "SONG_DETAIL"    // related songs (same genre / creator)
-  | "PLAYLIST"       // user's personal saved playlist
-  | "LIKED"          // user's liked songs
-  | "NONE";          // no context (single addAndPlay)
+  | "CREATOR_PAGE"
+  | "EXPLORE"
+  | "HOME"
+  | "SEARCH"
+  | "SONG_DETAIL"
+  | "PLAYLIST"
+  | "LIKED"
+  | "NONE";
 
 export const QUEUE_CONTEXT_LABELS: Record<QueueContext, string> = {
   CREATOR_PAGE: "Creator",
@@ -77,7 +86,6 @@ export const QUEUE_CONTEXT_LABELS: Record<QueueContext, string> = {
   NONE: "Now Playing",
 };
 
-// DEMO_TRACKS removed — queue only contains real DB-sourced tracks with valid audio URLs
 export const DEMO_TRACKS: Track[] = [];
 
 export const DEMO_ROOMS = [
@@ -95,11 +103,23 @@ interface PlayerState {
   volume: number;
   currentTime: number;
   duration: number;
-  /** True once the current track has fired canplay — safe to show real duration */
+  /** True once the current track has fired canplay */
   isReady: boolean;
   liked: Set<string>;
-  tracks: Track[]; // current context queue
-  queueContext: QueueContext; // where the queue was built from
+  /**
+   * IMMUTABLE SNAPSHOT — frozen at playQueueAt / addAndPlay time.
+   * Never mutated by page navigation, feed refreshes, or scroll events.
+   */
+  tracks: Track[];
+  queueContext: QueueContext;
+  /**
+   * Unique ID for the current playback session/queue.
+   * Rotated every time a new queue is started (playQueueAt / addAndPlay).
+   * null = no queue has been started yet (DB seed is allowed).
+   */
+  queueId: string | null;
+  /** Human-readable source label, e.g. "home_feed", "explore", "creator:123" */
+  sourceType: string;
   profileName: string;
   profileBio: string;
   profileLocation: string;
@@ -108,19 +128,19 @@ interface PlayerState {
   profileAvatar: string | null;
   profileBanner: string | null;
   tipsEarned: number;
-  trackComments: Record<string, Comment[]>; // trackId -> comments
-  trackTips: Record<string, number>; // trackId -> tip total
+  trackComments: Record<string, Comment[]>;
+  trackTips: Record<string, number>;
 }
 
 interface PlayerContextValue {
   state: PlayerState;
-  /** Convenience alias for state.isReady — true once canplay fires for the current track */
   isReady: boolean;
   audioRef: React.RefObject<HTMLAudioElement | null>;
   allTracks: () => Track[];
   currentTrackId: string | null;
-  /** Label for the current queue context (e.g. "Explore", "Creator", "My Playlist") */
   queueContextLabel: string;
+  /** Unique ID for the current playback session — rotates on every new queue */
+  queueId: string | null;
   playTrack: (idx: number) => void;
   togglePlay: () => void;
   nextTrack: () => void;
@@ -132,35 +152,27 @@ interface PlayerContextValue {
   seek: (t: number) => void;
   toggleLike: (id: string) => void;
   addTrack: (t: Track) => void;
-  /** Add a single track and play it immediately (context = NONE) */
+  /** Start a new single-track session. Rotates queueId. Does NOT merge into existing queue. */
   addAndPlay: (t: Track) => void;
   /**
    * Insert a track immediately after the current position in the session queue.
-   * Does NOT start playback. Does NOT persist to DB or localStorage.
-   * If the queue is empty, the track becomes the first item (but does not auto-play).
+   * Session-only — never written to DB or localStorage.
    */
   playNext: (t: Track) => void;
-  /** Open the Now Playing side panel (mobile) */
   openNowPlayingPanel: () => void;
-  /** Whether the Now Playing side panel is open */
   isNowPlayingPanelOpen: boolean;
-  /** Close the Now Playing side panel */
   closeNowPlayingPanel: () => void;
-  /** Open the full-screen Theater Player (desktop) */
   openTheater: () => void;
-  /** Whether the Theater Player overlay is open */
   isTheaterOpen: boolean;
-  /** Close the Theater Player overlay */
   closeTheater: () => void;
-  /** Replace the entire queue without starting playback (used for initial DB seed) */
+  /** Seed the queue only if no session has been started yet (queueId is null). */
   setQueue: (tracks: Track[]) => void;
-  /** Patch fields on a single track in the queue by track id (e.g. update visualReady after worker finishes) */
   patchTrack: (trackId: string, patch: Partial<Track>) => void;
   /**
    * Replace the entire queue with a context-tagged set and immediately play startIdx.
-   * Shuffle and repeat will operate ONLY within this queue.
+   * Freezes the queue as an immutable snapshot and rotates queueId.
    */
-  playQueueAt: (tracks: Track[], startIdx: number, context?: QueueContext) => void;
+  playQueueAt: (tracks: Track[], startIdx: number, context?: QueueContext, sourceType?: string) => void;
   setProfileName: (n: string) => void;
   setProfileBio: (b: string) => void;
   setProfileLocation: (l: string) => void;
@@ -172,51 +184,57 @@ interface PlayerContextValue {
   addTrackTip: (trackId: string, amount: number) => void;
   addComment: (trackId: string, comment: Comment) => void;
   incrementShare: (trackId: string) => void;
-  /** The creator handle of the currently playing track — for background routing */
   backgroundCreatorHandle: string | null;
 }
 
 const PLAYER_SESSION_KEY = "ln_player_session";
 
-function loadSessionTracks(): { tracks: Track[]; currentIdx: number; queueContext: QueueContext } {
+function loadSessionTracks(): {
+  tracks: Track[];
+  currentIdx: number;
+  queueContext: QueueContext;
+  queueId: string | null;
+  sourceType: string;
+} {
   try {
     const raw = sessionStorage.getItem(PLAYER_SESSION_KEY);
-    if (!raw) return { tracks: [], currentIdx: -1, queueContext: "NONE" };
+    if (!raw) return { tracks: [], currentIdx: -1, queueContext: "NONE", queueId: null, sourceType: "" };
     const parsed = JSON.parse(raw);
     if (Array.isArray(parsed.tracks) && typeof parsed.currentIdx === "number") {
       return {
         tracks: parsed.tracks as Track[],
         currentIdx: parsed.currentIdx,
         queueContext: (parsed.queueContext ?? "NONE") as QueueContext,
+        queueId: parsed.queueId ?? null,
+        sourceType: parsed.sourceType ?? "",
       };
     }
   } catch { /* ignore */ }
-  return { tracks: [], currentIdx: -1, queueContext: "NONE" };
+  return { tracks: [], currentIdx: -1, queueContext: "NONE", queueId: null, sourceType: "" };
 }
 
 const PlayerContext = createContext<PlayerContextValue | null>(null);
 
 export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const audioRef = useRef<HTMLAudioElement>(null as unknown as HTMLAudioElement);
-  // Initialise the Audio element once — crossOrigin MUST be set before any src is assigned.
   if (!audioRef.current) {
     const a = new Audio();
-    // REQUIRED for Web Audio API createMediaElementSource() to work with S3 CORS URLs.
-    // Must be set BEFORE any src is assigned — cannot be changed after first load.
     a.crossOrigin = "anonymous";
     (audioRef as React.MutableRefObject<HTMLAudioElement>).current = a;
   }
+
   const [isNowPlayingPanelOpen, setIsNowPlayingPanelOpen] = useState(false);
   const openNowPlayingPanel = useCallback(() => setIsNowPlayingPanelOpen(true), []);
   const closeNowPlayingPanel = useCallback(() => setIsNowPlayingPanelOpen(false), []);
   const [isTheaterOpen, setIsTheaterOpen] = useState(false);
   const openTheater = useCallback(() => setIsTheaterOpen(true), []);
   const closeTheater = useCallback(() => setIsTheaterOpen(false), []);
+
   const [state, setState] = useState<PlayerState>(() => {
     const session = loadSessionTracks();
     return {
       currentIdx: session.currentIdx,
-      isPlaying: false, // never auto-play on reload
+      isPlaying: false,
       isShuffle: false,
       isRepeat: false,
       isMuted: false,
@@ -227,6 +245,8 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       liked: new Set(),
       tracks: session.tracks,
       queueContext: session.queueContext,
+      queueId: session.queueId,
+      sourceType: session.sourceType,
       profileName: "",
       profileBio: "",
       profileLocation: "",
@@ -240,14 +260,9 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     };
   });
 
-  // Only real DB-sourced tracks — DEMO_TRACKS is empty, guard is here for safety
   const allTracks = useCallback(() => state.tracks.filter(t => !!t.audioUrl), [state.tracks]);
 
-  // ── Restore audio.src on mount after page reload ────────────────────────────
-  // sessionStorage restores the queue + currentIdx but the Audio element is
-  // brand-new with no src. Without this, togglePlay() calls audio.play() on an
-  // empty src and produces silence. We set src here (without auto-playing) so
-  // the element is ready the moment the user taps play.
+  // Restore audio.src on mount after page reload
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -255,40 +270,26 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     const t = tracks[state.currentIdx];
     if (t?.audioUrl && !audio.src) {
       audio.src = safeAudioUrl(t.audioUrl);
-      audio.load(); // preload metadata so duration shows immediately
+      audio.load();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // intentionally run once on mount only
+  }, []);
 
-  // Persist queue + currentIdx to sessionStorage so navigation doesn't lose the player state
+  // Persist queue snapshot + queueId to sessionStorage
   useEffect(() => {
     try {
       sessionStorage.setItem(PLAYER_SESSION_KEY, JSON.stringify({
         tracks: state.tracks,
         currentIdx: state.currentIdx,
         queueContext: state.queueContext,
+        queueId: state.queueId,
+        sourceType: state.sourceType,
       }));
     } catch { /* quota exceeded — ignore */ }
-  }, [state.tracks, state.currentIdx, state.queueContext]);
+  }, [state.tracks, state.currentIdx, state.queueContext, state.queueId, state.sourceType]);
 
-  // One-time mount: restore audio.src from session so the player is ready after page refresh.
-  // The Audio element is brand-new on mount — without this, togglePlay() calls play() on an
-  // empty src and the browser silently ignores it.
-  useEffect(() => {
-    const audio = audioRef.current;
-    const tracks = state.tracks.filter(t => !!t.audioUrl);
-    const track = state.currentIdx >= 0 ? tracks[state.currentIdx] : null;
-    if (track?.audioUrl && !audio.src) {
-      audio.src = track.audioUrl;
-      audio.load(); // prime the element — no auto-play
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // empty deps — run once on mount only
-
-  // Ref to hold pending audio action after setState completes (for mobile Safari gesture compliance)
   const pendingAudioAction = useRef<{ src: string; play: boolean } | null>(null);
 
-  // Process pending audio actions outside of setState (mobile Safari requires play() in gesture context)
   useEffect(() => {
     if (pendingAudioAction.current) {
       const audio = audioRef.current;
@@ -312,21 +313,19 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       ...s,
       duration: isFinite(audio.duration) && !isNaN(audio.duration) ? audio.duration : 0,
     }));
-    // canplay fires once the browser has buffered enough to begin playback.
-    // We use this as the "track is ready" signal — safe to show real duration.
     const onCanPlay = () => setState(s => ({ ...s, isReady: true }));
+
     const onEnded = () => {
       setState(s => {
+        // Navigate strictly within the frozen snapshot
         const tracks = s.tracks.filter(t => !!t.audioUrl);
         if (s.isRepeat) {
           audio.currentTime = 0;
           audio.play().catch(() => {});
           return s;
         }
-        // Shuffle and repeat operate ONLY within the current context queue
         let next = s.currentIdx + 1;
         if (s.isShuffle) {
-          // Pick a random index that is NOT the current one (if queue has >1 track)
           if (tracks.length > 1) {
             let rand = Math.floor(Math.random() * (tracks.length - 1));
             if (rand >= s.currentIdx) rand += 1;
@@ -335,7 +334,6 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
             next = 0;
           }
         }
-        // End of queue — stop playback instead of looping back to track 1
         if (next >= tracks.length) {
           audio.pause();
           audio.currentTime = 0;
@@ -343,16 +341,12 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
         }
         const t = tracks[next];
         if (t?.audioUrl) {
-          // Schedule audio action for after render (mobile Safari gesture compliance)
           pendingAudioAction.current = { src: safeAudioUrl(t.audioUrl), play: true };
         }
-        // Atomically reset readiness + timing on auto-advance
         return { ...s, currentIdx: next, isPlaying: !!t?.audioUrl, isReady: false, duration: 0, currentTime: 0 };
       });
     };
-    const onPlay = () => setState(s => ({ ...s, isPlaying: true }));
-    const onPause = () => setState(s => ({ ...s, isPlaying: false }));
-    // Skip to next track on audio error (broken URL, network failure, etc.)
+
     const onError = () => {
       setState(s => {
         const tracks = s.tracks.filter(t => !!t.audioUrl);
@@ -365,10 +359,12 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
         if (t?.audioUrl) {
           pendingAudioAction.current = { src: safeAudioUrl(t.audioUrl), play: true };
         }
-        // Atomically reset readiness + timing on error-skip
         return { ...s, currentIdx: next, isPlaying: !!t?.audioUrl, isReady: false, duration: 0, currentTime: 0 };
       });
     };
+
+    const onPlay = () => setState(s => ({ ...s, isPlaying: true }));
+    const onPause = () => setState(s => ({ ...s, isPlaying: false }));
 
     audio.addEventListener("timeupdate", onTimeUpdate);
     audio.addEventListener("durationchange", onDurationChange);
@@ -387,7 +383,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       audio.removeEventListener("error", onError);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Mount once — handlers use setState(s => ...) to always read latest state
+  }, []);
 
   const playTrack = useCallback((idx: number) => {
     const audio = audioRef.current;
@@ -403,7 +399,6 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       } else {
         audio.pause();
       }
-      // Atomically reset readiness + timing so no stale state leaks between tracks
       return { ...s, currentIdx: idx, isPlaying: !!t.audioUrl, isReady: false, duration: 0, currentTime: 0 };
     });
   }, []);
@@ -418,11 +413,11 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const nextTrack = useCallback(() => {
     const audio = audioRef.current;
     setState(s => {
+      // Navigate strictly within the frozen snapshot
       const tracks = s.tracks.filter(t => !!t.audioUrl);
       const next = s.isShuffle
         ? Math.floor(Math.random() * tracks.length)
         : s.currentIdx + 1;
-      // At end of queue, stop instead of looping
       if (!s.isShuffle && next >= tracks.length) {
         if (audio) { audio.pause(); audio.currentTime = 0; }
         return { ...s, isPlaying: false, isReady: false, duration: 0, currentTime: 0 };
@@ -433,23 +428,35 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
         audio.load();
         audio.play().catch(() => {});
       }
-      // Atomically reset readiness + timing
       return { ...s, currentIdx: next, isPlaying: !!t?.audioUrl, isReady: false, duration: 0, currentTime: 0 };
     });
   }, []);
 
+  /**
+   * Previous track with 3-second restart rule:
+   * • If currentTime > 3 s → restart the current track from the beginning.
+   * • Otherwise → go to the previous track in the frozen snapshot.
+   */
   const prevTrack = useCallback(() => {
     const audio = audioRef.current;
+    if (!audio) return;
+    // 3-second restart rule
+    if (audio.currentTime > 3) {
+      audio.currentTime = 0;
+      if (audio.paused) audio.play().catch(() => {});
+      return;
+    }
     setState(s => {
       const tracks = s.tracks.filter(t => !!t.audioUrl);
-      const prev = (s.currentIdx - 1 + tracks.length) % tracks.length;
+      if (tracks.length === 0) return s;
+      // At the very first track, restart it rather than wrapping to end
+      const prev = s.currentIdx <= 0 ? 0 : s.currentIdx - 1;
       const t = tracks[prev];
       if (audio && t?.audioUrl) {
         audio.src = safeAudioUrl(t.audioUrl);
         audio.load();
         audio.play().catch(() => {});
       }
-      // Atomically reset readiness + timing
       return { ...s, currentIdx: prev, isPlaying: !!t?.audioUrl, isReady: false, duration: 0, currentTime: 0 };
     });
   }, []);
@@ -471,7 +478,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     if (!audio) return;
     audio.volume = v;
     setState(s => ({ ...s, volume: v, isMuted: false }));
-    setCache(CACHE_KEYS.VOLUME, v, TTL.UI_STATE); // persist across page reloads
+    setCache(CACHE_KEYS.VOLUME, v, TTL.UI_STATE);
   }, []);
 
   const seek = useCallback((t: number) => {
@@ -494,11 +501,9 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   /**
    * Insert a track immediately after the current position in the session queue.
    * Session-only — never written to DB or localStorage.
-   * If the track is already in the queue, it is moved to the next position.
    */
   const playNext = useCallback((t: Track) => {
     setState(s => {
-      // Remove the track if it already exists to avoid duplicates
       const withoutTrack = s.tracks.filter(tr => tr.id !== t.id);
       const insertAt = s.currentIdx >= 0 ? s.currentIdx + 1 : 0;
       const newTracks = [
@@ -510,23 +515,81 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
-  // Add a single track and immediately play it — context is NONE (no queue context)
-  // Guard: silently reject tracks without a real audio URL
+  /**
+   * Start a new single-track playback session.
+   * Rotates queueId — the existing queue is replaced with just this track.
+   * Pages calling addAndPlay() should prefer playQueueAt() with a full list
+   * when they have surrounding context available.
+   */
   const addAndPlay = useCallback((t: Track) => {
     const audio = audioRef.current;
     if (!audio || !t.audioUrl) return;
+    const newQueueId = generateId();
+    if (t.audioUrl) {
+      audio.src = safeAudioUrl(t.audioUrl);
+      audio.load();
+      audio.play().catch(() => {});
+    }
+    setState(s => ({
+      ...s,
+      tracks: [t],
+      currentIdx: 0,
+      isPlaying: !!t.audioUrl,
+      queueContext: "NONE",
+      queueId: newQueueId,
+      sourceType: "single",
+      isReady: false,
+      duration: 0,
+      currentTime: 0,
+    }));
+  }, []);
+
+  /**
+   * Seed the queue ONLY if no playback session has been started yet (queueId is null).
+   * Once a user has tapped play, this is a no-op — the active session is never overwritten.
+   */
+  const setQueue = useCallback((newTracks: Track[]) => {
+    const validTracks = newTracks.filter(t => !!t.audioUrl);
     setState(s => {
-      const filtered = s.tracks.filter(tr => tr.id !== t.id);
-      const newTracks = [t, ...filtered];
-      const newIdx = 0;
-      if (t.audioUrl) {
-        audio.src = safeAudioUrl(t.audioUrl);
-        audio.load(); // reset ended state for mobile browsers
-        audio.play().catch(() => {});
-      }
-      // Atomically reset readiness + timing so no stale state leaks from previous track
-      return { ...s, tracks: newTracks, currentIdx: newIdx, isPlaying: !!t.audioUrl, queueContext: "NONE", isReady: false, duration: 0, currentTime: 0 };
+      // Guard: only seed if no session has been started
+      if (s.queueId !== null) return s;
+      return { ...s, tracks: validTracks };
     });
+  }, []);
+
+  /**
+   * Replace the entire queue with a context-tagged set and immediately play startIdx.
+   * Freezes the queue as an IMMUTABLE SNAPSHOT and rotates queueId.
+   * Next/prev/shuffle/repeat all operate exclusively within this snapshot.
+   */
+  const playQueueAt = useCallback((
+    newTracks: Track[],
+    startIdx: number,
+    context: QueueContext = "NONE",
+    sourceType = "",
+  ) => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    const validTracks = newTracks.filter(t => !!t.audioUrl);
+    const clampedIdx = Math.max(0, Math.min(startIdx, validTracks.length - 1));
+    const t = validTracks[clampedIdx];
+    if (!t?.audioUrl) return;
+    const newQueueId = generateId();
+    audio.src = safeAudioUrl(t.audioUrl);
+    audio.load();
+    audio.play().catch(() => {});
+    setState(s => ({
+      ...s,
+      tracks: validTracks,
+      currentIdx: clampedIdx,
+      isPlaying: true,
+      queueContext: context,
+      queueId: newQueueId,
+      sourceType,
+      isReady: false,
+      duration: 0,
+      currentTime: 0,
+    }));
   }, []);
 
   const setProfileName = useCallback((n: string) => setState(s => ({ ...s, profileName: n })), []);
@@ -554,7 +617,6 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     return { ...s, tracks: updated };
   }), []);
 
-  /** Patch a single track's fields in the queue by id */
   const patchTrack = useCallback((trackId: string, patch: Partial<Track>) => {
     setState(s => ({
       ...s,
@@ -562,41 +624,15 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     }));
   }, []);
 
-  /** Replace the entire queue without starting playback (used for initial DB seed) */
-  const setQueue = useCallback((newTracks: Track[]) => {
-    const validTracks = newTracks.filter(t => !!t.audioUrl);
-    setState(s => {
-      // Only seed if queue is currently empty to avoid overwriting user-initiated playback
-      if (s.tracks.length > 0) return s;
-      return { ...s, tracks: validTracks };
-    });
-  }, []);
-
-  /**
-   * Replace the entire queue with a context-tagged set and immediately play startIdx.
-   * Shuffle and repeat will operate ONLY within this context queue.
-   */
-  const playQueueAt = useCallback((newTracks: Track[], startIdx: number, context: QueueContext = "NONE") => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    const validTracks = newTracks.filter(t => !!t.audioUrl);
-    const clampedIdx = Math.max(0, Math.min(startIdx, validTracks.length - 1));
-    const t = validTracks[clampedIdx];
-    if (!t?.audioUrl) return;
-    audio.src = safeAudioUrl(t.audioUrl);
-    audio.load(); // reset ended state for mobile browsers
-    audio.play().catch(() => {});
-    // Atomically reset readiness + timing so no stale state leaks from previous track
-    setState(s => ({ ...s, tracks: validTracks, currentIdx: clampedIdx, isPlaying: true, queueContext: context, isReady: false, duration: 0, currentTime: 0 }));
-  }, []);
-
-  const currentTrackId = state.currentIdx >= 0 ? (state.tracks.filter(t => !!t.audioUrl)[state.currentIdx]?.id ?? null) : null;
-  const backgroundCreatorHandle = state.currentIdx >= 0 ? (state.tracks.filter(t => !!t.audioUrl)[state.currentIdx]?.creatorHandle ?? null) : null;
+  const currentTrackId = state.currentIdx >= 0
+    ? (state.tracks.filter(t => !!t.audioUrl)[state.currentIdx]?.id ?? null)
+    : null;
+  const backgroundCreatorHandle = state.currentIdx >= 0
+    ? (state.tracks.filter(t => !!t.audioUrl)[state.currentIdx]?.creatorHandle ?? null)
+    : null;
   const queueContextLabel = QUEUE_CONTEXT_LABELS[state.queueContext] ?? "Now Playing";
 
   // ── Play Audit (Trust Layer) ─────────────────────────────────────────────────
-  // Each track gets a fresh sessionId when it starts playing.
-  // After MIN_PLAY_SECONDS (30 s) of continuous listening, we fire recordPlay once.
   const playSessionRef = useRef<{ sessionId: string; songId: number; witnessId?: string; reported: boolean } | null>(null);
   const recordPlayMutation = trpc.songs.recordPlay.useMutation();
 
@@ -610,10 +646,9 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       if (!track?.id) return;
       const songId = parseInt(track.id, 10);
       if (isNaN(songId)) return;
-      // Start a new session if the track changed or no session exists
       if (!playSessionRef.current || playSessionRef.current.songId !== songId) {
         playSessionRef.current = {
-          sessionId: generateSessionId(),
+          sessionId: generateId(),
           songId,
           witnessId: track.witnessId,
           reported: false,
@@ -626,7 +661,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       if (!session || session.reported) return;
       const elapsed = audio.currentTime;
       if (elapsed >= MIN_PLAY_SECONDS) {
-        session.reported = true; // prevent duplicate fires
+        session.reported = true;
         recordPlayMutation.mutate({
           songId: session.songId,
           witnessId: session.witnessId,
@@ -638,7 +673,6 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     };
 
     const onEnded = () => {
-      // On natural end, fire a final play event if not already reported
       const session = playSessionRef.current;
       if (session && !session.reported && audio.currentTime >= MIN_PLAY_SECONDS) {
         session.reported = true;
@@ -650,7 +684,6 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
           totalDurationSeconds: audio.duration > 0 ? Math.floor(audio.duration) : undefined,
         });
       }
-      // Reset session for next track
       playSessionRef.current = null;
     };
 
@@ -665,7 +698,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.currentIdx, state.tracks]);
 
-  // ── MediaSession API: lock screen / notification shade controls ──
+  // ── MediaSession API ─────────────────────────────────────────────────────────
   useEffect(() => {
     if (!('mediaSession' in navigator)) return;
     const tracks = state.tracks.filter(t => !!t.audioUrl);
@@ -711,6 +744,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   return (
     <PlayerContext.Provider value={{
       state, isReady, audioRef, allTracks, currentTrackId, queueContextLabel,
+      queueId: state.queueId,
       playTrack, togglePlay, nextTrack, prevTrack,
       toggleShuffle, toggleRepeat, toggleMute, setVolume, seek,
       toggleLike, addTrack, addAndPlay, playNext, setQueue, playQueueAt, patchTrack,

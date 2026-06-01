@@ -157,7 +157,7 @@ function PlaylistDetail({
   playlistId, onBack,
 }: { playlistId: number; onBack: () => void }) {
   const { user } = useAuth();
-  const { addAndPlay, playQueueAt, openNowPlayingPanel } = usePlayer();
+  const { playQueueAt, openNowPlayingPanel } = usePlayer();
   const utils = trpc.useUtils();
   const [inviteHandle, setInviteHandle] = useState("");
   const [showInvite, setShowInvite] = useState(false);
@@ -348,7 +348,20 @@ function PlaylistDetail({
                 </p>
               </div>
               <button
-                onClick={() => { addAndPlay({ id: String(t.song.id), title: t.song.title, artist: t.creator?.artistHandle || t.creator?.name || String(t.song.userId), genre: t.song.genre || "", audioUrl: t.song.fileUrl, artUrl: t.song.coverArtUrl, witnessId: t.song.witnessId }); openNowPlayingPanel(); }}
+                onClick={() => {
+                  const playerTracks = tracks.map((tr: any) => ({
+                    id: String(tr.song.id), title: tr.song.title,
+                    artist: tr.creator?.artistHandle || tr.creator?.name || String(tr.song.userId),
+                    genre: tr.song.genre || "", audioUrl: tr.song.fileUrl, artUrl: tr.song.coverArtUrl,
+                    witnessId: tr.song.witnessId,
+                    visualReady: tr.song.visualReady ?? false,
+                    autoVideoUrl: tr.song.autoVideoUrl ?? undefined,
+                    creatorRole: tr.creator?.role ?? undefined,
+                  }));
+                  const startIdx = playerTracks.findIndex((tr: any) => tr.id === String(t.song.id));
+                  playQueueAt(playerTracks, startIdx >= 0 ? startIdx : 0, "PLAYLIST");
+                  openNowPlayingPanel();
+                }}
                 className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg
                   bg-[#1C1A14]/10 hover:bg-[#1C1A14]/20 text-[#C49A28] transition-all"
               >

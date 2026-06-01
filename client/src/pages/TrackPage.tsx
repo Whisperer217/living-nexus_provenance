@@ -32,7 +32,7 @@ export default function TrackPage() {
   const { id } = useParams<{ id: string }>();
   const [, navigate] = useLocation();
   const {
-    state, allTracks, addAndPlay, togglePlay, toggleLike,
+    state, allTracks, playQueueAt, togglePlay, toggleLike,
     openNowPlayingPanel, addTrackTip, addComment, incrementShare,
   } = usePlayer();
 
@@ -77,7 +77,10 @@ export default function TrackPage() {
     if (track && state.currentIdx === trackIdx) {
       togglePlay();
     } else if (track) {
-      addAndPlay(track);
+      // Play within the existing frozen queue snapshot so prev/next work correctly
+      const queue = tracks.length > 0 ? tracks : [track];
+      const idx = trackIdx >= 0 ? trackIdx : 0;
+      playQueueAt(queue, idx, state.queueContext);
       openNowPlayingPanel();
     }
   };
