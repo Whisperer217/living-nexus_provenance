@@ -31,17 +31,21 @@ import { toast } from "sonner";
 const GOLD = "#D4AF37";
 const GOLD_HL = "#F5E6B3";
 const GOLD_GLOW = "rgba(212,175,55,0.6)";
-/* Mobile glass */
-const GLASS_BG_MOBILE = "rgba(0,0,0,0.82)";
-const GLASS_BLUR_MOBILE = "blur(16px)";
+/* Mobile glass — Nebula & Crystal deep space */
+const GLASS_BG_MOBILE = "linear-gradient(180deg, #0a0415 0%, #0d0520 35%, #060212 100%)";
+const GLASS_BLUR_MOBILE = "blur(20px)";
 /* Desktop glass — slightly stronger separation (decision #8) */
 const GLASS_BG_DESKTOP = "rgba(0,0,0,0.75)";
 const GLASS_BLUR_DESKTOP = "blur(18px)";
-/* Glow: tightened radius, no fog (decision #1 from visual spec) */
-const GOLD_SHADOW_MOBILE = `0 0 10px rgba(212,175,55,0.45), 0 0 18px rgba(212,175,55,0.18)`;
+/* Mobile glow: nebula purple upward glow */
+const GOLD_SHADOW_MOBILE = `0 -4px 32px rgba(138,43,226,0.40), 0 0 18px rgba(138,43,226,0.20), 0 -2px 8px rgba(192,132,252,0.15)`;
 /* Desktop glow: directional — upward light + depth (decision #9) */
 const GOLD_SHADOW_DESKTOP = `0 -8px 24px rgba(212,175,55,0.45), 0 12px 32px rgba(0,0,0,0.9)`;
 const GOLD_BORDER = `1px solid rgba(212,175,55,0.45)`;
+/* Nebula palette — mobile only */
+const NEBULA = "rgba(138,43,226,0.85)";
+const NEBULA_BORDER = "1px solid rgba(138,43,226,0.30)";
+const CRYSTAL = "rgba(192,132,252,0.85)";
 
 /* ── Snap zone heights ──────────────────────────────────────────── */
 const SNAP = {
@@ -621,14 +625,15 @@ function GlobalPlayerInner() {
         className="flex items-center justify-center flex-shrink-0 cursor-grab active:cursor-grabbing"
         style={{ height: "20px", paddingTop: "6px", position: "relative" }}
       >
-        {/* Mobile: pill handle */}
+        {/* Mobile: pill handle — nebula purple */}
         {!isDesktop && (
           <div
             style={{
               width: "40px",
               height: "4px",
               borderRadius: "2px",
-              background: `rgba(212,175,55,0.4)`,
+              background: `rgba(138,43,226,0.45)`,
+              boxShadow: "0 0 6px rgba(138,43,226,0.3)",
             }}
           />
         )}
@@ -675,7 +680,7 @@ function GlobalPlayerInner() {
           >
             {visTrack?.title || "Nothing playing"}
           </p>
-          <p className="text-[11px] truncate" style={{ color: "rgba(212,175,55,0.7)" }}>
+          <p className="text-[11px] truncate" style={{ color: isDesktop ? "rgba(212,175,55,0.7)" : "rgba(192,132,252,0.7)" }}>
             {visTrack?.artist || ""}
           </p>
         </div>
@@ -732,7 +737,18 @@ function GlobalPlayerInner() {
           <button
             onClick={e => { e.stopPropagation(); togglePlay(); }}
             className="w-9 h-9 rounded-full flex items-center justify-center transition-transform hover:scale-105"
-            style={{ background: GOLD, color: "#000" }}
+            style={isDesktop
+              ? { background: GOLD, color: "#000" }
+              : {
+                  background: state.isPlaying
+                    ? "radial-gradient(circle at 35% 35%, rgba(192,132,252,0.9) 0%, rgba(138,43,226,0.85) 50%, rgba(88,28,135,0.95) 100%)"
+                    : "radial-gradient(circle at 35% 35%, rgba(245,230,179,0.9) 0%, rgba(212,175,55,0.85) 50%, rgba(160,120,20,0.95) 100%)",
+                  color: "#fff",
+                  boxShadow: state.isPlaying
+                    ? "0 0 12px rgba(138,43,226,0.6), 0 0 24px rgba(138,43,226,0.25)"
+                    : "0 0 12px rgba(212,175,55,0.55), 0 0 24px rgba(212,175,55,0.22)",
+                }
+            }
           >
             {state.isPlaying
               ? <Pause size={15} fill="currentColor" />
@@ -743,7 +759,7 @@ function GlobalPlayerInner() {
           <button
             onClick={e => { e.stopPropagation(); nextTrack(); }}
             className="p-1.5 transition-colors"
-            style={{ color: "rgba(255,255,255,0.4)" }}
+            style={{ color: isDesktop ? "rgba(255,255,255,0.4)" : "rgba(192,132,252,0.5)" }}
           >
             <SkipForward size={15} />
           </button>
@@ -751,7 +767,7 @@ function GlobalPlayerInner() {
           <button
             onClick={e => { e.stopPropagation(); setZone(z => z === "MINI" ? "EXPANDED" : "MINI"); setDragHeight(null); }}
             className="p-1.5 transition-colors"
-            style={{ color: GOLD }}
+            style={{ color: isDesktop ? GOLD : "rgba(192,132,252,0.7)" }}
             title={isMini ? "Expand player" : "Collapse player"}
           >
             {isMini ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
@@ -768,12 +784,12 @@ function GlobalPlayerInner() {
             transition: "opacity 0.2s ease",
           }}
         >
-          <span className="text-[10px] w-7 text-right tabular-nums" style={{ color: "rgba(212,175,55,0.6)" }}>
+          <span className="text-[10px] w-7 text-right tabular-nums" style={{ color: isDesktop ? "rgba(212,175,55,0.6)" : "rgba(192,132,252,0.6)" }}>
             {fmtTime(state.currentTime)}
           </span>
           <div
             className="flex-1 cursor-pointer relative"
-            style={{ background: "#1a1a1a", height: "3px", borderRadius: "2px" }}
+            style={{ background: isDesktop ? "#1a1a1a" : "rgba(138,43,226,0.12)", height: isDesktop ? "3px" : "4px", borderRadius: "2px" }}
             data-seek
             onClick={handleSeek}
           >
@@ -781,7 +797,7 @@ function GlobalPlayerInner() {
               className="h-full relative"
               style={{
                 width: `${progress}%`,
-                background: GOLD,
+                background: isDesktop ? GOLD : "linear-gradient(90deg, rgba(138,43,226,0.9) 0%, rgba(192,132,252,0.85) 60%, rgba(212,175,55,0.8) 100%)",
                 borderRadius: "2px",
               }}
             >
@@ -791,14 +807,16 @@ function GlobalPlayerInner() {
                 style={{
                   width: "12px",
                   height: "12px",
-                  background: GOLD_HL,
-                  boxShadow: state.isPlaying ? `0 0 14px rgba(245,230,179,0.7)` : "none",
+                  background: isDesktop ? GOLD_HL : "rgba(232,223,200,0.95)",
+                  boxShadow: state.isPlaying
+                    ? (isDesktop ? `0 0 14px rgba(245,230,179,0.7)` : `0 0 10px rgba(192,132,252,0.8), 0 0 20px rgba(138,43,226,0.4)`)
+                    : "none",
                   transform: "translateY(-50%) translateX(50%)",
                 }}
               />
             </div>
           </div>
-          <span className="text-[10px] w-7 tabular-nums" style={{ color: "rgba(212,175,55,0.6)" }}>
+          <span className="text-[10px] w-7 tabular-nums" style={{ color: isDesktop ? "rgba(212,175,55,0.6)" : "rgba(192,132,252,0.6)" }}>
             {fmtTime(state.duration, isReady)}
           </span>
         </div>
@@ -810,18 +828,30 @@ function GlobalPlayerInner() {
         <div className="flex items-center justify-between px-4 py-1 flex-shrink-0">
           {/* Playback controls — 3-tier hierarchy */}
           <div className="flex items-center gap-3">
-            <button onClick={e => { e.stopPropagation(); toggleShuffle(); }} className="p-1.5 transition-colors" style={{ color: state.isShuffle ? GOLD : "rgba(212,175,55,0.65)" }}><Shuffle size={14} /></button>
-            <button onClick={e => { e.stopPropagation(); prevTrack(); }} className="p-1.5 transition-colors" style={{ color: GOLD, opacity: 0.9 }}><SkipBack size={18} /></button>
-            {/* Circular play button — 56px spec */}
+            <button onClick={e => { e.stopPropagation(); toggleShuffle(); }} className="p-1.5 transition-colors" style={{ color: state.isShuffle ? (isDesktop ? GOLD : "rgba(192,132,252,0.9)") : (isDesktop ? "rgba(212,175,55,0.65)" : "rgba(192,132,252,0.45)") }}><Shuffle size={14} /></button>
+            <button onClick={e => { e.stopPropagation(); prevTrack(); }} className="p-1.5 transition-colors" style={{ color: isDesktop ? GOLD : "rgba(192,132,252,0.7)", opacity: 0.9 }}><SkipBack size={18} /></button>
+            {/* Circular play button — 64px crystal orb on mobile, 56px gold on desktop */}
             <button
               onClick={e => { e.stopPropagation(); togglePlay(); }}
               className="flex items-center justify-center rounded-full transition-transform hover:scale-105"
-              style={{ width: "56px", height: "56px", background: GOLD, color: "#000", boxShadow: `0 0 12px rgba(212,175,55,0.55), 0 0 24px rgba(212,175,55,0.22)`, filter: `drop-shadow(0 0 10px rgba(212,175,55,0.6))` }}
+              style={isDesktop
+                ? { width: "56px", height: "56px", background: GOLD, color: "#000", boxShadow: `0 0 12px rgba(212,175,55,0.55), 0 0 24px rgba(212,175,55,0.22)`, filter: `drop-shadow(0 0 10px rgba(212,175,55,0.6))` }
+                : {
+                    width: "64px", height: "64px",
+                    background: state.isPlaying
+                      ? "radial-gradient(circle at 35% 35%, rgba(192,132,252,0.95) 0%, rgba(138,43,226,0.9) 45%, rgba(88,28,135,1) 100%)"
+                      : "radial-gradient(circle at 35% 35%, rgba(245,230,179,0.95) 0%, rgba(212,175,55,0.9) 45%, rgba(160,120,20,1) 100%)",
+                    color: "#fff",
+                    boxShadow: state.isPlaying
+                      ? "0 0 20px rgba(138,43,226,0.7), 0 0 40px rgba(138,43,226,0.3), inset 0 1px 0 rgba(255,255,255,0.25)"
+                      : "0 0 20px rgba(212,175,55,0.6), 0 0 40px rgba(212,175,55,0.25), inset 0 1px 0 rgba(255,255,255,0.25)",
+                  }
+              }
             >
-              {state.isPlaying ? <Pause size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" className="ml-0.5" />}
+              {state.isPlaying ? <Pause size={isDesktop ? 20 : 24} fill="currentColor" /> : <Play size={isDesktop ? 20 : 24} fill="currentColor" className="ml-0.5" />}
             </button>
-            <button onClick={e => { e.stopPropagation(); nextTrack(); }} className="p-1.5 transition-colors" style={{ color: GOLD, opacity: 0.9 }}><SkipForward size={18} /></button>
-            <button onClick={e => { e.stopPropagation(); toggleRepeat(); }} className="p-1.5 transition-colors" style={{ color: state.isRepeat ? GOLD : "rgba(212,175,55,0.65)" }}><Repeat size={14} /></button>
+            <button onClick={e => { e.stopPropagation(); nextTrack(); }} className="p-1.5 transition-colors" style={{ color: isDesktop ? GOLD : "rgba(192,132,252,0.7)", opacity: 0.9 }}><SkipForward size={18} /></button>
+            <button onClick={e => { e.stopPropagation(); toggleRepeat(); }} className="p-1.5 transition-colors" style={{ color: state.isRepeat ? (isDesktop ? GOLD : "rgba(192,132,252,0.9)") : (isDesktop ? "rgba(212,175,55,0.65)" : "rgba(192,132,252,0.45)") }}><Repeat size={14} /></button>
           </div>
           {/* Right utility actions */}
           <div className="flex items-center gap-1">
@@ -831,29 +861,29 @@ function GlobalPlayerInner() {
               </button>
             )}
             {currentSongId && (
-              <button onClick={e => { e.stopPropagation(); setCommentsOpen(true); }} className="p-1.5 transition-colors" style={{ color: "rgba(212,175,55,0.65)" }} title="Comments">
+              <button onClick={e => { e.stopPropagation(); setCommentsOpen(true); }} className="p-1.5 transition-colors" style={{ color: isDesktop ? "rgba(212,175,55,0.65)" : "rgba(192,132,252,0.6)" }} title="Comments">
                 <MessageCircle size={14} />
               </button>
             )}
             {currentSongId && (
-              <button onClick={e => { e.stopPropagation(); setAddToCollectionOpen(true); }} className="p-1.5 transition-colors" style={{ color: "rgba(212,175,55,0.65)" }} title="Add to Collection">
+              <button onClick={e => { e.stopPropagation(); setAddToCollectionOpen(true); }} className="p-1.5 transition-colors" style={{ color: isDesktop ? "rgba(212,175,55,0.65)" : "rgba(192,132,252,0.6)" }} title="Add to Collection">
                 <FolderPlus size={15} />
               </button>
             )}
             {tipsEnabled && currentSongId && (
-              <button onClick={e => { e.stopPropagation(); setTipOpen(true); }} className="p-1.5 transition-colors" style={{ color: "rgba(212,175,55,0.65)" }} title="Tip creator">
+              <button onClick={e => { e.stopPropagation(); setTipOpen(true); }} className="p-1.5 transition-colors" style={{ color: isDesktop ? "rgba(212,175,55,0.65)" : "rgba(192,132,252,0.6)" }} title="Tip creator">
                 <DollarSign size={14} />
               </button>
             )}
-            <button ref={volumeBtnRef} onClick={e => { e.stopPropagation(); openVolumePopup(); }} className="p-1.5 transition-colors" style={{ color: state.isMuted ? "rgba(212,175,55,0.3)" : "rgba(212,175,55,0.65)" }}>
+            <button ref={volumeBtnRef} onClick={e => { e.stopPropagation(); openVolumePopup(); }} className="p-1.5 transition-colors" style={{ color: state.isMuted ? (isDesktop ? "rgba(212,175,55,0.3)" : "rgba(192,132,252,0.25)") : (isDesktop ? "rgba(212,175,55,0.65)" : "rgba(192,132,252,0.6)") }}>
               {state.isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
             </button>
-            <button onClick={e => { e.stopPropagation(); toggleGlow(); }} className="p-1.5 transition-all rounded" style={{ color: glowEnabled ? "#C084FC" : "rgba(212,175,55,0.4)", background: glowEnabled ? "rgba(192,132,252,0.08)" : "transparent" }} title={glowEnabled ? "Glow: ON" : "Glow: OFF"}><Waves size={14} /></button>
+            <button onClick={e => { e.stopPropagation(); toggleGlow(); }} className="p-1.5 transition-all rounded" style={{ color: glowEnabled ? "#C084FC" : (isDesktop ? "rgba(212,175,55,0.4)" : "rgba(192,132,252,0.4)"), background: glowEnabled ? "rgba(192,132,252,0.08)" : "transparent" }} title={glowEnabled ? "Glow: ON" : "Glow: OFF"}><Waves size={14} /></button>
             {/* Phase 164: Cinematic mode — deliberate button, not triggered by artwork tap */}
-            <button onClick={e => { e.stopPropagation(); setCinematic(true); }} className="p-1.5 transition-all rounded" style={{ color: cinematic ? GOLD : "rgba(212,175,55,0.65)", background: cinematic ? "rgba(212,175,55,0.08)" : "transparent" }} title="Cinematic View"><Maximize2 size={14} /></button>
-            <button ref={contextMenuBtnRef} onClick={e => { e.stopPropagation(); openContextMenu(); }} className="p-1.5 transition-colors" style={{ color: "rgba(212,175,55,0.65)" }}><MoreHorizontal size={16} /></button>
+            <button onClick={e => { e.stopPropagation(); setCinematic(true); }} className="p-1.5 transition-all rounded" style={{ color: cinematic ? (isDesktop ? GOLD : "rgba(192,132,252,0.9)") : (isDesktop ? "rgba(212,175,55,0.65)" : "rgba(192,132,252,0.5)"), background: cinematic ? (isDesktop ? "rgba(212,175,55,0.08)" : "rgba(138,43,226,0.08)") : "transparent" }} title="Cinematic View"><Maximize2 size={14} /></button>
+            <button ref={contextMenuBtnRef} onClick={e => { e.stopPropagation(); openContextMenu(); }} className="p-1.5 transition-colors" style={{ color: isDesktop ? "rgba(212,175,55,0.65)" : "rgba(192,132,252,0.6)" }}><MoreHorizontal size={16} /></button>
             {/* Collapse button: EXPANDED → MINI (FLOAT zone removed) */}
-            <button onClick={e => { e.stopPropagation(); setZone(z => z === "EXPANDED" ? "MINI" : "EXPANDED"); setDragHeight(null); }} className="p-1.5 transition-colors" style={{ color: GOLD, filter: `drop-shadow(0 0 6px rgba(212,175,55,0.5))` }} title={isExpanded ? "Collapse" : "Expand player"}>
+            <button onClick={e => { e.stopPropagation(); setZone(z => z === "EXPANDED" ? "MINI" : "EXPANDED"); setDragHeight(null); }} className="p-1.5 transition-colors" style={{ color: isDesktop ? GOLD : "rgba(192,132,252,0.8)", filter: isDesktop ? `drop-shadow(0 0 6px rgba(212,175,55,0.5))` : `drop-shadow(0 0 6px rgba(138,43,226,0.5))` }} title={isExpanded ? "Collapse" : "Expand player"}>
               {isExpanded ? <ChevronDown size={15} /> : <ChevronUp size={15} />}
             </button>
           </div>
@@ -878,8 +908,12 @@ function GlobalPlayerInner() {
                   height: "min(260px, 65vw)",
                   background: visTrack?.bg || "#111009",
                   boxShadow: swipeDir
-                    ? `0 8px 40px ${GOLD_GLOW}, ${swipeDir === "left" ? "-6px" : "6px"} 0 24px rgba(212,175,55,0.4), 0 0 0 1px rgba(212,175,55,0.3)`
-                    : `0 8px 40px ${GOLD_GLOW}, 0 0 0 1px rgba(212,175,55,0.3)`,
+                    ? (isDesktop
+                        ? `0 8px 40px ${GOLD_GLOW}, ${swipeDir === "left" ? "-6px" : "6px"} 0 24px rgba(212,175,55,0.4), 0 0 0 1px rgba(212,175,55,0.3)`
+                        : `0 8px 40px rgba(138,43,226,0.5), ${swipeDir === "left" ? "-6px" : "6px"} 0 24px rgba(138,43,226,0.35), 0 0 0 1px rgba(138,43,226,0.4)`)
+                    : (isDesktop
+                        ? `0 8px 40px ${GOLD_GLOW}, 0 0 0 1px rgba(212,175,55,0.3)`
+                        : `0 8px 40px rgba(138,43,226,0.35), 0 0 0 1px rgba(138,43,226,0.35), 0 0 0 3px rgba(88,28,135,0.2)`),
                   transform: swipeDelta !== 0 ? `translateX(${Math.sign(swipeDelta) * Math.min(Math.abs(swipeDelta) * 0.25, 24)}px) rotate(${Math.sign(swipeDelta) * Math.min(Math.abs(swipeDelta) * 0.02, 2)}deg)` : undefined,
                   transition: swipeDelta === 0 ? "transform 0.3s cubic-bezier(0.32,0.72,0,1), box-shadow 0.2s ease" : "none",
                   cursor: "pointer",
@@ -930,16 +964,16 @@ function GlobalPlayerInner() {
               <button
                 onClick={goToCreator}
                 className="text-[14px] transition-colors hover:opacity-80 flex items-center gap-1.5 mx-auto"
-                style={{ color: GOLD }}
+                style={{ color: isDesktop ? GOLD : "rgba(192,132,252,0.8)" }}
               >
                 {visTrack?.artist || ""}
                 {songDetail?.creator && (
-                  <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: "rgba(212,175,55,0.12)", border: `1px solid ${GOLD}` }}>
+                  <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: isDesktop ? "rgba(212,175,55,0.12)" : "rgba(138,43,226,0.12)", border: isDesktop ? `1px solid ${GOLD}` : "1px solid rgba(138,43,226,0.35)" }}>
                     ✓
                   </span>
                 )}
               </button>
-              <p className="text-[11px] tracking-widest uppercase" style={{ color: "rgba(212,175,55,0.5)", fontFamily: "'Cinzel', serif" }}>
+              <p className="text-[11px] tracking-widest uppercase" style={{ color: isDesktop ? "rgba(212,175,55,0.5)" : "rgba(138,43,226,0.55)", fontFamily: "'Cinzel', serif" }}>
                 Witnessed on Living Nexus
               </p>
             </div>
@@ -953,13 +987,13 @@ function GlobalPlayerInner() {
                 </button>
               )}
               {currentSongId && (
-                <button onClick={() => setCommentsOpen(true)} className="flex flex-col items-center gap-1 transition-colors" style={{ color: "rgba(255,255,255,0.5)" }}>
+                <button onClick={() => setCommentsOpen(true)} className="flex flex-col items-center gap-1 transition-colors" style={{ color: isDesktop ? "rgba(255,255,255,0.5)" : "rgba(192,132,252,0.6)" }}>
                   <MessageCircle size={22} />
                   <span className="text-[9px] uppercase tracking-widest">Comments</span>
                 </button>
               )}
               {currentSongId && (
-                <button onClick={() => setAddToCollectionOpen(true)} className="flex flex-col items-center gap-1 transition-colors" style={{ color: "rgba(255,255,255,0.5)" }}>
+                <button onClick={() => setAddToCollectionOpen(true)} className="flex flex-col items-center gap-1 transition-colors" style={{ color: isDesktop ? "rgba(255,255,255,0.5)" : "rgba(192,132,252,0.6)" }}>
                   <FolderPlus size={22} />
                   <span className="text-[9px] uppercase tracking-widest">Add</span>
                 </button>
@@ -971,19 +1005,19 @@ function GlobalPlayerInner() {
                   try { await navigator.clipboard.writeText(url); } catch {}
                 }}
                 className="flex flex-col items-center gap-1 transition-colors"
-                style={{ color: "rgba(255,255,255,0.5)" }}
+                style={{ color: isDesktop ? "rgba(255,255,255,0.5)" : "rgba(192,132,252,0.6)" }}
               >
                 <Share2 size={22} />
                 <span className="text-[9px] uppercase tracking-widest">Share</span>
               </button>
               {tipsEnabled && currentSongId && (
-                <button onClick={() => setTipOpen(true)} className="flex flex-col items-center gap-1 transition-colors" style={{ color: GOLD }}>
+                <button onClick={() => setTipOpen(true)} className="flex flex-col items-center gap-1 transition-colors" style={{ color: isDesktop ? GOLD : "rgba(212,175,55,0.85)" }}>
                   <DollarSign size={22} />
                   <span className="text-[9px] uppercase tracking-widest">Tip</span>
                 </button>
               )}
               {visTrack?.witnessId && (
-                <button onClick={goToVerify} className="flex flex-col items-center gap-1 transition-colors" style={{ color: GOLD }}>
+                <button onClick={goToVerify} className="flex flex-col items-center gap-1 transition-colors" style={{ color: isDesktop ? GOLD : "rgba(212,175,55,0.85)" }}>
                   <Shield size={22} />
                   <span className="text-[9px] uppercase tracking-widest">Verify</span>
                 </button>
@@ -996,22 +1030,22 @@ function GlobalPlayerInner() {
                 onClick={goToVerify}
                 className="w-full flex items-center justify-between rounded-xl px-4 py-3 transition-all hover:opacity-80"
                 style={{
-                  background: "rgba(212,175,55,0.06)",
-                  border: GOLD_BORDER,
+                  background: isDesktop ? "rgba(212,175,55,0.06)" : "rgba(138,43,226,0.06)",
+                  border: isDesktop ? GOLD_BORDER : "1px solid rgba(138,43,226,0.30)",
                 }}
               >
                 <div className="flex items-center gap-3">
-                  <Shield size={18} style={{ color: GOLD }} />
+                  <Shield size={18} style={{ color: isDesktop ? GOLD : "rgba(212,175,55,0.85)" }} />
                   <div className="text-left">
-                    <p className="text-[11px] font-bold tracking-widest uppercase" style={{ color: GOLD, fontFamily: "'Cinzel', serif" }}>
+                    <p className="text-[11px] font-bold tracking-widest uppercase" style={{ color: isDesktop ? GOLD : "rgba(212,175,55,0.85)", fontFamily: "'Cinzel', serif" }}>
                       Provenance
                     </p>
-                    <p className="text-[10px]" style={{ color: "rgba(212,175,55,0.6)" }}>
+                    <p className="text-[10px]" style={{ color: isDesktop ? "rgba(212,175,55,0.6)" : "rgba(192,132,252,0.6)" }}>
                       Verified Creation
                     </p>
                   </div>
                 </div>
-                <span className="text-[11px]" style={{ color: GOLD }}>View Details →</span>
+                <span className="text-[11px]" style={{ color: isDesktop ? GOLD : "rgba(192,132,252,0.7)" }}>View Details →</span>
               </button>
             )}
 
@@ -1034,9 +1068,9 @@ function GlobalPlayerInner() {
                 onClick={cycleSpeed}
                 className="px-3 py-1.5 rounded-full text-[11px] font-mono font-bold transition-all"
                 style={{
-                  color: playbackRate !== 1 ? GOLD : "rgba(255,255,255,0.4)",
-                  background: playbackRate !== 1 ? "rgba(212,175,55,0.08)" : "rgba(255,255,255,0.04)",
-                  border: `1px solid ${playbackRate !== 1 ? "rgba(212,175,55,0.3)" : "rgba(255,255,255,0.1)"}`,
+                  color: playbackRate !== 1 ? (isDesktop ? GOLD : "rgba(192,132,252,0.9)") : "rgba(255,255,255,0.4)",
+                  background: playbackRate !== 1 ? (isDesktop ? "rgba(212,175,55,0.08)" : "rgba(138,43,226,0.08)") : "rgba(255,255,255,0.04)",
+                  border: `1px solid ${playbackRate !== 1 ? (isDesktop ? "rgba(212,175,55,0.3)" : "rgba(138,43,226,0.3)") : "rgba(255,255,255,0.1)"}`,
                 }}
               >
                 {playbackRate === 1 ? "1×" : playbackRate === 1.5 ? "1.5×" : playbackRate === 2 ? "2×" : "¾×"}
@@ -1059,10 +1093,10 @@ function GlobalPlayerInner() {
             {upNext.length > 0 && (
               <div>
                 <div className="flex items-center gap-2 mb-3">
-                  <List size={13} style={{ color: GOLD }} />
+                  <List size={13} style={{ color: isDesktop ? GOLD : "rgba(192,132,252,0.7)" }} />
                   <span
                     className="text-[11px] font-bold tracking-widest uppercase"
-                    style={{ color: GOLD, fontFamily: "'Cinzel', serif" }}
+                    style={{ color: isDesktop ? GOLD : "rgba(192,132,252,0.7)", fontFamily: "'Cinzel', serif" }}
                   >
                     Up Next
                   </span>
@@ -1072,13 +1106,13 @@ function GlobalPlayerInner() {
                     <div
                       key={t.id}
                       className="flex items-center gap-3 rounded-xl px-3 py-2 transition-all hover:bg-white/5 cursor-pointer"
-                      style={{ border: "1px solid rgba(212,175,55,0.08)" }}
+                      style={{ border: isDesktop ? "1px solid rgba(212,175,55,0.08)" : "1px solid rgba(138,43,226,0.10)" }}
                       onClick={() => {
                         const idx = tracks.findIndex(tr => tr.id === t.id);
                         if (idx >= 0) playTrack(idx);
                       }}
                     >
-                      <span className="text-[11px] w-4 text-center" style={{ color: "rgba(212,175,55,0.4)" }}>
+                      <span className="text-[11px] w-4 text-center" style={{ color: isDesktop ? "rgba(212,175,55,0.4)" : "rgba(192,132,252,0.45)" }}>
                         {i + 1}
                       </span>
                       <div
@@ -1094,12 +1128,12 @@ function GlobalPlayerInner() {
                         <p className="text-[12px] font-semibold truncate" style={{ color: "#F5EDD8" }}>
                           {t.title}
                         </p>
-                        <p className="text-[10px] truncate" style={{ color: "rgba(212,175,55,0.6)" }}>
+                        <p className="text-[10px] truncate" style={{ color: isDesktop ? "rgba(212,175,55,0.6)" : "rgba(192,132,252,0.6)" }}>
                           {t.artist}
                         </p>
                       </div>
                       {t.dur && (
-                        <span className="text-[10px] flex-shrink-0 tabular-nums" style={{ color: "rgba(212,175,55,0.5)" }}>
+                        <span className="text-[10px] flex-shrink-0 tabular-nums" style={{ color: isDesktop ? "rgba(212,175,55,0.5)" : "rgba(192,132,252,0.5)" }}>
                           {t.dur}
                         </span>
                       )}

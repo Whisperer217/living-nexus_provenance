@@ -4624,3 +4624,20 @@
 - [x] Secondary controls row (equalizer, like, shield, waves, fullscreen)
 - [x] Crystal corner accents on album art container
 - [x] WID badge on album art (gold outline)
+
+## Phase 175: Nebula & Crystal Redesign Applied to Correct Mobile Component (GlobalPlayer)
+- [x] Identified MobilePlayerPanel was orphaned — GlobalPlayer is the actual mobile player
+- [x] GLASS_BG_MOBILE: deep space nebula gradient (#0a0415 → #0d0520 → #060212)
+- [x] GOLD_SHADOW_MOBILE: nebula purple upward glow
+- [x] Mobile drag handle: nebula purple with glow
+- [x] Mini bar artist text: crystal violet on mobile
+- [x] Mini bar play button: crystal orb (purple playing, gold paused) on mobile
+- [x] Mini bar next/expand: crystal violet on mobile
+- [x] Progress bar: nebula gradient fill, crystal knob glow, crystal time labels on mobile
+- [x] Expanded play button: 64px crystal orb on mobile
+- [x] Expanded shuffle/prev/next/repeat: crystal violet on mobile
+- [x] Utility buttons (comments, add, tip, volume, glow, cinematic, collapse): crystal violet on mobile
+- [x] Artwork frame: nebula purple glow and border on mobile
+- [x] Track artist/subtitle/provenance: crystal/nebula purple on mobile
+- [x] Action row, provenance strip, speed button, Up Next: crystal/nebula on mobile
+- [x] TypeScript: 0 errors | Tests: 237/237 pass
