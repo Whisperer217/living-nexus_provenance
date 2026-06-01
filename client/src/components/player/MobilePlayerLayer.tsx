@@ -678,16 +678,20 @@ export default function MobilePlayerLayer() {
   // Scrubber
   const progress = state.duration > 0 ? (state.currentTime / state.duration) * 100 : 0;
   const handleSeek = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    if (!audioRef.current?.duration) return;
+    const audio = audioRef.current;
+    const dur = (audio && isFinite(audio.duration) && audio.duration > 0) ? audio.duration : state.duration;
+    if (!dur) return;
     const rect = e.currentTarget.getBoundingClientRect();
-    seek(((e.clientX - rect.left) / rect.width) * audioRef.current.duration);
-  }, [audioRef, seek]);
+    seek(((e.clientX - rect.left) / rect.width) * dur);
+  }, [audioRef, seek, state.duration]);
   const handleSeekTouch = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
-    if (!audioRef.current?.duration) return;
+    const audio = audioRef.current;
+    const dur = (audio && isFinite(audio.duration) && audio.duration > 0) ? audio.duration : state.duration;
+    if (!dur) return;
     const rect = e.currentTarget.getBoundingClientRect();
     const touch = e.touches[0];
-    seek(((touch.clientX - rect.left) / rect.width) * audioRef.current.duration);
-  }, [audioRef, seek]);
+    seek(((touch.clientX - rect.left) / rect.width) * dur);
+  }, [audioRef, seek, state.duration]);
 
   // Share
   const handleShare = useCallback(async () => {

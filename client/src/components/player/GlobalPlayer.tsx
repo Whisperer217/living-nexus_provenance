@@ -394,10 +394,13 @@ function GlobalPlayerInner() {
   /* ── Progress ── */
   const progress = state.duration > 0 ? (state.currentTime / state.duration) * 100 : 0;
   const handleSeek = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    if (!audioRef.current?.duration) return;
+    const audio = audioRef.current;
+    // Use the audio element's duration (most accurate) or fall back to state.duration
+    const dur = (audio && isFinite(audio.duration) && audio.duration > 0) ? audio.duration : state.duration;
+    if (!dur) return;
     const rect = e.currentTarget.getBoundingClientRect();
-    seek(((e.clientX - rect.left) / rect.width) * audioRef.current.duration);
-  }, [audioRef, seek]);
+    seek(((e.clientX - rect.left) / rect.width) * dur);
+  }, [audioRef, seek, state.duration]);
 
   /* ── Navigation ── */
   const goToSong = useCallback(() => { if (currentSongId) navigate(`/song/${currentSongId}`); }, [currentSongId, navigate]);
@@ -428,7 +431,7 @@ function GlobalPlayerInner() {
     if (cinematic) return;
     // Only drag from the handle bar area (top 40px of player)
     const target = e.target as HTMLElement;
-    if (target.closest("button") || target.closest("input") || target.closest("canvas")) return;
+    if (target.closest("button") || target.closest("input") || target.closest("canvas") || target.closest("[data-seek]")) return;
     dragStartY.current = e.clientY;
     dragStartHeight.current = playerHeight;
     isDragging.current = true;
@@ -771,6 +774,7 @@ function GlobalPlayerInner() {
           <div
             className="flex-1 cursor-pointer relative"
             style={{ background: "#1a1a1a", height: "3px", borderRadius: "2px" }}
+            data-seek
             onClick={handleSeek}
           >
             <div
@@ -1454,7 +1458,7 @@ function GlobalPlayerInner() {
           {/* Progress */}
           <div className="flex items-center gap-3 mb-4">
             <span className="text-[10px] tabular-nums" style={{ color: "rgba(255,255,255,0.5)" }}>{fmtTime(state.currentTime)}</span>
-            <div className="flex-1 cursor-pointer" style={{ background: "rgba(255,255,255,0.15)", height: "3px", borderRadius: "2px" }} onClick={handleSeek}>
+            <div className="flex-1 cursor-pointer" style={{ background: "rgba(255,255,255,0.15)", height: "3px", borderRadius: "2px" }} data-seek onClick={handleSeek}>
               <div style={{ width: `${progress}%`, background: "#D4AF37", height: "100%", borderRadius: "2px", position: "relative" }}>
                 <div style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%) translateX(50%)", width: "12px", height: "12px", borderRadius: "50%", background: "#F5E6B3", boxShadow: "0 0 12px rgba(245,230,179,0.8)" }} />
               </div>

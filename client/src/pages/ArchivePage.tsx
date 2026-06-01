@@ -158,7 +158,7 @@ export default function ArchivePage() {
     id: String(song.id),
     title: song.title ?? "Untitled Work",
     artist: myArtistName,
-    audioUrl: song.fileUrl ?? "",
+    audioUrl: song.fileUrl || undefined,
     coverArt: song.coverArtUrl ?? "",
     artUrl: song.coverArtUrl ?? undefined,
     genre: song.genre ?? "",
@@ -166,9 +166,9 @@ export default function ArchivePage() {
     aiDisclosure: song.aiConsent ?? "original",
     coverPositionX: song.coverPositionX ?? 50,
     coverPositionY: song.coverPositionY ?? 50,
-        visualReady: song.visualReady ?? false,
-        autoVideoUrl: song.autoVideoUrl ?? undefined,
-        creatorRole: song.creator?.role ?? undefined,
+    visualReady: song.visualReady ?? false,
+    autoVideoUrl: song.autoVideoUrl ?? undefined,
+    creatorRole: song.creator?.role ?? undefined,
   });
 
   const handlePlay = (e: React.MouseEvent, songList: any[], idx: number) => {

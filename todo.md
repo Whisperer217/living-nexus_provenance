@@ -4604,3 +4604,11 @@
 - [x] Creator handles in LargeManifestationCard: show @handle when available
 - [x] Creator handles in MediumManifestationCard: show @handle when available
 - [x] Creator handles in MicroManifestationCard: show @handle when available
+
+## Phase 172: Player Bug Fixes (Discord Report)
+- [x] Fix: Progress bar click/seek not working (expanded + mini player)
+- [x] Fix: Previous track jumps to wrong track (queue ordering)
+- [x] Fix: Next track button not advancing
+- [x] Fix: Progress bar stops updating after first song
+- [x] Fix: Auto-advance not triggering when song ends
+- [x] Fix: Archive play button not playing the song

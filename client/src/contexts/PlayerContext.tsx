@@ -285,6 +285,23 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // empty deps — run once on mount only
 
+  // Ref to hold pending audio action after setState completes (for mobile Safari gesture compliance)
+  const pendingAudioAction = useRef<{ src: string; play: boolean } | null>(null);
+
+  // Process pending audio actions outside of setState (mobile Safari requires play() in gesture context)
+  useEffect(() => {
+    if (pendingAudioAction.current) {
+      const audio = audioRef.current;
+      const action = pendingAudioAction.current;
+      pendingAudioAction.current = null;
+      if (audio && action.src) {
+        audio.src = action.src;
+        audio.load();
+        if (action.play) audio.play().catch(() => {});
+      }
+    }
+  });
+
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -326,9 +343,8 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
         }
         const t = tracks[next];
         if (t?.audioUrl) {
-          audio.src = safeAudioUrl(t.audioUrl);
-          audio.load(); // required on iOS Safari to reset ended state before play()
-          audio.play().catch(() => {});
+          // Schedule audio action for after render (mobile Safari gesture compliance)
+          pendingAudioAction.current = { src: safeAudioUrl(t.audioUrl), play: true };
         }
         // Atomically reset readiness + timing on auto-advance
         return { ...s, currentIdx: next, isPlaying: !!t?.audioUrl, isReady: false, duration: 0, currentTime: 0 };
@@ -347,9 +363,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
         }
         const t = tracks[next];
         if (t?.audioUrl) {
-          audio.src = safeAudioUrl(t.audioUrl);
-          audio.load();
-          audio.play().catch(() => {});
+          pendingAudioAction.current = { src: safeAudioUrl(t.audioUrl), play: true };
         }
         // Atomically reset readiness + timing on error-skip
         return { ...s, currentIdx: next, isPlaying: !!t?.audioUrl, isReady: false, duration: 0, currentTime: 0 };
@@ -372,7 +386,8 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       audio.removeEventListener("pause", onPause);
       audio.removeEventListener("error", onError);
     };
-  }, [state.tracks]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Mount once — handlers use setState(s => ...) to always read latest state
 
   const playTrack = useCallback((idx: number) => {
     const audio = audioRef.current;
@@ -383,6 +398,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       if (!t) return s;
       if (t.audioUrl) {
         audio.src = safeAudioUrl(t.audioUrl);
+        audio.load();
         audio.play().catch(() => {});
       } else {
         audio.pause();
@@ -400,6 +416,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const nextTrack = useCallback(() => {
+    const audio = audioRef.current;
     setState(s => {
       const tracks = s.tracks.filter(t => !!t.audioUrl);
       const next = s.isShuffle
@@ -407,14 +424,13 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
         : s.currentIdx + 1;
       // At end of queue, stop instead of looping
       if (!s.isShuffle && next >= tracks.length) {
-        const audio = audioRef.current;
         if (audio) { audio.pause(); audio.currentTime = 0; }
         return { ...s, isPlaying: false, isReady: false, duration: 0, currentTime: 0 };
       }
       const t = tracks[next];
-      const audio = audioRef.current;
       if (audio && t?.audioUrl) {
         audio.src = safeAudioUrl(t.audioUrl);
+        audio.load();
         audio.play().catch(() => {});
       }
       // Atomically reset readiness + timing
@@ -423,13 +439,14 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const prevTrack = useCallback(() => {
+    const audio = audioRef.current;
     setState(s => {
       const tracks = s.tracks.filter(t => !!t.audioUrl);
       const prev = (s.currentIdx - 1 + tracks.length) % tracks.length;
       const t = tracks[prev];
-      const audio = audioRef.current;
       if (audio && t?.audioUrl) {
         audio.src = safeAudioUrl(t.audioUrl);
+        audio.load();
         audio.play().catch(() => {});
       }
       // Atomically reset readiness + timing
