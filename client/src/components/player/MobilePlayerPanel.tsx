@@ -30,7 +30,7 @@ import PlayerTipModal from "./PlayerTipModal";
 import { AiDisclosurePill } from "@/components/AiDisclosurePill";
 
 function fmtTime(s: number) {
-  if (!s || isNaN(s)) return "0:00";
+  if (!s || isNaN(s) || !isFinite(s)) return "0:00";
   const m = Math.floor(s / 60);
   return `${m}:${Math.floor(s % 60).toString().padStart(2, "0")}`;
 }
@@ -357,10 +357,10 @@ export default function MobilePlayerPanel() {
           paddingTop: "10px",
           paddingBottom: "10px",
           borderRadius: "10px 0 0 10px",
-          background: "#000000",
-          border: "1px solid rgba(196,154,40,0.12)",
+          background: "linear-gradient(180deg, #0d0520 0%, #060212 100%)",
+          border: "1px solid rgba(138,43,226,0.25)",
           borderRight: "none",
-          boxShadow: "-4px 0 24px rgba(0,0,0,0.50), -2px 0 8px rgba(196,154,40,0.12)",
+          boxShadow: "-4px 0 24px rgba(0,0,0,0.70), -2px 0 12px rgba(138,43,226,0.15)",
           touchAction: "none",
           userSelect: "none",
         }}
@@ -384,7 +384,7 @@ export default function MobilePlayerPanel() {
           <div className="flex items-end gap-[2px] h-3 pointer-events-none">
             {[0, 1, 2].map(i => (
               <div key={i} className="w-[3px] rounded-full"
-                style={{ background: "var(--ln-iron)", animation: `mobileWave 0.8s ease-in-out ${i * 0.15}s infinite alternate`, height: "6px" }} />
+                style={{ background: "rgba(192,132,252,0.7)", animation: `mobileWave 0.8s ease-in-out ${i * 0.15}s infinite alternate`, height: "6px" }} />
             ))}
           </div>
         )}
@@ -410,8 +410,8 @@ export default function MobilePlayerPanel() {
           className="md:hidden fixed z-[34]"
           style={{
             top: 0, left: 0, right: 0, bottom: "68px",
-            background: "rgba(0,0,0,0.55)",
-            backdropFilter: "blur(2px)",
+          background: "rgba(5,1,15,0.65)",
+          backdropFilter: "blur(4px)",
           }}
           onClick={closeNowPlayingPanel}
         />
@@ -430,9 +430,10 @@ export default function MobilePlayerPanel() {
           left: 0,
           right: 0,
           bottom: "68px",
-          background: "#000000",
+          background: "linear-gradient(180deg, #0a0415 0%, #0d0520 25%, #060212 60%, #000000 100%)",
           boxShadow: [
-            "0 -8px 48px rgba(0,0,0,0.80)",
+            "0 -8px 48px rgba(0,0,0,0.90)",
+            "0 -4px 80px rgba(138,43,226,0.12)",
             glowShadow !== "none" ? glowShadow : "",
           ].filter(Boolean).join(", "),
           transform: open ? "translateY(0)" : "translateY(100%)",
@@ -443,6 +444,14 @@ export default function MobilePlayerPanel() {
           overscrollBehavior: "contain",
         }}
       >
+        {/* ── Nebula ambient particles ── */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }}>
+          <div className="nebula-orb" style={{ top: "8%", left: "15%", width: "180px", height: "180px", background: "radial-gradient(circle, rgba(138,43,226,0.18) 0%, transparent 70%)" }} />
+          <div className="nebula-orb" style={{ top: "30%", right: "10%", width: "140px", height: "140px", background: "radial-gradient(circle, rgba(196,154,40,0.10) 0%, transparent 70%)" }} />
+          <div className="nebula-orb" style={{ bottom: "20%", left: "20%", width: "200px", height: "200px", background: "radial-gradient(circle, rgba(88,28,135,0.15) 0%, transparent 70%)" }} />
+          {/* Star field */}
+          <div className="star-field" />
+        </div>
         {/* ══ ARTWORK SECTION — full-bleed, dominant, ALWAYS visible ══ */}
         <div
           className="relative flex-shrink-0"
@@ -479,7 +488,13 @@ export default function MobilePlayerPanel() {
 
           {/* Gradient fade — bottom of artwork into controls */}
           <div className="absolute inset-x-0 bottom-0 h-24 pointer-events-none"
-            style={{ background: "linear-gradient(to bottom, transparent, #000000)" }} />
+            style={{ background: "linear-gradient(to bottom, transparent, #060212)" }} />
+          {/* Crystal frame edge glow */}
+          <div className="absolute inset-0 pointer-events-none"
+            style={{
+              boxShadow: "inset 0 0 30px rgba(138,43,226,0.08), inset 0 0 1px rgba(192,132,252,0.15)",
+              borderBottom: "1px solid rgba(138,43,226,0.15)",
+            }} />
 
           {/* Tap zone — toggle controls overlay (identity always stays) */}
           <div className="absolute inset-0 z-10 cursor-pointer" onClick={handleArtTap} />
@@ -489,14 +504,14 @@ export default function MobilePlayerPanel() {
 
           {/* ── Swipe-down handle ── */}
           <div className="absolute top-2 inset-x-0 flex justify-center z-20 pointer-events-none">
-            <div className="rounded-full" style={{ width: "40px", height: "4px", background: "rgba(196,154,40,0.2)" }} />
+            <div className="rounded-full" style={{ width: "40px", height: "4px", background: "rgba(138,43,226,0.35)" }} />
           </div>
 
           {/* ── Header controls ── */}
           <div className="absolute top-0 inset-x-0 flex items-center justify-between px-4 pt-8 z-20">
             <div className="flex flex-col gap-0.5">
               <span className="text-[9px] font-bold tracking-widest uppercase"
-                style={{ color: "rgba(196,154,40,0.5)", fontFamily: "'Cinzel', serif" }}>
+                style={{ color: "rgba(192,132,252,0.7)", fontFamily: "'Cinzel', serif", textShadow: "0 0 8px rgba(138,43,226,0.5)" }}>
                 Now Playing
               </span>
               {queueContextLabel && (
@@ -535,16 +550,16 @@ export default function MobilePlayerPanel() {
               <div
                 className="w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-90"
                 style={{
-                  background: isLiked ? "rgba(239,68,68,0.25)" : "rgba(0,0,0,0.45)",
+                  background: isLiked ? "rgba(239,68,68,0.25)" : "rgba(138,43,226,0.12)",
                   backdropFilter: "blur(8px)",
-                  border: isLiked ? "1px solid rgba(239,68,68,0.5)" : "1px solid rgba(196,154,40,0.10)",
-                  boxShadow: isLiked ? "0 0 12px rgba(196,68,10,0.3)" : "none",
+                  border: isLiked ? "1px solid rgba(239,68,68,0.5)" : "1px solid rgba(138,43,226,0.25)",
+                  boxShadow: isLiked ? "0 0 12px rgba(196,68,10,0.3)" : "0 0 6px rgba(138,43,226,0.15)",
                 }}
               >
                 <Heart size={18} fill={isLiked ? "var(--ln-ember)" : "none"}
-                  style={{ color: isLiked ? "var(--ln-ember)" : "rgba(196,154,40,0.6)" }} />
+                  style={{ color: isLiked ? "var(--ln-ember)" : "rgba(192,132,252,0.7)" }} />
               </div>
-              <span className="text-[9px]" style={{ color: "rgba(196,154,40,0.4)" }}>Love</span>
+              <span className="text-[9px]" style={{ color: "rgba(192,132,252,0.5)" }}>Love</span>
             </button>
 
             {/* Share 🔁 */}
@@ -555,16 +570,17 @@ export default function MobilePlayerPanel() {
               <div
                 className="w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-90"
                 style={{
-                  background: copied ? "rgba(196,154,40,0.15)" : "rgba(0,0,0,0.45)",
+                  background: copied ? "rgba(196,154,40,0.15)" : "rgba(138,43,226,0.12)",
                   backdropFilter: "blur(8px)",
-                  border: copied ? "1px solid rgba(196,154,40,0.3)" : "1px solid rgba(196,154,40,0.10)",
+                  border: copied ? "1px solid rgba(196,154,40,0.3)" : "1px solid rgba(138,43,226,0.25)",
+                  boxShadow: copied ? "0 0 8px rgba(196,154,40,0.3)" : "0 0 6px rgba(138,43,226,0.15)",
                 }}
               >
                 {copied
                   ? <Check size={18} style={{ color: "var(--ln-gold)" }} />
-                  : <Share2 size={18} style={{ color: "rgba(196,154,40,0.6)" }} />}
+                  : <Share2 size={18} style={{ color: "rgba(192,132,252,0.7)" }} />}
               </div>
-              <span className="text-[9px]" style={{ color: "rgba(196,154,40,0.4)" }}>
+              <span className="text-[9px]" style={{ color: "rgba(192,132,252,0.5)" }}>
                 {copied ? "Copied!" : "Share"}
               </span>
             </button>
@@ -577,14 +593,15 @@ export default function MobilePlayerPanel() {
               <div
                 className="w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-90"
                 style={{
-                  background: (sheetOpen && sheetTab === "comments") ? "rgba(56,189,248,0.25)" : "rgba(0,0,0,0.45)",
+                  background: (sheetOpen && sheetTab === "comments") ? "rgba(138,43,226,0.25)" : "rgba(138,43,226,0.12)",
                   backdropFilter: "blur(8px)",
-                  border: (sheetOpen && sheetTab === "comments") ? "1px solid rgba(56,189,248,0.4)" : "1px solid rgba(196,154,40,0.10)",
+                  border: (sheetOpen && sheetTab === "comments") ? "1px solid rgba(138,43,226,0.5)" : "1px solid rgba(138,43,226,0.25)",
+                  boxShadow: (sheetOpen && sheetTab === "comments") ? "0 0 12px rgba(138,43,226,0.4)" : "0 0 6px rgba(138,43,226,0.15)",
                 }}
               >
-                <MessageCircle size={18} style={{ color: (sheetOpen && sheetTab === "comments") ? "#38BDF8" : "rgba(196,154,40,0.6)" }} />
+                <MessageCircle size={18} style={{ color: (sheetOpen && sheetTab === "comments") ? "rgba(192,132,252,0.95)" : "rgba(192,132,252,0.7)" }} />
               </div>
-              <span className="text-[9px]" style={{ color: "rgba(196,154,40,0.4)" }}>
+              <span className="text-[9px]" style={{ color: "rgba(192,132,252,0.5)" }}>
                 {commentsData?.length ? commentsData.length : ""}Comment
               </span>
             </button>
@@ -608,63 +625,81 @@ export default function MobilePlayerPanel() {
         </div>
 
         {/* ══ TRACK IDENTITY — ALWAYS VISIBLE (cinematic mode keeps this) ══ */}
-        <div className="flex-shrink-0 px-6 pt-4 pb-2">
-          {/* Title */}
-          <button
-            onClick={() => { if (currentSongId) navigate(`/song/${currentSongId}`); }}
-            disabled={!currentSongId}
-            className="text-xl font-semibold leading-snug line-clamp-1 text-left w-full
-              transition-opacity hover:opacity-75 disabled:cursor-default"
-            style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}
+        <div className="flex-shrink-0 px-6 pt-4 pb-2" style={{ position: "relative", zIndex: 1 }}>
+          {/* Crystal identity card */}
+          <div
+            className="rounded-2xl px-4 py-3"
+            style={{
+              background: "linear-gradient(135deg, rgba(138,43,226,0.08) 0%, rgba(0,0,0,0.4) 50%, rgba(196,154,40,0.05) 100%)",
+              border: "1px solid rgba(138,43,226,0.18)",
+              backdropFilter: "blur(12px)",
+              boxShadow: "0 4px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(192,132,252,0.08)",
+            }}
           >
-            {currentTrack?.title || "No track selected"}
-          </button>
-          {/* Artist */}
-          <button
-            onClick={() => { if (creator?.id) navigate(`/creator/${creator.id}`); }}
-            disabled={!creator?.id}
-            className="text-sm truncate mt-0.5 text-left w-full transition-opacity hover:opacity-75 disabled:cursor-default"
-            style={{ color: "var(--ln-smoke)", fontFamily: "'Cinzel', serif" }}
-          >
-            {currentTrack?.artist || "—"}
-          </button>
-          {/* WID badge — always visible */}
-          {currentTrack?.witnessId && (
+            {/* Title */}
             <button
-              onClick={() => navigate(`/verify/${currentTrack.witnessId}`)}
-              className="mt-1.5 inline-flex items-center gap-1.5 text-[9px] font-mono px-2.5 py-1 rounded-full
-                transition-opacity hover:opacity-80"
-              style={{
-                background: "rgba(196,154,40,0.08)",
-                color: "var(--ln-gold)",
-                border: "1px solid rgba(196,154,40,0.25)",
-              }}
-              title="View Witness Certificate"
+              onClick={() => { if (currentSongId) navigate(`/song/${currentSongId}`); }}
+              disabled={!currentSongId}
+              className="text-xl font-semibold leading-snug line-clamp-1 text-left w-full
+                transition-opacity hover:opacity-75 disabled:cursor-default"
+              style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif", textShadow: "0 0 12px rgba(192,132,252,0.2)" }}
             >
-              <Shield size={10} />
-              WID: {currentTrack.witnessId.slice(0, 14)}…
+              {currentTrack?.title || "No track selected"}
             </button>
-          )}
+            {/* Artist */}
+            <button
+              onClick={() => { if (creator?.id) navigate(`/creator/${creator.id}`); }}
+              disabled={!creator?.id}
+              className="text-sm truncate mt-0.5 text-left w-full transition-opacity hover:opacity-75 disabled:cursor-default"
+              style={{ color: "rgba(192,132,252,0.7)", fontFamily: "'Cinzel', serif" }}
+            >
+              {currentTrack?.artist || "—"}
+            </button>
+            {/* WID badge — always visible */}
+            {currentTrack?.witnessId && (
+              <button
+                onClick={() => navigate(`/verify/${currentTrack.witnessId}`)}
+                className="mt-1.5 inline-flex items-center gap-1.5 text-[9px] font-mono px-2.5 py-1 rounded-full
+                  transition-opacity hover:opacity-80"
+                style={{
+                  background: "rgba(138,43,226,0.12)",
+                  color: "rgba(192,132,252,0.85)",
+                  border: "1px solid rgba(138,43,226,0.3)",
+                }}
+                title="View Witness Certificate"
+              >
+                <Shield size={10} />
+                WID: {currentTrack.witnessId.slice(0, 14)}…
+              </button>
+            )}
+          </div>
         </div>
 
         {/* ══ PROGRESS BAR — always visible ══ */}
-        <div className="flex-shrink-0 px-6 pb-2">
+        <div className="flex-shrink-0 px-6 pb-2" style={{ position: "relative", zIndex: 1 }}>
           <div
-            className="relative h-1 rounded-full cursor-pointer"
-            style={{ background: "rgba(196,154,40,0.09)" }}
+            className="relative h-1.5 rounded-full cursor-pointer"
+            style={{
+              background: "rgba(138,43,226,0.12)",
+              boxShadow: "inset 0 0 4px rgba(0,0,0,0.4)",
+            }}
             onClick={handleSeek}
             onTouchMove={handleSeekTouch}
           >
             <div
               className="absolute top-0 left-0 h-full rounded-full transition-all"
-              style={{ width: `${progress}%`, background: "var(--ln-gold)" }}
+              style={{
+                width: `${progress}%`,
+                background: "linear-gradient(90deg, rgba(138,43,226,0.8), var(--ln-gold))",
+                boxShadow: "0 0 8px rgba(138,43,226,0.5), 0 0 4px rgba(196,154,40,0.3)",
+              }}
             />
           </div>
           <div className="flex justify-between mt-1">
-            <span className="text-[10px]" style={{ color: "var(--ln-smoke)" }}>
+            <span className="text-[10px] font-mono" style={{ color: "rgba(192,132,252,0.6)" }}>
               {fmtTime(state.currentTime)}
             </span>
-            <span className="text-[10px]" style={{ color: "var(--ln-smoke)" }}>
+            <span className="text-[10px] font-mono" style={{ color: "rgba(192,132,252,0.6)" }}>
               {fmtTime(state.duration)}
             </span>
           </div>
@@ -673,40 +708,47 @@ export default function MobilePlayerPanel() {
         {/* ══ PLAYER CONTROLS — fade in cinematic mode, but always tappable ══ */}
         <div
           className="flex-shrink-0 px-6 pb-3 transition-opacity duration-500"
-          style={{ opacity: controlsVisible ? 1 : 0.15 }}
+          style={{ opacity: controlsVisible ? 1 : 0.15, position: "relative", zIndex: 1 }}
         >
           <div className="flex items-center justify-between">
             <button
               onClick={toggleShuffle}
               className="p-2 transition-colors"
-              style={{ color: state.isShuffle ? "var(--ln-gold)" : "var(--ln-iron)" }}
+              style={{ color: state.isShuffle ? "rgba(192,132,252,0.9)" : "rgba(138,43,226,0.35)" }}
             >
               <Shuffle size={18} />
             </button>
-            <button type="button" onClick={prevTrack} className="p-2" style={{ color: "var(--ln-parchment)" }}>
+            <button type="button" onClick={prevTrack} className="p-2 transition-colors"
+              style={{ color: "rgba(232,223,200,0.8)" }}>
               <SkipBack size={24} />
             </button>
+            {/* Crystal Orb Play Button */}
             <button
               onClick={togglePlay}
-              className="w-14 h-14 rounded-full flex items-center justify-center transition-transform
-                hover:scale-105 active:scale-95 shadow-xl"
+              className="w-16 h-16 rounded-full flex items-center justify-center transition-transform
+                hover:scale-105 active:scale-95"
               style={{
-                background: "var(--ln-parchment)",
-                color: "var(--ln-coal)",
-                boxShadow: "0 0 24px rgba(196,154,40,0.2)",
+                background: state.isPlaying
+                  ? "radial-gradient(circle at 35% 35%, rgba(192,132,252,0.95) 0%, rgba(138,43,226,0.85) 40%, rgba(88,28,135,0.9) 100%)"
+                  : "radial-gradient(circle at 35% 35%, rgba(232,223,200,0.95) 0%, rgba(196,154,40,0.7) 50%, rgba(120,90,20,0.8) 100%)",
+                color: state.isPlaying ? "#fff" : "#0a0415",
+                boxShadow: state.isPlaying
+                  ? "0 0 32px rgba(138,43,226,0.6), 0 0 12px rgba(192,132,252,0.4), inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -1px 0 rgba(0,0,0,0.3)"
+                  : "0 0 24px rgba(196,154,40,0.4), 0 0 8px rgba(232,223,200,0.3), inset 0 1px 0 rgba(255,255,255,0.35), inset 0 -1px 0 rgba(0,0,0,0.2)",
               }}
             >
               {state.isPlaying
-                ? <Pause size={22} fill="currentColor" />
-                : <Play size={22} fill="currentColor" className="ml-0.5" />}
+                ? <Pause size={26} fill="currentColor" />
+                : <Play size={26} fill="currentColor" className="ml-0.5" />}
             </button>
-            <button type="button" onClick={nextTrack} className="p-2" style={{ color: "var(--ln-parchment)" }}>
+            <button type="button" onClick={nextTrack} className="p-2 transition-colors"
+              style={{ color: "rgba(232,223,200,0.8)" }}>
               <SkipForward size={24} />
             </button>
             <button
               onClick={toggleRepeat}
               className="p-2 transition-colors"
-              style={{ color: state.isRepeat ? "var(--ln-gold)" : "var(--ln-iron)" }}
+              style={{ color: state.isRepeat ? "rgba(192,132,252,0.9)" : "rgba(138,43,226,0.35)" }}
             >
               <Repeat size={18} />
             </button>
@@ -714,7 +756,7 @@ export default function MobilePlayerPanel() {
         </div>
 
         {/* ══ FUNCTIONAL ROW — Gift | Details | Lyrics | Sound ══ */}
-        <div className="flex-shrink-0 px-6 pb-4">
+        <div className="flex-shrink-0 px-6 pb-4" style={{ position: "relative", zIndex: 1 }}>
           <div className="flex items-center gap-2">
             {/* Gift */}
             <button
@@ -726,10 +768,11 @@ export default function MobilePlayerPanel() {
               className="flex-1 flex items-center justify-center gap-1 py-2 rounded-xl text-[10px] font-semibold
                 transition-all active:scale-95 disabled:opacity-35 disabled:cursor-not-allowed"
               style={{
-                background: tipsEnabled ? "rgba(196,154,40,0.08)" : "#000000",
-                color: tipsEnabled ? "var(--ln-gold)" : "var(--ln-iron)",
-                border: tipsEnabled ? "1px solid rgba(196,154,40,0.2)" : "1px solid #111009",
+                background: tipsEnabled ? "rgba(196,154,40,0.10)" : "rgba(0,0,0,0.4)",
+                color: tipsEnabled ? "var(--ln-gold)" : "rgba(138,43,226,0.3)",
+                border: tipsEnabled ? "1px solid rgba(196,154,40,0.22)" : "1px solid rgba(138,43,226,0.10)",
                 fontFamily: "'Cinzel', serif",
+                backdropFilter: "blur(8px)",
               }}
               title={tipsEnabled ? "Gift creator" : "Tips not enabled"}
             >
@@ -743,10 +786,11 @@ export default function MobilePlayerPanel() {
               className="flex-1 flex items-center justify-center gap-1 py-2 rounded-xl text-[10px] font-semibold
                 transition-all active:scale-95"
               style={{
-                background: (sheetOpen && sheetTab === "details") ? "rgba(56,189,248,0.15)" : "#000000",
-                color: (sheetOpen && sheetTab === "details") ? "#38BDF8" : "var(--ln-smoke)",
-                border: (sheetOpen && sheetTab === "details") ? "1px solid rgba(56,189,248,0.35)" : "1px solid #111009",
+                background: (sheetOpen && sheetTab === "details") ? "rgba(138,43,226,0.18)" : "rgba(0,0,0,0.4)",
+                color: (sheetOpen && sheetTab === "details") ? "rgba(192,132,252,0.9)" : "rgba(138,43,226,0.5)",
+                border: (sheetOpen && sheetTab === "details") ? "1px solid rgba(138,43,226,0.4)" : "1px solid rgba(138,43,226,0.10)",
                 fontFamily: "'Cinzel', serif",
+                backdropFilter: "blur(8px)",
               }}
             >
               <Info size={12} />
@@ -759,10 +803,11 @@ export default function MobilePlayerPanel() {
               className="flex-1 flex items-center justify-center gap-1 py-2 rounded-xl text-[10px] font-semibold
                 transition-all active:scale-95"
               style={{
-                background: (sheetOpen && sheetTab === "lyrics") ? "rgba(170,142,100,0.15)" : "#000000",
-                color: (sheetOpen && sheetTab === "lyrics") ? "var(--ln-parchment)" : "var(--ln-smoke)",
-                border: (sheetOpen && sheetTab === "lyrics") ? "1px solid rgba(170,142,100,0.35)" : "1px solid #111009",
+                background: (sheetOpen && sheetTab === "lyrics") ? "rgba(196,154,40,0.12)" : "rgba(0,0,0,0.4)",
+                color: (sheetOpen && sheetTab === "lyrics") ? "var(--ln-gold)" : "rgba(138,43,226,0.5)",
+                border: (sheetOpen && sheetTab === "lyrics") ? "1px solid rgba(196,154,40,0.3)" : "1px solid rgba(138,43,226,0.10)",
                 fontFamily: "'Cinzel', serif",
+                backdropFilter: "blur(8px)",
               }}
             >
               <BookOpen size={12} />
@@ -775,10 +820,11 @@ export default function MobilePlayerPanel() {
               className="flex-1 flex items-center justify-center gap-1 py-2 rounded-xl text-[10px] font-semibold
                 transition-all active:scale-95"
               style={{
-                background: state.isMuted ? "rgba(239,68,68,0.12)" : "#000000",
-                color: state.isMuted ? "var(--ln-ember)" : "var(--ln-smoke)",
-                border: state.isMuted ? "1px solid rgba(196,68,10,0.3)" : "1px solid #111009",
+                background: state.isMuted ? "rgba(239,68,68,0.12)" : "rgba(0,0,0,0.4)",
+                color: state.isMuted ? "var(--ln-ember)" : "rgba(138,43,226,0.5)",
+                border: state.isMuted ? "1px solid rgba(196,68,10,0.3)" : "1px solid rgba(138,43,226,0.10)",
                 fontFamily: "'Cinzel', serif",
+                backdropFilter: "blur(8px)",
               }}
             >
               {state.isMuted ? <VolumeX size={12} /> : <Volume2 size={12} />}
@@ -791,11 +837,12 @@ export default function MobilePlayerPanel() {
               className="flex-1 flex items-center justify-center gap-1 py-2 rounded-xl text-[10px] font-semibold
                 transition-all active:scale-95"
               style={{
-                background: glowEnabled ? "rgba(138,43,226,0.12)" : "#000000",
-                color: glowEnabled ? "#C084FC" : "var(--ln-iron)",
-                border: glowEnabled ? "1px solid rgba(192,132,252,0.35)" : "1px solid #111009",
+                background: glowEnabled ? "rgba(138,43,226,0.18)" : "rgba(0,0,0,0.4)",
+                color: glowEnabled ? "rgba(192,132,252,0.9)" : "rgba(138,43,226,0.35)",
+                border: glowEnabled ? "1px solid rgba(192,132,252,0.35)" : "1px solid rgba(138,43,226,0.10)",
                 fontFamily: "'Cinzel', serif",
-                boxShadow: glowEnabled && state.isPlaying ? "0 0 10px rgba(138,43,226,0.4)" : "none",
+                backdropFilter: "blur(8px)",
+                boxShadow: glowEnabled && state.isPlaying ? "0 0 12px rgba(138,43,226,0.5), inset 0 0 8px rgba(138,43,226,0.1)" : "none",
               }}
             >
               <Waves size={12} />
@@ -832,10 +879,10 @@ export default function MobilePlayerPanel() {
             width: "100vw",
             height: "72vh",
             maxHeight: "600px",
-            background: "#000000",
-            borderTop: "1px solid rgba(196,154,40,0.12)",
-            borderRadius: "20px 20px 0 0",
-            boxShadow: "0 -8px 32px rgba(0,0,0,0.60)",
+          background: "linear-gradient(180deg, #0d0520 0%, #060212 100%)",
+          borderTop: "1px solid rgba(138,43,226,0.25)",
+          borderRadius: "20px 20px 0 0",
+          boxShadow: "0 -8px 48px rgba(0,0,0,0.80), 0 -4px 32px rgba(138,43,226,0.12)",
             transform: sheetOpen ? "translateY(0)" : "translateY(100%)",
             paddingBottom: "env(safe-area-inset-bottom, 0px)",
           }}
@@ -844,7 +891,7 @@ export default function MobilePlayerPanel() {
         >
           {/* Sheet drag handle */}
           <div className="flex-shrink-0 flex flex-col items-center pt-3 pb-2 cursor-grab active:cursor-grabbing">
-            <div className="rounded-full" style={{ width: "40px", height: "4px", background: "#000000" }} />
+            <div className="rounded-full" style={{ width: "40px", height: "4px", background: "rgba(138,43,226,0.4)" }} />
           </div>
 
           {/* Tab bar */}
@@ -855,10 +902,11 @@ export default function MobilePlayerPanel() {
                 onClick={() => setSheetTab(tab)}
                 className="flex-1 py-1.5 rounded-lg text-[11px] font-semibold capitalize transition-all"
                 style={{
-                  background: sheetTab === tab ? "rgba(196,154,40,0.08)" : "transparent",
-                  color: sheetTab === tab ? "var(--ln-gold)" : "var(--ln-smoke)",
-                  border: sheetTab === tab ? "1px solid rgba(196,154,40,0.2)" : "1px solid transparent",
+                  background: sheetTab === tab ? "rgba(138,43,226,0.15)" : "transparent",
+                  color: sheetTab === tab ? "rgba(192,132,252,0.9)" : "rgba(138,43,226,0.45)",
+                  border: sheetTab === tab ? "1px solid rgba(138,43,226,0.35)" : "1px solid transparent",
                   fontFamily: "'Cinzel', serif",
+                  boxShadow: sheetTab === tab ? "0 0 8px rgba(138,43,226,0.2)" : "none",
                 }}
               >
                 {tab}
@@ -881,13 +929,13 @@ export default function MobilePlayerPanel() {
               <div className="px-4 pb-4 space-y-3">
                 {currentTrack?.witnessId && (
                   <div className="flex items-start gap-2.5">
-                    <Shield size={13} className="flex-shrink-0 mt-0.5" style={{ color: "var(--ln-gold)" }} />
+                    <Shield size={13} className="flex-shrink-0 mt-0.5" style={{ color: "rgba(192,132,252,0.8)" }} />
                     <div className="min-w-0">
-                      <div className="text-[9px] uppercase tracking-wider mb-0.5" style={{ color: "var(--ln-smoke)" }}>Witness ID</div>
+                      <div className="text-[9px] uppercase tracking-wider mb-0.5" style={{ color: "rgba(138,43,226,0.5)" }}>Witness ID</div>
                       <button
                         onClick={() => { navigate(`/verify/${currentTrack.witnessId}`); setSheetOpen(false); }}
                         className="text-[11px] font-mono break-all text-left hover:opacity-75 transition-opacity"
-                        style={{ color: "var(--ln-gold)" }}
+                        style={{ color: "rgba(192,132,252,0.85)" }}
                       >
                         {currentTrack.witnessId}
                       </button>
@@ -896,9 +944,9 @@ export default function MobilePlayerPanel() {
                 )}
                 {creator && (
                   <div className="flex items-start gap-2.5">
-                    <User size={13} className="flex-shrink-0 mt-0.5" style={{ color: "var(--ln-seal-bright)" }} />
+                    <User size={13} className="flex-shrink-0 mt-0.5" style={{ color: "rgba(192,132,252,0.7)" }} />
                     <div className="min-w-0">
-                      <div className="text-[9px] uppercase tracking-wider mb-0.5" style={{ color: "var(--ln-smoke)" }}>Creator</div>
+                      <div className="text-[9px] uppercase tracking-wider mb-0.5" style={{ color: "rgba(138,43,226,0.5)" }}>Creator</div>
                       <button
                         onClick={() => { if (creator.id) { navigate(`/creator/${creator.id}`); setSheetOpen(false); } }}
                         className="text-[12px] font-semibold hover:opacity-75 transition-opacity"
@@ -911,9 +959,9 @@ export default function MobilePlayerPanel() {
                 )}
                 {song?.licenseStatus && (
                   <div className="flex items-start gap-2.5">
-                    <FileText size={13} className="flex-shrink-0 mt-0.5" style={{ color: "var(--ln-smoke)" }} />
+                    <FileText size={13} className="flex-shrink-0 mt-0.5" style={{ color: "rgba(138,43,226,0.5)" }} />
                     <div className="min-w-0">
-                      <div className="text-[9px] uppercase tracking-wider mb-0.5" style={{ color: "var(--ln-smoke)" }}>License</div>
+                      <div className="text-[9px] uppercase tracking-wider mb-0.5" style={{ color: "rgba(138,43,226,0.5)" }}>License</div>
                       <span className="text-[12px] capitalize" style={{ color: "var(--ln-parchment)" }}>{song.licenseStatus}</span>
                     </div>
                   </div>
@@ -922,7 +970,7 @@ export default function MobilePlayerPanel() {
                   <div className="flex items-start gap-2.5">
                     <Shield size={13} className="flex-shrink-0 mt-0.5" style={{ color: "var(--ln-ember)" }} />
                     <div className="min-w-0">
-                      <div className="text-[9px] uppercase tracking-wider mb-0.5" style={{ color: "var(--ln-smoke)" }}>AI Disclosure</div>
+                      <div className="text-[9px] uppercase tracking-wider mb-0.5" style={{ color: "rgba(138,43,226,0.5)" }}>AI Disclosure</div>
                       <AiDisclosurePill value={currentTrack.aiDisclosure as any} size="full" showTooltip={false} />
                     </div>
                   </div>
@@ -934,18 +982,18 @@ export default function MobilePlayerPanel() {
                   const overflow = tags.length - visible.length;
                   return (
                     <div className="flex items-start gap-2.5">
-                      <Tag size={13} className="flex-shrink-0 mt-0.5" style={{ color: "var(--ln-gold)" }} />
+                      <Tag size={13} className="flex-shrink-0 mt-0.5" style={{ color: "rgba(192,132,252,0.7)" }} />
                       <div className="min-w-0">
-                        <div className="text-[9px] uppercase tracking-wider mb-1.5" style={{ color: "var(--ln-smoke)" }}>Genre / Tags</div>
+                        <div className="text-[9px] uppercase tracking-wider mb-1.5" style={{ color: "rgba(138,43,226,0.5)" }}>Genre / Tags</div>
                         <div className="flex flex-wrap gap-1">
                           {visible.map((tag: string) => (
                             <span
                               key={tag}
                               className="text-[10px] px-2 py-0.5 rounded-full font-body leading-none"
                               style={{
-                                background: "rgba(0,0,0,0.85)",
-                                color: "var(--ln-parchment)",
-                                border: "1px solid rgba(196,154,40,0.08)",
+                                background: "rgba(138,43,226,0.08)",
+                                color: "rgba(232,223,200,0.85)",
+                                border: "1px solid rgba(138,43,226,0.2)",
                               }}
                             >
                               {tag}
@@ -955,9 +1003,9 @@ export default function MobilePlayerPanel() {
                             <span
                               className="text-[10px] px-2 py-0.5 rounded-full font-body leading-none"
                               style={{
-                                background: "rgba(0,0,0,0.7)",
-                                color: "var(--ln-iron)",
-                                border: "1px solid rgba(196,154,40,0.06)",
+                                background: "rgba(138,43,226,0.06)",
+                                color: "rgba(138,43,226,0.5)",
+                                border: "1px solid rgba(138,43,226,0.15)",
                               }}
                             >
                               +{overflow}
@@ -973,10 +1021,11 @@ export default function MobilePlayerPanel() {
                     onClick={() => { navigate(`/song/${currentSongId}`); setSheetOpen(false); closeNowPlayingPanel(); }}
                     className="w-full mt-2 py-2 rounded-xl text-[11px] font-semibold tracking-wide transition-all active:scale-95"
                     style={{
-                      background: "rgba(196,154,40,0.08)",
-                      color: "var(--ln-gold)",
-                      border: "1px solid rgba(196,154,40,0.17)",
+                      background: "rgba(138,43,226,0.10)",
+                      color: "rgba(192,132,252,0.85)",
+                      border: "1px solid rgba(138,43,226,0.25)",
                       fontFamily: "'Cinzel', serif",
+                      boxShadow: "0 0 8px rgba(138,43,226,0.15)",
                     }}
                   >
                     Open Full Song Page →
@@ -1000,15 +1049,15 @@ export default function MobilePlayerPanel() {
                   </pre>
                 ) : (
                   <div className="flex flex-col items-center justify-center py-12 gap-3">
-                    <BookOpen size={28} className="opacity-20" style={{ color: "var(--ln-gold)" }} />
-                    <p className="text-[12px] italic text-center" style={{ color: "var(--ln-iron)" }}>
+                    <BookOpen size={28} className="opacity-20" style={{ color: "rgba(192,132,252,0.6)" }} />
+                    <p className="text-[12px] italic text-center" style={{ color: "rgba(138,43,226,0.5)" }}>
                       No lyrics available for this track.
                     </p>
                     {currentSongId && (
                       <button
                         onClick={() => { navigate(`/song/${currentSongId}`); setSheetOpen(false); closeNowPlayingPanel(); }}
                         className="text-[11px] px-3 py-1.5 rounded-lg transition-all"
-                        style={{ color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.25)" }}
+                        style={{ color: "rgba(192,132,252,0.85)", border: "1px solid rgba(138,43,226,0.3)", background: "rgba(138,43,226,0.08)" }}
                       >
                         View song page
                       </button>
@@ -1026,19 +1075,19 @@ export default function MobilePlayerPanel() {
                     commentsData.map((c: any) => (
                       <div key={c.id} className="flex gap-2.5">
                         <div className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-[11px] font-bold"
-                          style={{ background: "rgba(196,154,40,0.08)", color: "var(--ln-gold)" }}>
+                          style={{ background: "rgba(138,43,226,0.12)", color: "rgba(192,132,252,0.85)" }}>
                           {(c.authorName ?? "A")[0].toUpperCase()}
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-baseline gap-2 mb-0.5">
-                            <span className="text-[11px] font-semibold" style={{ color: "var(--ln-seal-bright)" }}>
+                            <span className="text-[11px] font-semibold" style={{ color: "rgba(192,132,252,0.9)" }}>
                               {c.authorName ?? "Anonymous"}
                             </span>
-                            <span className="text-[9px]" style={{ color: "var(--ln-iron)" }}>
+                            <span className="text-[9px]" style={{ color: "rgba(138,43,226,0.4)" }}>
                               {new Date(c.createdAt).toLocaleDateString()}
                             </span>
                           </div>
-                          <p className="text-[12px] leading-relaxed" style={{ color: "var(--ln-smoke)" }}>
+                          <p className="text-[12px] leading-relaxed" style={{ color: "rgba(232,223,200,0.75)" }}>
                             {c.content}
                           </p>
                         </div>
@@ -1046,8 +1095,8 @@ export default function MobilePlayerPanel() {
                     ))
                   ) : (
                     <div className="text-center py-6">
-                      <MessageCircle size={20} className="mx-auto mb-1.5 opacity-20" style={{ color: "var(--ln-gold)" }} />
-                      <p className="text-[12px] italic" style={{ color: "var(--ln-iron)" }}>
+                      <MessageCircle size={20} className="mx-auto mb-1.5 opacity-20" style={{ color: "rgba(192,132,252,0.6)" }} />
+                      <p className="text-[12px] italic" style={{ color: "rgba(138,43,226,0.5)" }}>
                         No comments yet. Be the first.
                       </p>
                     </div>
@@ -1055,7 +1104,7 @@ export default function MobilePlayerPanel() {
                 </div>
                 {/* Comment input — pinned to bottom of sheet */}
                 <div className="flex-shrink-0 flex gap-2 px-4 pb-4 pt-2"
-                  style={{ borderTop: "1px solid rgba(196,154,40,0.12)" }}>
+                  style={{ borderTop: "1px solid rgba(138,43,226,0.15)" }}>
                   <input
                     value={newComment}
                     onChange={e => setNewComment(e.target.value)}
@@ -1065,8 +1114,8 @@ export default function MobilePlayerPanel() {
                     maxLength={1000}
                     className="flex-1 rounded-xl px-3 py-2 text-[12px] outline-none transition-colors disabled:opacity-50"
                     style={{
-                      background: "#000000",
-                      border: "1px solid rgba(196,154,40,0.12)",
+                      background: "rgba(138,43,226,0.06)",
+                      border: "1px solid rgba(138,43,226,0.2)",
                       color: "var(--ln-parchment)",
                     }}
                   />
@@ -1074,7 +1123,7 @@ export default function MobilePlayerPanel() {
                     onClick={submitComment}
                     disabled={!user || !newComment.trim() || addCommentMutation.isPending}
                     className="px-3 py-2 rounded-xl text-[12px] font-semibold transition-colors disabled:opacity-40 active:scale-95"
-                    style={{ background: "var(--ln-gold)", color: "var(--ln-coal)" }}
+                    style={{ background: "linear-gradient(135deg, rgba(138,43,226,0.8), rgba(88,28,135,0.9))", color: "rgba(232,223,200,0.95)", boxShadow: "0 0 12px rgba(138,43,226,0.4)" }}
                   >
                     Post
                   </button>
@@ -1088,7 +1137,8 @@ export default function MobilePlayerPanel() {
       {/* Sheet backdrop — dims the player panel behind the sheet */}
       {open && sheetOpen && (
         <div
-          className="md:hidden fixed inset-0 z-[55] bg-black/40"
+          className="md:hidden fixed inset-0 z-[55]"
+          style={{ background: "rgba(5,1,15,0.55)", backdropFilter: "blur(2px)" }}
           onClick={() => setSheetOpen(false)}
         />
       )}
@@ -1103,6 +1153,37 @@ export default function MobilePlayerPanel() {
           0%   { opacity: 1; transform: translateY(0) scale(1); }
           60%  { opacity: 0.8; transform: translateY(-40px) scale(1.3); }
           100% { opacity: 0; transform: translateY(-80px) scale(0.8); }
+        }
+        @keyframes nebulaPulse {
+          0%, 100% { opacity: 0.6; transform: scale(1); }
+          50% { opacity: 1; transform: scale(1.08); }
+        }
+        .nebula-orb {
+          position: absolute;
+          border-radius: 50%;
+          animation: nebulaPulse 6s ease-in-out infinite;
+          pointer-events: none;
+        }
+        .nebula-orb:nth-child(2) { animation-delay: -2s; }
+        .nebula-orb:nth-child(3) { animation-delay: -4s; }
+        .star-field {
+          position: absolute;
+          inset: 0;
+          background-image:
+            radial-gradient(1px 1px at 15% 12%, rgba(255,255,255,0.5) 0%, transparent 100%),
+            radial-gradient(1px 1px at 35% 28%, rgba(255,255,255,0.35) 0%, transparent 100%),
+            radial-gradient(1px 1px at 55% 8%, rgba(255,255,255,0.45) 0%, transparent 100%),
+            radial-gradient(1px 1px at 75% 18%, rgba(255,255,255,0.3) 0%, transparent 100%),
+            radial-gradient(1px 1px at 90% 35%, rgba(255,255,255,0.4) 0%, transparent 100%),
+            radial-gradient(1px 1px at 20% 45%, rgba(255,255,255,0.25) 0%, transparent 100%),
+            radial-gradient(1px 1px at 60% 55%, rgba(255,255,255,0.35) 0%, transparent 100%),
+            radial-gradient(1px 1px at 80% 65%, rgba(255,255,255,0.3) 0%, transparent 100%),
+            radial-gradient(1px 1px at 40% 72%, rgba(255,255,255,0.2) 0%, transparent 100%),
+            radial-gradient(1px 1px at 10% 80%, rgba(255,255,255,0.4) 0%, transparent 100%),
+            radial-gradient(1.5px 1.5px at 50% 22%, rgba(192,132,252,0.6) 0%, transparent 100%),
+            radial-gradient(1.5px 1.5px at 25% 60%, rgba(196,154,40,0.5) 0%, transparent 100%),
+            radial-gradient(1.5px 1.5px at 70% 42%, rgba(192,132,252,0.4) 0%, transparent 100%);
+          pointer-events: none;
         }
       `}</style>
 

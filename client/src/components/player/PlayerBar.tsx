@@ -24,7 +24,7 @@ import PlayerTipModal from "./PlayerTipModal";
 import { MediaAsset } from "@/components/MediaAsset";
 
 function fmtTime(s: number) {
-  if (!s || isNaN(s)) return "0:00";
+  if (!s || isNaN(s) || !isFinite(s)) return "0:00";
   const m = Math.floor(s / 60);
   return `${m}:${Math.floor(s % 60).toString().padStart(2, "0")}`;
 }

@@ -4612,3 +4612,15 @@
 - [x] Fix: Progress bar stops updating after first song
 - [x] Fix: Auto-advance not triggering when song ends
 - [x] Fix: Archive play button not playing the song
+
+## Phase 174: Mobile Player Nebula & Crystal Redesign
+- [x] Fix NaNNaNNaN duration display (guard against NaN/Infinity in formatTime)
+- [x] Fix mobile play button too small (increase touch target size)
+- [x] Redesign mobile player with Nebula & Crystal style: deep space bg, crystal beveled frame, nebula glow
+- [x] Crystal orb play button (large, centered, with nebula interior and gold ring)
+- [x] Purple/gold color palette (#9B5CFF nebula purple, #C084FC crystal violet, #D4AF37 nexus gold)
+- [x] Crystal progress slider with diamond-shaped thumb
+- [x] Track info: large serif/display font in gold/cream, smaller gold artist, small-caps purple subtitle
+- [x] Secondary controls row (equalizer, like, shield, waves, fullscreen)
+- [x] Crystal corner accents on album art container
+- [x] WID badge on album art (gold outline)
