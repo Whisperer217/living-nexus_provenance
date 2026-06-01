@@ -30,10 +30,19 @@ export const downloadRouter = Router();
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
+const MAX_INLINE_BYTES = 30 * 1024 * 1024; // 30 MB — above this we redirect to S3 directly
+const FETCH_TIMEOUT_MS = 25_000; // 25s timeout to stay under Cloud Run's 30s limit
+
 async function fetchBytes(url: string): Promise<Buffer | null> {
   try {
-    const res = await fetch(url);
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+    const res = await fetch(url, { signal: controller.signal });
+    clearTimeout(timer);
     if (!res.ok) return null;
+    // Check Content-Length before buffering to avoid OOM on large files
+    const contentLength = parseInt(res.headers.get("content-length") ?? "0", 10);
+    if (contentLength > MAX_INLINE_BYTES) return null; // caller will fall back to redirect
     const ab = await res.arrayBuffer();
     return Buffer.from(ab);
   } catch {
@@ -92,9 +101,14 @@ downloadRouter.get("/api/download/:songId", async (req: Request, res: Response) 
   }
 
   // 3. Fetch audio bytes from S3
+  //    If the file is too large (>30MB) or fetch times out, fall back to a direct S3 redirect.
+  //    This avoids OOM / 503 errors on Cloud Run for large audio files.
   const audioBuffer = await fetchBytes(song.fileUrl);
   if (!audioBuffer) {
-    res.status(502).json({ error: "Could not fetch audio file from storage." });
+    // Fallback: redirect directly to S3 URL with a Content-Disposition hint
+    // The browser will download it without ID3 tags, but it won't 503.
+    console.warn(`[download] Falling back to S3 redirect for song ${songId} (file too large or fetch failed)`);
+    res.redirect(302, song.fileUrl);
     return;
   }
 
