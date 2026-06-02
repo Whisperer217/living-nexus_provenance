@@ -1289,6 +1289,27 @@ export const appRouter = router({
       };
     }),
     delete: protectedProcedure.input(z.object({ songId: z.number() })).mutation(async ({ ctx, input }) => { await deleteSong(input.songId, ctx.user.id); return { success: true }; }),
+    // Bulk-dismiss stale Draft songs — soft-deletes all Draft songs for the user
+    dismissDrafts: protectedProcedure
+      .input(z.object({ olderThanDays: z.number().int().min(0).max(365).optional() }))
+      .mutation(async ({ ctx, input }) => {
+        const db = await getDb();
+        if (!db) throw new Error("Database unavailable");
+        const { songs: songsTable } = await import("../drizzle/schema.js");
+        const { and: _and, eq: _eq, lt: _lt } = await import("drizzle-orm");
+        const cutoff = input.olderThanDays != null
+          ? new Date(Date.now() - input.olderThanDays * 86400000)
+          : undefined;
+        const conditions: any[] = [
+          _eq(songsTable.userId, ctx.user.id),
+          _eq(songsTable.status, "Draft"),
+        ];
+        if (cutoff) conditions.push(_lt(songsTable.createdAt, cutoff));
+        const result = await db.update(songsTable)
+          .set({ status: "Deleted", isPublic: false, updatedAt: new Date() })
+          .where(_and(...conditions));
+        return { success: true, deleted: (result as any).rowsAffected ?? 0 };
+      }),
     reorderMySongs: protectedProcedure
       .input(z.object({ songIds: z.array(z.number()) }))
       .mutation(async ({ ctx, input }) => {

@@ -4652,3 +4652,9 @@
 - [x] nextTrack/onEnded: navigate strictly within the frozen snapshot (no re-fetch)
 - [x] Persist queueId to sessionStorage alongside tracks
 - [x] TypeScript: 0 errors | Tests: 237/237 pass
+
+## Phase 177: Fix Stale Draft Banner in Archive
+- [x] Add tRPC procedure songs.dismissDrafts to bulk-delete or publish stale Draft songs
+- [x] Add "Dismiss" (X) button to the draft continuation banner in ArchivePage
+- [x] Add "Clear all drafts" option when there are multiple drafts
+- [x] TypeScript: 0 errors | Tests: 237/237 pass

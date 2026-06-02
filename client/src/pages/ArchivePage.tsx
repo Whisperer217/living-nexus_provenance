@@ -14,7 +14,7 @@ import { toast } from "sonner";
 import {
   Music, Upload, Globe, EyeOff, Pencil, ExternalLink,
   Play, ListMusic, Trash2, GripVertical, Shield, CheckSquare, Square,
-  Download, Lock, Coins, Layers, AlertTriangle,
+  Download, Lock, Coins, Layers, AlertTriangle, X,
 } from "lucide-react";
 import { EditTrackPanel } from "@/components/EditTrackPanel";
 import { getLoginUrl } from "@/const";
@@ -226,6 +226,15 @@ export default function ArchivePage() {
       toast.success(label);
     },
     onSettled: () => utils.songs.mySongs.invalidate(),
+  });
+
+  /* Dismiss all drafts */
+  const dismissDrafts = trpc.songs.dismissDrafts.useMutation({
+    onSuccess: (data) => {
+      toast.success(`Cleared ${data.deleted} stale draft${data.deleted === 1 ? "" : "s"}.`);
+      utils.songs.mySongs.invalidate();
+    },
+    onError: () => toast.error("Failed to clear drafts"),
   });
 
   /* Delete (soft) */
@@ -521,7 +530,7 @@ export default function ArchivePage() {
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-semibold truncate" style={{ color: "rgba(212,175,55,0.80)", fontFamily: "'Cinzel', serif", letterSpacing: "0.04em" }}>
                   {draftSongs.length === 1
-                    ? `Unfinished ${typeLabel[draftType] ?? "Work"}: “${newestDraft.title || "Untitled"}”`
+                    ? `Unfinished ${typeLabel[draftType] ?? "Work"}: "${newestDraft.title || "Untitled"}"`
                     : `${draftSongs.length} unfinished manifestations in progress`}
                 </p>
                 <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.32)", fontFamily: "'DM Sans', sans-serif" }}>
@@ -529,12 +538,29 @@ export default function ArchivePage() {
                   Continue shaping your work.
                 </p>
               </div>
-              <Link href={resumeHref}>
-                <button className="text-xs px-3 py-1.5 rounded-full flex-shrink-0 transition-all"
-                  style={{ background: "rgba(212,175,55,0.12)", border: "1px solid rgba(212,175,55,0.25)", color: "#D4AF37", fontFamily: "'Cinzel', serif", letterSpacing: "0.06em", cursor: "pointer" }}>
-                  Continue →
-                </button>
-              </Link>
+              {/* Continue button — only shown for single draft */}
+              {draftSongs.length === 1 && (
+                <Link href={resumeHref}>
+                  <button className="text-xs px-3 py-1.5 rounded-full flex-shrink-0 transition-all"
+                    style={{ background: "rgba(212,175,55,0.12)", border: "1px solid rgba(212,175,55,0.25)", color: "#D4AF37", fontFamily: "'Cinzel', serif", letterSpacing: "0.06em", cursor: "pointer" }}>
+                    Continue →
+                  </button>
+                </Link>
+              )}
+              {/* Dismiss / clear all drafts button */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (dismissDrafts.isPending) return;
+                  dismissDrafts.mutate({});
+                }}
+                disabled={dismissDrafts.isPending}
+                title={draftSongs.length === 1 ? "Dismiss this draft" : "Clear all drafts"}
+                className="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center transition-all disabled:opacity-40"
+                style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.40)", cursor: "pointer" }}
+              >
+                <X style={{ width: 12, height: 12 }} />
+              </button>
             </div>
           );
         })()}
