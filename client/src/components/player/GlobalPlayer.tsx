@@ -775,8 +775,8 @@ function GlobalPlayerInner() {
         </div>
       </div>
 
-      {/* ── PROGRESS BAR — crisp 3px track, glow only on knob (decision #4 visual spec) ── */}
-      {!isMini && (
+      {/* ── PROGRESS BAR — desktop always + mobile mini only (mobile expanded has its own progress bar inside expanded content) ── */}
+      {!isMini && (isDesktop || !isExpanded) && (
         <div
           className="flex items-center gap-2 px-4 flex-shrink-0"
           style={{
@@ -836,73 +836,23 @@ function GlobalPlayerInner() {
         </div>
       )}
 
-      {/* ── EXPANDED CONTROLS ROW: stacked controls visible when not in MINI zone ── */}
-      {/* FLOAT zone removed — this row is shown whenever isExpanded is true ── */}
-      {isExpanded && (
-        <div className={isDesktop ? "flex items-center justify-between px-4 py-1 flex-shrink-0" : "flex items-center justify-center gap-5 px-4 py-2 flex-shrink-0"}>
-          {/* Playback controls — 3-tier hierarchy */}
-          <div className={isDesktop ? "flex items-center gap-3" : "flex items-center gap-5"}>
-            <button onClick={e => { e.stopPropagation(); toggleShuffle(); }} className="transition-colors" style={{ padding: isDesktop ? "6px" : "10px", color: state.isShuffle ? (isDesktop ? GOLD : "rgba(192,132,252,0.9)") : (isDesktop ? "rgba(212,175,55,0.65)" : "rgba(192,132,252,0.45)") }}><Shuffle size={isDesktop ? 14 : 18} /></button>
-            <button onClick={e => { e.stopPropagation(); prevTrack(); }} className="transition-colors" style={{ padding: isDesktop ? "6px" : "10px", color: isDesktop ? GOLD : "rgba(192,132,252,0.7)", opacity: 0.9 }}><SkipBack size={isDesktop ? 18 : 22} /></button>
-            {/* ── Crystal Orb Play Button (spec-accurate) ── */}
-            {isDesktop ? (
-              <button
-                onClick={e => { e.stopPropagation(); togglePlay(); }}
-                className="flex items-center justify-center rounded-full transition-all active:scale-95 hover:scale-105"
-                style={{ width: "56px", height: "56px", background: GOLD, color: "#000", boxShadow: `0 0 12px rgba(212,175,55,0.55), 0 0 24px rgba(212,175,55,0.22)`, filter: `drop-shadow(0 0 10px rgba(212,175,55,0.6))` }}
-              >
-                {state.isPlaying ? <Pause size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" style={{ marginLeft: "2px" }} />}
-              </button>
-            ) : (
-              <button
-                onClick={e => { e.stopPropagation(); togglePlay(); }}
-                className="relative flex items-center justify-center transition-all active:scale-90"
-                style={{ width: "88px", height: "88px", background: "transparent", border: "none", padding: 0, flexShrink: 0 }}
-                aria-label={state.isPlaying ? "Pause" : "Play"}
-              >
-                {/* Outer pulse ring — playing only */}
-                {state.isPlaying && (
-                  <span className="absolute inset-0 rounded-full" style={{ boxShadow: "0 0 0 3px rgba(138,43,226,0.3), 0 0 28px rgba(138,43,226,0.55), 0 0 56px rgba(138,43,226,0.18)", animation: "crystal-pulse 2.2s ease-in-out infinite", borderRadius: "50%" }} />
-                )}
-                {/* Faceted octagon outer ring */}
-                <svg viewBox="0 0 88 88" style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }} xmlns="http://www.w3.org/2000/svg">
-                  {[0,1,2,3,4,5,6,7].map(i => (
-                    <path
-                      key={i}
-                      d={`M 44 44 L ${44 + 42 * Math.cos((i * 45 - 22.5) * Math.PI / 180)} ${44 + 42 * Math.sin((i * 45 - 22.5) * Math.PI / 180)} A 42 42 0 0 1 ${44 + 42 * Math.cos(((i + 1) * 45 - 22.5) * Math.PI / 180)} ${44 + 42 * Math.sin(((i + 1) * 45 - 22.5) * Math.PI / 180)} Z`}
-                      fill={state.isPlaying
-                        ? (i % 2 === 0 ? "rgba(155,92,255,0.78)" : "rgba(88,28,135,0.52)")
-                        : (i % 2 === 0 ? "rgba(212,175,55,0.68)" : "rgba(140,100,10,0.45)")}
-                      stroke={state.isPlaying ? "rgba(192,132,252,0.45)" : "rgba(245,230,179,0.35)"}
-                      strokeWidth="0.6"
-                    />
-                  ))}
-                  <circle cx="44" cy="44" r="30" fill="none" stroke={state.isPlaying ? "rgba(192,132,252,0.65)" : "rgba(212,175,55,0.55)"} strokeWidth="1.2" />
-                </svg>
-                {/* Inner orb */}
-                <span
-                  className="absolute rounded-full flex items-center justify-center"
-                  style={{
-                    width: "60px", height: "60px",
-                    background: state.isPlaying
-                      ? "radial-gradient(circle at 32% 28%, rgba(192,132,252,0.95) 0%, rgba(138,43,226,0.88) 42%, rgba(88,28,135,1) 80%, rgba(30,8,65,1) 100%)"
-                      : "radial-gradient(circle at 32% 28%, rgba(255,245,200,0.98) 0%, rgba(212,175,55,0.92) 42%, rgba(160,120,20,1) 80%, rgba(70,45,5,1) 100%)",
-                    boxShadow: state.isPlaying
-                      ? "0 0 20px rgba(138,43,226,0.85), 0 0 40px rgba(138,43,226,0.38), inset 0 2px 0 rgba(255,255,255,0.32), inset 0 -3px 6px rgba(0,0,0,0.55)"
-                      : "0 0 20px rgba(212,175,55,0.7), 0 0 40px rgba(212,175,55,0.3), inset 0 2px 0 rgba(255,255,255,0.32), inset 0 -3px 6px rgba(0,0,0,0.55)",
-                  }}
-                >
-                  {/* Specular highlight */}
-                  <span className="absolute rounded-full" style={{ width: "20px", height: "11px", top: "11px", left: "15px", background: "rgba(255,255,255,0.38)", filter: "blur(3px)", transform: "rotate(-20deg)" }} />
-                  {state.isPlaying
-                    ? <Pause size={24} fill="white" style={{ color: "white", position: "relative", zIndex: 1 }} />
-                    : <Play size={24} fill="#D4AF37" style={{ color: "#D4AF37", position: "relative", zIndex: 1, marginLeft: "3px" }} />
-                  }
-                </span>
-              </button>
-            )}
-            <button onClick={e => { e.stopPropagation(); nextTrack(); }} className="transition-colors" style={{ padding: isDesktop ? "6px" : "10px", color: isDesktop ? GOLD : "rgba(192,132,252,0.7)", opacity: 0.9 }}><SkipForward size={isDesktop ? 18 : 22} /></button>
-            <button onClick={e => { e.stopPropagation(); toggleRepeat(); }} className="transition-colors" style={{ padding: isDesktop ? "6px" : "10px", color: state.isRepeat ? (isDesktop ? GOLD : "rgba(192,132,252,0.9)") : (isDesktop ? "rgba(212,175,55,0.65)" : "rgba(192,132,252,0.45)") }}><Repeat size={isDesktop ? 14 : 18} /></button>
+      {/* ── EXPANDED CONTROLS ROW: desktop only — on mobile, controls live inside expanded content ── */}
+      {isExpanded && isDesktop && (
+        <div className="flex items-center justify-between px-4 py-1 flex-shrink-0">
+          {/* Playback controls — desktop only */}
+          <div className="flex items-center gap-3">
+            <button onClick={e => { e.stopPropagation(); toggleShuffle(); }} className="transition-colors" style={{ padding: "6px", color: state.isShuffle ? GOLD : "rgba(212,175,55,0.65)" }}><Shuffle size={14} /></button>
+            <button onClick={e => { e.stopPropagation(); prevTrack(); }} className="transition-colors" style={{ padding: "6px", color: GOLD, opacity: 0.9 }}><SkipBack size={18} /></button>
+            {/* Desktop crystal orb play button */}
+            <button
+              onClick={e => { e.stopPropagation(); togglePlay(); }}
+              className="flex items-center justify-center rounded-full transition-all active:scale-95 hover:scale-105"
+              style={{ width: "56px", height: "56px", background: GOLD, color: "#000", boxShadow: `0 0 12px rgba(212,175,55,0.55), 0 0 24px rgba(212,175,55,0.22)`, filter: `drop-shadow(0 0 10px rgba(212,175,55,0.6))` }}
+            >
+              {state.isPlaying ? <Pause size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" style={{ marginLeft: "2px" }} />}
+            </button>
+            <button onClick={e => { e.stopPropagation(); nextTrack(); }} className="transition-colors" style={{ padding: "6px", color: GOLD, opacity: 0.9 }}><SkipForward size={18} /></button>
+            <button onClick={e => { e.stopPropagation(); toggleRepeat(); }} className="transition-colors" style={{ padding: "6px", color: state.isRepeat ? GOLD : "rgba(212,175,55,0.65)" }}><Repeat size={14} /></button>
           </div>
           {/* Right utility actions */}
           <div className="flex items-center gap-1">
@@ -1040,6 +990,55 @@ function GlobalPlayerInner() {
                 Witnessed on Living Nexus
               </p>
             </div>
+
+            {/* ── Mobile-only: progress bar + playback controls (spec order: art → info → progress → controls) ── */}
+            {!isDesktop && (
+              <>
+                {/* Progress bar */}
+                <div className="flex items-center gap-2 px-1">
+                  <span className="text-[10px] w-7 text-right tabular-nums" style={{ color: "rgba(192,132,252,0.6)" }}>{fmtTime(state.currentTime)}</span>
+                  <div
+                    className="flex-1 cursor-pointer relative"
+                    style={{ background: "rgba(138,43,226,0.12)", height: "4px", borderRadius: "2px" }}
+                    data-seek
+                    onClick={handleSeek}
+                  >
+                    <div className="h-full relative" style={{ width: `${progress}%`, background: "linear-gradient(90deg, rgba(138,43,226,0.9) 0%, rgba(192,132,252,0.85) 60%, rgba(212,175,55,0.8) 100%)", borderRadius: "2px" }}>
+                      <div className="absolute right-0 top-1/2" style={{ width: "14px", height: "14px", background: "linear-gradient(135deg, rgba(232,223,200,0.98) 0%, rgba(192,132,252,0.9) 50%, rgba(138,43,226,0.95) 100%)", transform: "translateY(-50%) translateX(50%) rotate(45deg)", boxShadow: state.isPlaying ? "0 0 10px rgba(192,132,252,0.9), 0 0 20px rgba(138,43,226,0.5), inset 0 1px 0 rgba(255,255,255,0.4)" : "0 0 6px rgba(192,132,252,0.5), inset 0 1px 0 rgba(255,255,255,0.3)", border: "1px solid rgba(245,230,179,0.5)" }} />
+                    </div>
+                  </div>
+                  <span className="text-[10px] w-7 tabular-nums" style={{ color: "rgba(192,132,252,0.6)" }}>{fmtTime(state.duration, isReady)}</span>
+                </div>
+                {/* Playback controls row */}
+                <div className="flex items-center justify-between px-2">
+                  <button onClick={e => { e.stopPropagation(); toggleShuffle(); }} style={{ padding: "10px", color: state.isShuffle ? "rgba(192,132,252,0.9)" : "rgba(192,132,252,0.45)" }}><Shuffle size={18} /></button>
+                  <button onClick={e => { e.stopPropagation(); prevTrack(); }} style={{ padding: "10px", color: "rgba(192,132,252,0.7)" }}><SkipBack size={22} /></button>
+                  {/* Crystal Orb Play Button — mobile expanded content */}
+                  <button
+                    onClick={e => { e.stopPropagation(); togglePlay(); }}
+                    className="relative flex items-center justify-center transition-all active:scale-90"
+                    style={{ width: "72px", height: "72px", background: "transparent", border: "none", padding: 0, flexShrink: 0 }}
+                    aria-label={state.isPlaying ? "Pause" : "Play"}
+                  >
+                    {state.isPlaying && (
+                      <span className="absolute inset-0 rounded-full" style={{ boxShadow: "0 0 0 3px rgba(138,43,226,0.3), 0 0 28px rgba(138,43,226,0.55), 0 0 56px rgba(138,43,226,0.18)", animation: "crystal-pulse 2.2s ease-in-out infinite", borderRadius: "50%" }} />
+                    )}
+                    <svg viewBox="0 0 72 72" style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }} xmlns="http://www.w3.org/2000/svg">
+                      {[0,1,2,3,4,5,6,7].map(i => (
+                        <path key={i} d={`M 36 36 L ${36 + 34 * Math.cos((i * 45 - 22.5) * Math.PI / 180)} ${36 + 34 * Math.sin((i * 45 - 22.5) * Math.PI / 180)} A 34 34 0 0 1 ${36 + 34 * Math.cos(((i + 1) * 45 - 22.5) * Math.PI / 180)} ${36 + 34 * Math.sin(((i + 1) * 45 - 22.5) * Math.PI / 180)} Z`} fill={state.isPlaying ? (i % 2 === 0 ? "rgba(155,92,255,0.78)" : "rgba(88,28,135,0.52)") : (i % 2 === 0 ? "rgba(212,175,55,0.68)" : "rgba(140,100,10,0.45)")} stroke={state.isPlaying ? "rgba(192,132,252,0.45)" : "rgba(245,230,179,0.35)"} strokeWidth="0.6" />
+                      ))}
+                      <circle cx="36" cy="36" r="24" fill="none" stroke={state.isPlaying ? "rgba(192,132,252,0.65)" : "rgba(212,175,55,0.55)"} strokeWidth="1.2" />
+                    </svg>
+                    <span className="absolute rounded-full flex items-center justify-center" style={{ width: "48px", height: "48px", background: state.isPlaying ? "radial-gradient(circle at 32% 28%, rgba(192,132,252,0.95) 0%, rgba(138,43,226,0.88) 42%, rgba(88,28,135,1) 80%, rgba(30,8,65,1) 100%)" : "radial-gradient(circle at 32% 28%, rgba(255,245,200,0.98) 0%, rgba(212,175,55,0.92) 42%, rgba(160,120,20,1) 80%, rgba(70,45,5,1) 100%)", boxShadow: state.isPlaying ? "0 0 20px rgba(138,43,226,0.85), 0 0 40px rgba(138,43,226,0.38), inset 0 2px 0 rgba(255,255,255,0.32), inset 0 -3px 6px rgba(0,0,0,0.55)" : "0 0 20px rgba(212,175,55,0.7), 0 0 40px rgba(212,175,55,0.3), inset 0 2px 0 rgba(255,255,255,0.32), inset 0 -3px 6px rgba(0,0,0,0.55)" }}>
+                      <span className="absolute rounded-full" style={{ width: "16px", height: "9px", top: "9px", left: "12px", background: "rgba(255,255,255,0.38)", filter: "blur(3px)", transform: "rotate(-20deg)" }} />
+                      {state.isPlaying ? <Pause size={20} fill="white" style={{ color: "white", position: "relative", zIndex: 1 }} /> : <Play size={20} fill="#D4AF37" style={{ color: "#D4AF37", position: "relative", zIndex: 1, marginLeft: "3px" }} />}
+                    </span>
+                  </button>
+                  <button onClick={e => { e.stopPropagation(); nextTrack(); }} style={{ padding: "10px", color: "rgba(192,132,252,0.7)" }}><SkipForward size={22} /></button>
+                  <button onClick={e => { e.stopPropagation(); toggleRepeat(); }} style={{ padding: "10px", color: state.isRepeat ? "rgba(192,132,252,0.9)" : "rgba(192,132,252,0.45)" }}><Repeat size={18} /></button>
+                </div>
+              </>
+            )}
 
             {/* ── Inline volume slider — mobile only, spec section 6 ── */}
             {!isDesktop && (

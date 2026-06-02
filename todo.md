@@ -4667,3 +4667,10 @@
 - [x] Centered controls row layout with equal spacing and larger touch targets (min 44x44px)
 - [x] Apply crystal orb play button to desktop PlayerBar
 - [x] TypeScript: 0 errors | Tests: 237/237 pass
+
+## Phase 179: Fix Mobile Player Layout Issues
+- [ ] Shrink play button to 64px (was rendering ~140px due to SVG ring overflow)
+- [ ] Fix section order: album art → track info → progress bar → controls (top to bottom)
+- [ ] Fix volume slider cut off at bottom
+- [ ] Ensure mini bar play button is also correctly sized
+- [ ] TypeScript: 0 errors | Tests: 237/237 pass
