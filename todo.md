@@ -4658,3 +4658,12 @@
 - [x] Add "Dismiss" (X) button to the draft continuation banner in ArchivePage
 - [x] Add "Clear all drafts" option when there are multiple drafts
 - [x] TypeScript: 0 errors | Tests: 237/237 pass
+
+## Phase 178: Full Nebula & Crystal Player Spec Implementation
+- [x] Crystal orb play button: faceted octagon outer ring (SVG), 4 interaction states (default/pressed/playing/disabled)
+- [x] Diamond-shaped progress bar knob (rotated square) with crystal glow
+- [x] Inline horizontal volume slider with crystal diamond knob (replace popup on mobile)
+- [x] Crystal beveled album art frame with corner crystal accents and inner glow
+- [x] Centered controls row layout with equal spacing and larger touch targets (min 44x44px)
+- [x] Apply crystal orb play button to desktop PlayerBar
+- [x] TypeScript: 0 errors | Tests: 237/237 pass

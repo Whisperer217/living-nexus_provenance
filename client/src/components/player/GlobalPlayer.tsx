@@ -801,19 +801,33 @@ function GlobalPlayerInner() {
                 borderRadius: "2px",
               }}
             >
-              {/* Knob — glow only here (decision #4) */}
-              <div
-                className="absolute right-0 top-1/2 -translate-y-1/2 rounded-full"
-                style={{
-                  width: "12px",
-                  height: "12px",
-                  background: isDesktop ? GOLD_HL : "rgba(232,223,200,0.95)",
-                  boxShadow: state.isPlaying
-                    ? (isDesktop ? `0 0 14px rgba(245,230,179,0.7)` : `0 0 10px rgba(192,132,252,0.8), 0 0 20px rgba(138,43,226,0.4)`)
-                    : "none",
-                  transform: "translateY(-50%) translateX(50%)",
-                }}
-              />
+              {/* Knob — diamond on mobile, circle on desktop */}
+              {isDesktop ? (
+                <div
+                  className="absolute right-0 top-1/2 -translate-y-1/2 rounded-full"
+                  style={{
+                    width: "12px",
+                    height: "12px",
+                    background: GOLD_HL,
+                    boxShadow: state.isPlaying ? `0 0 14px rgba(245,230,179,0.7)` : "none",
+                    transform: "translateY(-50%) translateX(50%)",
+                  }}
+                />
+              ) : (
+                <div
+                  className="absolute right-0 top-1/2"
+                  style={{
+                    width: "14px",
+                    height: "14px",
+                    background: "linear-gradient(135deg, rgba(232,223,200,0.98) 0%, rgba(192,132,252,0.9) 50%, rgba(138,43,226,0.95) 100%)",
+                    transform: "translateY(-50%) translateX(50%) rotate(45deg)",
+                    boxShadow: state.isPlaying
+                      ? "0 0 10px rgba(192,132,252,0.9), 0 0 20px rgba(138,43,226,0.5), inset 0 1px 0 rgba(255,255,255,0.4)"
+                      : "0 0 6px rgba(192,132,252,0.5), inset 0 1px 0 rgba(255,255,255,0.3)",
+                    border: "1px solid rgba(245,230,179,0.5)",
+                  }}
+                />
+              )}
             </div>
           </div>
           <span className="text-[10px] w-7 tabular-nums" style={{ color: isDesktop ? "rgba(212,175,55,0.6)" : "rgba(192,132,252,0.6)" }}>
@@ -825,33 +839,70 @@ function GlobalPlayerInner() {
       {/* ── EXPANDED CONTROLS ROW: stacked controls visible when not in MINI zone ── */}
       {/* FLOAT zone removed — this row is shown whenever isExpanded is true ── */}
       {isExpanded && (
-        <div className="flex items-center justify-between px-4 py-1 flex-shrink-0">
+        <div className={isDesktop ? "flex items-center justify-between px-4 py-1 flex-shrink-0" : "flex items-center justify-center gap-5 px-4 py-2 flex-shrink-0"}>
           {/* Playback controls — 3-tier hierarchy */}
-          <div className="flex items-center gap-3">
-            <button onClick={e => { e.stopPropagation(); toggleShuffle(); }} className="p-1.5 transition-colors" style={{ color: state.isShuffle ? (isDesktop ? GOLD : "rgba(192,132,252,0.9)") : (isDesktop ? "rgba(212,175,55,0.65)" : "rgba(192,132,252,0.45)") }}><Shuffle size={14} /></button>
-            <button onClick={e => { e.stopPropagation(); prevTrack(); }} className="p-1.5 transition-colors" style={{ color: isDesktop ? GOLD : "rgba(192,132,252,0.7)", opacity: 0.9 }}><SkipBack size={18} /></button>
-            {/* Circular play button — 64px crystal orb on mobile, 56px gold on desktop */}
-            <button
-              onClick={e => { e.stopPropagation(); togglePlay(); }}
-              className="flex items-center justify-center rounded-full transition-transform hover:scale-105"
-              style={isDesktop
-                ? { width: "56px", height: "56px", background: GOLD, color: "#000", boxShadow: `0 0 12px rgba(212,175,55,0.55), 0 0 24px rgba(212,175,55,0.22)`, filter: `drop-shadow(0 0 10px rgba(212,175,55,0.6))` }
-                : {
-                    width: "64px", height: "64px",
+          <div className={isDesktop ? "flex items-center gap-3" : "flex items-center gap-5"}>
+            <button onClick={e => { e.stopPropagation(); toggleShuffle(); }} className="transition-colors" style={{ padding: isDesktop ? "6px" : "10px", color: state.isShuffle ? (isDesktop ? GOLD : "rgba(192,132,252,0.9)") : (isDesktop ? "rgba(212,175,55,0.65)" : "rgba(192,132,252,0.45)") }}><Shuffle size={isDesktop ? 14 : 18} /></button>
+            <button onClick={e => { e.stopPropagation(); prevTrack(); }} className="transition-colors" style={{ padding: isDesktop ? "6px" : "10px", color: isDesktop ? GOLD : "rgba(192,132,252,0.7)", opacity: 0.9 }}><SkipBack size={isDesktop ? 18 : 22} /></button>
+            {/* ── Crystal Orb Play Button (spec-accurate) ── */}
+            {isDesktop ? (
+              <button
+                onClick={e => { e.stopPropagation(); togglePlay(); }}
+                className="flex items-center justify-center rounded-full transition-all active:scale-95 hover:scale-105"
+                style={{ width: "56px", height: "56px", background: GOLD, color: "#000", boxShadow: `0 0 12px rgba(212,175,55,0.55), 0 0 24px rgba(212,175,55,0.22)`, filter: `drop-shadow(0 0 10px rgba(212,175,55,0.6))` }}
+              >
+                {state.isPlaying ? <Pause size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" style={{ marginLeft: "2px" }} />}
+              </button>
+            ) : (
+              <button
+                onClick={e => { e.stopPropagation(); togglePlay(); }}
+                className="relative flex items-center justify-center transition-all active:scale-90"
+                style={{ width: "88px", height: "88px", background: "transparent", border: "none", padding: 0, flexShrink: 0 }}
+                aria-label={state.isPlaying ? "Pause" : "Play"}
+              >
+                {/* Outer pulse ring — playing only */}
+                {state.isPlaying && (
+                  <span className="absolute inset-0 rounded-full" style={{ boxShadow: "0 0 0 3px rgba(138,43,226,0.3), 0 0 28px rgba(138,43,226,0.55), 0 0 56px rgba(138,43,226,0.18)", animation: "crystal-pulse 2.2s ease-in-out infinite", borderRadius: "50%" }} />
+                )}
+                {/* Faceted octagon outer ring */}
+                <svg viewBox="0 0 88 88" style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }} xmlns="http://www.w3.org/2000/svg">
+                  {[0,1,2,3,4,5,6,7].map(i => (
+                    <path
+                      key={i}
+                      d={`M 44 44 L ${44 + 42 * Math.cos((i * 45 - 22.5) * Math.PI / 180)} ${44 + 42 * Math.sin((i * 45 - 22.5) * Math.PI / 180)} A 42 42 0 0 1 ${44 + 42 * Math.cos(((i + 1) * 45 - 22.5) * Math.PI / 180)} ${44 + 42 * Math.sin(((i + 1) * 45 - 22.5) * Math.PI / 180)} Z`}
+                      fill={state.isPlaying
+                        ? (i % 2 === 0 ? "rgba(155,92,255,0.78)" : "rgba(88,28,135,0.52)")
+                        : (i % 2 === 0 ? "rgba(212,175,55,0.68)" : "rgba(140,100,10,0.45)")}
+                      stroke={state.isPlaying ? "rgba(192,132,252,0.45)" : "rgba(245,230,179,0.35)"}
+                      strokeWidth="0.6"
+                    />
+                  ))}
+                  <circle cx="44" cy="44" r="30" fill="none" stroke={state.isPlaying ? "rgba(192,132,252,0.65)" : "rgba(212,175,55,0.55)"} strokeWidth="1.2" />
+                </svg>
+                {/* Inner orb */}
+                <span
+                  className="absolute rounded-full flex items-center justify-center"
+                  style={{
+                    width: "60px", height: "60px",
                     background: state.isPlaying
-                      ? "radial-gradient(circle at 35% 35%, rgba(192,132,252,0.95) 0%, rgba(138,43,226,0.9) 45%, rgba(88,28,135,1) 100%)"
-                      : "radial-gradient(circle at 35% 35%, rgba(245,230,179,0.95) 0%, rgba(212,175,55,0.9) 45%, rgba(160,120,20,1) 100%)",
-                    color: "#fff",
+                      ? "radial-gradient(circle at 32% 28%, rgba(192,132,252,0.95) 0%, rgba(138,43,226,0.88) 42%, rgba(88,28,135,1) 80%, rgba(30,8,65,1) 100%)"
+                      : "radial-gradient(circle at 32% 28%, rgba(255,245,200,0.98) 0%, rgba(212,175,55,0.92) 42%, rgba(160,120,20,1) 80%, rgba(70,45,5,1) 100%)",
                     boxShadow: state.isPlaying
-                      ? "0 0 20px rgba(138,43,226,0.7), 0 0 40px rgba(138,43,226,0.3), inset 0 1px 0 rgba(255,255,255,0.25)"
-                      : "0 0 20px rgba(212,175,55,0.6), 0 0 40px rgba(212,175,55,0.25), inset 0 1px 0 rgba(255,255,255,0.25)",
+                      ? "0 0 20px rgba(138,43,226,0.85), 0 0 40px rgba(138,43,226,0.38), inset 0 2px 0 rgba(255,255,255,0.32), inset 0 -3px 6px rgba(0,0,0,0.55)"
+                      : "0 0 20px rgba(212,175,55,0.7), 0 0 40px rgba(212,175,55,0.3), inset 0 2px 0 rgba(255,255,255,0.32), inset 0 -3px 6px rgba(0,0,0,0.55)",
+                  }}
+                >
+                  {/* Specular highlight */}
+                  <span className="absolute rounded-full" style={{ width: "20px", height: "11px", top: "11px", left: "15px", background: "rgba(255,255,255,0.38)", filter: "blur(3px)", transform: "rotate(-20deg)" }} />
+                  {state.isPlaying
+                    ? <Pause size={24} fill="white" style={{ color: "white", position: "relative", zIndex: 1 }} />
+                    : <Play size={24} fill="#D4AF37" style={{ color: "#D4AF37", position: "relative", zIndex: 1, marginLeft: "3px" }} />
                   }
-              }
-            >
-              {state.isPlaying ? <Pause size={isDesktop ? 20 : 24} fill="currentColor" /> : <Play size={isDesktop ? 20 : 24} fill="currentColor" className="ml-0.5" />}
-            </button>
-            <button onClick={e => { e.stopPropagation(); nextTrack(); }} className="p-1.5 transition-colors" style={{ color: isDesktop ? GOLD : "rgba(192,132,252,0.7)", opacity: 0.9 }}><SkipForward size={18} /></button>
-            <button onClick={e => { e.stopPropagation(); toggleRepeat(); }} className="p-1.5 transition-colors" style={{ color: state.isRepeat ? (isDesktop ? GOLD : "rgba(192,132,252,0.9)") : (isDesktop ? "rgba(212,175,55,0.65)" : "rgba(192,132,252,0.45)") }}><Repeat size={14} /></button>
+                </span>
+              </button>
+            )}
+            <button onClick={e => { e.stopPropagation(); nextTrack(); }} className="transition-colors" style={{ padding: isDesktop ? "6px" : "10px", color: isDesktop ? GOLD : "rgba(192,132,252,0.7)", opacity: 0.9 }}><SkipForward size={isDesktop ? 18 : 22} /></button>
+            <button onClick={e => { e.stopPropagation(); toggleRepeat(); }} className="transition-colors" style={{ padding: isDesktop ? "6px" : "10px", color: state.isRepeat ? (isDesktop ? GOLD : "rgba(192,132,252,0.9)") : (isDesktop ? "rgba(212,175,55,0.65)" : "rgba(192,132,252,0.45)") }}><Repeat size={isDesktop ? 14 : 18} /></button>
           </div>
           {/* Right utility actions */}
           <div className="flex items-center gap-1">
@@ -901,6 +952,17 @@ function GlobalPlayerInner() {
 
             {/* Large artwork — with swipe gesture + cinematic tap */}
             <div className="flex justify-center pt-2">
+              {/* Crystal beveled frame wrapper — mobile only */}
+              <div style={!isDesktop ? { position: "relative", padding: "3px", borderRadius: "20px", background: "linear-gradient(135deg, rgba(192,132,252,0.7) 0%, rgba(88,28,135,0.4) 30%, rgba(212,175,55,0.5) 60%, rgba(155,92,255,0.6) 100%)", boxShadow: "0 0 24px rgba(138,43,226,0.4), 0 0 48px rgba(138,43,226,0.15)" } : {}}>
+                {/* Corner crystal accents — mobile only */}
+                {!isDesktop && ["top-0 left-0","top-0 right-0","bottom-0 left-0","bottom-0 right-0"].map((pos, i) => (
+                  <span key={i} className={`absolute ${pos} w-4 h-4`} style={{ zIndex: 2 }}>
+                    <svg viewBox="0 0 16 16" style={{ width: "100%", height: "100%" }}>
+                      <polygon points={i === 0 ? "0,0 10,0 0,10" : i === 1 ? "16,0 6,0 16,10" : i === 2 ? "0,16 10,16 0,6" : "16,16 6,16 16,6"} fill="rgba(192,132,252,0.7)" />
+                      <polygon points={i === 0 ? "0,0 6,0 0,6" : i === 1 ? "16,0 10,0 16,6" : i === 2 ? "0,16 6,16 0,10" : "16,16 10,16 16,10"} fill="rgba(245,230,179,0.5)" />
+                    </svg>
+                  </span>
+                ))}
               <div
                 className="relative rounded-2xl overflow-hidden select-none"
                 style={{
@@ -913,7 +975,7 @@ function GlobalPlayerInner() {
                         : `0 8px 40px rgba(138,43,226,0.5), ${swipeDir === "left" ? "-6px" : "6px"} 0 24px rgba(138,43,226,0.35), 0 0 0 1px rgba(138,43,226,0.4)`)
                     : (isDesktop
                         ? `0 8px 40px ${GOLD_GLOW}, 0 0 0 1px rgba(212,175,55,0.3)`
-                        : `0 8px 40px rgba(138,43,226,0.35), 0 0 0 1px rgba(138,43,226,0.35), 0 0 0 3px rgba(88,28,135,0.2)`),
+                        : `0 0 0 1px rgba(192,132,252,0.55), 0 0 0 2px rgba(88,28,135,0.3), inset 0 0 20px rgba(138,43,226,0.08)`),
                   transform: swipeDelta !== 0 ? `translateX(${Math.sign(swipeDelta) * Math.min(Math.abs(swipeDelta) * 0.25, 24)}px) rotate(${Math.sign(swipeDelta) * Math.min(Math.abs(swipeDelta) * 0.02, 2)}deg)` : undefined,
                   transition: swipeDelta === 0 ? "transform 0.3s cubic-bezier(0.32,0.72,0,1), box-shadow 0.2s ease" : "none",
                   cursor: "pointer",
@@ -951,6 +1013,7 @@ function GlobalPlayerInner() {
                   </div>
                 )}
               </div>
+              </div>
             </div>
 
             {/* Title + artist + WID */}
@@ -977,6 +1040,44 @@ function GlobalPlayerInner() {
                 Witnessed on Living Nexus
               </p>
             </div>
+
+            {/* ── Inline volume slider — mobile only, spec section 6 ── */}
+            {!isDesktop && (
+              <div className="flex items-center gap-3 px-2">
+                <button onClick={e => { e.stopPropagation(); toggleMute(); }} style={{ color: state.isMuted ? "rgba(192,132,252,0.25)" : "rgba(192,132,252,0.6)", flexShrink: 0 }}>
+                  {state.isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
+                </button>
+                <div className="flex-1 relative" style={{ height: "6px" }}>
+                  {/* Track background */}
+                  <div className="absolute inset-0 rounded-full" style={{ background: "rgba(138,43,226,0.15)" }} />
+                  {/* Filled portion */}
+                  <div className="absolute left-0 top-0 h-full rounded-full" style={{ width: `${state.isMuted ? 0 : state.volume * 100}%`, background: "linear-gradient(90deg, rgba(138,43,226,0.85) 0%, rgba(192,132,252,0.8) 60%, rgba(212,175,55,0.75) 100%)" }} />
+                  {/* Diamond knob */}
+                  <div
+                    className="absolute top-1/2"
+                    style={{
+                      width: "14px", height: "14px",
+                      left: `calc(${state.isMuted ? 0 : state.volume * 100}% - 7px)`,
+                      background: "linear-gradient(135deg, rgba(232,223,200,0.98) 0%, rgba(192,132,252,0.9) 50%, rgba(138,43,226,0.95) 100%)",
+                      transform: "translateY(-50%) rotate(45deg)",
+                      boxShadow: "0 0 8px rgba(192,132,252,0.8), 0 0 16px rgba(138,43,226,0.4), inset 0 1px 0 rgba(255,255,255,0.4)",
+                      border: "1px solid rgba(245,230,179,0.5)",
+                    }}
+                  />
+                  {/* Invisible range input for interaction */}
+                  <input
+                    type="range" min={0} max={1} step={0.01}
+                    value={state.isMuted ? 0 : state.volume}
+                    onChange={e => { e.stopPropagation(); setVolume(parseFloat(e.target.value)); }}
+                    className="absolute inset-0 w-full opacity-0 cursor-pointer"
+                    style={{ height: "100%" }}
+                  />
+                </div>
+                <button onClick={e => { e.stopPropagation(); toggleMute(); }} style={{ color: state.isMuted ? "rgba(192,132,252,0.25)" : "rgba(192,132,252,0.6)", flexShrink: 0 }}>
+                  <Volume2 size={16} />
+                </button>
+              </div>
+            )}
 
             {/* Action row */}
             <div className="flex items-center justify-center gap-5">
@@ -1555,6 +1656,19 @@ function GlobalPlayerInner() {
     </>,
     document.body
   );
+}
+
+// crystal-pulse keyframe injected once at module level
+if (typeof document !== 'undefined' && !document.getElementById('crystal-pulse-style')) {
+  const s = document.createElement('style');
+  s.id = 'crystal-pulse-style';
+  s.textContent = `
+    @keyframes crystal-pulse {
+      0%, 100% { opacity: 0.7; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.04); }
+    }
+  `;
+  document.head.appendChild(s);
 }
 
 // Memoized export — prevents re-renders from parent layout changes (Decision #5)

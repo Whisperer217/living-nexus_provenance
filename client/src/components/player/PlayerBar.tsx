@@ -396,12 +396,40 @@ export default function PlayerBar() {
               <button type="button" onClick={prevTrack} className="p-2 text-white/70 hover:text-white transition-colors">
                 <SkipBack size={22} />
               </button>
+              {/* Crystal Orb Play Button — desktop */}
               <button
                 onClick={togglePlay}
-                className="w-14 h-14 rounded-full flex items-center justify-center transition-all hover:scale-105"
-                style={{ background: "var(--ln-gold)", color: "var(--ln-coal)" }}
+                className="relative flex items-center justify-center transition-all hover:scale-105 active:scale-95"
+                style={{ width: "64px", height: "64px", background: "transparent", border: "none", padding: 0 }}
               >
-                {state.isPlaying ? <Pause size={24} /> : <Play size={24} fill="currentColor" />}
+                {state.isPlaying && (
+                  <span className="absolute inset-0 rounded-full" style={{ boxShadow: "0 0 0 3px rgba(212,175,55,0.25), 0 0 24px rgba(212,175,55,0.45)", animation: "crystal-pulse 2.2s ease-in-out infinite", borderRadius: "50%" }} />
+                )}
+                <svg viewBox="0 0 64 64" style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}>
+                  {[0,1,2,3,4,5,6,7].map(i => (
+                    <path key={i}
+                      d={`M 32 32 L ${32 + 30 * Math.cos((i * 45 - 22.5) * Math.PI / 180)} ${32 + 30 * Math.sin((i * 45 - 22.5) * Math.PI / 180)} A 30 30 0 0 1 ${32 + 30 * Math.cos(((i + 1) * 45 - 22.5) * Math.PI / 180)} ${32 + 30 * Math.sin(((i + 1) * 45 - 22.5) * Math.PI / 180)} Z`}
+                      fill={i % 2 === 0 ? "rgba(212,175,55,0.72)" : "rgba(140,100,10,0.48)"}
+                      stroke="rgba(245,230,179,0.35)" strokeWidth="0.5"
+                    />
+                  ))}
+                  <circle cx="32" cy="32" r="22" fill="none" stroke="rgba(212,175,55,0.55)" strokeWidth="1" />
+                </svg>
+                <span className="absolute rounded-full flex items-center justify-center"
+                  style={{
+                    width: "44px", height: "44px",
+                    background: "radial-gradient(circle at 32% 28%, rgba(255,245,200,0.98) 0%, rgba(212,175,55,0.92) 42%, rgba(160,120,20,1) 80%, rgba(70,45,5,1) 100%)",
+                    boxShadow: state.isPlaying
+                      ? "0 0 16px rgba(212,175,55,0.8), 0 0 32px rgba(212,175,55,0.35), inset 0 2px 0 rgba(255,255,255,0.3)"
+                      : "0 0 10px rgba(212,175,55,0.5), inset 0 2px 0 rgba(255,255,255,0.25)",
+                  }}
+                >
+                  <span className="absolute rounded-full" style={{ width: "14px", height: "8px", top: "8px", left: "11px", background: "rgba(255,255,255,0.35)", filter: "blur(2px)", transform: "rotate(-20deg)" }} />
+                  {state.isPlaying
+                    ? <Pause size={18} fill="#1a0e00" style={{ color: "#1a0e00", position: "relative", zIndex: 1 }} />
+                    : <Play size={18} fill="#1a0e00" style={{ color: "#1a0e00", position: "relative", zIndex: 1, marginLeft: "2px" }} />
+                  }
+                </span>
               </button>
               <button type="button" onClick={nextTrack} className="p-2 text-white/70 hover:text-white transition-colors">
                 <SkipForward size={22} />
