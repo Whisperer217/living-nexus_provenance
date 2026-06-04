@@ -240,7 +240,42 @@ downloadRouter.get("/api/download/batch/:batchIndex", async (req: Request, res: 
     return;
   }
 
-  // 3. Build ZIP
+  // 3. Fetch all audio + cover art + certificates IN PARALLEL
+  //    Sequential fetching was the root cause of Cloud Run 60s timeouts:
+  //    10 tracks × 45s timeout = 450s worst case. Parallel caps it at ~45s.
+  type TrackAssets = {
+    trackNum: string;
+    song: Song;
+    witnessId: string;
+    verifyUrl: string;
+    year: string;
+    audioBuffer: Buffer | null;
+    coverBuffer: Buffer | null;
+    certBuffer: Buffer | null;
+  };
+
+  const trackAssets = await Promise.all(
+    batchSongs.map(async (song, i): Promise<TrackAssets> => {
+      const trackNum = String(start + i + 1).padStart(2, "0");
+      const witnessId = song.witnessId ?? "UNWITNESSED";
+      const verifyUrl = `https://www.livingnexus.org/verify/${witnessId}`;
+      const year = new Date(song.createdAt).getFullYear().toString();
+
+      const [audioBuffer, coverBuffer, certBuffer] = await Promise.all([
+        song.fileUrl ? fetchBytes(song.fileUrl) : Promise.resolve(null),
+        song.coverArtUrl ? fetchBytes(song.coverArtUrl) : Promise.resolve(null),
+        song.certificateUrl ? fetchBytes(song.certificateUrl) : Promise.resolve(null),
+      ]);
+
+      if (!audioBuffer && song.fileUrl) {
+        console.warn(`[download/batch] Skipping track ${song.id} "${song.title}" — fetch failed after retry`);
+      }
+
+      return { trackNum, song, witnessId, verifyUrl, year, audioBuffer, coverBuffer, certBuffer };
+    })
+  );
+
+  // 4. Build ZIP from fetched assets
   const zip = new JSZip();
   const readmeLines: string[] = [
     `Living Nexus — Creator Archive`,
@@ -255,14 +290,7 @@ downloadRouter.get("/api/download/batch/:batchIndex", async (req: Request, res: 
     ``,
   ];
 
-  for (let i = 0; i < batchSongs.length; i++) {
-    const song = batchSongs[i];
-    const trackNum = String(start + i + 1).padStart(2, "0");
-    const witnessId = song.witnessId ?? "UNWITNESSED";
-    const verifyUrl = `https://www.livingnexus.org/verify/${witnessId}`;
-    const year = new Date(song.createdAt).getFullYear().toString();
-
-    // Add README entry
+  for (const { trackNum, song, witnessId, verifyUrl, year, audioBuffer, coverBuffer, certBuffer } of trackAssets) {
     readmeLines.push(`Track ${trackNum}: ${song.title}`);
     readmeLines.push(`  WID: ${witnessId}`);
     readmeLines.push(`  Verify: ${verifyUrl}`);
@@ -270,61 +298,46 @@ downloadRouter.get("/api/download/batch/:batchIndex", async (req: Request, res: 
     readmeLines.push(`  Uploaded: ${new Date(song.createdAt).toLocaleDateString()}`);
     readmeLines.push(``);
 
-    // Fetch and tag audio — skip track on failure (don't abort entire ZIP)
-    if (song.fileUrl) {
-      const audioBuffer = await fetchBytes(song.fileUrl);
-      if (!audioBuffer) {
-        console.warn(`[download/batch] Skipping track ${song.id} "${song.title}" — fetch failed after retry`);
-        readmeLines.push(`  ⚠ Audio file unavailable — download individually from livingnexus.org/track/${song.id}`);
-        readmeLines.push(``);
-      }
-      if (audioBuffer) {
-        // Fetch cover art
-        let coverBuffer: Buffer | null = null;
-        if (song.coverArtUrl) coverBuffer = await fetchBytes(song.coverArtUrl);
-
-        // Build ID3 tags
-        const tags: NodeID3.Tags = {
-          title: song.title,
-          artist: creatorName,
-          album: song.albumName || "Living Nexus",
-          year,
-          genre: song.genre || undefined,
-          comment: { language: "eng", text: `Witness ID: ${witnessId}` },
-          userDefinedText: [
-            { description: "LNWID",         value: witnessId },
-            { description: "LN_CREATOR",    value: creatorName },
-            { description: "LN_TIMESTAMP",  value: song.createdAt.toISOString() },
-            { description: "LN_VERIFY_URL", value: verifyUrl },
-            { description: "LN_PLATFORM",   value: "Living Nexus — Sovereign Music" },
-            { description: "LN_DOCTRINE",   value: "Command Domains LLC · BDDT Publishing · Genesis Day March 20 2026" },
-            { description: "LN_AI_CONSENT", value: song.aiConsent ?? "prohibited" },
-          ],
-        };
-        if (coverBuffer) {
-          tags.image = {
-            mime: "image/jpeg",
-            type: { id: 3, name: "front cover" },
-            description: "Cover Art",
-            imageBuffer: coverBuffer,
-          };
-        }
-
-        const taggedBuffer = NodeID3.write(tags, audioBuffer);
-        const safeTitle = sanitizeFilename(song.title);
-        const widShort = witnessId.length > 20 ? witnessId.slice(0, 20) : witnessId;
-        const audioFilename = `${trackNum}_${safeTitle}_[${widShort}].mp3`;
-        zip.file(audioFilename, taggedBuffer);
-      }
+    if (song.fileUrl && !audioBuffer) {
+      readmeLines.push(`  ⚠ Audio file unavailable — download individually from livingnexus.org/track/${song.id}`);
+      readmeLines.push(``);
     }
 
-    // Add WID certificate PDF if available
-    if (song.certificateUrl) {
-      const certBuffer = await fetchBytes(song.certificateUrl);
-      if (certBuffer) {
-        const safeCertTitle = sanitizeFilename(song.title);
-        zip.file(`certificates/${trackNum}_${safeCertTitle}_WID_Certificate.pdf`, certBuffer);
+    if (audioBuffer) {
+      const tags: NodeID3.Tags = {
+        title: song.title,
+        artist: creatorName,
+        album: song.albumName || "Living Nexus",
+        year,
+        genre: song.genre || undefined,
+        comment: { language: "eng", text: `Witness ID: ${witnessId}` },
+        userDefinedText: [
+          { description: "LNWID",         value: witnessId },
+          { description: "LN_CREATOR",    value: creatorName },
+          { description: "LN_TIMESTAMP",  value: song.createdAt.toISOString() },
+          { description: "LN_VERIFY_URL", value: verifyUrl },
+          { description: "LN_PLATFORM",   value: "Living Nexus — Sovereign Music" },
+          { description: "LN_DOCTRINE",   value: "Command Domains LLC · BDDT Publishing · Genesis Day March 20 2026" },
+          { description: "LN_AI_CONSENT", value: song.aiConsent ?? "prohibited" },
+        ],
+      };
+      if (coverBuffer) {
+        tags.image = {
+          mime: "image/jpeg",
+          type: { id: 3, name: "front cover" },
+          description: "Cover Art",
+          imageBuffer: coverBuffer,
+        };
       }
+      const taggedBuffer = NodeID3.write(tags, audioBuffer);
+      const safeTitle = sanitizeFilename(song.title);
+      const widShort = witnessId.length > 20 ? witnessId.slice(0, 20) : witnessId;
+      zip.file(`${trackNum}_${safeTitle}_[${widShort}].mp3`, taggedBuffer);
+    }
+
+    if (certBuffer) {
+      const safeCertTitle = sanitizeFilename(song.title);
+      zip.file(`certificates/${trackNum}_${safeCertTitle}_WID_Certificate.pdf`, certBuffer);
     }
   }
 

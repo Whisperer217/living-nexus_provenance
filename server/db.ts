@@ -364,13 +364,18 @@ export async function reorderSongs(userId: number, orderedIds: number[]) {
   );
 }
 
-export async function getPublicSongs(opts?: { genre?: string; search?: string; limit?: number; offset?: number; randomize?: boolean; seed?: number; contentType?: "audio" | "lyrics" | "manuscript" | "comic" }) {
+export async function getPublicSongs(opts?: { genre?: string; search?: string; limit?: number; offset?: number; randomize?: boolean; seed?: number; contentType?: "audio" | "lyrics" | "manuscript" | "comic" | "written" }) {
   const db = await getDb();
   if (!db) return [];
   const limit = opts?.limit ?? 50;
   const offset = opts?.offset ?? 0;
   const conditions: ReturnType<typeof eq>[] = [eq(songs.isPublic, true) as ReturnType<typeof eq>, eq(songs.status, "Published") as ReturnType<typeof eq>];
-  if (opts?.contentType) conditions.push(eq(songs.contentType, opts.contentType) as ReturnType<typeof eq>);
+  if (opts?.contentType === "written") {
+    // "written" is a virtual type that matches both manuscript and comic
+    conditions.push(or(eq(songs.contentType, "manuscript"), eq(songs.contentType, "comic")) as unknown as ReturnType<typeof eq>);
+  } else if (opts?.contentType) {
+    conditions.push(eq(songs.contentType, opts.contentType) as ReturnType<typeof eq>);
+  }
   if (opts?.genre) conditions.push(eq(songs.genre, opts.genre) as ReturnType<typeof eq>);
   if (opts?.search) {
     conditions.push(or(
@@ -2503,7 +2508,11 @@ export async function getTrendingWorks(opts?: { genre?: string; limit?: number; 
     eq(songs.status, "Published"),
   ];
   if (opts?.genre) conditions.push(eq(songs.genre, opts.genre));
-  if (opts?.contentType) conditions.push(eq(songs.contentType, opts.contentType as "audio" | "lyrics" | "manuscript" | "comic"));
+  if (opts?.contentType === "written") {
+    conditions.push(or(eq(songs.contentType, "manuscript"), eq(songs.contentType, "comic")) as unknown as ReturnType<typeof sql>);
+  } else if (opts?.contentType) {
+    conditions.push(eq(songs.contentType, opts.contentType as "audio" | "lyrics" | "manuscript" | "comic"));
+  }
 
   const rows = await db.select({
     song: songs,
@@ -3642,7 +3651,7 @@ export async function getRecentCreators(limit = 8) {
 }
 
 /** Return top `limit` published songs uploaded in the last 7 days, ranked by play count. */
-export async function getNewThisWeek(opts?: { genre?: string; contentType?: "audio" | "lyrics" | "manuscript" | "comic"; limit?: number }) {
+export async function getNewThisWeek(opts?: { genre?: string; contentType?: "audio" | "lyrics" | "manuscript" | "comic" | "written"; limit?: number }) {
   const db = await getDb();
   if (!db) return [];
   const limit = opts?.limit ?? 24;
@@ -3653,7 +3662,11 @@ export async function getNewThisWeek(opts?: { genre?: string; contentType?: "aud
     sql`${songs.createdAt} >= ${sevenDaysAgo}` as unknown as ReturnType<typeof eq>,
   ];
   if (opts?.genre) conditions.push(eq(songs.genre, opts.genre) as ReturnType<typeof eq>);
-  if (opts?.contentType) conditions.push(eq(songs.contentType, opts.contentType) as ReturnType<typeof eq>);
+  if (opts?.contentType === "written") {
+    conditions.push(or(eq(songs.contentType, "manuscript"), eq(songs.contentType, "comic")) as unknown as ReturnType<typeof eq>);
+  } else if (opts?.contentType) {
+    conditions.push(eq(songs.contentType, opts.contentType) as ReturnType<typeof eq>);
+  }
   return db.select({
     song: songs,
     creator: {

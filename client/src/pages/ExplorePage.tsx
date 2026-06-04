@@ -398,8 +398,8 @@ export default function ExplorePage() {
     { staleTime: 60_000, refetchOnWindowFocus: false }
   );
 
-  // Map UI "novel" alias → server "manuscript" content type (must be declared before queries)
-  const serverContentType = contentType === "novel" ? "manuscript" : contentType;
+  // Map UI "novel" alias → server "written" content type (matches both manuscript AND comic)
+  const serverContentType = contentType === "novel" ? "written" : contentType;
 
   // New This Week query
   const { data: newThisWeekData, isLoading: newThisWeekLoading } = trpc.songs.newThisWeek.useQuery(

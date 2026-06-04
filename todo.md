@@ -4686,3 +4686,9 @@
 - [x] Wire title field to songs.updateMetadata mutation payload
 - [x] Add WID-immutability note under title field: "Renaming does not change the Witness ID"
 - [x] TypeScript: 0 errors | Vitest: 237/237 passing
+## Phase 181: Batch Download Parallel Fetch + Comics/Novels Filter Fix
+- [x] Batch archive download: rewrite sequential fetch loop to parallel Promise.all — fixes Cloud Run 60s timeout (10 tracks × 45s sequential = 450s worst case, now ~45s max)
+- [x] Add "written" virtual contentType to getPublicSongs, getTrendingWorks, getNewThisWeek — OR(manuscript, comic) condition
+- [x] Update tRPC router discover/trending/newThisWeek to accept "written" in contentType enum
+- [x] Fix ExplorePage: Comics & Novels tab now sends "written" (was "manuscript"), so both comics and manuscripts appear
+- [x] TypeScript: 0 errors | Vitest: 237/237 passing
