@@ -107,6 +107,7 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
   // Desktop: centered modal. Mobile: right-side sheet.
   const isMobile = useIsMobile();
 
+  const [title, setTitle] = useState(song.title ?? "");
   const [caption, setCaption] = useState(song.caption ?? "");
   const [genre, setGenre] = useState(song.genre ?? "");
   const [collectionTag, setCollectionTag] = useState(song.collectionTag ?? "");
@@ -442,6 +443,7 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
     try {
       await updateMetadata.mutateAsync({
         songId: song.id,
+        title: title.trim() || undefined,
         caption: caption.trim() || null,
         genre: genre || null,
         collectionTag: collectionTag.trim() || null,
@@ -737,6 +739,28 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
 
         {/* Form */}
         <div className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 py-6 space-y-6" style={{ WebkitOverflowScrolling: "touch", overscrollBehavior: "contain" }}>
+
+          {/* Track Title */}
+          <div className="space-y-2.5">
+            <Label className="text-white text-sm font-medium">
+              {isManuscript ? "Manuscript Title" : isComic ? "Comic / Novel Title" : "Track Title"}
+            </Label>
+            <Input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Enter title…"
+              maxLength={200}
+              className="text-sm"
+              style={{
+                background: "rgba(255,255,255,0.04)",
+                border: "1px solid rgba(255,255,255,0.12)",
+                color: "#f1f5f9",
+              }}
+            />
+            <p className="text-xs" style={{ color: "#64748b" }}>
+              Renaming this work does not change the Witness ID — the cryptographic proof is based on file content, not the title.
+            </p>
+          </div>
 
           {/* Cover Art */}
           <div className="space-y-2.5">

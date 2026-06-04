@@ -31,21 +31,31 @@ export const downloadRouter = Router();
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 const MAX_INLINE_BYTES = 30 * 1024 * 1024; // 30 MB — above this we redirect to S3 directly
-const FETCH_TIMEOUT_MS = 25_000; // 25s timeout to stay under Cloud Run's 30s limit
+const FETCH_TIMEOUT_MS = 45_000; // 45s timeout — increased from 25s to handle slow CDN cold-cache responses
+const FETCH_RETRIES = 1; // retry once on timeout/failure before giving up
 
-async function fetchBytes(url: string): Promise<Buffer | null> {
+async function fetchBytes(url: string, retries = FETCH_RETRIES): Promise<Buffer | null> {
   try {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
     const res = await fetch(url, { signal: controller.signal });
     clearTimeout(timer);
-    if (!res.ok) return null;
+    if (!res.ok) {
+      console.warn(`[download] fetchBytes non-OK status ${res.status} for ${url.slice(0, 80)}`);
+      return null;
+    }
     // Check Content-Length before buffering to avoid OOM on large files
     const contentLength = parseInt(res.headers.get("content-length") ?? "0", 10);
     if (contentLength > MAX_INLINE_BYTES) return null; // caller will fall back to redirect
     const ab = await res.arrayBuffer();
     return Buffer.from(ab);
-  } catch {
+  } catch (err) {
+    const isTimeout = err instanceof Error && err.name === "AbortError";
+    console.warn(`[download] fetchBytes ${isTimeout ? "timed out" : "failed"} for ${url.slice(0, 80)} — retries left: ${retries}`);
+    if (retries > 0) {
+      await new Promise(r => setTimeout(r, 1000)); // brief pause before retry
+      return fetchBytes(url, retries - 1);
+    }
     return null;
   }
 }
@@ -105,9 +115,13 @@ downloadRouter.get("/api/download/:songId", async (req: Request, res: Response) 
   //    This avoids OOM / 503 errors on Cloud Run for large audio files.
   const audioBuffer = await fetchBytes(song.fileUrl);
   if (!audioBuffer) {
-    // Fallback: redirect directly to S3 URL with a Content-Disposition hint
-    // The browser will download it without ID3 tags, but it won't 503.
-    console.warn(`[download] Falling back to S3 redirect for song ${songId} (file too large or fetch failed)`);
+    // Fallback: redirect directly to CloudFront URL.
+    // Set Content-Disposition so the browser downloads instead of opening a new tab.
+    // The file won't have ID3 tags but it won't 503.
+    console.warn(`[download] Falling back to CDN redirect for song ${songId} (file too large or fetch failed after retry)`);
+    const safeTitle = sanitizeFilename(song.title);
+    const fallbackFilename = `${safeTitle}.mp3`;
+    res.setHeader("Content-Disposition", `attachment; filename="${fallbackFilename}"`);
     res.redirect(302, song.fileUrl);
     return;
   }
@@ -256,9 +270,14 @@ downloadRouter.get("/api/download/batch/:batchIndex", async (req: Request, res: 
     readmeLines.push(`  Uploaded: ${new Date(song.createdAt).toLocaleDateString()}`);
     readmeLines.push(``);
 
-    // Fetch and tag audio
+    // Fetch and tag audio — skip track on failure (don't abort entire ZIP)
     if (song.fileUrl) {
       const audioBuffer = await fetchBytes(song.fileUrl);
+      if (!audioBuffer) {
+        console.warn(`[download/batch] Skipping track ${song.id} "${song.title}" — fetch failed after retry`);
+        readmeLines.push(`  ⚠ Audio file unavailable — download individually from livingnexus.org/track/${song.id}`);
+        readmeLines.push(``);
+      }
       if (audioBuffer) {
         // Fetch cover art
         let coverBuffer: Buffer | null = null;

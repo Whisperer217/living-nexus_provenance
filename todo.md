@@ -4674,3 +4674,15 @@
 - [ ] Fix volume slider cut off at bottom
 - [ ] Ensure mini bar play button is also correctly sized
 - [ ] TypeScript: 0 errors | Tests: 237/237 pass
+
+## Phase 180: Download Route Timeout Fix + Track Title Editing
+
+- [x] Increase download route fetch timeout from 25s to 45s (handles slow CDN cold-cache)
+- [x] Add retry logic (1 retry with 1s pause) to fetchBytes() before giving up
+- [x] Batch download: skip failed tracks instead of aborting entire ZIP
+- [x] CDN fallback redirect: set Content-Disposition header so browser downloads instead of opening inline
+- [x] Add title state to EditTrackPanel.tsx (pre-populated with song.title)
+- [x] Add Track Title input field at top of EditTrackPanel form (above Cover Art)
+- [x] Wire title field to songs.updateMetadata mutation payload
+- [x] Add WID-immutability note under title field: "Renaming does not change the Witness ID"
+- [x] TypeScript: 0 errors | Vitest: 237/237 passing
