@@ -4692,3 +4692,11 @@
 - [x] Update tRPC router discover/trending/newThisWeek to accept "written" in contentType enum
 - [x] Fix ExplorePage: Comics & Novels tab now sends "written" (was "manuscript"), so both comics and manuscripts appear
 - [x] TypeScript: 0 errors | Vitest: 237/237 passing
+## Phase 182: Typography System Overhaul
+- [x] Add type scale CSS variables to :root (--text-xs through --text-h1, --leading-*, --weight-*, --tracking-*, --space-*)
+- [x] Update @layer base: body font-size to 16px (var(--text-base)), line-height 1.7, weight 450
+- [x] Rewrite h1-h4 base styles using type scale variables (Cinzel h1/h2, Cormorant h3/h4, DM Sans h5/h6)
+- [x] Add semantic utility classes: .type-body, .type-ui, .type-caption, .type-overline, .type-h1 through .type-h4
+- [x] Update .museum-section-title, .museum-section-header, .museum-caption to reference variables
+- [x] Add global minimum font-size floor: text-[7px]/[8px]/[9px]/[10px] all bumped to var(--text-xs) = 11px
+- [x] TypeScript: 0 errors | Vitest: 237/237 passing
