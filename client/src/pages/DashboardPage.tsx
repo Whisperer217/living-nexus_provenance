@@ -432,7 +432,7 @@ export default function DashboardPage() {
                 <p className="text-2xl font-bold" style={{ color, fontFamily: "'Cinzel', serif" }}>{value}</p>
                 {delta != null && delta > 0 && (
                   <span
-                    className="text-[10px] font-bold px-1.5 py-0.5 rounded-full mb-0.5 flex items-center gap-0.5"
+                    className="text-[11px] font-bold px-1.5 py-0.5 rounded-full mb-0.5 flex items-center gap-0.5"
                     style={{ background: "color-mix(in srgb, var(--lnx-red) 20%, transparent)", color: "var(--lnx-orange-soft)", border: "1px solid color-mix(in srgb, var(--lnx-red) 40%, transparent)" }}
                   >
                     <TrendingUp className="w-2.5 h-2.5" />
@@ -573,7 +573,7 @@ export default function DashboardPage() {
             Activity
             {(newEventCount as number) > 0 && activeTab !== "activity" ? (
               <span
-                className="text-[9px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center animate-pulse"
+                className="text-[11px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center animate-pulse"
                 style={{ background: "var(--ln-ember)", color: "white" }}
               >{(newEventCount as number) > 99 ? "99+" : String(newEventCount)}</span>
             ) : activityEvents?.length ? (
@@ -946,13 +946,13 @@ export default function DashboardPage() {
                             />
                             <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-0.5">
                               <Camera className="w-3.5 h-3.5 text-white" />
-                              <span className="text-white text-[8px]">Edit</span>
+                              <span className="text-white text-[11px]">Edit</span>
                             </div>
                           </>
                         ) : (
                           <div className="w-full h-full flex flex-col items-center justify-center gap-1">
                             <Camera className="w-4 h-4" style={{ color: "rgba(196,154,40,0.4)" }} />
-                            <span className="text-[8px]" style={{ color: "rgba(196,154,40,0.4)" }}>Add Cover</span>
+                            <span className="text-[11px]" style={{ color: "rgba(196,154,40,0.4)" }}>Add Cover</span>
                           </div>
                         )}
                       </div>
@@ -966,7 +966,7 @@ export default function DashboardPage() {
                         <p className="text-xs mb-3" style={{ color: "var(--ln-iron)" }}>
                           {col.trackCount ?? "?"} tracks &middot; Registered {new Date(col.createdAt).toLocaleDateString()}
                         </p>
-                        <p className="text-[10px] font-mono break-all" style={{ color: "var(--ln-iron)" }}>
+                        <p className="text-[11px] font-mono break-all" style={{ color: "var(--ln-iron)" }}>
                           Hash: {col.collectiveHash?.slice(0, 32)}…
                         </p>
                       </div>
@@ -1544,15 +1544,15 @@ function ArchiveTab() {
                     <div className="flex-1 min-w-0">
                       <p className="text-sm truncate" style={{ color: "var(--ln-parchment)" }}>{track.title}</p>
                       {track.witnessId && (
-                        <p className="text-[10px] font-mono" style={{ color: "rgba(232,223,200,0.6)" }}>{track.witnessId}</p>
+                        <p className="text-[11px] font-mono" style={{ color: "rgba(232,223,200,0.6)" }}>{track.witnessId}</p>
                       )}
                     </div>
                     <div className="flex items-center gap-1.5 flex-shrink-0">
                       {track.hasAudio && (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: "rgba(58,138,86,0.15)", color: "var(--lnx-green)" }}>MP3</span>
+                        <span className="text-[11px] px-1.5 py-0.5 rounded" style={{ background: "rgba(58,138,86,0.15)", color: "var(--lnx-green)" }}>MP3</span>
                       )}
                       {track.hasCertificate && (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: "rgba(196,154,40,0.08)", color: "var(--ln-gold)" }}>WID</span>
+                        <span className="text-[11px] px-1.5 py-0.5 rounded" style={{ background: "rgba(196,154,40,0.08)", color: "var(--ln-gold)" }}>WID</span>
                       )}
                     </div>
                   </div>
@@ -1653,21 +1653,21 @@ function WIDCacheTab() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1 flex-wrap">
                     <span
-                      className="text-[10px] font-bold tracking-widest px-2 py-0.5 rounded"
+                      className="type-overline px-2 py-0.5 rounded"
                       style={{ background: `${color}18`, color, fontFamily: "'Cinzel', serif" }}
                     >
                       {label}
                     </span>
                     <CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "var(--lnx-green)" }} />
-                    <span className="text-[10px]" style={{ color: "var(--lnx-green)" }}>Verified</span>
+                    <span className="text-[11px]" style={{ color: "var(--lnx-green)" }}>Verified</span>
                   </div>
                   <p className="text-sm font-semibold truncate mb-1" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>
                     {snap.title}
                   </p>
-                  <p className="text-[10px] font-mono break-all mb-1" style={{ color: "var(--ln-iron)" }}>
+                  <p className="text-[11px] font-mono break-all mb-1" style={{ color: "var(--ln-iron)" }}>
                     {snap.wid}
                   </p>
-                  <p className="text-[10px]" style={{ color: "var(--ln-smoke)" }}>
+                  <p className="text-[11px]" style={{ color: "var(--ln-smoke)" }}>
                     Witnessed {new Date(snap.timestamp).toLocaleString()}
                   </p>
                 </div>
@@ -1677,7 +1677,7 @@ function WIDCacheTab() {
                   href={`/verify/${snap.wid}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-shrink-0 flex items-center gap-1 text-[11px] px-3 py-1.5 rounded-lg transition-opacity hover:opacity-80"
+                  className="flex-shrink-0 flex items-center gap-1 type-overline px-3 py-1.5 rounded-lg transition-opacity hover:opacity-80"
                   style={{ background: `${color}18`, color, border: `1px solid ${color}44`, fontFamily: "'Cinzel', serif" }}
                 >
                   <ExternalLink className="w-3 h-3" />

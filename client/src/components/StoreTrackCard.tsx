@@ -331,7 +331,7 @@ export function StoreTrackCard({ song, size = "md", allSongs, songIndex }: Store
                   />
                 )}
                 <span
-                  className="text-[10px] truncate"
+                  className="type-caption truncate"
                   style={{ color: "rgba(200,169,106,0.85)", fontFamily: "'Cinzel', serif", letterSpacing: "0.02em" }}
                 >
                   {song.artistHandle ? `@${song.artistHandle}` : (song.artistName || "Unknown")}
@@ -339,7 +339,7 @@ export function StoreTrackCard({ song, size = "md", allSongs, songIndex }: Store
                 {(song.wid || song.widShort) && (
                   <div className="flex items-center gap-0.5 flex-shrink-0">
                     <Shield className="w-2.5 h-2.5" style={{ color: "rgba(196,154,40,0.6)" }} />
-                    <span className="text-[8px] font-mono tracking-wider uppercase" style={{ color: "rgba(196,154,40,0.5)" }}>WID</span>
+                    <span className="type-overline" style={{ color: "rgba(196,154,40,0.5)" }}>WID</span>
                   </div>
                 )}
               </div>
@@ -349,18 +349,18 @@ export function StoreTrackCard({ song, size = "md", allSongs, songIndex }: Store
                 {plays && (
                   <div className="flex items-center gap-0.5">
                     <Flame className="w-2.5 h-2.5" style={{ color: "rgba(196,154,40,0.55)" }} />
-                    <span className="text-[10px] tabular-nums" style={{ color: "rgba(196,154,40,0.55)" }}>{plays}</span>
+                    <span className="text-[11px] tabular-nums" style={{ color: "rgba(196,154,40,0.55)" }}>{plays}</span>
                   </div>
                 )}
                 {tips && (
                   <div className="flex items-center gap-0.5">
                     <Heart className="w-2.5 h-2.5" style={{ color: "rgba(220,80,80,0.65)" }} />
-                    <span className="text-[10px] tabular-nums" style={{ color: "rgba(220,80,80,0.65)" }}>{tips}</span>
+                    <span className="text-[11px] tabular-nums" style={{ color: "rgba(220,80,80,0.65)" }}>{tips}</span>
                   </div>
                 )}
                 {funding && (
                   <div className="flex items-center gap-0.5">
-                    <span className="text-[10px] tabular-nums font-medium" style={{ color: "rgba(196,154,40,0.8)" }}>+{funding}</span>
+                    <span className="text-[11px] tabular-nums font-medium" style={{ color: "rgba(196,154,40,0.8)" }}>+{funding}</span>
                   </div>
                 )}
               </div>
@@ -369,7 +369,7 @@ export function StoreTrackCard({ song, size = "md", allSongs, songIndex }: Store
             {/* Contributed badge — shown when user has supported */}
             {isActive && (
               <div
-                className="absolute top-3 right-3 text-[8px] px-2 py-0.5 rounded-full font-bold tracking-wider"
+                className="absolute top-3 right-3 text-[11px] px-2 py-0.5 rounded-full font-bold tracking-wider"
                 style={{
                   background: "rgba(196,154,40,0.18)",
                   border: "1px solid rgba(196,154,40,0.4)",

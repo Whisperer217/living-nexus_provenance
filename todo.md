@@ -4700,3 +4700,12 @@
 - [x] Update .museum-section-title, .museum-section-header, .museum-caption to reference variables
 - [x] Add global minimum font-size floor: text-[7px]/[8px]/[9px]/[10px] all bumped to var(--text-xs) = 11px
 - [x] TypeScript: 0 errors | Vitest: 237/237 passing
+
+## Phase 183: Typography Migration & Explore Density
+- [x] Migrate TrackCard genre chips, WID badge, testimony, like count to semantic tokens
+- [x] Migrate StoreTrackCard artist name, WID, resonance stats, NOW PLAYING badge
+- [x] Migrate ArchivePage WID monospace spans to text-[11px]
+- [x] Migrate DashboardPage stat delta chips, activity badge, cover overlay labels, archive batch WID, WID cache labels
+- [x] Migrate CreatorProfilePage FeaturedCard WID/AI-OFF/title/genre, SongRow WID badge
+- [x] Migrate ExploreCard hot badge, WID badge, title, artist row, content-type chip, genre chips, like count
+- [x] Increase ExploreCard info panel padding and genre chip spacing for mobile readability

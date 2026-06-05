@@ -194,21 +194,21 @@ function FeaturedCard({ song, onPlay, isPlaying }: { song: any; onPlay: () => vo
           )}
           {song.witnessId && (
             <Link href={`/verify/${song.witnessId}`} onClick={(e: React.MouseEvent) => e.stopPropagation()}
-              className="absolute bottom-2 left-2 flex items-center gap-0.5 text-[8px] font-bold px-1.5 py-0.5 rounded z-10 font-heading tracking-wider wid-glow transition-opacity opacity-90 hover:opacity-100"
+              className="absolute bottom-2 left-2 flex items-center gap-0.5 type-overline px-1.5 py-0.5 rounded z-10 font-heading tracking-wider wid-glow transition-opacity opacity-90 hover:opacity-100"
               style={{ background: "rgba(0,0,0,0.72)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.5)" }}
             >
               <Shield size={8} /><span>WID</span>
             </Link>
           )}
           {song.aiConsent === "prohibited" && (
-            <div className="absolute top-2 left-2 text-[9px] font-bold px-1.5 py-0.5 rounded" style={{ background: "rgba(239,68,68,0.85)", color: "white" }}>
+            <div className="absolute top-2 left-2 text-[11px] font-bold px-1.5 py-0.5 rounded" style={{ background: "rgba(239,68,68,0.85)", color: "white" }}>
               AI OFF
             </div>
           )}
         </div>
         <div className="p-3">
-          <p className="text-[13px] font-heading text-white/90 truncate mb-0.5 tracking-wide hover:text-[#C49A28] transition-colors" style={{ fontFamily: "'Cinzel', serif" }}>{song.title}</p>
-          {song.genre && <p className="text-[10px] truncate" style={{ color: "var(--ln-smoke)" }}>{song.genre}</p>}
+          <p className="type-ui font-heading text-white/90 truncate mb-0.5 tracking-wide hover:text-[#C49A28] transition-colors" style={{ fontFamily: "'Cinzel', serif" }}>{song.title}</p>
+          {song.genre && <p className="type-caption truncate" style={{ color: "var(--ln-smoke)" }}>{song.genre}</p>}
         </div>
       </Link>
     </div>
@@ -284,7 +284,7 @@ function SongRow({ song, index, isPlaying, onPlay, isOwner, onDelete }: {
                 href={`/verify/${song.witnessId}`}
                 onClick={(e: React.MouseEvent) => e.stopPropagation()}
               >
-                <Badge className="text-[9px] px-1 py-0 cursor-pointer hover:opacity-80 transition-opacity" style={{ background: "rgba(196,154,40,0.15)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.2)" }}>
+                <Badge className="type-overline px-1 py-0 cursor-pointer hover:opacity-80 transition-opacity" style={{ background: "rgba(196,154,40,0.15)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.2)" }}>
                   <Shield className="w-2.5 h-2.5 mr-0.5" /> WID
                 </Badge>
               </Link>

@@ -182,7 +182,7 @@ function ExploreCard({
             }}
           >
             <Crown size={9} style={{ color: "var(--ln-coal)" }} />
-            <span className="text-[8px] font-heading font-bold tracking-widest" style={{ color: "var(--ln-coal)" }}>
+            <span className="text-[11px] font-heading font-bold tracking-widest" style={{ color: "var(--ln-coal)" }}>
               {(song.playCount ?? 0) >= 1000
                 ? `${Math.floor((song.playCount ?? 0) / 1000)}K PLAYS`
                 : `${song.playCount} PLAYS`}
@@ -195,7 +195,7 @@ function ExploreCard({
           <Link
             href={`/verify/${song.witnessId}`}
             onClick={(e: React.MouseEvent) => e.stopPropagation()}
-            className="absolute bottom-2 left-2 flex items-center gap-0.5 text-[8px] font-bold px-1.5 py-0.5 rounded z-10 font-heading tracking-wider wid-glow wid-origin-glow transition-opacity opacity-90 hover:opacity-100"
+            className="absolute bottom-2 left-2 flex items-center gap-0.5 type-overline px-1.5 py-0.5 rounded z-10 font-heading tracking-wider wid-glow wid-origin-glow transition-opacity opacity-90 hover:opacity-100"
             style={{ background: "rgba(0,0,0,0.72)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.5)" }}
             title={`Verified Witness ID: ${song.witnessId}`}
           >
@@ -211,20 +211,20 @@ function ExploreCard({
       </div>
 
       {/* ── Info panel ── */}
-      <div className="p-3">
+      <div className="p-3 pb-4">
         {/* Song title → song/book detail page */}
         <Link
           href={isNonAudio ? `/book/${song.id}` : `/song/${song.id}`}
           onClick={(e: React.MouseEvent) => e.stopPropagation()}
-          className="block text-[13px] font-heading text-white/90 truncate mb-1 tracking-wide hover:text-[#C49A28] transition-colors cursor-pointer"
+          className="block type-ui font-heading text-white/90 truncate mb-1 tracking-wide hover:text-[#C49A28] transition-colors cursor-pointer"
           title={`Open ${song.title}`}
         >
           {song.title}
         </Link>
 
         {/* Artist row — avatar initial + name → creator profile */}
-        <div className="flex items-center gap-2 text-[11px] text-white/75 mb-2">
-          <div className="w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold
+        <div className="flex items-center gap-2 type-caption text-white/75 mb-2.5">
+          <div className="w-4 h-4 rounded-full flex items-center justify-center text-[11px] font-bold
             bg-gradient-to-br from-[#7C3AED] to-[#A78BFA] text-white flex-shrink-0">
             {artistName.charAt(0).toUpperCase()}
           </div>
@@ -244,20 +244,20 @@ function ExploreCard({
 
         {/* Genre pills — own row, never competes with actions */}
         {/* Content-type chip */}
-        <div className="flex flex-wrap gap-1 mb-1 items-center">
+        <div className="flex flex-wrap gap-1 mb-2 items-center">
           <span
-            className="text-[8px] px-1.5 py-0.5 rounded-full font-heading tracking-widest leading-none uppercase"
+            className="type-overline px-1.5 py-0.5 rounded-full font-heading tracking-widest leading-none uppercase"
             style={{ background: ctColors.chipBg, color: ctColors.text, border: `1px solid ${ctColors.chipBorder}` }}
           >
             {ctColors.icon} {ctColors.label}
           </span>
         </div>
         {song.genre && (
-          <div className="flex flex-wrap gap-1 mb-2">
+          <div className="flex flex-wrap gap-1.5 mb-3">
             {(song.genre as string).split(/[,/|]+/).map((t: string) => t.trim()).filter(Boolean).slice(0, 3).map((tag: string) => (
               <span
                 key={tag}
-                className="text-[9px] px-1.5 py-0.5 rounded-full font-body leading-tight"
+                className="text-[11px] px-1.5 py-0.5 rounded-full font-body leading-tight"
                 style={{ background: ctColors.chipBg, color: ctColors.text, border: `1px solid ${ctColors.chipBorder}` }}
               >
                 {tag}
@@ -265,7 +265,7 @@ function ExploreCard({
             ))}
             {(song.genre as string).split(/[,/|]+/).filter((t: string) => t.trim()).length > 3 && (
               <span
-                className="text-[9px] px-1.5 py-0.5 rounded-full font-body leading-tight"
+                className="text-[11px] px-1.5 py-0.5 rounded-full font-body leading-tight"
                 style={{ background: "var(--ln-coal)", color: "var(--ln-iron)", border: "1px solid #111009" }}
               >
                 +{(song.genre as string).split(/[,/|]+/).filter((t: string) => t.trim()).length - 3}
@@ -283,7 +283,7 @@ function ExploreCard({
             >
               <Heart size={12} fill={liked ? "currentColor" : "none"} />
               {likeCount > 0 && (
-                <span className="text-[10px] leading-none font-medium tabular-nums">
+                <span className="text-[11px] leading-none font-medium tabular-nums">
                   {likeCount >= 1000 ? `${(likeCount / 1000).toFixed(1)}k` : likeCount}
                 </span>
               )}

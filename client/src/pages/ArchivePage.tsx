@@ -99,7 +99,7 @@ function ConfirmDeleteModal({
           </div>
           <p className="text-xs leading-relaxed" style={{ color: "#E2E8F0" }}>
             Your Witness ID{" "}
-            <span className="font-mono text-[10px]" style={{ color: "var(--ln-gold)" }}>
+            <span className="font-mono text-[11px]" style={{ color: "var(--ln-gold)" }}>
               {song.witnessId}
             </span>{" "}
             remains on record permanently. The cryptographic proof of origin is never deleted — only the track is removed from public view.
@@ -705,7 +705,7 @@ export default function ArchivePage() {
                     {/* WID in monospace — always shown if present */}
                     {song.witnessId && (
                       <p
-                        className="font-mono text-[10px] truncate mt-0.5 tracking-tight"
+                        className="font-mono text-[11px] truncate mt-0.5 tracking-tight"
                         style={{ color: "rgba(196,154,40,0.55)" }}
                         title={`Witness ID: ${song.witnessId}`}
                       >

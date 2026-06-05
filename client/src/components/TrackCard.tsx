@@ -62,7 +62,7 @@ function GenrePills({ genre, maxVisible = 4, chipBg, chipBorder, textColor }: {
       {visible.map(tag => (
         <span
           key={tag}
-          className="text-[9px] px-1.5 py-0.5 rounded-full font-body leading-none"
+          className="text-[11px] px-1.5 py-0.5 rounded-full font-body leading-none"
           style={{
             background: chipBg ?? "rgba(20,18,40,0.8)",
             color: textColor ?? "#9b8fc0",
@@ -74,7 +74,7 @@ function GenrePills({ genre, maxVisible = 4, chipBg, chipBorder, textColor }: {
       ))}
       {overflow > 0 && (
         <span
-          className="text-[9px] px-1.5 py-0.5 rounded-full font-body leading-none"
+          className="text-[11px] px-1.5 py-0.5 rounded-full font-body leading-none"
           style={{
             background: "rgba(14,12,30,0.6)",
             color: "#7a7099",
@@ -223,13 +223,13 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
           }}
         >
           <Crown size={9} style={{ color: "#0A0806" }} />
-          <span className="text-[8px] font-heading font-bold tracking-widest" style={{ color: "#0A0806" }}>
+          <span           className="text-[11px] font-heading font-bold tracking-widest" style={{ color: "#0A0806" }}>
             {(track.plays ?? 0) >= 1000 ? `${Math.floor((track.plays ?? 0) / 1000)}K PLAYS` : `${track.plays} PLAYS`}
           </span>
         </div>
       )}
       {track.isOwn && (
-        <div className="absolute top-2 left-2 z-20 text-[9px] font-bold px-2 py-0.5 rounded bg-black/70 text-[#C49A28] border border-[#C49A28]/30 font-heading tracking-wider">
+        <div className="absolute top-2 left-2 z-20 text-[11px] font-bold px-2 py-0.5 rounded bg-black/70 text-[#C49A28] border border-[#C49A28]/30 font-heading tracking-wider">
           YOURS
         </div>
       )}
@@ -265,7 +265,7 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
         {/* LAYER 3: Testimony — 2-line max, #F5F5F5 @ 0.92 */}
         {testimonySnippet && (
           <p
-            className="text-[11px] leading-snug line-clamp-2 cursor-pointer"
+            className="type-caption leading-snug line-clamp-2 cursor-pointer"
             onClick={handleCoverClick}
             style={{
               color: "rgba(245,245,245,0.92)",
@@ -299,7 +299,7 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
                 title={`Verified Witness ID: ${track.witnessId}`}
               >
                 <Shield size={8} style={{ color: "rgba(196,154,40,0.6)" }} />
-                <span className="text-[8px] font-mono tracking-wider uppercase" style={{ color: "rgba(196,154,40,0.5)" }}>WID</span>
+                <span className="type-overline" style={{ color: "rgba(196,154,40,0.5)" }}>WID</span>
               </Link>
             )}
           </div>
@@ -313,7 +313,7 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
             >
               <Heart size={11} fill={isLiked ? "currentColor" : "none"} />
               {likeCount > 0 && (
-                <span className="text-[10px] leading-none tabular-nums">
+                <span className="text-[11px] leading-none tabular-nums">
                   {likeCount >= 1000 ? `${(likeCount / 1000).toFixed(1)}k` : likeCount}
                 </span>
               )}
