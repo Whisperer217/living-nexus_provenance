@@ -153,6 +153,7 @@ function OEmbedUpdater() {
 }
 
 function Router() {
+  const [location] = useLocation();
   return (
     <Suspense fallback={<PageLoader />}>
       <Switch>
@@ -164,6 +165,7 @@ function Router() {
         {/* App pages inside MainLayout */}
         <Route>
           <MainLayout>
+            <ErrorBoundary resetKey={location}>
             <Suspense fallback={<PageLoader />}>
               <Switch>
                 <Route path="/" component={HomePage} />
@@ -247,6 +249,7 @@ function Router() {
                 <Route component={NotFound} />
               </Switch>
             </Suspense>
+            </ErrorBoundary>
           </MainLayout>
         </Route>
       </Switch>

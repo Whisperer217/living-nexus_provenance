@@ -185,13 +185,13 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           <span className="font-display text-base gold-shimmer">Living Nexus</span>
         </div>
 
-        {/* Bell -- opens What's New modal */}
+        {/* Bell -- opens Notifications page */}
         {!!user && (
           <button
-            onClick={() => setWhatsNewOpen(true)}
+            onClick={() => navigate("/notifications")}
             className="relative flex items-center justify-center rounded-lg transition-all"
             style={{ minWidth: 44, minHeight: 44, color: "rgba(255,255,255,0.4)" }}
-            aria-label="What's New"
+            aria-label="Notifications"
           >
             <Bell size={18} />
             {(unreadCount as number) > 0 && (

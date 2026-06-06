@@ -4709,3 +4709,9 @@
 - [x] Migrate CreatorProfilePage FeaturedCard WID/AI-OFF/title/genre, SongRow WID badge
 - [x] Migrate ExploreCard hot badge, WID badge, title, artist row, content-type chip, genre chips, like count
 - [x] Increase ExploreCard info panel padding and genre chip spacing for mobile readability
+
+## Phase 184: Signal Icon + ErrorBoundary Fixes
+- [x] Fix mobile Bell icon: was opening What's New modal, now navigates to /notifications
+- [x] Upgrade ErrorBoundary: auto-resets on route change (resetKey=location), adds Try Again button alongside Reload, adds inline variant for section-level errors
+- [x] Scope ErrorBoundary inside MainLayout so nav/header survive page-level errors
+- [x] TypeScript: 0 errors | Vitest: 237/237 passing
