@@ -122,7 +122,7 @@ export function DiscoverySection() {
   const hidden = useMemo(() => (hiddenRaw ?? []).map(mapToManifestation), [hiddenRaw]);
 
   return (
-    <div className="px-4 sm:px-6 py-6">
+    <div className="px-4 sm:px-6 py-6 max-w-2xl mx-auto lg:max-w-none">
 
       {/* ═══════════════════════════════════════════════════════════════
           1. FEATURED REALMS — Large cinematic cards
