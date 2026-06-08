@@ -4721,3 +4721,8 @@
 - [x] Include lyrics.txt in single-track ZIP when lyrics exist
 - [x] Embed lyricsText as USLT ID3 tag in batch archive download
 - [x] Include per-track lyrics.txt in batch archive ZIP
+
+## Phase 186: ID3 Metadata Auto-Populate on Upload
+- [x] Create useAudioMetadata hook (music-metadata parseBlob, extracts title/album/genre/lyrics/cover art)
+- [x] Wire hook into UploadPage — auto-populates fields on audio file drop or browse
+- [x] Wire hook into BatchUploadPage — auto-populates per-card title/genre/cover art on each file select

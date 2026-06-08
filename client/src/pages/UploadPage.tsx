@@ -22,6 +22,7 @@ import { getLoginUrl } from "@/const";
 import { addWIDSnapshot } from "@/lib/lnxCache";
 import { runUploadPipeline, type UploadMetadata } from "@/lib/uploadPipeline";
 import { CosmicMediumIcon } from "@/components/CosmicMediumIcon";
+import { useAudioMetadata } from "@/hooks/useAudioMetadata";
 import { HAAIDeclarationForm, EMPTY_HAAI } from "@/components/HAAIDeclarationForm";
 import { StoryboardBuilder } from "@/components/reader/StoryboardBuilder";
 import {
@@ -207,6 +208,8 @@ export default function UploadPage() {
   const [descriptionGenerating, setDescriptionGenerating] = useState(false);
   const galleryInputRef = useRef<HTMLInputElement>(null);
 
+  const { extractMetadata, isExtracting: isExtractingMeta } = useAudioMetadata();
+
   const [uploadMode, setUploadMode] = useState<"audio" | "lyrics" | "manuscript" | "comic">("audio");
   const [documentFile, setDocumentFile] = useState<File | null>(null);
   const documentInputRef = useRef<HTMLInputElement>(null);
@@ -362,10 +365,26 @@ export default function UploadPage() {
       }
       setAudioFile(file);
       if (!title) setTitle(file.name.replace(/\.[^/.]+$/, ""));
+      // Auto-populate form fields from embedded ID3 metadata
+      extractMetadata(file).then(meta => {
+        if (meta.title) setTitle(meta.title);
+        if (meta.album && !albumName) setAlbumName(meta.album);
+        if (meta.genre && !genre) setGenre(meta.genre);
+        if (meta.lyrics && !lyrics) setLyrics(meta.lyrics);
+        if (meta.coverArtBlob && !coverFile) {
+          const ext = meta.coverArtBlob.type.includes("png") ? "png" : "jpg";
+          const artFile = new File([meta.coverArtBlob], `cover.${ext}`, { type: meta.coverArtBlob.type });
+          setCoverFile(artFile);
+          toast.success("Cover art extracted from audio file");
+        }
+        if (meta.title || meta.album || meta.genre || meta.lyrics) {
+          toast.success("Metadata loaded from audio file");
+        }
+      });
     } else {
       toast.error("Please drop an audio file");
     }
-  }, [title]);
+  }, [title, albumName, genre, lyrics, coverFile, extractMetadata]);
 
   const handleGenerateWid = async () => {
     if (uploadMode === "manuscript" || uploadMode === "comic") {
@@ -964,7 +983,7 @@ export default function UploadPage() {
                   className="rounded-xl p-8 text-center cursor-pointer transition-all"
                   style={{ border: `2px dashed ${audioFile ? "var(--ln-seal-bright)" : audioDragging ? "var(--ln-gold)" : "rgba(196,154,40,0.2)"}`, background: audioFile ? "rgba(74,222,128,0.05)" : audioDragging ? "rgba(196,154,40,0.04)" : "var(--ln-coal)" }}>
                   <input ref={audioInputRef} type="file" accept="audio/*,audio/mpeg,audio/mp3,audio/wav,audio/x-wav,audio/flac,audio/x-flac,audio/aac,audio/ogg,audio/x-m4a,audio/mp4,.mp3,.wav,.flac,.aac,.ogg,.m4a,.aiff,.aif" className="hidden"
-                    onChange={e => { const f = e.target.files?.[0]; if (f) { if (f.size > 375 * 1024 * 1024) { toast.error(`File too large (${(f.size/1024/1024).toFixed(0)} MB). Maximum size is 375 MB. Consider converting WAV to MP3 first.`); e.target.value = ""; return; } setAudioFile(f); if (!title) setTitle(f.name.replace(/\.[^/.]+$/, "")); } }} />
+                    onChange={e => { const f = e.target.files?.[0]; if (f) { if (f.size > 375 * 1024 * 1024) { toast.error(`File too large (${(f.size/1024/1024).toFixed(0)} MB). Maximum size is 375 MB. Consider converting WAV to MP3 first.`); e.target.value = ""; return; } setAudioFile(f); if (!title) setTitle(f.name.replace(/\.[^/.]+$/, "")); extractMetadata(f).then(meta => { if (meta.title) setTitle(meta.title); if (meta.album && !albumName) setAlbumName(meta.album); if (meta.genre && !genre) setGenre(meta.genre); if (meta.lyrics && !lyrics) setLyrics(meta.lyrics); if (meta.coverArtBlob && !coverFile) { const ext = meta.coverArtBlob.type.includes("png") ? "png" : "jpg"; setCoverFile(new File([meta.coverArtBlob], `cover.${ext}`, { type: meta.coverArtBlob.type })); toast.success("Cover art extracted from audio file"); } if (meta.title || meta.album || meta.genre || meta.lyrics) toast.success("Metadata loaded from audio file"); }); } }} />
                   {audioFile ? (
                     <div className="flex flex-col items-center gap-2">
                       <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: "rgba(74,222,128,0.18)" }}>

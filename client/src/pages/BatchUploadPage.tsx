@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 
 import { EDIT_GENRES as GENRES } from "@shared/contentTypes";
+import { useAudioMetadata } from "@/hooks/useAudioMetadata";
 // ── WID crypto helpers ────────────────────────────────────────────────────────
 async function sha256Hex(buffer: ArrayBuffer): Promise<string> {
   const hashBuf = await crypto.subtle.digest("SHA-256", buffer);
@@ -158,11 +159,27 @@ function TrackCardUI({
 }) {
   const audioInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
+  const { extractMetadata } = useAudioMetadata();
 
   const handleAudioFile = (file: File) => {
-    const title = stripTrackPrefix(file.name.replace(/\.[^.]+$/, ""));
-    onChange(card.id, { audioFile: file, title: card.title || title, audioStatus: "hashing" });
+    const fallbackTitle = stripTrackPrefix(file.name.replace(/\.[^.]+$/, ""));
+    onChange(card.id, { audioFile: file, title: card.title || fallbackTitle, audioStatus: "hashing" });
     onGenerateWid(card.id, file);
+    // Auto-populate card fields from embedded ID3 metadata
+    extractMetadata(file).then(meta => {
+      const patch: Partial<TrackCard> = {};
+      if (meta.title) patch.title = meta.title;
+      if (meta.genre && !card.genre) patch.genre = meta.genre;
+      if (meta.coverArtBlob && !card.coverFile) {
+        const ext = meta.coverArtBlob.type.includes("png") ? "png" : "jpg";
+        patch.coverFile = new File([meta.coverArtBlob], `cover.${ext}`, { type: meta.coverArtBlob.type });
+        patch.coverPreview = undefined; // will be set below via FileReader
+        const reader = new FileReader();
+        reader.onload = ev => onChange(card.id, { coverPreview: ev.target?.result as string });
+        reader.readAsDataURL(meta.coverArtBlob);
+      }
+      if (Object.keys(patch).length > 0) onChange(card.id, patch);
+    });
   };
 
   const handleAudioDrop = (e: React.DragEvent) => {
