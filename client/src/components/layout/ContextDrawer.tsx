@@ -269,8 +269,8 @@ export default function ContextDrawer({
           bottom: 0,
           width: 300,
           zIndex: 300,
-          background: "rgba(12,11,9,0.98)",
-          borderRight: "1px solid rgba(212,175,55,0.12)",
+          background: "rgba(0,0,0,0.99)",
+          borderRight: "1px solid rgba(196,154,40,0.14)",
           backdropFilter: "blur(20px)",
           /* Close: push fully off-screen left past the rail so no artifact bleeds into the 72px rail zone */
           transform: open ? "translateX(0)" : "translateX(calc(-100% - 72px))",

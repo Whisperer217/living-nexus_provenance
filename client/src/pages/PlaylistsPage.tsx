@@ -45,7 +45,7 @@ function CreatePlaylistDialog({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="bg-[#111009] border border-white/[0.08] text-white max-w-md">
+      <DialogContent className="bg-[#000000] border border-white/[0.08] text-white max-w-md">
         <DialogHeader>
           <DialogTitle className="font-heading text-[#C49A28]">New Playlist</DialogTitle>
         </DialogHeader>
@@ -56,7 +56,7 @@ function CreatePlaylistDialog({
               value={name}
               onChange={e => setName(e.target.value)}
               placeholder="Name your playlist..."
-              className="bg-[#111009] border-white/[0.08] text-white placeholder:text-white/50"
+              className="bg-[#000000] border-white/[0.08] text-white placeholder:text-white/50"
             />
           </div>
           <div>
@@ -66,7 +66,7 @@ function CreatePlaylistDialog({
               onChange={e => setDescription(e.target.value)}
               placeholder="What's this playlist about?"
               rows={2}
-              className="bg-[#111009] border-white/[0.08] text-white placeholder:text-white/50 resize-none"
+              className="bg-[#000000] border-white/[0.08] text-white placeholder:text-white/50 resize-none"
             />
           </div>
           <div className="flex items-center justify-between">
@@ -110,12 +110,12 @@ function PlaylistCard({
     <div
       onClick={onOpen}
       className="group flex items-center gap-3 p-3 rounded-xl cursor-pointer
-        bg-[#111009] border border-white/[0.06]
-        hover:border-[#C49A28]/30 hover:bg-[#111009] transition-all"
+        bg-[#000000] border border-white/[0.06]
+        hover:border-[#C49A28]/30 hover:bg-[#000000] transition-all"
     >
       {/* Cover / icon */}
       <div className="w-12 h-12 rounded-lg flex-shrink-0 overflow-hidden
-        bg-[#111009] flex items-center justify-center border border-white/[0.06]">
+        bg-[#000000] flex items-center justify-center border border-white/[0.06]">
         {playlist.coverArtUrl
           ? <img src={playlist.coverArtUrl} alt="" className="w-full h-full object-cover" />
           : <ListMusic size={20} className="text-[#C49A28]/60" />}
@@ -225,7 +225,7 @@ function PlaylistDetail({
       {/* Header */}
       <div className="flex items-start gap-4 mb-6">
         <div className="w-20 h-20 rounded-xl flex-shrink-0 overflow-hidden
-          bg-[#111009] flex items-center justify-center border border-white/[0.06]">
+          bg-[#000000] flex items-center justify-center border border-white/[0.06]">
           {playlist.coverArtUrl
             ? <img src={playlist.coverArtUrl} alt="" className="w-full h-full object-cover" />
             : <ListMusic size={28} className="text-[#C49A28]/50" />}
@@ -275,7 +275,7 @@ function PlaylistDetail({
             value={inviteHandle}
             onChange={e => setInviteHandle(e.target.value)}
             placeholder="Artist handle or name..."
-            className="bg-[#111009] border-white/[0.08] text-white placeholder:text-white/50 text-sm"
+            className="bg-[#000000] border-white/[0.08] text-white placeholder:text-white/50 text-sm"
             onKeyDown={e => e.key === "Enter" && handleInvite()}
           />
           <Button
@@ -296,8 +296,8 @@ function PlaylistDetail({
           <div className="flex flex-wrap gap-2">
             {collaborators.map((c: any) => (
               <div key={c.id} className="flex items-center gap-1.5 px-2 py-1 rounded-full
-                bg-[#111009] border border-white/[0.06]">
-                <div className="w-5 h-5 rounded-full overflow-hidden bg-[#111009]">
+                bg-[#000000] border border-white/[0.06]">
+                <div className="w-5 h-5 rounded-full overflow-hidden bg-[#000000]">
                   {c.user.profilePhotoUrl
                     ? <img src={c.user.profilePhotoUrl} alt="" className="w-full h-full object-cover" />
                     : <span className="w-full h-full flex items-center justify-center text-[8px] text-white/50">
@@ -333,10 +333,10 @@ function PlaylistDetail({
             <div
               key={t.id}
               className="group flex items-center gap-3 p-2.5 rounded-xl
-                hover:bg-[#111009] transition-colors"
+                hover:bg-[#000000] transition-colors"
             >
               <span className="text-[11px] text-white/45 w-5 text-right flex-shrink-0">{i + 1}</span>
-              <div className="w-9 h-9 rounded-lg overflow-hidden flex-shrink-0 bg-[#111009]">
+              <div className="w-9 h-9 rounded-lg overflow-hidden flex-shrink-0 bg-[#000000]">
                 {t.song.coverArtUrl
                   ? <img src={t.song.coverArtUrl} alt="" className="w-full h-full object-cover" />
                   : <Music size={14} className="m-auto text-white/45 mt-2.5" />}
@@ -403,7 +403,7 @@ export default function PlaylistsPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-[#111009] flex items-center justify-center">
+      <div className="min-h-screen bg-[#000000] flex items-center justify-center">
         <div className="text-center">
           <ListMusic size={40} className="mx-auto mb-4 text-[#C49A28]/40" />
           <p className="text-white/50 mb-4">Sign in to access your playlists</p>
@@ -416,7 +416,7 @@ export default function PlaylistsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#111009] pb-32">
+    <div className="min-h-screen bg-[#000000] pb-32">
       <div className="max-w-2xl mx-auto px-4 py-8">
         {/* Header */}
         {activePlaylistId ? (

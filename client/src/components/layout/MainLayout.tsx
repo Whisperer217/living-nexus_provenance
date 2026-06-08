@@ -134,12 +134,12 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   // ── Warm theme tokens (mobile chrome only) ─────────────────────────
   const { mode: lightsMode } = useLightsMode();
   const isWarm = lightsMode === "on";
-  const MOBILE_HEADER_BG = isWarm ? "rgba(55,68,85,0.72)" : "var(--ln-coal)";
-  const MOBILE_HEADER_BORDER = isWarm ? "rgba(100,125,150,0.22)" : "rgba(44,52,56,0.35)";
+  const MOBILE_HEADER_BG = isWarm ? "rgba(55,68,85,0.72)" : "rgba(0,0,0,0.97)";
+  const MOBILE_HEADER_BORDER = isWarm ? "rgba(100,125,150,0.22)" : "rgba(196,154,40,0.16)";
 
   return (
     <div
-      className="noise-overlay flex flex-col h-dvh overflow-hidden bg-[#111009] relative"
+      className="noise-overlay flex flex-col h-dvh overflow-hidden bg-background relative"
       style={{ overscrollBehavior: "none" }}
     >
       {/* ── LeftRail -- fixed 72px column, desktop only ── */}

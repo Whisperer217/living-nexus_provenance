@@ -96,7 +96,7 @@ function SovereignMigrationTracker() {
   };
 
   return (
-    <div className="mt-5 p-4" style={{ background: "#111009)", border: "1px solid rgba(196,154,40,0.17)" }}>
+    <div className="mt-5 p-4" style={{ background: "#000000)", border: "1px solid rgba(196,154,40,0.17)" }}>
       <div className="flex items-center justify-between mb-3">
         <p className="text-[10px] font-heading tracking-widest uppercase" style={{ color: "var(--ln-gold)" }}>Sovereign Migration Status</p>
         {isLoading ? (
@@ -117,8 +117,8 @@ function SovereignMigrationTracker() {
                 <div className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold"
                   style={{
                     background: done ? "var(--ln-gold)" : "var(--ln-coal)",
-                    border: current ? "2px solid #E8DFC8" : done ? "none" : "1px solid #111009",
-                    color: done ? "#111009)" : "var(--ln-iron)",
+                    border: current ? "2px solid #E8DFC8" : done ? "none" : "1px solid #000000",
+                    color: done ? "#000000)" : "var(--ln-iron)",
                   }}>
                   {done ? "✓" : i + 1}
                 </div>

@@ -146,7 +146,7 @@ export default function DiscoverPage() {
   return (
     <div className="min-h-screen" style={{ background: "var(--ln-coal)" }}>
       {/* Hero */}
-      <div className="relative overflow-hidden" style={{ background: "linear-gradient(135deg, var(--ln-coal) 0%, #111009 50%, #111009 100%)" }}>
+      <div className="relative overflow-hidden" style={{ background: "linear-gradient(135deg, #111111 0%, #000000 50%, #000000 100%)" }}>
         <div className="absolute inset-0 opacity-20" style={{ backgroundImage: "radial-gradient(circle at 20% 50%, rgba(196,154,40,0.25) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(196,154,40,0.15) 0%, transparent 50%)" }} />
         {/* Radial depth: dark center bleeding to deep purple/blue edge */}
         <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 100% 80% at 50% 50%, transparent 0%, rgba(44,52,56,0.3) 50%, rgba(44,52,56,0.6) 100%)" }} />

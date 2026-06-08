@@ -805,7 +805,7 @@ export default function UploadPage() {
   };
 
   if (!isAuthenticated) return (
-    <div className="min-h-screen" style={{ background: "#111009" }}>
+    <div className="min-h-screen" style={{ background: "#000000" }}>
       {/* ── Hero Banner ─────────────────────────────────────────────────── */}
       <div className="relative w-full overflow-hidden" style={{ height: "200px" }}>
         <img
@@ -841,7 +841,7 @@ export default function UploadPage() {
   ];
 
   return (
-    <div className="min-h-screen" style={{ background: "#111009" }}>
+    <div className="min-h-screen" style={{ background: "#000000" }}>
       {/* ── Hero Banner ─────────────────────────────────────────────────── */}
       <div className="relative w-full overflow-hidden" style={{ height: "200px" }}>
         <img

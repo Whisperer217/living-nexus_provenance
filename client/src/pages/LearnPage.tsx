@@ -237,7 +237,7 @@ function LexiconSection() {
                   ? { background: colors.bg, color: colors.text, border: `1px solid ${colors.border}` }
                   : isActive
                   ? { background: "rgba(196,154,40,0.12)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.25)" }
-                  : { background: "var(--ln-coal)", color: "var(--ln-iron)", border: "1px solid #111009" }
+                  : { background: "var(--ln-coal)", color: "var(--ln-iron)", border: "1px solid rgba(196,154,40,0.10)" }
                 }
               >
                 {cat}

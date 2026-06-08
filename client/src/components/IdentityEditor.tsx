@@ -49,14 +49,14 @@ export function IdentityEditor({ profile }: { profile: any }) {
     });
   };
 
-  const fieldClass = "w-full rounded-xl px-3 py-2.5 text-[13px] font-body text-white/80 bg-[#111009] border border-white/[0.08] focus:border-[#C49A28]/60 outline-none placeholder:text-white/30 transition-colors";
+  const fieldClass = "w-full rounded-xl px-3 py-2.5 text-[13px] font-body text-white/80 bg-[#0A0A0A] border border-white/[0.08] focus:border-[#C49A28]/60 outline-none placeholder:text-white/30 transition-colors";
   const labelClass = "text-[10px] font-heading tracking-widest text-white/40 block mb-1.5";
   const sectionTitle = "text-[14px] font-heading tracking-wide mb-4";
 
   return (
     <div className="space-y-8">
       {/* ── Witness Identity Layer ── */}
-      <div className="p-5 rounded-2xl" style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.2)" }}>
+      <div className="p-5 rounded-2xl" style={{ background: "#0D0D0D", border: "1px solid rgba(196,154,40,0.2)" }}>
         <div className="flex items-center gap-2 mb-5">
           <Fingerprint size={16} style={{ color: "var(--ln-gold)" }} />
           <h3 className={sectionTitle} style={{ color: "var(--ln-gold)", margin: "0" }}>Witness Identity</h3>
@@ -104,7 +104,7 @@ export function IdentityEditor({ profile }: { profile: any }) {
       </div>
 
       {/* ── Distribution Identity Layer ── */}
-      <div className="p-5 rounded-2xl" style={{ background: "var(--ln-coal)", border: "1px solid rgba(96,165,250,0.2)" }}>
+      <div className="p-5 rounded-2xl" style={{ background: "#0D0D0D", border: "1px solid rgba(96,165,250,0.2)" }}>
         <div className="flex items-center gap-2 mb-5">
           <Globe size={16} className="text-blue-400" />
           <h3 className={sectionTitle} style={{ color: "#60a5fa", margin: "0" }}>Distribution Identity</h3>

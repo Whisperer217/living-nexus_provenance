@@ -46,7 +46,7 @@ export const CARD_PAN_STYLE = { width: `${CARD_PAN_W}px` } as const;
 
 // ── Visual tokens added in redesign v2.31 ──
 export const CARD_BORDER_COLOR   = 'rgba(196, 154, 40, 0.15)' as const;  // --ln-gold @ 15%
-export const CARD_BG_COLOR       = '#111009' as const;                    // --ln-coal
+export const CARD_BG_COLOR       = '#000000' as const;                    // --ln-coal
 export const CARD_HOVER_BG       = '#1C1A14' as const;                    // --ln-iron
 export const WID_BADGE_BG        = '#C49A28' as const;                    // --ln-gold
 export const WID_BADGE_TEXT      = '#0A0806' as const;                    // --ln-void

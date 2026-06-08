@@ -112,7 +112,7 @@ function FounderCard({
       className="relative flex flex-col rounded-2xl overflow-hidden transition-all duration-300"
       style={{
         background:
-          "linear-gradient(160deg, #111009 0%, #111009 100%)",
+          "#000000",
         border: "1px solid rgba(196,154,40,0.08)",
         boxShadow: "0 4px 24px rgba(0,0,0,0.40)",
       }}
@@ -240,7 +240,7 @@ export default function ContributorsPage() {
         className="relative overflow-hidden"
         style={{
           background:
-            "linear-gradient(160deg, #111009 0%, #111009 100%)",
+            "#000000",
           borderBottom: "1px solid rgba(230,205,174,0.07)",
         }}
       >

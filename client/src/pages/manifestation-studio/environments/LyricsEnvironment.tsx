@@ -207,7 +207,7 @@ export function LyricsEnvironment({ onBack }: LyricsEnvironmentProps) {
             </div>
 
             <div className="flex justify-end pt-4">
-              <Button onClick={() => { if (!lyrics.trim()) { toast.error("Write some lyrics first"); return; } setStep("metadata"); }} disabled={!lyrics.trim()} className="gap-2" style={{ background: atmosphere.colorPrimary, color: "#111009" }}>
+              <Button onClick={() => { if (!lyrics.trim()) { toast.error("Write some lyrics first"); return; } setStep("metadata"); }} disabled={!lyrics.trim()} className="gap-2" style={{ background: atmosphere.colorPrimary, color: "#000000" }}>
                 Continue <ChevronRight size={14} />
               </Button>
             </div>
@@ -261,7 +261,7 @@ export function LyricsEnvironment({ onBack }: LyricsEnvironmentProps) {
               <Button variant="outline" onClick={() => setStep("upload")} className="gap-1" style={{ borderColor: atmosphere.colorBorder, color: "var(--ln-parchment)" }}>
                 <ChevronLeft size={14} /> Back
               </Button>
-              <Button onClick={() => { if (!title) { toast.error("Title is required"); return; } setStep("provenance"); }} disabled={!title} className="gap-2" style={{ background: atmosphere.colorPrimary, color: "#111009" }}>
+              <Button onClick={() => { if (!title) { toast.error("Title is required"); return; } setStep("provenance"); }} disabled={!title} className="gap-2" style={{ background: atmosphere.colorPrimary, color: "#000000" }}>
                 Continue <ChevronRight size={14} />
               </Button>
             </div>
@@ -289,7 +289,7 @@ export function LyricsEnvironment({ onBack }: LyricsEnvironmentProps) {
                 <p className="text-[11px] mb-6 max-w-sm mx-auto" style={{ color: "rgba(245,237,216,0.5)" }}>
                   This hashes your exact lyrics text and signs it — proving you authored these words at this moment.
                 </p>
-                <Button onClick={generateWID} disabled={generatingWid} className="gap-2" style={{ background: atmosphere.colorPrimary, color: "#111009" }}>
+                <Button onClick={generateWID} disabled={generatingWid} className="gap-2" style={{ background: atmosphere.colorPrimary, color: "#000000" }}>
                   {generatingWid ? <Loader2 size={14} className="animate-spin" /> : <Zap size={14} />}
                   {generatingWid ? "Inscribing..." : "Generate Witness ID"}
                 </Button>
@@ -313,7 +313,7 @@ export function LyricsEnvironment({ onBack }: LyricsEnvironmentProps) {
               <Button variant="outline" onClick={() => setStep("metadata")} className="gap-1" style={{ borderColor: atmosphere.colorBorder, color: "var(--ln-parchment)" }}>
                 <ChevronLeft size={14} /> Back
               </Button>
-              <Button onClick={() => setStep("publish")} disabled={!witnessData} className="gap-2" style={{ background: atmosphere.colorPrimary, color: "#111009" }}>
+              <Button onClick={() => setStep("publish")} disabled={!witnessData} className="gap-2" style={{ background: atmosphere.colorPrimary, color: "#000000" }}>
                 Continue <ChevronRight size={14} />
               </Button>
             </div>
@@ -337,7 +337,7 @@ export function LyricsEnvironment({ onBack }: LyricsEnvironmentProps) {
               <p className="text-[11px]" style={{ color: "rgba(245,237,216,0.5)" }}>{wordCount} words • {verseCount} verses</p>
             </div>
 
-            <Button onClick={handlePublish} disabled={uploadPhase !== "idle"} className="w-full gap-2 py-6 text-base font-semibold" style={{ background: "var(--ln-gold)", color: "#111009", boxShadow: "0 4px 20px rgba(212,175,55,0.3)" }}>
+            <Button onClick={handlePublish} disabled={uploadPhase !== "idle"} className="w-full gap-2 py-6 text-base font-semibold" style={{ background: "var(--ln-gold)", color: "#000000", boxShadow: "0 4px 20px rgba(212,175,55,0.3)" }}>
               {uploadPhase === "uploading" ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}
               {uploadPhase === "uploading" ? "Publishing..." : "Publish to Living Nexus"}
             </Button>

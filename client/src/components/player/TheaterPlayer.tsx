@@ -567,7 +567,7 @@ export default function TheaterPlayer() {
                     className="rounded-xl p-6 text-center mt-4"
                     style={{
                       background: "var(--ln-coal)",
-                      border: "1px dashed #111009",
+                      border: "1px dashed rgba(196,154,40,0.15)",
                     }}
                   >
                     <p className="text-[13px] italic mb-1.5" style={{ color: "var(--ln-iron)" }}>
@@ -643,7 +643,7 @@ export default function TheaterPlayer() {
                 </div>
                 {/* Total signals summary */}
                 {Object.keys(reactionCounts).length > 0 && (
-                  <div className="rounded-xl p-4" style={{ background: "var(--ln-coal)", border: "1px solid #111009" }}>
+                  <div className="rounded-xl p-4" style={{ background: "#0A0A0A", border: "1px solid rgba(196,154,40,0.10)" }}>
                     <div className="text-[10px] font-heading tracking-[0.15em] uppercase mb-2" style={{ color: "var(--ln-iron)" }}>
                       Total signals
                     </div>
@@ -738,7 +738,7 @@ export default function TheaterPlayer() {
                       className="flex-1 rounded-lg px-3 py-2 text-[13px] outline-none transition-colors disabled:opacity-50"
                       style={{
                         background: "var(--ln-coal)",
-                        border: "1px solid #111009",
+                        border: "1px solid rgba(196,154,40,0.10)",
                         color: "var(--ln-parchment)",
                       }}
                       onFocus={e => (e.currentTarget.style.borderColor = "rgba(196,154,40,0.42)")}
@@ -765,7 +765,7 @@ export default function TheaterPlayer() {
             style={{
               background: "rgba(44,52,56,0.8)",
               color: "var(--ln-smoke)",
-              border: "1px solid #111009",
+              border: "1px solid rgba(196,154,40,0.10)",
             }}
             onMouseEnter={e => (e.currentTarget.style.color = "var(--ln-parchment)")}
             onMouseLeave={e => (e.currentTarget.style.color = "var(--ln-smoke)")}
@@ -781,7 +781,7 @@ export default function TheaterPlayer() {
             style={{
               background: "rgba(44,52,56,0.8)",
               color: "var(--ln-smoke)",
-              border: "1px solid #111009",
+              border: "1px solid rgba(196,154,40,0.10)",
             }}
           >
             <ChevronDown size={12} />

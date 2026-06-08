@@ -718,7 +718,7 @@ export default function SongDetailPage() {
                 {!(song as any).videoUrl && (
                   <div
                     className="relative w-full sm:w-56 h-56 rounded-2xl overflow-hidden flex items-center justify-center group cursor-pointer"
-                    style={{ background: "linear-gradient(135deg, var(--ln-coal), #111009)" }}
+                    style={{ background: "linear-gradient(135deg, #111111, #000000)" }}
                     onClick={song.fileUrl ? handlePlay : undefined}
                   >
                     {song.coverArtUrl
@@ -956,7 +956,7 @@ export default function SongDetailPage() {
 
             {/* ── PROMINENT TIP PANEL ── */}
             {tipsEnabled && !isOwner && (
-              <div className="rounded-2xl p-5" style={{ background: "linear-gradient(135deg, rgba(44,52,56,0.6), #111009)", border: "1px solid rgba(196,154,40,0.3)" }}>
+              <div className="rounded-2xl p-5" style={{ background: "linear-gradient(135deg, rgba(44,52,56,0.6), #000000)", border: "1px solid rgba(196,154,40,0.3)" }}>
                 <div className="flex items-center gap-2 mb-3">
                   <DollarSign className="w-4 h-4" style={{ color: "var(--ln-gold)" }} />
                   <p className="text-sm font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-gold)" }}>

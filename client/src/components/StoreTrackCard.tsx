@@ -239,7 +239,7 @@ export function StoreTrackCard({ song, size = "md", allSongs, songIndex }: Store
             ) : (
               <div
                 className="w-full h-full"
-                style={{ background: "linear-gradient(135deg, #1a1409 0%, #0d0b07 50%, #111009 100%)" }}
+                style={{ background: "linear-gradient(135deg, #111111 0%, #0A0A0A 50%, #000000 100%)" }}
               />
             )}
           </div>

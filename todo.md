@@ -4745,3 +4745,21 @@
 - [x] MobileNavDrawer: Collapse Registry section (3 links → 1 to /witness-registry)
 - [x] MobileNavDrawer: Mirror clean structure from ContextDrawer
 - [x] TypeScript: 0 errors | Vitest: 237/237 passing
+## Phase 189: Global UI/UX Refactor — True-Black Theme & Typography Enhancement
+- [x] index.css: Replace #111009/#1C1A14 surface tokens with true-black palette (#000000/#0A0A0A/#111111/#1A1A1A)
+- [x] index.css: Add -webkit-font-smoothing: antialiased and font-smoothing to body
+- [x] index.css: Update Cormorant Garamond Google Font import (add weights 400/500/600/700 italic)
+- [x] index.css: Tighten type scale — increase letter-spacing on h1/h2, refine line-heights
+- [x] index.css: Update .cosmic-bg, .museum-pan-wrapper fade gradients, .sg-divider-wide-center bg to true-black
+- [x] index.css: Update html/body background-color hardcoded value to #000000
+- [x] index.css: Update [data-theme="dark"] tokens to match new true-black palette
+- [x] MainLayout.tsx: Replace bg-[#111009] with bg-background; update --ln-coal mobile header token
+- [x] TopBar.tsx: Replace rgba(10,8,6,0.97) NAV_BG with rgba(0,0,0,0.97); fix fontFamily Inter → DM Sans
+- [x] ContextDrawer.tsx: Audit and replace any hard-coded #111009 surface values
+- [x] MobileNavDrawer.tsx: Audit and replace any hard-coded surface values
+- [x] ContextualModal.tsx: Replace bg-[#111009] with bg-background semantic token
+- [x] LeftRail.tsx: Audit hard-coded background values for true-black alignment
+- [x] All pages (25+ files): bulk-replaced all remaining #111009/#1C1A14/rgba(10,x,x) background values
+- [x] All components (15+ files): TrackCard, StoreTrackCard, BookCard, GlobalPlayer, PlayerBar, TheaterPlayer, GiftModal, TipModal, TosAcceptanceModal, WelcomeModal, WhatsNewModal, IdentityEditor, EditTrackPanel, ManifestationBundle, FeaturedProjectsCarousel, AddToPlaylistButton, RightRail, QuickRefSlider
+- [x] cardTokens.ts: CARD_BG_COLOR updated to #000000
+- [x] TypeScript: 0 errors | Vitest: 237/237 passing

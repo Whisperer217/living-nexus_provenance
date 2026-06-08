@@ -249,7 +249,7 @@ export function ComicEnvironment({ onBack }: ComicEnvironmentProps) {
             </div>
 
             <div className="flex justify-end pt-4">
-              <Button onClick={() => { if (pages.length === 0 && !documentFile) { toast.error("Add pages or a document first"); return; } setStep("metadata"); }} disabled={pages.length === 0 && !documentFile} className="gap-2" style={{ background: atmosphere.colorPrimary, color: "#111009" }}>
+              <Button onClick={() => { if (pages.length === 0 && !documentFile) { toast.error("Add pages or a document first"); return; } setStep("metadata"); }} disabled={pages.length === 0 && !documentFile} className="gap-2" style={{ background: atmosphere.colorPrimary, color: "#000000" }}>
                 Continue <ChevronRight size={14} />
               </Button>
             </div>
@@ -307,7 +307,7 @@ export function ComicEnvironment({ onBack }: ComicEnvironmentProps) {
               <Button variant="outline" onClick={() => setStep("upload")} className="gap-1" style={{ borderColor: atmosphere.colorBorder, color: "var(--ln-parchment)" }}>
                 <ChevronLeft size={14} /> Back
               </Button>
-              <Button onClick={() => { if (!title) { toast.error("Title is required"); return; } setStep("provenance"); }} disabled={!title} className="gap-2" style={{ background: atmosphere.colorPrimary, color: "#111009" }}>
+              <Button onClick={() => { if (!title) { toast.error("Title is required"); return; } setStep("provenance"); }} disabled={!title} className="gap-2" style={{ background: atmosphere.colorPrimary, color: "#000000" }}>
                 Continue <ChevronRight size={14} />
               </Button>
             </div>
@@ -332,7 +332,7 @@ export function ComicEnvironment({ onBack }: ComicEnvironmentProps) {
                 <p className="text-sm mb-4" style={{ color: "var(--ln-parchment)" }}>
                   Seal your {pages.length} page{pages.length !== 1 ? "s" : ""} with a Witness ID
                 </p>
-                <Button onClick={generateWID} disabled={generatingWid} className="gap-2" style={{ background: atmosphere.colorPrimary, color: "#111009" }}>
+                <Button onClick={generateWID} disabled={generatingWid} className="gap-2" style={{ background: atmosphere.colorPrimary, color: "#000000" }}>
                   {generatingWid ? <Loader2 size={14} className="animate-spin" /> : <Zap size={14} />}
                   {generatingWid ? "Sequencing..." : "Generate Witness ID"}
                 </Button>
@@ -354,7 +354,7 @@ export function ComicEnvironment({ onBack }: ComicEnvironmentProps) {
               <Button variant="outline" onClick={() => setStep("metadata")} className="gap-1" style={{ borderColor: atmosphere.colorBorder, color: "var(--ln-parchment)" }}>
                 <ChevronLeft size={14} /> Back
               </Button>
-              <Button onClick={() => setStep("publish")} disabled={!witnessData} className="gap-2" style={{ background: atmosphere.colorPrimary, color: "#111009" }}>
+              <Button onClick={() => setStep("publish")} disabled={!witnessData} className="gap-2" style={{ background: atmosphere.colorPrimary, color: "#000000" }}>
                 Continue <ChevronRight size={14} />
               </Button>
             </div>
@@ -378,7 +378,7 @@ export function ComicEnvironment({ onBack }: ComicEnvironmentProps) {
               <p className="text-[11px]" style={{ color: "rgba(245,237,216,0.5)" }}>{pages.length} pages • {category || "Uncategorized"}</p>
             </div>
 
-            <Button onClick={handlePublish} disabled={uploadPhase !== "idle"} className="w-full gap-2 py-6 text-base font-semibold" style={{ background: "var(--ln-gold)", color: "#111009", boxShadow: "0 4px 20px rgba(212,175,55,0.3)" }}>
+            <Button onClick={handlePublish} disabled={uploadPhase !== "idle"} className="w-full gap-2 py-6 text-base font-semibold" style={{ background: "var(--ln-gold)", color: "#000000", boxShadow: "0 4px 20px rgba(212,175,55,0.3)" }}>
               {uploadPhase === "uploading" ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}
               {uploadPhase === "uploading" ? "Publishing..." : "Publish to Living Nexus"}
             </Button>

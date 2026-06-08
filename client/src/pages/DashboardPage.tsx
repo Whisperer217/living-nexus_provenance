@@ -186,7 +186,7 @@ export default function DashboardPage() {
   });
 
   if (!isAuthenticated) return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: "#111009" }}>
+    <div className="min-h-screen flex items-center justify-center" style={{ background: "#000000" }}>
       <div className="text-center">
         <p style={{ color: "var(--ln-smoke)" }}>Please sign in to access your dashboard.</p>
         <Link href="/"><Button className="mt-4" style={{ background: "var(--ln-gold)", color: "var(--ln-parchment)" }}>Go Home</Button></Link>
@@ -205,7 +205,7 @@ export default function DashboardPage() {
   const tipsEnabled = connectData?.status === "enabled";
 
   return (
-    <div className="min-h-screen" style={{ background: "#111009" }}>
+    <div className="min-h-screen" style={{ background: "#000000" }}>
       {/* ── Hero Banner ─────────────────────────────────────────────────── */}
       <div className="relative w-full overflow-hidden" style={{ height: "200px" }}>
         <img
@@ -331,7 +331,7 @@ export default function DashboardPage() {
 
         {/* Pre-Onboarding Checklist Modal */}
         <Dialog open={showChecklist} onOpenChange={setShowChecklist}>
-          <DialogContent style={{ background: "var(--ln-coal)", border: "1px solid #111009", color: "var(--ln-parchment)" }}>
+          <DialogContent style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.10)", color: "var(--ln-parchment)" }}>
             <DialogHeader>
               <DialogTitle style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-gold)" }}>
                 Before You Start — Have These Ready
@@ -390,7 +390,7 @@ export default function DashboardPage() {
                 onClick={() => connectData?.status === "not_connected" ? setShowChecklist(true) : connectMutation.mutate({ returnUrl: `${window.location.origin}/dashboard` })}
                 disabled={connectMutation.isPending}
                 className="flex-shrink-0 font-bold text-sm"
-                style={{ background: "#111009", color: "var(--ln-gold)", border: "none" }}
+                style={{ background: "#000000", color: "var(--ln-gold)", border: "none" }}
               >
                 {connectMutation.isPending ? "Loading..." : connectData?.status === "pending" ? "Complete Setup" : "Enable Gifts"}
               </Button>
@@ -1072,7 +1072,7 @@ export default function DashboardPage() {
                     { label: "Gifts Received", value: analyticsData.totalGiftsReceived, icon: Gift, color: "var(--ln-seal-bright)" },
                     { label: "Downloads", value: analyticsData.totalDownloads, icon: Download, color: "#38BDF8" },
                   ].map(({ label, value, icon: Icon, color }) => (
-                    <div key={label} className="p-4" style={{ background: "var(--ln-coal)", border: "1px solid #111009" }}>
+                    <div key={label} className="p-4" style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.10)" }}>
                       <div className="flex items-center gap-2 mb-2">
                         <Icon className="w-4 h-4" style={{ color }} />
                         <span className="text-xs" style={{ color: "var(--ln-smoke)" }}>{label}</span>
@@ -1082,7 +1082,7 @@ export default function DashboardPage() {
                   ))}
                 </div>
                 {/* 30-day activity trend */}
-                <div className="rounded-xl p-5" style={{ background: "var(--ln-coal)", border: "1px solid #111009" }}>
+                <div className="rounded-xl p-5" style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.10)" }}>
                   <div className="flex items-center gap-2 mb-4">
                     <TrendingUp className="w-4 h-4" style={{ color: "#38BDF8" }} />
                     <h3 className="text-sm font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>30-Day Activity Trend</h3>
@@ -1106,7 +1106,7 @@ export default function DashboardPage() {
                 </div>
                 {/* Plays by track */}
                 {analyticsData.playsByTrack.filter((t: { plays: number }) => t.plays > 0).length > 0 && (
-                  <div className="rounded-xl p-5" style={{ background: "var(--ln-coal)", border: "1px solid #111009" }}>
+                  <div className="rounded-xl p-5" style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.10)" }}>
                     <div className="flex items-center gap-2 mb-4">
                       <Play className="w-4 h-4" style={{ color: "var(--ln-gold)" }} />
                       <h3 className="text-sm font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>Plays by Track</h3>
@@ -1126,7 +1126,7 @@ export default function DashboardPage() {
                 )}
                 {/* Likes by track */}
                 {analyticsData.likesByTrack.filter((t: { likes: number }) => t.likes > 0).length > 0 && (
-                  <div className="rounded-xl p-5" style={{ background: "var(--ln-coal)", border: "1px solid #111009" }}>
+                  <div className="rounded-xl p-5" style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.10)" }}>
                     <div className="flex items-center gap-2 mb-4">
                       <Heart className="w-4 h-4" style={{ color: "var(--ln-ember)" }} />
                       <h3 className="text-sm font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>Likes by Track</h3>
@@ -1146,7 +1146,7 @@ export default function DashboardPage() {
                 )}
                 {/* Gifts by track */}
                 {analyticsData.giftsByTrack.filter((t: { giftCount: number }) => t.giftCount > 0).length > 0 && (
-                  <div className="rounded-xl p-5" style={{ background: "var(--ln-coal)", border: "1px solid #111009" }}>
+                  <div className="rounded-xl p-5" style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.10)" }}>
                     <div className="flex items-center gap-2 mb-4">
                       <Gift className="w-4 h-4" style={{ color: "var(--ln-seal-bright)" }} />
                       <h3 className="text-sm font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>Gifts by Track</h3>
@@ -1281,7 +1281,7 @@ function DiscordIntegrationTab() {
         const url = urls[ev.key] ?? "";
         const isDirty = url !== (saved?.webhookUrl ?? "");
         return (
-          <div key={ev.key} className="p-5 rounded-xl" style={{ background: "rgba(44,52,56,0.6)", border: "1px solid #111009" }}>
+          <div key={ev.key} className="p-5 rounded-xl" style={{ background: "rgba(44,52,56,0.6)", border: "1px solid rgba(196,154,40,0.10)" }}>
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-3">
                 <span className="text-2xl">{ev.icon}</span>
@@ -1311,8 +1311,8 @@ function DiscordIntegrationTab() {
                 onChange={e => setUrls(prev => ({ ...prev, [ev.key]: e.target.value }))}
                 className="flex-1 px-3 py-2 rounded-lg text-sm outline-none"
                 style={{
-                  background: "#111009",
-                  border: "1px solid #111009",
+                  background: "#000000",
+                  border: "1px solid rgba(196,154,40,0.10)",
                   color: "var(--ln-parchment)",
                   fontFamily: "monospace",
                 }}
@@ -1535,7 +1535,7 @@ function ArchiveTab() {
                     key={track.id}
                     className="flex items-center gap-3 px-4 py-2.5"
                     style={{
-                      borderBottom: ti < batch.tracks.length - 1 ? "1px solid #111009" : "none",
+                      borderBottom: ti < batch.tracks.length - 1 ? "1px solid rgba(196,154,40,0.08)" : "none",
                     }}
                   >
                     <span className="text-xs w-5 text-right flex-shrink-0" style={{ color: "var(--ln-iron)" }}>
@@ -1639,7 +1639,7 @@ function WIDCacheTab() {
               <div
                 key={snap.wid}
                 className="flex items-start gap-4 p-4 rounded-xl"
-                style={{ background: "var(--ln-coal)", border: "1px solid #111009" }}
+                style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.10)" }}
               >
                 {/* Medium icon */}
                 <div

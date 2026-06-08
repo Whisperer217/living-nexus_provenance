@@ -266,7 +266,7 @@ function ExploreCard({
             {(song.genre as string).split(/[,/|]+/).filter((t: string) => t.trim()).length > 3 && (
               <span
                 className="text-[11px] px-1.5 py-0.5 rounded-full font-body leading-tight"
-                style={{ background: "var(--ln-coal)", color: "var(--ln-iron)", border: "1px solid #111009" }}
+                style={{ background: "var(--ln-coal)", color: "var(--ln-iron)", border: "1px solid rgba(196,154,40,0.10)" }}
               >
                 +{(song.genre as string).split(/[,/|]+/).filter((t: string) => t.trim()).length - 3}
               </span>
@@ -719,7 +719,7 @@ export default function ExplorePage() {
             value={query}
             onChange={e => setQuery(e.target.value)}
             className="w-full pl-10 pr-4 py-2.5 rounded-xl text-[13.5px] font-body text-white/80
-              bg-[#111009] border border-white/[0.08] outline-none
+              bg-[#000000] border border-white/[0.08] outline-none
               focus:border-[#A78BFA]/50 transition-colors placeholder:text-white/60
               max-w-[480px]"
           />
@@ -886,7 +886,7 @@ export default function ExplorePage() {
                 </div>
                 <div className="museum-pan-row -mx-6 px-6">
                   {Array.from({ length: 8 }).map((_, i) => (
-                    <div key={i} className="flex-shrink-0 rounded-xl overflow-hidden border border-white/[0.06] bg-[#111009] animate-pulse" style={{ width: "var(--card-pan-w)" }}>
+                    <div key={i} className="flex-shrink-0 rounded-xl overflow-hidden border border-white/[0.06] bg-[#000000] animate-pulse" style={{ width: "var(--card-pan-w)" }}>
                       <div className="bg-white/[0.04]" style={{ height: "200px" }} />
                       <div className="p-3 space-y-2">
                         <div className="h-3 bg-white/[0.06] rounded w-3/4" />

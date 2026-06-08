@@ -390,7 +390,7 @@ function TrackCardUI({
                   >
                     <SelectValue placeholder="Genre" />
                   </SelectTrigger>
-                  <SelectContent position="popper" side="bottom" sideOffset={4} style={{ background: "#1C1A14", border: "1px solid rgba(196,154,40,0.5)", color: "#E8DFC8", maxHeight: 220, overflowY: "auto" }}>
+                  <SelectContent position="popper" side="bottom" sideOffset={4} style={{ background: "#0A0A0A", border: "1px solid rgba(196,154,40,0.5)", color: "#E8DFC8", maxHeight: 220, overflowY: "auto" }}>
                     {GENRES.map(g => (
                       <SelectItem key={g} value={g} style={{ color: "#E8DFC8", fontSize: "12px" }}>{g}</SelectItem>
                     ))}
@@ -406,7 +406,7 @@ function TrackCardUI({
                   >
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent style={{ background: "#1C1A14", border: "1px solid rgba(196,154,40,0.5)", color: "var(--ln-parchment)" }}>
+                  <SelectContent style={{ background: "#0A0A0A", border: "1px solid rgba(196,154,40,0.5)", color: "var(--ln-parchment)" }}>
                     {AI_OPTIONS.map(o => (
                       <SelectItem key={o.value} value={o.value} style={{ color: "var(--ln-parchment)", fontSize: "12px" }}>
                         {o.label}
@@ -829,7 +829,7 @@ export default function BatchUploadPage() {
             {collectionResult.trackCount} track{collectionResult.trackCount > 1 ? "s" : ""} registered to the Living Nexus Archive
           </p>
         </div>
-        <div className="p-6 space-y-4" style={{ background: "#1C1A14", border: "1px solid rgba(196,154,40,0.5)", color: "var(--ln-parchment)" }}>
+        <div className="p-6 space-y-4" style={{ background: "#0A0A0A", border: "1px solid rgba(196,154,40,0.5)", color: "var(--ln-parchment)" }}>
           <div>
             <p className="text-[10px] font-heading tracking-widest uppercase mb-1" style={{ color: "var(--ln-parchment)" }}>
               Collection WID
@@ -943,7 +943,7 @@ export default function BatchUploadPage() {
       {/* Album info */}
       <div
         className="p-4 space-y-3"
-        style={{ background: "#1C1A14", border: "1px solid rgba(196,154,40,0.5)", color: "var(--ln-parchment)" }}
+        style={{ background: "#0A0A0A", border: "1px solid rgba(196,154,40,0.5)", color: "var(--ln-parchment)" }}
       >
         <p className="text-[10px] font-heading tracking-widest uppercase" style={{ color: "var(--ln-parchment)" }}>
           Collection / Album
@@ -1015,7 +1015,7 @@ export default function BatchUploadPage() {
       {/* Album-level sketch options */}
       <div
         className="p-4 space-y-3"
-        style={{ background: "#1C1A14", border: "1px solid rgba(196,154,40,0.5)", color: "var(--ln-parchment)" }}
+        style={{ background: "#0A0A0A", border: "1px solid rgba(196,154,40,0.5)", color: "var(--ln-parchment)" }}
       >
         <p className="text-[10px] font-heading tracking-widest uppercase" style={{ color: "var(--ln-parchment)" }}>Album Options</p>
         <div className="flex flex-wrap gap-6">
@@ -1055,7 +1055,7 @@ export default function BatchUploadPage() {
       {/* Batch fill panel */}
       <div
         className="rounded-2xl overflow-hidden"
-        style={{ background: "#1C1A14", border: "1px solid rgba(196,154,40,0.5)", color: "var(--ln-parchment)" }}
+        style={{ background: "#0A0A0A", border: "1px solid rgba(196,154,40,0.5)", color: "var(--ln-parchment)" }}
       >
         <button
           onClick={() => setBatchFillOpen(o => !o)}
@@ -1101,7 +1101,7 @@ export default function BatchUploadPage() {
                   >
                     <SelectValue placeholder="Select genre" />
                   </SelectTrigger>
-                  <SelectContent position="popper" side="bottom" sideOffset={4} style={{ background: "#1C1A14", border: "1px solid rgba(196,154,40,0.5)", color: "#E8DFC8", maxHeight: 220, overflowY: "auto" }}>
+                  <SelectContent position="popper" side="bottom" sideOffset={4} style={{ background: "#0A0A0A", border: "1px solid rgba(196,154,40,0.5)", color: "#E8DFC8", maxHeight: 220, overflowY: "auto" }}>
                     {GENRES.map(g => (
                       <SelectItem key={g} value={g} style={{ color: "#E8DFC8", fontSize: "12px" }}>{g}</SelectItem>
                     ))}
@@ -1117,7 +1117,7 @@ export default function BatchUploadPage() {
                   >
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent style={{ background: "#1C1A14", border: "1px solid rgba(196,154,40,0.5)", color: "var(--ln-parchment)" }}>
+                  <SelectContent style={{ background: "#0A0A0A", border: "1px solid rgba(196,154,40,0.5)", color: "var(--ln-parchment)" }}>
                     {AI_OPTIONS.map(o => (
                       <SelectItem key={o.value} value={o.value} style={{ color: "var(--ln-parchment)", fontSize: "12px" }}>
                         {o.label}
@@ -1228,7 +1228,7 @@ export default function BatchUploadPage() {
         <button
           onClick={addCard}
           className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl transition-all hover:bg-white/[0.04]"
-          style={{ border: "1.5px dashed #111009", color: "var(--ln-parchment)" }}
+          style={{ border: "1.5px dashed rgba(196,154,40,0.18)", color: "var(--ln-parchment)" }}
         >
           <Plus size={16} />
           <span className="text-sm">Add Track</span>

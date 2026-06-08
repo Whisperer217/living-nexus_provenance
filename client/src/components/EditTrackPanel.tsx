@@ -966,7 +966,7 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
               >
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent style={{ background: "#1C1A14", border: "1px solid rgba(196,154,40,0.4)", color: "var(--ln-parchment)" }}>
+              <SelectContent style={{ background: "#0A0A0A", border: "1px solid rgba(196,154,40,0.35)", color: "var(--ln-parchment)" }}>
                 <SelectItem value="prohibited" style={{ color: "var(--ln-parchment)" }}>
                   Human-Made — No AI Training
                 </SelectItem>
@@ -1035,7 +1035,7 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
               >
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent style={{ background: "#1C1A14", border: "1px solid rgba(196,154,40,0.4)", color: "var(--ln-parchment)" }}>
+              <SelectContent style={{ background: "#0A0A0A", border: "1px solid rgba(196,154,40,0.35)", color: "var(--ln-parchment)" }}>
                 {Object.entries(STATUS_LABELS).map(([val, label]) => (
                   <SelectItem key={val} value={val} style={{ color: STATUS_COLORS[val] ?? "var(--ln-parchment)" }}>
                     {label}

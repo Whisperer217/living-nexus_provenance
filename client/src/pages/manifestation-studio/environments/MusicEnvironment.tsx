@@ -130,7 +130,7 @@ function AudioPreview({ file }: { file: File }) {
   return (
     <div className="flex items-center gap-3 px-4 py-3 rounded-xl" style={{ background: "rgba(124,58,237,0.06)", border: `1px solid ${atmosphere.colorBorder}` }}>
       <button onClick={toggle} className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: atmosphere.colorPrimary }}>
-        {playing ? <Pause size={14} color="#111009" /> : <Play size={14} color="#111009" className="ml-0.5" />}
+        {playing ? <Pause size={14} color="#000000" /> : <Play size={14} color="#000000" className="ml-0.5" />}
       </button>
       <div className="flex-1">
         <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(167,139,250,0.15)" }}>
@@ -406,7 +406,7 @@ export function MusicEnvironment({ onBack }: MusicEnvironmentProps) {
                 onClick={() => { if (!audioFile) { toast.error("Drop an audio file first"); return; } setStep("metadata"); }}
                 disabled={!audioFile}
                 className="gap-2"
-                style={{ background: atmosphere.colorPrimary, color: "#111009" }}
+                style={{ background: atmosphere.colorPrimary, color: "#000000" }}
               >
                 Continue <ChevronRight size={14} />
               </Button>
@@ -499,7 +499,7 @@ export function MusicEnvironment({ onBack }: MusicEnvironmentProps) {
               <Button variant="outline" onClick={() => setStep("upload")} className="gap-1" style={{ borderColor: atmosphere.colorBorder, color: "var(--ln-parchment)" }}>
                 <ChevronLeft size={14} /> Back
               </Button>
-              <Button onClick={() => { if (!title) { toast.error("Title is required"); return; } setStep("provenance"); }} disabled={!title} className="gap-2" style={{ background: atmosphere.colorPrimary, color: "#111009" }}>
+              <Button onClick={() => { if (!title) { toast.error("Title is required"); return; } setStep("provenance"); }} disabled={!title} className="gap-2" style={{ background: atmosphere.colorPrimary, color: "#000000" }}>
                 Continue <ChevronRight size={14} />
               </Button>
             </div>
@@ -528,7 +528,7 @@ export function MusicEnvironment({ onBack }: MusicEnvironmentProps) {
                 <p className="text-[11px] mb-6 max-w-sm mx-auto" style={{ color: "rgba(245,237,216,0.5)" }}>
                   This creates a SHA-256 hash of your audio file and signs it with an ECDSA keypair — proving you possessed this exact file at this moment.
                 </p>
-                <Button onClick={generateWID} disabled={generatingWid} className="gap-2" style={{ background: atmosphere.colorPrimary, color: "#111009" }}>
+                <Button onClick={generateWID} disabled={generatingWid} className="gap-2" style={{ background: atmosphere.colorPrimary, color: "#000000" }}>
                   {generatingWid ? <Loader2 size={14} className="animate-spin" /> : <Zap size={14} />}
                   {generatingWid ? "Generating..." : "Generate Witness ID"}
                 </Button>
@@ -569,7 +569,7 @@ export function MusicEnvironment({ onBack }: MusicEnvironmentProps) {
               <Button variant="outline" onClick={() => setStep("metadata")} className="gap-1" style={{ borderColor: atmosphere.colorBorder, color: "var(--ln-parchment)" }}>
                 <ChevronLeft size={14} /> Back
               </Button>
-              <Button onClick={() => setStep("publish")} disabled={!witnessData} className="gap-2" style={{ background: atmosphere.colorPrimary, color: "#111009" }}>
+              <Button onClick={() => setStep("publish")} disabled={!witnessData} className="gap-2" style={{ background: atmosphere.colorPrimary, color: "#000000" }}>
                 Continue <ChevronRight size={14} />
               </Button>
             </div>
@@ -608,7 +608,7 @@ export function MusicEnvironment({ onBack }: MusicEnvironmentProps) {
               onClick={handlePublish}
               disabled={uploadPhase !== "idle"}
               className="w-full gap-2 py-6 text-base font-semibold"
-              style={{ background: "var(--ln-gold)", color: "#111009", boxShadow: "0 4px 20px rgba(212,175,55,0.3)" }}
+              style={{ background: "var(--ln-gold)", color: "#000000", boxShadow: "0 4px 20px rgba(212,175,55,0.3)" }}
             >
               {uploadPhase === "uploading" ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}
               {uploadPhase === "uploading" ? "Publishing..." : "Publish to Living Nexus"}
@@ -705,7 +705,7 @@ export function MusicEnvironment({ onBack }: MusicEnvironmentProps) {
           ].map((check, i) => (
             <div key={i} className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full flex items-center justify-center" style={{ background: check.done ? "var(--ln-seal-bright)" : "rgba(196,154,40,0.1)", border: `1px solid ${check.done ? "var(--ln-seal-bright)" : "rgba(196,154,40,0.2)"}` }}>
-                {check.done && <CheckCircle2 size={8} color="#111009" />}
+                {check.done && <CheckCircle2 size={8} color="#000000" />}
               </div>
               <span className="text-[11px]" style={{ color: check.done ? "var(--ln-seal-bright)" : "rgba(245,237,216,0.4)" }}>{check.label}</span>
             </div>

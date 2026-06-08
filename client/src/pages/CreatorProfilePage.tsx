@@ -358,7 +358,7 @@ function BannerUploadCTA({ onFocalDetected }: { onFocalDetected?: (focal: { x: n
   return (
     <label
       className="w-full h-full flex flex-col items-center justify-center gap-3 cursor-pointer group/cta"
-      style={{ background: "linear-gradient(135deg, var(--ln-coal), #111009)" }}
+      style={{ background: "linear-gradient(135deg, #111111, #000000)" }}
     >
       <div
         className="absolute inset-0 opacity-[0.06] pointer-events-none"
@@ -789,7 +789,7 @@ export default function CreatorProfilePage() {
         ) : (
           <div
             className="absolute inset-0 z-0"
-            style={{ background: "linear-gradient(135deg, var(--ln-coal) 0%, #111009 40%, #111009 100%)" }}
+            style={{ background: "linear-gradient(135deg, #111111 0%, #000000 40%, #000000 100%)" }}
           >
             <div
               className="w-full h-full opacity-10"
@@ -802,7 +802,7 @@ export default function CreatorProfilePage() {
         )}
 
         {/* ── z-10: Bottom fade gradient ── */}
-        <div className="absolute inset-x-0 bottom-0 h-24 z-10 bg-gradient-to-t from-[#111009] to-transparent pointer-events-none" />
+        <div className="absolute inset-x-0 bottom-0 h-24 z-10 bg-gradient-to-t from-[#000000] to-transparent pointer-events-none" />
 
         {/* ── z-10: Gold corner accents ── */}
         <div className="absolute top-0 left-0 w-12 h-12 pointer-events-none z-10" style={{ borderTop: "3px solid #c9a84c", borderLeft: "3px solid #c9a84c" }} />
@@ -855,9 +855,9 @@ export default function CreatorProfilePage() {
           <div
             className="w-full h-full rounded-2xl overflow-hidden"
             style={{
-              background: "linear-gradient(135deg, var(--ln-coal), #111009)",
+              background: "linear-gradient(135deg, #111111, #000000)",
               /* Ring: dark bg outline so avatar pops off the banner */
-              outline: "4px solid #111009",
+              outline: "4px solid #000000",
               boxShadow: "0 4px 24px rgba(0,0,0,0.6), 0 0 0 1px rgba(201,168,76,0.25)",
             }}
           >
@@ -892,7 +892,7 @@ export default function CreatorProfilePage() {
         className="w-full"
         style={{
           background: "var(--ln-coal)",
-          borderBottom: "1px solid #111009",
+          borderBottom: "1px solid rgba(196,154,40,0.08)",
         }}
       >
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
@@ -1401,7 +1401,7 @@ export default function CreatorProfilePage() {
                       {project.bannerUrl ? (
                         <img src={project.bannerUrl} alt={project.title} className="absolute inset-0 w-full h-full object-cover object-center" />
                       ) : (
-                        <div className="absolute inset-0 bg-gradient-to-br from-[#1a1025] to-[#111009] flex items-center justify-center">
+                        <div className="absolute inset-0 bg-gradient-to-br from-[#1a1025] to-[#000000] flex items-center justify-center">
                           <span className="text-4xl font-bold" style={{ color: "rgba(196,154,40,0.15)" }}>{project.title[0]}</span>
                         </div>
                       )}
@@ -1557,7 +1557,7 @@ export default function CreatorProfilePage() {
                   const albumCoverY = collection?.coverPositionY ?? albumSongs[0]?.coverPositionY ?? 50;
                   return (
                   <div key={albumName} className="rounded-xl overflow-hidden" style={{ background: "var(--ln-coal)", border: "1px solid #C49A28" }}>
-                    <div className="flex items-center gap-4 p-4" style={{ borderBottom: "1px solid #111009" }}>
+                    <div className="flex items-center gap-4 p-4" style={{ borderBottom: "1px solid rgba(196,154,40,0.08)" }}>
                       {albumCoverUrl ? (
                         <img src={albumCoverUrl} alt={albumName} className="w-14 h-14 rounded-lg object-cover flex-shrink-0" style={{ objectPosition: `${albumCoverX}% ${albumCoverY}%` }} />
                       ) : (
@@ -1718,7 +1718,7 @@ export default function CreatorProfilePage() {
                   {t.linkedWorks && (t.linkedWorks as string[]).length > 0 && (
                     <div className="mt-2 flex flex-wrap gap-1.5">
                       {(t.linkedWorks as string[]).map((wid: string) => (
-                        <span key={wid} className="font-mono text-[9px] px-1.5 py-0.5 rounded" style={{ background: "var(--ln-coal)", color: "var(--ln-iron)", border: "1px solid #111009" }}>{wid}</span>
+                        <span key={wid} className="font-mono text-[9px] px-1.5 py-0.5 rounded" style={{ background: "var(--ln-coal)", color: "var(--ln-iron)", border: "1px solid rgba(196,154,40,0.10)" }}>{wid}</span>
                       ))}
                     </div>
                   )}

@@ -98,7 +98,7 @@ export default function TrustPage() {
     <div style={{ background: BG, minHeight: "100vh", color: TEXT }}>
       {/* Hero */}
       <div style={{
-        background: `linear-gradient(180deg, #111009 0%, ${BG} 100%)`,
+        background: `linear-gradient(180deg, #000000 0%, ${BG} 100%)`,
         borderBottom: `1px solid ${BORDER}`,
         padding: "60px 24px 48px",
         textAlign: "center",

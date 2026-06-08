@@ -259,7 +259,7 @@ export default function ArtworkNormalizationPage() {
             { label: "Flagged", value: report.totalFlagged, icon: <AlertTriangle size={16} />, color: "var(--ln-parchment)" },
           ].map(card => (
             <div key={card.label} className="rounded-xl p-4"
-              style={{ background: "var(--ln-coal)", border: "1px solid #111009" }}>
+              style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.10)" }}>
               <div className="flex items-center gap-2 mb-2" style={{ color: card.color }}>
                 {card.icon}
                 <span className="text-[11px] font-heading tracking-wide uppercase">{card.label}</span>
@@ -275,7 +275,7 @@ export default function ArtworkNormalizationPage() {
         <div className="rounded-xl p-4 mb-8 font-mono text-[11px] whitespace-pre-wrap leading-relaxed"
           style={{
             background: "var(--ln-coal)",
-            border: "1px solid #111009",
+            border: "1px solid rgba(196,154,40,0.10)",
             color: "var(--ln-iron)",
           }}>
           {report.summary}

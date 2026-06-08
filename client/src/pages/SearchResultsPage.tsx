@@ -122,7 +122,7 @@ export default function SearchResultsPage() {
       {/* ── Search bar ── */}
       <div
         className="sticky top-[56px] z-10 px-6 py-3"
-        style={{ background: "rgba(10,8,6,0.95)", borderBottom: "1px solid rgba(196,154,40,0.12)", backdropFilter: "blur(12px)" }}
+        style={{ background: "rgba(0,0,0,0.95)", borderBottom: "1px solid rgba(196,154,40,0.12)", backdropFilter: "blur(12px)" }}
       >
         <form onSubmit={handleSearch} className="flex items-center gap-3 max-w-2xl mx-auto">
           <div

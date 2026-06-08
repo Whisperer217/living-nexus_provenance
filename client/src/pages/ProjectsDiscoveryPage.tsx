@@ -43,7 +43,7 @@ function ProjectCard({ project }: { project: any }) {
             <div
               className="absolute inset-0 w-full h-full flex items-center justify-center"
               style={{
-                background: "linear-gradient(135deg, var(--ln-coal), #111009, #111009)",
+                background: "linear-gradient(135deg, var(--ln-coal), #000000, #000000)",
               }}
             >
               <span

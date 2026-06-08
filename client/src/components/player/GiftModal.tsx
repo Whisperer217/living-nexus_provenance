@@ -149,7 +149,7 @@ export default function GiftModal({
         <div
           className="px-5 pt-5 pb-4"
           style={{
-            background: "linear-gradient(180deg, #111009 0%, transparent 100%)",
+            background: "linear-gradient(180deg, #000000 0%, transparent 100%)",
           }}
         >
           <div className="flex items-start justify-between">
@@ -229,7 +229,7 @@ export default function GiftModal({
                         : "var(--ln-coal)",
                       border: isActive
                         ? "1px solid rgba(196,154,40,0.3)"
-                        : "1px solid #111009",
+                        : "1px solid rgba(196,154,40,0.10)",
                       boxShadow: isActive
                         ? "0 0 16px rgba(196,154,40,0.09)"
                         : "none",

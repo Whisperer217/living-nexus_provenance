@@ -58,8 +58,8 @@ function NotifRow({
     <div
       className={`group flex items-start gap-3 p-3 rounded-xl cursor-pointer transition-all
         ${notif.isRead
-          ? "bg-[#111009] border border-white/[0.04] hover:border-white/[0.08]"
-          : "bg-[#111009] border border-[#C49A28]/10 hover:border-[#C49A28]/20"
+          ? "bg-[#000000] border border-white/[0.04] hover:border-white/[0.08]"
+          : "bg-[#000000] border border-[#C49A28]/10 hover:border-[#C49A28]/20"
         }`}
       onClick={handleClick}
     >
@@ -73,7 +73,7 @@ function NotifRow({
           <NotifIcon type={notif.type} />
         )}
         {!notif.isRead && (
-          <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-[#1C1A14] border-2 border-[#111009]" />
+          <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-[#1C1A14] border-2 border-[#000000]" />
         )}
       </div>
 
@@ -203,7 +203,7 @@ export default function NotificationsPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-[#111009] flex items-center justify-center">
+      <div className="min-h-screen bg-[#000000] flex items-center justify-center">
         <div className="text-center">
           <Bell size={40} className="mx-auto mb-4 text-[#C49A28]/40" />
           <p className="text-white/50 mb-4">Sign in to see your notifications</p>
@@ -219,7 +219,7 @@ export default function NotificationsPage() {
   const displayed = tab === "inbox" ? unread : notifications;
 
   return (
-    <div className="min-h-screen bg-[#111009] pb-32">
+    <div className="min-h-screen bg-[#000000] pb-32">
       <div className="max-w-2xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
@@ -250,7 +250,7 @@ export default function NotificationsPage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-1 mb-5 p-1 rounded-xl bg-[#111009] border border-white/[0.06]">
+        <div className="flex gap-1 mb-5 p-1 rounded-xl bg-[#000000] border border-white/[0.06]">
           {(["inbox", "all"] as const).map(t => (
             <button
               key={t}

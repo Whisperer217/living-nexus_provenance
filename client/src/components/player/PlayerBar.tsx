@@ -737,7 +737,7 @@ export default function PlayerBar() {
               disabled={!currentSongId}
               className="w-14 h-14 rounded-lg flex-shrink-0 overflow-hidden flex items-center justify-center text-2xl
                 transition-opacity hover:opacity-80 disabled:cursor-default"
-              style={{ background: currentTrack?.bg || "#111009" }}
+              style={{ background: currentTrack?.bg || "#000000" }}
               title={currentTrack?.title || ""}
             >
               {currentTrack?.artUrl && currentTrack.artType !== "video"

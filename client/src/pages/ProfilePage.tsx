@@ -62,7 +62,7 @@ function EditableField({
             rows={3}
             placeholder={placeholder}
             className="flex-1 px-3 py-2 rounded-xl text-[13px] font-body text-white/80
-              bg-[#111009] border border-[#A78BFA]/50 outline-none resize-none
+              bg-[#000000] border border-[#A78BFA]/50 outline-none resize-none
               placeholder:text-white/60 overflow-hidden"
             style={{ minHeight: "4.5rem" }}
             autoFocus
@@ -73,7 +73,7 @@ function EditableField({
             onChange={e => setVal(e.target.value)}
             placeholder={placeholder}
             className="flex-1 px-3 py-2 rounded-xl text-[13px] font-body text-white/80
-              bg-[#111009] border border-[#A78BFA]/50 outline-none
+              bg-[#000000] border border-[#A78BFA]/50 outline-none
               placeholder:text-white/60"
             autoFocus
             onKeyDown={e => { if (e.key === "Enter") save(); if (e.key === "Escape") cancel(); }}
@@ -115,7 +115,7 @@ function HandleField({ value, onSave }: { value: string; onSave: (v: string) => 
           onChange={e => setVal(e.target.value)}
           placeholder="artist-handle"
           className="flex-1 px-2 py-1 rounded-lg text-[13px] font-body text-white/80
-            bg-[#111009] border border-[#A78BFA]/50 outline-none
+            bg-[#000000] border border-[#A78BFA]/50 outline-none
             placeholder:text-white/60"
           autoFocus
           onKeyDown={e => { if (e.key === "Enter") save(); if (e.key === "Escape") cancel(); }}
@@ -479,7 +479,7 @@ export default function ProfilePage() {
           <div
             className="w-full h-full flex flex-col items-center justify-center gap-3 cursor-pointer group/cta"
             style={{
-              background: "linear-gradient(135deg, var(--ln-coal), #111009)",
+              background: "linear-gradient(135deg, #111111, #000000)",
             }}
             onClick={() => bannerRef.current?.click()}
           >
@@ -515,7 +515,7 @@ export default function ProfilePage() {
         )}
         {/* Bottom fade — only when banner is populated */}
         {profile?.bannerUrl && (
-          <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[#111009] to-transparent pointer-events-none" />
+          <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[#000000] to-transparent pointer-events-none" />
         )}
         {/* Gold corner accents */}
         <div className="absolute top-0 left-0 w-12 h-12 pointer-events-none" style={{ borderTop: "3px solid #c9a84c", borderLeft: "3px solid #c9a84c" }} />
@@ -591,7 +591,7 @@ export default function ProfilePage() {
         className="w-full"
         style={{
           background: "var(--ln-coal)",
-          borderBottom: "1px solid #111009",
+          borderBottom: "1px solid rgba(196,154,40,0.08)",
         }}
       >
         <div className="px-6">
@@ -601,9 +601,9 @@ export default function ProfilePage() {
             <div className="-mt-20 flex-shrink-0">
               <div className="relative group">
                 <div
-                  className="w-36 h-36 rounded-2xl overflow-hidden bg-[#111009] flex items-center justify-center"
+                  className="w-36 h-36 rounded-2xl overflow-hidden bg-[#000000] flex items-center justify-center"
                   style={{
-                    outline: "3px solid #111009",
+                    outline: "3px solid #000000",
                     border: "1.5px solid rgba(212,175,55,0.25)",
                     boxShadow: "0 4px 20px rgba(0,0,0,0.5)",
                   }}
@@ -762,7 +762,7 @@ export default function ProfilePage() {
       <div className="px-6 pt-5">
 
         {/* ── Creator Defaults: AI Disclosure + Primary Genre ── */}
-        <div className="mb-4 p-4 rounded-xl border border-white/[0.07] bg-[#111009]">
+        <div className="mb-4 p-4 rounded-xl border border-white/[0.07] bg-[#000000]">
           <p className="text-[10px] font-semibold tracking-widest uppercase mb-3" style={{ color: "#E2E8F0", fontFamily: "'Cinzel', serif" }}>
             Creator Defaults — applied to every upload
           </p>
@@ -773,7 +773,7 @@ export default function ProfilePage() {
               <select
                 value={profile?.aiDisclosure || "original"}
                 onChange={e => save({ aiDisclosure: e.target.value as "original" | "ai_assisted" | "ai_generated" | "human_authored_ai_instrument" })}
-                className="px-3 py-2 rounded-lg text-[13px] font-body text-white/80 bg-[#111009] border border-white/[0.1] outline-none cursor-pointer hover:border-[#A78BFA]/50 transition-colors"
+                className="px-3 py-2 rounded-lg text-[13px] font-body text-white/80 bg-[#000000] border border-white/[0.1] outline-none cursor-pointer hover:border-[#A78BFA]/50 transition-colors"
                 style={{ background: "var(--ln-coal)" }}
               >
                 <option value="original">Human-Made — No AI Used</option>
@@ -850,19 +850,19 @@ export default function ProfilePage() {
         <div className="flex items-center gap-3 mb-5 flex-wrap">
           {profile?.twitterHandle && (
             <a href={`https://twitter.com/${profile.twitterHandle}`} target="_blank" rel="noreferrer"
-              className="p-2 rounded-lg bg-[#111009] border border-white/[0.06] text-white/40 hover:text-[#1DA1F2] hover:border-[#1DA1F2]/30 transition-all">
+              className="p-2 rounded-lg bg-[#000000] border border-white/[0.06] text-white/40 hover:text-[#1DA1F2] hover:border-[#1DA1F2]/30 transition-all">
               <Twitter size={14} />
             </a>
           )}
           {profile?.instagramHandle && (
             <a href={`https://instagram.com/${profile.instagramHandle}`} target="_blank" rel="noreferrer"
-              className="p-2 rounded-lg bg-[#111009] border border-white/[0.06] text-white/40 hover:text-[#E1306C] hover:border-[#E1306C]/30 transition-all">
+              className="p-2 rounded-lg bg-[#000000] border border-white/[0.06] text-white/40 hover:text-[#E1306C] hover:border-[#E1306C]/30 transition-all">
               <Instagram size={14} />
             </a>
           )}
           {profile?.youtubeHandle && (
             <a href={`https://youtube.com/@${profile.youtubeHandle}`} target="_blank" rel="noreferrer"
-              className="p-2 rounded-lg bg-[#111009] border border-white/[0.06] text-white/40 hover:text-[#FF0000] hover:border-[#FF0000]/30 transition-all">
+              className="p-2 rounded-lg bg-[#000000] border border-white/[0.06] text-white/40 hover:text-[#FF0000] hover:border-[#FF0000]/30 transition-all">
               <Youtube size={14} />
             </a>
           )}
@@ -961,7 +961,7 @@ export default function ProfilePage() {
                 { label: "Witnessing", value: witnessNetwork?.witnessing?.length ?? 0, sub: "creators you witness", color: "#60a5fa" },
                 { label: "Witnesses", value: witnessNetwork?.witnessedBy?.length ?? 0, sub: "creators witnessing you", color: "#fb923c" },
               ].map(s => (
-                <div key={s.label} className="p-4 rounded-xl bg-[#111009] border border-white/[0.06]">
+                <div key={s.label} className="p-4 rounded-xl bg-[#000000] border border-white/[0.06]">
                   <div className="text-[22px] font-heading mb-1" style={{ color: s.color }}>{s.value}</div>
                   <div className="text-[12px] font-body text-white/70">{s.label}</div>
                   <div className="text-[11px] font-body text-white/40 mt-0.5">{s.sub}</div>
@@ -969,7 +969,7 @@ export default function ProfilePage() {
               ))}
             </div>
             {/* Stripe Connect status card */}
-            <div className="p-4 rounded-xl border border-white/[0.07] bg-[#111009]">
+            <div className="p-4 rounded-xl border border-white/[0.07] bg-[#000000]">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <DollarSign size={14} className="text-[#C49A28]" />
@@ -1076,7 +1076,7 @@ export default function ProfilePage() {
             {songsLoading ? (
               <div className="space-y-2">
                 {Array.from({ length: 5 }).map((_, i) => (
-                  <div key={i} className="flex items-center gap-3 p-3 rounded-xl border border-white/[0.04] bg-[#111009] animate-pulse">
+                  <div key={i} className="flex items-center gap-3 p-3 rounded-xl border border-white/[0.04] bg-[#000000] animate-pulse">
                     <div className="w-11 h-11 rounded-lg flex-shrink-0 bg-white/[0.06]" />
                     <div className="flex-1 space-y-2">
                       <div className="h-3 rounded bg-white/[0.06] w-2/3" />
@@ -1092,8 +1092,8 @@ export default function ProfilePage() {
               </div>
             ) : (
               (dbSongs as any[]).map((song) => (
-                <div key={song.id} className="flex items-center gap-3 p-3 rounded-xl border border-white/[0.06] bg-[#111009] hover:border-white/[0.12] transition-all group">
-                  <div className="w-11 h-11 rounded-lg flex-shrink-0 overflow-hidden bg-[#111009]">
+                <div key={song.id} className="flex items-center gap-3 p-3 rounded-xl border border-white/[0.06] bg-[#000000] hover:border-white/[0.12] transition-all group">
+                  <div className="w-11 h-11 rounded-lg flex-shrink-0 overflow-hidden bg-[#000000]">
                     {song.coverArtUrl
                       ? <img src={song.coverArtUrl} alt="" className="w-full h-full object-cover" style={{ objectPosition: `${(song as any).coverPositionX ?? 50}% ${(song as any).coverPositionY ?? 50}%` }} />
                       : <div className="w-full h-full flex items-center justify-center text-white/60"><Music size={16} /></div>}
@@ -1167,7 +1167,7 @@ export default function ProfilePage() {
 
             {/* New collection input */}
             {creatingCollection && (
-              <div className="flex items-center gap-2 p-3 rounded-xl border border-[rgba(196,154,40,0.3)] bg-[#111009]">
+              <div className="flex items-center gap-2 p-3 rounded-xl border border-[rgba(196,154,40,0.3)] bg-[#000000]">
                 <FolderOpen size={14} className="text-[#C49A28] flex-shrink-0" />
                 <input
                   autoFocus
@@ -1192,7 +1192,7 @@ export default function ProfilePage() {
               (myCollections as any[]).map((col) => {
                 const isExpanded = expandedCollectionId === col.id;
                 return (
-                  <div key={col.id} className="rounded-xl border border-white/[0.06] bg-[#111009] overflow-hidden">
+                  <div key={col.id} className="rounded-xl border border-white/[0.06] bg-[#000000] overflow-hidden">
                     {/* Collection header */}
                     <div
                       className="flex items-center gap-3 p-3 cursor-pointer hover:bg-white/[0.02] transition-all"
@@ -1259,7 +1259,7 @@ export default function ProfilePage() {
                 {(myLegacyPlaylists as any[]).map((pl: any) => {
                   const isExpanded = expandedLegacyPlaylistId === pl.id;
                   return (
-                    <div key={pl.id} className="rounded-xl border border-white/[0.06] bg-[#111009] overflow-hidden mb-2">
+                    <div key={pl.id} className="rounded-xl border border-white/[0.06] bg-[#000000] overflow-hidden mb-2">
                       <div
                         className="flex items-center gap-3 p-3 cursor-pointer hover:bg-white/[0.02] transition-all"
                         onClick={() => setExpandedLegacyPlaylistId(isExpanded ? null : pl.id)}
@@ -1324,8 +1324,8 @@ export default function ProfilePage() {
                 const s = item.song ?? item;
                 const creatorName = item.creator?.artistHandle || item.creator?.name || artistName;
                 return (
-                  <div key={s.id} className="flex items-center gap-3 p-3 rounded-xl border border-white/[0.06] bg-[#111009] hover:border-white/[0.12] transition-all">
-                    <div className="w-10 h-10 rounded-lg flex-shrink-0 overflow-hidden bg-[#111009]">
+                  <div key={s.id} className="flex items-center gap-3 p-3 rounded-xl border border-white/[0.06] bg-[#000000] hover:border-white/[0.12] transition-all">
+                    <div className="w-10 h-10 rounded-lg flex-shrink-0 overflow-hidden bg-[#000000]">
                       {s.coverArtUrl
                         ? <img src={s.coverArtUrl} alt="" className="w-full h-full object-cover" />
                         : <div className="w-full h-full flex items-center justify-center"><Music size={14} className="text-white/40" /></div>}
@@ -1388,7 +1388,7 @@ export default function ProfilePage() {
                       {n.refId && n.refType === "song" && n.songTitle && (
                         <div
                           className="mt-2 flex items-center gap-2 rounded-lg overflow-hidden"
-                          style={{ background: "var(--ln-coal)", border: "1px solid #111009" }}
+                          style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.10)" }}
                           onClick={(e) => e.stopPropagation()}
                         >
                           {/* Cover art — links to song page */}
@@ -1462,7 +1462,7 @@ export default function ProfilePage() {
                           className="mt-1.5 text-[10px] font-body px-2 py-0.5 rounded-md transition-all"
                           style={{
                             background: replyingTo === n.id ? "var(--ln-coal)" : "var(--ln-coal)",
-                            border: "1px solid #111009",
+                            border: "1px solid rgba(196,154,40,0.10)",
                             color: replyingTo === n.id ? "#A78BFA" : "var(--ln-smoke)",
                           }}
                         >
@@ -1488,7 +1488,7 @@ export default function ProfilePage() {
                         className="w-full px-3 py-2 rounded-xl text-[12px] font-body text-white/80 resize-none outline-none placeholder:text-white/40"
                         style={{
                           background: "var(--ln-coal)",
-                          border: "1px solid #111009",
+                          border: "1px solid rgba(196,154,40,0.10)",
                         }}
                         autoFocus
                         onKeyDown={(e) => {
@@ -1508,7 +1508,7 @@ export default function ProfilePage() {
                           className="text-[11px] font-body px-3 py-1 rounded-lg transition-all disabled:opacity-40"
                           style={{
                             background: "var(--ln-coal)",
-                            border: "1px solid #111009",
+                            border: "1px solid rgba(196,154,40,0.10)",
                             color: "#A78BFA",
                           }}
                         >
@@ -1546,7 +1546,7 @@ export default function ProfilePage() {
               </div>
             ) : (
               (myFieldNotes as any[]).map((note: any) => (
-                <div key={note.id} className="p-3 rounded-xl border border-white/[0.06] bg-[#111009] hover:border-white/[0.12] transition-all">
+                <div key={note.id} className="p-3 rounded-xl border border-white/[0.06] bg-[#000000] hover:border-white/[0.12] transition-all">
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
                       <p className="text-[13px] font-body text-white/80 truncate">{note.title}</p>
@@ -1627,7 +1627,7 @@ export default function ProfilePage() {
                   </div>
 
                   {/* WID preview */}
-                  <div className="rounded-xl p-3" style={{ background: "var(--ln-coal)", border: "1px solid #111009" }}>
+                  <div className="rounded-xl p-3" style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.10)" }}>
                     <div className="text-[10px] font-heading tracking-widest text-white/50 mb-1">WILL GENERATE</div>
                     <div className="font-mono text-[13px]" style={{ color: "var(--ln-gold)" }}>WID-TST-XXXXXXXX-YYYYYYYY</div>
                     <div className="text-[10px] font-body text-white/50 mt-0.5">A unique Witness ID sealed to your identity and this content</div>
@@ -1671,7 +1671,7 @@ export default function ProfilePage() {
             ) : (
               <div className="space-y-3">
                 {(myTestimonies as any[]).map((t: any) => (
-                  <div key={t.id} className="p-4 rounded-xl border border-white/[0.06] bg-[#111009] hover:border-white/[0.12] transition-all">
+                  <div key={t.id} className="p-4 rounded-xl border border-white/[0.06] bg-[#000000] hover:border-white/[0.12] transition-all">
                     {/* WID badge */}
                     <div className="flex items-center justify-between mb-2">
                       <span
@@ -1690,7 +1690,7 @@ export default function ProfilePage() {
                     {t.linkedWorks && (t.linkedWorks as string[]).length > 0 && (
                       <div className="mt-2 flex flex-wrap gap-1.5">
                         {(t.linkedWorks as string[]).map((wid: string) => (
-                          <span key={wid} className="font-mono text-[9px] px-1.5 py-0.5 rounded" style={{ background: "var(--ln-coal)", color: "var(--ln-smoke)", border: "1px solid #111009" }}>{wid}</span>
+                          <span key={wid} className="font-mono text-[9px] px-1.5 py-0.5 rounded" style={{ background: "var(--ln-coal)", color: "var(--ln-smoke)", border: "1px solid rgba(196,154,40,0.10)" }}>{wid}</span>
                         ))}
                       </div>
                     )}
@@ -1737,7 +1737,7 @@ export default function ProfilePage() {
                   : "var(--ln-gold)",
                 border: lightsMode === 'on'
                   ? "1px solid rgba(170,142,100,0.5)"
-                  : "1px solid #111009",
+                  : "1px solid #000000",
                 color: lightsMode === 'on' ? "var(--ln-smoke)" : "var(--ln-smoke)",
               }}
             >
@@ -1819,7 +1819,7 @@ function SocialsEditor({
       <button
         onClick={() => setEditing(true)}
         className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-body
-          bg-[#111009] border border-white/[0.06] text-white/70
+          bg-[#000000] border border-white/[0.06] text-white/70
           hover:border-[#A78BFA]/30 hover:text-[#A78BFA] transition-all"
       >
         <Edit2 size={10} /> Edit Socials
@@ -1840,7 +1840,7 @@ function SocialsEditor({
           onChange={e => set(e.target.value)}
           placeholder={placeholder}
           className="px-3 py-1.5 rounded-lg text-[12px] font-body text-white/70
-            bg-[#111009] border border-white/[0.08] outline-none
+            bg-[#000000] border border-white/[0.08] outline-none
             focus:border-[#A78BFA]/50 placeholder:text-white/60"
         />
       ))}

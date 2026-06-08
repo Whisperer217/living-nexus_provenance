@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300;1,9..40,400;1,9..40,500&display=swap');
 
 /* ═══════════════════════════════════════════════════════════════════
    LIVING NEXUS — Digital Sacred Museum Design System
@@ -81,91 +81,92 @@
 
 :root {
   /* ══════════════════════════════════════════════════════════════════
-     LIVING NEXUS — Gunmetal Museum Palette  (ANCHORED)
+     LIVING NEXUS — True-Black Museum Palette  (v2 — ANCHORED)
      "A museum of multimedia assets in a digital system" — Doc Seraph Mercer
-     Gunmetal Gray walls · Pearl Quartzite text · Quartzite Gold veining
+     True Black void · Pearl Quartzite text · Quartzite Gold veining
      ══════════════════════════════════════════════════════════════════ */
 
-  /* ── Surface Steps (gunmetal museum walls) ── */
-  --void:   #111009;   /* Near-black — page background */
-  --void-2: #111009;   /* Darker Gunmetal — sidebar / nav */
-  --void-3: #1C1A14;   /* Lifted Steel — cards / raised surfaces */
-  --void-4: #4A5560;   /* Elevated Steel — modals / popovers */
+  /* ── Surface Steps (true-black museum void) ── */
+  --void:   #000000;   /* True Black — page background */
+  --void-2: #080808;   /* Near-Black — sidebar / nav */
+  --void-3: #111111;   /* Lifted Void — cards / raised surfaces */
+  --void-4: #1A1A1A;   /* Elevated Void — modals / popovers */
+  --void-5: #222222;   /* Surface Void — hover states / inputs */
 
-  /* ── Quartzite Stone Tones (pearl text + accents on dark metal) ── */
-  --stone-light:  #E8DFC8;   /* Pale Quartzite — primary text */
-  --stone-mid:    #DACAAA;   /* Warm Quartzite — secondary text */
+  /* ── Quartzite Stone Tones (pearl text + accents on black void) ── */
+  --stone-light:  #EDE5D0;   /* Pale Quartzite — primary text (slightly warmer) */
+  --stone-mid:    #D8C9A8;   /* Warm Quartzite — secondary text */
   --stone-warm:   #C49A28;   /* Honey Quartzite — gold accent */
   --stone-deep:   #BD9B63;   /* Amber Quartzite — deeper accent */
   --stone-shadow: #6B6555;   /* Shadow Quartzite — muted */
 
-  /* ── Gold Accent (quartzite veining on gunmetal) ── */
-  --gold:       #C49A28;   /* Quartzite Gold — primary accent */
-  --gold-dim:   #6B6555;   /* Shadow Stone — muted gold */
-  --gold-glow:  #D0A15F;   /* Bright Vein — hover / active */
-  --gold-bright:#E8DFC8;   /* Pearl Stone — highlight */
-  --rose:       #C49A28;   /* Quartzite Gold (secondary) */
-  --terra:      #E2725B;   /* Terra Cotta — warm destructive */
-  --teal:       #6B6555;   /* Shadow Stone (warm accent) */
-  --teal-dim:   #8A7250;   /* Deeper shadow stone */
-  --violet:     #C49A28;   /* Quartzite Gold (highlight) */
-  --violet-dim: #6B6555;   /* Shadow Stone */
+  /* ── Gold Accent (quartzite veining on black void) ── */
+  --gold:        #C49A28;   /* Quartzite Gold — primary accent */
+  --gold-dim:    #6B6555;   /* Shadow Stone — muted gold */
+  --gold-glow:   #D4A84B;   /* Bright Vein — hover / active (slightly richer) */
+  --gold-bright: #EDE5D0;   /* Pearl Stone — highlight */
+  --rose:        #C49A28;   /* Quartzite Gold (secondary) */
+  --terra:       #E2725B;   /* Terra Cotta — warm destructive */
+  --teal:        #6B6555;   /* Shadow Stone (warm accent) */
+  --teal-dim:    #8A7250;   /* Deeper shadow stone */
+  --violet:      #C49A28;   /* Quartzite Gold (highlight) */
+  --violet-dim:  #6B6555;   /* Shadow Stone */
 
   /* ── PROVENANCE COLOR SYSTEM — Semantic meaning tokens ── */
   --lnx-gold:       #C49A28;   /* Quartzite Gold */
-  --lnx-gold-glow:  #D0A15F;   /* Bright Vein — glow states */
+  --lnx-gold-glow:  #D4A84B;   /* Bright Vein — glow states */
   --lnx-gold-muted: #6B6555;   /* Shadow Stone — muted */
   /* Green = Verified / Published / Alive */
   --lnx-green:      #4ADE80;
   --lnx-green-soft: #86EFAC;
   /* Orange = Draft / In Progress / Transition */
-  --lnx-orange:     #D0A15F;   /* Bright Vein */
-  --lnx-orange-soft:#E8DFC8;   /* Pearl Stone */
+  --lnx-orange:     #D4A84B;   /* Bright Vein */
+  --lnx-orange-soft:#EDE5D0;   /* Pearl Stone */
   /* Red = Destructive / Warning / Irreversible */
   --lnx-red:        #F87171;
   --lnx-red-soft:   #FCA5A5;
-  /* Foundation — gunmetal backgrounds */
-  --lnx-bg:         #111009;   /* Near-black — page bg */
-  --lnx-bg-2:       #111009;   /* Darker Gunmetal — nav/sidebar */
-  --lnx-bg-3:       #1C1A14;   /* Lifted Steel — cards */
-  --lnx-text:       #E8DFC8;   /* Pale Quartzite — primary text */
+  /* Foundation — true-black backgrounds */
+  --lnx-bg:         #000000;   /* True Black — page bg */
+  --lnx-bg-2:       #080808;   /* Near-Black — nav/sidebar */
+  --lnx-bg-3:       #111111;   /* Lifted Void — cards */
+  --lnx-text:       #EDE5D0;   /* Pale Quartzite — primary text */
   --lnx-text-muted: #6B6555;   /* Shadow Stone — muted text */
 
   /* ── Semantic Tokens ── */
   --radius: 0.6rem;
-  --background: var(--void);          /* #111009 — Near-black */
-  --foreground: #E8DFC8;              /* Pale Quartzite text */
-  --card: var(--void-3);              /* Lifted Steel */
-  --card-foreground: #E8DFC8;
-  --popover: var(--void-4);           /* Elevated Steel */
-  --popover-foreground: #E8DFC8;
+  --background: var(--void);          /* #000000 — True Black */
+  --foreground: #EDE5D0;              /* Pale Quartzite text */
+  --card: var(--void-3);              /* Lifted Void */
+  --card-foreground: #EDE5D0;
+  --popover: var(--void-4);           /* Elevated Void */
+  --popover-foreground: #EDE5D0;
   --primary: var(--gold);             /* Quartzite Gold */
-  --primary-foreground: #111009;      /* Dark gunmetal on gold button */
-  --secondary: var(--void-2);         /* Darker Gunmetal */
-  --secondary-foreground: #E8DFC8;
-  --muted: var(--void-3);             /* Lifted Steel — muted surface */
+  --primary-foreground: #000000;      /* True Black on gold button */
+  --secondary: var(--void-2);         /* Near-Black */
+  --secondary-foreground: #EDE5D0;
+  --muted: var(--void-3);             /* Lifted Void — muted surface */
   --muted-foreground: #6B6555;        /* Shadow Stone */
   --accent: var(--gold-glow);         /* Bright Vein */
-  --accent-foreground: #111009;
+  --accent-foreground: #000000;
   --destructive: #E2725B;             /* Terra Cotta */
-  --destructive-foreground: #E8DFC8;
-  --border: rgba(203, 177, 131, 0.28); /* Quartzite Gold border */
-  --input:  rgba(203, 177, 131, 0.16);
+  --destructive-foreground: #EDE5D0;
+  --border: rgba(196, 154, 40, 0.22); /* Quartzite Gold border — slightly tighter on black */
+  --input:  rgba(196, 154, 40, 0.12);
   --ring: var(--gold);
 
   --chart-1: #C49A28;   /* Quartzite Gold */
-  --chart-2: #D0A15F;   /* Bright Vein */
-  --chart-3: #E8DFC8;   /* Pale Quartzite */
+  --chart-2: #D4A84B;   /* Bright Vein */
+  --chart-3: #EDE5D0;   /* Pale Quartzite */
   --chart-4: #6B6555;   /* Shadow Stone */
-  --chart-5: #1C1A14;   /* Lifted Steel */
+  --chart-5: #111111;   /* Lifted Void */
 
-  --sidebar: var(--void-2);           /* Darker Gunmetal */
-  --sidebar-foreground: #E8DFC8;
+  --sidebar: var(--void-2);           /* Near-Black */
+  --sidebar-foreground: #EDE5D0;
   --sidebar-primary: var(--gold);
-  --sidebar-primary-foreground: #111009;
+  --sidebar-primary-foreground: #000000;
   --sidebar-accent: var(--void-3);
-  --sidebar-accent-foreground: #E8DFC8;
-  --sidebar-border: rgba(203, 177, 131, 0.22);
+  --sidebar-accent-foreground: #EDE5D0;
+  --sidebar-border: rgba(196, 154, 40, 0.16);
   --sidebar-ring: var(--gold);
 
   /* ══════════════════════════════════════════════════════════════════
@@ -183,19 +184,19 @@
   --text-sm:    0.875rem;   /* 14px — captions, timestamps, meta */
   --text-base:  1rem;       /* 16px — body copy, UI labels, form fields */
   --text-h4:    1.25rem;    /* 20px — card titles, sidebar group headers */
-  --text-h3:    1.5rem;     /* 24px — panel headings, modal titles */
+  --text-h3:    1.5625rem;  /* 25px — panel headings, modal titles (refined from 24px) */
   --text-h2:    2rem;       /* 32px — page section headings */
-  --text-h1:    clamp(2rem, 5vw, 3rem); /* 32–48px — hero, page titles */
+  --text-h1:    clamp(2.25rem, 5vw, 3.25rem); /* 36–52px — hero, page titles (bumped up) */
 
   /* ── Line Heights ── */
-  --leading-body:  1.7;   /* body — generous for dark bg readability */
+  --leading-body:  1.75;  /* body — generous for true-black readability */
   --leading-h4:    1.5;   /* h4 — comfortable for card/label context */
   --leading-h3:    1.4;   /* h3 — panel headings */
-  --leading-h2:    1.25;  /* h2 — section headings */
-  --leading-h1:    1.1;   /* h1 — display, tight and monumental */
+  --leading-h2:    1.2;   /* h2 — section headings (tighter, more monumental) */
+  --leading-h1:    1.05;  /* h1 — display, ultra-tight and monumental */
 
   /* ── Font Weights ── */
-  --weight-body:     450;  /* DM Sans — optical sweet spot on dark bg */
+  --weight-body:     400;  /* DM Sans — clean on true-black */
   --weight-ui:       500;  /* DM Sans medium — buttons, labels, nav */
   --weight-h4:       500;  /* Cormorant medium — card titles */
   --weight-h3:       600;  /* Cormorant semibold — panel headings */
@@ -203,20 +204,20 @@
   --weight-h1:       700;  /* Cinzel bold — hero, page titles */
 
   /* ── Letter Spacing ── */
-  --tracking-body:     0em;    /* DM Sans — no tracking needed */
-  --tracking-ui:       0.02em; /* UI labels — slight open */
-  --tracking-h4:       0.02em; /* Cormorant h4 — editorial warmth */
-  --tracking-h3:       0.03em; /* Cormorant h3 — slight lift */
-  --tracking-h2:       0.05em; /* Cinzel h2 — architectural spacing */
-  --tracking-h1:       0.06em; /* Cinzel h1 — monumental, wide */
-  --tracking-overline: 0.18em; /* Cinzel caps overlines — room to breathe */
+  --tracking-body:     0em;     /* DM Sans — no tracking needed */
+  --tracking-ui:       0.015em; /* UI labels — subtle open */
+  --tracking-h4:       0.025em; /* Cormorant h4 — editorial warmth */
+  --tracking-h3:       0.035em; /* Cormorant h3 — slight lift */
+  --tracking-h2:       0.06em;  /* Cinzel h2 — architectural spacing */
+  --tracking-h1:       0.08em;  /* Cinzel h1 — monumental, wide */
+  --tracking-overline: 0.20em;  /* Cinzel caps overlines — room to breathe */
 
   /* ── Paragraph / Heading Margin Rhythm ── */
-  --space-body:  1rem;    /* 16px — between paragraphs */
-  --space-h4:    0.5rem;  /* 8px  — below card titles */
-  --space-h3:    0.75rem; /* 12px — below panel headings */
-  --space-h2:    1rem;    /* 16px — below section headings */
-  --space-h1:    1.5rem;  /* 24px — below hero headings */
+  --space-body:  1.125rem; /* 18px — between paragraphs (slightly more air) */
+  --space-h4:    0.5rem;   /* 8px  — below card titles */
+  --space-h3:    0.875rem; /* 14px — below panel headings */
+  --space-h2:    1.25rem;  /* 20px — below section headings */
+  --space-h1:    1.75rem;  /* 28px — below hero headings */
 }
 
 /* =================================================================
@@ -226,55 +227,56 @@
    Saved to user profile and localStorage for flash-free load.
 ================================================================= */
 
-/* ── DARK THEME (mirrors :root — gunmetal is already dark) ── */
+/* ── DARK THEME (mirrors :root — true-black is the default) ── */
 [data-theme="dark"] {
-  --void:   #111009;
-  --void-2: #111009;
-  --void-3: #1C1A14;
-  --void-4: #4A5560;
+  --void:   #000000;
+  --void-2: #080808;
+  --void-3: #111111;
+  --void-4: #1A1A1A;
+  --void-5: #222222;
 
-  --gold:       #C49A28;
-  --gold-dim:   #6B6555;
-  --gold-glow:  #D0A15F;
-  --rose:       #C49A28;
-  --terra:      #E2725B;
-  --teal:       #6B6555;
-  --teal-dim:   #8A7250;
+  --gold:        #C49A28;
+  --gold-dim:    #6B6555;
+  --gold-glow:   #D4A84B;
+  --rose:        #C49A28;
+  --terra:       #E2725B;
+  --teal:        #6B6555;
+  --teal-dim:    #8A7250;
 
   --background:          var(--void);
-  --foreground:          #E8DFC8;
+  --foreground:          #EDE5D0;
   --card:                var(--void-3);
-  --card-foreground:     #E8DFC8;
+  --card-foreground:     #EDE5D0;
   --popover:             var(--void-4);
-  --popover-foreground:  #E8DFC8;
+  --popover-foreground:  #EDE5D0;
   --primary:             var(--gold);
-  --primary-foreground:  #111009;
+  --primary-foreground:  #000000;
   --secondary:           var(--void-2);
-  --secondary-foreground:#E8DFC8;
+  --secondary-foreground:#EDE5D0;
   --muted:               var(--void-3);
   --muted-foreground:    #6B6555;
   --accent:              var(--gold-glow);
-  --accent-foreground:   #111009;
-  --border:              rgba(203, 177, 131, 0.28);
-  --input:               rgba(203, 177, 131, 0.16);
+  --accent-foreground:   #000000;
+  --border:              rgba(196, 154, 40, 0.22);
+  --input:               rgba(196, 154, 40, 0.12);
   --ring:                var(--gold);
 
-  --lnx-bg:         #111009;
-  --lnx-bg-2:       #111009;
-  --lnx-bg-3:       #1C1A14;
-  --lnx-text:       #E8DFC8;
+  --lnx-bg:         #000000;
+  --lnx-bg-2:       #080808;
+  --lnx-bg-3:       #111111;
+  --lnx-text:       #EDE5D0;
   --lnx-text-muted: #6B6555;
   --lnx-gold:       #C49A28;
-  --lnx-gold-glow:  #D0A15F;
+  --lnx-gold-glow:  #D4A84B;
   --lnx-gold-muted: #6B6555;
 
   --sidebar:                    var(--void-2);
-  --sidebar-foreground:         #E8DFC8;
+  --sidebar-foreground:         #EDE5D0;
   --sidebar-primary:            var(--gold);
-  --sidebar-primary-foreground: #111009;
+  --sidebar-primary-foreground: #000000;
   --sidebar-accent:             var(--void-3);
-  --sidebar-accent-foreground:  #E8DFC8;
-  --sidebar-border:             rgba(203, 177, 131, 0.22);
+  --sidebar-accent-foreground:  #EDE5D0;
+  --sidebar-border:             rgba(196, 154, 40, 0.16);
   --sidebar-ring:               var(--gold);
 }
 
@@ -311,7 +313,7 @@
   html, body {
     height: 100%;
     overscroll-behavior: none; /* seal the viewport floor — no bounce void on mobile */
-    background-color: #111009; /* Near-black — match app bg */
+    background-color: #000000; /* True Black — match app bg */
     overflow-x: hidden; /* prevent horizontal scroll from revealing right-side drawers on mobile */
     /* overflow-y is NOT locked here — panels lock body.overflow via JS when needed */
   }
@@ -383,6 +385,10 @@
     font-weight: var(--weight-body);
     line-height: var(--leading-body);
     letter-spacing: var(--tracking-body);
+    /* Font smoothing — crisp rendering on true-black backgrounds */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
     transition:
       background-color 0.45s ease,
       color 0.35s ease;
@@ -407,8 +413,9 @@
     font-weight: var(--weight-h1);
     line-height: var(--leading-h1);
     letter-spacing: var(--tracking-h1);
-    color: #E8DFC8;
+    color: #EDE5D0;
     margin-bottom: var(--space-h1);
+    -webkit-font-smoothing: antialiased;
   }
   h2 {
     font-family: var(--font-display);
@@ -416,8 +423,9 @@
     font-weight: var(--weight-h2);
     line-height: var(--leading-h2);
     letter-spacing: var(--tracking-h2);
-    color: #E8DFC8;
+    color: #EDE5D0;
     margin-bottom: var(--space-h2);
+    -webkit-font-smoothing: antialiased;
   }
   h3 {
     font-family: var(--font-editorial);
@@ -425,7 +433,7 @@
     font-weight: var(--weight-h3);
     line-height: var(--leading-h3);
     letter-spacing: var(--tracking-h3);
-    color: #DACAAA;
+    color: #D8C9A8;
     margin-bottom: var(--space-h3);
   }
   h4 {
@@ -434,7 +442,7 @@
     font-weight: var(--weight-h4);
     line-height: var(--leading-h4);
     letter-spacing: var(--tracking-h4);
-    color: #DACAAA;
+    color: #D8C9A8;
     margin-bottom: var(--space-h4);
   }
   h5, h6 {
@@ -554,13 +562,14 @@ html body[data-scroll-locked] {
      They reference the CSS variables above so changes propagate globally.
   ────────────────────────────────────────────────────────────────── */
 
-  /* Body copy — DM Sans 16px/1.7 */
+  /* Body copy — DM Sans 16px/1.75 */
   .type-body {
     font-family: var(--font-body);
     font-size: var(--text-base);
     font-weight: var(--weight-body);
     line-height: var(--leading-body);
     letter-spacing: var(--tracking-body);
+    -webkit-font-smoothing: antialiased;
   }
 
   /* UI labels, nav items, button text — DM Sans 16px/500 */
@@ -579,7 +588,7 @@ html body[data-scroll-locked] {
     font-weight: var(--weight-body);
     line-height: var(--leading-h4);
     letter-spacing: var(--tracking-body);
-    color: #DACAAA;
+    color: #D8C9A8;
   }
 
   /* Overlines, badges, WID labels — Cinzel 11px uppercase */
@@ -599,17 +608,17 @@ html body[data-scroll-locked] {
     font-weight: var(--weight-h4);
     line-height: var(--leading-h4);
     letter-spacing: var(--tracking-h4);
-    color: #DACAAA;
+    color: #D8C9A8;
   }
 
-  /* Panel/modal headings — Cormorant 24px */
+  /* Panel/modal headings — Cormorant 25px */
   .type-h3 {
     font-family: var(--font-editorial);
     font-size: var(--text-h3);
     font-weight: var(--weight-h3);
     line-height: var(--leading-h3);
     letter-spacing: var(--tracking-h3);
-    color: #DACAAA;
+    color: #D8C9A8;
   }
 
   /* Section headings — Cinzel 32px */
@@ -619,17 +628,19 @@ html body[data-scroll-locked] {
     font-weight: var(--weight-h2);
     line-height: var(--leading-h2);
     letter-spacing: var(--tracking-h2);
-    color: #E8DFC8;
+    color: #EDE5D0;
+    -webkit-font-smoothing: antialiased;
   }
 
-  /* Hero/page titles — Cinzel 32–48px */
+  /* Hero/page titles — Cinzel 36–52px */
   .type-h1 {
     font-family: var(--font-display);
     font-size: var(--text-h1);
     font-weight: var(--weight-h1);
     line-height: var(--leading-h1);
     letter-spacing: var(--tracking-h1);
-    color: #E8DFC8;
+    color: #EDE5D0;
+    -webkit-font-smoothing: antialiased;
   }
 
   /* ── MUSEUM SECTION TITLE — Cinzel caps with quartzite gold underline ── */
@@ -639,6 +650,7 @@ html body[data-scroll-locked] {
     font-weight: 600;
     letter-spacing: var(--tracking-overline);
     text-transform: uppercase;
+    -webkit-font-smoothing: antialiased;
     color: #C49A28;             /* Quartzite Gold */
     position: relative;
     display: inline-flex;
@@ -668,7 +680,8 @@ html body[data-scroll-locked] {
     font-size: var(--text-base); /* 16px — anchored to body baseline */
     font-weight: 600;
     letter-spacing: 0.08em;
-    color: #E8DFC8;
+    -webkit-font-smoothing: antialiased;
+    color: #EDE5D0;
   }
 
   /* ── MUSEUM CAPTION — Cormorant Garamond for descriptions / pull quotes ── */
@@ -677,7 +690,7 @@ html body[data-scroll-locked] {
     font-size: var(--text-sm);   /* 14px — caption tier */
     font-weight: 400;
     letter-spacing: 0.01em;
-    color: #DACAAA;
+    color: #D8C9A8;
     line-height: var(--leading-body);
   }
 
@@ -785,14 +798,14 @@ html body[data-scroll-locked] {
      Cover art fills the top. Info panel below has a pearl-stone face.
   ────────────────────────────────────────────────────────────────── */
   .museum-card {
-    background: #1C1A14;                         /* Lifted Steel — card body */
-    border: 1px solid rgba(203, 177, 131, 0.32); /* Quartzite Gold border */
+    background: #111111;                         /* Lifted Void — card body */
+    border: 1px solid rgba(196, 154, 40, 0.22);  /* Quartzite Gold border */
     border-radius: 0.75rem;
     overflow: hidden;
     transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
     box-shadow:
-      0 2px 8px rgba(0, 0, 0, 0.35),
-      0 1px 3px rgba(0, 0, 0, 0.25);
+      0 2px 8px rgba(0, 0, 0, 0.60),
+      0 1px 3px rgba(0, 0, 0, 0.40);
   }
   .museum-card:hover {
     transform: translateY(-4px);
@@ -819,9 +832,9 @@ html body[data-scroll-locked] {
   .museum-card-info {
     background: linear-gradient(
       to bottom,
-      #1C1A14 0%,          /* matches card body at top */
-      #384249 60%,         /* slight deepening */
-      #323C42 100%         /* darkest at bottom — grounds the card */
+      #111111 0%,          /* matches card body at top */
+      #141414 60%,         /* slight deepening */
+      #0A0A0A 100%         /* darkest at bottom — grounds the card */
     );
     padding: 0.75rem;
   }
@@ -876,11 +889,11 @@ html body[data-scroll-locked] {
   }
   .museum-pan-wrapper::before {
     left: 0;
-    background: linear-gradient(to right, #111009, transparent);
+    background: linear-gradient(to right, #000000, transparent);
   }
   .museum-pan-wrapper::after {
     right: 0;
-    background: linear-gradient(to left, #111009, transparent);
+    background: linear-gradient(to left, #000000, transparent);
   }
 
   /* ── MUSEUM GRID — 3-column max, consistent gutter ── */
@@ -967,7 +980,7 @@ html body[data-scroll-locked] {
     align-items: center;
     gap: 0.5rem;
     padding: 0 0.75rem;
-    background: #111009;
+    background: #000000;
   }
   .sg-divider-wide-center::before,
   .sg-divider-wide-center::after {
@@ -1153,20 +1166,20 @@ html body[data-scroll-locked] {
     animation: progressGlow 1.8s ease-in-out infinite;
   }
 
-  /* ── Lantern cathedral background — warm charred oak with amber radial glow ── */
+  /* ── Lantern cathedral background — true-black void with amber radial glow ── */
   .cosmic-bg {
     background:
       radial-gradient(ellipse 80% 50% at 50% 0%,
-        rgba(203, 177, 131, 0.08) 0%,
-        rgba(208, 161, 95, 0.05) 40%,
+        rgba(196, 154, 40, 0.07) 0%,
+        rgba(212, 168, 75, 0.04) 40%,
         transparent 70%
       ),
       radial-gradient(ellipse 60% 40% at 50% 100%,
-        rgba(203, 177, 131, 0.06) 0%,
-        rgba(53, 62, 67, 0.04) 50%,
+        rgba(196, 154, 40, 0.05) 0%,
+        rgba(0, 0, 0, 0.0) 50%,
         transparent 80%
       ),
-      #111009;
+      #000000;
   }
 
   /* ── CTA button glow — lantern warmth ── */
@@ -1489,7 +1502,7 @@ input[type="range"].volume-slider-theater::-moz-range-thumb {
 
   /* ── Living Nexus Identity Palette ── */
   --ln-void:          #0A0806;   /* deepest background */
-  --ln-coal:          #111009;   /* card/surface background */
+  --ln-coal:          #000000;   /* card/surface background */
   --ln-iron:          #1C1A14;   /* secondary surface, hover bg */
   --ln-ash:           #2E2B22;   /* borders, dividers */
   --ln-steel:         #3D3A2E;   /* disabled states, muted borders */
@@ -1675,7 +1688,7 @@ h1, h2, h3, h4, h5, h6,
 
 /* ── Modal overlays ── */
 .ln-modal-backdrop {
-  background: rgba(10,8,6,0.85);
+  background: rgba(0,0,0,0.85);
   backdrop-filter: blur(2px);
 }
 .ln-modal {
@@ -2274,7 +2287,7 @@ h1, h2, h3, h4, h5, h6,
 /* ── Comic reader chrome ── */
 .comic-reader-nav-btn {
   color: var(--ln-smoke);
-  background: rgba(10,8,6,0.6);
+  background: rgba(0,0,0,0.60);
   border: none;
   cursor: pointer;
   padding: 12px;

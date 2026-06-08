@@ -103,7 +103,7 @@ export default function TipModal({ track, onClose, originRect }: Props) {
       {/* Track info card — fully dissected */}
       <div
         className="mx-4 mb-4 rounded-xl overflow-hidden"
-        style={{ background: "var(--ln-coal)", border: "1px solid #111009" }}
+        style={{ background: "#0A0A0A", border: "1px solid rgba(196,154,40,0.12)" }}
       >
         {/* Cover + title row */}
         <div className="flex items-center gap-3 p-3">
@@ -146,7 +146,7 @@ export default function TipModal({ track, onClose, originRect }: Props) {
                   style={{
                     background: "var(--ln-coal)",
                     color: "var(--ln-smoke)",
-                    border: "1px solid #111009",
+                    border: "1px solid rgba(196,154,40,0.10)",
                   }}
                 >
                   {tag}
@@ -158,7 +158,7 @@ export default function TipModal({ track, onClose, originRect }: Props) {
                   style={{
                     background: "var(--ln-coal)",
                     color: "var(--ln-iron)",
-                    border: "1px solid #111009",
+                    border: "1px solid rgba(196,154,40,0.10)",
                   }}
                 >
                   +{genreTags.length - 4}
@@ -195,7 +195,7 @@ export default function TipModal({ track, onClose, originRect }: Props) {
             onClick={() => { setSelected(amt); setCustom(""); }}
             className={`py-2 rounded-lg text-[13px] font-bold transition-all
               ${selected === amt && !custom
-                ? "bg-[#1C1A14]/10 border border-[#C49A28] text-[#C49A28]"
+                ? "bg-[#111111]/10 border border-[#C49A28] text-[#C49A28]"
                 : "bg-white/[0.04] border border-white/[0.08] text-white/50 hover:border-[#C49A28]/40 hover:text-[#C49A28]"
               }`}
           >

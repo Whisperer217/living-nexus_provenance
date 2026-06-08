@@ -87,7 +87,7 @@ export function TosAcceptanceModal() {
         </DialogHeader>
 
         {/* Scrollable TOS summary */}
-        <ScrollArea className="h-64 rounded-md border border-[#2a2a2a] bg-[#111] px-4 py-3 text-sm text-[#b0a090] leading-relaxed">
+        <ScrollArea className="h-64 rounded-md border border-white/[0.08] bg-[#000] px-4 py-3 text-sm text-[#b0a090] leading-relaxed">
           <div className="space-y-4">
             <section>
               <h3 className="text-[#e8dcc8] font-semibold mb-1">1. Platform Purpose</h3>

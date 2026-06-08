@@ -123,7 +123,7 @@ export default function RightRail() {
           transform: "translateY(-50%)",
           width: 20,
           height: 48,
-          background: "rgba(10,9,7,0.92)",
+          background: "rgba(0,0,0,0.95)",
           border: "1px solid rgba(212,175,55,0.18)",
           borderRight: isOpen ? "none" : "1px solid rgba(212,175,55,0.18)",
           borderRadius: isOpen ? "6px 0 0 6px" : "0 6px 6px 0",
@@ -146,7 +146,7 @@ export default function RightRail() {
           right: isOpen ? 0 : -300,
           bottom: 0,
           width: 300,
-          background: "rgba(10,9,7,0.92)",
+          background: "rgba(0,0,0,0.95)",
           borderLeft: "1px solid rgba(212,175,55,0.08)",
           /* z-index: 80 — below ContextDrawer (300) and LeftRail (310),
              but above page content so it never disappears behind it */

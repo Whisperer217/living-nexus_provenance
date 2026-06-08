@@ -304,7 +304,7 @@ export default function TermsPage() {
         {/* Footer */}
         <div
           className="mt-16 pt-8 text-center"
-          style={{ borderTop: "1px solid #111009" }}
+          style={{ borderTop: "1px solid #000000" }}
         >
           <p className="text-xs mb-4" style={{ color: "var(--ln-iron)" }}>
             Living Nexus is operated by Command Domains LLC · BDDT Publishing

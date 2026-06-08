@@ -62,8 +62,8 @@ export default function LeftRail({ drawerOpen, activeMode, onRailClick }: LeftRa
         left: 0,
         bottom: 0,
         width: 72,
-        background: "rgba(10,9,7,0.97)",
-        borderRight: "1px solid rgba(212,175,55,0.08)",
+        background: "rgba(0,0,0,0.98)",
+        borderRight: "1px solid rgba(196,154,40,0.12)",
         zIndex: 310,  /* above drawer backdrop (299) and panel (300) — rail is always visible */
         overflowY: "auto",
         overflowX: "hidden",

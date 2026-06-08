@@ -322,8 +322,8 @@ export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCoun
   const { mode: lightsMode } = useLightsMode();
   const isWarm = lightsMode === "on";
 
-  const NAV_BG = isWarm ? "rgba(55,68,85,0.72)" : "rgba(10,8,6,0.97)";
-  const NAV_BORDER = isWarm ? "rgba(100,125,150,0.22)" : "rgba(196,154,40,0.22)";
+  const NAV_BG = isWarm ? "rgba(55,68,85,0.72)" : "rgba(0,0,0,0.97)";
+  const NAV_BORDER = isWarm ? "rgba(100,125,150,0.22)" : "rgba(196,154,40,0.18)";
 
   return (
     <div className="hidden md:block">
@@ -368,7 +368,7 @@ export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCoun
               onBlur={() => setSearchFocused(false)}
               onKeyDown={e => { if (e.key === "Escape") { setShowDropdown(false); searchRef.current?.blur(); } }}
               className="flex-1 bg-transparent outline-none text-white/80 placeholder:text-white/25"
-              style={{ fontSize: "12px", fontFamily: "'Inter', sans-serif" }}
+              style={{ fontSize: "12px", fontFamily: "var(--font-body)" }}
             />
           </div>
           {/* Autocomplete dropdown */}
@@ -380,7 +380,7 @@ export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCoun
                 top: "calc(100% + 4px)",
                 left: 0,
                 width: 280,
-                background: "rgba(14,12,10,0.97)",
+                background: "rgba(0,0,0,0.98)",
                 border: "1px solid rgba(196,154,40,0.28)",
                 boxShadow: "0 8px 32px rgba(0,0,0,0.6)",
                 backdropFilter: "blur(16px)",
@@ -529,7 +529,7 @@ export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCoun
                 <div
                   className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white overflow-hidden"
                   style={{
-                    background: "linear-gradient(135deg, #1C1A14, #3D3A2E)",
+                    background: "linear-gradient(135deg, #111111, #1A1A1A)",
                     boxShadow: hasWid
                       ? "0 0 0 2px #C49A28, 0 0 10px rgba(196,154,40,0.25)"
                       : avatarMenuOpen

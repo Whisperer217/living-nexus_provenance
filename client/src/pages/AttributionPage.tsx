@@ -155,7 +155,7 @@ export default function AttributionPage() {
       {/* ── Hero ────────────────────────────────────────────────────────── */}
       <div
         className="relative w-full overflow-hidden"
-        style={{ height: "180px", background: "linear-gradient(135deg, #1A2226 0%, #111009 60%, #1A2226 100%)" }}
+        style={{ height: "180px", background: "linear-gradient(135deg, #1A2226 0%, #000000 60%, #1A2226 100%)" }}
       >
         <div
           className="absolute inset-0 opacity-10"

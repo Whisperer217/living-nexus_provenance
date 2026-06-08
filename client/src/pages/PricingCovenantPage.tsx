@@ -298,7 +298,7 @@ export default function PricingCovenantPage() {
       <div
         className="mx-4 md:mx-auto max-w-3xl rounded-2xl p-8 md:p-10 mb-14"
         style={{
-          background: "linear-gradient(135deg, var(--ln-coal), #111009)",
+          background: "linear-gradient(135deg, #111111, #000000)",
           border: "1px solid rgba(196,154,40,0.15)",
         }}
       >

@@ -29,7 +29,7 @@ export function StudioShell({
   const currentStepIdx = STUDIO_STEPS.findIndex((s) => s.id === currentStep);
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: "#111009" }}>
+    <div className="min-h-screen flex flex-col" style={{ background: "#000000" }}>
       {/* ── Top Bar ── */}
       <div
         className="flex items-center gap-3 px-4 py-3 border-b flex-shrink-0"
@@ -78,7 +78,7 @@ export function StudioShell({
                       : isActive
                       ? atmosphere.colorPrimary
                       : "rgba(196,154,40,0.08)",
-                    color: isDone || isActive ? "#111009" : "rgba(196,154,40,0.4)",
+                    color: isDone || isActive ? "#000000" : "rgba(196,154,40,0.4)",
                     border: `1px solid ${isDone ? "var(--ln-seal-bright)" : isActive ? atmosphere.colorPrimary : "rgba(196,154,40,0.15)"}`,
                     boxShadow: isActive ? `0 0 12px ${atmosphere.colorGlow}` : "none",
                   }}

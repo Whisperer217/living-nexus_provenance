@@ -34,7 +34,7 @@ export default function ManifestationStudio() {
   // Auth gate
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: "#111009" }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "#000000" }}>
         <div className="text-center max-w-md px-6">
           <p className="text-lg mb-2" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>
             Sign in to begin manifesting
@@ -47,7 +47,7 @@ export default function ManifestationStudio() {
             className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all hover:scale-105"
             style={{
               background: "var(--ln-gold)",
-              color: "#111009",
+              color: "#000000",
               boxShadow: "0 4px 20px rgba(212,175,55,0.3)",
             }}
           >

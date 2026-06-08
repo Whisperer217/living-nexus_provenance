@@ -356,7 +356,7 @@ export default function ArchivePage() {
 
   return (
     <>
-    <div className="min-h-screen" style={{ background: "#111009" }}>
+    <div className="min-h-screen" style={{ background: "#000000" }}>
       {/* ── Hero Banner ─────────────────────────────────────────────────── */}
       <div className="relative w-full overflow-hidden" style={{ height: "200px" }}>
         <img
@@ -587,7 +587,7 @@ export default function ArchivePage() {
 
           return (
             <div className="text-center py-24 rounded-2xl flex flex-col items-center"
-              style={{ background: "linear-gradient(135deg, rgba(10,9,7,0.95) 0%, rgba(20,17,10,0.90) 100%)", border: "1px dashed rgba(212,175,55,0.25)", boxShadow: "inset 0 0 60px rgba(212,175,55,0.03)" }}>
+              style={{ background: "linear-gradient(135deg, rgba(0,0,0,0.95) 0%, rgba(10,10,10,0.90) 100%)", border: "1px dashed rgba(212,175,55,0.25)", boxShadow: "inset 0 0 60px rgba(212,175,55,0.03)" }}>
               <div className="mb-6" style={{ width: 72, height: 72, borderRadius: "50%", background: "radial-gradient(circle, rgba(212,175,55,0.12) 0%, transparent 70%)", border: "1px solid rgba(212,175,55,0.18)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <Music style={{ color: "rgba(212,175,55,0.45)", width: 28, height: 28 }} />
               </div>
@@ -784,7 +784,7 @@ export default function ArchivePage() {
                             label: "No DL",
                             bg: "rgba(44,52,56,0.6)",
                             color: "var(--ln-parchment)",
-                            border: "1px solid #111009",
+                            border: "1px solid rgba(196,154,40,0.10)",
                           },
                           free: {
                             icon: <Download className="w-3 h-3" />,

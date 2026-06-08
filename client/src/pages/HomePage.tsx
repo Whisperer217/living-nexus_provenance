@@ -98,7 +98,7 @@ function WIDTrustLayer() {
       <div
         className="flex items-center gap-4 rounded-2xl px-5 py-4"
         style={{
-          background: "#111009",
+          background: "#000000",
           border: "1px solid rgba(196,154,40,0.20)",
           boxShadow: "0 2px 12px rgba(0,0,0,0.50)",
         }}
@@ -137,7 +137,7 @@ function WIDTrustLayer() {
       <div
         className="rounded-2xl px-5 py-4 relative overflow-hidden"
         style={{
-          background: "#111009",
+          background: "#000000",
           border: "1px solid rgba(196,154,40,0.15)",
           boxShadow: "0 2px 12px rgba(0,0,0,0.50)",
         }}
@@ -200,7 +200,7 @@ function WIDTrustLayer() {
                 style={{
                   width: "148px",
                   height: "196px",
-                  background: "#111009",
+                  background: "#000000",
                   border: "1px solid rgba(196,154,40,0.12)",
                   boxShadow: "0 4px 24px rgba(0,0,0,0.70)",
                 }}
@@ -214,7 +214,7 @@ function WIDTrustLayer() {
                   />
                 ) : (
                   <div className="absolute inset-0 flex items-center justify-center"
-                    style={{ background: "#111009" }}>
+                    style={{ background: "#000000" }}>
                     <Fingerprint size={28} style={{ color: "rgba(196,154,40,0.25)" }} />
                   </div>
                 )}
@@ -261,7 +261,7 @@ function WIDTrustLayer() {
                   <div
                     className="w-12 h-12 rounded-full flex items-center justify-center transition-transform active:scale-90"
                     style={{
-                      background: "#1C1A14",
+                      background: "#0A0A0A",
                       boxShadow: "0 0 24px rgba(196,154,40,0.30)",
                     }}
                   >
@@ -330,7 +330,7 @@ function FeaturedCreatorsCarousel() {
               className="flex-shrink-0 flex flex-col items-center gap-2 p-3 rounded-2xl cursor-pointer transition-all hover:scale-105"
               style={{
                 width: "88px",
-                background: "#1C1A14",
+                background: "#0A0A0A",
                 border: "1px solid rgba(196,154,40,0.12)",
               }}
             >
@@ -416,8 +416,8 @@ function NewVoicesCarousel() {
                 )}
                 {/* NEW badge */}
                 <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full flex items-center justify-center"
-                  style={{ background: "var(--ln-seal-bright)", border: "1.5px solid #111009" }}>
-                  <Sparkles size={8} style={{ color: "#111009" }} />
+                  style={{ background: "var(--ln-seal-bright)", border: "1.5px solid #000000" }}>
+                  <Sparkles size={8} style={{ color: "#000000" }} />
                 </div>
               </div>
               <div className="text-center min-w-0 w-full">
@@ -467,7 +467,7 @@ function HorizontalTrackGrid({
           <div
             key={i}
             className="flex-shrink-0 rounded-2xl animate-pulse"
-            style={{ width: "var(--card-pan-w)", height: 220, background: "#1C1A14" }}
+            style={{ width: "var(--card-pan-w)", height: 220, background: "#0A0A0A" }}
           />
         ))}
       </div>
@@ -762,7 +762,7 @@ function HeroCarousel({ isAuthenticated, getLoginUrl: getLogin }: { isAuthentica
       {/* Scrims */}
       <div className="absolute inset-0 z-10" style={{ background: "linear-gradient(to right, rgba(20,10,30,0.85) 0%, rgba(30,16,40,0.55) 40%, rgba(40,20,50,0.08) 68%, transparent 100%)" }} />
       <div className="absolute inset-0 z-10" style={{ background: "linear-gradient(to top, rgba(20,10,30,0.80) 0%, rgba(30,16,40,0.18) 38%, transparent 100%)" }} />
-      <div className="absolute inset-0 z-10" style={{ background: "radial-gradient(ellipse 100% 100% at 50% 50%, transparent 40%, rgba(10,8,6,0.30) 80%, rgba(10,8,6,0.60) 100%)" }} />
+      <div className="absolute inset-0 z-10" style={{ background: "radial-gradient(ellipse 100% 100% at 50% 50%, transparent 40%, rgba(0,0,0,0.30) 80%, rgba(0,0,0,0.60) 100%)" }} />
 
       {/* Content */}
       <div className="relative z-20 flex flex-col justify-end px-6 pb-12 pt-16 max-w-3xl">
@@ -989,7 +989,7 @@ export default function HomePage() {
         <div
           className="rounded-2xl p-5 relative overflow-hidden"
           style={{
-            background: "linear-gradient(135deg, #1C1A14 0%, #111009 100%)",
+            background: "linear-gradient(135deg, #1C1A14 0%, #000000 100%)",
             border: "1px solid rgba(196,154,40,0.18)",
           }}
         >
@@ -1119,7 +1119,7 @@ export default function HomePage() {
         <div
           className="rounded-2xl p-5 relative overflow-hidden sg-hero-frame"
           style={{
-            background: "linear-gradient(135deg, #1C1A14 0%, #111009 100%)",
+            background: "linear-gradient(135deg, #1C1A14 0%, #000000 100%)",
             border: "1px solid rgba(196,154,40,0.18)",
             boxShadow: "0 0 40px rgba(196,154,40,0.04)",
           }}

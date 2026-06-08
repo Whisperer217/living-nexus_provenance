@@ -187,7 +187,7 @@ function UsersTab() {
                 ) : sorted.map((u: any, i: number) => (
                   <tr key={u.id} style={{
                     background: i % 2 === 0 ? CARD : CARD,
-                    borderBottom: `1px solid #111009`,
+                    borderBottom: `1px solid rgba(196,154,40,0.08)`,
                   }}>
                     <td className={tdStyle}>
                       <div className="font-medium" style={{ color: TEXT }}>{u.artistHandle ? `@${u.artistHandle}` : u.name ?? "—"}</div>
@@ -447,7 +447,7 @@ function PromoCodesTab() {
                 {codes.map((c: any, i: number) => (
                   <tr key={c.id} style={{
                     background: i % 2 === 0 ? CARD : CARD,
-                    borderBottom: `1px solid #111009`,
+                    borderBottom: `1px solid rgba(196,154,40,0.08)`,
                   }}>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
@@ -1936,7 +1936,7 @@ function DataRightsTab() {
                   return (
                     <tr key={req.id} style={{
                       background: i % 2 === 0 ? CARD : CARD,
-                      borderBottom: `1px solid #111009`,
+                      borderBottom: `1px solid rgba(196,154,40,0.08)`,
                     }}>
                       <td className="px-4 py-3 text-sm">
                         <div className="font-medium" style={{ color: TEXT }}>

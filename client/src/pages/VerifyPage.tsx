@@ -739,7 +739,7 @@ export default function VerifyPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: "#111009" }}>
+    <div className="min-h-screen flex flex-col" style={{ background: "#000000" }}>
 
       {/* ── Header ── */}
       <header className="flex items-center gap-3 px-6 py-4 border-b" style={{ borderColor: "var(--ln-coal)" }}>

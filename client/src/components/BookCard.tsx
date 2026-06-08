@@ -53,7 +53,7 @@ export default function BookCard({ item, prefetchedLiked, prefetchedLikeCount, o
     <div
       className="group relative flex flex-col rounded-xl overflow-hidden cursor-pointer transition-all duration-200"
       style={{
-        background: "linear-gradient(160deg, #1E2D3A 0%, #232E35 60%, #111009 100%)",
+        background: "linear-gradient(160deg, #1E2D3A 0%, #1A2830 60%, #000000 100%)",
         border: "1px solid rgba(196,154,40,0.15)",
         boxShadow: "0 2px 12px rgba(0,0,0,0.35)",
       }}
@@ -69,7 +69,7 @@ export default function BookCard({ item, prefetchedLiked, prefetchedLikeCount, o
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center"
-            style={{ background: "linear-gradient(135deg, #1E2D3A, #111009)" }}>
+            style={{ background: "linear-gradient(135deg, #1E2D3A, #000000)" }}>
             <ImageIcon className="w-10 h-10 opacity-20" style={{ color: "var(--ln-gold)" }} />
           </div>
         )}

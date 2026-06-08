@@ -153,7 +153,7 @@ export default function PlaylistPage() {
                   border
                   ${isActive
                     ? "border-[#C49A28]/30 bg-[#1C1A14]/[0.07]"
-                    : "border-white/[0.06] bg-[#111009] hover:border-[#A78BFA]/25 hover:bg-white/[0.05]"
+                    : "border-white/[0.06] bg-[#000000] hover:border-[#A78BFA]/25 hover:bg-white/[0.05]"
                   }`}
                 onClick={() => handlePlay(song.id)}
               >

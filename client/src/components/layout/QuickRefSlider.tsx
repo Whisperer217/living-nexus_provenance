@@ -216,7 +216,7 @@ export default function QuickAccessPanel({ open, onToggle }: Props) {
                 className="w-full pl-8 pr-3 py-2 rounded-lg text-[12px] font-body outline-none transition-all"
                 style={{
                   background: "var(--ln-coal)",
-                  border: "1px solid #111009",
+                  border: "1px solid rgba(196,154,40,0.10)",
                   color: "var(--ln-parchment)",
                 }}
                 onFocus={e => (e.currentTarget.style.borderColor = "rgba(196,154,40,0.42)")}
@@ -242,7 +242,7 @@ export default function QuickAccessPanel({ open, onToggle }: Props) {
                   className="px-2.5 py-1 rounded-full text-[10px] font-body transition-all"
                   style={isActive
                     ? { background: "rgba(196,154,40,0.15)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.3)" }
-                    : { background: "var(--ln-coal)", color: "var(--ln-smoke)", border: "1px solid #111009" }
+                    : { background: "var(--ln-coal)", color: "var(--ln-smoke)", border: "1px solid rgba(196,154,40,0.10)" }
                   }
                 >
                   {g.label}

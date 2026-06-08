@@ -132,7 +132,7 @@ export default function WelcomeModal() {
         </DialogDescription>
 
         {/* Gold header band */}
-        <div className="px-6 pt-6 pb-4 text-center" style={{ borderBottom: "1px solid #111009" }}>
+        <div className="px-6 pt-6 pb-4 text-center" style={{ borderBottom: "1px solid rgba(196,154,40,0.10)" }}>
           <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-3"
             style={{ background: "rgba(196,154,40,0.08)", border: "1px solid rgba(196,154,40,0.25)" }}>
             <Music2 className="w-7 h-7" style={{ color: "var(--ln-gold)" }} />

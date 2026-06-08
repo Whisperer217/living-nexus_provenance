@@ -168,7 +168,7 @@ export function ContextualModal({
             transition: "transform 0.18s cubic-bezier(0.34,1.56,0.64,1), opacity 0.15s ease",
             overflowY: "auto",
           }}
-          className={`rounded-xl border border-white/[0.12] bg-[#111009] shadow-[0_16px_48px_rgba(0,0,0,0.85),0_0_0_1px_rgba(255,255,255,0.06)] ${className}`}
+          className={`rounded-xl border border-white/[0.10] bg-[#000000] shadow-[0_16px_48px_rgba(0,0,0,0.90),0_0_0_1px_rgba(196,154,40,0.08)] ${className}`}
           onClick={e => e.stopPropagation()}
         >
           {(title || showClose) && (
@@ -216,7 +216,7 @@ export function ContextualModal({
             transition: "transform 0.25s cubic-bezier(0.32,0.72,0,1)",
             overflowY: "auto",
           }}
-          className={`rounded-t-2xl border-t border-white/[0.12] bg-[#111009] shadow-[0_-8px_40px_rgba(0,0,0,0.8)] ${className}`}
+          className={`rounded-t-2xl border-t border-white/[0.10] bg-[#000000] shadow-[0_-8px_40px_rgba(0,0,0,0.85)] ${className}`}
           onClick={e => e.stopPropagation()}
         >
           {/* Drag handle */}
@@ -270,7 +270,7 @@ export function ContextualModal({
           transition: "transform 0.2s cubic-bezier(0.34,1.56,0.64,1), opacity 0.15s ease",
           overflowY: "auto",
         }}
-        className={`rounded-xl border border-white/[0.12] bg-[#111009] shadow-[0_24px_64px_rgba(0,0,0,0.9)] ${className}`}
+        className={`rounded-xl border border-white/[0.10] bg-[#000000] shadow-[0_24px_64px_rgba(0,0,0,0.95)] ${className}`}
         onClick={e => e.stopPropagation()}
       >
         {(title || showClose) && (

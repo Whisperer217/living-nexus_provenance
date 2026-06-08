@@ -81,7 +81,7 @@ export function ManifestationBundle({ bundle }: { bundle: BundleData }) {
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
           />
         ) : (
-          <div className="w-full h-full" style={{ background: "linear-gradient(135deg, #1C1A14, #2A2520)" }} />
+          <div className="w-full h-full" style={{ background: "linear-gradient(135deg, #111111, #0A0A0A)" }} />
         )}
 
         {/* Gradient overlay */}

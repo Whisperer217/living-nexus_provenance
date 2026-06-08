@@ -52,7 +52,7 @@ export default function FoundersPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#111009] text-white">
+    <div className="min-h-screen bg-[#000000] text-white">
       {/* Back nav */}
       <div className="max-w-2xl mx-auto px-4 pt-6">
         <Link href="/">

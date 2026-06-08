@@ -220,7 +220,7 @@ function NoteForm({
               style={
                 active
                   ? { background: `${cat.color}22`, color: cat.color, border: `1px solid ${cat.color}50` }
-                  : { background: "var(--ln-coal)", color: "var(--ln-iron)", border: "1px solid #111009" }
+                  : { background: "var(--ln-coal)", color: "var(--ln-iron)", border: "1px solid rgba(196,154,40,0.10)" }
               }
             >
               <Icon size={10} />
@@ -247,7 +247,7 @@ function NoteForm({
           style={
             isPublic
               ? { background: "rgba(74,222,128,0.12)", color: "var(--ln-seal-bright)", border: "1px solid rgba(74,222,128,0.28)" }
-              : { background: "var(--ln-coal)", color: "var(--ln-iron)", border: "1px solid #111009" }
+              : { background: "var(--ln-coal)", color: "var(--ln-iron)", border: "1px solid rgba(196,154,40,0.10)" }
           }
         >
           {isPublic ? <><Eye size={11} /> Public — visible to all</> : <><EyeOff size={11} /> Private — only you</>}
@@ -418,7 +418,7 @@ export default function FieldNotesPage() {
               style={
                 activeFilter === "all"
                   ? { background: "#C49A2822", color: "var(--ln-gold)", border: "1px solid #C49A2850" }
-                  : { background: "var(--ln-coal)", color: "var(--ln-iron)", border: "1px solid #111009" }
+                  : { background: "var(--ln-coal)", color: "var(--ln-iron)", border: "1px solid rgba(196,154,40,0.10)" }
               }
             >
               All
@@ -435,7 +435,7 @@ export default function FieldNotesPage() {
                   style={
                     activeFilter === cat.value
                       ? { background: `${cat.color}22`, color: cat.color, border: `1px solid ${cat.color}50` }
-                      : { background: "var(--ln-coal)", color: "var(--ln-iron)", border: "1px solid #111009" }
+                      : { background: "var(--ln-coal)", color: "var(--ln-iron)", border: "1px solid rgba(196,154,40,0.10)" }
                   }
                 >
                   <Icon size={9} />

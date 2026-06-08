@@ -87,7 +87,7 @@ export default function FounderEraPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#111009] text-white">
+    <div className="min-h-screen bg-[#000000] text-white">
       {/* Back nav */}
       <div className="max-w-lg mx-auto px-4 pt-6">
         <div className="flex items-center justify-between mb-8">

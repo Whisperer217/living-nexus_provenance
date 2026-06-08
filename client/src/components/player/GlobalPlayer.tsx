@@ -664,7 +664,7 @@ function GlobalPlayerInner() {
         <button
           onClick={e => { e.stopPropagation(); goToSong(); }}
           className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center"
-          style={{ background: visTrack?.bg || "#111009" }}
+          style={{ background: visTrack?.bg || "#000000" }}
         >
           {visTrack?.artUrl
             ? <img src={visTrack.artUrl} alt="" className="w-full h-full object-cover" />
@@ -918,7 +918,7 @@ function GlobalPlayerInner() {
                 style={{
                   width: "min(260px, 65vw)",
                   height: "min(260px, 65vw)",
-                  background: visTrack?.bg || "#111009",
+                  background: visTrack?.bg || "#000000",
                   boxShadow: swipeDir
                     ? (isDesktop
                         ? `0 8px 40px ${GOLD_GLOW}, ${swipeDir === "left" ? "-6px" : "6px"} 0 24px rgba(212,175,55,0.4), 0 0 0 1px rgba(212,175,55,0.3)`
@@ -1217,7 +1217,7 @@ function GlobalPlayerInner() {
                       </span>
                       <div
                         className="w-9 h-9 rounded-lg flex-shrink-0 overflow-hidden flex items-center justify-center"
-                        style={{ background: t.bg || "#111009" }}
+                        style={{ background: t.bg || "#000000" }}
                       >
                         {t.artUrl
                           ? <img src={t.artUrl} alt="" className="w-full h-full object-cover" />
@@ -1379,7 +1379,7 @@ function GlobalPlayerInner() {
         style={{
           position: "relative",
           zIndex: 1,
-          background: "var(--ln-coal, #111009)",
+          background: "var(--ln-coal, #000000)",
           border: `1px solid rgba(212,175,55,0.25)`,
           borderRadius: isDesktop ? "20px" : "20px 20px 0 0",
           boxShadow: `0 -4px 32px rgba(212,175,55,0.12), 0 0 0 1px rgba(212,175,55,0.08)`,
@@ -1467,7 +1467,7 @@ function GlobalPlayerInner() {
               onClick={handleSubmitComment}
               disabled={!user || !commentText.trim() || commentSubmitting}
               className="w-9 h-9 flex items-center justify-center rounded-xl transition-all hover:scale-105 disabled:opacity-40"
-              style={{ background: "#C49A28", color: "#111009" }}
+              style={{ background: "#C49A28", color: "#000000" }}
             >
               <Send size={14} />
             </button>
@@ -1552,7 +1552,7 @@ function GlobalPlayerInner() {
         >
           {visTrack.artUrl
             ? <img src={visTrack.artUrl} alt={visTrack.title} className="w-full h-full object-cover" style={{ objectPosition: `${visTrack.coverPositionX ?? 50}% ${visTrack.coverPositionY ?? 50}%` }} />
-            : <div className="w-full h-full flex items-center justify-center text-8xl" style={{ background: visTrack.bg || "#111009" }}>{visTrack.emoji || "🎵"}</div>
+            : <div className="w-full h-full flex items-center justify-center text-8xl" style={{ background: visTrack.bg || "#000000" }}>{visTrack.emoji || "🎵"}</div>
           }
           {swipeDir && (
             <div className="absolute inset-0 flex items-center justify-center" style={{ background: "rgba(0,0,0,0.15)", backdropFilter: "blur(2px)" }}>

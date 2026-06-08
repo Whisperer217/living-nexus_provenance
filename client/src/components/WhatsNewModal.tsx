@@ -612,7 +612,7 @@ export function WhatsNewModal({ forceOpen = false, onClose }: WhatsNewModalProps
         <div
           className="flex-shrink-0 px-4 pt-4 pb-3"
           style={{
-            background: "linear-gradient(135deg, var(--ln-coal), #111009)",
+            background: "linear-gradient(135deg, #111111, #000000)",
             borderBottom: "1px solid rgba(196,154,40,0.08)",
           }}
         >
