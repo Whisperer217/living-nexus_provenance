@@ -3221,12 +3221,36 @@ ${workType === "manuscript" || workType === "comic" ? "Category" : "Genre"}: ${i
           .from(playlistVersions)
           .leftJoin(usersTable, eqOp(playlistVersions.savedByUserId, usersTable.id))
           .where(eqOp(playlistVersions.playlistId, input.playlistId))
-          .orderBy(descOp(playlistVersions.versionNum))
+                    .orderBy(descOp(playlistVersions.versionNum))
           .limit(20);
         return rows;
       }),
+    /** Check which of the user's playlists already contain a given song */
+    songInPlaylists: protectedProcedure
+      .input(z.object({ songId: z.number().int().positive() }))
+      .query(async ({ ctx, input }) => {
+        const { getDb: getDb2 } = await import("./db");
+        const { playlistTracks: pt2, playlists: pl2 } = await import("../drizzle/schema");
+        const { eq: eqOp2, and: andOp2, inArray } = await import("drizzle-orm");
+        const db2 = await getDb2();
+        // Get all playlist IDs the user owns
+        const userPlaylists = await db2
+          .select({ id: pl2.id })
+          .from(pl2)
+          .where(eqOp2(pl2.ownerId, ctx.user.id));
+        const playlistIds = userPlaylists.map((p: { id: number }) => p.id);
+        if (playlistIds.length === 0) return {} as Record<number, boolean>;
+        // Check which contain this song
+        const rows2 = await db2
+          .select({ playlistId: pt2.playlistId })
+          .from(pt2)
+          .where(andOp2(eqOp2(pt2.songId, input.songId), inArray(pt2.playlistId, playlistIds)));
+        const containsSet = new Set(rows2.map((r: { playlistId: number }) => r.playlistId));
+        const result: Record<number, boolean> = {};
+        for (const id of playlistIds) result[id] = containsSet.has(id);
+        return result;
+      }),
   }),
-
   // ── Notifications ──────────────────────────────────────────────────────────
   notifications: router({
     /** Get the current user's notification inbox */

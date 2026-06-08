@@ -1,9 +1,10 @@
 /* ═══════════════════════════════════════════════════════════════════
    LIVING NEXUS — PlaylistsPage
    Collaborative playlists: create, manage, invite co-editors, play.
+   Phase 190: inline song search/add, fixed artist names, improved UX.
 ═══════════════════════════════════════════════════════════════════ */
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
 import { useLocation } from "wouter";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -11,6 +12,7 @@ import { toast } from "sonner";
 import {
   Plus, ListMusic, Users, Lock, Globe, Trash2, Play,
   UserPlus, Check, X, Music, ChevronRight, Loader2,
+  Search, PlusCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -56,7 +58,8 @@ function CreatePlaylistDialog({
               value={name}
               onChange={e => setName(e.target.value)}
               placeholder="Name your playlist..."
-              className="bg-[#000000] border-white/[0.08] text-white placeholder:text-white/50"
+              className="bg-[#0A0A0A] border-white/[0.08] text-white placeholder:text-white/50"
+              onKeyDown={e => e.key === "Enter" && name.trim() && create.mutate({ name, description, isPublic, isCollaborative })}
             />
           </div>
           <div>
@@ -66,7 +69,7 @@ function CreatePlaylistDialog({
               onChange={e => setDescription(e.target.value)}
               placeholder="What's this playlist about?"
               rows={2}
-              className="bg-[#000000] border-white/[0.08] text-white placeholder:text-white/50 resize-none"
+              className="bg-[#0A0A0A] border-white/[0.08] text-white placeholder:text-white/50 resize-none"
             />
           </div>
           <div className="flex items-center justify-between">
@@ -89,13 +92,117 @@ function CreatePlaylistDialog({
           <Button
             onClick={() => create.mutate({ name, description, isPublic, isCollaborative })}
             disabled={!name.trim() || create.isPending}
-            className="bg-[#1C1A14] hover:bg-[var(--lnx-gold-muted)] text-black font-heading"
+            className="bg-[#C49A28] hover:bg-[#B8860B] text-black font-heading"
           >
             {create.isPending ? <Loader2 size={14} className="animate-spin" /> : "Create"}
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+/* ── Inline Song Search & Add ───────────────────────────────────── */
+function InlineSongSearch({ playlistId, existingSongIds }: { playlistId: number; existingSongIds: Set<number> }) {
+  const utils = trpc.useUtils();
+  const [query, setQuery] = useState("");
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const { data: results, isFetching } = trpc.search.global.useQuery(
+    { q: query },
+    { enabled: query.trim().length >= 2, staleTime: 5_000 }
+  );
+
+  const addTrack = trpc.playlists.addTrack.useMutation({
+    onSuccess: (_d, vars) => {
+      utils.playlists.getById.invalidate({ id: playlistId });
+      const song = results?.songs.find(s => s.id === vars.songId);
+      toast.success(`Added "${song?.title ?? "track"}" to playlist`);
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
+  // Close on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const songs = results?.songs ?? [];
+
+  return (
+    <div ref={containerRef} className="relative mb-5">
+      <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#0A0A0A] border border-white/[0.08] focus-within:border-[#C49A28]/40 transition-colors">
+        <Search size={13} className="text-white/40 flex-shrink-0" />
+        <input
+          value={query}
+          onChange={e => { setQuery(e.target.value); setOpen(true); }}
+          onFocus={() => setOpen(true)}
+          placeholder="Search songs to add..."
+          className="flex-1 bg-transparent text-sm text-white placeholder:text-white/35 outline-none"
+        />
+        {isFetching && <Loader2 size={12} className="animate-spin text-white/30 flex-shrink-0" />}
+        {query && (
+          <button onClick={() => { setQuery(""); setOpen(false); }} className="text-white/30 hover:text-white/60 transition-colors">
+            <X size={12} />
+          </button>
+        )}
+      </div>
+
+      {/* Results dropdown */}
+      {open && query.trim().length >= 2 && (
+        <div className="absolute z-50 left-0 right-0 mt-1 rounded-xl border border-white/[0.08] bg-[#000000] shadow-[0_16px_40px_rgba(0,0,0,0.85)] overflow-hidden">
+          {songs.length === 0 && !isFetching ? (
+            <div className="px-4 py-3 text-sm text-white/40 text-center">No results for "{query}"</div>
+          ) : (
+            <div className="max-h-56 overflow-y-auto">
+              {songs.map(song => {
+                const alreadyIn = existingSongIds.has(song.id);
+                const isPending = addTrack.isPending && addTrack.variables?.songId === song.id;
+                return (
+                  <button
+                    key={song.id}
+                    onClick={() => {
+                      if (alreadyIn) return;
+                      addTrack.mutate({ playlistId, songId: song.id });
+                      setQuery("");
+                      setOpen(false);
+                    }}
+                    disabled={alreadyIn || isPending}
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors
+                      ${alreadyIn ? "opacity-50 cursor-default" : "hover:bg-white/[0.05] cursor-pointer"}`}
+                  >
+                    <div className="w-8 h-8 rounded-lg flex-shrink-0 overflow-hidden bg-[#111111] flex items-center justify-center">
+                      {song.coverArtUrl
+                        ? <img src={song.coverArtUrl} alt="" className="w-full h-full object-cover" />
+                        : <Music size={12} className="text-white/30" />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[13px] text-white truncate">{song.title}</p>
+                      <p className="text-[11px] text-white/45 truncate">
+                        {song.creatorHandle || song.creatorName || "Unknown"}
+                        {song.genre && <span className="text-white/30"> · {song.genre}</span>}
+                      </p>
+                    </div>
+                    {isPending
+                      ? <Loader2 size={13} className="animate-spin text-[#C49A28]/60 flex-shrink-0" />
+                      : alreadyIn
+                        ? <Check size={13} className="text-[#C49A28] flex-shrink-0" />
+                        : <PlusCircle size={13} className="text-white/40 flex-shrink-0" />}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -111,11 +218,11 @@ function PlaylistCard({
       onClick={onOpen}
       className="group flex items-center gap-3 p-3 rounded-xl cursor-pointer
         bg-[#000000] border border-white/[0.06]
-        hover:border-[#C49A28]/30 hover:bg-[#000000] transition-all"
+        hover:border-[#C49A28]/30 hover:bg-[#0A0A0A] transition-all"
     >
       {/* Cover / icon */}
       <div className="w-12 h-12 rounded-lg flex-shrink-0 overflow-hidden
-        bg-[#000000] flex items-center justify-center border border-white/[0.06]">
+        bg-[#0A0A0A] flex items-center justify-center border border-white/[0.06]">
         {playlist.coverArtUrl
           ? <img src={playlist.coverArtUrl} alt="" className="w-full h-full object-cover" />
           : <ListMusic size={20} className="text-[#C49A28]/60" />}
@@ -135,13 +242,16 @@ function PlaylistCard({
         {playlist.description && (
           <p className="text-[11px] text-white/40 truncate">{playlist.description}</p>
         )}
+        {typeof playlist.trackCount === "number" && (
+          <p className="text-[10px] text-white/30 mt-0.5">{playlist.trackCount} track{playlist.trackCount !== 1 ? "s" : ""}</p>
+        )}
       </div>
 
       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
         {isOwner && (
           <button
             onClick={e => { e.stopPropagation(); onDelete(); }}
-            className="p-1.5 rounded-lg hover:bg-red-500/10 text-white/50 hover:text-lnx-red transition-colors"
+            className="p-1.5 rounded-lg hover:bg-red-500/10 text-white/50 hover:text-red-400 transition-colors"
           >
             <Trash2 size={13} />
           </button>
@@ -190,23 +300,27 @@ function PlaylistDetail({
   const { playlist, tracks, collaborators } = data;
   const isOwner = user?.id === playlist.ownerId;
   const isMember = isOwner || collaborators.some((c: any) => c.user.id === user?.id && c.acceptedAt);
+  const existingSongIds = new Set<number>(tracks.map((t: any) => t.song.id));
+
+  const buildPlayerTracks = () =>
+    tracks
+      .filter((t: any) => !!t.song.fileUrl)
+      .map((t: any) => ({
+        id: String(t.song.id),
+        title: t.song.title,
+        artist: t.creator?.artistHandle || t.creator?.name || "Unknown",
+        genre: t.song.genre || "",
+        audioUrl: t.song.fileUrl,
+        artUrl: t.song.coverArtUrl,
+        witnessId: t.song.witnessId,
+        visualReady: t.song.visualReady ?? false,
+        autoVideoUrl: t.song.autoVideoUrl ?? undefined,
+        creatorRole: t.creator?.role ?? undefined,
+      }));
 
   const playAll = () => {
-    if (!tracks.length) return;
-    const queue = tracks.map((t: any) => ({
-      id: t.song.id, title: t.song.title, artist: t.song.userId,
-      artUrl: t.song.coverArtUrl, audioUrl: t.song.fileUrl, witnessId: t.song.witnessId,
-      visualReady: t.song.visualReady ?? false,
-      autoVideoUrl: t.song.autoVideoUrl ?? undefined,
-      creatorRole: t.creator?.role ?? undefined,
-    }));
-    const playerTracks = tracks.map((t: any) => ({
-      id: String(t.song.id), title: t.song.title, artist: t.creator?.artistHandle || t.creator?.name || String(t.song.userId),
-      genre: t.song.genre || "", audioUrl: t.song.fileUrl, artUrl: t.song.coverArtUrl, witnessId: t.song.witnessId,
-      visualReady: t.song.visualReady ?? false,
-      autoVideoUrl: t.song.autoVideoUrl ?? undefined,
-      creatorRole: t.creator?.role ?? undefined,
-    }));
+    const playerTracks = buildPlayerTracks();
+    if (!playerTracks.length) { toast.info("No playable tracks in this playlist"); return; }
     playQueueAt(playerTracks, 0, "PLAYLIST");
     openNowPlayingPanel();
   };
@@ -225,7 +339,7 @@ function PlaylistDetail({
       {/* Header */}
       <div className="flex items-start gap-4 mb-6">
         <div className="w-20 h-20 rounded-xl flex-shrink-0 overflow-hidden
-          bg-[#000000] flex items-center justify-center border border-white/[0.06]">
+          bg-[#0A0A0A] flex items-center justify-center border border-white/[0.06]">
           {playlist.coverArtUrl
             ? <img src={playlist.coverArtUrl} alt="" className="w-full h-full object-cover" />
             : <ListMusic size={28} className="text-[#C49A28]/50" />}
@@ -252,16 +366,16 @@ function PlaylistDetail({
           onClick={playAll}
           disabled={!tracks.length}
           size="sm"
-          className="bg-[#1C1A14] hover:bg-[var(--lnx-gold-muted)] text-black font-heading text-xs"
+          className="bg-[#C49A28] hover:bg-[#B8860B] text-black font-heading text-xs"
         >
-          <Play size={12} className="mr-1" /> Play All
+          <Play size={12} className="mr-1" fill="currentColor" /> Play All
         </Button>
         {isOwner && playlist.isCollaborative && (
           <Button
             onClick={() => setShowInvite(v => !v)}
             size="sm"
             variant="outline"
-            className="border-[#A78BFA]/30 text-[#A78BFA] hover:bg-[#A78BFA]/10 text-xs"
+            className="border-[#A78BFA]/30 text-[#A78BFA] hover:bg-[#A78BFA]/10 text-xs bg-transparent"
           >
             <UserPlus size={12} className="mr-1" /> Invite
           </Button>
@@ -275,7 +389,7 @@ function PlaylistDetail({
             value={inviteHandle}
             onChange={e => setInviteHandle(e.target.value)}
             placeholder="Artist handle or name..."
-            className="bg-[#000000] border-white/[0.08] text-white placeholder:text-white/50 text-sm"
+            className="bg-[#0A0A0A] border-white/[0.08] text-white placeholder:text-white/50 text-sm"
             onKeyDown={e => e.key === "Enter" && handleInvite()}
           />
           <Button
@@ -296,8 +410,8 @@ function PlaylistDetail({
           <div className="flex flex-wrap gap-2">
             {collaborators.map((c: any) => (
               <div key={c.id} className="flex items-center gap-1.5 px-2 py-1 rounded-full
-                bg-[#000000] border border-white/[0.06]">
-                <div className="w-5 h-5 rounded-full overflow-hidden bg-[#000000]">
+                bg-[#0A0A0A] border border-white/[0.06]">
+                <div className="w-5 h-5 rounded-full overflow-hidden bg-[#111111]">
                   {c.user.profilePhotoUrl
                     ? <img src={c.user.profilePhotoUrl} alt="" className="w-full h-full object-cover" />
                     : <span className="w-full h-full flex items-center justify-center text-[8px] text-white/50">
@@ -309,7 +423,7 @@ function PlaylistDetail({
                 {isOwner && (
                   <button
                     onClick={() => removeCollab.mutate({ playlistId, userId: c.user.id })}
-                    className="text-white/45 hover:text-lnx-red transition-colors"
+                    className="text-white/45 hover:text-red-400 transition-colors"
                   >
                     <X size={10} />
                   </button>
@@ -320,64 +434,68 @@ function PlaylistDetail({
         </div>
       )}
 
+      {/* Inline song search/add (members only) */}
+      {isMember && (
+        <InlineSongSearch playlistId={playlistId} existingSongIds={existingSongIds} />
+      )}
+
       {/* Track list */}
       {tracks.length === 0 ? (
         <div className="text-center py-12 text-white/50">
           <Music size={32} className="mx-auto mb-3 opacity-30" />
           <p className="text-sm">No tracks yet</p>
-          {isMember && <p className="text-xs mt-1">Add tracks from any song page</p>}
+          {isMember && <p className="text-xs mt-1 text-white/35">Search above to add songs</p>}
         </div>
       ) : (
         <div className="space-y-1">
-          {tracks.map((t: any, i: number) => (
-            <div
-              key={t.id}
-              className="group flex items-center gap-3 p-2.5 rounded-xl
-                hover:bg-[#000000] transition-colors"
-            >
-              <span className="text-[11px] text-white/45 w-5 text-right flex-shrink-0">{i + 1}</span>
-              <div className="w-9 h-9 rounded-lg overflow-hidden flex-shrink-0 bg-[#000000]">
-                {t.song.coverArtUrl
-                  ? <img src={t.song.coverArtUrl} alt="" className="w-full h-full object-cover" />
-                  : <Music size={14} className="m-auto text-white/45 mt-2.5" />}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm text-white truncate">{t.song.title}</p>
-                <p className="text-[11px] text-white/40 truncate">
-                  Added by {t.addedBy.artistHandle || t.addedBy.name}
-                </p>
-              </div>
-              <button
-                onClick={() => {
-                  const playerTracks = tracks.map((tr: any) => ({
-                    id: String(tr.song.id), title: tr.song.title,
-                    artist: tr.creator?.artistHandle || tr.creator?.name || String(tr.song.userId),
-                    genre: tr.song.genre || "", audioUrl: tr.song.fileUrl, artUrl: tr.song.coverArtUrl,
-                    witnessId: tr.song.witnessId,
-                    visualReady: tr.song.visualReady ?? false,
-                    autoVideoUrl: tr.song.autoVideoUrl ?? undefined,
-                    creatorRole: tr.creator?.role ?? undefined,
-                  }));
-                  const startIdx = playerTracks.findIndex((tr: any) => tr.id === String(t.song.id));
-                  playQueueAt(playerTracks, startIdx >= 0 ? startIdx : 0, "PLAYLIST");
-                  openNowPlayingPanel();
-                }}
-                className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg
-                  bg-[#1C1A14]/10 hover:bg-[#1C1A14]/20 text-[#C49A28] transition-all"
+          {tracks.map((t: any, i: number) => {
+            const artistName = t.creator?.artistHandle || t.creator?.name || "Unknown";
+            return (
+              <div
+                key={t.id}
+                className="group flex items-center gap-3 p-2.5 rounded-xl hover:bg-[#0A0A0A] transition-colors"
               >
-                <Play size={12} />
-              </button>
-              {isMember && (
+                <span className="text-[11px] text-white/45 w-5 text-right flex-shrink-0">{i + 1}</span>
+                <div className="w-9 h-9 rounded-lg overflow-hidden flex-shrink-0 bg-[#111111]">
+                  {t.song.coverArtUrl
+                    ? <img src={t.song.coverArtUrl} alt="" className="w-full h-full object-cover" />
+                    : <Music size={14} className="m-auto text-white/45 mt-2.5" />}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm text-white truncate">{t.song.title}</p>
+                  <p className="text-[11px] text-white/40 truncate">
+                    {artistName}
+                    {t.addedBy && (
+                      <span className="text-white/25"> · added by {t.addedBy.artistHandle || t.addedBy.name}</span>
+                    )}
+                  </p>
+                </div>
+                {/* Play this track */}
                 <button
-                  onClick={() => removeTrack.mutate({ playlistTrackId: t.id, playlistId })}
+                  onClick={() => {
+                    const playerTracks = buildPlayerTracks();
+                    const startIdx = playerTracks.findIndex((tr: any) => tr.id === String(t.song.id));
+                    playQueueAt(playerTracks, startIdx >= 0 ? startIdx : 0, "PLAYLIST");
+                    openNowPlayingPanel();
+                  }}
                   className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg
-                    hover:bg-red-500/10 text-white/45 hover:text-lnx-red transition-all"
+                    bg-[#C49A28]/10 hover:bg-[#C49A28]/20 text-[#C49A28] transition-all"
                 >
-                  <X size={12} />
+                  <Play size={12} fill="currentColor" />
                 </button>
-              )}
-            </div>
-          ))}
+                {/* Remove track */}
+                {isMember && (
+                  <button
+                    onClick={() => removeTrack.mutate({ playlistTrackId: t.id, playlistId })}
+                    className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg
+                      hover:bg-red-500/10 text-white/45 hover:text-red-400 transition-all"
+                  >
+                    <X size={12} />
+                  </button>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
     </div>
@@ -407,7 +525,7 @@ export default function PlaylistsPage() {
         <div className="text-center">
           <ListMusic size={40} className="mx-auto mb-4 text-[#C49A28]/40" />
           <p className="text-white/50 mb-4">Sign in to access your playlists</p>
-          <Button onClick={() => navigate("/")} className="bg-[#1C1A14] text-black font-heading">
+          <Button onClick={() => navigate("/")} className="bg-[#C49A28] hover:bg-[#B8860B] text-black font-heading">
             Go Home
           </Button>
         </div>
@@ -423,7 +541,7 @@ export default function PlaylistsPage() {
           <div className="flex items-center gap-3 mb-6">
             <button
               onClick={() => setActivePlaylistId(null)}
-              className="text-white/40 hover:text-white transition-colors text-sm font-body"
+              className="text-white/40 hover:text-white transition-colors text-sm font-body flex items-center gap-1"
             >
               ← Playlists
             </button>
@@ -437,7 +555,7 @@ export default function PlaylistsPage() {
             <Button
               onClick={() => setShowCreate(true)}
               size="sm"
-              className="bg-[#1C1A14] hover:bg-[var(--lnx-gold-muted)] text-black font-heading"
+              className="bg-[#C49A28] hover:bg-[#B8860B] text-black font-heading"
             >
               <Plus size={14} className="mr-1" /> New
             </Button>
@@ -455,10 +573,10 @@ export default function PlaylistsPage() {
           <div className="text-center py-16">
             <ListMusic size={40} className="mx-auto mb-4 text-[#C49A28]/20" />
             <p className="text-white/40 mb-2">No playlists yet</p>
-            <p className="text-sm text-white/45 mb-6">Create one and invite collaborators to build it together</p>
+            <p className="text-sm text-white/35 mb-6">Create one and start adding songs from anywhere on the platform</p>
             <Button
               onClick={() => setShowCreate(true)}
-              className="bg-[#1C1A14] hover:bg-[var(--lnx-gold-muted)] text-black font-heading"
+              className="bg-[#C49A28] hover:bg-[#B8860B] text-black font-heading"
             >
               <Plus size={14} className="mr-1" /> Create Your First Playlist
             </Button>

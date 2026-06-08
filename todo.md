@@ -4763,3 +4763,13 @@
 - [x] All components (15+ files): TrackCard, StoreTrackCard, BookCard, GlobalPlayer, PlayerBar, TheaterPlayer, GiftModal, TipModal, TosAcceptanceModal, WelcomeModal, WhatsNewModal, IdentityEditor, EditTrackPanel, ManifestationBundle, FeaturedProjectsCarousel, AddToPlaylistButton, RightRail, QuickRefSlider
 - [x] cardTokens.ts: CARD_BG_COLOR updated to #000000
 - [x] TypeScript: 0 errors | Vitest: 237/237 passing
+
+## Phase 190: Playlist Management System
+- [x] Build AddToNamedPlaylistPopover component: dropdown showing all user playlists + one-click add + "New Playlist" shortcut
+- [x] Add playlists.songInPlaylists tRPC procedure: returns which of user's playlists contain a given song
+- [x] Upgrade PlaylistsPage: inline song search/add bar (globalSearch), per-row play button, improved empty state
+- [x] Fix PlaylistsPage track row: show creator artistHandle/name instead of raw userId
+- [x] Fix PlaylistsPage Play All button styling → gold
+- [x] Wire AddToNamedPlaylistPopover into SongDetailPage action bar
+- [x] Wire AddToNamedPlaylistPopover into ArchivePage track row actions (published songs only)
+- [x] TypeScript: 0 errors | Vitest: 237/237 passing

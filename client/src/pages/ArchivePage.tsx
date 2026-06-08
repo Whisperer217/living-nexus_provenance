@@ -21,6 +21,7 @@ import { getLoginUrl } from "@/const";
 import { usePlayer } from "@/contexts/PlayerContext";
 import MyListsTab from "@/components/MyListsTab";
 import ExternalPlaylistsTab from "@/components/ExternalPlaylistsTab";
+import AddToNamedPlaylistPopover from "@/components/AddToNamedPlaylistPopover";
 
 /* ── Status tag ─────────────────────────────────────────────────── */
 const STATUS_STYLES: Record<string, { bg: string; text: string }> = {
@@ -819,6 +820,12 @@ export default function ArchivePage() {
                         );
                       })()}
 
+                      {/* Add to named playlist (published songs only) */}
+                      {isPublished && (
+                        <span onClick={(e) => e.stopPropagation()}>
+                          <AddToNamedPlaylistPopover songId={song.id} songTitle={song.title} variant="compact" />
+                        </span>
+                      )}
                       {/* Publish toggle */}
                       {!isDeleted && (
                         <button

@@ -29,6 +29,7 @@ import { useLike } from "@/hooks/useLike";
 import { useRef as _useRef } from "react";
 import { useWaveformVisualizer } from "@/hooks/useWaveformVisualizer";
 import AddToPlaylistButton from "@/components/AddToPlaylistButton";
+import AddToNamedPlaylistPopover from "@/components/AddToNamedPlaylistPopover";
 import { WIDPanel } from "@/components/WIDPanel";
 import { ActivationPanel } from "@/components/ActivationPanel";
 import { EvidencePanel } from "@/components/EvidencePanel";
@@ -813,6 +814,9 @@ export default function SongDetailPage() {
                   )}
                   {!isOwner && (
                     <AddToPlaylistButton songId={song.id} variant="full" />
+                  )}
+                  {!isOwner && (
+                    <AddToNamedPlaylistPopover songId={song.id} songTitle={song.title} variant="full" />
                   )}
                   {/* Download button — permission-aware */}
                   {(() => {
