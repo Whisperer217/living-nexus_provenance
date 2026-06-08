@@ -10,14 +10,27 @@ import {
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 
-const CURRENT_VERSION = "v2.45.0";
+const CURRENT_VERSION = "v2.46.0";
 const STORAGE_KEY = `living-nexus-whats-new-seen-${CURRENT_VERSION}`;
 
 const UPDATES = [
   {
+    version: "v2.46.0",
+    date: "Jun 8, 2026",
+    label: "Latest",
+    items: [
+      { icon: Shield, text: "Trust Restoration — Four confirmed bugs repaired: TopBar guide links now resolve correctly, /settings no longer 404s, duplicate archive routes removed, and Explore deep links (?medium=, ?sort=) now drive page state." },
+      { icon: Users, text: "Creator Identity — The Identity tab is fully rebuilt. Origin Statement now carries its proper prompt: \"What truth, experience, mission, or curiosity gave rise to this creator identity?\" with a live 300-word counter." },
+      { icon: Zap, text: "Active Mediums selector — Creators can now declare which creative forms they work in: Music, Books, Comics, Manuscripts, Video, Other. Saves to your identity record." },
+      { icon: BookOpen, text: "Creative Mission field — A new identity field for what you are actively building toward right now. Distinct from philosophy or doctrine — this is your current direction." },
+      { icon: Scroll, text: "Operational Doctrine — The platform now has a three-document governance spine: LAMININ (Foundation), LN-ADP v1 (Drift Protocol), and the new Operational Doctrine (Decision Filter). Every feature is evaluated against the canonical sequence: Identity → Domain → Manifestation → Provenance → Discovery → Distribution → Artifact." },
+      { icon: ArrowUpFromLine, text: "Identity gate on Upload — When your Origin Statement is empty, a soft prompt appears at the top of the Register Work page. Not a wall — a reminder. Establish identity before registering your first work." },
+    ],
+  },
+  {
     version: "v2.45.0",
     date: "May 4, 2026",
-    label: "Latest",
+    label: "",
     items: [
       { icon: Music, text: "Global player now lives in the top navbar — artwork, seek bar, timestamps, shuffle/prev/pause/next/repeat controls, and expand arrow are all inline. The separate player strip below the navbar is gone on desktop." },
       { icon: Shield, text: "Register WID fixed — after publishing a work, you are now taken directly to the song page where your WID badge is immediately visible. The success toast shows your full WID." },

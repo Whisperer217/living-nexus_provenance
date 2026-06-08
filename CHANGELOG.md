@@ -14,6 +14,33 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) conventi
 
 ---
 
+## [2.46.0] — 2026-06-08 · Phase 193.5 + 194: Trust Restoration + Creator Identity Completion
+
+### Fixed (Phase 193.5 — Trust Restoration)
+- **TopBar guide autocomplete links** — `/guides/${id}` corrected to `/guide/${id}` (singular route). Guide links in the search autocomplete now resolve correctly.
+- **`/settings` route** — Added redirect to `/settings/billing`. The Settings option in the avatar menu no longer 404s.
+- **Duplicate archive routes** — Removed duplicate `/archive/mine` and `/archive/ledger` route registrations from the inner App.tsx block.
+- **Explore deep links** — `/explore?medium=music`, `?sort=new`, `?sort=trending` now drive page state via `useSearch` + `useEffect` sync. ContextDrawer deep links are functional.
+
+### Added (Phase 194 — Creator Identity Completion)
+- **`creativeMission` DB column** — New `text` column on the `users` table (migration `0104` applied). Stores what the creator is actively building toward right now.
+- **`creativeMission` in tRPC** — Added to `profile.update` input schema and `updateUserProfile` type in `server/db.ts`.
+- **IdentityEditor rewrite** — The Profile → Identity tab is fully rebuilt with a two-layer structure:
+  - *Witness Identity Layer:* Origin Statement (renamed from "ORIGIN STORY"; carries the prompt "What truth, experience, mission, or curiosity gave rise to this creator identity?" with live 300-word counter), Creative Mission (new), Active Mediums selector (Music / Books / Comics / Manuscripts / Video / Other toggles), Creative Philosophy, Doctrine, Archive Continuity, Sigil URL.
+  - *Distribution Identity Layer:* Official Artist Name, Label/Imprint, DSP profile links (Spotify, Apple Music, YouTube Music, Other).
+- **Creative Mission on CreatorIdentityPage** — Public identity page now renders the Creative Mission field.
+- **Soft identity gate on UploadPage** — When `originStatement` is empty, a non-blocking gold banner prompts the creator to establish identity before registering their first work.
+
+### Governance
+- **`references/OPERATIONAL-DOCTRINE.md`** — Preference hierarchy, feature gate, and canonical sequence: `Identity → Domain → Manifestation → Provenance → Discovery → Distribution → Artifact`.
+- **README three-spine structure** — Architecture Documentation table now names all three governance documents: I. LAMININ (Foundation), II. LN-ADP v1 (Drift Protocol), III. Operational Doctrine (Decision Filter).
+
+### Technical
+- TypeScript: 0 errors
+- Vitest: 237/237 passing
+
+---
+
 ## [Mobile 1.0.0] — 2026-05-26 · Mobile Phase 1: App Shell — All 5 Screens
 
 ### Platform

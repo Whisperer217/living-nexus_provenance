@@ -28,7 +28,7 @@ import {
 export type NavMode = "home" | "explore" | "profile" | "upload" | "archive";
 
 // Version string — keep in sync with WhatsNewModal
-export const WHATS_NEW_VERSION = "v2.43.0";
+export const WHATS_NEW_VERSION = "v2.46.0";
 
 interface PanelLink {
   icon: React.ReactNode;
