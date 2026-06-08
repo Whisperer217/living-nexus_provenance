@@ -4733,3 +4733,15 @@
 - [x] Wire editId URL param into UploadPage — reads ?editId=, calls getMyDraft, hydrates all form fields from draft data
 - [x] Add "Continuing Unpublished Draft" banner in UploadPage when editId is present
 - [x] TypeScript: 0 errors | Vitest: 237/237 passing
+## Phase 188: Left Pane Navigation Cleanup
+- [x] ContextDrawer: Remove duplicate Guide Character links (keep one /guides/upload)
+- [x] ContextDrawer: Remove duplicate Prompt Studio links (keep /keeper-compose only)
+- [x] ContextDrawer: Remove /upload/drafts and /upload/history dead links (redirect aliases)
+- [x] ContextDrawer: Remove duplicate Draft Works / Upload History links in upload panel
+- [x] ContextDrawer: Collapse archive panel Registry section (3 links → 1 to /witness-registry)
+- [x] ContextDrawer: Fix home panel /#founders-era hash link → /founder-era real route
+- [x] ContextDrawer: Add Dashboard link to profile panel (logical home for creator tools)
+- [x] MobileNavDrawer: Remove duplicate Draft Works / Upload History (both → /archive)
+- [x] MobileNavDrawer: Collapse Registry section (3 links → 1 to /witness-registry)
+- [x] MobileNavDrawer: Mirror clean structure from ContextDrawer
+- [x] TypeScript: 0 errors | Vitest: 237/237 passing

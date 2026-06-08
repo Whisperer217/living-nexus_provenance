@@ -15,11 +15,11 @@ import { createPortal } from "react-dom";
 import { useLocation } from "wouter";
 import {
   X, LogIn, LogOut, Sparkles,
-  Home, Compass, User, Upload, Archive,
+  Home, Compass, User, Archive,
   Music, FileText, BookOpen, Image, Users,
-  Star, TrendingUp, Clock,
-  FolderOpen, Settings, PenTool, History,
-  Shield, BookMarked, LayoutGrid, LayoutDashboard,
+  Star,
+  Settings,
+  Shield, BookMarked, LayoutDashboard,
 } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
@@ -47,14 +47,14 @@ interface NavSection {
 
 const ALL_SECTIONS: NavSection[] = [
   {
+    // Top-level navigation
     links: [
-      { icon: <Home size={14} />, label: "Home", path: "/" },
-      { icon: <Compass size={14} />, label: "Explore", path: "/explore" },
-      { icon: <User size={14} />, label: "Profile", path: "/profile", authOnly: true },
+      { icon: <Home size={14} />, label: "Home", path: "/", description: "Featured works & creators" },
+      { icon: <Compass size={14} />, label: "Explore", path: "/explore", description: "Browse the witnessed archive" },
     ],
   },
   {
-    heading: "Explore",
+    heading: "Explore by Medium",
     links: [
       { icon: <Music size={14} />, label: "Music", path: "/explore?medium=music" },
       { icon: <FileText size={14} />, label: "Lyrics", path: "/explore?medium=lyrics" },
@@ -66,22 +66,27 @@ const ALL_SECTIONS: NavSection[] = [
   {
     heading: "Creator Tools",
     links: [
-      { icon: <Shield size={14} />, label: "Register Work", path: "/upload", gold: true, authOnly: true },
-      { icon: <Users size={14} />, label: "Guide Directory", path: "/guides" },
-      { icon: <Shield size={14} />, label: "Upload Guide Character", path: "/guides/upload", gold: true, authOnly: true },
-      { icon: <Sparkles size={14} />, label: "Prompt Studio", path: "/keeper-compose" },
-      { icon: <LayoutDashboard size={14} />, label: "Dashboard", path: "/dashboard", authOnly: true },
-      { icon: <PenTool size={14} />, label: "Draft Works", path: "/archive", authOnly: true },
-      { icon: <History size={14} />, label: "Upload History", path: "/archive", authOnly: true },
+      { icon: <Shield size={14} />, label: "Register Work", path: "/upload", gold: true, authOnly: true, description: "Issue a Witness ID" },
+      { icon: <Sparkles size={14} />, label: "Prompt Studio", path: "/keeper-compose", description: "Lyrics → AI music prompt" },
+      { icon: <Users size={14} />, label: "Guide Directory", path: "/guides", description: "Browse guide characters" },
+      { icon: <Shield size={14} />, label: "Register Guide Character", path: "/guides/upload", gold: true, authOnly: true, description: "Register a guide entity" },
+    ],
+  },
+  {
+    heading: "My Account",
+    links: [
+      { icon: <User size={14} />, label: "My Profile", path: "/profile", authOnly: true, description: "Public creator page" },
+      { icon: <Archive size={14} />, label: "My Archive", path: "/archive", authOnly: true, description: "All your registered works" },
+      { icon: <LayoutDashboard size={14} />, label: "Dashboard", path: "/dashboard", authOnly: true, description: "Analytics & slots" },
+      { icon: <Settings size={14} />, label: "Settings", path: "/settings/billing", authOnly: true },
     ],
   },
   {
     heading: "Registry",
     links: [
-      { icon: <BookMarked size={14} />, label: "Witness Registry", path: "/witness-registry", gold: true },
-      { icon: <Archive size={14} />, label: "My Works", path: "/archive", authOnly: true },
-      { icon: <Shield size={14} />, label: "Verified Works", path: "/witness-registry" },
-      { icon: <Clock size={14} />, label: "Provenance Ledger", path: "/witness-registry" },
+      { icon: <BookMarked size={14} />, label: "Witness Registry", path: "/witness-registry", gold: true, description: "Public ledger of all registered works" },
+      { icon: <Shield size={14} />, label: "Verify a WID", path: "/verify", description: "Check any Witness ID" },
+      { icon: <Star size={14} />, label: "Founding Creators", path: "/founders", description: "View the founding registry" },
     ],
   },
 ];

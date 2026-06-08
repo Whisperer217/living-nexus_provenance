@@ -17,9 +17,9 @@ import { getLoginUrl } from "@/const";
 import {
   Home, Compass, User, Upload, Archive,
   Music, FileText, BookOpen, Image, Users,
-  Star, TrendingUp, Clock, Sparkles,
+  Star, TrendingUp, Sparkles,
   FolderOpen, Settings, LogOut, LogIn,
-  PenTool, History, Shield, BookMarked,
+  Shield, BookMarked,
   LayoutGrid, LayoutDashboard, X,
 } from "lucide-react";
 
@@ -71,7 +71,7 @@ const PANELS: Record<NavMode, ModePanel> = {
       {
         heading: "Founder's Era",
         links: [
-          { icon: <Shield size={14} />, label: "Founder's Era", path: "/#founders-era", description: "Earliest provenance anchors" },
+          { icon: <Shield size={14} />, label: "Founder's Era", path: "/founder-era", description: "Earliest provenance anchors" },
           { icon: <Users size={14} />, label: "Founding Creators", path: "/founders", description: "View the founding registry" },
         ],
       },
@@ -96,7 +96,7 @@ const PANELS: Record<NavMode, ModePanel> = {
         heading: "By Creator",
         links: [
           { icon: <Users size={14} />, label: "All Creators", path: "/explore?filter=creators" },
-          { icon: <Star size={14} />, label: "Featured Creators", path: "/founders" },
+          { icon: <Star size={14} />, label: "Founding Creators", path: "/founders", description: "View the founding registry" },
         ],
       },
     ],
@@ -112,6 +112,7 @@ const PANELS: Record<NavMode, ModePanel> = {
           { icon: <User size={14} />, label: "My Profile", path: "/profile", description: "Public creator page", authOnly: true },
           { icon: <Music size={14} />, label: "My Works", path: "/profile?tab=works", description: "All registered works", authOnly: true },
           { icon: <FolderOpen size={14} />, label: "Collections", path: "/profile?tab=collections", description: "Curated playlists", authOnly: true },
+          { icon: <LayoutDashboard size={14} />, label: "Dashboard", path: "/dashboard", description: "Creator analytics & slots", authOnly: true },
         ],
       },
       {
@@ -132,21 +133,16 @@ const PANELS: Record<NavMode, ModePanel> = {
       {
         links: [
           { icon: <Shield size={14} />, label: "Register Work", path: "/upload", description: "Issue a Witness ID", authOnly: true, gold: true },
+          { icon: <Sparkles size={14} />, label: "Prompt Studio", path: "/keeper-compose", description: "Lyrics → AI music prompt" },
           { icon: <Users size={14} />, label: "Guide Directory", path: "/guides", description: "Browse guide characters" },
           { icon: <Shield size={14} />, label: "Register Guide Character", path: "/guides/upload", description: "Register a guide entity", authOnly: true, gold: true },
-          { icon: <Sparkles size={14} />, label: "Prompt Studio", path: "/prompt-studio", description: "Lyrics → music prompt" },
-          { icon: <Shield size={14} />, label: "Upload Guide Character", path: "/guides/upload", description: "Register a guide entity", authOnly: true, gold: true },
-          { icon: <Sparkles size={14} />, label: "Prompt Studio", path: "/keeper-compose", description: "Lyrics → AI music prompt" },
         ],
       },
       {
         heading: "Your Registrations",
         links: [
-          { icon: <PenTool size={14} />, label: "Draft Works", path: "/upload/drafts", description: "Unfinished registrations", authOnly: true },
-          { icon: <History size={14} />, label: "Registration History", path: "/upload/history", description: "All past submissions", authOnly: true },
-          { icon: <PenTool size={14} />, label: "Draft Works", path: "/archive", description: "Unfinished registrations", authOnly: true },
-          { icon: <History size={14} />, label: "Upload History", path: "/archive", description: "All past submissions", authOnly: true },
-          { icon: <LayoutDashboard size={14} />, label: "Dashboard", path: "/dashboard", description: "Creator analytics", authOnly: true },
+          { icon: <Archive size={14} />, label: "My Archive", path: "/archive", description: "All your registered works", authOnly: true },
+          { icon: <LayoutDashboard size={14} />, label: "Dashboard", path: "/dashboard", description: "Creator analytics & slots", authOnly: true },
         ],
       },
     ],
@@ -161,13 +157,14 @@ const PANELS: Record<NavMode, ModePanel> = {
         links: [
           { icon: <BookMarked size={14} />, label: "Witness Registry", path: "/witness-registry", description: "Public ledger of all registered works", gold: true },
           { icon: <Archive size={14} />, label: "My Works", path: "/archive", description: "Your personally registered works", authOnly: true },
+          { icon: <LayoutDashboard size={14} />, label: "Dashboard", path: "/dashboard", description: "Creator analytics & slots", authOnly: true },
         ],
       },
       {
-        heading: "Registry",
+        heading: "Verify & Learn",
         links: [
-          { icon: <Shield size={14} />, label: "Verified Works", path: "/witness-registry", description: "Content hash recorded at registration" },
-          { icon: <Clock size={14} />, label: "Provenance Ledger", path: "/witness-registry", description: "Timestamped creation record" },
+          { icon: <Shield size={14} />, label: "Verify a WID", path: "/verify", description: "Check any Witness ID" },
+          { icon: <BookOpen size={14} />, label: "WID Specification", path: "/doctrine/wid-spec", description: "How Witness IDs work" },
         ],
       },
     ],
