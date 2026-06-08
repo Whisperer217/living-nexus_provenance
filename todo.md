@@ -4726,3 +4726,10 @@
 - [x] Create useAudioMetadata hook (music-metadata parseBlob, extracts title/album/genre/lyrics/cover art)
 - [x] Wire hook into UploadPage — auto-populates fields on audio file drop or browse
 - [x] Wire hook into BatchUploadPage — auto-populates per-card title/genre/cover art on each file select
+## Phase 187: Unpublished Draft UX Fix
+- [x] Fix Archive banner label: "Unfinished Manifestation" → "Unpublished Draft"
+- [x] Fix Continue button routing: now routes to /upload?editId={song.id}&type={draftType} instead of blank /upload?type=audio
+- [x] Add songs.getMyDraft protected tRPC procedure — fetches creator's own song by ID regardless of publish status
+- [x] Wire editId URL param into UploadPage — reads ?editId=, calls getMyDraft, hydrates all form fields from draft data
+- [x] Add "Continuing Unpublished Draft" banner in UploadPage when editId is present
+- [x] TypeScript: 0 errors | Vitest: 237/237 passing

@@ -520,7 +520,7 @@ export default function ArchivePage() {
             ? Math.floor((Date.now() - new Date(newestDraft.createdAt).getTime()) / 86400000)
             : null;
           const isBook = draftType === "manuscript" || draftType === "comic";
-          const resumeHref = isBook ? `/book/${newestDraft.id}/studio` : `/upload?type=${draftType}`;
+          const resumeHref = isBook ? `/book/${newestDraft.id}/studio` : `/upload?editId=${newestDraft.id}&type=${draftType}`;
           return (
             <div className="mb-4 rounded-xl px-4 py-3 flex items-center gap-3"
               style={{ background: "rgba(212,175,55,0.05)", border: "1px solid rgba(212,175,55,0.15)" }}>
@@ -530,12 +530,12 @@ export default function ArchivePage() {
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-semibold truncate" style={{ color: "rgba(212,175,55,0.80)", fontFamily: "'Cinzel', serif", letterSpacing: "0.04em" }}>
                   {draftSongs.length === 1
-                    ? `Unfinished ${typeLabel[draftType] ?? "Work"}: "${newestDraft.title || "Untitled"}"`
-                    : `${draftSongs.length} unfinished manifestations in progress`}
+                    ? `Unpublished Draft: "${newestDraft.title || "Untitled"}"`
+                    : `${draftSongs.length} unpublished drafts in your archive`}
                 </p>
                 <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.32)", fontFamily: "'DM Sans', sans-serif" }}>
                   {daysSince !== null && daysSince > 0 ? `Last touched ${daysSince} day${daysSince === 1 ? "" : "s"} ago — ` : ""}
-                  Continue shaping your work.
+                  Saved — continue editing or publish when ready.
                 </p>
               </div>
               {/* Continue button — only shown for single draft */}

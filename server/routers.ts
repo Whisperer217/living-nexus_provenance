@@ -965,6 +965,18 @@ export const appRouter = router({
     }),
     mySongs: protectedProcedure.query(async ({ ctx }) => getSongsByUser(ctx.user.id)),
     bySelf: protectedProcedure.query(async ({ ctx }) => getSongsByUser(ctx.user.id)),
+    getMyDraft: protectedProcedure
+      .input(z.object({ id: z.number().int().positive() }))
+      .query(async ({ ctx, input }) => {
+        const db = await getDb();
+        if (!db) return null;
+        const { songs: songsTable } = await import("../drizzle/schema");
+        const { eq: eqOp, and: andOp } = await import("drizzle-orm");
+        const result = await db.select().from(songsTable)
+          .where(andOp(eqOp(songsTable.id, input.id), eqOp(songsTable.userId, ctx.user.id)))
+          .limit(1);
+        return result[0] ?? null;
+      }),
     reorder: protectedProcedure
       .input(z.object({ orderedIds: z.array(z.number()).min(1).max(500) }))
       .mutation(async ({ ctx, input }) => {

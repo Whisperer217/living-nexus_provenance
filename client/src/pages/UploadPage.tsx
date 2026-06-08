@@ -221,6 +221,13 @@ export default function UploadPage() {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadPhase, setUploadPhase] = useState<"idle" | "uploading" | "processing" | "done">("idle");
   const [pipelineMeta, setPipelineMeta] = useState<UploadMetadata | null>(null);
+  // Draft editing — editId is parsed from ?editId= URL param
+  const [editId, setEditId] = useState<number | null>(null);
+  const draftHydrated = useRef(false);
+  const { data: draftData } = trpc.songs.getMyDraft.useQuery(
+    { id: editId ?? 0 },
+    { enabled: !!editId && !!user }
+  );
 
   // Load creator profile defaults (aiDisclosure, primaryGenre)
   const { data: creatorProfile } = trpc.profile.me.useQuery(undefined, { enabled: !!user });
@@ -234,6 +241,7 @@ export default function UploadPage() {
 
   // Pre-fill from Prompt Studio query params (?title=&genre=&mood=&tags=)
   // Phase 148G: also supports ?type= for Archive intelligent CTA preselection
+  // Phase 187: also supports ?editId= for draft continuation from Archive page
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const qTitle = params.get("title");
@@ -241,6 +249,7 @@ export default function UploadPage() {
     const qMood = params.get("mood");
     const qTags = params.get("tags");
     const qType = params.get("type") as "audio" | "lyrics" | "manuscript" | "comic" | null;
+    const qEditId = params.get("editId");
     if (qTitle) setTitle(qTitle);
     if (qGenre) setGenre(qGenre);
     if (qMood) {
@@ -256,11 +265,66 @@ export default function UploadPage() {
     if (qType && ["audio", "lyrics", "manuscript", "comic"].includes(qType)) {
       setUploadMode(qType);
     }
+    // ?editId= triggers draft pre-population (Phase 187)
+    if (qEditId) {
+      const parsed = parseInt(qEditId, 10);
+      if (!isNaN(parsed) && parsed > 0) setEditId(parsed);
+    }
     // Clean the URL so refreshing doesn't re-apply
-    if (qTitle || qGenre || qMood || qTags || qType) {
+    if (qTitle || qGenre || qMood || qTags || qType || qEditId) {
       window.history.replaceState({}, "", window.location.pathname);
     }
   }, []);
+
+  // Hydrate form fields from draft data (runs once when draftData arrives)
+  useEffect(() => {
+    if (!draftData || draftHydrated.current) return;
+    draftHydrated.current = true;
+    if (draftData.title) setTitle(draftData.title);
+    if (draftData.genre) setGenre(draftData.genre);
+    if (draftData.bpm) setBpm(String(draftData.bpm));
+    if (draftData.keySignature) setKeySignature(draftData.keySignature);
+    if (draftData.albumName) setAlbumName(draftData.albumName);
+    if (draftData.releaseDate) setReleaseDate(draftData.releaseDate);
+    if (draftData.isrc) setIsrc(draftData.isrc);
+    if (draftData.lyricsText) setLyrics(draftData.lyricsText);
+    if (draftData.aiConsent) setAiConsent(draftData.aiConsent as "prohibited" | "permitted_attribution" | "permitted");
+    if (draftData.aiDisclosure) setAiDisclosure(draftData.aiDisclosure as "original" | "ai_assisted" | "ai_generated" | "human_authored_ai_instrument");
+    if (draftData.ownershipStatus) setOwnershipStatus(draftData.ownershipStatus as "full" | "partial");
+    if (Array.isArray(draftData.moodTags) && draftData.moodTags.length > 0) setSelectedMoods(draftData.moodTags as string[]);
+    if (draftData.caption) setCaption(draftData.caption);
+    if (draftData.headlineCaption) setHeadlineCaption(draftData.headlineCaption);
+    if (draftData.description) setDescription(draftData.description);
+    if (draftData.playerAssetType) setPlayerAssetType(draftData.playerAssetType as "cover" | "video");
+    if (draftData.aiToolSuno) setAiToolSuno(draftData.aiToolSuno);
+    if (draftData.aiToolUdio) setAiToolUdio(draftData.aiToolUdio);
+    if (draftData.aiToolSonato) setAiToolSonato(draftData.aiToolSonato);
+    if (draftData.aiToolOther) setAiToolOther(draftData.aiToolOther);
+    if (draftData.aiToolOtherName) setAiToolOtherName(draftData.aiToolOtherName);
+    if (draftData.contentType && ["audio", "lyrics", "manuscript", "comic"].includes(draftData.contentType)) {
+      setUploadMode(draftData.contentType as "audio" | "lyrics" | "manuscript" | "comic");
+    }
+    // HAAI declaration fields
+    if (draftData.haaiVisualConcept || draftData.haaiStyleLanguage || draftData.haaiInstrumentation ||
+        draftData.haaiVocalConveyance || draftData.haaiLyricalInspiration || draftData.haaiEmotionalTone) {
+      setHaaiDeclaration({
+        haaiVisualConcept: draftData.haaiVisualConcept ?? "",
+        haaiStyleLanguage: draftData.haaiStyleLanguage ?? "",
+        haaiInstrumentation: draftData.haaiInstrumentation ?? "",
+        haaiVocalConveyance: draftData.haaiVocalConveyance ?? "",
+        haaiLyricalInspiration: draftData.haaiLyricalInspiration ?? "",
+        haaiEmotionalTone: draftData.haaiEmotionalTone ?? "",
+      });
+    }
+    // Credits from creditsJson
+    if (draftData.creditsJson) {
+      try {
+        const parsed = JSON.parse(draftData.creditsJson as string);
+        if (Array.isArray(parsed)) setCredits(parsed);
+      } catch { /* ignore malformed creditsJson */ }
+    }
+    toast.success("Draft loaded — continue where you left off");
+  }, [draftData]);
 
   const generateCaptionMutation = trpc.songs.generateCaption.useMutation({
     onSuccess: (data) => {
@@ -828,6 +892,20 @@ export default function UploadPage() {
           </div>
         )}
 
+        {/* Draft continuation banner — shown when editId is present */}
+        {editId && (
+          <div
+            className="flex items-center gap-3 px-4 py-3 rounded-xl mb-6 text-sm"
+            style={{ background: "rgba(196,154,40,0.08)", border: "1px solid rgba(196,154,40,0.35)" }}
+          >
+            <RefreshCw className="w-4 h-4 flex-shrink-0" style={{ color: "var(--ln-gold)" }} />
+            <span style={{ color: "var(--ln-parchment)" }}>
+              <strong style={{ color: "var(--ln-gold)" }}>Continuing Unpublished Draft</strong>
+              {draftData?.title ? ` — "${draftData.title}"` : ""}
+              {" "}· Your previous metadata has been restored. Upload a new file and Manifest to register.
+            </span>
+          </div>
+        )}
         <div className="flex items-center gap-1 mb-8">
           {steps.map((s, i) => {
             const Icon = s.icon;
