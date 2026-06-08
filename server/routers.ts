@@ -586,6 +586,7 @@ export const appRouter = router({
       sigilUrl: z.string().url().optional().or(z.literal('')),
       activeMediums: z.array(z.string()).optional(),
       archiveContinuity: z.string().max(5000).optional(),
+      creativeMission: z.string().max(2000).optional(),
       // Distribution Identity Layer
       officialArtistName: z.string().max(128).optional(),
       localizedName: z.string().max(128).optional(),

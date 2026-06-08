@@ -4822,9 +4822,9 @@
 - [x] Add LN-ADP v1 reference to README.md architecture table
 
 ## Phase 194: Creator Identity Completion
-- [ ] Audit CreatorIdentityPage — check existing fields and flow
-- [ ] Add Origin Statement field (100–300 words, "What truth/experience/mission gave rise to this creator identity?")
-- [ ] Ensure identity fields: Name, Identity, Avatar, Testimony, Creative Mission, Active Mediums
-- [ ] Wire identity completion to onboarding sequence (Identity → Domain → Manifestations)
-- [ ] Ensure identity page is accessible before upload (gate or prompt)
-- [ ] TypeScript: 0 errors | Vitest: 237+ passing
+- [x] Audit CreatorIdentityPage — check existing fields and flow
+- [x] Add Origin Statement field (100–300 words, "What truth/experience/mission gave rise to this creator identity?")
+- [x] Ensure identity fields: Name, Identity, Avatar, Testimony, Creative Mission, Active Mediums
+- [x] Wire identity completion to onboarding sequence (Identity → Domain → Manifestations)
+- [x] Ensure identity page is accessible before upload (gate or prompt)
+- [x] TypeScript: 0 errors | Vitest: 237/237 passing

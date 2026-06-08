@@ -859,6 +859,31 @@ export default function UploadPage() {
         </div>
       </div>
       <div className="container py-10 max-w-2xl">
+        {/* ── Soft Identity Prompt (shown when originStatement is empty) ── */}
+        {user && creatorProfile && !creatorProfile.originStatement && (
+          <div
+            className="mb-6 px-4 py-3 rounded-xl flex items-start gap-3"
+            style={{ background: "rgba(196,154,40,0.06)", border: "1px solid rgba(196,154,40,0.25)" }}
+          >
+            <span className="text-[18px] mt-0.5" style={{ lineHeight: 1, color: "var(--ln-gold)" }}>✦</span>
+            <div className="flex-1 min-w-0">
+              <p className="text-[12px] font-heading tracking-wide" style={{ color: "var(--ln-gold)" }}>
+                Your identity is not yet established
+              </p>
+              <p className="text-[11px] font-body mt-0.5" style={{ color: "rgba(196,154,40,0.6)" }}>
+                Before registering your first work, consider anchoring your creator identity.
+                An Origin Statement gives provenance to everything you upload.
+              </p>
+            </div>
+            <a
+              href="/profile?tab=identity"
+              className="flex-shrink-0 px-3 py-1.5 rounded-lg text-[10px] font-heading tracking-widest transition-all hover:opacity-80"
+              style={{ background: "rgba(196,154,40,0.12)", border: "1px solid rgba(196,154,40,0.3)", color: "var(--ln-gold)" }}
+            >
+              ESTABLISH
+            </a>
+          </div>
+        )}
         <div className="mb-8">
           <div className="flex items-start justify-between gap-4">
             <div>

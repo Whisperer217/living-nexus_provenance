@@ -155,7 +155,7 @@ export async function updateUserProfile(userId: number, data: {
   cashAppHandle?: string; paypalUsername?: string; venmoHandle?: string;
   // Witness Identity Layer
   originStatement?: string; creativePhilosophy?: string; creativeDoctrine?: string;
-  sigilUrl?: string; activeMediums?: string[]; archiveContinuity?: string;
+  sigilUrl?: string; activeMediums?: string[]; archiveContinuity?: string; creativeMission?: string;
   // Distribution Identity Layer
   officialArtistName?: string; localizedName?: string;
   dspSpotifyUrl?: string; dspAppleMusicUrl?: string; dspTikTokHandle?: string;

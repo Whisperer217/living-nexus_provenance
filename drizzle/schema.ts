@@ -74,6 +74,7 @@ export const users = mysqlTable("users", {
   sigilUrl: text("sigilUrl"),                         // Personal sigil/mark image
   activeMediums: json("activeMediums"),               // ["music","books","comics","manuscripts","video"]
   archiveContinuity: text("archiveContinuity"),       // Statement about archive direction/legacy
+  creativeMission: text("creativeMission"),             // Active creative mission — what the creator is currently building toward
 
   // ─── Distribution Identity Layer (industry-facing metadata) ────────────────
   officialArtistName: varchar("officialArtistName", { length: 128 }),  // Industry-facing artist/band name

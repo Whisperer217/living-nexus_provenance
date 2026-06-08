@@ -291,6 +291,9 @@ export default function CreatorIdentityPage() {
           {/* Origin Statement */}
           <IdentityField label="ORIGIN STATEMENT" value={creator.originStatement} />
 
+          {/* Creative Mission */}
+          <IdentityField label="CREATIVE MISSION" value={(creator as any).creativeMission} />
+
           {/* Creative Philosophy */}
           <IdentityField label="CREATIVE PHILOSOPHY" value={creator.creativePhilosophy} />
 
