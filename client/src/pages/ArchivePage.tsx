@@ -15,6 +15,7 @@ import {
   Music, Upload, Globe, EyeOff, Pencil, ExternalLink,
   Play, ListMusic, Trash2, GripVertical, Shield, CheckSquare, Square,
   Download, Lock, Coins, Layers, AlertTriangle, X,
+  Library, ChevronRight, Layers2,
 } from "lucide-react";
 import { EditTrackPanel } from "@/components/EditTrackPanel";
 import { getLoginUrl } from "@/const";
@@ -22,6 +23,7 @@ import { usePlayer } from "@/contexts/PlayerContext";
 import MyListsTab from "@/components/MyListsTab";
 import ExternalPlaylistsTab from "@/components/ExternalPlaylistsTab";
 import AddToNamedPlaylistPopover from "@/components/AddToNamedPlaylistPopover";
+
 
 /* ── Status tag ─────────────────────────────────────────────────── */
 const STATUS_STYLES: Record<string, { bg: string; text: string }> = {
@@ -46,6 +48,142 @@ function StatusTag({ status }: { status: string }) {
 function formatDate(date: Date | string | null | undefined): string {
   if (!date) return "—";
   return new Date(date).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+}
+
+/* ── CollectionsSection — batch upload albums ───────────────────── */
+function CollectionsSection() {
+  const { data: collections = [], isLoading } = trpc.userCollections.list.useQuery();
+  const utils = trpc.useUtils();
+  const [expanded, setExpanded] = useState<number | null>(null);
+  const { data: tracks = [] } = trpc.userCollections.getTracks.useQuery(
+    { collectionId: expanded! },
+    { enabled: expanded !== null }
+  );
+  const { playQueueAt } = usePlayer();
+
+  const handlePlayCollection = (e: React.MouseEvent, colId: number, colTracks: any[]) => {
+    e.stopPropagation();
+    const playable = colTracks.filter((t: any) => t.fileUrl);
+    if (!playable.length) { toast.error("No playable tracks in this collection."); return; }
+    playQueueAt(playable.map((t: any) => ({
+      id: String(t.id),
+      title: t.title ?? "Untitled",
+      artist: t.creatorName ?? "Unknown",
+      audioUrl: t.fileUrl,
+      coverArt: t.coverArtUrl ?? "",
+      artUrl: t.coverArtUrl ?? undefined,
+      genre: t.genre ?? "",
+      witnessId: t.witnessId ?? "",
+      aiDisclosure: t.aiConsent ?? "original",
+    })), 0, "PLAYLIST");
+    toast.success(`Playing collection: ${colTracks[0]?.collectionName ?? ""}`);
+  };
+
+  if (isLoading) return (
+    <div className="space-y-2">
+      {[1,2,3].map(i => <div key={i} className="h-14 rounded-xl animate-pulse" style={{ background: "var(--ln-coal)" }} />)}
+    </div>
+  );
+
+  return (
+    <div>
+      <h3 className="text-xs font-bold tracking-widest mb-3 flex items-center gap-2"
+        style={{ color: "var(--ln-smoke)", fontFamily: "'Cinzel', serif" }}>
+        <Library size={13} /> BATCH UPLOAD ALBUMS
+        <span className="ml-auto text-xs font-normal" style={{ color: "var(--ln-iron)" }}>
+          {collections.length} album{collections.length !== 1 ? "s" : ""}
+        </span>
+      </h3>
+      {collections.length === 0 ? (
+        <div className="rounded-xl p-6 text-center" style={{ border: "1px dashed rgba(196,154,40,0.2)", background: "rgba(196,154,40,0.02)" }}>
+          <Library className="w-8 h-8 mx-auto mb-2 opacity-30" style={{ color: "var(--ln-gold)" }} />
+          <p className="text-sm" style={{ color: "var(--ln-smoke)" }}>No batch upload albums yet.</p>
+          <p className="text-xs mt-1" style={{ color: "var(--ln-iron)" }}>Upload multiple tracks together to create an album collection.</p>
+          <Link href="/upload">
+            <button className="mt-3 text-xs px-4 py-1.5 rounded-full transition-all"
+              style={{ background: "rgba(196,154,40,0.10)", border: "1px solid rgba(196,154,40,0.25)", color: "var(--ln-gold)" }}>
+              Register Work →
+            </button>
+          </Link>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {(collections as any[]).map((col: any) => {
+            const isOpen = expanded === col.id;
+            return (
+              <div key={col.id} className="rounded-xl overflow-hidden"
+                style={{ border: "1px solid rgba(196,154,40,0.18)", background: "var(--ln-coal)" }}>
+                {/* Header row */}
+                <div
+                  className="flex items-center gap-3 p-3 cursor-pointer hover:bg-white/5 transition-colors"
+                  onClick={() => setExpanded(isOpen ? null : col.id)}
+                >
+                  <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
+                    style={{ background: "rgba(196,154,40,0.08)" }}>
+                    <Library className="w-5 h-5" style={{ color: "var(--ln-gold)" }} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold truncate" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>
+                      {col.name}
+                    </p>
+                    <p className="text-xs mt-0.5" style={{ color: "var(--ln-smoke)" }}>
+                      {col.trackCount ?? 0} tracks
+                    </p>
+                  </div>
+                  {/* Play all */}
+                  {isOpen && tracks.length > 0 && (
+                    <button
+                      onClick={(e) => handlePlayCollection(e, col.id, tracks as any[])}
+                      className="flex items-center gap-1 text-xs px-3 py-1 rounded-full flex-shrink-0"
+                      style={{ background: "rgba(196,154,40,0.12)", border: "1px solid rgba(196,154,40,0.3)", color: "var(--ln-gold)" }}
+                    >
+                      <Play size={11} /> Play All
+                    </button>
+                  )}
+                  <ChevronRight
+                    size={16}
+                    className={`flex-shrink-0 transition-transform ${isOpen ? "rotate-90" : ""}`}
+                    style={{ color: "var(--ln-smoke)" }}
+                  />
+                </div>
+                {/* Expanded track list */}
+                {isOpen && (
+                  <div className="border-t" style={{ borderColor: "rgba(196,154,40,0.12)" }}>
+                    {(tracks as any[]).length === 0 ? (
+                      <p className="text-xs p-4 text-center" style={{ color: "var(--ln-smoke)" }}>No tracks in this collection.</p>
+                    ) : (
+                      <div className="divide-y" style={{ borderColor: "rgba(196,154,40,0.08)" }}>
+                        {(tracks as any[]).map((t: any, idx: number) => (
+                          <div key={t.id} className="flex items-center gap-3 px-3 py-2 hover:bg-white/5 transition-colors">
+                            <span className="text-xs w-5 text-center font-mono tabular-nums flex-shrink-0" style={{ color: "var(--ln-smoke)" }}>{idx + 1}</span>
+                            <div className="w-8 h-8 rounded flex-shrink-0 overflow-hidden flex items-center justify-center"
+                              style={{ background: "rgba(196,154,40,0.08)" }}>
+                              {t.coverArtUrl
+                                ? <img src={t.coverArtUrl} alt={t.title} className="w-full h-full object-cover" />
+                                : <Music size={12} style={{ color: "var(--ln-gold)" }} />}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm truncate" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>{t.title}</p>
+                              {t.witnessId && <p className="text-[11px] font-mono truncate" style={{ color: "rgba(196,154,40,0.5)" }}>{t.witnessId}</p>}
+                            </div>
+                            <Link href={`/song/${t.id}`}>
+                              <button className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-white/10 flex-shrink-0">
+                                <ExternalLink size={12} style={{ color: "var(--ln-gold)" }} />
+                              </button>
+                            </Link>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
 }
 
 /* ── Confirm Delete Modal ───────────────────────────────────────── */
@@ -141,7 +279,7 @@ export default function ArchivePage() {
   const utils = trpc.useUtils();
   const [editingSong, setEditingSong] = useState<any | null>(null);
   const [deletingSong, setDeletingSong] = useState<any | null>(null);
-  const [activeTab, setActiveTab] = useState<"tracks" | "lists" | "external">("tracks");
+  const [activeTab, setActiveTab] = useState<"tracks" | "collections" | "external">("tracks");
   const { playQueueAt } = usePlayer();
   const { user } = useAuth();
   const myArtistName = user?.artistHandle || user?.name || "Unknown Creator";
@@ -442,7 +580,7 @@ export default function ArchivePage() {
 
         {/* ── Tab switcher ───────────────────────────────────────── */}
         <div className="flex gap-1 mb-6 p-1 rounded-xl" style={{ background: "var(--ln-coal)" }}>
-          {(["tracks", "lists", "external"] as const).map((tab) => (
+          {(["tracks", "collections", "external"] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -452,13 +590,26 @@ export default function ArchivePage() {
                 : { color: "var(--ln-smoke)" }}
             >
               {tab === "tracks" && <><Music size={13} /> My Tracks</>}
-              {tab === "lists"  && <><ListMusic size={13} /> My Lists</>}
+              {tab === "collections" && <><Layers2 size={13} /> Collections &amp; Playlists</>}
               {tab === "external" && <><Globe size={13} /> External</>}
             </button>
           ))}
         </div>
 
-        {activeTab === "lists"    && <MyListsTab />}
+        {activeTab === "collections" && (
+          <div className="space-y-8">
+            {/* ── Batch Upload Albums (userCollections) ── */}
+            <CollectionsSection />
+            {/* ── Named Playlists ── */}
+            <div>
+              <h3 className="text-xs font-bold tracking-widest mb-3 flex items-center gap-2"
+                style={{ color: "var(--ln-smoke)", fontFamily: "'Cinzel', serif" }}>
+                <ListMusic size={13} /> NAMED PLAYLISTS
+              </h3>
+              <MyListsTab />
+            </div>
+          </div>
+        )}
         {activeTab === "external" && <ExternalPlaylistsTab />}
 
         {/* ── Track toolbar ──────────────────────────────────────── */}

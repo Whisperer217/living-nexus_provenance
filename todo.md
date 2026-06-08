@@ -4773,3 +4773,10 @@
 - [x] Wire AddToNamedPlaylistPopover into SongDetailPage action bar
 - [x] Wire AddToNamedPlaylistPopover into ArchivePage track row actions (published songs only)
 - [x] TypeScript: 0 errors | Vitest: 237/237 passing
+
+## Phase 191: Collections & Playlists Discoverability
+- [x] ArchivePage: Rename "My Lists" tab → "Collections & Playlists", move to 2nd position (before External)
+- [x] ArchivePage: Add CollectionsSection (batch upload albums) above MyListsTab in the combined tab
+- [x] ArchivePage: CollectionsSection has expand/collapse, Play All, per-track view, empty state with Register Work CTA
+- [x] ProfilePage: Move "Collections" tab to 2nd position (right after Overview), renamed to "Collections & Playlists"
+- [x] TypeScript: 0 errors | Vitest: 237/237 passing

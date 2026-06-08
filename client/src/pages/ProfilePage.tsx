@@ -913,8 +913,8 @@ export default function ProfilePage() {
         {(() => {
           const tabs: { id: typeof activeTab; label: string; badge?: string | null }[] = [
             { id: "overview",     label: "Overview" },
+            { id: "collections",  label: "Collections & Playlists" },
             { id: "works",        label: "Works" },
-            { id: "collections",  label: "Collections" },
             { id: "liked",        label: "Liked" },
             { id: "signals",      label: "Signals", badge: (unreadCount as number) > 0 ? String(unreadCount) : null },
             { id: "field-notes",  label: "Field Notes" },
