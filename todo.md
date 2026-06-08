@@ -4780,3 +4780,14 @@
 - [x] ArchivePage: CollectionsSection has expand/collapse, Play All, per-track view, empty state with Register Work CTA
 - [x] ProfilePage: Move "Collections" tab to 2nd position (right after Overview), renamed to "Collections & Playlists"
 - [x] TypeScript: 0 errors | Vitest: 237/237 passing
+
+## Phase 192: Track Display Order Persistence
+- [x] db.ts: Add getNextDisplayOrder(userId) helper — returns MAX(displayOrder)+1 for a creator
+- [x] db.ts: Update createSong to accept optional displayOrder param
+- [x] routers.ts: songs.upload mutation — set displayOrder to getNextDisplayOrder() before insert
+- [x] routers.ts: songs.batchUpload mutation — get starting slot before loop, pass batchDisplayOrder++ to each createSong
+- [x] Verified: getPublicSongs already sorts by displayOrder when creatorId is present (db.ts line ~401)
+- [x] Verified: getCreator procedure uses getSongsByUser which already sorts by displayOrder ASC, createdAt ASC
+- [x] Verified: ArchivePage already has full drag-to-reorder with grip handles wired to songs.reorder mutation
+- [x] Verified: Global discover/home feeds intentionally sort by recency (correct behavior for discovery)
+- [x] TypeScript: 0 errors | Vitest: 237/237 passing

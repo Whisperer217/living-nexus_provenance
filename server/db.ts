@@ -293,6 +293,17 @@ export async function getAllCreators() {
 
 // ─── Songs ────────────────────────────────────────────────────────────────────
 
+/** Returns the next available displayOrder slot for a creator (MAX + 1, or 1 if none set). */
+export async function getNextDisplayOrder(userId: number): Promise<number> {
+  const db = await getDb();
+  if (!db) return 1;
+  const rows = await db
+    .select({ maxOrder: sql<number>`COALESCE(MAX(${songs.displayOrder}), 0)` })
+    .from(songs)
+    .where(eq(songs.userId, userId));
+  return (rows[0]?.maxOrder ?? 0) + 1;
+}
+
 export async function createSong(data: {
   userId: number; title: string; genre?: string; bpm?: number; keySignature?: string;
   moodTags?: string[]; lyricsText?: string; lyricsHash?: string; coWriters?: string[]; albumName?: string;
@@ -307,6 +318,7 @@ export async function createSong(data: {
   isLyricsOnly?: boolean;
   contentType?: "audio" | "lyrics" | "manuscript" | "comic";
   caption?: string | null;
+  displayOrder?: number;
 }) {
   const db = await getDb();
   if (!db) throw new Error("Database unavailable");
