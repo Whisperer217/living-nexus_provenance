@@ -41,6 +41,8 @@ import {
   guides,
   type Guide,
   type InsertGuide,
+  domainBlocks,
+  domainVersions,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 import type { SearchResults } from "../shared/searchTypes";
@@ -4772,4 +4774,82 @@ export async function getSongsByIds(
     .orderBy(desc(songs.createdAt))
     .limit(limit)
     .offset(offset);
+}
+
+// ─── Creator Domain Helpers ───────────────────────────────────────────────────
+
+export async function getDomainBlocks(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db
+    .select()
+    .from(domainBlocks)
+    .where(eq(domainBlocks.userId, userId))
+    .orderBy(asc(domainBlocks.position));
+}
+
+export async function saveDomainLayout(
+  userId: number,
+  blocks: Array<{
+    blockType: string;
+    position: number;
+    visible: boolean;
+    size: "small" | "medium" | "large" | "full";
+    config: Record<string, unknown> | null;
+  }>,
+  changeNote?: string
+) {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+
+  // Delete existing blocks for this user
+  await db.delete(domainBlocks).where(eq(domainBlocks.userId, userId));
+
+  // Insert new block layout
+  if (blocks.length > 0) {
+    await db.insert(domainBlocks).values(
+      blocks.map((b) => ({
+        userId,
+        blockType: b.blockType,
+        position: b.position,
+        visible: b.visible,
+        size: b.size,
+        config: b.config ?? undefined,
+      }))
+    );
+  }
+
+  // Get next version number
+  const [versionRow] = await db
+    .select({ maxVersion: sql<number>`MAX(\`versionNumber\`)` })
+    .from(domainVersions)
+    .where(eq(domainVersions.userId, userId));
+  const nextVersion = (versionRow?.maxVersion ?? 0) + 1;
+
+  // Record version snapshot
+  await db.insert(domainVersions).values({
+    userId,
+    versionNumber: nextVersion,
+    layoutSnapshot: blocks.map((b) => ({
+      blockType: b.blockType,
+      position: b.position,
+      visible: b.visible,
+      size: b.size,
+      config: b.config ?? {},
+    })),
+    changeNote: changeNote ?? null,
+  });
+
+  return nextVersion;
+}
+
+export async function getDomainVersions(userId: number, limit = 20) {
+  const db = await getDb();
+  if (!db) return [];
+  return db
+    .select()
+    .from(domainVersions)
+    .where(eq(domainVersions.userId, userId))
+    .orderBy(desc(domainVersions.versionNumber))
+    .limit(limit);
 }

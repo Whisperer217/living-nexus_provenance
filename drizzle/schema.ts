@@ -1635,3 +1635,48 @@ export const distributionInterests = mysqlTable("distributionInterests", {
 }));
 export type DistributionInterest = typeof distributionInterests.$inferSelect;
 export type InsertDistributionInterest = typeof distributionInterests.$inferInsert;
+
+// ─── Creator Domain Blocks ────────────────────────────────────────────────────
+// Modular Manifestation Blocks that compose a creator's public domain page.
+// Each creator owns a set of blocks; the position field defines display order.
+// The config JSON stores block-type-specific settings (e.g. which shelf medium,
+// featured song IDs, custom heading text, link URLs, etc.)
+export const domainBlocks = mysqlTable("domainBlocks", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  blockType: varchar("blockType", { length: 64 }).notNull(),
+  position: int("position").default(0).notNull(),
+  visible: boolean("visible").default(true).notNull(),
+  size: mysqlEnum("size", ["small", "medium", "large", "full"]).default("full").notNull(),
+  config: json("config").$type<Record<string, unknown>>(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (t) => ({
+  userIdx: index("domainBlocks_userId_idx").on(t.userId),
+  positionIdx: index("domainBlocks_position_idx").on(t.userId, t.position),
+}));
+export type DomainBlock = typeof domainBlocks.$inferSelect;
+export type InsertDomainBlock = typeof domainBlocks.$inferInsert;
+
+// ─── Creator Domain Versions ──────────────────────────────────────────────────
+// Every time a creator saves their domain layout, a version snapshot is recorded.
+// This makes the evolution of the creator's domain part of their provenance record.
+export const domainVersions = mysqlTable("domainVersions", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  versionNumber: int("versionNumber").notNull(),
+  layoutSnapshot: json("layoutSnapshot").$type<Array<{
+    blockType: string;
+    position: number;
+    visible: boolean;
+    size: string;
+    config: Record<string, unknown>;
+  }>>().notNull(),
+  changeNote: varchar("changeNote", { length: 512 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (t) => ({
+  userIdx: index("domainVersions_userId_idx").on(t.userId),
+  versionIdx: index("domainVersions_version_idx").on(t.userId, t.versionNumber),
+}));
+export type DomainVersion = typeof domainVersions.$inferSelect;
+export type InsertDomainVersion = typeof domainVersions.$inferInsert;

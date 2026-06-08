@@ -4791,3 +4791,16 @@
 - [x] Verified: ArchivePage already has full drag-to-reorder with grip handles wired to songs.reorder mutation
 - [x] Verified: Global discover/home feeds intentionally sort by recency (correct behavior for discovery)
 - [x] TypeScript: 0 errors | Vitest: 237/237 passing
+
+## Phase 193: Creator Domain Engine
+- [x] Schema: Add domainBlocks table (userId, blockType, position, config JSON, visible, size, createdAt, updatedAt)
+- [x] Schema: Add domainVersions table (userId, versionNumber, layoutSnapshot JSON, changeNote, createdAt) — provenance of domain changes
+- [x] DB: pnpm db:push — both tables migrated to TiDB successfully
+- [x] shared/domainTypes.ts: DomainBlockType (16 types), DomainBlockSize, DomainBlockRecord, ShelfBlockConfig, FeaturedWorkBlockConfig, DEFAULT_DOMAIN_LAYOUT
+- [x] server/db.ts: getDomainBlocks, saveDomainLayout, getDomainVersions, getNextDomainVersion helpers
+- [x] server/routers.ts: domain router — getLayout (public), saveLayout (protected, creates version), getVersionHistory (protected), getPublicVersionHistory (public)
+- [x] ShelfBlock.tsx: Visual shelf for Music/Books/Comics/Manuscripts/Artifacts/Merch — horizontal scroll rack with cover art, play, WID badge, empty state
+- [x] DomainRenderer.tsx: Renders 16 block types in creator-defined order; fetches own data; handles empty state with onboarding prompt
+- [x] DomainEditor.tsx: Drag-drop reorder (mouse/touch), show/hide toggle, size selector (sm/md/lg/full), add/remove blocks, save with provenance versioning, version history timeline panel
+- [x] CreatorProfilePage.tsx: DomainRenderer rendered above Projects section; "Edit Domain" toggle button (owner only); DomainEditor panel slides in
+- [x] TypeScript: 0 errors | Vitest: 237/237 passing

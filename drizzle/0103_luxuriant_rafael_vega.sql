@@ -1,0 +1,1 @@
+ALTER TABLE `domainBlocks` MODIFY COLUMN `config` json;

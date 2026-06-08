@@ -32,6 +32,9 @@ import { MediaAsset } from "@/components/MediaAsset";
 import { QRShareModal } from "@/components/QRIdentityCard";
 import { FeaturedBookModel } from "@/components/reader/FeaturedBookModel";
 import { HorizontalBookReader, type BookPage } from "@/components/reader/HorizontalBookReader";
+import { DomainRenderer } from "@/components/domain/DomainRenderer";
+import { DomainEditor } from "@/components/domain/DomainEditor";
+import { LayoutGrid } from "lucide-react";
 
 // ─── Context Menu ─────────────────────────────────────────────────────────────
 interface ContextMenuProps {
@@ -394,6 +397,7 @@ export default function CreatorProfilePage() {
   const creatorId = parseInt(id || "0");
   const [tipOpen, setTipOpen] = useState(false);
   const [tipSuccess, setTipSuccess] = useState(false);
+  const [showDomainEditor, setShowDomainEditor] = useState(false);
   const [tipAmount, setTipAmount] = useState("5");
   const [witnessNetworkOpen, setWitnessNetworkOpen] = useState(false);
   const [witnessNetworkTab, setWitnessNetworkTab] = useState<"witnessing" | "witnesses">("witnesses");
@@ -1374,6 +1378,31 @@ export default function CreatorProfilePage() {
       </div>{/* end profile header bg */}
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6">
+        {/* ── Domain Editor toggle (owner only) ── */}
+        {isOwner && (
+          <div className="flex justify-end pt-4 pb-2">
+            <button
+              onClick={() => setShowDomainEditor((v) => !v)}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs transition-all"
+              style={{
+                background: showDomainEditor ? "rgba(212,175,55,0.15)" : "rgba(255,255,255,0.05)",
+                border: `1px solid ${showDomainEditor ? "rgba(212,175,55,0.4)" : "rgba(255,255,255,0.1)"}`,
+                color: showDomainEditor ? "#D4AF37" : "rgba(255,255,255,0.4)",
+              }}
+            >
+              <LayoutGrid className="w-3.5 h-3.5" />
+              {showDomainEditor ? "Close Domain Editor" : "Edit Domain"}
+            </button>
+          </div>
+        )}
+        {/* ── Domain Editor panel (owner only) ── */}
+        {isOwner && showDomainEditor && (
+          <div className="mb-6">
+            <DomainEditor userId={creator.id} onClose={() => setShowDomainEditor(false)} />
+          </div>
+        )}
+        {/* ── Domain Renderer (block-based layout) ── */}
+        <DomainRenderer userId={creator.id} isOwner={isOwner} />
         {/* ── Projects Section (top priority) ── */}
         {(creatorProjects as any[]).length > 0 && (
           <section className="py-6">

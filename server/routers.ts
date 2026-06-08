@@ -117,6 +117,9 @@ import {
   deleteGuide,
   globalSearch,
   type SearchResults,
+  getDomainBlocks,
+  saveDomainLayout,
+  getDomainVersions,
 } from "./db";
 import { FOUNDER_PRICE_EARLY_CENTS, FOUNDER_PRICE_LATE_CENTS, FOUNDER_THRESHOLD, LICENSE_PRICE_CENTS, LICENSE_SLOTS, SLOT_PACKAGES, getSlotPackage, type SlotPackageId } from "./livingArchiveProducts";
 import { ENV } from "./_core/env";
@@ -6852,6 +6855,70 @@ If a field cannot be determined from the document, use an empty string. For symb
       .input(z.object({ q: z.string().min(1).max(200) }))
       .query(async ({ input }): Promise<SearchResults> => {
         return globalSearch(input.q);
+      }),
+  }),
+
+  // ─── Creator Domain Engine ─────────────────────────────────────────────────
+  domain: router({
+    /**
+     * Get the domain layout for a creator (public — for rendering the domain page).
+     * Returns the DEFAULT_DOMAIN_LAYOUT if the creator has not yet saved a custom layout.
+     */
+    getLayout: publicProcedure
+      .input(z.object({ userId: z.number().int().positive() }))
+      .query(async ({ input }) => {
+        const blocks = await getDomainBlocks(input.userId);
+        return blocks;
+      }),
+
+    /**
+     * Get the authenticated user's own domain layout (for the editor).
+     */
+    getMyLayout: protectedProcedure
+      .query(async ({ ctx }) => {
+        const blocks = await getDomainBlocks(ctx.user.id);
+        return blocks;
+      }),
+
+    /**
+     * Save a new domain layout. Automatically creates a provenance version snapshot.
+     */
+    saveLayout: protectedProcedure
+      .input(z.object({
+        blocks: z.array(z.object({
+          blockType: z.string().max(64),
+          position: z.number().int().min(0),
+          visible: z.boolean(),
+          size: z.enum(["small", "medium", "large", "full"]),
+          config: z.record(z.string(), z.unknown()).nullable(),
+        })),
+        changeNote: z.string().max(512).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const versionNumber = await saveDomainLayout(
+          ctx.user.id,
+          input.blocks,
+          input.changeNote,
+        );
+        return { success: true, versionNumber };
+      }),
+
+    /**
+     * Get the version history for a creator's domain (provenance trail).
+     */
+    getVersionHistory: protectedProcedure
+      .input(z.object({ limit: z.number().int().min(1).max(50).default(20) }))
+      .query(async ({ ctx, input }) => {
+        return getDomainVersions(ctx.user.id, input.limit);
+      }),
+
+    /**
+     * Get the version history for a creator's domain (public — for the provenance trail block).
+     */
+    getPublicVersionHistory: publicProcedure
+      .input(z.object({ userId: z.number().int().positive(), limit: z.number().int().min(1).max(20).default(10) }))
+      .query(async ({ input }) => {
+        return getDomainVersions(input.userId, input.limit);
       }),
   }),
 });

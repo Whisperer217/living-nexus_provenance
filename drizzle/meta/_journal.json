@@ -708,6 +708,20 @@
       "when": 1779348125721,
       "tag": "0101_next_captain_marvel",
       "breakpoints": true
+    },
+    {
+      "idx": 102,
+      "version": "5",
+      "when": 1780957610533,
+      "tag": "0102_rare_magik",
+      "breakpoints": true
+    },
+    {
+      "idx": 103,
+      "version": "5",
+      "when": 1780957643274,
+      "tag": "0103_luxuriant_rafael_vega",
+      "breakpoints": true
     }
   ]
 }
