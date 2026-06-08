@@ -11,12 +11,20 @@ The platform is built on the **LAMININ Doctrine**: four structural arms (Registr
 ## Architecture Documentation
 
 > **Start here before writing a single line of code.**
+> These three documents are the spine of the platform. Read them in order. Enforce them without apology.
+
+### The Three Spine Documents
+
+| Document | Role |
+|---|---|
+| **[docs/LAMININ.md](./docs/LAMININ.md)** | **I. Foundation** — The load-bearing structure. Four arms (Registry, Community, Commerce, Doctrine). The LAMININ Doctrine governs what the platform *is*. |
+| **[references/LN-ADP-v1.md](./references/LN-ADP-v1.md)** | **II. Drift Protocol** — How to detect when the platform is losing coherence. Five North Stars, Drift Check, Trust Restoration Rule, Cosmos constraint. |
+| **[references/OPERATIONAL-DOCTRINE.md](./references/OPERATIONAL-DOCTRINE.md)** | **III. Operational Doctrine** — What to build, what to defer, and in what order. Preference hierarchy, feature gate, canonical sequence: Identity → Artifact. |
+
+### Supporting References
 
 | Document | Purpose |
 |---|---|
-| **[docs/LAMININ.md](./docs/LAMININ.md)** | Foundational Architecture Doctrine — the load-bearing structure of this entire codebase. Read this first. |
-| **[references/LN-ADP-v1.md](./references/LN-ADP-v1.md)** | **Architectural Drift Protocol v1** — evaluate every feature against this before building. Five North Stars, Drift Check, Trust Restoration Rule. |
-| **[references/OPERATIONAL-DOCTRINE.md](./references/OPERATIONAL-DOCTRINE.md)** | **Operational Doctrine** — preference hierarchy, feature gate, and the canonical sequence: Identity → Domain → Manifestation → Provenance → Discovery → Distribution → Artifact. |
 | **[MOBILE_ROADMAP.md](./MOBILE_ROADMAP.md)** | Native mobile app (Expo/React Native) — current state and full build roadmap. |
 | **[LN-PHASE2-SPEC.md](./LN-PHASE2-SPEC.md)** | Phase 2 spec: Floating Avatar Widget, Cinematic Mode, Global Player. |
 | **[docs/first-witness-flow-ux.md](./docs/first-witness-flow-ux.md)** | UX spec for the First Witness onboarding ceremony. |
