@@ -4715,3 +4715,9 @@
 - [x] Upgrade ErrorBoundary: auto-resets on route change (resetKey=location), adds Try Again button alongside Reload, adds inline variant for section-level errors
 - [x] Scope ErrorBoundary inside MainLayout so nav/header survive page-level errors
 - [x] TypeScript: 0 errors | Vitest: 237/237 passing
+
+## Phase 185: Lyrics in Downloads
+- [x] Embed lyricsText as USLT ID3 tag in single-track download
+- [x] Include lyrics.txt in single-track ZIP when lyrics exist
+- [x] Embed lyricsText as USLT ID3 tag in batch archive download
+- [x] Include per-track lyrics.txt in batch archive ZIP

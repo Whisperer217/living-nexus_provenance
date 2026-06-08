@@ -151,6 +151,13 @@ downloadRouter.get("/api/download/:songId", async (req: Request, res: Response) 
       language: "eng",
       text: `Witness ID: ${witnessId}`,
     },
+    // Embed lyrics as USLT (Unsynchronised Lyrics) ID3 tag — shows in Apple Music, VLC, foobar2000, etc.
+    ...(song.lyricsText ? {
+      unsynchronisedLyrics: {
+        language: "eng",
+        text: song.lyricsText,
+      },
+    } : {}),
     userDefinedText: [
       { description: "LNWID",          value: witnessId },
       { description: "LN_CREATOR",     value: creatorName },
@@ -180,11 +187,7 @@ downloadRouter.get("/api/download/:songId", async (req: Request, res: Response) 
   const safeArtist = sanitizeFilename(creatorName.replace(/^@/, ""));
   const filename = `${safeTitle} - ${safeArtist} [${widShort}].mp3`;
 
-  // 8. Stream tagged file directly with Content-Disposition: attachment
-  //    This forces the browser to download rather than opening in a new tab.
-  //    Previous approach (S3 redirect) caused browsers to open the file instead of downloading.
-
-  // Record download in DB (non-fatal)
+  // 8. Record download in DB (non-fatal)
   try {
     let userId: number | undefined;
     try {
@@ -194,11 +197,44 @@ downloadRouter.get("/api/download/:songId", async (req: Request, res: Response) 
     await recordDownload({ songId, userId });
   } catch { /* non-fatal */ }
 
-  res.setHeader("Content-Type", "audio/mpeg");
-  res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
-  res.setHeader("Content-Length", taggedBuffer.length.toString());
-  res.setHeader("Cache-Control", "no-store");
-  res.end(taggedBuffer);
+  // 9. If lyrics exist, bundle MP3 + lyrics.txt into a ZIP so the text is always accessible
+  //    regardless of whether the user's music player supports USLT tags.
+  //    If no lyrics, stream the tagged MP3 directly (same as before).
+  if (song.lyricsText) {
+    const zip = new JSZip();
+    zip.file(filename, taggedBuffer);
+
+    // Build lyrics.txt with header
+    const lyricsHeader = [
+      `Title:    ${song.title}`,
+      `Artist:   ${creatorName}`,
+      `Album:    ${song.albumName || "Living Nexus"}`,
+      `Year:     ${year}`,
+      `WID:      ${witnessId}`,
+      `Verify:   ${verifyUrl}`,
+      `Platform: Living Nexus — Sovereign Music`,
+      `© Command Domains LLC · BDDT Publishing`,
+      "",
+      "--- LYRICS ---",
+      "",
+    ].join("\n");
+    zip.file("lyrics.txt", lyricsHeader + song.lyricsText);
+
+    const zipBuffer = await zip.generateAsync({ type: "nodebuffer", compression: "DEFLATE" });
+    const zipFilename = `${safeTitle} - ${safeArtist} [${widShort}].zip`;
+    res.setHeader("Content-Type", "application/zip");
+    res.setHeader("Content-Disposition", `attachment; filename="${zipFilename}"`);
+    res.setHeader("Content-Length", zipBuffer.length.toString());
+    res.setHeader("Cache-Control", "no-store");
+    res.end(zipBuffer);
+  } else {
+    // No lyrics — stream tagged MP3 directly
+    res.setHeader("Content-Type", "audio/mpeg");
+    res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+    res.setHeader("Content-Length", taggedBuffer.length.toString());
+    res.setHeader("Cache-Control", "no-store");
+    res.end(taggedBuffer);
+  }
 });
 
 // ── Batch Archive Download ────────────────────────────────────────────────────
@@ -311,6 +347,10 @@ downloadRouter.get("/api/download/batch/:batchIndex", async (req: Request, res: 
         year,
         genre: song.genre || undefined,
         comment: { language: "eng", text: `Witness ID: ${witnessId}` },
+        // Embed lyrics as USLT tag so they appear in music players
+        ...(song.lyricsText ? {
+          unsynchronisedLyrics: { language: "eng", text: song.lyricsText },
+        } : {}),
         userDefinedText: [
           { description: "LNWID",         value: witnessId },
           { description: "LN_CREATOR",    value: creatorName },
@@ -333,6 +373,24 @@ downloadRouter.get("/api/download/batch/:batchIndex", async (req: Request, res: 
       const safeTitle = sanitizeFilename(song.title);
       const widShort = witnessId.length > 20 ? witnessId.slice(0, 20) : witnessId;
       zip.file(`${trackNum}_${safeTitle}_[${widShort}].mp3`, taggedBuffer);
+
+      // Also include a plain-text lyrics file for players that don’t read USLT tags
+      if (song.lyricsText) {
+        const lyricsHeader = [
+          `Title:    ${song.title}`,
+          `Artist:   ${creatorName}`,
+          `Album:    ${song.albumName || "Living Nexus"}`,
+          `Year:     ${year}`,
+          `WID:      ${witnessId}`,
+          `Verify:   ${verifyUrl}`,
+          `Platform: Living Nexus — Sovereign Music`,
+          `© Command Domains LLC · BDDT Publishing`,
+          "",
+          "--- LYRICS ---",
+          "",
+        ].join("\n");
+        zip.file(`lyrics/${trackNum}_${safeTitle}_lyrics.txt`, lyricsHeader + song.lyricsText);
+      }
     }
 
     if (certBuffer) {
