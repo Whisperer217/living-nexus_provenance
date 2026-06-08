@@ -4804,3 +4804,27 @@
 - [x] DomainEditor.tsx: Drag-drop reorder (mouse/touch), show/hide toggle, size selector (sm/md/lg/full), add/remove blocks, save with provenance versioning, version history timeline panel
 - [x] CreatorProfilePage.tsx: DomainRenderer rendered above Projects section; "Edit Domain" toggle button (owner only); DomainEditor panel slides in
 - [x] TypeScript: 0 errors | Vitest: 237/237 passing
+
+## Phase 193.5: Trust Restoration
+- [x] Fix TopBar guide autocomplete links: /guides/${id} → /guide/${id} (singular route)
+- [x] Fix /settings route: add redirect to /settings/billing (was 404)
+- [x] Fix duplicate /archive/mine and /archive/ledger routes in App.tsx
+- [x] Fix ExplorePage deep links: /explore?medium=music, ?sort=new, ?sort=trending now drive page state (useSearch + useEffect sync)
+- [x] Audit Creator Identity path: create/edit/view/QR/card — intact
+- [x] Audit Manifestation path: upload/WID display/edit/archive/restore/delete — intact
+- [x] Audit Archive path: tracks/collections/drafts/delete — intact
+- [x] Audit Domain path: view/edit/save/version history (domainBlocks + domainVersions tables confirmed migrated) — intact
+- [x] Audit QR path: generate/scan/log/deep-link (qrRouter confirmed) — intact
+- [x] Audit Discovery path: Home/Explore/Search/Shelf — intact (deep links now fixed)
+- [x] Audit Playback path: expand/collapse/floating/queue — intact
+- [x] TypeScript: 0 errors | Vitest: 237/237 passing
+- [x] Save LN-ADP v1 to references/LN-ADP-v1.md
+- [x] Add LN-ADP v1 reference to README.md architecture table
+
+## Phase 194: Creator Identity Completion
+- [ ] Audit CreatorIdentityPage — check existing fields and flow
+- [ ] Add Origin Statement field (100–300 words, "What truth/experience/mission gave rise to this creator identity?")
+- [ ] Ensure identity fields: Name, Identity, Avatar, Testimony, Creative Mission, Active Mediums
+- [ ] Wire identity completion to onboarding sequence (Identity → Domain → Manifestations)
+- [ ] Ensure identity page is accessible before upload (gate or prompt)
+- [ ] TypeScript: 0 errors | Vitest: 237+ passing

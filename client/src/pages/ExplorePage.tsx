@@ -9,7 +9,7 @@ import { getCache, setCache, CACHE_KEYS, TTL, setExploreCache, getExploreCache }
 import { usePlayer } from "@/contexts/PlayerContext";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
-import { Link, useLocation } from "wouter";
+import { Link, useLocation, useSearch } from "wouter";
 import { Search, Music, Play, Shuffle, Infinity, TrendingUp, Heart, DollarSign, Shield, SkipForward, ListPlus, ExternalLink, Crown, Rocket, Users, Bell, Sparkles, BookOpen, LayoutGrid, List } from "lucide-react";
 import { AiDisclosurePill } from "@/components/AiDisclosurePill";
 import { MediaAsset } from "@/components/MediaAsset";
@@ -354,14 +354,41 @@ function ExploreCard({
 
 export default function ExplorePage() {
   const { addAndPlay, playQueueAt, playNext, openNowPlayingPanel, currentTrackId, state: playerState } = usePlayer();
+  const search = useSearch();
   const [query, setQuery] = useState("");
   const [activeGenre, setActiveGenre] = useState("All");
-  const [mode, setMode] = useState<ExploreMode>("infinite");
+  const [mode, setMode] = useState<ExploreMode>(() => {
+    const p = new URLSearchParams(typeof window !== "undefined" ? window.location.search : "");
+    const s = p.get("sort");
+    if (s === "new") return "new";
+    if (s === "trending") return "trending";
+    return "infinite";
+  });
   // "store" = StoreTrackCard shelf rows; "classic" = creator-grouped pan-rows
   const [viewMode, setViewMode] = useState<"store" | "classic">("store");
-  const [contentType, setContentType] = useState<ContentType>(
-    () => (getCache<string>(CACHE_KEYS.EXPLORE_TAB) as ContentType) ?? "audio"
-  );
+  const [contentType, setContentType] = useState<ContentType>(() => {
+    const p = new URLSearchParams(typeof window !== "undefined" ? window.location.search : "");
+    const m = p.get("medium");
+    const mediumMap: Record<string, ContentType> = {
+      music: "audio", lyrics: "lyrics", manuscripts: "manuscript", comics: "comic",
+    };
+    if (m && mediumMap[m]) return mediumMap[m];
+    return (getCache<string>(CACHE_KEYS.EXPLORE_TAB) as ContentType) ?? "audio";
+  });
+
+  // Sync mode/contentType when URL search params change (e.g. ContextDrawer deep links)
+  useEffect(() => {
+    const p = new URLSearchParams(search);
+    const s = p.get("sort");
+    if (s === "new") setMode("new");
+    else if (s === "trending") setMode("trending");
+    const m = p.get("medium");
+    const mediumMap: Record<string, ContentType> = {
+      music: "audio", lyrics: "lyrics", manuscripts: "manuscript", comics: "comic",
+    };
+    if (m && mediumMap[m]) setContentType(mediumMap[m]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search]);
 
   // Infinite scroll state — accumulate pages client-side
   const [offset, setOffset] = useState(0);

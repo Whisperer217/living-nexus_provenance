@@ -178,9 +178,7 @@ function Router() {
                 <Route path="/batch-upload" component={BatchUploadPage} />
                 <Route path="/liked" component={LikedPage} />
                 <Route path="/archive" component={ArchivePage} />
-                {/* Archive sub-routes — prevent 404 on ContextDrawer/MobileNavDrawer links */}
-                <Route path="/archive/mine"><Redirect to="/archive" /></Route>
-                <Route path="/archive/ledger"><Redirect to="/witness-registry" /></Route>
+                {/* Archive sub-routes — handled in stability redirects section below */}
                 <Route path="/song/:id" component={SongDetailPage} />
                 <Route path="/book/:id" component={BookDetailPage} />
                 <Route path="/book/:id/studio" component={CreatorStudioPage} />
@@ -217,6 +215,7 @@ function Router() {
                 <Route path="/witness-flow/song/:songId" component={WitnessFlowPage} />
                 <Route path="/founders" component={FoundersPage} />
                 <Route path="/founder-era" component={FounderEraPage} />
+                <Route path="/settings"><Redirect to="/settings/billing" /></Route>
                 <Route path="/settings/billing" component={LivingArchiveBillingPage} />
                 <Route path="/prompt/:token" component={SharedPromptPage} />
                 <Route path="/terms/compare" component={TosComparePage} />

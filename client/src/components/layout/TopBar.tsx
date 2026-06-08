@@ -283,7 +283,7 @@ export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCoun
     }
     // Guides
     for (const g of acData.guides) {
-      items.push({ key: `g-${g.id}`, label: g.canonicalName, sub: g.archetypeType ?? "Guide", img: g.artworkUrl ?? null, href: `/guides/${g.id}`, isWid: !!g.widCode });
+      items.push({ key: `g-${g.id}`, label: g.canonicalName, sub: g.archetypeType ?? "Guide", img: g.artworkUrl ?? null, href: `/guide/${g.id}`, isWid: !!g.widCode });
     }
     // Sort alphabetically by label
     items.sort((a, b) => a.label.localeCompare(b.label));
