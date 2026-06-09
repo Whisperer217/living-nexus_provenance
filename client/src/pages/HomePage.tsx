@@ -709,7 +709,8 @@ const HERO_SLIDES = [
   },
   {
     id: 4,
-    img: "/manus-storage/distribution-vision_ffed3ea8.png",
+    img: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663123503966/CikRjojXDGlVnusc.png",
+    imgMirror: true, /* scaleX(-1) applied to background image for visual variety */
     tag: "We Are Distributing",
     headline: "Beyond the cloud —",
     accent: "into physical reality.",
@@ -754,7 +755,10 @@ function HeroCarousel({ isAuthenticated, getLoginUrl: getLogin }: { isAuthentica
             src={s.img}
             alt=""
             className="w-full h-full object-cover object-center"
-            style={{ filter: "saturate(1.2) contrast(1.08)" }}
+            style={{
+              filter: "saturate(1.2) contrast(1.08)",
+              transform: (s as any).imgMirror ? "scaleX(-1)" : undefined,
+            }}
           />
         </div>
       ))}

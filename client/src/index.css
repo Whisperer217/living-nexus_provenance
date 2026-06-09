@@ -355,11 +355,13 @@
     --player-height: 64px;                 /* MiniBar height */
     --bottom-stack: calc(var(--nav-total) + var(--player-height)); /* total reserved bottom */
     --card-pan-w: 160px;                   /* Pan-row card width — desktop default */
+    --card-img-h: 200px;                   /* Pan-row card image height — uniform across all card types */
   }
   /* Mobile: wider cards that fill viewport better (~2.3 cards visible per row) */
   @media (max-width: 639px) {
     :root {
       --card-pan-w: clamp(140px, 42vw, 170px);
+      --card-img-h: 190px;               /* Slightly shorter on mobile for better proportions */
     }
   }
 
@@ -1476,7 +1478,9 @@ input[type="range"].volume-slider-theater::-moz-range-thumb {
   width: 100%;
   overflow: hidden;
   border-radius: 0.75rem; /* rounded-xl — consistent across all cards */
-  max-height: 200px;     /* unified cap — matches pan-row and grid cards site-wide */
+  height: var(--card-img-h, 200px); /* fixed height — all pan-row cards same size */
+  min-height: var(--card-img-h, 200px);
+  max-height: var(--card-img-h, 200px);
   border: 1px solid rgba(196, 154, 40, 0.15);
 }
 

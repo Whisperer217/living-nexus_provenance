@@ -4957,3 +4957,10 @@
 - [x] Add overflow-hidden to CreatorProfilePage Projects section
 - [x] TypeScript 0 errors
 - [x] Vitest 237/237 passing
+
+## Hero Carousel + Card Height Fixes
+- [x] Remove eMastered distribution slide image, replace with mirrored slide 1 image (scaleX -1)
+- [x] Add --card-img-h CSS variable (200px desktop, 190px mobile) for uniform pan-row card heights
+- [x] Update prov-card-img-wrap to use fixed height/min-height/max-height via --card-img-h
+- [x] TypeScript 0 errors
+- [x] Vitest 237/237 passing
