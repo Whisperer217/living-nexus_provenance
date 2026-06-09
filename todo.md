@@ -4848,3 +4848,27 @@
 - [x] Import ManifestationShelf and StandaloneShelf into CreatorProfilePage
 - [x] Preserve songs.length === 0 empty state
 - [x] TypeScript: 0 errors | Vitest: 237/237 passing
+
+## Phase 194.3: Creator Domain Command Center
+- [ ] Create /domain route and CreatorDomainPage with sidebar nav (Identity, Domain Layout, Shelves, Manifestations, Testimony, Analytics, Public Domain)
+- [ ] Add Edit/Preview toggle that switches between management view and live CreatorProfilePage embed
+- [ ] Add persistent "View Public Domain" button (opens /creator/:id in new tab) visible in all sections
+- [ ] Wire "My Domain" link into ProfilePage header action bar
+- [ ] Wire "My Domain" link into DashboardPage
+- [ ] Wire "My Domain" link into DashboardLayout sidebar nav
+- [ ] TypeScript: 0 errors | Vitest: passing
+
+## Phase 194.3: Creator Domain Command Center
+- [x] Build CreatorDomainPage (/domain) with 7-section sidebar nav
+- [x] Overview section: stats, recent works, quick links
+- [x] Identity section: links to profile and identity editor
+- [x] Shelves section: links to ManifestationShelf (Phase 194.2)
+- [x] Works section: full works list with play/manage actions
+- [x] Testimony section: testimony list
+- [x] Analytics section: play/witness/tip stats
+- [x] Public Domain section: Edit/Preview toggle + View Public Domain link
+- [x] Add /domain route to App.tsx
+- [x] Add "My Domain" button to ProfilePage header action bar
+- [x] Add "My Domain" as first item in ContextDrawer profile panel
+- [x] Add "My Domain" as first item in MobileNavDrawer My Account section
+- [x] Add "My Domain" button to DashboardPage action bar

@@ -16,7 +16,7 @@ import {
   Music, Upload, DollarSign, Shield, Trash2, ExternalLink,
   BarChart2, CheckCircle, AlertCircle, CheckCircle2, Download, Play, Activity, MessageCircle, Zap, Gift,
   Library, RefreshCw, FileArchive, PackageOpen, Camera, X,
-  TrendingUp, Heart, LineChart, Pencil, Fingerprint, BookOpen, FileText, Image, Bell
+  TrendingUp, Heart, LineChart, Pencil, Fingerprint, BookOpen, FileText, Image, Bell, LayoutGrid
 } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell } from "recharts";
 
@@ -317,6 +317,11 @@ export default function DashboardPage() {
 
         {/* Action buttons */}
         <div className="flex items-center justify-end mb-8 gap-2">
+            <Link href="/domain">
+              <Button size="sm" style={{ background: "rgba(196,154,40,0.12)", border: "1px solid rgba(196,154,40,0.3)", color: "var(--ln-gold)" }}>
+                <LayoutGrid className="w-3 h-3 mr-1" /> My Domain
+              </Button>
+            </Link>
             <Link href={`/creator/${user?.id}`}>
               <Button size="sm" variant="outline" style={{ borderColor: "var(--ln-iron)", color: "var(--ln-parchment)" }}>
                 <ExternalLink className="w-3 h-3 mr-1" /> View Profile

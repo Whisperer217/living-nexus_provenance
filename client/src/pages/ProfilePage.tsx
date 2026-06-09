@@ -16,7 +16,7 @@ import {
   CheckCircle, AlertCircle, Zap, LogOut,
   Fingerprint, ScrollText, Activity, Upload, Star, Layers, Eye, Users, Shield,
   Download, Trash2, AlertTriangle, Sun, Moon,
-  FolderOpen, Plus, ChevronDown, ChevronRight, GripVertical,
+  FolderOpen, Plus, ChevronDown, ChevronRight, GripVertical, LayoutGrid,
 } from "lucide-react";
 import { AddToCollectionButton } from "@/components/AddToCollectionModal";
 import { toast } from "sonner";
@@ -736,6 +736,17 @@ export default function ProfilePage() {
               </div>
               {/* Actions */}
               <div className="flex items-center gap-1.5">
+                {/* My Domain — primary CTA */}
+                <Link href="/domain">
+                  <button
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all hover:opacity-90"
+                    style={{ background: "rgba(196,154,40,0.12)", border: "1px solid rgba(196,154,40,0.3)", color: "var(--ln-gold)" }}
+                    title="Open Creator Domain Command Center"
+                  >
+                    <LayoutGrid size={13} />
+                    My Domain
+                  </button>
+                </Link>
                 <button
                   onClick={copyProfileLink}
                   className="w-9 h-9 rounded-lg flex items-center justify-center transition-colors"

@@ -19,7 +19,7 @@ import {
   Music, FileText, BookOpen, Image, Users,
   Star,
   Settings,
-  Shield, BookMarked, LayoutDashboard,
+  Shield, BookMarked, LayoutDashboard, LayoutGrid,
 } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
@@ -75,6 +75,7 @@ const ALL_SECTIONS: NavSection[] = [
   {
     heading: "My Account",
     links: [
+      { icon: <LayoutGrid size={14} />, label: "My Domain", path: "/domain", authOnly: true, gold: true, description: "Creator Domain Command Center" },
       { icon: <User size={14} />, label: "My Profile", path: "/profile", authOnly: true, description: "Public creator page" },
       { icon: <Archive size={14} />, label: "My Archive", path: "/archive", authOnly: true, description: "All your registered works" },
       { icon: <LayoutDashboard size={14} />, label: "Dashboard", path: "/dashboard", authOnly: true, description: "Analytics & slots" },

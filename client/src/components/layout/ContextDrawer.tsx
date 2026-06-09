@@ -109,6 +109,7 @@ const PANELS: Record<NavMode, ModePanel> = {
     sections: [
       {
         links: [
+          { icon: <LayoutGrid size={14} />, label: "My Domain", path: "/domain", description: "Creator Domain Command Center", authOnly: true, gold: true },
           { icon: <User size={14} />, label: "My Profile", path: "/profile", description: "Public creator page", authOnly: true },
           { icon: <Music size={14} />, label: "My Works", path: "/profile?tab=works", description: "All registered works", authOnly: true },
           { icon: <FolderOpen size={14} />, label: "Collections", path: "/profile?tab=collections", description: "Curated playlists", authOnly: true },
