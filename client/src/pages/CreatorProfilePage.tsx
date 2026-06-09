@@ -34,6 +34,7 @@ import { FeaturedBookModel } from "@/components/reader/FeaturedBookModel";
 import { HorizontalBookReader, type BookPage } from "@/components/reader/HorizontalBookReader";
 import { DomainRenderer } from "@/components/domain/DomainRenderer";
 import { DomainEditor } from "@/components/domain/DomainEditor";
+import { CreatorIdentitySection } from "@/components/CreatorIdentitySection";
 import { LayoutGrid } from "lucide-react";
 
 // ─── Context Menu ─────────────────────────────────────────────────────────────
@@ -1378,6 +1379,10 @@ export default function CreatorProfilePage() {
       </div>{/* end profile header bg */}
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6">
+        {/* ── Creator Identity Section ── */}
+        <div className="pt-6">
+          <CreatorIdentitySection creator={creator} isOwner={isOwner} />
+        </div>
         {/* ── Domain Editor toggle (owner only) ── */}
         {isOwner && (
           <div className="flex justify-end pt-4 pb-2">

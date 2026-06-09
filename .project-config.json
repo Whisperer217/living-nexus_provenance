@@ -12,10 +12,10 @@
   "experiments": null,
   "git_remote": {
     "repo_url": "s3://vida-prod-gitrepo/webdev-git/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr",
-    "access_key_id": "ASIAZV3A2ECZAQ7QON3S",
-    "secret_access_key": "UfzmDAsFgpHYazQtD9QbOJ3zk6sC8B3KFYKTI/il",
-    "session_token": "IQoJb3JpZ2luX2VjEDMaCXVzLWVhc3QtMSJHMEUCICSVpfeiaxDtGYtTHsk+2Wq5C6yQpfWEyq5ZGAr5WEeYAiEAxLENEG4CKD3W/ytdvYY8aLcJBKXAwC7l08DNIQ4FGdQq/gMI+///////////ARAEGgw2NjUzODYwOTg4NjYiDFpJq3VXsqz5xEm4/SrSA/7480gWot/pc6759+sefFjSIIOVi/1Y/KI0FLiX6SH0GdynXcZyIs/kpr47llH7EhWKvhz/Ym+zmxPS+qFJH33IZEOwlxMZgNeCXFy6wFtwLTm76W8u0wQHJog8Aut5AC026Tmq2TsDKZCHkSjcMmkWsTNBnaocI+zujnQ/1gpS1bggoVT+9ymvkD99kDkHkktI0MNKg9V+Bvwuji4QFZ1OBLCOucEd4xsLOyIFWEKKsxqc5TNt+5WoNpk+9jqY1UM3Q9rj8tpPvG6wLV5zAopeCs9N++zJUnmNvV9WIBkV6hBzOg+kCbhhFLmYNVqpidLSpDuFlOhGtTewiUKcvxcOJ271enzOyIeDhArq7zJvJ4pazlRn5ii1mQY4tUN4DtNmeJAzrDFExYGSapKs7AVaOukE+AGu+Vtr9AHIrNt66V6xkvD/UoFVjw6mA/41iKzaGio/suZPh4Uw23YEkrhrNTVJzC7f8dPuu8Mfx9B+XhKYLy9irQar/pMm3LgzTIz3JAQUhX/cEoEgJlLynO306mFJ/VPPL+xNV9tri44wvGgaqJfBF+QiLbSXNGMKw353q1U7PwBuLwRA9PpZCApiuvxpkpK4bgLv9pS2kGD9fdEwuNC50AY6nQFR+RIPgebcNE+IEJ1+Ui3VMBqm0myBvRLouznph6dZdVekT1FIZUcI+7jzP0XCaN+NJpoCo8W1ldFkq03GSZBWEvaAjLVDHE8CxugwumPy+j+e5Ba/psqDbv/8mTbX7J7AZ/QmkMG5D+Un+gXsk/5ONcijV8CZreZvjCeCQj9nCKgsT2VBZNf+pNYk7Qy9N7p38jDJyEKyinTsB+JZ",
-    "expiration": "2026-05-21T14:04:40.000Z"
+    "access_key_id": "ASIAZV3A2ECZJVXJY6NG",
+    "secret_access_key": "zWdlOf4GfU5GkhTuo18VkX4LHnjZaOeLt8e09y+H",
+    "session_token": "IQoJb3JpZ2luX2VjEP7//////////wEaCXVzLWVhc3QtMSJIMEYCIQDhSLsUHNybrAY9Daq2en6oqnPRrepthhmdtCEPPyu6xgIhAJK7QnxrIWcXgY2/SqZrWjcrd0riMbTCCzSMarii8dDMKv4DCMf//////////wEQBBoMNjY1Mzg2MDk4ODY2Igw1UEou5oQr3eivfO8q0gNVvsWQqA+hxmwAI4YU8yVwItEie0QN+cc97pOfFTuQ6bFXPY/Kf30fypMp1KvLExCRZYDQFaAyEm3XPo5noqMcv6LJS7DZ/KNG9GNQnbtWNuoJzXm/1xL8pUjM7uBntGHZSXljClWEASdOiZxBQk+AthHuPcLAjmQKprSSgwaOsA7mPktG1DbmCAYn31cUR7VVPiKYK96gJobuQ+G59u7WepaOLH2fCjELeuUjwix8Bp6+P9RHW/bv0qL3dOb8h3SuhcBlegrONWQLu5xjNXcE2i2E7TDHclOmijJJ9VHT7JjH+Z7XKUACx9eAj9ZmyZIzcBaqAl5dRiYrjP+JUUeCrOCAs4ZP1z682uEESbPzp/1LnXvVhLZdNCVvmkYCT7ROWHaLR4QPS51MTCtttiMjSbCs9yYZ9eZ8xbj03kySBpbwuunlsBfzOAcZJ/Nt+ctBQHLIsxUY54fcp5UcWuP3PTs26YxzkPf6JI6IAKvf3HQkn15yCLpEOmbr+FMs1dT1zbaztcKIhltOXQuWYupwzQyLjSU3IiW03MWdIJgV1T0h5cLi94u+sTWs3ujsXqOfR/qYcDnqmLcTc9sHsiexKnsHUISB/NiBBoa6/twAwSM2MN3MntEGOpwBoEhSmDF38KvpcoSnfp5kmcOFS81l4/l7FgOxTUICf5FXxDjyUFfMq/RcuEd4yaML7AvhzRRgqGfRtVoWms0273CYhm0d8mzo+DgOiekjospce6PS24YpjxZPgjm2gH7OYFavYROKI9qlCz+q937OmwDDuWmAYfIuweDmN4i0xyi37iSX4ozwwLB11isnoIqVWqR9S/h+akEZ8TcB",
+    "expiration": "2026-06-09T17:36:29.000Z"
   },
   "name": "living-nexus",
   "path": "/home/ubuntu/living-nexus",
