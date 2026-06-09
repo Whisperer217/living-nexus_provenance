@@ -316,6 +316,10 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     const onCanPlay = () => setState(s => ({ ...s, isReady: true }));
 
     const onEnded = () => {
+      // Read current state snapshot synchronously via a ref-based approach:
+      // We use a functional setState to read state, but we set audio.src DIRECTLY
+      // here (outside setState) to avoid the React 19 concurrent-mode race where
+      // pendingAudioAction.current might be consumed before setState commits.
       setState(s => {
         // Navigate strictly within the frozen snapshot
         const tracks = s.tracks.filter(t => !!t.audioUrl);
@@ -341,7 +345,11 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
         }
         const t = tracks[next];
         if (t?.audioUrl) {
-          pendingAudioAction.current = { src: safeAudioUrl(t.audioUrl), play: true };
+          // Set audio.src directly inside setState callback — this is synchronous
+          // and avoids the deferred-ref race condition in React 19 concurrent mode.
+          audio.src = safeAudioUrl(t.audioUrl);
+          audio.load();
+          audio.play().catch(() => {});
         }
         return { ...s, currentIdx: next, isPlaying: !!t?.audioUrl, isReady: false, duration: 0, currentTime: 0 };
       });
@@ -357,7 +365,9 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
         }
         const t = tracks[next];
         if (t?.audioUrl) {
-          pendingAudioAction.current = { src: safeAudioUrl(t.audioUrl), play: true };
+          audio.src = safeAudioUrl(t.audioUrl);
+          audio.load();
+          audio.play().catch(() => {});
         }
         return { ...s, currentIdx: next, isPlaying: !!t?.audioUrl, isReady: false, duration: 0, currentTime: 0 };
       });

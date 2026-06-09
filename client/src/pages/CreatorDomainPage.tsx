@@ -349,16 +349,7 @@ export default function CreatorDomainPage() {
                       Your Creator Domain — the primary object of your presence
                     </p>
                   </div>
-                  <a
-                    href={publicDomainUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all hover:opacity-90"
-                    style={{ background: "var(--ln-gold)", color: "#000" }}
-                  >
-                    <Globe className="w-4 h-4" />
-                    View Public Domain
-                  </a>
+
                 </div>
 
                 {/* Stats grid */}

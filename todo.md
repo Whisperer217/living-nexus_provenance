@@ -4926,3 +4926,11 @@
 - [x] Upgrade getCommentsBySong to leftJoin users and resolve authorName from userId when stored value is null/Anonymous
 - [x] Remove authorName from all client-side comment mutation calls (SongDetailPage, PlayerBar, TheaterPlayer, MobilePlayerLayer, MobilePlayerPanel, BookDetailPage)
 - [x] TypeScript: 0 errors | Vitest: 237/237 passing
+
+## Community Feedback Fixes (Jun 9 2026 — Slimdoggy)
+- [x] Remove duplicate "View Public Domain" button from Creator Domain Overview section (header button is canonical)
+- [x] Fix auto-advance to next track: set audio.src directly inside onEnded setState callback to avoid React 19 concurrent-mode race with pendingAudioAction ref
+- [x] Fix same race in onError handler for consistency
+- [x] Fix GuideCard field names: artworkUrl (not coverArtUrl), widCode (not wid)
+- [x] Add Living Nexus Canon stock guides section to Guide Directory (The Witness, Conductor, Archivist, Sovereign, Cipher)
+- [x] Guide Directory now shows two sections: LN Canon + Creator Guides, both searchable
