@@ -35,6 +35,7 @@ import { HorizontalBookReader, type BookPage } from "@/components/reader/Horizon
 import { DomainRenderer } from "@/components/domain/DomainRenderer";
 import { DomainEditor } from "@/components/domain/DomainEditor";
 import { CreatorIdentitySection } from "@/components/CreatorIdentitySection";
+import { ManifestationShelf, StandaloneShelf, type ShelfTrack } from "@/components/ManifestationShelf";
 import { LayoutGrid } from "lucide-react";
 
 // ─── Context Menu ─────────────────────────────────────────────────────────────
@@ -652,6 +653,53 @@ export default function CreatorProfilePage() {
     }
     playMutation.mutate({ songId: song.id });
     // Open the Now Playing side panel immediately on mobile
+    openNowPlayingPanel();
+  };
+
+  // ── Shelf play handler: maps ShelfTrack[] → player queue, calls playQueueAt ──
+  const handleShelfPlay = (track: ShelfTrack, albumTracks: ShelfTrack[]) => {
+    if (!track.fileUrl) { toast.error("No audio file available"); return; }
+    const playableTracks = albumTracks.filter((t) => !!t.fileUrl);
+    const artistName = data?.creator?.artistHandle || data?.creator?.name || "Unknown";
+    if (playableTracks.length > 1) {
+      const queue = playableTracks.map((t) => ({
+        id: String(t.id),
+        title: t.title,
+        artist: artistName,
+        genre: t.genre || "",
+        audioUrl: t.fileUrl!,
+        artUrl: t.coverArtUrl || undefined,
+        witnessId: t.witnessId || undefined,
+        aiDisclosure: (data?.creator as any)?.aiDisclosure || undefined,
+        creatorId: (data?.creator as any)?.id ?? undefined,
+        coverPositionX: t.coverPositionX ?? 50,
+        coverPositionY: t.coverPositionY ?? 50,
+        visualReady: false,
+        autoVideoUrl: undefined,
+        creatorRole: (data?.creator as any)?.role ?? undefined,
+        contentType: ((t.contentType ?? "audio") as "audio" | "lyrics" | "manuscript" | "comic"),
+      }));
+      const startIdx = queue.findIndex((q) => q.id === String(track.id));
+      playQueueAt(queue, startIdx >= 0 ? startIdx : 0, "CREATOR_PAGE");
+    } else {
+      addAndPlay({
+        id: String(track.id),
+        title: track.title,
+        artist: artistName,
+        genre: track.genre || "",
+        artUrl: track.coverArtUrl || undefined,
+        audioUrl: track.fileUrl || undefined,
+        aiDisclosure: (data?.creator as any)?.aiDisclosure || undefined,
+        creatorId: (data?.creator as any)?.id ?? undefined,
+        coverPositionX: track.coverPositionX ?? 50,
+        coverPositionY: track.coverPositionY ?? 50,
+        visualReady: false,
+        autoVideoUrl: undefined,
+        creatorRole: (data?.creator as any)?.role ?? undefined,
+        contentType: ((track.contentType ?? "audio") as "audio" | "lyrics" | "manuscript" | "comic"),
+      });
+    }
+    playMutation.mutate({ songId: track.id });
     openNowPlayingPanel();
   };
 
@@ -1556,7 +1604,7 @@ export default function CreatorProfilePage() {
           </section>
         )}
 
-        {/* ── Albums (grouped by albumName) ── */}
+        {/* ── Album Shelves (ManifestationShelf) ── */}
         {(() => {
           // Build albumMap keyed by albumName, sorted by trackOrder within each album
           const albumMap = new Map<string, any[]>();
@@ -1566,7 +1614,6 @@ export default function CreatorProfilePage() {
               albumMap.get(song.albumName)!.push(song);
             }
           });
-          // Sort each album's tracks by trackOrder (preserves batch upload sequence)
           albumMap.forEach((albumSongs) => {
             albumSongs.sort((a: any, b: any) => (a.trackOrder ?? 0) - (b.trackOrder ?? 0));
           });
@@ -1584,67 +1631,48 @@ export default function CreatorProfilePage() {
               <h2 className="text-base font-bold mb-4" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>Albums</h2>
               <div className="space-y-5">
                 {albumEntries.map(([albumName, albumSongs]) => {
-                  // Prefer the collection's own cover art; fall back to first track's cover
                   const collection = collectionByAlbum.get(albumName);
                   const albumCoverUrl = collection?.coverArtUrl || albumSongs[0]?.coverArtUrl;
                   const albumCoverX = collection?.coverPositionX ?? albumSongs[0]?.coverPositionX ?? 50;
                   const albumCoverY = collection?.coverPositionY ?? albumSongs[0]?.coverPositionY ?? 50;
+                  // Infer medium from first track's contentType
+                  const firstContentType = albumSongs[0]?.contentType ?? "audio";
+                  const medium: "music" | "books" | "comics" | "manuscripts" | "artifacts" | "merch" =
+                    firstContentType === "lyrics" ? "music"
+                    : firstContentType === "manuscript" ? "manuscripts"
+                    : firstContentType === "comic" ? "comics"
+                    : "music";
+                  const shelfAlbum = {
+                    name: albumName,
+                    coverArtUrl: albumCoverUrl ?? undefined,
+                    coverPositionX: albumCoverX,
+                    coverPositionY: albumCoverY,
+                    medium,
+                    tracks: albumSongs.map((s: any) => ({
+                      id: s.id,
+                      title: s.title,
+                      genre: s.genre ?? null,
+                      coverArtUrl: s.coverArtUrl ?? null,
+                      coverPositionX: s.coverPositionX ?? null,
+                      coverPositionY: s.coverPositionY ?? null,
+                      artAspectRatio: s.artAspectRatio ?? null,
+                      durationSeconds: s.durationSeconds ?? null,
+                      witnessId: s.witnessId ?? null,
+                      fileUrl: s.fileUrl ?? null,
+                      aiConsent: s.aiConsent ?? null,
+                      contentType: s.contentType ?? null,
+                      trackOrder: s.trackOrder ?? null,
+                    })),
+                  };
                   return (
-                  <div key={albumName} className="rounded-xl overflow-hidden" style={{ background: "var(--ln-coal)", border: "1px solid #C49A28" }}>
-                    <div className="flex items-center gap-4 p-4" style={{ borderBottom: "1px solid rgba(196,154,40,0.08)" }}>
-                      {albumCoverUrl ? (
-                        <img src={albumCoverUrl} alt={albumName} className="w-14 h-14 rounded-lg object-cover flex-shrink-0" style={{ objectPosition: `${albumCoverX}% ${albumCoverY}%` }} />
-                      ) : (
-                        <div className="w-14 h-14 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "rgba(196,154,40,0.08)" }}>
-                          <Music className="w-6 h-6" style={{ color: "var(--ln-gold)" }} />
-                        </div>
-                      )}
-                      <div>
-                        <p className="font-bold text-sm" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>{albumName}</p>
-                        <p className="text-xs mt-0.5" style={{ color: "var(--ln-smoke)" }}>{albumSongs.length} track{albumSongs.length !== 1 ? "s" : ""}</p>
-                      </div>
-                    </div>
-                    <div className="space-y-0.5 p-2">
-                      {albumSongs.map((song: any, idx: number) => (
-                        <SongRow
-                          key={song.id}
-                          song={song}
-                          index={idx}
-                          isPlaying={playingId === song.id}
-                          onPlay={() => {
-                            // Build queue from ONLY this album's tracks in sorted order
-                            const albumQueue = albumSongs
-                              .filter((s: any) => !!s.fileUrl)
-                              .map((s: any) => ({
-                                id: String(s.id),
-                                title: s.title,
-                                artist: data?.creator?.artistHandle || data?.creator?.name || "Unknown",
-                                genre: s.genre || "",
-                                audioUrl: s.fileUrl!,
-                                artUrl: s.coverArtUrl || undefined,
-                                witnessId: s.witnessId || undefined,
-                                coverPositionX: s.coverPositionX ?? 50,
-                                coverPositionY: s.coverPositionY ?? 50,
-                                visualReady: s.visualReady ?? false,
-                                autoVideoUrl: s.autoVideoUrl ?? undefined,
-                                creatorId: (data?.creator as any)?.id ?? undefined,
-                                creatorRole: (data?.creator as any)?.role ?? undefined,
-                                contentType: ((s as any).contentType ?? "audio") as "audio" | "lyrics" | "manuscript" | "comic",
-                              }));
-                            if (albumQueue.length > 1) {
-                              const startIdx = albumQueue.findIndex((t: any) => t.id === String(song.id));
-                              playQueueAt(albumQueue, startIdx >= 0 ? startIdx : 0, "CREATOR_PAGE");
-                            } else {
-                              handlePlay(song);
-                            }
-                            openNowPlayingPanel();
-                          }}
-                          isOwner={isOwner}
-                          onDelete={(id) => deleteMutation.mutate({ songId: id })}
-                        />
-                      ))}
-                    </div>
-                  </div>
+                    <ManifestationShelf
+                      key={albumName}
+                      album={shelfAlbum}
+                      playingId={playingId}
+                      onPlayTrack={(track, albumTracks) => handleShelfPlay(track, albumTracks)}
+                      isOwner={isOwner}
+                      onDeleteTrack={(id) => deleteMutation.mutate({ songId: id })}
+                    />
                   );
                 })}
               </div>
@@ -1692,27 +1720,35 @@ export default function CreatorProfilePage() {
             </div>
           </section>
         )}
-        {/* ── Full Song List (all songs in compact row format) ── */}
-        {songs.length > 0 && (
-          <section className="py-4 pb-32">
-            <h2 className="text-base font-bold mb-3" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>
-              All Songs
-            </h2>
-            <div className="space-y-0.5">
-              {songs.map((song: any, idx: number) => (
-                <SongRow
-                  key={song.id}
-                  song={song}
-                  index={idx}
-                  isPlaying={playingId === song.id}
-                  onPlay={() => handlePlay(song)}
-                  isOwner={isOwner}
-                  onDelete={(id) => deleteMutation.mutate({ songId: id })}
-                />
-              ))}
-            </div>
-          </section>
-        )}
+        {/* ── Standalone Works (songs without an album) ── */}
+        {(() => {
+          const standaloneSongs = songs.filter((s: any) => !s.albumName);
+          if (!standaloneSongs.length) return null;
+          const standaloneTracks = standaloneSongs.map((s: any) => ({
+            id: s.id,
+            title: s.title,
+            genre: s.genre ?? null,
+            coverArtUrl: s.coverArtUrl ?? null,
+            coverPositionX: s.coverPositionX ?? null,
+            coverPositionY: s.coverPositionY ?? null,
+            artAspectRatio: s.artAspectRatio ?? null,
+            durationSeconds: s.durationSeconds ?? null,
+            witnessId: s.witnessId ?? null,
+            fileUrl: s.fileUrl ?? null,
+            aiConsent: s.aiConsent ?? null,
+            contentType: s.contentType ?? null,
+            trackOrder: s.trackOrder ?? null,
+          }));
+          return (
+            <section className="py-4 pb-32">
+              <StandaloneShelf
+                tracks={standaloneTracks}
+                playingId={playingId}
+                onPlayTrack={(track, allTracks) => handleShelfPlay(track, allTracks)}
+              />
+            </section>
+          );
+        })()}
 
         {songs.length === 0 && (
           <div className="text-center py-24">

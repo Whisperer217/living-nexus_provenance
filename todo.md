@@ -4841,3 +4841,10 @@
 - [x] Add empty state: "Creator identity has not yet been completed" with owner link to /profile?tab=identity
 - [x] Verify identity section renders before manifestations on both desktop and mobile
 - [x] TypeScript: 0 errors | Vitest: 237/237 passing
+## Phase 194.2: Shelf Manifestation Layout
+- [x] Replace Albums IIFE section in CreatorProfilePage with ManifestationShelf components
+- [x] Replace Full Song List section in CreatorProfilePage with StandaloneShelf for non-album songs
+- [x] Add handleShelfPlay helper that maps ShelfTrack → player queue and calls playQueueAt
+- [x] Import ManifestationShelf and StandaloneShelf into CreatorProfilePage
+- [x] Preserve songs.length === 0 empty state
+- [x] TypeScript: 0 errors | Vitest: 237/237 passing
