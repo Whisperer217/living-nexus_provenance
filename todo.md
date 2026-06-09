@@ -4902,3 +4902,12 @@
 - [x] Wire CinematicModeEngine into MobilePlayerLayer (mobile)
 - [x] Remove old CinematicLayer function from MobilePlayerLayer
 - [x] TypeScript: 0 errors | Vitest: 237/237 passing
+
+## Phase 194.2 (Gesture): Gesture-Based Manifestation Navigation
+- [x] Build useManifestationGesture hook (desktop drag, double-click, hold; mobile swipe, long-press, swipe-up)
+- [x] Build ManifestationQuickView panel (cover, creator, WID, provenance, witness count, comments)
+- [x] Build CreatorDomainEntry animation (swipe-up expand + creator header fade-in)
+- [x] Wire gesture layer into PlayerBar (desktop: drag next/prev, double-click witness, hold Quick View)
+- [x] Wire gesture layer into MobilePlayerLayer (swipe next/prev, long-press Quick View, swipe-up Creator Domain)
+- [x] TypeScript check 0 errors
+- [x] Vitest all passing

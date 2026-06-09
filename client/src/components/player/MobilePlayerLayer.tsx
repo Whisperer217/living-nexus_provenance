@@ -22,6 +22,7 @@ import React, { useState, useRef, useCallback, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { usePlayer, type Track } from "@/contexts/PlayerContext";
 import { CinematicModeEngine } from "@/components/player/CinematicModeEngine";
+import { ManifestationGestureWrapper } from "@/components/player/ManifestationGestureLayer";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useLocation } from "wouter";
@@ -1284,7 +1285,15 @@ export default function MobilePlayerLayer() {
 
       {/* Artwork — square, centered, pinch-to-zoom */}
       <div className="flex-shrink-0 px-8 pb-5">
-        <div
+        <ManifestationGestureWrapper
+          track={currentTrack}
+          songId={currentSongId}
+          isLiked={isLiked}
+          onNext={nextTrack}
+          onPrev={prevTrack}
+          onWitness={handleToggleLike}
+          isMobile={true}
+          enableDomainEntry={true}
           className="w-full rounded-2xl relative"
           style={{
             aspectRatio: "1 / 1",
@@ -1292,6 +1301,9 @@ export default function MobilePlayerLayer() {
             overflow: artZoomed ? "visible" : "hidden",
             zIndex: artZoomed ? 20 : "auto",
           }}
+        >
+        <div
+          className="w-full h-full"
           onTouchStart={onArtTouchStart}
           onTouchMove={onArtTouchMove}
           onTouchEnd={onArtTouchEnd}
@@ -1335,6 +1347,7 @@ export default function MobilePlayerLayer() {
             />
           )}
         </div>
+        </ManifestationGestureWrapper>
       </div>
 
       {/* Track info */}

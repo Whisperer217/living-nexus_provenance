@@ -23,6 +23,7 @@ import { createPortal } from "react-dom";
 import PlayerTipModal from "./PlayerTipModal";
 import { MediaAsset } from "@/components/MediaAsset";
 import { CinematicModeEngine } from "@/components/player/CinematicModeEngine";
+import { ManifestationGestureWrapper } from "@/components/player/ManifestationGestureLayer";
 
 function fmtTime(s: number) {
   if (!s || isNaN(s) || !isFinite(s)) return "0:00";
@@ -339,7 +340,17 @@ export default function PlayerBar() {
         <div className="flex h-full overflow-hidden">
 
           {/* LEFT — Art / Video (256px wide) — MRS player mode */}
-          <div className="w-64 h-full flex-shrink-0 relative overflow-hidden">
+          <ManifestationGestureWrapper
+            track={currentTrack}
+            songId={currentSongId}
+            isLiked={isLiked}
+            onNext={nextTrack}
+            onPrev={prevTrack}
+            onWitness={() => { if (user && currentSongId && !isNaN(currentSongId)) toggleLikeMutation.mutate({ songId: currentSongId }); }}
+            isDesktop={true}
+            enableDomainEntry={true}
+            className="w-64 h-full flex-shrink-0 relative overflow-hidden"
+          >
             <MediaAsset
               src={currentTrack.artUrl}
               alt={currentTrack.title}
@@ -370,13 +381,12 @@ export default function PlayerBar() {
                 ✓ Video WID
               </button>
             )}
-            {/* Gold gradient fade to center */}
+                        {/* Gold gradient fade to center */}
             <div
               className="absolute inset-0 pointer-events-none z-10"
               style={{ background: "linear-gradient(to right, transparent 60%, #000000)" }}
             />
-          </div>
-
+          </ManifestationGestureWrapper>
           {/* CENTER — Track info + controls */}
           <div className="flex-1 flex flex-col justify-between px-5 py-3 min-w-0 overflow-hidden">
             {/* Track info */}
