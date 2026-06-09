@@ -510,10 +510,12 @@ function HorizontalTrackGrid({
         {row1.map((track, idx) => (
           <div key={track.id} className="flex-shrink-0" style={{ width: "var(--card-pan-w)" }}>
             {(track.contentType === "manuscript" || track.contentType === "comic") ? (
-              <BookCard
-                item={{ song: { id: track.songId ?? parseInt(track.id, 10), title: track.title, coverArtUrl: track.artUrl, witnessId: track.witnessId, genre: track.genre, contentType: track.contentType }, creator: { id: track.creatorId, name: track.artist, artistHandle: track.artistHandle } }}
-                {...getPrefetch(track)}
-              />
+              <div style={{ height: "var(--card-img-h, 200px)", overflow: "hidden", borderRadius: "0.75rem" }}>
+                <BookCard
+                  item={{ song: { id: track.songId ?? parseInt(track.id, 10), title: track.title, coverArtUrl: track.artUrl, witnessId: track.witnessId, genre: track.genre, contentType: track.contentType }, creator: { id: track.creatorId, name: track.artist, artistHandle: track.artistHandle } }}
+                  {...getPrefetch(track)}
+                />
+              </div>
             ) : (
               <TrackCard track={track} index={idx} onTip={onTip} onPlay={handleSectionPlay} {...getPrefetch(track)} />
             )}
@@ -530,10 +532,12 @@ function HorizontalTrackGrid({
           {row2.map((track, idx) => (
             <div key={track.id} className="flex-shrink-0" style={{ width: "var(--card-pan-w)" }}>
               {(track.contentType === "manuscript" || track.contentType === "comic") ? (
-                <BookCard
-                  item={{ song: { id: track.songId ?? parseInt(track.id, 10), title: track.title, coverArtUrl: track.artUrl, witnessId: track.witnessId, genre: track.genre, contentType: track.contentType }, creator: { id: track.creatorId, name: track.artist, artistHandle: track.artistHandle } }}
-                  {...getPrefetch(track)}
-                />
+                <div style={{ height: "var(--card-img-h, 200px)", overflow: "hidden", borderRadius: "0.75rem" }}>
+                  <BookCard
+                    item={{ song: { id: track.songId ?? parseInt(track.id, 10), title: track.title, coverArtUrl: track.artUrl, witnessId: track.witnessId, genre: track.genre, contentType: track.contentType }, creator: { id: track.creatorId, name: track.artist, artistHandle: track.artistHandle } }}
+                    {...getPrefetch(track)}
+                  />
+                </div>
               ) : (
               <TrackCard track={track} index={12 + idx} onTip={onTip} onPlay={handleSectionPlay} {...getPrefetch(track)} />
             )}

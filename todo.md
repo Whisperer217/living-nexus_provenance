@@ -4971,3 +4971,8 @@
 - [x] Add click-outside handler to ModeSelector so it closes on tap elsewhere
 - [x] TypeScript 0 errors
 - [x] Vitest 237/237 passing
+
+## Pan Row Card Height Fix (Phase 194.X)
+- [x] Wrap BookCard in fixed-height container (var(--card-img-h)) in HorizontalTrackGrid rows 1 and 2 — prevents comic/manuscript cards from being taller than audio TrackCards
+- [x] Remove paddingBottom:125% override from FeaturedProjectsCarousel prov-card-img-wrap — restores uniform fixed-height standard
+- [x] TypeScript: 0 errors | Vitest: 237/237 passing

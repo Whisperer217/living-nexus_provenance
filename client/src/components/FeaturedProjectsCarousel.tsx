@@ -114,8 +114,8 @@ export default function FeaturedProjectsCarousel({ projects, isAuthenticated }: 
               <div
                 className="museum-card parchment-grain group cursor-pointer active:scale-[0.97]"
               >
-                {/* Image — locked 4:5 ratio, max 200px tall */}
-                <div className="prov-card-img-wrap" style={{ paddingBottom: "125%", maxHeight: "200px" }}>
+                {/* Image — fixed height matching pan-row standard */}
+                <div className="prov-card-img-wrap">
                   {project.bannerUrl ? (
                     <img
                       src={project.bannerUrl}
