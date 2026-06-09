@@ -4879,3 +4879,26 @@
 - [x] Fix authorName in TheaterPlayer.tsx — use artistHandle || name || undefined
 - [x] Fix authorName in MobilePlayerLayer.tsx — use artistHandle || name || undefined
 - [x] Fix authorName in BookDetailPage.tsx — use artistHandle || name || undefined
+
+## Phase 195: Cinematic Player Evolution
+- [ ] Build CinematicModeEngine component with mode selector and shared infrastructure
+- [ ] Implement Living Canvas mode (audio-reactive color extraction, particles, parallax)
+- [ ] Implement Archive Artifact mode (museum exhibit, WID/provenance metadata)
+- [ ] Implement Retro Signal mode (CRT glow, waveform, audio-reactive spectrum)
+- [ ] Implement Shelf Playback mode (item pulled from shelf, nearby works left/right)
+- [ ] Implement Cosmos Playback mode (central node, related works orbit)
+- [ ] Wire CinematicModeEngine into PlayerBar (desktop cinematic mode)
+- [ ] Wire CinematicModeEngine into MobilePlayerLayer (mobile cinematic state)
+- [ ] Add mode persistence (remember last selected mode per user)
+
+## Phase 195: Cinematic Player Evolution
+- [x] Build CinematicModeEngine component with all five modes
+- [x] Living Canvas mode — audio-reactive color extraction, particles, parallax
+- [x] Archive Artifact mode — museum exhibit with WID, provenance metadata
+- [x] Retro Signal mode — CRT glow, waveform, audio-reactive spectrum
+- [x] Shelf Playback mode — manifestation pulled from shelf, nearby works visible
+- [x] Cosmos Playback mode — central node with orbiting related works
+- [x] Wire CinematicModeEngine into PlayerBar (desktop)
+- [x] Wire CinematicModeEngine into MobilePlayerLayer (mobile)
+- [x] Remove old CinematicLayer function from MobilePlayerLayer
+- [x] TypeScript: 0 errors | Vitest: 237/237 passing

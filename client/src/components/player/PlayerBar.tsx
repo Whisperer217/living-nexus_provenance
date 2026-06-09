@@ -22,6 +22,7 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import PlayerTipModal from "./PlayerTipModal";
 import { MediaAsset } from "@/components/MediaAsset";
+import { CinematicModeEngine } from "@/components/player/CinematicModeEngine";
 
 function fmtTime(s: number) {
   if (!s || isNaN(s) || !isFinite(s)) return "0:00";
@@ -33,7 +34,7 @@ export default function PlayerBar() {
   const {
     state, audioRef, allTracks, togglePlay, nextTrack, prevTrack,
     toggleShuffle, toggleRepeat, toggleMute, setVolume, seek,
-    openTheater,
+    openTheater, playTrack,
   } = usePlayer();
   const [, navigate] = useLocation();
   const { user } = useAuth();
@@ -313,133 +314,24 @@ export default function PlayerBar() {
         </button>
       )}
 
-      {/* ══ INLINE CINEMATIC MODE (full-viewport) ══ */}
+      {/* ══ CINEMATIC MODE ENGINE — Phase 195 ══ */}
       {isCinematic && currentTrack && (
-        <div className="absolute inset-0 w-full h-full overflow-hidden">
-          {/* Full-bleed artwork / video */}
-          <MediaAsset
-            src={currentTrack.artUrl}
-            alt={currentTrack.title}
-            mode="cinematic"
-            focalX={currentTrack.coverPositionX ?? 50}
-            focalY={currentTrack.coverPositionY ?? 50}
-            emoji={currentTrack.emoji}
-            bg={currentTrack.bg}
-            showGradient={false}
-            videoUrl={videoUrl}
-            showVideo={showVideo}
-            videoRef={videoRef}
-            className="absolute inset-0 w-full h-full object-cover"
-          />
-          {/* Dark gradient at bottom for controls legibility */}
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{ background: "linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 40%, transparent 70%)" }}
-          />
-          {/* Exit cinematic button — top right */}
-          <button
-            onClick={() => setIsCinematic(false)}
-            className="absolute top-4 right-4 z-20 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all"
-            style={{
-              background: "var(--ln-iron)",
-              border: "1px solid rgba(63,74,80,0.6)",
-              color: "var(--ln-gold)",
-              backdropFilter: "blur(8px)",
-            }}
-          >
-            <Minimize2 size={12} /> Exit Cinematic
-          </button>
-          {/* Track info — top left */}
-          <div className="absolute top-4 left-4 z-20">
-            <div className="text-2xl font-bold" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>
-              {currentTrack.title}
-            </div>
-            <div className="text-sm mt-1" style={{ color: "var(--ln-seal-bright)" }}>
-              {currentTrack.artist}
-            </div>
-            {currentTrack.witnessId && (
-              <button
-                onClick={goToVerify}
-                className="text-[9px] font-mono mt-1 block transition-opacity hover:opacity-80"
-                style={{ color: "rgba(196,154,40,0.6)" }}
-              >
-                WID: {currentTrack.witnessId.slice(0, 24)}…
-              </button>
-            )}
-          </div>
-          {/* Controls overlay — bottom center */}
-          <div className="absolute bottom-8 left-0 right-0 z-20 flex flex-col items-center gap-4 px-8">
-            {/* Progress bar */}
-            <div className="w-full flex items-center gap-3">
-              <span className="text-[11px] tabular-nums w-8" style={{ color: "var(--ln-smoke)" }}>{fmtTime(state.currentTime)}</span>
-              <div
-                className="flex-1 h-1 rounded-full cursor-pointer group relative"
-                style={{ background: "rgba(44,52,56,0.5)" }}
-                onClick={handleSeek}
-              >
-                <div
-                  className="h-full rounded-full"
-                  style={{
-                    width: `${progress}%`,
-                    background: "linear-gradient(90deg, #EF4444 0%, #6B6555 50%, #E8DFC8 100%)",
-                    boxShadow: progress > 2 ? "0 0 8px 1px rgba(196,154,40,0.35)" : "none",
-                  }}
-                />
-              </div>
-              <span className="text-[11px] tabular-nums w-8" style={{ color: "var(--ln-smoke)" }}>{fmtTime(state.duration)}</span>
-            </div>
-            {/* Playback controls */}
-            <div className="flex items-center gap-6">
-              <button type="button" onClick={toggleShuffle} className={`p-2 transition-colors ${state.isShuffle ? "text-[#C49A28]" : "text-white/40 hover:text-white/80"}`}>
-                <Shuffle size={18} />
-              </button>
-              <button type="button" onClick={prevTrack} className="p-2 text-white/70 hover:text-white transition-colors">
-                <SkipBack size={22} />
-              </button>
-              {/* Crystal Orb Play Button — desktop */}
-              <button
-                onClick={togglePlay}
-                className="relative flex items-center justify-center transition-all hover:scale-105 active:scale-95"
-                style={{ width: "64px", height: "64px", background: "transparent", border: "none", padding: 0 }}
-              >
-                {state.isPlaying && (
-                  <span className="absolute inset-0 rounded-full" style={{ boxShadow: "0 0 0 3px rgba(212,175,55,0.25), 0 0 24px rgba(212,175,55,0.45)", animation: "crystal-pulse 2.2s ease-in-out infinite", borderRadius: "50%" }} />
-                )}
-                <svg viewBox="0 0 64 64" style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}>
-                  {[0,1,2,3,4,5,6,7].map(i => (
-                    <path key={i}
-                      d={`M 32 32 L ${32 + 30 * Math.cos((i * 45 - 22.5) * Math.PI / 180)} ${32 + 30 * Math.sin((i * 45 - 22.5) * Math.PI / 180)} A 30 30 0 0 1 ${32 + 30 * Math.cos(((i + 1) * 45 - 22.5) * Math.PI / 180)} ${32 + 30 * Math.sin(((i + 1) * 45 - 22.5) * Math.PI / 180)} Z`}
-                      fill={i % 2 === 0 ? "rgba(212,175,55,0.72)" : "rgba(140,100,10,0.48)"}
-                      stroke="rgba(245,230,179,0.35)" strokeWidth="0.5"
-                    />
-                  ))}
-                  <circle cx="32" cy="32" r="22" fill="none" stroke="rgba(212,175,55,0.55)" strokeWidth="1" />
-                </svg>
-                <span className="absolute rounded-full flex items-center justify-center"
-                  style={{
-                    width: "44px", height: "44px",
-                    background: "radial-gradient(circle at 32% 28%, rgba(255,245,200,0.98) 0%, rgba(212,175,55,0.92) 42%, rgba(160,120,20,1) 80%, rgba(70,45,5,1) 100%)",
-                    boxShadow: state.isPlaying
-                      ? "0 0 16px rgba(212,175,55,0.8), 0 0 32px rgba(212,175,55,0.35), inset 0 2px 0 rgba(255,255,255,0.3)"
-                      : "0 0 10px rgba(212,175,55,0.5), inset 0 2px 0 rgba(255,255,255,0.25)",
-                  }}
-                >
-                  <span className="absolute rounded-full" style={{ width: "14px", height: "8px", top: "8px", left: "11px", background: "rgba(255,255,255,0.35)", filter: "blur(2px)", transform: "rotate(-20deg)" }} />
-                  {state.isPlaying
-                    ? <Pause size={18} fill="#1a0e00" style={{ color: "#1a0e00", position: "relative", zIndex: 1 }} />
-                    : <Play size={18} fill="#1a0e00" style={{ color: "#1a0e00", position: "relative", zIndex: 1, marginLeft: "2px" }} />
-                  }
-                </span>
-              </button>
-              <button type="button" onClick={nextTrack} className="p-2 text-white/70 hover:text-white transition-colors">
-                <SkipForward size={22} />
-              </button>
-              <button type="button" onClick={toggleRepeat} className={`p-2 transition-colors ${state.isRepeat ? "text-[#C49A28]" : "text-white/40 hover:text-white/80"}`}>
-                <Repeat size={18} />
-              </button>
-            </div>
-          </div>
-        </div>
+        <CinematicModeEngine
+          track={currentTrack}
+          queue={tracks}
+          currentIdx={state.currentIdx}
+          isPlaying={state.isPlaying}
+          currentTime={state.currentTime}
+          duration={state.duration}
+          progress={progress}
+          onClose={() => setIsCinematic(false)}
+          onPlayIdx={playTrack}
+          onTogglePlay={togglePlay}
+          onSeek={(pct) => seek(state.duration * pct / 100)}
+          onNext={nextTrack}
+          onPrev={prevTrack}
+          analyserNode={(window as any).__lnAnalyser ?? null}
+        />
       )}
 
       {/* ══ EXPANDED CINEMATIC VIEW ══ */}

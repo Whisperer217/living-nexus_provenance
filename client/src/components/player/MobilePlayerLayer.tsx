@@ -21,6 +21,7 @@
 import React, { useState, useRef, useCallback, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { usePlayer, type Track } from "@/contexts/PlayerContext";
+import { CinematicModeEngine } from "@/components/player/CinematicModeEngine";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useLocation } from "wouter";
@@ -265,7 +266,7 @@ export default function MobilePlayerLayer() {
     setVolume, seek,
     queueContextLabel,
     patchTrack,
-    addAndPlay, playQueueAt, playNext,
+    addAndPlay, playQueueAt, playNext, playTrack,
   } = usePlayer();
   const { user } = useAuth();
   const [, navigate] = useLocation();
@@ -1781,193 +1782,6 @@ export default function MobilePlayerLayer() {
     </div>
   );
 
-  // ══════════════════════════════════════════════════════════════
-  //  CINEMATIC STATE
-  // ══════════════════════════════════════════════════════════════
-  const CinematicLayer = () => (
-    <div
-      className="md:hidden fixed inset-0 z-[9020] bg-black"
-      style={{ overscrollBehaviorX: "none", touchAction: "pan-y" }}
-      onTouchStart={onCinematicTouchStart}
-      onTouchEnd={onCinematicTouchEnd}
-      onClick={showOverlay}
-    >
-      {/* Full-bleed artwork/video */}
-      <MediaAsset
-        src={currentTrack.artUrl}
-        alt={currentTrack.title}
-        mode="cinematic"
-        focalX={currentTrack.coverPositionX ?? 50}
-        focalY={currentTrack.coverPositionY ?? 50}
-        emoji={currentTrack.emoji}
-        bg={currentTrack.bg}
-        showGradient={false}
-        videoUrl={videoUrl}
-        showVideo={showVideo}
-        videoRef={videoRef as React.RefObject<HTMLVideoElement | null>}
-        className="absolute inset-0 w-full h-full"
-      />
-      {/* Ambient gradient — bottom fade */}
-      <div
-        className="absolute inset-x-0 bottom-0 pointer-events-none"
-        style={{
-          height: isLandscape ? "35%" : "45%",
-          background: "linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 100%)",
-          transition: "opacity 0.4s",
-          opacity: overlayVisible ? 1 : 0,
-        }}
-      />
-      {/* Top gradient */}
-      <div
-        className="absolute inset-x-0 top-0 pointer-events-none"
-        style={{
-          height: "20%",
-          background: "linear-gradient(to bottom, rgba(0,0,0,0.60) 0%, transparent 100%)",
-          transition: "opacity 0.4s",
-          opacity: overlayVisible ? 1 : 0,
-        }}
-      />
-      {/* Overlay controls */}
-      <div
-        className="absolute inset-0 flex flex-col justify-between"
-        style={{
-          transition: "opacity 0.4s",
-          opacity: overlayVisible ? 1 : 0,
-          pointerEvents: overlayVisible ? "auto" : "none",
-          paddingTop: "env(safe-area-inset-top, 16px)",
-          paddingBottom: "env(safe-area-inset-bottom, 16px)",
-        }}
-      >
-        {/* Top bar */}
-        <div className="flex items-center justify-between px-5 pt-3">
-          <button
-            onClick={(e) => { e.stopPropagation(); setPlayerState("expanded"); }}
-            className="p-2 rounded-xl transition-all active:scale-90"
-            style={{ color: "rgba(255,255,255,0.7)", background: "rgba(0,0,0,0.30)", backdropFilter: "blur(8px)" }}
-          >
-            <ChevronDown size={22} />
-          </button>
-          <div className="text-center">
-            <div className="text-[9px] font-heading tracking-[0.2em] uppercase text-white/50">
-              Cinematic
-            </div>
-          </div>
-          {/* WID badge in cinematic */}
-          {widBadge ? (
-            <button
-              onClick={(e) => { e.stopPropagation(); setPlayerState("expanded"); setWidPanelOpen(true); }}
-              className="flex items-center gap-1 px-2 py-1 rounded-full text-[9px] font-bold"
-              style={{
-                background: "rgba(0,0,0,0.85)",
-                border: "1px solid rgba(74,222,128,0.5)",
-                color: "var(--ln-seal-bright)",
-                backdropFilter: "blur(4px)",
-              }}
-            >
-              <Shield size={8} />
-              WID
-            </button>
-          ) : <div className="w-10" />}
-        </div>
-        {/* Bottom controls */}
-        {isLandscape ? (
-          <div className="px-6 pb-3">
-            <div className="flex items-center gap-4">
-              <div className="min-w-0 flex-1">
-                <div className="text-[14px] font-heading text-white truncate">{currentTrack.title}</div>
-                <div className="text-[11px] text-white/50 truncate mt-0.5">{currentTrack.artist}</div>
-              </div>
-              <button type="button" onClick={togglePlay} className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full"
-                style={{ background: "linear-gradient(135deg, #C49A28, #C49A28)", color: "#111009" }}>
-                {state.isPlaying ? <Pause size={18} fill="currentColor" /> : <Play size={18} fill="currentColor" style={{ marginLeft: "2px" }} />}
-              </button>
-              {!isNonAudio && (
-                <div className="flex-1">
-                  <Scrubber
-                    progress={progress}
-                    currentTime={state.currentTime}
-                    duration={state.duration}
-                    onSeek={handleSeek}
-                    onSeekTouch={handleSeekTouch}
-                    thin
-                  />
-                </div>
-              )}
-              {!isNonAudio && (
-                <span className="text-[10px] font-mono text-white/50 flex-shrink-0">
-                  {fmtTime(state.duration)}
-                </span>
-              )}
-              <button type="button" onClick={nextTrack} style={{ color: "rgba(255,255,255,0.6)" }}>
-                <SkipForward size={20} fill="currentColor" />
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="px-6 pb-4 space-y-5">
-            {/* Track info + like */}
-            <div className="flex items-center justify-between">
-              <div className="min-w-0 flex-1">
-                <div className="text-[17px] font-heading text-white truncate">{currentTrack.title}</div>
-                <div className="text-[12px] text-white/50 truncate mt-0.5">{currentTrack.artist}</div>
-              </div>
-              <button type="button" onClick={handleToggleLike} className="flex-shrink-0 ml-3 p-2"
-                style={{ color: isLiked ? "var(--ln-ember)" : "rgba(255,255,255,0.4)" }}>
-                <Heart size={20} fill={isLiked ? "currentColor" : "none"} />
-              </button>
-            </div>
-            {!isNonAudio && (
-              <Scrubber
-                progress={progress}
-                currentTime={state.currentTime}
-                duration={state.duration}
-                onSeek={handleSeek}
-                onSeekTouch={handleSeekTouch}
-              />
-            )}
-            <ControlsRow large overlay />
-            {/* Action tray */}
-            <div className="flex items-center justify-around pt-1">
-              <button
-                onClick={(e) => { e.stopPropagation(); setGiftOpen(true); }}
-                className="flex flex-col items-center gap-1 transition-all active:scale-90"
-                style={{ color: "rgba(255,255,255,0.55)" }}
-              >
-                <div className="w-9 h-9 flex items-center justify-center rounded-xl"
-                  style={{ background: "rgba(196,154,40,0.08)", backdropFilter: "blur(8px)" }}>
-                  <DollarSign size={16} />
-                </div>
-                <span className="text-[9px] font-heading tracking-widest uppercase">Support</span>
-              </button>
-              <button
-                onClick={(e) => { e.stopPropagation(); handleShare(); }}
-                className="flex flex-col items-center gap-1 transition-all active:scale-90"
-                style={{ color: "rgba(255,255,255,0.55)" }}
-              >
-                <div className="w-9 h-9 flex items-center justify-center rounded-xl"
-                  style={{ background: "rgba(196,154,40,0.08)", backdropFilter: "blur(8px)" }}>
-                  {copied ? <Check size={16} style={{ color: "#C49A28" }} /> : <Share2 size={16} />}
-                </div>
-                <span className="text-[9px] font-heading tracking-widest uppercase">{copied ? "Copied" : "Share Artifact"}</span>
-              </button>
-              <button
-                onClick={(e) => { e.stopPropagation(); setPlayerState("mini"); navigate(`/song/${currentSongId}`); }}
-                className="flex flex-col items-center gap-1 transition-all active:scale-90"
-                style={{ color: "rgba(255,255,255,0.55)" }}
-              >
-                <div className="w-9 h-9 flex items-center justify-center rounded-xl"
-                  style={{ background: "rgba(196,154,40,0.08)", backdropFilter: "blur(8px)" }}>
-                  <ListMusic size={16} />
-                </div>
-                <span className="text-[9px] font-heading tracking-widest uppercase">View Record</span>
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-
   // ── Render via portal ──────────────────────────────────────────
   return createPortal(
     <>
@@ -1982,7 +1796,24 @@ export default function MobilePlayerLayer() {
       {/* Mini player — sits above bottom nav when a track is loaded */}
       {playerState === "mini" && <MiniBar />}
       {playerState === "expanded" && <ExpandedSheet />}
-      {playerState === "cinematic" && <CinematicLayer />}
+      {playerState === "cinematic" && currentTrack && (
+        <CinematicModeEngine
+          track={currentTrack}
+          queue={tracks}
+          currentIdx={state.currentIdx}
+          isPlaying={state.isPlaying}
+          currentTime={state.currentTime}
+          duration={state.duration}
+          progress={progress}
+          onClose={() => setPlayerState("expanded")}
+          onPlayIdx={playTrack}
+          onTogglePlay={togglePlay}
+          onSeek={(pct) => seek(state.duration * pct / 100)}
+          onNext={nextTrack}
+          onPrev={prevTrack}
+          analyserNode={(window as any).__lnAnalyser ?? null}
+        />
+      )}
       {giftOpen && currentTrack && currentSongId && (
         <GiftModal
           songId={currentSongId}
