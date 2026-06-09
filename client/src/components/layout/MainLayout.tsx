@@ -239,7 +239,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           {/* MainColumn -- fluid, scrollable. lg:pr-[300px] reserves space for the fixed RightRail.
                On creator-focus routes the RightRail is hidden so we remove the right padding. */}
           <div
-            className={`flex-1 overflow-y-auto player-scroll-area ${rightRailOpen && !isCreatorFocus ? "lg:pr-[300px]" : ""}`}
+            className={`flex-1 overflow-y-auto overflow-x-hidden player-scroll-area ${rightRailOpen && !isCreatorFocus ? "lg:pr-[300px]" : ""}`}
             style={{ overscrollBehaviorX: "none", overscrollBehaviorY: "none", touchAction: "pan-y" }}
           >
             {children}

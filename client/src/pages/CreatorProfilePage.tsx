@@ -1458,7 +1458,7 @@ export default function CreatorProfilePage() {
         <DomainRenderer userId={creator.id} isOwner={isOwner} />
         {/* ── Projects Section (top priority) ── */}
         {(creatorProjects as any[]).length > 0 && (
-          <section className="py-6">
+          <section className="py-6 overflow-hidden">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-base font-bold" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>
                 Projects

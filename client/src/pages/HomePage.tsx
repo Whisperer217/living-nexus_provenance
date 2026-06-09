@@ -93,7 +93,7 @@ function WIDTrustLayer() {
   };
 
   return (
-    <div className="px-6 pt-4 pb-6 space-y-4">
+    <div className="px-6 pt-4 pb-6 space-y-4 overflow-hidden">
       {/* ── Animated WID counter ── */}
       <div
         className="flex items-center gap-4 rounded-2xl px-5 py-4"
@@ -308,7 +308,7 @@ function FeaturedCreatorsCarousel() {
   if (!creators || creators.length === 0) return null;
 
   return (
-    <div className="px-6 pb-6">
+    <div className="px-6 pb-6 overflow-hidden">
       <div className="flex items-center justify-between mb-3">
         <h2 className="museum-section-title">
           <Users size={13} className="inline mr-1.5 opacity-70" />
@@ -378,7 +378,7 @@ function NewVoicesCarousel() {
   const creators = (allRecent ?? []).filter((c: any) => !featuredIds.has(c.id)).slice(0, 10);
   if (creators.length === 0) return null;
   return (
-    <div className="px-6 pb-6">
+    <div className="px-6 pb-6 overflow-hidden">
       <div className="flex items-center justify-between mb-3">
         <h2 className="museum-section-title">
           <Sparkles size={13} className="inline mr-1.5" style={{ color: "var(--ln-seal-bright)" }} />
@@ -985,7 +985,7 @@ export default function HomePage() {
       {/* ══════════════════════════════════════════════════════════════
           FOUNDER'S ERA BLOCK
       ══════════════════════════════════════════════════════════════ */}
-      <div className="px-6 py-5">
+      <div className="px-6 py-5 overflow-hidden">
         <div
           className="rounded-2xl p-5 relative overflow-hidden"
           style={{
@@ -1291,7 +1291,7 @@ export default function HomePage() {
         </div>
       </div>
 
-      <div className="px-6 py-5">
+      <div className="px-6 py-5 overflow-hidden">
         {/* Genre icon cards */}
         <div className="mb-7">
           <h2 className="museum-section-title mb-3">Browse Genres</h2>

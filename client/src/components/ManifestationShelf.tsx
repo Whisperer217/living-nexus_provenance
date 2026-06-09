@@ -334,7 +334,7 @@ export function ManifestationShelf({
       </div>
 
       {/* ── Horizontal track rack ── */}
-      <div className="relative">
+      <div className="relative overflow-hidden"> {/* Phase 194.2: overflow-hidden clips card bleed */}
         {/* Left fade */}
         {canScrollLeft && (
           <div

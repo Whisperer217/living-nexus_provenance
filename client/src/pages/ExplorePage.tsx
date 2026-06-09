@@ -736,7 +736,7 @@ export default function ExplorePage() {
         </div>
       </div>
 
-      <div className="px-6 py-5">
+      <div className="px-6 py-5 overflow-hidden">
         {/* Search */}
         <div className="relative mb-5">
           <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/65" />

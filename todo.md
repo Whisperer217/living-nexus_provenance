@@ -4945,3 +4945,15 @@
 - [x] Verified: overscroll-behavior: none already on html,body combined rule
 - [x] Verified: body.overlay-active-full uses position:fixed to seal iOS rubber-band void
 - [x] TypeScript: 0 errors
+
+## Phase 193.6A + 194.2 Mobile Domain Consistency Pass
+- [x] Audit all pages for horizontal overflow sources
+- [x] Add max-width: 100% to html/body in index.css
+- [x] Fix museum-pan-row overflow-y to hidden (was visible)
+- [x] Add overflow-x-hidden to MainLayout main scroll container
+- [x] Add overflow-hidden to ExplorePage main content wrapper
+- [x] Add overflow-hidden to HomePage WIDTrustLayer, FeaturedCreatorsCarousel, NewVoicesCarousel, px-6 py-5 sections
+- [x] Add overflow-hidden to DiscoverPage root container
+- [x] Add overflow-hidden to CreatorProfilePage Projects section
+- [x] TypeScript 0 errors
+- [x] Vitest 237/237 passing

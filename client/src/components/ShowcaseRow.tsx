@@ -39,7 +39,7 @@ export function ShowcaseRow({ title, seeAllHref, children, className = "" }: Sho
   };
 
   return (
-    <section className={`mb-10 ${className}`}>
+    <section className={`mb-10 overflow-hidden ${className}`}>
       {/* Section header */}
       <div className="flex items-center justify-between mb-4 px-1">
         <div className="flex items-center gap-2">

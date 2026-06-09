@@ -312,6 +312,7 @@
   }
   html, body {
     height: 100%;
+    max-width: 100%; /* Phase 194.2: hard viewport width cap — prevents iOS horizontal drag */
     overscroll-behavior: none; /* seal the viewport floor — no bounce void on mobile */
     background-color: #000000; /* True Black — match app bg */
     overflow-x: hidden; /* prevent horizontal scroll from revealing right-side drawers on mobile */
@@ -870,7 +871,7 @@ html body[data-scroll-locked] {
     display: flex;
     gap: 0.75rem;
     overflow-x: auto;
-    overflow-y: visible;
+    overflow-y: hidden; /* Phase 194.2: was visible — visible breaks parent clip, allowing bleed */
     padding-bottom: 0.5rem;
     scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
