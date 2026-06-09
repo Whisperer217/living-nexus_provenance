@@ -198,7 +198,7 @@ export default function MobilePlayerPanel() {
     addCommentMutation.mutate({
       songId: currentSongId,
       content: newComment.trim(),
-      authorName: user?.name ?? "Anonymous",
+      authorName: user?.artistHandle || user?.name || undefined,
     });
   }, [newComment, currentSongId, addCommentMutation, user]);
 

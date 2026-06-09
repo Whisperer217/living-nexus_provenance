@@ -4872,3 +4872,10 @@
 - [x] Add "My Domain" as first item in ContextDrawer profile panel
 - [x] Add "My Domain" as first item in MobileNavDrawer My Account section
 - [x] Add "My Domain" button to DashboardPage action bar
+
+## Phase 193.6-fix: Comment Attribution Fixes
+- [x] Fix authorName in PlayerBar.tsx — use artistHandle || name || undefined
+- [x] Fix authorName in MobilePlayerPanel.tsx — use artistHandle || name || undefined
+- [x] Fix authorName in TheaterPlayer.tsx — use artistHandle || name || undefined
+- [x] Fix authorName in MobilePlayerLayer.tsx — use artistHandle || name || undefined
+- [x] Fix authorName in BookDetailPage.tsx — use artistHandle || name || undefined

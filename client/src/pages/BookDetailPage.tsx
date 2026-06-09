@@ -842,14 +842,14 @@ export default function BookDetailPage() {
                   onKeyDown={e => {
                     if (e.key === "Enter" && !e.shiftKey && commentText.trim()) {
                       e.preventDefault();
-                      commentMutation.mutate({ songId: bookId, content: commentText.trim(), authorName: user?.name || undefined });
+                      commentMutation.mutate({ songId: bookId, content: commentText.trim(), authorName: user?.artistHandle || user?.name || undefined });
                     }
                   }}
                   style={{ background: "#1E2D3A", border: "1px solid rgba(196,154,40,0.15)", color: "var(--ln-parchment)", fontSize: "13px" }}
                 />
                 {commentText.trim() && (
                   <Button size="sm"
-                    onClick={() => commentMutation.mutate({ songId: bookId, content: commentText.trim(), authorName: user?.name || undefined })}
+                    onClick={() => commentMutation.mutate({ songId: bookId, content: commentText.trim(), authorName: user?.artistHandle || user?.name || undefined })}
                     disabled={commentMutation.isPending}
                     style={{ background: "var(--ln-gold)", color: "#1E2D3A" }}>
                     Post

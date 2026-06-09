@@ -227,7 +227,7 @@ export default function PlayerBar() {
     addCommentMutation.mutate({
       songId: currentSongId,
       content: newComment.trim(),
-      authorName: user?.name ?? "Anonymous",
+      authorName: user?.artistHandle || user?.name || undefined,
     });
   };
 
