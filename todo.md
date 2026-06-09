@@ -4828,3 +4828,8 @@
 - [x] Wire identity completion to onboarding sequence (Identity → Domain → Manifestations)
 - [x] Ensure identity page is accessible before upload (gate or prompt)
 - [x] TypeScript: 0 errors | Vitest: 237/237 passing
+
+## Phase 193.6: Production Crash Fixes
+- [x] Fix /identity/:id crash — countByCreator returns {count:N} object, not plain number; extract .count before rendering
+- [x] Fix /settings crash — same error boundary; /settings redirect to /settings/billing confirmed working
+- [x] TypeScript: 0 errors | Vitest: 237/237 passing

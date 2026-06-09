@@ -114,9 +114,14 @@ export default function CreatorIdentityPage() {
     );
   }
 
-  const activeMediums = (creator.activeMediums as string[] | null) || [];
+  const activeMediums = (() => {
+    const raw = creator.activeMediums;
+    if (!raw) return [];
+    if (Array.isArray(raw)) return raw as string[];
+    try { const parsed = JSON.parse(raw as unknown as string); return Array.isArray(parsed) ? parsed : []; } catch { return []; }
+  })();
   const isOwner = user?.id === creator.id;
-  const manifestationCount = songCount ?? creator.songSlotsUsed ?? 0;
+  const manifestationCount = (typeof songCount === 'object' && songCount !== null ? (songCount as any).count : songCount) ?? creator.songSlotsUsed ?? 0;
 
   const handleCopyLink = () => {
     const url = `${window.location.origin}/identity/${creator.id}`;
