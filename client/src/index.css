@@ -321,8 +321,27 @@
      fixed-position overlays against the html root instead of the viewport.
      iOS Safari scroll void is sealed by body.overlay-active { position:fixed } instead.
      The html height:100% is preserved for layout integrity. */
+  /* ── Phase 193.6: Mobile Overscroll & Canvas Boundary Seal ──────────────
+     iOS Safari rubber-band bounce paints the BROWSER CANVAS from the html
+     element's background — not from body. We must set background-color on
+     html explicitly (separate from the html,body combined rule above) so
+     the bounce region matches the app void, not the browser's black default.
+
+     Android Chrome uses the theme-color meta for the overscroll region;
+     that is set in index.html as #000000.
+
+     overscroll-behavior-y: contain on html prevents bounce from propagating
+     to the browser chrome while still allowing in-app scroll.
+
+     NOTE: html overflow:hidden was removed — it breaks Radix Dialog portals
+     by clipping fixed-position overlays against the html root instead of the
+     viewport. iOS Safari scroll void is sealed by body.overlay-active
+     { position:fixed } instead. The html height:100% is preserved.
+     ─────────────────────────────────────────────────────────────────────── */
   html {
     height: 100%;
+    background-color: #000000; /* explicit — iOS paints bounce region from html bg */
+    overscroll-behavior-y: contain; /* contain bounce within app, don't expose browser chrome */
   }
   /* ── Bottom Stack Layout Tokens ─────────────────────────────────────
      Single source of truth for all bottom-anchored heights.
@@ -347,6 +366,7 @@
     min-height: 100dvh; /* dvh = true mobile viewport height, not browser-lied vh */
     display: flex;
     flex-direction: column;
+    background-color: #000000; /* seal root — prevents transparent root exposing html canvas */
   }
   /* scroll-lock override moved outside @layer base — see below */
 

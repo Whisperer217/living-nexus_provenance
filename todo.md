@@ -4934,3 +4934,14 @@
 - [x] Fix GuideCard field names: artworkUrl (not coverArtUrl), widCode (not wid)
 - [x] Add Living Nexus Canon stock guides section to Guide Directory (The Witness, Conductor, Archivist, Sovereign, Cipher)
 - [x] Guide Directory now shows two sections: LN Canon + Creator Guides, both searchable
+
+## Phase 193.6 — Mobile Overscroll & Canvas Boundary Audit
+- [x] Audit html/body/#root background layers — all three now explicitly set to #000000
+- [x] Add overscroll-behavior-y: contain to html element (iOS bounce containment)
+- [x] Add explicit background-color: #000000 to html element (iOS paints bounce from html bg, not body)
+- [x] Add explicit background-color: #000000 to #root (prevents transparent root exposing canvas)
+- [x] Update theme-color meta from #0a0805 to #000000 (Android Chrome overscroll region)
+- [x] Add prefers-color-scheme dark/light theme-color variants (both #000000)
+- [x] Verified: overscroll-behavior: none already on html,body combined rule
+- [x] Verified: body.overlay-active-full uses position:fixed to seal iOS rubber-band void
+- [x] TypeScript: 0 errors

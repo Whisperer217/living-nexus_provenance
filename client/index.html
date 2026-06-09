@@ -14,7 +14,12 @@
     <link rel="icon" type="image/png" sizes="64x64" href="https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/HMNMkWUWAfVdTbRj3YmPCF/ln-favicon-64_612204fb.png" />
     <link rel="icon" type="image/png" sizes="32x32" href="https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/HMNMkWUWAfVdTbRj3YmPCF/ln-favicon-32_fab7a647.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/HMNMkWUWAfVdTbRj3YmPCF/ln-app-icon-180_815d861d.png" />
-    <meta name="theme-color" content="#0a0805" />
+    <!-- Phase 193.6: theme-color matches app true-black void (#000000)
+         Android Chrome uses this for the overscroll bounce region color.
+         Both prefers-color-scheme variants set to black so no fallback chrome shows. -->
+    <meta name="theme-color" content="#000000" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000000" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#000000" />
 
     <!-- Open Graph / Social -->
     <meta property="og:title" content="Living Nexus — Audio Provenance Platform for Creators" />
