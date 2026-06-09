@@ -4921,3 +4921,8 @@
 - [x] Rewrite ShelfPlayback: ArtBase + queue strip overlay in lower third + controls
 - [x] Rewrite CosmosPlayback: ArtBase + starfield/orbit canvas overlay + orbit labels + controls
 - [x] TypeScript: 0 errors | Vitest: 237/237 passing
+## Anonymous Comments Fix
+- [x] Upgrade comments.add and addReply to protectedProcedure — always use ctx.user identity, never fall back to Anonymous
+- [x] Upgrade getCommentsBySong to leftJoin users and resolve authorName from userId when stored value is null/Anonymous
+- [x] Remove authorName from all client-side comment mutation calls (SongDetailPage, PlayerBar, TheaterPlayer, MobilePlayerLayer, MobilePlayerPanel, BookDetailPage)
+- [x] TypeScript: 0 errors | Vitest: 237/237 passing

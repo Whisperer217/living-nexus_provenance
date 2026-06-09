@@ -212,7 +212,7 @@ export default function TheaterPlayer() {
     addCommentMutation.mutate({
       songId: currentSongId,
       content: newComment.trim(),
-      authorName: user?.artistHandle || user?.name || undefined,
+      
     });
   };
 

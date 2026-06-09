@@ -629,7 +629,7 @@ export default function MobilePlayerLayer() {
     addCommentMutation.mutate({
       songId: currentSongId,
       content: commentText.trim(),
-      authorName: user?.artistHandle || user?.name || undefined,
+      
     });
   }, [commentText, currentSongId, user, addCommentMutation]);
 

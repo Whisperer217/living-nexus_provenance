@@ -684,19 +684,54 @@ export async function updateSongStamp(
 export async function getCommentsBySong(songId: number) {
   const db = await getDb();
   if (!db) return [];
-  // Fetch all comments for the song (top-level + replies), oldest first for threading
-  const allComments = await db
-    .select()
+  // Join users to resolve authorName from userId when stored value is null/empty/Anonymous
+  const authorUser = alias(users, 'authorUser');
+  const rows = await db
+    .select({
+      id: comments.id,
+      songId: comments.songId,
+      userId: comments.userId,
+      authorName: comments.authorName,
+      content: comments.content,
+      parentId: comments.parentId,
+      createdAt: comments.createdAt,
+      resolvedHandle: authorUser.artistHandle,
+      resolvedName: authorUser.name,
+      resolvedAvatar: authorUser.profilePhotoUrl,
+    })
     .from(comments)
+    .leftJoin(authorUser, eq(comments.userId, authorUser.id))
     .where(eq(comments.songId, songId))
     .orderBy(comments.createdAt)
     .limit(200);
+  // Resolve display name: stored authorName -> user artistHandle -> user name -> 'Anonymous'
+  type RawRow = typeof rows[0];
+  type CommentRow = {
+    id: number; songId: number; userId: number | null; authorName: string | null;
+    content: string; parentId: number | null; createdAt: Date; avatarUrl: string | null;
+  };
+  const resolved: CommentRow[] = rows.map((r: RawRow) => {
+    const stored = r.authorName;
+    const isBlank = !stored || stored === 'Anonymous';
+    const displayName = isBlank
+      ? (r.resolvedHandle || r.resolvedName || stored || 'Anonymous')
+      : stored;
+    return {
+      id: r.id,
+      songId: r.songId,
+      userId: r.userId,
+      authorName: displayName,
+      content: r.content,
+      parentId: r.parentId,
+      createdAt: r.createdAt,
+      avatarUrl: r.resolvedAvatar ?? null,
+    };
+  });
   // Build threaded structure: top-level comments with nested replies
-  type CommentRow = typeof allComments[0];
   type CommentWithReplies = CommentRow & { replies: CommentRow[] };
   const topLevel: CommentWithReplies[] = [];
   const replyMap = new Map<number, CommentRow[]>();
-  for (const c of allComments) {
+  for (const c of resolved) {
     if (c.parentId == null) {
       topLevel.push({ ...c, replies: [] });
     } else {

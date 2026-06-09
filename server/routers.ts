@@ -1924,27 +1924,59 @@ ${workType === "manuscript" || workType === "comic" ? "Category" : "Genre"}: ${i
   }),
   comments: router({
     list: publicProcedure.input(z.object({ songId: z.number() })).query(async ({ input }) => getCommentsBySong(input.songId)),
-    add: publicProcedure.input(z.object({ songId: z.number(), content: z.string().min(1).max(1000), authorName: z.string().max(128).optional() })).mutation(async ({ ctx, input }) => {
-      // Events is the primary write target
-      const actorName = input.authorName || ctx.user?.artistHandle || ctx.user?.name || "Anonymous";
+    add: protectedProcedure.input(z.object({ songId: z.number(), content: z.string().min(1).max(1000) })).mutation(async ({ ctx, input }) => {
+      // Always use the authenticated user's identity — never fall back to Anonymous
+      const actorName = ctx.user.artistHandle || ctx.user.name || "Creator";
       await createEvent({
         type: "COMMENT",
         workId: input.songId,
         workType: "song",
-        actorId: ctx.user?.id,
+        actorId: ctx.user.id,
         actorName,
         payload: { content: input.content },
       });
       // Secondary write: comments table for legacy queries
-      await addComment({ songId: input.songId, userId: ctx.user?.id, authorName: actorName, content: input.content });
+      await addComment({ songId: input.songId, userId: ctx.user.id, authorName: actorName, content: input.content });
       // Notify the song owner if commenter is a different user
-      if (ctx.user?.id) {
+      const song = await getSongById(input.songId);
+      if (song && song.userId && song.userId !== ctx.user.id) {
+        await createNotification({
+          userId: song.userId,
+          type: "comment",
+          title: `${actorName} commented on "${song.title}"`,
+          body: input.content.slice(0, 120),
+          actorId: ctx.user.id,
+          actorName,
+          actorAvatarUrl: undefined,
+          refId: input.songId,
+          refType: "song",
+        });
+      }
+      return { success: true };
+    }),
+    addReply: protectedProcedure
+      .input(z.object({
+        songId: z.number(),
+        parentId: z.number(),
+        content: z.string().min(1).max(1000),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const actorName = ctx.user.artistHandle || ctx.user.name || "Creator";
+        // Insert reply with parentId
+        await addComment({
+          songId: input.songId,
+          userId: ctx.user.id,
+          authorName: actorName,
+          content: input.content,
+          parentId: input.parentId,
+        });
+        // Notify the song owner if commenter is a different user
         const song = await getSongById(input.songId);
         if (song && song.userId && song.userId !== ctx.user.id) {
           await createNotification({
             userId: song.userId,
             type: "comment",
-            title: `${actorName} commented on "${song.title}"`,
+            title: `${actorName} replied to a comment on "${song.title}"`,
             body: input.content.slice(0, 120),
             actorId: ctx.user.id,
             actorName,
@@ -1952,43 +1984,6 @@ ${workType === "manuscript" || workType === "comic" ? "Category" : "Genre"}: ${i
             refId: input.songId,
             refType: "song",
           });
-        }
-      }
-      return { success: true };
-    }),
-    addReply: publicProcedure
-      .input(z.object({
-        songId: z.number(),
-        parentId: z.number(),
-        content: z.string().min(1).max(1000),
-        authorName: z.string().max(128).optional(),
-      }))
-      .mutation(async ({ ctx, input }) => {
-        const actorName = input.authorName || ctx.user?.artistHandle || ctx.user?.name || "Anonymous";
-        // Insert reply with parentId
-        await addComment({
-          songId: input.songId,
-          userId: ctx.user?.id,
-          authorName: actorName,
-          content: input.content,
-          parentId: input.parentId,
-        });
-        // Notify the parent comment author if they are a different logged-in user
-        if (ctx.user?.id) {
-          const song = await getSongById(input.songId);
-          if (song && song.userId && song.userId !== ctx.user.id) {
-            await createNotification({
-              userId: song.userId,
-              type: "comment",
-              title: `${actorName} replied to a comment on "${song.title}"`,
-              body: input.content.slice(0, 120),
-              actorId: ctx.user.id,
-              actorName,
-              actorAvatarUrl: undefined,
-              refId: input.songId,
-              refType: "song",
-            });
-          }
         }
         return { success: true };
       }),

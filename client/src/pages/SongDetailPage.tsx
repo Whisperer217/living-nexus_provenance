@@ -1237,13 +1237,13 @@ export default function SongDetailPage() {
                     onKeyDown={(e) => {
                       if (e.key === "Enter" && !e.shiftKey && commentText.trim()) {
                         e.preventDefault();
-                        commentMutation.mutate({ songId: song.id, content: commentText.trim(), authorName: user?.artistHandle || user?.name || undefined });
+                        commentMutation.mutate({ songId: song.id, content: commentText.trim() });
                       }
                     }}
                     style={{ background: "var(--ln-coal)", border: "1px solid #C49A28", color: "var(--ln-parchment)", fontSize: "13px" }} />
                   {commentText.trim() && (
                     <Button size="sm"
-                      onClick={() => commentMutation.mutate({ songId: song.id, content: commentText.trim(), authorName: user?.artistHandle || user?.name || undefined })}
+                      onClick={() => commentMutation.mutate({ songId: song.id, content: commentText.trim() })}
                       disabled={commentMutation.isPending}
                       style={{ background: "var(--ln-gold)", color: "var(--ln-parchment)" }}>
                       Post
@@ -1299,7 +1299,7 @@ export default function SongDetailPage() {
                                 onKeyDown={e => {
                                   if (e.key === "Enter" && !e.shiftKey && replyText.trim()) {
                                     e.preventDefault();
-                                    replyMutation.mutate({ songId: song.id, parentId: c.id, content: replyText.trim(), authorName: user?.artistHandle || user?.name || undefined });
+                                    replyMutation.mutate({ songId: song.id, parentId: c.id, content: replyText.trim() });
                                   }
                                   if (e.key === "Escape") { setReplyingTo(null); setReplyText(""); }
                                 }}
@@ -1308,7 +1308,7 @@ export default function SongDetailPage() {
                               />
                               {replyText.trim() && (
                                 <Button size="sm"
-                                  onClick={() => replyMutation.mutate({ songId: song.id, parentId: c.id, content: replyText.trim(), authorName: user?.artistHandle || user?.name || undefined })}
+                                  onClick={() => replyMutation.mutate({ songId: song.id, parentId: c.id, content: replyText.trim() })}
                                   disabled={replyMutation.isPending}
                                   className="h-6 text-[11px] px-2"
                                   style={{ background: "var(--ln-gold)", color: "var(--ln-parchment)" }}>
