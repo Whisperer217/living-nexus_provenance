@@ -4911,3 +4911,13 @@
 - [x] Wire gesture layer into MobilePlayerLayer (swipe next/prev, long-press Quick View, swipe-up Creator Domain)
 - [x] TypeScript check 0 errors
 - [x] Vitest all passing
+
+## Phase 194.2 (Cinematic Fix): Full-Screen Art in All Cinematic Modes
+- [x] Diagnose: ArchiveArtifact showed 200px card; CosmosPlayback showed 100px circle; art never filled screen
+- [x] Add shared ArtBase component: blurred bg fill + sharp full-bleed object-contain art + bottom/top gradients
+- [x] Rewrite LivingCanvas: ArtBase + particle canvas overlay + controls at bottom
+- [x] Rewrite ArchiveArtifact: ArtBase + grid overlay + corner accents + provenance strip overlay + controls
+- [x] Rewrite RetroSignal: ArtBase + semi-transparent CRT canvas overlay + signal header + controls
+- [x] Rewrite ShelfPlayback: ArtBase + queue strip overlay in lower third + controls
+- [x] Rewrite CosmosPlayback: ArtBase + starfield/orbit canvas overlay + orbit labels + controls
+- [x] TypeScript: 0 errors | Vitest: 237/237 passing

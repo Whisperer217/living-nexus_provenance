@@ -1,42 +1,22 @@
 /**
- * CinematicModeEngine — Phase 195
+ * CinematicModeEngine — Phase 195 (v2 — Full-Screen Art)
  * ─────────────────────────────────────────────────────────────────────────────
- * Five playback experiences that transform the Living Nexus player from a
- * conventional streaming interface into a living archive.
+ * Five playback experiences. ALL modes fill the screen edge-to-edge with the
+ * artwork. Mode-specific overlays (metadata, waveform, shelf, cosmos) are
+ * layered on top of the full-bleed art, never replacing it.
  *
  * Modes:
- *   living-canvas  — artwork expands into full-screen environment with
- *                    audio-reactive color extraction, slow pulse, particles
- *   archive-artifact — manifestation as museum exhibit with WID, provenance,
- *                    witness count, creator metadata
- *   retro-signal   — CRT glow, waveform, audio-reactive spectrum bars
- *   shelf-playback — item pulled from a shelf, nearby queue works visible
- *   cosmos         — playing track as central node, related works orbit
- *
- * Usage:
- *   <CinematicModeEngine
- *     track={currentTrack}
- *     queue={state.tracks}
- *     currentIdx={state.currentIdx}
- *     isPlaying={state.isPlaying}
- *     currentTime={state.currentTime}
- *     duration={state.duration}
- *     progress={progress}
- *     onClose={onClose}
- *     onPlayIdx={onPlayIdx}
- *     onTogglePlay={togglePlay}
- *     onSeek={seek}
- *     onNext={nextTrack}
- *     onPrev={prevTrack}
- *   />
+ *   living-canvas    — artwork fills screen, particles + pulse overlay
+ *   archive-artifact — museum overlay: WID, provenance grid, corner accents
+ *   retro-signal     — CRT waveform + spectrum bars over full-screen art
+ *   shelf-playback   — queue strip at bottom, art fills top 70%
+ *   cosmos           — starfield + orbit rings over full-screen art
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Track } from "@/contexts/PlayerContext";
 import {
   ChevronDown,
-  ChevronLeft,
-  ChevronRight,
   Shield,
   Pause,
   Play,
@@ -117,6 +97,57 @@ function contentTypeLabel(ct?: string): string {
   return ct ? (map[ct] ?? ct) : "Manifestation";
 }
 
+// ─── Full-Screen Art Base ─────────────────────────────────────────────────────
+// All modes share this: artwork fills 100% of the container, blurred copy as bg.
+
+function ArtBase({ track }: { track: Track }) {
+  return (
+    <>
+      {/* Blurred background fill */}
+      {track.artUrl ? (
+        <img
+          src={track.artUrl}
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ filter: "blur(32px) brightness(0.35) saturate(1.6)", transform: "scale(1.08)" }}
+          aria-hidden
+        />
+      ) : (
+        <div
+          className="absolute inset-0"
+          style={{ background: track.bg || "linear-gradient(135deg, #0A0C0E 0%, #1A1F23 100%)" }}
+        />
+      )}
+      {/* Sharp full-bleed art — centered, cover */}
+      {track.artUrl ? (
+        <img
+          src={track.artUrl}
+          alt={track.title}
+          className="absolute inset-0 w-full h-full object-contain"
+          style={{ zIndex: 1 }}
+        />
+      ) : (
+        <div
+          className="absolute inset-0 flex items-center justify-center text-[96px] z-[1]"
+          style={{ textShadow: "0 8px 40px rgba(0,0,0,0.8)" }}
+        >
+          {track.emoji || "◈"}
+        </div>
+      )}
+      {/* Bottom gradient — controls legibility */}
+      <div
+        className="absolute inset-x-0 bottom-0 pointer-events-none z-[2]"
+        style={{ height: "52%", background: "linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.4) 60%, transparent 100%)" }}
+      />
+      {/* Top gradient — chrome legibility */}
+      <div
+        className="absolute inset-x-0 top-0 pointer-events-none z-[2]"
+        style={{ height: "20%", background: "linear-gradient(to bottom, rgba(0,0,0,0.65) 0%, transparent 100%)" }}
+      />
+    </>
+  );
+}
+
 // ─── Shared Controls Bar ──────────────────────────────────────────────────────
 
 function ControlsBar({
@@ -129,7 +160,6 @@ function ControlsBar({
   onSeek,
   onNext,
   onPrev,
-  light = false,
 }: {
   track: Track;
   isPlaying: boolean;
@@ -140,7 +170,6 @@ function ControlsBar({
   onSeek: (pct: number) => void;
   onNext: () => void;
   onPrev: () => void;
-  light?: boolean;
 }) {
   const barRef = useRef<HTMLDivElement>(null);
   const handleSeekClick = (e: React.MouseEvent) => {
@@ -150,32 +179,29 @@ function ControlsBar({
     onSeek(Math.max(0, Math.min(100, pct)));
   };
 
-  const textColor = light ? "rgba(255,255,255,0.9)" : "rgba(232,223,200,0.9)";
-  const dimColor = light ? "rgba(255,255,255,0.5)" : "rgba(196,154,40,0.6)";
-
   return (
     <div className="flex flex-col items-center gap-3 w-full px-6">
       {/* Track identity */}
       <div className="text-center">
         <div
           className="text-xl font-bold leading-tight"
-          style={{ fontFamily: "'Cinzel', serif", color: textColor }}
+          style={{ fontFamily: "'Cinzel', serif", color: "rgba(245,237,216,0.97)" }}
         >
           {track.title}
         </div>
-        <div className="text-sm mt-0.5" style={{ color: dimColor }}>
+        <div className="text-sm mt-0.5" style={{ color: "rgba(196,154,40,0.8)" }}>
           {track.artist}
         </div>
       </div>
       {/* Progress */}
       <div className="w-full flex items-center gap-3">
-        <span className="text-[11px] tabular-nums w-8 text-right" style={{ color: dimColor }}>
+        <span className="text-[11px] tabular-nums w-8 text-right" style={{ color: "rgba(196,154,40,0.6)" }}>
           {fmtTime(currentTime)}
         </span>
         <div
           ref={barRef}
           className="flex-1 h-1 rounded-full cursor-pointer relative"
-          style={{ background: "rgba(44,52,56,0.5)" }}
+          style={{ background: "rgba(255,255,255,0.12)" }}
           onClick={handleSeekClick}
         >
           <div
@@ -187,7 +213,7 @@ function ControlsBar({
             }}
           />
         </div>
-        <span className="text-[11px] tabular-nums w-8" style={{ color: dimColor }}>
+        <span className="text-[11px] tabular-nums w-8" style={{ color: "rgba(196,154,40,0.6)" }}>
           {fmtTime(duration)}
         </span>
       </div>
@@ -196,7 +222,7 @@ function ControlsBar({
         <button
           onClick={onPrev}
           className="p-2 transition-opacity hover:opacity-80 active:scale-90"
-          style={{ color: textColor }}
+          style={{ color: "rgba(245,237,216,0.9)" }}
         >
           <SkipBack size={22} />
         </button>
@@ -206,10 +232,10 @@ function ControlsBar({
           style={{
             width: 56,
             height: 56,
-            background: "rgba(196,154,40,0.15)",
-            border: "1.5px solid rgba(196,154,40,0.5)",
+            background: "rgba(196,154,40,0.18)",
+            border: "1.5px solid rgba(196,154,40,0.6)",
             color: "var(--ln-gold)",
-            boxShadow: isPlaying ? "0 0 20px rgba(196,154,40,0.3)" : "none",
+            boxShadow: isPlaying ? "0 0 24px rgba(196,154,40,0.35)" : "none",
           }}
         >
           {isPlaying ? <Pause size={24} /> : <Play size={24} />}
@@ -217,7 +243,7 @@ function ControlsBar({
         <button
           onClick={onNext}
           className="p-2 transition-opacity hover:opacity-80 active:scale-90"
-          style={{ color: textColor }}
+          style={{ color: "rgba(245,237,216,0.9)" }}
         >
           <SkipForward size={22} />
         </button>
@@ -281,6 +307,7 @@ function ModeSelector({
 }
 
 // ─── Mode: Living Canvas ──────────────────────────────────────────────────────
+// Full-screen art + particle overlay + controls at bottom.
 
 function LivingCanvas({
   track,
@@ -298,7 +325,6 @@ function LivingCanvas({
   const particlesRef = useRef<Array<{ x: number; y: number; vx: number; vy: number; life: number; size: number; hue: number }>>([]);
   const timeRef = useRef(0);
 
-  // Spawn particles
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -319,17 +345,12 @@ function LivingCanvas({
     return () => clearInterval(id);
   }, [isPlaying]);
 
-  // Animation loop
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
-
-    const resize = () => {
-      canvas.width = canvas.offsetWidth;
-      canvas.height = canvas.offsetHeight;
-    };
+    const resize = () => { canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight; };
     resize();
     const ro = new ResizeObserver(resize);
     ro.observe(canvas);
@@ -339,7 +360,6 @@ function LivingCanvas({
       const t = timeRef.current;
       const w = canvas.width;
       const h = canvas.height;
-
       ctx.clearRect(0, 0, w, h);
 
       // Slow parallax vignette pulse
@@ -371,38 +391,17 @@ function LivingCanvas({
       animRef.current = requestAnimationFrame(draw);
     };
     animRef.current = requestAnimationFrame(draw);
-    return () => {
-      cancelAnimationFrame(animRef.current);
-      ro.disconnect();
-    };
+    return () => { cancelAnimationFrame(animRef.current); ro.disconnect(); };
   }, [isPlaying]);
 
   return (
-    <div className="absolute inset-0 flex flex-col">
-      {/* Artwork background */}
-      {track.artUrl ? (
-        <img
-          src={track.artUrl}
-          alt={track.title}
-          className="absolute inset-0 w-full h-full object-cover"
-          style={{ filter: "blur(2px) brightness(0.55) saturate(1.4)", transform: "scale(1.05)" }}
-        />
-      ) : (
-        <div
-          className="absolute inset-0"
-          style={{ background: "linear-gradient(135deg, #0A0C0E 0%, #1A1F23 50%, #0A0C0E 100%)" }}
-        />
-      )}
-      {/* Canvas overlay */}
-      <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" />
-      {/* Bottom gradient */}
-      <div
-        className="absolute inset-x-0 bottom-0 pointer-events-none"
-        style={{ height: "55%", background: "linear-gradient(to top, rgba(0,0,0,0.92) 0%, transparent 100%)" }}
-      />
-      {/* Controls */}
-      <div className="absolute inset-x-0 bottom-0 pb-10 flex flex-col items-center gap-6">
-        {track.witnessId && (
+    <div className="absolute inset-0">
+      <ArtBase track={track} />
+      {/* Particle canvas overlay */}
+      <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none z-[3]" />
+      {/* WID badge */}
+      {track.witnessId && (
+        <div className="absolute top-16 left-1/2 -translate-x-1/2 z-[4]">
           <Link
             href={`/verify/${track.witnessId}`}
             className="flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-bold"
@@ -416,7 +415,10 @@ function LivingCanvas({
             <Shield size={8} />
             WID: {track.witnessId.slice(0, 20)}…
           </Link>
-        )}
+        </div>
+      )}
+      {/* Controls */}
+      <div className="absolute inset-x-0 bottom-0 pb-10 z-[4] flex flex-col items-center gap-6">
         <ControlsBar
           track={track}
           isPlaying={isPlaying}
@@ -434,6 +436,7 @@ function LivingCanvas({
 }
 
 // ─── Mode: Archive Artifact ───────────────────────────────────────────────────
+// Full-screen art + museum overlay (grid lines, corner accents, provenance strip).
 
 function ArchiveArtifact({
   track,
@@ -453,125 +456,108 @@ function ArchiveArtifact({
   }, [track.id]);
 
   return (
-    <div
-      className="absolute inset-0 flex flex-col items-center justify-center overflow-hidden"
-      style={{ background: "linear-gradient(160deg, #0D0F11 0%, #141A1E 60%, #0A0C0E 100%)" }}
-    >
-      {/* Subtle grid lines */}
+    <div className="absolute inset-0">
+      <ArtBase track={track} />
+
+      {/* Subtle grid lines overlay */}
       <div
-        className="absolute inset-0 pointer-events-none"
+        className="absolute inset-0 pointer-events-none z-[3]"
         style={{
           backgroundImage:
             "linear-gradient(rgba(196,154,40,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(196,154,40,0.04) 1px, transparent 1px)",
           backgroundSize: "40px 40px",
         }}
       />
-      {/* Museum card */}
+
+      {/* Corner accent marks — top-left and top-right */}
+      {[
+        { top: "16px", left: "16px", borderTop: "2px solid var(--ln-gold)", borderLeft: "2px solid var(--ln-gold)" },
+        { top: "16px", right: "16px", borderTop: "2px solid var(--ln-gold)", borderRight: "2px solid var(--ln-gold)" },
+        { bottom: "16px", left: "16px", borderBottom: "2px solid var(--ln-gold)", borderLeft: "2px solid var(--ln-gold)" },
+        { bottom: "16px", right: "16px", borderBottom: "2px solid var(--ln-gold)", borderRight: "2px solid var(--ln-gold)" },
+      ].map((style, i) => (
+        <div
+          key={i}
+          className="absolute pointer-events-none z-[4]"
+          style={{ ...style, width: 28, height: 28 }}
+        />
+      ))}
+
+      {/* Artifact label — top center */}
       <div
-        className="relative z-10 flex flex-col items-center gap-6 w-full max-w-lg px-8"
+        className="absolute top-16 inset-x-0 flex justify-center z-[4]"
         style={{
           opacity: revealed ? 1 : 0,
-          transform: revealed ? "translateY(0)" : "translateY(16px)",
-          transition: "opacity 0.6s ease, transform 0.6s ease",
+          transition: "opacity 0.6s ease",
         }}
       >
-        {/* Artifact label */}
         <div
-          className="text-[9px] font-mono tracking-[0.3em] uppercase"
-          style={{ color: "rgba(196,154,40,0.5)" }}
+          className="text-[9px] font-mono tracking-[0.3em] uppercase px-3 py-1 rounded-full"
+          style={{
+            color: "rgba(196,154,40,0.8)",
+            background: "rgba(0,0,0,0.55)",
+            backdropFilter: "blur(8px)",
+            border: "1px solid rgba(196,154,40,0.2)",
+          }}
         >
           Living Nexus Archive — {contentTypeLabel(track.contentType)}
         </div>
+      </div>
 
-        {/* Artwork in exhibit frame */}
+      {/* Provenance strip — bottom overlay above controls */}
+      <div
+        className="absolute inset-x-0 z-[4] px-6"
+        style={{
+          bottom: "200px",
+          opacity: revealed ? 1 : 0,
+          transform: revealed ? "translateY(0)" : "translateY(12px)",
+          transition: "opacity 0.6s ease 0.2s, transform 0.6s ease 0.2s",
+        }}
+      >
+        {/* Metadata grid */}
         <div
-          className="relative"
+          className="grid grid-cols-4 gap-3 text-[10px] mb-3 py-3 px-4 rounded-xl"
           style={{
-            width: 200,
-            height: 200,
-            border: "2px solid rgba(196,154,40,0.3)",
-            boxShadow: "0 0 40px rgba(196,154,40,0.12), inset 0 0 20px rgba(0,0,0,0.4)",
+            background: "rgba(0,0,0,0.55)",
+            border: "1px solid rgba(196,154,40,0.15)",
+            backdropFilter: "blur(12px)",
           }}
         >
-          {track.artUrl ? (
-            <img src={track.artUrl} alt={track.title} className="w-full h-full object-cover" />
-          ) : (
-            <div
-              className="w-full h-full flex items-center justify-center text-4xl"
-              style={{ background: "rgba(20,26,30,0.8)" }}
-            >
-              {track.emoji || "◈"}
-            </div>
-          )}
-          {/* Corner accents */}
           {[
-            "top-0 left-0 border-t-2 border-l-2",
-            "top-0 right-0 border-t-2 border-r-2",
-            "bottom-0 left-0 border-b-2 border-l-2",
-            "bottom-0 right-0 border-b-2 border-r-2",
-          ].map((cls, i) => (
-            <div
-              key={i}
-              className={`absolute w-4 h-4 ${cls}`}
-              style={{ borderColor: "var(--ln-gold)", margin: "-2px" }}
-            />
+            ["Type", contentTypeLabel(track.contentType)],
+            ["Origin", aiLabel(track.aiDisclosure)],
+            ["Plays", track.plays?.toLocaleString() ?? "—"],
+            ["Genre", track.genre || "—"],
+          ].map(([label, value]) => (
+            <div key={label} className="flex flex-col gap-0.5">
+              <span style={{ color: "rgba(196,154,40,0.5)", fontFamily: "monospace" }}>{label}</span>
+              <span style={{ color: "var(--ln-parchment)" }}>{value}</span>
+            </div>
           ))}
         </div>
 
-        {/* Provenance metadata */}
-        <div className="w-full space-y-2">
-          <div
-            className="text-2xl font-bold text-center"
-            style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}
+        {/* WID provenance row */}
+        {track.witnessId && (
+          <Link
+            href={`/verify/${track.witnessId}`}
+            className="flex items-center gap-2 px-3 py-2 rounded-lg transition-opacity hover:opacity-80"
+            style={{
+              background: "rgba(74,222,128,0.06)",
+              border: "1px solid rgba(74,222,128,0.25)",
+              backdropFilter: "blur(8px)",
+            }}
           >
-            {track.title}
-          </div>
-          <div className="text-sm text-center" style={{ color: "rgba(196,154,40,0.7)" }}>
-            {track.artist}
-          </div>
+            <Shield size={10} style={{ color: "var(--ln-seal-bright)" }} />
+            <div className="flex flex-col">
+              <span className="text-[8px] font-mono" style={{ color: "rgba(74,222,128,0.6)" }}>WITNESS ID</span>
+              <span className="text-[10px] font-mono" style={{ color: "var(--ln-seal-bright)" }}>{track.witnessId}</span>
+            </div>
+          </Link>
+        )}
+      </div>
 
-          {/* Metadata grid */}
-          <div
-            className="grid grid-cols-2 gap-2 mt-4 text-[10px]"
-            style={{ borderTop: "1px solid rgba(196,154,40,0.15)", paddingTop: "12px" }}
-          >
-            {[
-              ["Type", contentTypeLabel(track.contentType)],
-              ["Origin", aiLabel(track.aiDisclosure)],
-              ["Plays", track.plays?.toLocaleString() ?? "—"],
-              ["Genre", track.genre || "—"],
-            ].map(([label, value]) => (
-              <div key={label} className="flex flex-col gap-0.5">
-                <span style={{ color: "rgba(196,154,40,0.45)", fontFamily: "monospace" }}>{label}</span>
-                <span style={{ color: "var(--ln-parchment)" }}>{value}</span>
-              </div>
-            ))}
-          </div>
-
-          {/* WID provenance row */}
-          {track.witnessId && (
-            <Link
-              href={`/verify/${track.witnessId}`}
-              className="flex items-center gap-2 mt-2 px-3 py-2 rounded-lg transition-opacity hover:opacity-80"
-              style={{
-                background: "rgba(74,222,128,0.06)",
-                border: "1px solid rgba(74,222,128,0.25)",
-              }}
-            >
-              <Shield size={10} style={{ color: "var(--ln-seal-bright)" }} />
-              <div className="flex flex-col">
-                <span className="text-[8px] font-mono" style={{ color: "rgba(74,222,128,0.6)" }}>
-                  WITNESS ID
-                </span>
-                <span className="text-[10px] font-mono" style={{ color: "var(--ln-seal-bright)" }}>
-                  {track.witnessId}
-                </span>
-              </div>
-            </Link>
-          )}
-        </div>
-
-        {/* Controls */}
+      {/* Controls */}
+      <div className="absolute inset-x-0 bottom-0 pb-10 z-[4] flex flex-col items-center gap-4">
         <ControlsBar
           track={track}
           isPlaying={isPlaying}
@@ -589,6 +575,7 @@ function ArchiveArtifact({
 }
 
 // ─── Mode: Retro Signal ───────────────────────────────────────────────────────
+// Full-screen art + CRT canvas overlay (scanlines, spectrum, waveform).
 
 function RetroSignal({
   track,
@@ -611,11 +598,7 @@ function RetroSignal({
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
-
-    const resize = () => {
-      canvas.width = canvas.offsetWidth;
-      canvas.height = canvas.offsetHeight;
-    };
+    const resize = () => { canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight; };
     resize();
     const ro = new ResizeObserver(resize);
     ro.observe(canvas);
@@ -629,28 +612,27 @@ function RetroSignal({
       const w = canvas.width;
       const h = canvas.height;
 
-      // CRT scanline background
-      ctx.fillStyle = "rgba(0, 8, 4, 0.85)";
+      // Semi-transparent dark CRT tint (art shows through)
+      ctx.fillStyle = "rgba(0, 8, 4, 0.55)";
       ctx.fillRect(0, 0, w, h);
 
       // Scanlines
       for (let y = 0; y < h; y += 4) {
-        ctx.fillStyle = "rgba(0,0,0,0.15)";
+        ctx.fillStyle = "rgba(0,0,0,0.12)";
         ctx.fillRect(0, y, w, 1);
       }
 
       // CRT vignette
       const vign = ctx.createRadialGradient(w / 2, h / 2, h * 0.2, w / 2, h / 2, h * 0.85);
       vign.addColorStop(0, "rgba(0,0,0,0)");
-      vign.addColorStop(1, "rgba(0,0,0,0.55)");
+      vign.addColorStop(1, "rgba(0,0,0,0.5)");
       ctx.fillStyle = vign;
       ctx.fillRect(0, 0, w, h);
 
-      // Get frequency data
+      // Frequency data
       if (analyserNode) {
         analyserNode.getByteFrequencyData(dataArray);
       } else {
-        // Simulated bars when no analyser
         for (let i = 0; i < bufferLength; i++) {
           dataArray[i] = isPlaying
             ? Math.floor(80 + 100 * Math.abs(Math.sin(t * 3 + i * 0.3)) * Math.random())
@@ -658,16 +640,16 @@ function RetroSignal({
         }
       }
 
-      // Spectrum bars
+      // Spectrum bars — bottom third of screen
       const barW = (w * 0.8) / bufferLength;
       const startX = w * 0.1;
-      const barAreaH = h * 0.35;
-      const barY = h * 0.55;
+      const barAreaH = h * 0.28;
+      const barY = h * 0.62;
 
       for (let i = 0; i < bufferLength; i++) {
         const barH = (dataArray[i] / 255) * barAreaH;
-        const hue = 120 + i * 0.8; // green → teal
-        const alpha = 0.7 + 0.3 * (dataArray[i] / 255);
+        const hue = 120 + i * 0.8;
+        const alpha = 0.6 + 0.3 * (dataArray[i] / 255);
         ctx.fillStyle = `hsla(${hue}, 80%, 55%, ${alpha})`;
         ctx.shadowColor = `hsl(${hue}, 90%, 60%)`;
         ctx.shadowBlur = 4;
@@ -675,7 +657,7 @@ function RetroSignal({
       }
       ctx.shadowBlur = 0;
 
-      // Waveform line
+      // Waveform line — mid screen
       if (analyserNode) {
         analyserNode.getByteTimeDomainData(dataArray);
       } else {
@@ -684,7 +666,7 @@ function RetroSignal({
         }
       }
       ctx.beginPath();
-      ctx.strokeStyle = "rgba(74,222,128,0.8)";
+      ctx.strokeStyle = "rgba(74,222,128,0.85)";
       ctx.lineWidth = 1.5;
       ctx.shadowColor = "rgba(74,222,128,0.6)";
       ctx.shadowBlur = 6;
@@ -692,73 +674,64 @@ function RetroSignal({
       let x = w * 0.1;
       for (let i = 0; i < bufferLength; i++) {
         const v = dataArray[i] / 128;
-        const y = (v * h * 0.12) + h * 0.35;
+        const y = (v * h * 0.1) + h * 0.32;
         i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
         x += sliceW;
       }
       ctx.stroke();
       ctx.shadowBlur = 0;
 
-      // Static noise overlay (subtle)
-      const noiseAlpha = 0.03 + 0.01 * Math.sin(t * 20);
+      // Static noise
+      const noiseAlpha = 0.025 + 0.01 * Math.sin(t * 20);
       ctx.fillStyle = `rgba(255,255,255,${noiseAlpha})`;
       for (let i = 0; i < 200; i++) {
         ctx.fillRect(Math.random() * w, Math.random() * h, 1, 1);
       }
 
-      // Horizontal glitch line (rare)
+      // Rare glitch line
       if (Math.random() < 0.015) {
         const gy = Math.random() * h;
-        ctx.fillStyle = "rgba(74,222,128,0.15)";
+        ctx.fillStyle = "rgba(74,222,128,0.12)";
         ctx.fillRect(0, gy, w, 1);
       }
 
       animRef.current = requestAnimationFrame(draw);
     };
     animRef.current = requestAnimationFrame(draw);
-    return () => {
-      cancelAnimationFrame(animRef.current);
-      ro.disconnect();
-    };
+    return () => { cancelAnimationFrame(animRef.current); ro.disconnect(); };
   }, [isPlaying, analyserNode]);
 
   return (
-    <div
-      className="absolute inset-0 flex flex-col"
-      style={{ background: "#000804" }}
-    >
-      <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" />
+    <div className="absolute inset-0">
+      <ArtBase track={track} />
+      {/* CRT canvas overlay */}
+      <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none z-[3]" />
 
       {/* Signal header */}
-      <div className="relative z-10 flex flex-col items-center pt-10 gap-1">
+      <div className="absolute top-16 inset-x-0 flex flex-col items-center gap-1 z-[4]">
         <div
-          className="text-[8px] font-mono tracking-[0.4em] uppercase"
-          style={{ color: "rgba(74,222,128,0.5)" }}
+          className="text-[8px] font-mono tracking-[0.4em] uppercase px-3 py-1 rounded-full"
+          style={{
+            color: "rgba(74,222,128,0.8)",
+            background: "rgba(0,0,0,0.55)",
+            backdropFilter: "blur(8px)",
+          }}
         >
           ◈ SIGNAL ACQUIRED ◈
-        </div>
-        <div
-          className="text-2xl font-bold"
-          style={{ fontFamily: "'Courier New', monospace", color: "rgba(74,222,128,0.9)", textShadow: "0 0 12px rgba(74,222,128,0.5)" }}
-        >
-          {track.title}
-        </div>
-        <div className="text-sm font-mono" style={{ color: "rgba(74,222,128,0.55)" }}>
-          {track.artist}
         </div>
         {track.witnessId && (
           <Link
             href={`/verify/${track.witnessId}`}
-            className="mt-1 text-[8px] font-mono transition-opacity hover:opacity-80"
-            style={{ color: "rgba(74,222,128,0.4)" }}
+            className="mt-0.5 text-[8px] font-mono transition-opacity hover:opacity-80"
+            style={{ color: "rgba(74,222,128,0.5)" }}
           >
             WID:{track.witnessId.slice(0, 24)}
           </Link>
         )}
       </div>
 
-      {/* Controls at bottom */}
-      <div className="absolute inset-x-0 bottom-0 pb-8 z-10 flex flex-col items-center gap-4">
+      {/* Controls */}
+      <div className="absolute inset-x-0 bottom-0 pb-8 z-[4] flex flex-col items-center gap-4">
         <ControlsBar
           track={track}
           isPlaying={isPlaying}
@@ -769,7 +742,6 @@ function RetroSignal({
           onSeek={onSeek}
           onNext={onNext}
           onPrev={onPrev}
-          light
         />
       </div>
     </div>
@@ -777,6 +749,7 @@ function RetroSignal({
 }
 
 // ─── Mode: Shelf Playback ─────────────────────────────────────────────────────
+// Current track art fills top 65% of screen. Queue strip sits in the lower third.
 
 function ShelfPlayback({
   track,
@@ -792,7 +765,6 @@ function ShelfPlayback({
   onNext,
   onPrev,
 }: Omit<CinematicModeEngineProps, "onClose">) {
-  // Show 2 before + current + 2 after
   const windowSize = 5;
   const half = Math.floor(windowSize / 2);
   const start = Math.max(0, currentIdx - half);
@@ -801,33 +773,38 @@ function ShelfPlayback({
   const relIdx = currentIdx - start;
 
   return (
-    <div
-      className="absolute inset-0 flex flex-col items-center justify-between"
-      style={{ background: "linear-gradient(180deg, #0D0A06 0%, #1A1208 50%, #0D0A06 100%)" }}
-    >
-      {/* Shelf wood grain top */}
-      <div
-        className="absolute top-0 inset-x-0 h-1"
-        style={{ background: "linear-gradient(90deg, rgba(139,90,43,0.3), rgba(196,154,40,0.5), rgba(139,90,43,0.3))" }}
-      />
+    <div className="absolute inset-0">
+      <ArtBase track={track} />
 
-      {/* Shelf label */}
-      <div className="pt-8 pb-2 text-center">
+      {/* Shelf label — top */}
+      <div className="absolute top-16 inset-x-0 flex flex-col items-center z-[4]">
         <div
-          className="text-[8px] font-mono tracking-[0.3em] uppercase"
-          style={{ color: "rgba(196,154,40,0.4)" }}
+          className="text-[8px] font-mono tracking-[0.3em] uppercase px-3 py-1 rounded-full"
+          style={{
+            color: "rgba(196,154,40,0.7)",
+            background: "rgba(0,0,0,0.55)",
+            backdropFilter: "blur(8px)",
+            border: "1px solid rgba(196,154,40,0.2)",
+          }}
         >
           Creator Domain — Shelf
         </div>
         {track.creatorHandle && (
-          <div className="text-sm mt-0.5" style={{ color: "rgba(196,154,40,0.6)" }}>
+          <div className="text-sm mt-1" style={{ color: "rgba(196,154,40,0.6)" }}>
             {track.creatorHandle}
           </div>
         )}
       </div>
 
-      {/* Shelf items */}
-      <div className="flex items-end justify-center gap-3 px-4 flex-1">
+      {/* Queue strip — lower third */}
+      <div
+        className="absolute inset-x-0 z-[4] flex items-end justify-center gap-3 px-4"
+        style={{ bottom: "200px" }}
+      >
+        {/* Shelf wood grain bar */}
+        <div className="absolute inset-x-4 bottom-0 h-2 rounded-sm"
+          style={{ background: "linear-gradient(180deg, rgba(139,90,43,0.6) 0%, rgba(101,65,30,0.8) 100%)", boxShadow: "0 4px 12px rgba(0,0,0,0.5)" }}
+        />
         {visible.map((t, i) => {
           const isCurrent = i === relIdx;
           const dist = Math.abs(i - relIdx);
@@ -840,68 +817,40 @@ function ShelfPlayback({
               key={t.id}
               onClick={() => onPlayIdx(start + i)}
               className="flex flex-col items-center gap-1.5 transition-all duration-300 focus:outline-none"
-              style={{
-                transform: `scale(${scale}) translateY(${translateY}px)`,
-                opacity,
-              }}
+              style={{ transform: `scale(${scale}) translateY(${translateY}px)`, opacity }}
             >
-              {/* Album spine / cover */}
               <div
                 className="relative overflow-hidden"
                 style={{
-                  width: isCurrent ? 120 : 80,
-                  height: isCurrent ? 120 : 80,
-                  border: isCurrent
-                    ? "2px solid rgba(196,154,40,0.7)"
-                    : "1px solid rgba(196,154,40,0.2)",
-                  boxShadow: isCurrent
-                    ? "0 8px 32px rgba(0,0,0,0.6), 0 0 20px rgba(196,154,40,0.2)"
-                    : "0 4px 12px rgba(0,0,0,0.4)",
-                  transition: "width 0.3s, height 0.3s, border 0.3s",
+                  width: isCurrent ? 80 : 56,
+                  height: isCurrent ? 80 : 56,
+                  border: isCurrent ? "2px solid rgba(196,154,40,0.7)" : "1px solid rgba(196,154,40,0.2)",
+                  boxShadow: isCurrent ? "0 8px 32px rgba(0,0,0,0.6), 0 0 20px rgba(196,154,40,0.2)" : "0 4px 12px rgba(0,0,0,0.4)",
+                  transition: "width 0.3s, height 0.3s",
+                  borderRadius: 4,
                 }}
               >
                 {t.artUrl ? (
                   <img src={t.artUrl} alt={t.title} className="w-full h-full object-cover" />
                 ) : (
-                  <div
-                    className="w-full h-full flex items-center justify-center"
-                    style={{ background: "rgba(20,15,8,0.9)", fontSize: isCurrent ? 32 : 20 }}
-                  >
+                  <div className="w-full h-full flex items-center justify-center" style={{ background: "rgba(20,15,8,0.9)", fontSize: isCurrent ? 24 : 16 }}>
                     {t.emoji || "◈"}
                   </div>
                 )}
                 {isCurrent && isPlaying && (
-                  <div
-                    className="absolute bottom-1.5 right-1.5 flex gap-0.5 items-end"
-                    style={{ height: 12 }}
-                  >
+                  <div className="absolute bottom-1 right-1 flex gap-0.5 items-end" style={{ height: 10 }}>
                     {[0, 1, 2].map((b) => (
-                      <div
-                        key={b}
-                        className="w-1 rounded-sm"
-                        style={{
-                          background: "var(--ln-gold)",
-                          height: `${40 + 60 * Math.random()}%`,
-                          animation: `shelf-eq ${0.4 + b * 0.15}s ease-in-out infinite alternate`,
-                        }}
+                      <div key={b} className="w-1 rounded-sm"
+                        style={{ background: "var(--ln-gold)", height: `${40 + 60 * Math.random()}%`, animation: `shelf-eq ${0.4 + b * 0.15}s ease-in-out infinite alternate` }}
                       />
                     ))}
                   </div>
                 )}
               </div>
               {isCurrent && (
-                <div className="text-center max-w-[120px]">
-                  <div
-                    className="text-[11px] font-semibold truncate"
-                    style={{ color: "var(--ln-parchment)" }}
-                  >
-                    {t.title}
-                  </div>
-                  {t.witnessId && (
-                    <div className="text-[8px] font-mono mt-0.5" style={{ color: "rgba(74,222,128,0.6)" }}>
-                      WID ◈
-                    </div>
-                  )}
+                <div className="text-center max-w-[80px]">
+                  <div className="text-[10px] font-semibold truncate" style={{ color: "var(--ln-parchment)" }}>{t.title}</div>
+                  {t.witnessId && <div className="text-[8px] font-mono mt-0.5" style={{ color: "rgba(74,222,128,0.6)" }}>WID ◈</div>}
                 </div>
               )}
             </button>
@@ -909,17 +858,8 @@ function ShelfPlayback({
         })}
       </div>
 
-      {/* Shelf wood grain bottom */}
-      <div
-        className="inset-x-0 h-3 rounded-sm mx-4 mb-2"
-        style={{
-          background: "linear-gradient(180deg, rgba(139,90,43,0.6) 0%, rgba(101,65,30,0.8) 100%)",
-          boxShadow: "0 4px 12px rgba(0,0,0,0.5)",
-        }}
-      />
-
       {/* Controls */}
-      <div className="pb-8 w-full flex flex-col items-center gap-4">
+      <div className="absolute inset-x-0 bottom-0 pb-8 z-[4] flex flex-col items-center gap-4">
         <ControlsBar
           track={track}
           isPlaying={isPlaying}
@@ -944,6 +884,7 @@ function ShelfPlayback({
 }
 
 // ─── Mode: Cosmos ─────────────────────────────────────────────────────────────
+// Full-screen art + starfield + orbit rings canvas overlay.
 
 function CosmosPlayback({
   track,
@@ -963,7 +904,6 @@ function CosmosPlayback({
   const animRef = useRef<number>(0);
   const timeRef = useRef(0);
 
-  // Nearby tracks for orbit (up to 6)
   const orbitTracks = [
     ...queue.slice(Math.max(0, currentIdx - 3), currentIdx),
     ...queue.slice(currentIdx + 1, currentIdx + 4),
@@ -987,7 +927,7 @@ function CosmosPlayback({
       ctx.clearRect(0, 0, w, h);
 
       // Starfield
-      ctx.fillStyle = "rgba(196,154,40,0.15)";
+      ctx.fillStyle = "rgba(196,154,40,0.2)";
       for (let i = 0; i < 60; i++) {
         const sx = ((i * 137.5 + t * 2) % w);
         const sy = ((i * 97.3 + t * 1.5) % h);
@@ -997,31 +937,27 @@ function CosmosPlayback({
         ctx.fill();
       }
 
-      // Orbit rings
+      // Orbit rings — centered on screen
       const cx = w / 2;
       const cy = h * 0.42;
       const r1 = Math.min(w, h) * 0.22;
       const r2 = Math.min(w, h) * 0.35;
 
-      ctx.strokeStyle = "rgba(196,154,40,0.08)";
+      ctx.strokeStyle = "rgba(196,154,40,0.12)";
       ctx.lineWidth = 1;
       ctx.beginPath(); ctx.arc(cx, cy, r1, 0, Math.PI * 2); ctx.stroke();
       ctx.beginPath(); ctx.arc(cx, cy, r2, 0, Math.PI * 2); ctx.stroke();
 
-      // Orbit nodes (related tracks)
+      // Orbit nodes
       orbitTracks.forEach((ot, i) => {
         const angle = (i / orbitTracks.length) * Math.PI * 2 + t * 0.4;
         const radius = i % 2 === 0 ? r1 : r2;
         const nx = cx + radius * Math.cos(angle);
         const ny = cy + radius * Math.sin(angle);
-
-        // Connection line
-        ctx.strokeStyle = "rgba(196,154,40,0.12)";
+        ctx.strokeStyle = "rgba(196,154,40,0.15)";
         ctx.lineWidth = 0.5;
         ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(nx, ny); ctx.stroke();
-
-        // Node dot
-        ctx.fillStyle = "rgba(196,154,40,0.5)";
+        ctx.fillStyle = "rgba(196,154,40,0.6)";
         ctx.shadowColor = "rgba(196,154,40,0.4)";
         ctx.shadowBlur = 6;
         ctx.beginPath(); ctx.arc(nx, ny, 4, 0, Math.PI * 2); ctx.fill();
@@ -1030,7 +966,7 @@ function CosmosPlayback({
 
       // Central pulse ring
       const pulse = 0.5 + 0.5 * Math.sin(t * (isPlaying ? 3 : 1));
-      ctx.strokeStyle = `rgba(196,154,40,${0.15 + 0.1 * pulse})`;
+      ctx.strokeStyle = `rgba(196,154,40,${0.2 + 0.12 * pulse})`;
       ctx.lineWidth = 1.5;
       ctx.beginPath();
       ctx.arc(cx, cy, 52 + 4 * pulse, 0, Math.PI * 2);
@@ -1043,52 +979,18 @@ function CosmosPlayback({
   }, [isPlaying, orbitTracks]);
 
   return (
-    <div
-      className="absolute inset-0 flex flex-col items-center"
-      style={{ background: "linear-gradient(180deg, #050608 0%, #0A0C10 100%)" }}
-    >
-      <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" />
+    <div className="absolute inset-0">
+      <ArtBase track={track} />
+      {/* Cosmos canvas overlay */}
+      <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none z-[3]" />
 
-      {/* Central artwork node */}
-      <div
-        className="relative z-10 mt-16"
-        style={{
-          width: 100,
-          height: 100,
-          borderRadius: "50%",
-          overflow: "hidden",
-          border: "2px solid rgba(196,154,40,0.5)",
-          boxShadow: "0 0 40px rgba(196,154,40,0.25), 0 0 80px rgba(196,154,40,0.1)",
-        }}
-      >
-        {track.artUrl ? (
-          <img src={track.artUrl} alt={track.title} className="w-full h-full object-cover" />
-        ) : (
-          <div
-            className="w-full h-full flex items-center justify-center text-3xl"
-            style={{ background: "rgba(10,12,16,0.9)" }}
-          >
-            {track.emoji || "◈"}
-          </div>
-        )}
-      </div>
-
-      {/* Track name */}
-      <div className="relative z-10 mt-4 text-center px-8">
-        <div
-          className="text-xl font-bold"
-          style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}
-        >
-          {track.title}
-        </div>
-        <div className="text-sm mt-0.5" style={{ color: "rgba(196,154,40,0.6)" }}>
-          {track.artist}
-        </div>
+      {/* Track identity + WID — top center */}
+      <div className="absolute top-16 inset-x-0 flex flex-col items-center gap-1 z-[4] px-8">
         {track.witnessId && (
           <Link
             href={`/verify/${track.witnessId}`}
-            className="flex items-center justify-center gap-1 mt-1 text-[9px] font-mono transition-opacity hover:opacity-80"
-            style={{ color: "rgba(74,222,128,0.5)" }}
+            className="flex items-center gap-1 text-[9px] font-mono transition-opacity hover:opacity-80"
+            style={{ color: "rgba(74,222,128,0.6)" }}
           >
             <Shield size={8} /> WID
           </Link>
@@ -1097,16 +999,17 @@ function CosmosPlayback({
 
       {/* Orbit track labels */}
       {orbitTracks.length > 0 && (
-        <div className="relative z-10 mt-4 flex flex-wrap justify-center gap-2 px-8">
-          {orbitTracks.map((ot, i) => (
+        <div className="absolute inset-x-0 z-[4] flex flex-wrap justify-center gap-2 px-8" style={{ top: "60%" }}>
+          {orbitTracks.map((ot) => (
             <button
               key={ot.id}
               onClick={() => onPlayIdx(queue.indexOf(ot))}
               className="px-2 py-0.5 rounded-full text-[9px] font-mono transition-opacity hover:opacity-80"
               style={{
-                background: "rgba(196,154,40,0.08)",
-                border: "1px solid rgba(196,154,40,0.2)",
-                color: "rgba(196,154,40,0.6)",
+                background: "rgba(0,0,0,0.55)",
+                border: "1px solid rgba(196,154,40,0.25)",
+                color: "rgba(196,154,40,0.7)",
+                backdropFilter: "blur(4px)",
               }}
             >
               {ot.title.slice(0, 16)}{ot.title.length > 16 ? "…" : ""}
@@ -1116,7 +1019,7 @@ function CosmosPlayback({
       )}
 
       {/* Controls */}
-      <div className="absolute inset-x-0 bottom-0 pb-8 z-10 flex flex-col items-center gap-4">
+      <div className="absolute inset-x-0 bottom-0 pb-8 z-[4] flex flex-col items-center gap-4">
         <ControlsBar
           track={track}
           isPlaying={isPlaying}
@@ -1153,18 +1056,17 @@ export function CinematicModeEngine(props: CinematicModeEngineProps) {
 
   return (
     <div className="fixed inset-0 z-[9020] overflow-hidden" style={{ background: "#000" }}>
-      {/* Mode content */}
+      {/* Mode content — fills entire viewport */}
       {mode === "living-canvas" && <LivingCanvas {...sharedProps} />}
       {mode === "archive-artifact" && <ArchiveArtifact {...sharedProps} />}
       {mode === "retro-signal" && <RetroSignal {...sharedProps} />}
       {mode === "shelf-playback" && <ShelfPlayback {...sharedProps} />}
       {mode === "cosmos" && <CosmosPlayback {...sharedProps} />}
 
-      {/* Top chrome — always on top */}
+      {/* Top chrome — always on top of mode content */}
       <div
         className="absolute top-0 inset-x-0 z-30 flex items-center justify-between px-4 pt-3 pb-2"
         style={{
-          background: "linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, transparent 100%)",
           paddingTop: "max(12px, env(safe-area-inset-top))",
         }}
       >
