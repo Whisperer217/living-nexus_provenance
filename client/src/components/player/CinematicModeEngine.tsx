@@ -118,12 +118,12 @@ function ArtBase({ track }: { track: Track }) {
           style={{ background: track.bg || "linear-gradient(135deg, #0A0C0E 0%, #1A1F23 100%)" }}
         />
       )}
-      {/* Sharp full-bleed art — centered, cover */}
+      {/* Sharp full-bleed art — fills viewport edge-to-edge */}
       {track.artUrl ? (
         <img
           src={track.artUrl}
           alt={track.title}
-          className="absolute inset-0 w-full h-full object-contain"
+          className="absolute inset-0 w-full h-full object-cover"
           style={{ zIndex: 1 }}
         />
       ) : (
@@ -262,8 +262,25 @@ function ModeSelector({
   onChange: (m: CinematicMode) => void;
 }) {
   const [open, setOpen] = useState(false);
+  const wrapRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent | TouchEvent) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    document.addEventListener("touchstart", handler);
+    return () => {
+      document.removeEventListener("mousedown", handler);
+      document.removeEventListener("touchstart", handler);
+    };
+  }, [open]);
+
   return (
-    <div className="relative">
+    <div className="relative" ref={wrapRef}>
       <button
         onClick={() => setOpen((o) => !o)}
         className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-semibold transition-all"
@@ -279,12 +296,14 @@ function ModeSelector({
       </button>
       {open && (
         <div
-          className="absolute top-full mt-1 right-0 z-50 rounded-xl overflow-hidden"
+          className="fixed z-[9999] rounded-xl overflow-hidden"
           style={{
             background: "rgba(10,12,14,0.95)",
             border: "1px solid rgba(196,154,40,0.25)",
             backdropFilter: "blur(16px)",
             minWidth: 160,
+            top: "52px",
+            right: "16px",
           }}
         >
           {MODE_ORDER.map((m) => (

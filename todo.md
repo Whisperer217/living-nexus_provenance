@@ -4964,3 +4964,10 @@
 - [x] Update prov-card-img-wrap to use fixed height/min-height/max-height via --card-img-h
 - [x] TypeScript 0 errors
 - [x] Vitest 237/237 passing
+
+## Cinematic Mode Fixes (Full-Screen + Mode Switcher)
+- [x] Change ArtBase sharp art from object-contain to object-cover (fills edge-to-edge, no letterboxing)
+- [x] Fix ModeSelector dropdown to use position:fixed z-[9999] so overflow-hidden on root doesn't clip it
+- [x] Add click-outside handler to ModeSelector so it closes on tap elsewhere
+- [x] TypeScript 0 errors
+- [x] Vitest 237/237 passing
