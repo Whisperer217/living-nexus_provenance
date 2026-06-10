@@ -278,10 +278,22 @@ export function ShelfBlock({ userId, config, medium, isOwner = false }: ShelfBlo
   });
 
   const handlePlay = (index: number) => {
-    const playable = filteredSongs.filter((s) => s.fileUrl);
     const clicked = filteredSongs[index];
-    if (!clicked?.fileUrl) return;
+    if (!clicked) return;
 
+    // Books and comics are not audio — navigate to their reader page instead of queuing
+    const isReadable = clicked.contentType === "manuscript" || clicked.contentType === "comic";
+    if (isReadable) {
+      window.location.href = `/book/${clicked.id}`;
+      return;
+    }
+
+    // Only audio tracks with an actual audio fileUrl should enter the player
+    if (!clicked.fileUrl) return;
+
+    const playable = filteredSongs.filter(
+      (s) => s.fileUrl && s.contentType !== "manuscript" && s.contentType !== "comic"
+    );
     const clickedPlayableIdx = playable.findIndex((s) => s.id === clicked.id);
     if (clickedPlayableIdx === -1) {
       addAndPlay(buildTrack(clicked));

@@ -610,9 +610,14 @@ export default function CreatorProfilePage() {
   );
 
   const handlePlay = (song: any) => {
+    // Books and comics are not audio — navigate to their reader page
+    if (song.contentType === "manuscript" || song.contentType === "comic") {
+      window.location.href = `/book/${song.id}`;
+      return;
+    }
     if (!song.fileUrl) { toast.error("No audio file available"); return; }
-    // Build queue from all this creator's public songs so playback continues
-    const creatorSongs = (data?.songs || []).filter((s: any) => !!s.fileUrl);
+    // Build queue from all this creator's public AUDIO songs so playback continues
+    const creatorSongs = (data?.songs || []).filter((s: any) => !!s.fileUrl && s.contentType !== "manuscript" && s.contentType !== "comic");
     if (creatorSongs.length > 1) {
       const queue = creatorSongs.map((s: { id: number; title: string; fileUrl: string; coverArtUrl?: string; genre?: string; witnessId?: string; coverPositionX?: number; coverPositionY?: number; visualReady?: boolean; autoVideoUrl?: string | null; contentType?: string }) => ({
         id: String(s.id),
