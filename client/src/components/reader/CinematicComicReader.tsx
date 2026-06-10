@@ -523,7 +523,7 @@ export function CinematicComicReader({
 
       {/* ── Top bar (sticky reader controls) ── */}
       <div
-        className="absolute top-0 left-0 right-0 z-[100] flex items-center justify-between px-4 py-3 transition-all duration-500"
+        className="absolute top-0 left-0 right-0 z-[100] flex items-center justify-between px-3 py-2 transition-all duration-500"
         style={{
           opacity: showControls ? 1 : 0,
           pointerEvents: showControls ? "auto" : "none",
@@ -542,7 +542,7 @@ export function CinematicComicReader({
             <ChevronLeft size={16} />
             <span className="hidden sm:inline">EXIT</span>
           </button>
-          <span className="text-xs font-heading font-bold tracking-widest truncate max-w-[30vw]" style={{ color: "#E8DFC8" }}>
+          <span className="hidden sm:inline text-xs font-heading font-bold tracking-widest truncate max-w-[30vw]" style={{ color: "#E8DFC8" }}>
             {title.toUpperCase()}
           </span>
           {/* Emotional beat indicator */}
@@ -588,7 +588,7 @@ export function CinematicComicReader({
                 title={isLocked ? "Witness Access required for Guided Mode" : undefined}
               >
                 {icons[m]}
-                <span className="hidden sm:inline">{labels[m]}</span>
+                <span className="hidden md:inline">{labels[m]}</span>
                 {isLocked && <Lock size={8} style={{ opacity: 0.5 }} />}
               </button>
             );
@@ -635,8 +635,10 @@ export function CinematicComicReader({
         </div>
       </div>
 
-      {/* ── Page area ── */}
-      <div className="flex-1 flex items-center justify-center overflow-hidden relative">
+        {/* ── Page area ── */}
+      <div className="flex-1 flex items-center justify-center overflow-hidden relative"
+        style={{ paddingBottom: isMobile ? "calc(80px + env(safe-area-inset-bottom, 0px))" : "0" }}
+      >
 
         {/* Left nav zone */}
         <button
@@ -657,7 +659,7 @@ export function CinematicComicReader({
         <div
           className={`flex items-center justify-center gap-2 h-full w-full
             ${transDir === "forward" ? "cn-page-forward" : transDir === "back" ? "cn-page-back" : ""}`}
-          style={{ padding: mode === "guided" ? "0" : "52px 80px 52px" }}
+          style={{ padding: mode === "guided" ? "0" : isMobile ? "48px 0 8px" : "52px 80px 52px" }}
         >
           {/* Guided mode: full page with panel zoom transform */}
           {mode === "guided" ? (
@@ -712,7 +714,7 @@ export function CinematicComicReader({
                   alt={`Page ${pageIdx + 1}`}
                   className="max-h-full object-contain rounded-sm shadow-2xl"
                   style={{
-                    maxWidth: mode === "spread" ? "540px" : "1100px",
+                    maxWidth: mode === "spread" ? "540px" : isMobile ? "100vw" : "1100px",
                     transform: `scale(${zoom})`,
                     transformOrigin: "center center",
                     transition: "transform 0.2s ease",
@@ -722,8 +724,8 @@ export function CinematicComicReader({
                   loading="eager"
                 />
               )}
-              {/* Spread: second page */}
-              {mode === "spread" && spreadRight !== null && shouldLoadPage(spreadRight) && (
+              {/* Spread: second page — hidden on mobile (too cramped) */}
+              {mode === "spread" && !isMobile && spreadRight !== null && shouldLoadPage(spreadRight) && (
                 <img
                   src={pages[spreadRight]?.imageUrl}
                   alt={`Page ${spreadRight + 1}`}
