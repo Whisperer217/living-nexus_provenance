@@ -376,6 +376,16 @@ export default function ExplorePage() {
     return (getCache<string>(CACHE_KEYS.EXPLORE_TAB) as ContentType) ?? "audio";
   });
 
+  // Detect filter=creators from URL
+  const filterParam = new URLSearchParams(search).get("filter");
+  const isCreatorsMode = filterParam === "creators";
+
+  // All Creators query — only fetched when filter=creators
+  const { data: allCreatorsData, isLoading: creatorsLoading } = trpc.profile.allCreators.useQuery(
+    undefined,
+    { enabled: isCreatorsMode, staleTime: 120_000, refetchOnWindowFocus: false }
+  );
+
   // Sync mode/contentType when URL search params change (e.g. ContextDrawer deep links)
   useEffect(() => {
     const p = new URLSearchParams(search);
@@ -903,7 +913,7 @@ export default function ExplorePage() {
         </div>
 
         {/* Loading skeleton — pan-row style */}
-        {isLoading && (
+        {!isCreatorsMode && isLoading && (
           <div className="space-y-7">
             {Array.from({ length: 3 }).map((_, gi) => (
               <div key={gi}>
@@ -927,8 +937,47 @@ export default function ExplorePage() {
           </div>
         )}
 
+        {/* ── ALL CREATORS MODE ─────────────────────────────────────────────────────── */}
+        {isCreatorsMode && (
+          <div>
+            {creatorsLoading ? (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                {Array.from({ length: 12 }).map((_, i) => (
+                  <div key={i} className="rounded-2xl overflow-hidden animate-pulse" style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.10)" }}>
+                    <div className="h-24" style={{ background: "rgba(255,255,255,0.04)" }} />
+                    <div className="p-4 space-y-2">
+                      <div className="w-12 h-12 rounded-full -mt-8 mb-2" style={{ background: "rgba(255,255,255,0.08)" }} />
+                      <div className="h-3 rounded w-3/4" style={{ background: "rgba(255,255,255,0.06)" }} />
+                      <div className="h-2.5 rounded w-1/2" style={{ background: "rgba(255,255,255,0.04)" }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : !allCreatorsData || allCreatorsData.length === 0 ? (
+              <div className="text-center py-20">
+                <div className="text-5xl mb-4">🌌</div>
+                <div className="font-heading text-[17px] mb-2" style={{ color: "rgba(255,255,255,0.50)" }}>No creators yet</div>
+                <div className="text-[13px] font-body" style={{ color: "rgba(255,255,255,0.35)" }}>Be the first to register your work on Living Nexus.</div>
+              </div>
+            ) : (
+              <>
+                <div className="flex items-center gap-2 mb-5">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: "var(--ln-gold)" }}><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                  <span className="font-heading text-[13px] tracking-widest uppercase" style={{ color: "var(--ln-gold)" }}>All Creators</span>
+                  <span className="text-[11px] font-body ml-1" style={{ color: "rgba(255,255,255,0.35)" }}>{allCreatorsData.length} registered</span>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                  {allCreatorsData.map((creator: any) => (
+                    <StoreCreatorCard key={creator.id} creator={creator} />
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
         {/* ── STORE VIEW ───────────────────────────────────────────────────────────────── */}
-        {!isLoading && songs.length > 0 && viewMode === "store" && (
+        {!isCreatorsMode && !isLoading && songs.length > 0 && viewMode === "store" && (
           <div className="-mx-6">
             {/* Group by genre for store rows */}
             {(() => {
@@ -983,7 +1032,7 @@ export default function ExplorePage() {
 
         {/* ── CLASSIC VIEW ──────────────────────────────────────────────────────────────── */}
         {/* Creator-grouped pan-rows — infinite mode only */}
-        {!isLoading && songs.length > 0 && viewMode === "classic" && mode === "infinite" && (
+        {!isCreatorsMode && !isLoading && songs.length > 0 && viewMode === "classic" && mode === "infinite" && (
           <div
             className="space-y-8"
             style={isShuffling ? { opacity: 0.5, transition: "opacity 0.2s" } : { opacity: 1, transition: "opacity 0.3s" }}
@@ -1072,7 +1121,7 @@ export default function ExplorePage() {
         )}
 
         {/* Flat grid — randomize / trending / new modes: all tracks across all creators (classic view only) */}
-        {!isLoading && songs.length > 0 && viewMode === "classic" && mode !== "infinite" && (
+        {!isCreatorsMode && !isLoading && songs.length > 0 && viewMode === "classic" && mode !== "infinite" && (
           <div
             className="grid gap-4"
             style={{
@@ -1102,7 +1151,7 @@ export default function ExplorePage() {
           </div>
         )}
         {/* Infinite scroll sentinel — only rendered in infinite mode */}
-        {mode === "infinite" && !isLoading && (
+        {!isCreatorsMode && mode === "infinite" && !isLoading && (
           <div ref={loaderRef} className="py-8 flex justify-center">
             {(isFetchingMore || pageFetching) && hasMore && (
               <div className="flex items-center gap-2 text-[12px]" style={{ color: "rgba(255,255,255,0.40)" }}>
@@ -1185,7 +1234,7 @@ export default function ExplorePage() {
         )}
 
         {/* Empty state */}
-        {!isLoading && songs.length === 0 && (
+        {!isCreatorsMode && !isLoading && songs.length === 0 && (
           <div className="text-center py-20 text-white/70">
             {mode === "new" ? (
               <>

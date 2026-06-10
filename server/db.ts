@@ -271,6 +271,7 @@ export async function getAllCreators() {
       licenseStatus: users.licenseStatus, songSlotsUsed: users.songSlotsUsed,
       stripeAccountStatus: users.stripeAccountStatus,
       isPinned: users.isPinned,
+      role: users.role,
       publishedCount: sql<number>`count(${songs.id})`,
     })
     .from(users)
@@ -290,7 +291,21 @@ export async function getAllCreators() {
     .having(sql`count(${songs.id}) > 0`)
     .orderBy(desc(users.createdAt))
     .limit(500); // Safety cap — paginate if platform exceeds 500 active creators
-  return results;
+
+  // Batch-fetch WID counts (songs with a witnessId) for all returned creators
+  if (results.length === 0) return results.map((r: typeof results[number]) => ({ ...r, widCount: 0 }));
+  const creatorIds = results.map((r: typeof results[number]) => r.id);
+  const widCounts = await db
+    .select({ userId: songs.userId, count: sql<number>`count(*)` })
+    .from(songs)
+    .where(and(
+      isNotNull(songs.witnessId),
+      ne(songs.status as any, "Deleted"),
+      sql`${songs.userId} IN (${sql.raw(creatorIds.join(","))})`
+    ))
+    .groupBy(songs.userId);
+  const widMap = new Map(widCounts.map((r: { userId: number | null; count: number }) => [r.userId, Number(r.count)]));
+  return results.map((r: typeof results[number]) => ({ ...r, widCount: widMap.get(r.id) ?? 0 }));
 }
 
 // ─── Songs ────────────────────────────────────────────────────────────────────
