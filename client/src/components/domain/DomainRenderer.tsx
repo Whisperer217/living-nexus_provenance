@@ -10,8 +10,9 @@
 import { trpc } from "@/lib/trpc";
 import { DEFAULT_DOMAIN_LAYOUT, type DomainBlockRecord, type ShelfBlockConfig, type ProvenanceTrailBlockConfig, type CustomTextBlockConfig, type DividerBlockConfig, type DistributionLinksBlockConfig, type FeaturedWorkBlockConfig, type BioBlockConfig, type HeroBlockConfig } from "@shared/domainTypes";
 import { ShelfBlock } from "./ShelfBlock";
-import { Shield, ExternalLink, Music2, Clock, Layers, Hash, Library, GitFork, Heart } from "lucide-react";
+import { Shield, ExternalLink, Music2, Clock, Layers, Hash, Library, GitFork, Heart, Play } from "lucide-react";
 import { Link } from "wouter";
+import { usePlayer, type Track } from "@/contexts/PlayerContext";
 
 interface DomainRendererProps {
   userId: number;
@@ -338,6 +339,47 @@ function FeaturedWorkBlock({ userId, config }: { userId: number; config: Feature
 }
 
 // ── CollectionsShelfBlock ─────────────────────────────────────────────────────
+function CollectionPlayButton({ collectionId, collectionName }: { collectionId: number; collectionName: string }) {
+  const { playQueueAt } = usePlayer();
+  const utils = trpc.useUtils();
+
+  const handlePlay = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      const result = await utils.client.collections.getTracksById.query({ collectionId });
+      if (!result?.length) return;
+      const tracks: Track[] = result
+        .filter((t: any) => t.song?.fileUrl)
+        .map((t: any) => ({
+          id: String(t.song.id),
+          title: t.song.title,
+          artist: t.creator?.artistHandle ?? t.creator?.name ?? "Unknown",
+          genre: t.song.genre ?? "",
+          audioUrl: t.song.fileUrl ?? undefined,
+          artUrl: t.song.coverArtUrl ?? undefined,
+          witnessId: t.song.witnessId ?? undefined,
+          creatorHandle: t.creator?.artistHandle ?? t.creator?.name ?? undefined,
+          creatorId: t.creator?.id,
+        }));
+      if (tracks.length > 0) playQueueAt(tracks, 0, "PLAYLIST");
+    } catch {
+      // silently ignore
+    }
+  };
+
+  return (
+    <button
+      onClick={handlePlay}
+      className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+      style={{ background: "rgba(212,175,55,0.15)", border: "1px solid rgba(212,175,55,0.3)" }}
+      title={`Play ${collectionName}`}
+    >
+      <Play className="w-3 h-3 text-[#D4AF37] ml-0.5" />
+    </button>
+  );
+}
+
 function CollectionsShelfBlock({ userId, isOwner }: { userId: number; isOwner: boolean }) {
   const { data: collections = [], isLoading } = trpc.collections.listByUser.useQuery(
     { userId },
@@ -414,6 +456,10 @@ function CollectionsShelfBlock({ userId, isOwner }: { userId: number; isOwner: b
                   <span className="text-[9px] font-mono text-[#D4AF37]/30 truncate">{col.wid}</span>
                 </div>
               </div>
+              {/* Play button — appears on hover */}
+              {(col.trackCount ?? 0) > 0 && (
+                <CollectionPlayButton collectionId={col.id} collectionName={col.name} />
+              )}
             </div>
           </Link>
         ))}

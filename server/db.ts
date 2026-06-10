@@ -5062,7 +5062,7 @@ export async function getCollectionTracksWithSongs(collectionId: number) {
     .orderBy(asc(collectionTracks.position));
 }
 
-export async function addTrackToManifestedCollection(collectionId: number, songId: number, addedByUserId: number, note?: string) {
+export async function addTrackToManifestedCollection(collectionId: number, songId: number, addedByUserId: number, note?: string | null) {
   const db = await getDb();
   if (!db) throw new Error("Database unavailable");
   // Get current max position

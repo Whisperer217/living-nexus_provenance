@@ -7014,7 +7014,7 @@ If a field cannot be determined from the document, use an empty string. For symb
       .mutation(async ({ ctx, input }) => {
         const col = await getManifestedCollectionById(input.collectionId);
         if (!col || col.ownerId !== ctx.user.id) throw new TRPCError({ code: "FORBIDDEN" });
-        await addTrackToManifestedCollection(input.collectionId, input.songId, ctx.user.id, input.note);
+        await addTrackToManifestedCollection(input.collectionId, input.songId, ctx.user.id, input.note ?? null);
         return { success: true };
       }),
 
@@ -7047,6 +7047,17 @@ If a field cannot be determined from the document, use an empty string. For symb
         if (!col.isPublic && col.ownerId !== ctx.user.id) throw new TRPCError({ code: "FORBIDDEN" });
         const ownerName = ctx.user.name ?? ctx.user.artistHandle ?? "Unknown";
         return forkManifestedCollection(input.collectionId, ctx.user.id, ownerName);
+      }),
+
+    /** Get tracks for a collection by ID — used for Play All on profile shelves. */
+    getTracksById: publicProcedure
+      .input(z.object({ collectionId: z.number().int().positive() }))
+      .query(async ({ input, ctx }) => {
+        const col = await getManifestedCollectionById(input.collectionId);
+        if (!col) throw new TRPCError({ code: "NOT_FOUND" });
+        // Only allow if public, or if the requesting user owns it
+        if (!col.isPublic && col.ownerId !== ctx.user?.id) throw new TRPCError({ code: "FORBIDDEN" });
+        return getCollectionTracksWithSongs(input.collectionId);
       }),
   }),
 });
