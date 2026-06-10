@@ -191,7 +191,7 @@ export default function BookDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: "#1E2D3A" }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--ln-coal)" }}>
         <div className="text-center space-y-3">
           <div className="w-10 h-10 rounded-full border-2 border-t-transparent animate-spin mx-auto" style={{ borderColor: "var(--ln-gold)", borderTopColor: "transparent" }} />
           <p className="text-sm font-heading" style={{ color: "var(--ln-smoke)" }}>Loading work…</p>
@@ -202,7 +202,7 @@ export default function BookDetailPage() {
 
   if (!song) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: "#1E2D3A" }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--ln-coal)" }}>
         <div className="text-center space-y-4">
           <BookOpen className="w-12 h-12 mx-auto opacity-30" style={{ color: "var(--ln-gold)" }} />
           <p className="font-heading text-lg" style={{ color: "var(--ln-parchment)" }}>Work not found</p>
@@ -221,7 +221,7 @@ export default function BookDetailPage() {
   }
 
   return (
-    <div className="min-h-screen pb-24" style={{ background: "linear-gradient(160deg, #1A2530 0%, #1E2D3A 40%, #232E35 100%)" }}>
+    <div className="min-h-screen pb-24" style={{ background: "linear-gradient(160deg, #0A0B08 0%, #111210 40%, #141510 100%)" }}>
       <Helmet>
         <title>{song.title} — {typeLabel} · Living Nexus</title>
         <meta name="description" content={`${song.title} by ${artistName} — ${typeLabel} witnessed on Living Nexus. ${song.witnessId ? `Witness ID: ${song.witnessId}` : ""}`} />
@@ -230,7 +230,7 @@ export default function BookDetailPage() {
 
       {/* ── Top nav bar ── */}
       <div className="sticky top-0 z-30 flex items-center justify-between px-4 py-3"
-        style={{ background: "linear-gradient(180deg, #1A2530 0%, rgba(26,37,48,0.92) 100%)", borderBottom: "1px solid rgba(196,154,40,0.08)", backdropFilter: "blur(12px)" }}>
+        style={{ background: "linear-gradient(180deg, #0A0B08 0%, rgba(10,11,8,0.92) 100%)", borderBottom: "1px solid rgba(196,154,40,0.08)", backdropFilter: "blur(12px)" }}>
         <button onClick={() => navigate(-1 as any)} className="flex items-center gap-2 text-sm transition-colors hover:text-[#C49A28]" style={{ color: "var(--ln-smoke)" }}>
           <ChevronLeft size={18} />
           <span className="font-heading tracking-wide text-xs">BACK</span>
@@ -459,40 +459,7 @@ export default function BookDetailPage() {
           </div>
         </div>
 
-        {/* ── SECTION 1: Origin Testimony ── */}
-        {(song as any).caption && (
-          <div
-            className="relative rounded-2xl overflow-hidden"
-            style={{ minHeight: "220px" }}
-          >
-            {/* Artwork as atmospheric background */}
-            {song.coverArtUrl && (
-              <img
-                src={song.coverArtUrl}
-                alt=""
-                className="absolute inset-0 w-full h-full object-cover"
-                style={{ filter: "brightness(0.55) saturate(0.8)", transform: "scale(1.04)" }}
-              />
-            )}
-            {/* Bottom gradient */}
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.35) 50%, rgba(0,0,0,0.10) 100%)" }} />
-            {/* Testimony content */}
-            <div className="relative z-10 flex flex-col justify-end h-full px-6 py-6">
-              <p className="text-[10px] uppercase tracking-widest font-heading mb-2" style={{ color: "rgba(196,154,40,0.7)" }}>Origin Testimony</p>
-              <p
-                className="text-lg md:text-xl leading-relaxed"
-                style={{ color: "#F5F5F5", fontFamily: "'Cormorant Garamond', serif", opacity: 0.95, maxWidth: "720px" }}
-              >
-                {(song as any).caption}
-              </p>
-              {(song as any).description && (song as any).description !== (song as any).caption && (
-                <p className="mt-3 text-sm leading-relaxed" style={{ color: "rgba(232,223,200,0.7)", fontFamily: "'Cormorant Garamond', serif", maxWidth: "680px" }}>
-                  {(song as any).description}
-                </p>
-              )}
-            </div>
-          </div>
-        )}
+        {/* Origin Testimony removed — description already shown in the hero metadata panel above */}
 
         {/* ── SECTION 2: Reader Access (Cinematic Entry) ── */}
         {hasStoryboard && (
@@ -570,7 +537,7 @@ export default function BookDetailPage() {
 
         {/* ── Fallback Document Viewer (legacy PDF, no storyboard) ── */}
         {!hasStoryboard && fileUrl && (
-          <div className="rounded-2xl overflow-hidden" style={{ background: "#1A2530", border: "1px solid rgba(196,154,40,0.15)" }}>
+          <div className="rounded-2xl overflow-hidden" style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.15)" }}>
             <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: "1px solid rgba(196,154,40,0.08)" }}>
               <div className="flex items-center gap-2">
                 <FileText size={15} style={{ color: accentColor }} />
@@ -596,7 +563,7 @@ export default function BookDetailPage() {
                   src={`${fileUrl}#toolbar=0&navpanes=0&scrollbar=1`}
                   className="w-full h-full"
                   title={song.title}
-                  style={{ border: "none", background: "#1A2530" }}
+                  style={{ border: "none", background: "var(--ln-coal)" }}
                 />
               </div>
             )}
@@ -628,7 +595,7 @@ export default function BookDetailPage() {
         {/* ── Consent Modal ── */}
         {consentOpen && (
           <div className="fixed inset-0 z-[200] flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.85)" }}>
-            <div className="w-full max-w-md rounded-2xl p-6 flex flex-col gap-4" style={{ background: "#1A2530", border: "1px solid rgba(196,154,40,0.25)" }}>
+            <div className="w-full max-w-md rounded-2xl p-6 flex flex-col gap-4" style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.25)" }}>
               <div className="flex items-center gap-3">
                 <Shield size={20} style={{ color: "var(--ln-gold)" }} />
                 <h2 className="text-base font-heading font-bold" style={{ color: "var(--ln-parchment)" }}>Before You Read</h2>
@@ -674,7 +641,7 @@ export default function BookDetailPage() {
         {/* ── Purchase Gate Modal ── */}
         {purchaseOpen && (
           <div className="fixed inset-0 z-[200] flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.85)" }}>
-            <div className="w-full max-w-sm rounded-2xl p-6 flex flex-col gap-4" style={{ background: "#1A2530", border: "1px solid rgba(196,154,40,0.25)" }}>
+            <div className="w-full max-w-sm rounded-2xl p-6 flex flex-col gap-4" style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.25)" }}>
               <div className="flex items-center gap-3">
                 <BookOpen size={20} style={{ color: accentColor }} />
                 <h2 className="text-base font-heading font-bold" style={{ color: "var(--ln-parchment)" }}>{song.title}</h2>
@@ -783,7 +750,7 @@ export default function BookDetailPage() {
 
         {/* ── Full Text Reader (lyricsText) ── */}
         {(song as any)?.lyricsText && (
-          <div className="rounded-2xl overflow-hidden" style={{ background: "#1A2530", border: "1px solid rgba(196,154,40,0.15)" }}>
+          <div className="rounded-2xl overflow-hidden" style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.15)" }}>
             <button
               onClick={() => setShowFullText(v => !v)}
               className="w-full flex items-center justify-between px-4 py-3 transition-colors hover:bg-white/5"
@@ -813,7 +780,7 @@ export default function BookDetailPage() {
               {REACTIONS.map(emoji => (
                 <button key={emoji}
                   className="flex items-center gap-1 px-3 py-1.5 rounded-full text-sm transition-all hover:scale-110 active:scale-95"
-                  style={{ background: "#1E2D3A", border: "1px solid rgba(196,154,40,0.15)" }}>
+                  style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.15)" }}>
                   {emoji}
                 </button>
               ))}
@@ -831,7 +798,7 @@ export default function BookDetailPage() {
             </h3>
             <div className="flex gap-2 mb-3">
               <div className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold"
-                style={{ background: "#1E2D3A", color: "var(--ln-gold)" }}>
+                style={{ background: "var(--ln-coal)", color: "var(--ln-gold)" }}>
                 {user ? (user.name || "?").charAt(0).toUpperCase() : "?"}
               </div>
               <div className="flex-1 space-y-2">
@@ -845,13 +812,13 @@ export default function BookDetailPage() {
                       commentMutation.mutate({ songId: bookId, content: commentText.trim() });
                     }
                   }}
-                  style={{ background: "#1E2D3A", border: "1px solid rgba(196,154,40,0.15)", color: "var(--ln-parchment)", fontSize: "13px" }}
+                  style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.15)", color: "var(--ln-parchment)", fontSize: "13px" }}
                 />
                 {commentText.trim() && (
                   <Button size="sm"
                     onClick={() => commentMutation.mutate({ songId: bookId, content: commentText.trim() })}
                     disabled={commentMutation.isPending}
-                    style={{ background: "var(--ln-gold)", color: "#1E2D3A" }}>
+                    style={{ background: "var(--ln-gold)", color: "var(--ln-coal)" }}>
                     Post
                   </Button>
                 )}
@@ -861,7 +828,7 @@ export default function BookDetailPage() {
               {comments?.map((c: any) => (
                 <div key={c.id} className="flex gap-2">
                   <div className="w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center text-[10px] font-bold"
-                    style={{ background: "#1E2D3A", color: "var(--ln-gold)" }}>
+                    style={{ background: "var(--ln-coal)", color: "var(--ln-gold)" }}>
                     {(c.authorName || "?").charAt(0).toUpperCase()}
                   </div>
                   <div className="flex-1">
