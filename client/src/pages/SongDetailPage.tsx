@@ -38,6 +38,7 @@ import { VersionHistoryModal } from "@/components/VersionHistoryModal";
 import { safeAudioUrl } from "@shared/const";
 import { getContentTypeColors } from "@/lib/contentTypeColors";
 import { QRShareModal } from "@/components/QRIdentityCard";
+import { CinematicComicReader, type BookPage } from "@/components/reader/CinematicComicReader";
 import { CreatorHandle } from "@/components/CreatorHandle";
 
 // Slug keys stored in DB (safe ASCII, no charset issues); emoji shown in UI
@@ -138,6 +139,7 @@ export default function SongDetailPage() {
   const [showTipModal, setShowTipModal] = useState(false);
   const heroRef = useRef<HTMLDivElement>(null);
   const [headerCollapsed, setHeaderCollapsed] = useState(false);
+  const [readerOpen, setReaderOpen] = useState(false);
   useEffect(() => {
     const onScroll = () => {
       if (!heroRef.current) return;
@@ -1377,6 +1379,7 @@ export default function SongDetailPage() {
             pagesJson: (song as any).pagesJson,
           }}
           onPlay={handlePlay}
+          onOpenReader={() => setReaderOpen(true)}
         />
 
         {/* ── LYRICS — full width, bottom of page, collapsed by default ── */}
@@ -1516,6 +1519,23 @@ export default function SongDetailPage() {
           onClose={() => setVersionHistoryOpen(false)}
         />
       )}
+
+      {/* ── COMIC / MANUSCRIPT READER OVERLAY ── */}
+      {readerOpen && song && (() => {
+        const pages: BookPage[] = (() => {
+          try { return (song as any).pagesJson ? JSON.parse((song as any).pagesJson) : []; } catch { return []; }
+        })();
+        if (pages.length === 0) return null;
+        return (
+          <div className="fixed inset-0 z-[200]">
+            <CinematicComicReader
+              pages={pages}
+              title={song.title}
+              onClose={() => setReaderOpen(false)}
+            />
+          </div>
+        );
+      })()}
 
       {/* Share Modal */}
       <Dialog open={shareOpen} onOpenChange={setShareOpen}>
