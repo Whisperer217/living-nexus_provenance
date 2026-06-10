@@ -1125,7 +1125,7 @@ export default function UploadPage() {
                           </div>
                         </div>
                       ))}
-                      <p className="text-[9px] pt-1" style={{ color: "var(--ln-iron)" }}>
+                      <p className="text-[9px] pt-1" style={{ color: "rgba(232,223,200,0.45)" }}>
                         <span style={{ color: cl.color + "99" }}>!</span> = required &nbsp;·&nbsp; ○ = optional but recommended
                       </p>
                     </div>
@@ -1157,7 +1157,7 @@ export default function UploadPage() {
                       <Music className="w-10 h-10 mx-auto mb-3" style={{ color: "var(--ln-gold)", opacity: 0.4 }} />
                       <p className="font-medium text-sm mb-1" style={{ color: "var(--ln-parchment)" }}>{audioDragging ? "Drop it!" : "Drop audio file here or click to browse"}</p>
                       <p className="text-xs" style={{ color: "#E2E8F0" }}>MP3, WAV, FLAC, M4A, OGG supported</p>
-                      <p className="text-xs mt-1" style={{ color: "var(--ln-iron)" }}>On iPhone, use Safari for best file access</p>
+                      <p className="text-xs mt-1" style={{ color: "rgba(232,223,200,0.45)" }}>On iPhone, use Safari for best file access</p>
                     </>
                   )}
                 </div>
@@ -1368,7 +1368,7 @@ export default function UploadPage() {
                     <>
                       <Video className="w-6 h-6 mx-auto mb-1" style={{ color: "var(--ln-seal-bright)", opacity: 0.4 }} />
                       <p className="text-sm" style={{ color: "#E2E8F0" }}>Music Video <span style={{ color: "#B8A88A" }}>(optional)</span> — MP4, MOV, max 500 MB</p>
-                      <p className="text-xs mt-0.5" style={{ color: "var(--ln-iron)" }}>Video gets its own Witness ID alongside your audio</p>
+                      <p className="text-xs mt-0.5" style={{ color: "rgba(232,223,200,0.45)" }}>Video gets its own Witness ID alongside your audio</p>
                     </>
                   )}
                 </div>
@@ -1407,18 +1407,18 @@ export default function UploadPage() {
 
               {/* ── Headline Caption ── */}
               <div>
-                <label className="text-xs mb-1.5 block font-medium" style={{ color: "#B8A88A" }}>Headline Caption <span style={{ color: "var(--ln-iron)" }}>(optional — short punchy subtitle)</span></label>
+                <label className="text-xs mb-1.5 block font-medium" style={{ color: "#B8A88A" }}>Headline Caption <span style={{ color: "rgba(232,223,200,0.45)" }}>(optional — short punchy subtitle)</span></label>
                 <Input value={headlineCaption} onChange={e => setHeadlineCaption(e.target.value)}
                   placeholder="e.g. A midnight confession in three chords"
                   maxLength={120}
                   style={{ background: "#1E1B12", border: "1px solid rgba(196,154,40,0.30)", color: "var(--ln-parchment)" }} />
-                {headlineCaption && <p className="text-[10px] mt-1" style={{ color: "var(--ln-iron)" }}>{headlineCaption.length}/120</p>}
+                {headlineCaption && <p className="text-[10px] mt-1" style={{ color: "rgba(232,223,200,0.45)" }}>{headlineCaption.length}/120</p>}
               </div>
 
               {/* ── Description with AI Generator ── */}
               <div>
                 <div className="flex items-center justify-between mb-1.5">
-                  <label className="text-xs font-medium" style={{ color: "#B8A88A" }}>Description <span style={{ color: "var(--ln-iron)" }}>(optional — the story behind the work)</span></label>
+                  <label className="text-xs font-medium" style={{ color: "#B8A88A" }}>Description <span style={{ color: "rgba(232,223,200,0.45)" }}>(optional — the story behind the work)</span></label>
                   <button
                     type="button"
                     disabled={descriptionGenerating || !title}
@@ -1458,7 +1458,7 @@ export default function UploadPage() {
               {/* ── Gallery Images ── */}
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="text-xs font-medium" style={{ color: "#B8A88A" }}>Gallery Images <span style={{ color: "var(--ln-iron)" }}>(optional — process photos, artwork, liner notes)</span></label>
+                  <label className="text-xs font-medium" style={{ color: "#B8A88A" }}>Gallery Images <span style={{ color: "rgba(232,223,200,0.45)" }}>(optional — process photos, artwork, liner notes)</span></label>
                   <button
                     type="button"
                     onClick={() => galleryInputRef.current?.click()}
@@ -1522,7 +1522,7 @@ export default function UploadPage() {
                   </div>
                 )}
                 {galleryImages.length === 0 && (
-                  <p className="text-[11px]" style={{ color: "var(--ln-iron)" }}>No gallery images yet. Add process photos, artwork variations, or visual context for your work.</p>
+                  <p className="text-[11px]" style={{ color: "rgba(232,223,200,0.45)" }}>No gallery images yet. Add process photos, artwork variations, or visual context for your work.</p>
                 )}
               </div>
 
@@ -1540,13 +1540,13 @@ export default function UploadPage() {
                   <div className="flex flex-wrap gap-2">
                     {creatorProfile?.primaryGenre && !GENRES.includes(creatorProfile.primaryGenre) && (
                       <button type="button" key="profile-genre" onClick={() => setGenre(genre === creatorProfile.primaryGenre ? "" : (creatorProfile.primaryGenre ?? ""))} className="px-3 py-1 rounded-full text-xs transition-all"
-                        style={{ background: genre === creatorProfile.primaryGenre ? "rgba(196,154,40,0.2)" : "var(--ln-coal)", color: genre === creatorProfile.primaryGenre ? "var(--ln-gold)" : "var(--ln-iron)", border: `1px solid ${genre === creatorProfile.primaryGenre ? "rgba(196,154,40,0.4)" : "rgba(196,154,40,0.15)"}` }}>
+                        style={{ background: genre === creatorProfile.primaryGenre ? "rgba(196,154,40,0.2)" : "var(--ln-coal)", color: genre === creatorProfile.primaryGenre ? "var(--ln-gold)" : "rgba(232,223,200,0.45)", border: `1px solid ${genre === creatorProfile.primaryGenre ? "rgba(196,154,40,0.4)" : "rgba(196,154,40,0.15)"}` }}>
                         {creatorProfile.primaryGenre}
                       </button>
                     )}
                     {GENRES.map(g => (
                       <button type="button" key={g} onClick={() => setGenre(g === genre ? "" : g)} className="px-3 py-1 rounded-full text-xs transition-all"
-                        style={{ background: genre === g ? "rgba(196,154,40,0.2)" : "var(--ln-coal)", color: genre === g ? "var(--ln-gold)" : "var(--ln-iron)", border: `1px solid ${genre === g ? "rgba(196,154,40,0.4)" : "rgba(196,154,40,0.15)"}` }}>
+                        style={{ background: genre === g ? "rgba(196,154,40,0.2)" : "var(--ln-coal)", color: genre === g ? "var(--ln-gold)" : "rgba(232,223,200,0.45)", border: `1px solid ${genre === g ? "rgba(196,154,40,0.4)" : "rgba(196,154,40,0.15)"}` }}>
                         {g}
                       </button>
                     ))}
@@ -1558,7 +1558,7 @@ export default function UploadPage() {
                   <div className="flex flex-wrap gap-2">
                     {(uploadMode === "manuscript" ? MANUSCRIPT_CATEGORIES : COMIC_CATEGORIES).map(cat => (
                       <button type="button" key={cat} onClick={() => setGenre(cat === genre ? "" : cat)} className="px-3 py-1 rounded-full text-xs transition-all"
-                        style={{ background: genre === cat ? "rgba(196,154,40,0.2)" : "var(--ln-coal)", color: genre === cat ? "var(--ln-gold)" : "var(--ln-iron)", border: `1px solid ${genre === cat ? "rgba(196,154,40,0.4)" : "rgba(196,154,40,0.15)"}` }}>
+                        style={{ background: genre === cat ? "rgba(196,154,40,0.2)" : "var(--ln-coal)", color: genre === cat ? "var(--ln-gold)" : "rgba(232,223,200,0.45)", border: `1px solid ${genre === cat ? "rgba(196,154,40,0.4)" : "rgba(196,154,40,0.15)"}` }}>
                         {cat}
                       </button>
                     ))}
@@ -1650,7 +1650,7 @@ export default function UploadPage() {
                   </button>
                 </div>
                 {credits.length === 0 && (
-                  <p className="text-[11px]" style={{ color: "var(--ln-iron)" }}>No credits added. Click "Add credit" to list co-writers, producers, engineers, etc.</p>
+                  <p className="text-[11px]" style={{ color: "rgba(232,223,200,0.45)" }}>No credits added. Click "Add credit" to list co-writers, producers, engineers, etc.</p>
                 )}
                 <div className="space-y-2">
                   {credits.map((c, i) => (
@@ -1917,11 +1917,11 @@ export default function UploadPage() {
                       <button type="button" onClick={() => { navigator.clipboard.writeText(witnessData.wid); toast.success("WID copied!"); }} className="flex items-center gap-1 text-xs hover:underline" style={{ color: "#E2E8F0" }}>
                         <Copy className="w-3 h-3" /> Copy
                       </button>
-                      <span style={{ color: "var(--ln-iron)" }}>·</span>
+                      <span style={{ color: "rgba(232,223,200,0.45)" }}>·</span>
                       <button type="button" onClick={() => playIdentityChord(witnessData.frequencies)} className="flex items-center gap-1 text-xs hover:underline" style={{ color: "#E2E8F0" }}>
                         <Play className="w-3 h-3" /> Play Identity Chord
                       </button>
-                      <span style={{ color: "var(--ln-iron)" }}>·</span>
+                      <span style={{ color: "rgba(232,223,200,0.45)" }}>·</span>
                       <button type="button" onClick={handleGenerateWid} className="flex items-center gap-1 text-xs hover:underline" style={{ color: "#E2E8F0" }}>
                         <RefreshCw className="w-3 h-3" /> Regenerate
                       </button>
@@ -1953,10 +1953,10 @@ export default function UploadPage() {
                   {/* ── WID Legal Disclaimer ── */}
                   <div
                     className="px-3 py-2.5 flex items-start gap-2"
-                    style={{ background: "rgba(44,52,56,0.7)", border: "1px solid rgba(196,154,40,0.08)" }}
+                    style={{ background: "rgba(196,154,40,0.06)", border: "1px solid rgba(196,154,40,0.18)" }}
                   >
-                    <ShieldCheck className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" style={{ color: "rgba(232,223,200,0.6)" }} />
-                    <p className="text-[11px] leading-relaxed" style={{ color: "var(--ln-iron)" }}>
+                    <ShieldCheck className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" style={{ color: "rgba(232,223,200,0.7)" }} />
+                    <p className="text-[11px] leading-relaxed" style={{ color: "rgba(232,223,200,0.75)" }}>
                       Your Witness ID preserves verifiable proof of authorship, creation date, and work integrity — supporting, but not replacing, official copyright registration. For legal protection, visit{" "}
                       <a href="https://www.copyright.gov/registration/" target="_blank" rel="noopener noreferrer" className="underline" style={{ color: "var(--ln-gold)" }}>copyright.gov/registration</a>.
                     </p>
@@ -2036,7 +2036,7 @@ export default function UploadPage() {
                           className="text-sm resize-none"
                           style={{ background: "var(--ln-coal)", borderColor: "rgba(196,154,40,0.15)", color: "var(--ln-parchment)" }}
                         />
-                        <p className="text-[10px]" style={{ color: "var(--ln-iron)", letterSpacing: "0.04em" }}>
+                        <p className="text-[10px]" style={{ color: "rgba(232,223,200,0.45)", letterSpacing: "0.04em" }}>
                           🔐 Your lyrics are WID protected and never used for AI training.
                         </p>
                         <button type="button" onClick={() => { setCaptionState("idle"); setCaption(""); }} className="text-[10px] hover:underline" style={{ color: "#B8A88A" }}>Reset caption</button>
@@ -2132,7 +2132,7 @@ export default function UploadPage() {
           )}
         </div>
 
-        <p className="text-center text-xs mt-6" style={{ color: "var(--ln-iron)" }}>
+        <p className="text-center text-xs mt-6" style={{ color: "rgba(232,223,200,0.45)" }}>
           BDDT Publishing · Command Domains LLC · Sovereign Shutter™ Framework
         </p>
       </div>
