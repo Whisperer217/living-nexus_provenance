@@ -4976,3 +4976,8 @@
 - [x] Wrap BookCard in fixed-height container (var(--card-img-h)) in HorizontalTrackGrid rows 1 and 2 — prevents comic/manuscript cards from being taller than audio TrackCards
 - [x] Remove paddingBottom:125% override from FeaturedProjectsCarousel prov-card-img-wrap — restores uniform fixed-height standard
 - [x] TypeScript: 0 errors | Vitest: 237/237 passing
+
+## Discover Page + EvidencePanel Fixes
+- [x] EvidencePanel: default expanded=true so Witnessed Work is immediately visible (not buried under down-arrow)
+- [x] DiscoverPage: manuscripts/comics in grid open reader/book page instead of triggering audio error
+- [x] DiscoverPage: title link routes to /book/:id for manuscript/comic content types

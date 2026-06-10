@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -100,7 +100,20 @@ export default function DiscoverPage() {
   const { data: creators, isLoading: creatorsLoading } = trpc.profile.allCreators.useQuery(undefined, { refetchOnWindowFocus: false });
   const playMutation = trpc.songs.play.useMutation();
 
+  const [, navigate] = useLocation();
+
   const handlePlay = (clickedSong: any) => {
+    const ct = clickedSong.song.contentType;
+    // Manuscripts and comics: open the reader/book detail page instead of audio player
+    if (ct === "manuscript" || ct === "comic") {
+      const pages = (() => { try { return clickedSong.song.pagesJson ? JSON.parse(clickedSong.song.pagesJson) : []; } catch { return []; } })();
+      if (pages.length > 0) {
+        setReaderSong(clickedSong.song);
+      } else {
+        navigate(`/book/${clickedSong.song.id}`);
+      }
+      return;
+    }
     if (!clickedSong.song.fileUrl) { toast.error("No audio file available"); return; }
     if (songs && songs.length > 0) {
       // Build full queue from current filtered results and play from the clicked track
@@ -406,6 +419,7 @@ export default function DiscoverPage() {
                   key={item.song.id}
                   onClick={() => handlePlay(item)}
                   onContextMenu={(e) => openMenu(e, item)}
+                  data-content-type={item.song.contentType}
                   className={`group museum-card parchment-grain cursor-pointer ${
                     isActive ? "museum-card--active" : ""
                   }`}
@@ -463,7 +477,11 @@ export default function DiscoverPage() {
                   </div>
                   <div className="p-3">
                     <div className="flex items-start justify-between gap-1 mb-0.5">
-                      <Link href={`/song/${item.song.id}`} className="flex-1 min-w-0" onClick={e => e.stopPropagation()}>
+                      <Link
+                        href={(item.song.contentType === "manuscript" || item.song.contentType === "comic") ? `/book/${item.song.id}` : `/song/${item.song.id}`}
+                        className="flex-1 min-w-0"
+                        onClick={e => e.stopPropagation()}
+                      >
                         <p className="font-semibold text-sm truncate hover:underline" style={{ color: "#FFFFFF", fontFamily: "'Cinzel', serif" }}>{item.song.title}</p>
                       </Link>
                       <button

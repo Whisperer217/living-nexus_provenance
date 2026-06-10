@@ -180,8 +180,8 @@ export function EvidencePanel({ songId, isOwner, manifestation, onPlay, onOpenRe
   const { user } = useAuth();
   const utils = trpc.useUtils();
 
-  // Default collapsed — manifestation hero above already surfaces the work
-  const [expanded, setExpanded] = useState(false);
+  // Default expanded — the witnessed work IS the primary content, not a secondary detail
+  const [expanded, setExpanded] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [formType, setFormType] = useState<"file" | "link" | "note">("file");
   const [formTitle, setFormTitle] = useState("");
