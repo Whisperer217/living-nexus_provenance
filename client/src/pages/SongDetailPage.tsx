@@ -141,6 +141,20 @@ export default function SongDetailPage() {
   const heroRef = useRef<HTMLDivElement>(null);
   const [headerCollapsed, setHeaderCollapsed] = useState(false);
   const [readerOpen, setReaderOpen] = useState(false);
+
+  // Open the reader: if the work has storyboard pages use the in-page reader,
+  // otherwise fall back to the BookDetailPage which handles raw PDFs.
+  const handleReadNow = () => {
+    const pagesJson = (song as any)?.pagesJson;
+    let hasPages = false;
+    try { hasPages = pagesJson ? JSON.parse(pagesJson).length > 0 : false; } catch {}
+    if (hasPages) {
+      setReaderOpen(true);
+    } else {
+      window.location.href = `/book/${song?.id}`;
+    }
+  };
+
   useEffect(() => {
     const onScroll = () => {
       if (!heroRef.current) return;
@@ -575,7 +589,7 @@ export default function SongDetailPage() {
               <div
                 className="relative w-full rounded-2xl overflow-hidden group cursor-pointer"
                 style={{ aspectRatio: "1/1", background: "linear-gradient(135deg, #111111, #000000)" }}
-                onClick={song.fileUrl ? handlePlay : ((song as any).contentType === "comic" || (song as any).contentType === "manuscript") ? () => setReaderOpen(true) : undefined}
+                onClick={song.fileUrl ? handlePlay : ((song as any).contentType === "comic" || (song as any).contentType === "manuscript") ? handleReadNow : undefined}
               >
                 {song.coverArtUrl
                   ? <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover" style={{ objectPosition: `${song.coverPositionX ?? 50}% ${song.coverPositionY ?? 50}%` }} />
@@ -617,7 +631,7 @@ export default function SongDetailPage() {
                     {isReadable ? (
                       /* Comics/manuscripts: READ NOW is primary, audio play is secondary if available */
                       <>
-                        <button type="button" onClick={() => setReaderOpen(true)}
+                        <button type="button" onClick={handleReadNow}
                           className="w-full flex items-center justify-center gap-3 py-3.5 rounded-xl font-heading font-bold tracking-widest text-sm transition-all hover:scale-[1.02] active:scale-[0.98]"
                           style={{ background: "rgba(196,154,40,0.92)", border: "1px solid rgba(196,154,40,0.6)", color: "#0A0B08", boxShadow: "0 4px 24px rgba(196,154,40,0.2)" }}>
                           <BookOpen size={16} style={{ color: "#0A0B08" }} />
@@ -1200,7 +1214,7 @@ export default function SongDetailPage() {
             pagesJson: (song as any).pagesJson,
           }}
           onPlay={handlePlay}
-          onOpenReader={() => setReaderOpen(true)}
+          onOpenReader={handleReadNow}
         />
 
         {/* ── LYRICS — full width, bottom of page, collapsed by default ── */}
@@ -1346,6 +1360,7 @@ export default function SongDetailPage() {
         const pages: BookPage[] = (() => {
           try { return (song as any).pagesJson ? JSON.parse((song as any).pagesJson) : []; } catch { return []; }
         })();
+        // handleReadNow already redirected to /book/:id if no pages — this guard is a safety net
         if (pages.length === 0) return null;
         return (
           <div className="fixed inset-0 z-[200]">
