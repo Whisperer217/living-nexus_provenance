@@ -354,9 +354,10 @@ function PromoCodesTab() {
               <Input
                 placeholder="BDDT-FREE"
                 value={form.code}
-                onChange={e => setForm(p => ({ ...p, code: e.target.value.toUpperCase() }))}
+                onChange={e => setForm(p => ({ ...p, code: e.target.value.toUpperCase().replace(/\s+/g, '-').replace(/[^A-Z0-9_-]/g, '') }))}
                 style={{ background: CARD, borderColor: BORDER, color: TEXT }}
               />
+              <p className="text-[10px] mt-1" style={{ color: MUTED }}>Letters, numbers, dashes, underscores only. Spaces auto-convert to dashes.</p>
             </div>
             <div>
               <label className="text-xs mb-1 block" style={{ color: SUBTEXT }}>Description (internal note)</label>

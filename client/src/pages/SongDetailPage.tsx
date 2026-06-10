@@ -610,33 +610,50 @@ export default function SongDetailPage() {
               </div>
 
               {/* Primary CTA button — below art */}
-              <div className="mt-4 flex flex-col gap-2">
-                {song.fileUrl && (
-                  <button type="button" onClick={handlePlay}
-                    className="w-full flex items-center justify-center gap-3 py-3.5 rounded-xl font-heading font-bold tracking-widest text-sm transition-all hover:scale-[1.02] active:scale-[0.98]"
-                    style={{ background: isPlaying ? "rgba(196,154,40,0.15)" : "rgba(196,154,40,0.92)", border: "1px solid rgba(196,154,40,0.6)", color: isPlaying ? "rgba(196,154,40,0.9)" : "#0A0B08", boxShadow: "0 4px 24px rgba(196,154,40,0.2)" }}>
-                    {isPlaying ? <Pause size={16} fill="currentColor" /> : <Play size={16} fill="currentColor" className="ml-0.5" />}
-                    {isPlaying ? "NOW PLAYING" : "PLAY NOW"}
-                  </button>
-                )}
-                {((song as any).contentType === "comic" || (song as any).contentType === "manuscript") && (
-                  <button type="button" onClick={() => setReaderOpen(true)}
-                    className="w-full flex items-center justify-center gap-3 py-3.5 rounded-xl font-heading font-bold tracking-widest text-sm transition-all hover:scale-[1.02] active:scale-[0.98]"
-                    style={{ background: "rgba(196,154,40,0.92)", border: "1px solid rgba(196,154,40,0.6)", color: "#0A0B08", boxShadow: "0 4px 24px rgba(196,154,40,0.2)" }}>
-                    <BookOpen size={16} style={{ color: "#0A0B08" }} />
-                    READ NOW
-                  </button>
-                )}
-                {/* Stats row */}
-                <div className="flex items-center justify-center gap-5 text-xs pt-1" style={{ color: "rgba(255,255,255,0.4)" }}>
-                  <span className="flex items-center gap-1"><Headphones className="w-3 h-3" />{song.playCount || 0}</span>
-                  <span className="flex items-center gap-1"><MessageSquare className="w-3 h-3" />{comments?.length || 0}</span>
-                  {likeCount > 0 && <span className="flex items-center gap-1"><Heart className="w-3 h-3" />{likeCount}</span>}
-                </div>
+              {(() => {
+                const isReadable = (song as any).contentType === "comic" || (song as any).contentType === "manuscript";
+                return (
+                  <div className="mt-4 flex flex-col gap-2">
+                    {isReadable ? (
+                      /* Comics/manuscripts: READ NOW is primary, audio play is secondary if available */
+                      <>
+                        <button type="button" onClick={() => setReaderOpen(true)}
+                          className="w-full flex items-center justify-center gap-3 py-3.5 rounded-xl font-heading font-bold tracking-widest text-sm transition-all hover:scale-[1.02] active:scale-[0.98]"
+                          style={{ background: "rgba(196,154,40,0.92)", border: "1px solid rgba(196,154,40,0.6)", color: "#0A0B08", boxShadow: "0 4px 24px rgba(196,154,40,0.2)" }}>
+                          <BookOpen size={16} style={{ color: "#0A0B08" }} />
+                          READ NOW
+                        </button>
+                        {song.fileUrl && (
+                          <button type="button" onClick={handlePlay}
+                            className="w-full flex items-center justify-center gap-3 py-2.5 rounded-xl font-heading font-bold tracking-widest text-xs transition-all hover:scale-[1.02] active:scale-[0.98]"
+                            style={{ background: isPlaying ? "rgba(196,154,40,0.15)" : "rgba(196,154,40,0.08)", border: "1px solid rgba(196,154,40,0.35)", color: isPlaying ? "rgba(196,154,40,0.9)" : "rgba(196,154,40,0.7)" }}>
+                            {isPlaying ? <Pause size={14} fill="currentColor" /> : <Play size={14} fill="currentColor" className="ml-0.5" />}
+                            {isPlaying ? "NOW PLAYING" : "LISTEN"}
+                          </button>
+                        )}
+                      </>
+                    ) : (
+                      /* Audio/lyrics: PLAY NOW is primary */
+                      song.fileUrl && (
+                        <button type="button" onClick={handlePlay}
+                          className="w-full flex items-center justify-center gap-3 py-3.5 rounded-xl font-heading font-bold tracking-widest text-sm transition-all hover:scale-[1.02] active:scale-[0.98]"
+                          style={{ background: isPlaying ? "rgba(196,154,40,0.15)" : "rgba(196,154,40,0.92)", border: "1px solid rgba(196,154,40,0.6)", color: isPlaying ? "rgba(196,154,40,0.9)" : "#0A0B08", boxShadow: "0 4px 24px rgba(196,154,40,0.2)" }}>
+                          {isPlaying ? <Pause size={16} fill="currentColor" /> : <Play size={16} fill="currentColor" className="ml-0.5" />}
+                          {isPlaying ? "NOW PLAYING" : "PLAY NOW"}
+                        </button>
+                      )
+                    )}
+                  </div>
+                );
+              })()}
+              {/* Stats row */}
+              <div className="flex items-center justify-center gap-5 text-xs pt-1" style={{ color: "rgba(255,255,255,0.4)" }}>
+                <span className="flex items-center gap-1"><Headphones className="w-3 h-3" />{song.playCount || 0}</span>
+                <span className="flex items-center gap-1"><MessageSquare className="w-3 h-3" />{comments?.length || 0}</span>
+                {likeCount > 0 && <span className="flex items-center gap-1"><Heart className="w-3 h-3" />{likeCount}</span>}
               </div>
             </div>
           </div>
-
           {/* ── RIGHT: Title + Provenance + Artifacts + Actions ── */}
           <div className="flex flex-col gap-5">
 
