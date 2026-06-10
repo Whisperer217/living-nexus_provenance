@@ -549,6 +549,9 @@ export function DomainRenderer({ userId, isOwner = false }: DomainRendererProps)
             {block.blockType === "shelf_collections" && (
               <CollectionsShelfBlock userId={userId} isOwner={isOwner} />
             )}
+            {block.blockType === "shelf_games" && (
+              <ShelfBlock userId={userId} config={cfg as ShelfBlockConfig} medium="games" isOwner={isOwner} />
+            )}
           </BlockWrapper>
         );
       })}

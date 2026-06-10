@@ -22,7 +22,7 @@ import { Link } from "wouter";
 interface ShelfBlockProps {
   userId: number;
   config: ShelfBlockConfig;
-  medium: "music" | "books" | "comics" | "manuscripts" | "artifacts" | "merch";
+  medium: "music" | "books" | "comics" | "manuscripts" | "artifacts" | "merch" | "games";
   isOwner?: boolean;
 }
 
@@ -34,6 +34,7 @@ const MEDIUM_META = {
   manuscripts: { label: "Manuscripts",  icon: FileText,    coverRatio: "3/4" as const },
   artifacts:   { label: "Artifacts",    icon: Package,     coverRatio: "1/1" as const },
   merch:       { label: "Merchandise",  icon: ShoppingBag, coverRatio: "1/1" as const },
+  games:       { label: "Games",        icon: Package,     coverRatio: "1/1" as const },
 };
 
 // ── Spine view (tall book-style) ───────────────────────────────────────────────
@@ -248,6 +249,7 @@ export function ShelfBlock({ userId, config, medium, isOwner = false }: ShelfBlo
       if (medium === "music") return !s.contentType || s.contentType === "audio";
       if (medium === "books" || medium === "manuscripts") return s.contentType === "manuscript";
       if (medium === "comics") return s.contentType === "comic";
+      if (medium === "games") return s.contentType === "game";
       return true;
     })
     .slice(0, maxItems);
@@ -287,12 +289,17 @@ export function ShelfBlock({ userId, config, medium, isOwner = false }: ShelfBlo
       window.location.href = `/book/${clicked.id}`;
       return;
     }
+    // Games navigate to their game detail page
+    if (clicked.contentType === "game") {
+      window.location.href = `/game/${clicked.id}`;
+      return;
+    }
 
     // Only audio tracks with an actual audio fileUrl should enter the player
     if (!clicked.fileUrl) return;
 
     const playable = filteredSongs.filter(
-      (s) => s.fileUrl && s.contentType !== "manuscript" && s.contentType !== "comic"
+      (s) => s.fileUrl && s.contentType !== "manuscript" && s.contentType !== "comic" && s.contentType !== "game"
     );
     const clickedPlayableIdx = playable.findIndex((s) => s.id === clicked.id);
     if (clickedPlayableIdx === -1) {

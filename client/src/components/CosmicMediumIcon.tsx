@@ -11,7 +11,7 @@
 
 import React from "react";
 
-type MediumType = "audio" | "lyrics" | "manuscript" | "comic";
+type MediumType = "audio" | "lyrics" | "manuscript" | "comic" | "game";
 
 interface CosmicMediumIconProps {
   medium: MediumType;
@@ -30,6 +30,7 @@ export const MEDIUM_COLORS: Record<MediumType, { primary: string; glow: string; 
   lyrics:     { primary: "#F5C451",  glow: "rgba(245,196,81,0.35)",  bg: "rgba(208,161,95,0.12)",  border: "rgba(245,196,81,0.40)"  },
   manuscript: { primary: "var(--ln-seal-bright)",  glow: "rgba(74,222,128,0.30)",  bg: "rgba(22,163,74,0.12)",   border: "rgba(74,222,128,0.40)"  },
   comic:      { primary: "#F87171",  glow: "rgba(248,113,113,0.30)", bg: "rgba(220,38,38,0.12)",   border: "rgba(248,113,113,0.40)" },
+  game:       { primary: "#34D399",  glow: "rgba(52,211,153,0.30)",  bg: "rgba(16,185,129,0.12)",  border: "rgba(52,211,153,0.40)"  },
 };
 
 // ── SVG Glyphs ────────────────────────────────────────────────────────────────
@@ -118,6 +119,35 @@ function ManuscriptGlyph({ color, size }: { color: string; size: number }) {
   );
 }
 
+function GameGlyph({ color, size }: { color: string; size: number }) {
+  const s = size;
+  return (
+    <svg width={s} height={s} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      {/* Outer ring */}
+      <circle cx="24" cy="24" r="21" stroke={color} strokeWidth="0.6" strokeDasharray="3 4" opacity="0.35" />
+      {/* Controller body */}
+      <rect x="10" y="17" width="28" height="14" rx="7" stroke={color} strokeWidth="1" fill={color} fillOpacity="0.08" />
+      {/* D-pad left side */}
+      <rect x="14" y="22" width="5" height="2" rx="1" fill={color} opacity="0.7" />
+      <rect x="15.5" y="20.5" width="2" height="5" rx="1" fill={color} opacity="0.7" />
+      {/* Buttons right side */}
+      <circle cx="32" cy="22" r="1.5" fill={color} opacity="0.8" />
+      <circle cx="35" cy="24" r="1.5" fill={color} opacity="0.6" />
+      <circle cx="32" cy="26" r="1.5" fill={color} opacity="0.5" />
+      <circle cx="29" cy="24" r="1.5" fill={color} opacity="0.6" />
+      {/* Center button */}
+      <circle cx="24" cy="24" r="2" stroke={color} strokeWidth="0.8" fill={color} fillOpacity="0.2" />
+      {/* Star sparks */}
+      <circle cx="7"  cy="9"  r="0.8" fill={color} opacity="0.6" />
+      <circle cx="41" cy="9"  r="0.8" fill={color} opacity="0.6" />
+      <circle cx="7"  cy="39" r="0.8" fill={color} opacity="0.5" />
+      <circle cx="41" cy="39" r="0.8" fill={color} opacity="0.5" />
+      <line x1="7" y1="9" x2="12" y2="17" stroke={color} strokeWidth="0.4" opacity="0.25" />
+      <line x1="41" y1="9" x2="36" y2="17" stroke={color} strokeWidth="0.4" opacity="0.25" />
+    </svg>
+  );
+}
+
 function ComicGlyph({ color, size }: { color: string; size: number }) {
   const s = size;
   return (
@@ -153,6 +183,7 @@ const GLYPHS: Record<MediumType, React.FC<{ color: string; size: number }>> = {
   lyrics:     LyricsGlyph,
   manuscript: ManuscriptGlyph,
   comic:      ComicGlyph,
+  game:       GameGlyph,
 };
 
 export const MEDIUM_LABELS: Record<MediumType, string> = {
@@ -160,6 +191,7 @@ export const MEDIUM_LABELS: Record<MediumType, string> = {
   lyrics:     "Lyrics",
   manuscript: "Manuscripts",
   comic:      "Comics",
+  game:       "Games",
 };
 
 // ── Main component ─────────────────────────────────────────────────────────────

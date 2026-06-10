@@ -254,7 +254,21 @@ export const songs = mysqlTable("songs", {
   // "lyrics"     = standalone lyric sheet (WID-LYR only, no audio)
   // "manuscript" = novel, short story, essay, academic paper
   // "comic"      = comic book, graphic novel, illustrated story
-  contentType: mysqlEnum("contentType", ["audio", "lyrics", "manuscript", "comic"]).default("audio").notNull(),
+  contentType: mysqlEnum("contentType", ["audio", "lyrics", "manuscript", "comic", "game"]).default("audio").notNull(),
+
+  // ─── Game Manifestation (contentType = "game") ────────────────────────────────
+  // gameEngine: the engine/format used to build the game
+  //   "html5" | "twine" | "construct" | "gdevelop" | "rpgmaker" | "unity_webgl" | "other"
+  gameEngine: varchar("gameEngine", { length: 32 }),
+  // gameUrl: iframe src for browser-playable games (HTML5, Twine, Construct, GDevelop, RPG Maker, Unity WebGL)
+  // null = download-only game
+  gameUrl: text("gameUrl"),
+  // gameDownloadUrl: direct download link (ZIP, EXE, APK, etc.) — optional, can coexist with gameUrl
+  gameDownloadUrl: text("gameDownloadUrl"),
+  // gameDownloadSize: human-readable size string e.g. "42 MB" — shown on download button
+  gameDownloadSize: varchar("gameDownloadSize", { length: 32 }),
+  // creatorNotes: designer's commentary, patch notes, or intent statement — shown below the game viewer
+  creatorNotes: text("creatorNotes"),
 
   // Visual pipeline readiness
   // true = autoVideoUrl is populated and the work is fully visually ready

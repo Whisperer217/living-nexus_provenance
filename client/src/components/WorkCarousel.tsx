@@ -10,19 +10,20 @@ import { useRef } from "react";
 import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
 // Card width is responsive via CSS variable --card-pan-w
-import { Play, Pause, FileText, BookOpen, Layers, Music, ChevronRight } from "lucide-react";
+import { Play, Pause, FileText, BookOpen, Layers, Music, ChevronRight, Gamepad2 } from "lucide-react";
 import { MediaAsset } from "@/components/MediaAsset";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { toast } from "sonner";
 import { CreatorHandle } from "@/components/CreatorHandle";
 
-export type WorkType = "audio" | "lyrics" | "manuscript" | "comic";
+export type WorkType = "audio" | "lyrics" | "manuscript" | "comic" | "game";
 
 const WID_TYPE_LABEL: Record<WorkType, string> = {
   audio: "WID-MUS",
   lyrics: "WID-LYR",
   manuscript: "WID-MAN",
   comic: "WID-COM",
+  game: "WID-GAM",
 };
 
 const WID_TYPE_COLOR: Record<WorkType, string> = {
@@ -30,6 +31,7 @@ const WID_TYPE_COLOR: Record<WorkType, string> = {
   lyrics: "#c084fc",
   manuscript: "#4ade80",
   comic: "#60a5fa",
+  game: "#22C55E",
 };
 
 const CONTENT_ICON: Record<WorkType, React.ElementType> = {
@@ -37,6 +39,7 @@ const CONTENT_ICON: Record<WorkType, React.ElementType> = {
   lyrics: FileText,
   manuscript: BookOpen,
   comic: Layers,
+  game: Gamepad2,
 };
 
 interface WorkCarouselProps {
@@ -147,7 +150,7 @@ export function WorkCarousel({ type, title, limit = 12, viewAllHref, onOpenReade
           {(works as any[]).map((item: any) => {
             const isActive = type === "audio" && currentTrackId === String(item.song.id);
             const isPlaying = isActive && playerState.isPlaying;
-            const href = (type === "manuscript" || type === "comic") ? `/book/${item.song.id}` : `/song/${item.song.id}`;
+            const href = (type === "manuscript" || type === "comic") ? `/book/${item.song.id}` : type === "game" ? `/game/${item.song.id}` : `/song/${item.song.id}`;
             return (
               <div
                 key={item.song.id}
@@ -158,6 +161,7 @@ export function WorkCarousel({ type, title, limit = 12, viewAllHref, onOpenReade
                 onClick={() => {
                   if (type === "audio") { handlePlay(item); return; }
                   if ((type === "comic" || type === "manuscript") && onOpenReader) { onOpenReader(item.song); return; }
+                  if (type === "game") { window.location.href = `/game/${item.song.id}`; return; }
                 }}
               >
                 {/* Cover / thumbnail */}

@@ -339,7 +339,7 @@ export async function createSong(data: {
   witnessId?: string; harmonicSignature?: number[];
   ecdsaPublicKey?: string; ecdsaSignature?: string; certificateUrl?: string; certificateKey?: string;
   isLyricsOnly?: boolean;
-  contentType?: "audio" | "lyrics" | "manuscript" | "comic";
+  contentType?: "audio" | "lyrics" | "manuscript" | "comic" | "game";
   caption?: string | null;
   displayOrder?: number;
 }) {
@@ -399,7 +399,7 @@ export async function reorderSongs(userId: number, orderedIds: number[]) {
   );
 }
 
-export async function getPublicSongs(opts?: { genre?: string; search?: string; limit?: number; offset?: number; randomize?: boolean; seed?: number; contentType?: "audio" | "lyrics" | "manuscript" | "comic" | "written" }) {
+export async function getPublicSongs(opts?: { genre?: string; search?: string; limit?: number; offset?: number; randomize?: boolean; seed?: number; contentType?: "audio" | "lyrics" | "manuscript" | "comic" | "written" | "game" }) {
   const db = await getDb();
   if (!db) return [];
   const limit = opts?.limit ?? 50;
@@ -3721,7 +3721,7 @@ export async function getRecentCreators(limit = 8) {
 }
 
 /** Return top `limit` published songs uploaded in the last 7 days, ranked by play count. */
-export async function getNewThisWeek(opts?: { genre?: string; contentType?: "audio" | "lyrics" | "manuscript" | "comic" | "written"; limit?: number }) {
+export async function getNewThisWeek(opts?: { genre?: string; contentType?: "audio" | "lyrics" | "manuscript" | "comic" | "written" | "game"; limit?: number }) {
   const db = await getDb();
   if (!db) return [];
   const limit = opts?.limit ?? 24;

@@ -736,6 +736,13 @@
       "when": 1781124028519,
       "tag": "0105_good_vampiro",
       "breakpoints": true
+    },
+    {
+      "idx": 106,
+      "version": "5",
+      "when": 1781133464973,
+      "tag": "0106_legal_whizzer",
+      "breakpoints": true
     }
   ]
 }

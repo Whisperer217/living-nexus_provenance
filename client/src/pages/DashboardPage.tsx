@@ -1593,6 +1593,7 @@ function WIDCacheTab() {
     lyrics: "WID-LYR",
     manuscript: "WID-MAN",
     comic: "WID-CMX",
+    game: "WID-GAM",
   };
 
   const MEDIUM_COLOR: Record<string, string> = {
@@ -1600,6 +1601,7 @@ function WIDCacheTab() {
     lyrics: "var(--ln-gold)",
     manuscript: "var(--lnx-orange)",
     comic: "#38BDF8",
+    game: "#22C55E",
   };
 
   return (

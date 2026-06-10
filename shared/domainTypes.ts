@@ -15,6 +15,7 @@ export const DOMAIN_BLOCK_TYPES = [
   "shelf_artifacts",   // Artifact collection — relics, objects, visual art
   "shelf_merch",       // Merchandise display — physical products
   "shelf_collections", // Manifested Collections shelf
+  "shelf_games",       // Game arcade — playable games
   // ── Featured Category ─────────────────────────────────────────────────────
   "featured_work",     // Pinned/highlighted works (up to 6 IDs)
   // ── Commerce Category ─────────────────────────────────────────────────────
@@ -154,4 +155,5 @@ export const DEFAULT_DOMAIN_LAYOUT: Array<{
   { blockType: "provenance_trail", position: 8, visible: true, size: "full",  config: { showDomainVersions: true, showWids: true, maxItems: 10 } },
   { blockType: "field_notes",    position: 9, visible: false, size: "full",   config: {} },
   { blockType: "shelf_collections", position: 10, visible: false, size: "full",  config: { heading: "Collections" } },
+  { blockType: "shelf_games",       position: 11, visible: false, size: "full",  config: { heading: "Games" } },
 ];

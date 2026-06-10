@@ -79,6 +79,7 @@ function widPrefixForMode(mode: string): string {
     case "lyrics":     return "WID-LYR";
     case "manuscript": return "WID-MAN";
     case "comic":      return "WID-COM";
+    case "game":       return "WID-GAM";
     default:           return "WID-MUS";
   }
 }
@@ -210,7 +211,11 @@ export default function UploadPage() {
 
   const { extractMetadata, isExtracting: isExtractingMeta } = useAudioMetadata();
 
-  const [uploadMode, setUploadMode] = useState<"audio" | "lyrics" | "manuscript" | "comic">("audio");
+  const [uploadMode, setUploadMode] = useState<"audio" | "lyrics" | "manuscript" | "comic" | "game">("audio");
+  const [gameUrl, setGameUrl] = useState("");
+  const [gameDownloadUrl, setGameDownloadUrl] = useState("");
+  const [gameEngine, setGameEngine] = useState("");
+  const [gameCreatorNotes, setGameCreatorNotes] = useState("");
   const [documentFile, setDocumentFile] = useState<File | null>(null);
   const documentInputRef = useRef<HTMLInputElement>(null);
   const [storyboardPagesJson, setStoryboardPagesJson] = useState<string | null>(null);
@@ -248,7 +253,7 @@ export default function UploadPage() {
     const qGenre = params.get("genre");
     const qMood = params.get("mood");
     const qTags = params.get("tags");
-    const qType = params.get("type") as "audio" | "lyrics" | "manuscript" | "comic" | null;
+    const qType = params.get("type") as "audio" | "lyrics" | "manuscript" | "comic" | "game" | null;
     const qEditId = params.get("editId");
     if (qTitle) setTitle(qTitle);
     if (qGenre) setGenre(qGenre);
@@ -262,7 +267,7 @@ export default function UploadPage() {
       setCaption(qTags);
     }
     // ?type= preselects the manifestation upload mode (from Archive CTA)
-    if (qType && ["audio", "lyrics", "manuscript", "comic"].includes(qType)) {
+    if (qType && ["audio", "lyrics", "manuscript", "comic", "game"].includes(qType)) {
       setUploadMode(qType);
     }
     // ?editId= triggers draft pre-population (Phase 187)
@@ -301,8 +306,8 @@ export default function UploadPage() {
     if (draftData.aiToolSonato) setAiToolSonato(draftData.aiToolSonato);
     if (draftData.aiToolOther) setAiToolOther(draftData.aiToolOther);
     if (draftData.aiToolOtherName) setAiToolOtherName(draftData.aiToolOtherName);
-    if (draftData.contentType && ["audio", "lyrics", "manuscript", "comic"].includes(draftData.contentType)) {
-      setUploadMode(draftData.contentType as "audio" | "lyrics" | "manuscript" | "comic");
+    if (draftData.contentType && ["audio", "lyrics", "manuscript", "comic", "game"].includes(draftData.contentType)) {
+      setUploadMode(draftData.contentType as "audio" | "lyrics" | "manuscript" | "comic" | "game");
     }
     // HAAI declaration fields
     if (draftData.haaiVisualConcept || draftData.haaiStyleLanguage || draftData.haaiInstrumentation ||
@@ -721,6 +726,37 @@ export default function UploadPage() {
       } catch (err: any) { toast.error(err.message || "Failed to prepare upload"); }
       return;
     }
+    if (uploadMode === "game") {
+      if (!title) { toast.error("Title is required"); return; }
+      try {
+        let coverArtUrl: string | undefined;
+        if (coverFile) {
+          const compressed = await compressCoverArt(coverFile);
+          const { url } = await uploadFileToS3(compressed, "cover");
+          coverArtUrl = url;
+        }
+        uploadMutation.mutate({
+          coverArtUrl, title, genre: genre || undefined,
+          albumName: albumName || undefined, releaseDate: releaseDate || undefined,
+          isrc: isrc || undefined, aiConsent, ownershipStatus, moodTags: selectedMoods, coWriters: [],
+          creditsJson: credits.filter(c => c.role && c.name).length > 0 ? JSON.stringify(credits.filter(c => c.role && c.name)) : undefined,
+          caption: caption || undefined,
+          headlineCaption: headlineCaption || undefined,
+          description: description || undefined,
+          galleryImagesJson: galleryImages.length > 0 ? JSON.stringify(galleryImages) : undefined,
+          contentType: "game",
+          gameUrl: gameUrl || undefined,
+          gameDownloadUrl: gameDownloadUrl || undefined,
+          gameEngine: gameEngine || undefined,
+          creatorNotes: gameCreatorNotes || undefined,
+          aiToolSuno, aiToolUdio, aiToolSonato, aiToolOther,
+          aiToolOtherName: aiToolOtherName || undefined,
+          aiDisclosure,
+          ...(aiDisclosure === "human_authored_ai_instrument" ? haaiDeclaration : {}),
+        } as any);
+      } catch (err: any) { toast.error(err.message || "Failed to prepare upload"); }
+      return;
+    }
     if (uploadMode === "lyrics") {
       if (!title || !lyrics.trim()) { toast.error("Title and lyrics are required"); return; }
       try {
@@ -888,10 +924,10 @@ export default function UploadPage() {
           <div className="flex items-start justify-between gap-4">
             <div>
               <h1 className="text-2xl md:text-3xl font-bold mb-1" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>
-                {uploadMode === "audio" ? "Register Track" : uploadMode === "lyrics" ? "Register Lyrics" : uploadMode === "manuscript" ? "Register Manuscript" : "Register Comic / Novel"}
+                {uploadMode === "audio" ? "Register Track" : uploadMode === "lyrics" ? "Register Lyrics" : uploadMode === "manuscript" ? "Register Manuscript" : uploadMode === "game" ? "Register Game" : "Register Comic / Novel"}
               </h1>
               <p className="text-sm" style={{ color: "#E2E8F0" }}>
-                {uploadMode === "audio" ? "Register your music with cryptographic provenance — BDDT Publishing / Command Domains LLC" : uploadMode === "lyrics" ? "Register your lyrics with a cryptographic Witness ID — authorship sealed at creation" : uploadMode === "manuscript" ? "Seal your manuscript with provenance — every word, dated and verified" : "Register your comic or novel — art and story, sealed with a Witness ID"}
+                {uploadMode === "audio" ? "Register your music with cryptographic provenance — BDDT Publishing / Command Domains LLC" : uploadMode === "lyrics" ? "Register your lyrics with a cryptographic Witness ID — authorship sealed at creation" : uploadMode === "manuscript" ? "Seal your manuscript with provenance — every word, dated and verified" : uploadMode === "game" ? "Register your game as a witnessed manifestation — playable, versioned, provenance-sealed" : "Register your comic or novel — art and story, sealed with a Witness ID"}
               </p>
             </div>
             <button
@@ -989,6 +1025,13 @@ export default function UploadPage() {
                     label="Comic / Novel"
                     onClick={() => { setUploadMode("comic"); setAudioFile(null); setDocumentFile(null); setWitnessData(null); }}
                   />
+                  <CosmicMediumIcon
+                    medium="game"
+                    size={38}
+                    active={uploadMode === "game"}
+                    label="Game"
+                    onClick={() => { setUploadMode("game"); setAudioFile(null); setDocumentFile(null); setWitnessData(null); }}
+                  />
                 </div>
               </div>
 
@@ -1045,6 +1088,19 @@ export default function UploadPage() {
                       { label: "ISBN", note: "Enter in the ISRC field — leave blank if self-published", required: false },
                       { label: "Issue / volume number", note: "Enter in the Album/Series field", required: false },
                       { label: "Genre / themes", note: "e.g. Superhero, Horror, Fantasy, Slice of Life", required: false },
+                    ],
+                  },
+                  game: {
+                    icon: "🎮",
+                    color: "#34D399",
+                    title: "Before You Register a Game",
+                    items: [
+                      { label: "Cover art image", note: "Square or landscape — key art for the game", required: true },
+                      { label: "Title and creator name", required: true },
+                      { label: "Game URL (HTML5/WebGL)", note: "Hosted URL for browser-playable games (itch.io, GitHub Pages, etc.)", required: false },
+                      { label: "Download URL", note: "Direct link to ZIP, EXE, or APK for downloadable games", required: false },
+                      { label: "Game engine", note: "e.g. Unity WebGL, Twine, Construct, GDevelop, RPG Maker", required: false },
+                      { label: "Creator notes", note: "Controls, lore, or dev notes for players", required: false },
                     ],
                   },
                 };
@@ -1212,6 +1268,65 @@ export default function UploadPage() {
                 </div>
               )}
 
+              {uploadMode === "game" && (
+                <div className="space-y-3 rounded-xl p-4" style={{ background: "rgba(52,211,153,0.05)", border: "1px solid rgba(52,211,153,0.2)" }}>
+                  <p className="text-xs font-heading tracking-widest uppercase" style={{ color: "#34D399" }}>🎮 Game Details</p>
+                  <div>
+                    <label className="text-xs font-medium block mb-1" style={{ color: "var(--ln-parchment)" }}>Game URL (HTML5 / WebGL)</label>
+                    <input
+                      type="url"
+                      value={gameUrl}
+                      onChange={e => setGameUrl(e.target.value)}
+                      placeholder="https://itch.io/... or GitHub Pages URL"
+                      className="w-full rounded-lg px-3 py-2 text-sm"
+                      style={{ background: "var(--ln-coal)", border: "1px solid rgba(52,211,153,0.25)", color: "var(--ln-parchment)" }}
+                    />
+                    <p className="text-[10px] mt-1" style={{ color: "#5A6A72" }}>For browser-playable games — will be embedded in an iframe on the game page</p>
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium block mb-1" style={{ color: "var(--ln-parchment)" }}>Download URL</label>
+                    <input
+                      type="url"
+                      value={gameDownloadUrl}
+                      onChange={e => setGameDownloadUrl(e.target.value)}
+                      placeholder="https://... (ZIP, EXE, APK)"
+                      className="w-full rounded-lg px-3 py-2 text-sm"
+                      style={{ background: "var(--ln-coal)", border: "1px solid rgba(52,211,153,0.25)", color: "var(--ln-parchment)" }}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium block mb-1" style={{ color: "var(--ln-parchment)" }}>Game Engine</label>
+                    <select
+                      value={gameEngine}
+                      onChange={e => setGameEngine(e.target.value)}
+                      className="w-full rounded-lg px-3 py-2 text-sm"
+                      style={{ background: "var(--ln-coal)", border: "1px solid rgba(52,211,153,0.25)", color: gameEngine ? "var(--ln-parchment)" : "#5A6A72" }}
+                    >
+                      <option value="">Select engine (optional)</option>
+                      <option value="Unity WebGL">Unity WebGL</option>
+                      <option value="Twine">Twine</option>
+                      <option value="Construct">Construct</option>
+                      <option value="GDevelop">GDevelop</option>
+                      <option value="RPG Maker">RPG Maker</option>
+                      <option value="Godot">Godot (HTML5 export)</option>
+                      <option value="Bitsy">Bitsy</option>
+                      <option value="Ren'Py">Ren'Py</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium block mb-1" style={{ color: "var(--ln-parchment)" }}>Creator Notes</label>
+                    <textarea
+                      value={gameCreatorNotes}
+                      onChange={e => setGameCreatorNotes(e.target.value)}
+                      placeholder="Controls, lore, dev notes, content warnings..."
+                      rows={3}
+                      className="w-full rounded-lg px-3 py-2 text-sm resize-none"
+                      style={{ background: "var(--ln-coal)", border: "1px solid rgba(52,211,153,0.25)", color: "var(--ln-parchment)" }}
+                    />
+                  </div>
+                </div>
+              )}
               <div onClick={() => coverInputRef.current?.click()} className="rounded-xl p-5 text-center cursor-pointer transition-all hover:bg-white/5"
                 style={{ border: `2px dashed ${coverFile ? "var(--ln-gold)" : "rgba(196,154,40,0.15)"}`, background: coverFile ? "rgba(196,154,40,0.04)" : "var(--ln-coal)" }}>
                 <input ref={coverInputRef} type="file" accept="image/*" className="hidden"
