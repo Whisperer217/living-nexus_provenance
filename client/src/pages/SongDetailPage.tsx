@@ -685,7 +685,9 @@ export default function SongDetailPage() {
               {(() => { const _ctc = getContentTypeColors((song as any).contentType ?? "audio"); return (
                 <div className="flex flex-wrap gap-1.5 mb-3">
                   <Badge style={{ background: _ctc.chipBg, color: _ctc.text, border: `1px solid ${_ctc.chipBorder}`, fontSize: "11px" }}>{_ctc.icon} {_ctc.label}</Badge>
-                  {song.genre && <Badge style={{ background: _ctc.chipBg, color: _ctc.text, border: `1px solid ${_ctc.chipBorder}`, fontSize: "11px" }}>{song.genre}</Badge>}
+                  {song.genre && song.genre.split(",").map((g: string) => g.trim()).filter(Boolean).map((g: string, i: number) => (
+                    <Badge key={i} style={{ background: _ctc.chipBg, color: _ctc.text, border: `1px solid ${_ctc.chipBorder}`, fontSize: "11px" }}>{g}</Badge>
+                  ))}
                   {song.bpm && <Badge style={{ background: "var(--ln-coal)", color: "var(--ln-smoke)", border: "1px solid #C49A28", fontSize: "11px" }}>{song.bpm} BPM</Badge>}
                   {song.keySignature && <Badge style={{ background: "var(--ln-coal)", color: "var(--ln-smoke)", border: "1px solid #C49A28", fontSize: "11px" }}>{song.keySignature}</Badge>}
                 </div>
