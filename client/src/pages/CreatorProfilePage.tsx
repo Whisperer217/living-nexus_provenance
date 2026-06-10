@@ -1411,14 +1411,26 @@ export default function CreatorProfilePage() {
                     {isWitnessingCreator ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 )}
-                <button
-                  onClick={() => { navigator.clipboard.writeText(window.location.href); toast.success("Profile link copied!"); }}
-                  className="w-9 h-9 rounded-lg flex items-center justify-center transition-colors"
-                  style={{ border: "1px solid rgba(196,154,40,0.12)", color: "var(--ln-smoke)", background: "transparent" }}
-                  title="Copy profile link"
-                >
-                  <Share2 className="w-4 h-4" />
-                </button>
+                <QRShareModal
+                  entity={{
+                    type: "creator",
+                    id: creator.id,
+                    slug: creator.artistHandle || String(creator.id),
+                    name: creator.name || creator.artistHandle || "Creator",
+                    subtitle: creator.artistHandle ? `@${creator.artistHandle}` : undefined,
+                    description: creator.bio ?? undefined,
+                    thumbnailUrl: creator.profilePhotoUrl ?? creator.bannerUrl ?? undefined,
+                  }}
+                  trigger={
+                    <button
+                      className="w-9 h-9 rounded-lg flex items-center justify-center transition-colors"
+                      style={{ border: "1px solid rgba(196,154,40,0.12)", color: "var(--ln-smoke)", background: "transparent" }}
+                      title="Share identity card"
+                    >
+                      <Share2 className="w-4 h-4" />
+                    </button>
+                  }
+                />
               </div>
             </div>{/* end mobile stacked layout */}
 

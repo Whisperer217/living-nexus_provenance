@@ -4981,3 +4981,8 @@
 - [x] EvidencePanel: default expanded=true so Witnessed Work is immediately visible (not buried under down-arrow)
 - [x] DiscoverPage: manuscripts/comics in grid open reader/book page instead of triggering audio error
 - [x] DiscoverPage: title link routes to /book/:id for manuscript/comic content types
+
+## Phase N+1: Duplicate Gift Panel + Download Card Fix
+- [x] Remove duplicate Gift/tip panel from SongDetailPage (appeared twice: once in hero right column, once below fold)
+- [x] Fix Identity Card "Download Card" button — add crossOrigin=anonymous to canvas image load to prevent canvas taint blocking toBlob/toDataURL
+- [x] Add QRShareModal (ID Card) to mobile CreatorProfilePage action buttons (was plain copy-link button, now opens full ID card modal)

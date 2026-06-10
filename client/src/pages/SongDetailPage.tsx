@@ -959,39 +959,6 @@ export default function SongDetailPage() {
               );
             })()}
 
-            {/* ── PROMINENT TIP PANEL ── */}
-            {tipsEnabled && !isOwner && (
-              <div className="rounded-2xl p-5" style={{ background: "linear-gradient(135deg, rgba(44,52,56,0.6), #000000)", border: "1px solid rgba(196,154,40,0.3)" }}>
-                <div className="flex items-center gap-2 mb-3">
-                  <DollarSign className="w-4 h-4" style={{ color: "var(--ln-gold)" }} />
-                  <p className="text-sm font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-gold)" }}>
-                    Gift {creator?.artistHandle || creator?.name}
-                  </p>
-                  <span className="text-xs ml-auto" style={{ color: "var(--ln-iron)" }}>90% goes directly to the artist</span>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {["1", "2", "5", "10", "25"].map(amt => (
-                    <button
-                      key={amt}
-                      onClick={() => { setTipAmount(amt); tipMutation.mutate({ songId: song.id, amountCents: Math.round(parseFloat(amt) * 100), origin: window.location.origin }); }}
-                      disabled={tipMutation.isPending}
-                      className="px-4 py-2 rounded-lg text-sm font-bold transition-all hover:scale-105 active:scale-95 disabled:opacity-60"
-                      style={{ background: "var(--ln-gold)", color: "var(--ln-parchment)" }}
-                    >
-                      ${amt}
-                    </button>
-                  ))}
-                  <button
-                    onClick={() => setTipOpen(true)}
-                    className="px-4 py-2 rounded-lg text-sm font-medium transition-all hover:scale-105 active:scale-95"
-                    style={{ background: "var(--ln-coal)", color: "var(--ln-parchment)", border: "1px solid #C3AB7D" }}
-                  >
-                    Custom
-                  </button>
-                </div>
-              </div>
-            )}
-
             {/* WID + Sovereign Stamp + HAAI are now shown inline in the hero right column above */}
             {/* ══ 6. METADATA — Tags, AI label (demoted footnote) ══ */}
             {(() => {

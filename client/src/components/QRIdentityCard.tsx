@@ -171,6 +171,7 @@ async function renderCardToCanvas(
       await new Promise<void>((resolve) => {
         img.onload = () => resolve();
         img.onerror = () => resolve();
+        img.crossOrigin = "anonymous";
         img.src = entity.thumbnailUrl!;
       });
       if (img.complete && img.naturalWidth > 0) {
