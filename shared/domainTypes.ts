@@ -14,6 +14,7 @@ export const DOMAIN_BLOCK_TYPES = [
   "shelf_manuscripts", // Manuscript cabinet — academic papers, manuscripts
   "shelf_artifacts",   // Artifact collection — relics, objects, visual art
   "shelf_merch",       // Merchandise display — physical products
+  "shelf_collections", // Manifested Collections shelf
   // ── Featured Category ─────────────────────────────────────────────────────
   "featured_work",     // Pinned/highlighted works (up to 6 IDs)
   // ── Commerce Category ─────────────────────────────────────────────────────
@@ -152,4 +153,5 @@ export const DEFAULT_DOMAIN_LAYOUT: Array<{
   { blockType: "distribution_links", position: 7, visible: true, size: "full", config: { heading: "Find My Work", showSpotify: true, showAppleMusic: true, showBandcamp: true } },
   { blockType: "provenance_trail", position: 8, visible: true, size: "full",  config: { showDomainVersions: true, showWids: true, maxItems: 10 } },
   { blockType: "field_notes",    position: 9, visible: false, size: "full",   config: {} },
+  { blockType: "shelf_collections", position: 10, visible: false, size: "full",  config: { heading: "Collections" } },
 ];

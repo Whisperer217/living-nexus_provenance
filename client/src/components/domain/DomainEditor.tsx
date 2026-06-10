@@ -17,7 +17,7 @@ import {
   GripVertical, Eye, EyeOff, Save, History, ChevronDown,
   Music, BookOpen, BookMarked, FileText, Package, ShoppingBag,
   User, AlignLeft, Link2, Shield, FileEdit, Minus, Star, LayoutGrid,
-  Loader2, Check, X
+  Library, Loader2, Check, X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -33,6 +33,7 @@ const BLOCK_META: Record<DomainBlockType, { label: string; category: string; ico
   shelf_manuscripts:  { label: "Manuscript Cabinet", category: "Shelf",      icon: FileText,     description: "Academic papers and manuscripts" },
   shelf_artifacts:    { label: "Artifact Case",      category: "Shelf",      icon: Package,      description: "Relics, objects, and visual art" },
   shelf_merch:        { label: "Merch Display",      category: "Shelf",      icon: ShoppingBag,  description: "Physical products and merchandise" },
+  shelf_collections:  { label: "Collections Shelf",  category: "Shelf",      icon: Library,      description: "Manifested Collections — curated provenance paths" },
   featured_work:      { label: "Featured Works",     category: "Featured",   icon: Star,         description: "Pinned and highlighted works (up to 6)" },
   distribution_links: { label: "Distribution Links", category: "Commerce",   icon: Link2,        description: "Spotify, Apple Music, Bandcamp, etc." },
   tip_jar:            { label: "Tip Jar",            category: "Commerce",   icon: Package,      description: "Direct support and tipping" },

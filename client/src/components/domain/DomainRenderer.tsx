@@ -10,7 +10,7 @@
 import { trpc } from "@/lib/trpc";
 import { DEFAULT_DOMAIN_LAYOUT, type DomainBlockRecord, type ShelfBlockConfig, type ProvenanceTrailBlockConfig, type CustomTextBlockConfig, type DividerBlockConfig, type DistributionLinksBlockConfig, type FeaturedWorkBlockConfig, type BioBlockConfig, type HeroBlockConfig } from "@shared/domainTypes";
 import { ShelfBlock } from "./ShelfBlock";
-import { Shield, ExternalLink, Music2, Clock, Layers, Hash } from "lucide-react";
+import { Shield, ExternalLink, Music2, Clock, Layers, Hash, Library, GitFork, Heart } from "lucide-react";
 import { Link } from "wouter";
 
 interface DomainRendererProps {
@@ -337,6 +337,91 @@ function FeaturedWorkBlock({ userId, config }: { userId: number; config: Feature
   );
 }
 
+// ── CollectionsShelfBlock ─────────────────────────────────────────────────────
+function CollectionsShelfBlock({ userId, isOwner }: { userId: number; isOwner: boolean }) {
+  const { data: collections = [], isLoading } = trpc.collections.listByUser.useQuery(
+    { userId },
+    { enabled: !!userId }
+  );
+
+  if (isLoading) {
+    return (
+      <div className="space-y-3 animate-pulse">
+        <div className="h-4 w-32 rounded bg-white/10" />
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          {[...Array(3)].map((_, i) => <div key={i} className="h-28 rounded bg-white/5" />)}
+        </div>
+      </div>
+    );
+  }
+
+  if (collections.length === 0) {
+    if (!isOwner) return null;
+    return (
+      <div className="text-center py-8 text-white/30 text-sm">
+        <Library className="w-8 h-8 mx-auto mb-2 opacity-40" />
+        <p>No public collections yet.</p>
+        <p className="text-xs mt-1">Create your first Manifested Collection from any song page.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <Library className="w-4 h-4 text-[#D4AF37]/60" />
+          <h3 className="text-xs tracking-widest uppercase text-white/30"
+            style={{ fontFamily: "var(--font-display)", letterSpacing: "0.14em" }}>
+            Collections
+          </h3>
+        </div>
+        {isOwner && (
+          <Link href="/playlists">
+            <span className="text-[10px] text-[#D4AF37]/50 hover:text-[#D4AF37] transition-colors cursor-pointer">Manage</span>
+          </Link>
+        )}
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {(collections as any[]).map((col: any) => (
+          <Link key={col.id} href={`/collection/${col.slug}`}>
+            <div className="group flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all"
+              style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}
+              onMouseEnter={e => (e.currentTarget.style.background = "rgba(255,255,255,0.06)")}
+              onMouseLeave={e => (e.currentTarget.style.background = "rgba(255,255,255,0.03)")}>
+              {/* Cover art */}
+              <div className="w-12 h-12 rounded-lg flex-shrink-0 overflow-hidden flex items-center justify-center"
+                style={{ background: "rgba(212,175,55,0.08)", border: "1px solid rgba(212,175,55,0.15)" }}>
+                {col.coverArtUrl
+                  ? <img src={col.coverArtUrl} alt={col.name} className="w-full h-full object-cover" />
+                  : <Library className="w-5 h-5 text-[#D4AF37]/40" />}
+              </div>
+              {/* Info */}
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-white/80 truncate group-hover:text-white transition-colors">{col.name}</p>
+                {col.forkedFromWid && (
+                  <p className="text-[10px] text-[#D4AF37]/50 flex items-center gap-1 mt-0.5">
+                    <GitFork className="w-2.5 h-2.5" /> Forked
+                  </p>
+                )}
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-[10px] text-white/30 flex items-center gap-0.5">
+                    <Music2 className="w-2.5 h-2.5" /> {col.trackCount ?? 0}
+                  </span>
+                  <span className="text-[10px] text-white/30 flex items-center gap-0.5">
+                    <Heart className="w-2.5 h-2.5" /> {col.followerCount ?? 0}
+                  </span>
+                  <span className="text-[9px] font-mono text-[#D4AF37]/30 truncate">{col.wid}</span>
+                </div>
+              </div>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ── Block wrapper ─────────────────────────────────────────────────────────────
 function BlockWrapper({ size, children }: { size: string; children: React.ReactNode }) {
   const paddingClass = size === "full" ? "px-0" : "px-4";
@@ -414,6 +499,9 @@ export function DomainRenderer({ userId, isOwner = false }: DomainRendererProps)
             )}
             {block.blockType === "field_notes" && (
               <div className="text-sm text-white/30 italic">Field Notes coming soon</div>
+            )}
+            {block.blockType === "shelf_collections" && (
+              <CollectionsShelfBlock userId={userId} isOwner={isOwner} />
             )}
           </BlockWrapper>
         );

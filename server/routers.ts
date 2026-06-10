@@ -120,6 +120,19 @@ import {
   getDomainBlocks,
   saveDomainLayout,
   getDomainVersions,
+  createManifestedCollection,
+  getManifestedCollectionBySlug,
+  getManifestedCollectionById,
+  getManifestedCollectionsByOwner,
+  updateManifestedCollection,
+  deleteManifestedCollection,
+  getCollectionTracksWithSongs,
+  addTrackToManifestedCollection,
+  removeTrackFromManifestedCollection,
+  toggleCollectionFollow,
+  isFollowingCollection,
+  forkManifestedCollection,
+  getPublicCollections,
 } from "./db";
 import { FOUNDER_PRICE_EARLY_CENTS, FOUNDER_PRICE_LATE_CENTS, FOUNDER_THRESHOLD, LICENSE_PRICE_CENTS, LICENSE_SLOTS, SLOT_PACKAGES, getSlotPackage, type SlotPackageId } from "./livingArchiveProducts";
 import { ENV } from "./_core/env";
@@ -6915,6 +6928,125 @@ If a field cannot be determined from the document, use an empty string. For symb
       .input(z.object({ userId: z.number().int().positive(), limit: z.number().int().min(1).max(20).default(10) }))
       .query(async ({ input }) => {
         return getDomainVersions(input.userId, input.limit);
+      }),
+  }),
+
+  // ─── Manifested Collections ─────────────────────────────────────────────────
+  collections: router({
+    /** Get a public collection by slug (with tracks + owner info). */
+    getBySlug: publicProcedure
+      .input(z.object({ slug: z.string().min(1) }))
+      .query(async ({ input, ctx }) => {
+        const row = await getManifestedCollectionBySlug(input.slug);
+        if (!row) throw new TRPCError({ code: "NOT_FOUND" });
+        if (!row.collection.isPublic && row.collection.ownerId !== ctx.user?.id) {
+          throw new TRPCError({ code: "FORBIDDEN" });
+        }
+        const tracks = await getCollectionTracksWithSongs(row.collection.id);
+        const following = ctx.user ? await isFollowingCollection(row.collection.id, ctx.user.id) : false;
+        return { ...row, tracks, following };
+      }),
+
+    /** List all public collections (discovery feed). */
+    listPublic: publicProcedure
+      .input(z.object({ limit: z.number().int().min(1).max(50).default(20), offset: z.number().int().min(0).default(0) }))
+      .query(async ({ input }) => {
+        return getPublicCollections(input.limit, input.offset);
+      }),
+
+    /** List collections owned by a specific user (public only unless self). */
+    listByUser: publicProcedure
+      .input(z.object({ userId: z.number().int().positive() }))
+      .query(async ({ input, ctx }) => {
+        const includePrivate = ctx.user?.id === input.userId;
+        return getManifestedCollectionsByOwner(input.userId, includePrivate);
+      }),
+
+    /** List the current user's own collections (all, including private). */
+    listMine: protectedProcedure.query(async ({ ctx }) => {
+      return getManifestedCollectionsByOwner(ctx.user.id, true);
+    }),
+
+    /** Create a new Manifested Collection. */
+    create: protectedProcedure
+      .input(z.object({
+        name: z.string().min(1).max(128),
+        description: z.string().max(1000).optional(),
+        purpose: z.string().max(2000).optional(),
+        coverArtUrl: z.string().url().optional(),
+        isPublic: z.boolean().default(true),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        return createManifestedCollection({ ownerId: ctx.user.id, ...input });
+      }),
+
+    /** Update collection metadata (owner only). */
+    update: protectedProcedure
+      .input(z.object({
+        id: z.number().int().positive(),
+        name: z.string().min(1).max(128).optional(),
+        description: z.string().max(1000).optional(),
+        purpose: z.string().max(2000).optional(),
+        coverArtUrl: z.string().url().optional(),
+        isPublic: z.boolean().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const { id, ...data } = input;
+        await updateManifestedCollection(id, ctx.user.id, data);
+        return { success: true };
+      }),
+
+    /** Delete a collection (owner only). */
+    delete: protectedProcedure
+      .input(z.object({ id: z.number().int().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        await deleteManifestedCollection(input.id, ctx.user.id);
+        return { success: true };
+      }),
+
+    /** Add a track to a collection (owner only). */
+    addTrack: protectedProcedure
+      .input(z.object({
+        collectionId: z.number().int().positive(),
+        songId: z.number().int().positive(),
+        note: z.string().max(500).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const col = await getManifestedCollectionById(input.collectionId);
+        if (!col || col.ownerId !== ctx.user.id) throw new TRPCError({ code: "FORBIDDEN" });
+        await addTrackToManifestedCollection(input.collectionId, input.songId, ctx.user.id, input.note);
+        return { success: true };
+      }),
+
+    /** Remove a track from a collection (owner only). */
+    removeTrack: protectedProcedure
+      .input(z.object({
+        collectionId: z.number().int().positive(),
+        songId: z.number().int().positive(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const col = await getManifestedCollectionById(input.collectionId);
+        if (!col || col.ownerId !== ctx.user.id) throw new TRPCError({ code: "FORBIDDEN" });
+        await removeTrackFromManifestedCollection(input.collectionId, input.songId);
+        return { success: true };
+      }),
+
+    /** Toggle follow/unfollow on a collection. */
+    toggleFollow: protectedProcedure
+      .input(z.object({ collectionId: z.number().int().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        return toggleCollectionFollow(input.collectionId, ctx.user.id);
+      }),
+
+    /** Fork a collection — creates a copy under the current user with provenance lineage. */
+    fork: protectedProcedure
+      .input(z.object({ collectionId: z.number().int().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        const col = await getManifestedCollectionById(input.collectionId);
+        if (!col) throw new TRPCError({ code: "NOT_FOUND" });
+        if (!col.isPublic && col.ownerId !== ctx.user.id) throw new TRPCError({ code: "FORBIDDEN" });
+        const ownerName = ctx.user.name ?? ctx.user.artistHandle ?? "Unknown";
+        return forkManifestedCollection(input.collectionId, ctx.user.id, ownerName);
       }),
   }),
 });

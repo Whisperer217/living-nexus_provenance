@@ -1681,3 +1681,66 @@ export const domainVersions = mysqlTable("domainVersions", {
 }));
 export type DomainVersion = typeof domainVersions.$inferSelect;
 export type InsertDomainVersion = typeof domainVersions.$inferInsert;
+
+// ─── Manifested Collections ───────────────────────────────────────────────────
+// A Manifested Collection is a shareable, provenance-tracked playlist.
+// Each collection gets a WID-COL identifier and a public slug URL.
+// Collections can be forked (like Git) — the fork lineage is preserved.
+export const manifestedCollections = mysqlTable("manifestedCollections", {
+  id: int("id").autoincrement().primaryKey(),
+  ownerId: int("ownerId").notNull(),               // user who created/owns this collection
+  wid: varchar("wid", { length: 64 }).notNull().unique(), // WID-COL-XXXX provenance ID
+  slug: varchar("slug", { length: 128 }).notNull().unique(), // URL slug: /collection/:slug
+  name: varchar("name", { length: 128 }).notNull(),
+  description: text("description"),
+  purpose: text("purpose"),                        // "Curated expression of meaning" — the why
+  coverArtUrl: text("coverArtUrl"),
+  isPublic: boolean("isPublic").default(true).notNull(),
+  forkedFromId: int("forkedFromId"),               // null = original; set = fork lineage
+  forkedFromWid: varchar("forkedFromWid", { length: 64 }), // preserved even if original deleted
+  forkedFromOwnerName: varchar("forkedFromOwnerName", { length: 128 }), // display name of original curator
+  trackCount: int("trackCount").default(0).notNull(),
+  followerCount: int("followerCount").default(0).notNull(),
+  forkCount: int("forkCount").default(0).notNull(),
+  playCount: int("playCount").default(0).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (t) => ({
+  ownerIdx: index("mc_ownerId_idx").on(t.ownerId),
+  slugIdx: index("mc_slug_idx").on(t.slug),
+  widIdx: index("mc_wid_idx").on(t.wid),
+  publicIdx: index("mc_isPublic_idx").on(t.isPublic),
+}));
+export type ManifestedCollection = typeof manifestedCollections.$inferSelect;
+export type InsertManifestedCollection = typeof manifestedCollections.$inferInsert;
+
+// ─── Collection Tracks ────────────────────────────────────────────────────────
+export const collectionTracks = mysqlTable("collectionTracks", {
+  id: int("id").autoincrement().primaryKey(),
+  collectionId: int("collectionId").notNull(),
+  songId: int("songId").notNull(),
+  addedByUserId: int("addedByUserId").notNull(),
+  position: int("position").notNull().default(0),
+  note: text("note"),                              // optional curator note on this track
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (t) => ({
+  collectionIdx: index("ct_collectionId_idx").on(t.collectionId),
+  songIdx: index("ct_songId_idx").on(t.songId),
+  uniqueTrack: uniqueIndex("ct_unique_track").on(t.collectionId, t.songId),
+}));
+export type CollectionTrack = typeof collectionTracks.$inferSelect;
+export type InsertCollectionTrack = typeof collectionTracks.$inferInsert;
+
+// ─── Collection Followers ─────────────────────────────────────────────────────
+export const collectionFollowers = mysqlTable("collectionFollowers", {
+  id: int("id").autoincrement().primaryKey(),
+  collectionId: int("collectionId").notNull(),
+  userId: int("userId").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (t) => ({
+  collectionIdx: index("cf_collectionId_idx").on(t.collectionId),
+  userIdx: index("cf_userId_idx").on(t.userId),
+  uniqueFollow: uniqueIndex("cf_unique_follow").on(t.collectionId, t.userId),
+}));
+export type CollectionFollower = typeof collectionFollowers.$inferSelect;
+export type InsertCollectionFollower = typeof collectionFollowers.$inferInsert;

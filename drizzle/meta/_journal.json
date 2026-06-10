@@ -729,6 +729,13 @@
       "when": 1780961166988,
       "tag": "0104_unusual_katie_power",
       "breakpoints": true
+    },
+    {
+      "idx": 105,
+      "version": "5",
+      "when": 1781124028519,
+      "tag": "0105_good_vampiro",
+      "breakpoints": true
     }
   ]
 }

@@ -43,6 +43,12 @@ import {
   type InsertGuide,
   domainBlocks,
   domainVersions,
+  manifestedCollections,
+  collectionTracks,
+  collectionFollowers,
+  type ManifestedCollection,
+  type InsertManifestedCollection,
+  type CollectionTrack,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 import type { SearchResults } from "../shared/searchTypes";
@@ -4903,3 +4909,256 @@ export async function getDomainVersions(userId: number, limit = 20) {
     .orderBy(desc(domainVersions.versionNumber))
     .limit(limit);
 }
+
+// ─── Manifested Collections ───────────────────────────────────────────────────
+
+/** Generate a WID-COL identifier from a random suffix. */
+function generateCollectionWid(): string {
+  const rand = Math.random().toString(36).slice(2, 10).toUpperCase();
+  const rand2 = Math.random().toString(36).slice(2, 10).toUpperCase();
+  return `WID-COL-${rand}-${rand2}`;
+}
+
+/** Generate a URL-safe slug from a name + random suffix. */
+function generateSlug(name: string): string {
+  const base = name
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .trim()
+    .replace(/\s+/g, "-")
+    .slice(0, 60);
+  const suffix = Math.random().toString(36).slice(2, 7);
+  return `${base}-${suffix}`;
+}
+
+export async function createManifestedCollection(data: {
+  ownerId: number;
+  name: string;
+  description?: string;
+  purpose?: string;
+  coverArtUrl?: string;
+  isPublic?: boolean;
+  forkedFromId?: number;
+  forkedFromWid?: string;
+  forkedFromOwnerName?: string;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  const wid = generateCollectionWid();
+  const slug = generateSlug(data.name);
+  const result = await db.insert(manifestedCollections).values({
+    ownerId: data.ownerId,
+    wid,
+    slug,
+    name: data.name,
+    description: data.description ?? null,
+    purpose: data.purpose ?? null,
+    coverArtUrl: data.coverArtUrl ?? null,
+    isPublic: data.isPublic ?? true,
+    forkedFromId: data.forkedFromId ?? null,
+    forkedFromWid: data.forkedFromWid ?? null,
+    forkedFromOwnerName: data.forkedFromOwnerName ?? null,
+  });
+  return { id: (result as any).insertId as number, wid, slug };
+}
+
+export async function getManifestedCollectionBySlug(slug: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const rows = await db
+    .select({
+      collection: manifestedCollections,
+      owner: {
+        id: users.id,
+        name: users.name,
+        artistHandle: users.artistHandle,
+        profilePhotoUrl: users.profilePhotoUrl,
+      },
+    })
+    .from(manifestedCollections)
+    .leftJoin(users, eq(manifestedCollections.ownerId, users.id))
+    .where(eq(manifestedCollections.slug, slug))
+    .limit(1);
+  return rows.length > 0 ? rows[0] : undefined;
+}
+
+export async function getManifestedCollectionById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const rows = await db
+    .select()
+    .from(manifestedCollections)
+    .where(eq(manifestedCollections.id, id))
+    .limit(1);
+  return rows.length > 0 ? rows[0] : undefined;
+}
+
+export async function getManifestedCollectionsByOwner(ownerId: number, includePrivate = false) {
+  const db = await getDb();
+  if (!db) return [];
+  const conditions = includePrivate
+    ? eq(manifestedCollections.ownerId, ownerId)
+    : and(eq(manifestedCollections.ownerId, ownerId), eq(manifestedCollections.isPublic, true));
+  return db
+    .select()
+    .from(manifestedCollections)
+    .where(conditions)
+    .orderBy(desc(manifestedCollections.createdAt));
+}
+
+export async function updateManifestedCollection(id: number, ownerId: number, data: {
+  name?: string;
+  description?: string;
+  purpose?: string;
+  coverArtUrl?: string;
+  isPublic?: boolean;
+}) {
+  const db = await getDb();
+  if (!db) return;
+  await db
+    .update(manifestedCollections)
+    .set(data)
+    .where(and(eq(manifestedCollections.id, id), eq(manifestedCollections.ownerId, ownerId)));
+}
+
+export async function deleteManifestedCollection(id: number, ownerId: number) {
+  const db = await getDb();
+  if (!db) return;
+  // Remove tracks first
+  await db.delete(collectionTracks).where(eq(collectionTracks.collectionId, id));
+  await db.delete(collectionFollowers).where(eq(collectionFollowers.collectionId, id));
+  await db
+    .delete(manifestedCollections)
+    .where(and(eq(manifestedCollections.id, id), eq(manifestedCollections.ownerId, ownerId)));
+}
+
+export async function getCollectionTracksWithSongs(collectionId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db
+    .select({
+      track: collectionTracks,
+      song: {
+        id: songs.id,
+        title: songs.title,
+        coverArtUrl: songs.coverArtUrl,
+        fileUrl: songs.fileUrl,
+        durationSeconds: songs.durationSeconds,
+        witnessId: songs.witnessId,
+        genre: songs.genre,
+        status: songs.status,
+      },
+      creator: {
+        id: users.id,
+        name: users.name,
+        artistHandle: users.artistHandle,
+        profilePhotoUrl: users.profilePhotoUrl,
+      },
+    })
+    .from(collectionTracks)
+    .leftJoin(songs, eq(collectionTracks.songId, songs.id))
+    .leftJoin(users, eq(songs.userId, users.id))
+    .where(eq(collectionTracks.collectionId, collectionId))
+    .orderBy(asc(collectionTracks.position));
+}
+
+export async function addTrackToManifestedCollection(collectionId: number, songId: number, addedByUserId: number, note?: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  // Get current max position
+  const rows = await db
+    .select({ maxPos: sql<number>`COALESCE(MAX(${collectionTracks.position}), -1)` })
+    .from(collectionTracks)
+    .where(eq(collectionTracks.collectionId, collectionId));
+  const position = (rows[0]?.maxPos ?? -1) + 1;
+  await db.insert(collectionTracks).values({ collectionId, songId, addedByUserId, position, note: note ?? null });
+  // Update track count
+  await db.execute(sql`UPDATE manifestedCollections SET trackCount = trackCount + 1 WHERE id = ${collectionId}`);
+}
+
+export async function removeTrackFromManifestedCollection(collectionId: number, songId: number) {
+  const db = await getDb();
+  if (!db) return;
+  await db.delete(collectionTracks).where(and(eq(collectionTracks.collectionId, collectionId), eq(collectionTracks.songId, songId)));
+  await db.execute(sql`UPDATE manifestedCollections SET trackCount = GREATEST(0, trackCount - 1) WHERE id = ${collectionId}`);
+}
+
+export async function toggleCollectionFollow(collectionId: number, userId: number): Promise<{ following: boolean }> {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  const existing = await db
+    .select()
+    .from(collectionFollowers)
+    .where(and(eq(collectionFollowers.collectionId, collectionId), eq(collectionFollowers.userId, userId)))
+    .limit(1);
+  if (existing.length > 0) {
+    await db.delete(collectionFollowers).where(and(eq(collectionFollowers.collectionId, collectionId), eq(collectionFollowers.userId, userId)));
+    await db.execute(sql`UPDATE manifestedCollections SET followerCount = GREATEST(0, followerCount - 1) WHERE id = ${collectionId}`);
+    return { following: false };
+  } else {
+    await db.insert(collectionFollowers).values({ collectionId, userId });
+    await db.execute(sql`UPDATE manifestedCollections SET followerCount = followerCount + 1 WHERE id = ${collectionId}`);
+    return { following: true };
+  }
+}
+
+export async function isFollowingCollection(collectionId: number, userId: number): Promise<boolean> {
+  const db = await getDb();
+  if (!db) return false;
+  const rows = await db
+    .select()
+    .from(collectionFollowers)
+    .where(and(eq(collectionFollowers.collectionId, collectionId), eq(collectionFollowers.userId, userId)))
+    .limit(1);
+  return rows.length > 0;
+}
+
+export async function forkManifestedCollection(originalId: number, newOwnerId: number, newOwnerName: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  const original = await getManifestedCollectionById(originalId);
+  if (!original) throw new Error("Collection not found");
+  // Create the fork
+  const { id: forkId, wid: forkWid, slug: forkSlug } = await createManifestedCollection({
+    ownerId: newOwnerId,
+    name: original.name,
+    description: original.description ?? undefined,
+    purpose: original.purpose ?? undefined,
+    coverArtUrl: original.coverArtUrl ?? undefined,
+    isPublic: false, // forks start private
+    forkedFromId: originalId,
+    forkedFromWid: original.wid,
+    forkedFromOwnerName: newOwnerName,
+  });
+  // Copy tracks
+  const tracks = await getCollectionTracksWithSongs(originalId);
+  for (const { track } of tracks) {
+    await addTrackToManifestedCollection(forkId, track.songId, newOwnerId);
+  }
+  // Increment fork count on original
+  await db.execute(sql`UPDATE manifestedCollections SET forkCount = forkCount + 1 WHERE id = ${originalId}`);
+  return { id: forkId, wid: forkWid, slug: forkSlug };
+}
+
+export async function getPublicCollections(limit = 20, offset = 0) {
+  const db = await getDb();
+  if (!db) return [];
+  return db
+    .select({
+      collection: manifestedCollections,
+      owner: {
+        id: users.id,
+        name: users.name,
+        artistHandle: users.artistHandle,
+        profilePhotoUrl: users.profilePhotoUrl,
+      },
+    })
+    .from(manifestedCollections)
+    .leftJoin(users, eq(manifestedCollections.ownerId, users.id))
+    .where(eq(manifestedCollections.isPublic, true))
+    .orderBy(desc(manifestedCollections.createdAt))
+    .limit(limit)
+    .offset(offset);
+}
+
+export type { ManifestedCollection, InsertManifestedCollection, CollectionTrack };
