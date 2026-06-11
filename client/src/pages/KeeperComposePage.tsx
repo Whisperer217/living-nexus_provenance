@@ -658,7 +658,8 @@ Please respond in Suno-ready format:
       const objectUrl = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = objectUrl;
-      a.download = `keeper-vision-${index + 1}.png`;
+      const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+      a.download = `keeper-vision-${ts}-${index + 1}.png`;
       a.click();
       URL.revokeObjectURL(objectUrl);
     } catch {

@@ -57,39 +57,32 @@ function HeroBlock({ userId, config }: { userId: number; config: HeroBlockConfig
         style={{ background: "radial-gradient(ellipse at 50% 100%, rgba(212,175,55,0.06) 0%, transparent 70%)" }} />
 
       <div className="relative z-10 flex flex-col items-center text-center px-6 py-12 gap-4">
-        {/* Avatar */}
-        <div className="relative">
-          <div className="w-24 h-24 rounded-full overflow-hidden border-2"
-            style={{ borderColor: "rgba(212,175,55,0.4)", boxShadow: "0 0 24px rgba(212,175,55,0.15)" }}>
-            {creator.avatarUrl ? (
-              <img src={creator.avatarUrl} alt={creator.displayName ?? creator.username}
+        {/* Avatar — only render when creator has an actual profile photo; skip placeholder circle */}
+        {(creator as any).profilePhotoUrl && (
+          <div className="relative">
+            <div className="w-24 h-24 rounded-full overflow-hidden border-2"
+              style={{ borderColor: "rgba(212,175,55,0.4)", boxShadow: "0 0 24px rgba(212,175,55,0.15)" }}>
+              <img src={(creator as any).profilePhotoUrl} alt={(creator as any).name ?? (creator as any).artistHandle ?? ""}
                 className="w-full h-full object-cover" />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center bg-[#111111]">
-                <span className="text-3xl font-bold text-[#D4AF37]/60"
-                  style={{ fontFamily: "var(--font-display)" }}>
-                  {(creator.displayName ?? creator.username ?? "?")[0].toUpperCase()}
-                </span>
+            </div>
+            {/* WID badge */}
+            {creator.witnessId && (
+              <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center"
+                style={{ background: "#000", border: "1px solid rgba(212,175,55,0.5)" }}>
+                <Shield className="w-3 h-3 text-[#D4AF37]" />
               </div>
             )}
           </div>
-          {/* WID badge */}
-          {creator.witnessId && (
-            <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center"
-              style={{ background: "#000", border: "1px solid rgba(212,175,55,0.5)" }}>
-              <Shield className="w-3 h-3 text-[#D4AF37]" />
-            </div>
-          )}
-        </div>
+        )}
 
         {/* Name */}
         <div>
           <h1 className="text-3xl font-bold text-white"
             style={{ fontFamily: "var(--font-display)", letterSpacing: "0.04em" }}>
-            {creator.displayName ?? creator.username}
+            {(creator as any).artistHandle ?? (creator as any).name ?? "Creator"}
           </h1>
-          {creator.artistHandle && (
-            <p className="text-sm text-[#D4AF37]/60 mt-0.5">@{creator.artistHandle}</p>
+          {(creator as any).artistHandle && (
+            <p className="text-sm text-[#D4AF37]/60 mt-0.5">@{(creator as any).artistHandle}</p>
           )}
         </div>
 
