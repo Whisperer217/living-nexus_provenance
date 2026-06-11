@@ -5054,3 +5054,9 @@
 - [x] Fix insertId extraction in db.ts: manifestedCollections line 4962
 - [x] Add maxTokens: 800 to keeper.chat invokeLLM call to reduce Guide verbosity
 - [x] TypeScript: 0 errors
+## Phase 203: Inline Edit on Work Detail Page (Owner Only)
+- [ ] Add editingSong state + Edit button to SongDetailPage action bar (owner only, Pencil icon, gold border)
+- [ ] Add missing cover art warning banner on SongDetailPage (owner only, shows when coverArtUrl is null)
+- [ ] Wire EditTrackPanel into SongDetailPage — opens on Edit click, closes on save/close, invalidates getById query
+- [ ] Add missing cover art filter to ArchivePage (filter button "Missing Art" in status filter row)
+- [ ] TypeScript: 0 errors

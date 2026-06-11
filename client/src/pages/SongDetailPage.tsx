@@ -24,7 +24,7 @@ import {
   Shield, Music, ChevronLeft, Download, Headphones,
   ExternalLink, Check, ChevronDown, ChevronUp, Twitter, Heart,
   Video, ImageIcon, History, Hash, FileText, Link2, StickyNote,
-  BookOpen, ShieldCheck, Network,
+  BookOpen, ShieldCheck, Network, Pencil, AlertTriangle,
 } from "lucide-react";
 import { useLike } from "@/hooks/useLike";
 import { useRef as _useRef } from "react";
@@ -41,6 +41,7 @@ import { getContentTypeColors } from "@/lib/contentTypeColors";
 import { QRShareModal } from "@/components/QRIdentityCard";
 import { CinematicComicReader, type BookPage } from "@/components/reader/CinematicComicReader";
 import { CreatorHandle } from "@/components/CreatorHandle";
+import { EditTrackPanel } from "@/components/EditTrackPanel";
 
 // Slug keys stored in DB (safe ASCII, no charset issues); emoji shown in UI
 const REACTION_SLUGS = ["fire", "love", "wow", "clap", "thumbsup", "thumbsdown", "mindblown", "+"];
@@ -123,6 +124,7 @@ export default function SongDetailPage() {
   });
   const [shareOpen, setShareOpen] = useState(false);
   const [versionHistoryOpen, setVersionHistoryOpen] = useState(false);
+  const [editingOpen, setEditingOpen] = useState(false);
   // Derive play state from global player — this page is a remote control only
   const isThisTrackActive = currentTrackId === `song-${songId}`;
   const isPlaying = isThisTrackActive && playerState.isPlaying;
@@ -870,7 +872,28 @@ export default function SongDetailPage() {
               {!isOwner && (
                 <FlagContentButton workId={song.id} workType="audio" workTitle={song.title} size="sm" className="px-2 py-1 rounded border border-zinc-800 hover:border-red-800/60" />
               )}
+              {isOwner && (
+                <Button size="sm" variant="outline" onClick={() => setEditingOpen(true)}
+                  style={{ borderColor: "rgba(196,154,40,0.5)", color: "var(--ln-gold)", background: "rgba(196,154,40,0.06)" }}>
+                  <Pencil className="w-3.5 h-3.5 mr-1" />Edit Work
+                </Button>
+              )}
             </div>
+
+            {/* ── Missing cover art alert (owner only) ── */}
+            {isOwner && !song.coverArtUrl && (
+              <div className="flex items-start gap-3 rounded-xl px-4 py-3" style={{ background: "rgba(234,179,8,0.06)", border: "1px solid rgba(234,179,8,0.35)" }}>
+                <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: "#eab308" }} />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold" style={{ color: "#eab308", fontFamily: "'Cinzel', serif" }}>Missing Cover Art</p>
+                  <p className="text-xs mt-0.5" style={{ color: "rgba(234,179,8,0.7)" }}>This work has no cover art. Add one so it displays correctly across the platform.</p>
+                </div>
+                <Button size="sm" variant="outline" onClick={() => setEditingOpen(true)}
+                  style={{ borderColor: "rgba(234,179,8,0.4)", color: "#eab308", flexShrink: 0, fontSize: "11px" }}>
+                  Add Art
+                </Button>
+              </div>
+            )}
 
             {/* ── Tip panel ── */}
             {tipsEnabled && !isOwner && (
@@ -1468,6 +1491,35 @@ export default function SongDetailPage() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* ── Owner: Edit Work Panel ── */}
+      {editingOpen && song && (
+        <EditTrackPanel
+          song={{
+            id: song.id,
+            title: song.title,
+            genre: song.genre ?? undefined,
+            caption: (song as any).caption ?? undefined,
+            collectionTag: (song as any).collectionTag ?? undefined,
+            coverArtUrl: song.coverArtUrl ?? undefined,
+            coverPositionX: song.coverPositionX ?? undefined,
+            coverPositionY: song.coverPositionY ?? undefined,
+            aiConsent: (song as any).aiConsent ?? undefined,
+            status: (song as any).status ?? "Published",
+            lyricsText: song.lyricsText ?? undefined,
+            downloadPermission: (song as any).downloadPermission ?? undefined,
+            downloadTipThresholdCents: (song as any).downloadTipThresholdCents ?? undefined,
+            witnessId: song.witnessId ?? undefined,
+            contentType: (song as any).contentType ?? "audio",
+            creditsJson: (song as any).creditsJson ?? undefined,
+          }}
+          onClose={() => setEditingOpen(false)}
+          onSaved={() => {
+            setEditingOpen(false);
+            utils.songs.getById.invalidate({ id: songId });
+          }}
+        />
+      )}
 
     </div>
   );

@@ -295,6 +295,7 @@ export default function ArchivePage() {
 
   // Filter + sort state
   const [statusFilter, setStatusFilter] = useState<"All" | "Published" | "Draft" | "Deleted">("All");
+  const [missingArtFilter, setMissingArtFilter] = useState(false);
   const [sortBy, setSortBy] = useState<"newest" | "oldest" | "title">("newest");
 
   const buildTrack = (song: any) => ({
@@ -503,6 +504,9 @@ export default function ArchivePage() {
     if (statusFilter !== "All") {
       list = list.filter((s: any) => s.status === statusFilter);
     }
+    if (missingArtFilter) {
+      list = list.filter((s: any) => !s.coverArtUrl);
+    }
     if (sortBy === "newest") {
       list.sort((a: any, b: any) => new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime());
     } else if (sortBy === "oldest") {
@@ -669,6 +673,20 @@ export default function ArchivePage() {
                 );
               })}
             </div>
+            {/* Missing Art filter pill */}
+            {displaySongs.filter((s: any) => !s.coverArtUrl).length > 0 && (
+              <button
+                onClick={() => setMissingArtFilter(v => !v)}
+                className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium transition-all"
+                style={missingArtFilter
+                  ? { background: "rgba(234,179,8,0.12)", border: "1px solid #eab308", color: "#eab308" }
+                  : { background: "transparent", border: "1px solid rgba(234,179,8,0.35)", color: "rgba(234,179,8,0.65)" }
+                }
+              >
+                <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: missingArtFilter ? "#eab308" : "rgba(234,179,8,0.4)" }} />
+                Missing Art <span className="opacity-60">({displaySongs.filter((s: any) => !s.coverArtUrl).length})</span>
+              </button>
+            )}
             {/* Sort dropdown */}
             <div className="ml-auto flex items-center gap-1">
               <span className="text-xs" style={{ color: "var(--ln-smoke)" }}>Sort:</span>
