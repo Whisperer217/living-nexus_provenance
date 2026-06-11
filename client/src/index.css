@@ -179,14 +179,14 @@
   --font-editorial:  'Cormorant Garamond', serif;
   --font-body:       'DM Sans', sans-serif;
 
-  /* ── Type Sizes ── */
-  --text-xs:    0.6875rem;  /* 11px — badges, WID labels, overlines (absolute floor) */
-  --text-sm:    0.875rem;   /* 14px — captions, timestamps, meta */
-  --text-base:  1rem;       /* 16px — body copy, UI labels, form fields */
-  --text-h4:    1.25rem;    /* 20px — card titles, sidebar group headers */
-  --text-h3:    1.5625rem;  /* 25px — panel headings, modal titles (refined from 24px) */
-  --text-h2:    2rem;       /* 32px — page section headings */
-  --text-h1:    clamp(2.25rem, 5vw, 3.25rem); /* 36–52px — hero, page titles (bumped up) */
+  /* ── Type Sizes (fluid — clamp scales smoothly across zoom & viewport) ── */
+  --text-xs:    clamp(0.6875rem, 0.65rem + 0.2vw, 0.75rem);   /* 11–12px — badges, WID labels */
+  --text-sm:    clamp(0.8125rem, 0.78rem + 0.2vw, 0.9375rem); /* 13–15px — captions, meta */
+  --text-base:  clamp(0.9375rem, 0.9rem + 0.25vw, 1.0625rem); /* 15–17px — body copy */
+  --text-h4:    clamp(1.125rem, 1.05rem + 0.4vw, 1.375rem);   /* 18–22px — card titles */
+  --text-h3:    clamp(1.375rem, 1.25rem + 0.6vw, 1.75rem);    /* 22–28px — panel headings */
+  --text-h2:    clamp(1.625rem, 1.4rem + 1.1vw, 2.25rem);     /* 26–36px — section headings */
+  --text-h1:    clamp(2rem, 1.5rem + 2.5vw, 3.5rem);          /* 32–56px — hero, page titles */
 
   /* ── Line Heights ── */
   --leading-body:  1.75;  /* body — generous for true-black readability */
@@ -213,11 +213,46 @@
   --tracking-overline: 0.20em;  /* Cinzel caps overlines — room to breathe */
 
   /* ── Paragraph / Heading Margin Rhythm ── */
-  --space-body:  1.125rem; /* 18px — between paragraphs (slightly more air) */
+  --space-body:  1.125rem; /* 18px — between paragraphs */
   --space-h4:    0.5rem;   /* 8px  — below card titles */
   --space-h3:    0.875rem; /* 14px — below panel headings */
   --space-h2:    1.25rem;  /* 20px — below section headings */
   --space-h1:    1.75rem;  /* 28px — below hero headings */
+
+  /* ── Fluid Spacing Scale (use for padding/gap/margin instead of fixed px) ── */
+  --space-1:  clamp(0.25rem, 0.2rem + 0.25vw, 0.375rem);   /* 4–6px */
+  --space-2:  clamp(0.375rem, 0.3rem + 0.4vw, 0.625rem);   /* 6–10px */
+  --space-3:  clamp(0.5rem, 0.4rem + 0.5vw, 0.875rem);     /* 8–14px */
+  --space-4:  clamp(0.75rem, 0.6rem + 0.75vw, 1.25rem);    /* 12–20px */
+  --space-5:  clamp(1rem, 0.8rem + 1vw, 1.75rem);          /* 16–28px */
+  --space-6:  clamp(1.25rem, 1rem + 1.25vw, 2.25rem);      /* 20–36px */
+  --space-8:  clamp(1.5rem, 1.2rem + 1.5vw, 3rem);         /* 24–48px */
+  --space-10: clamp(2rem, 1.5rem + 2.5vw, 4rem);           /* 32–64px */
+
+  /* ── Responsive Container Widths ── */
+  --container-sm:  640px;
+  --container-md:  768px;
+  --container-lg:  1024px;
+  --container-xl:  1280px;
+  --container-2xl: 1536px;
+
+  /* ── Layout Chrome Dimensions (single source of truth) ── */
+  --topbar-h:    52px;   /* desktop TopBar height */
+  --leftrail-w:  72px;   /* desktop LeftRail width */
+  --drawer-w:    300px;  /* ContextDrawer width */
+  --rightrail-w: 300px;  /* RightRail width */
+
+  /* ── Compose / Terminal Typography (Space Mono aesthetic, fluid) ── */
+  /* These replace hardcoded 0.45rem–0.75rem values in KeeperComposePage */
+  --compose-xs:   clamp(0.5625rem, 0.5rem + 0.3vw, 0.6875rem);  /* 9–11px — micro labels */
+  --compose-sm:   clamp(0.625rem,  0.55rem + 0.35vw, 0.75rem);  /* 10–12px — section labels */
+  --compose-base: clamp(0.6875rem, 0.62rem + 0.4vw, 0.875rem);  /* 11–14px — body terminal text */
+  --compose-md:   clamp(0.75rem,   0.68rem + 0.4vw, 0.9375rem); /* 12–15px — prompt/output text */
+  --compose-lg:   clamp(0.875rem,  0.78rem + 0.5vw, 1.125rem);  /* 14–18px — headings in compose */
+
+  /* Reference image tile sizes (fluid) */
+  --compose-ref-tile-mobile: clamp(2.5rem, 8vw, 3.5rem);   /* 40–56px mobile */
+  --compose-ref-tile:        clamp(3rem,   5vw, 5rem);      /* 48–80px desktop */
 }
 
 /* =================================================================
@@ -354,8 +389,8 @@
     --nav-total: calc(var(--nav-height) + var(--nav-safe)); /* full nav footprint */
     --player-height: 64px;                 /* MiniBar height */
     --bottom-stack: calc(var(--nav-total) + var(--player-height)); /* total reserved bottom */
-    --card-pan-w: 160px;                   /* Pan-row card width — desktop default */
-    --card-img-h: 200px;                   /* Pan-row card image height — uniform across all card types */
+    --card-pan-w: clamp(140px, 11vw, 200px);  /* Pan-row card width — fluid across zoom levels */
+    --card-img-h: clamp(175px, 14vw, 240px);  /* Pan-row card image height — fluid across zoom levels */
   }
   /* Mobile: wider cards that fill viewport better (~2.3 cards visible per row) */
   @media (max-width: 639px) {

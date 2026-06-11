@@ -445,7 +445,7 @@ export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCoun
 
         {/* RIGHT: CTAs + Bell + Avatar */}
         <div
-          className="flex items-center gap-2 px-4 shrink-0"
+          className="flex items-center gap-1.5 px-3 shrink-0"
           style={{
             borderLeft: "1px solid rgba(46,43,34,0.80)",
             height: "100%",
@@ -455,9 +455,9 @@ export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCoun
           {user && userId && (
             <button
               onClick={() => goTo(`/creator/${userId}?openPromptStudio=1`)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-all"
               style={{
-                fontSize: "11px",
+                fontSize: "clamp(9px, 0.7vw, 11px)",
                 fontFamily: "'Cinzel', serif",
                 fontWeight: 500,
                 letterSpacing: "0.05em",
@@ -473,9 +473,10 @@ export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCoun
                 (e.currentTarget as HTMLElement).style.color = "var(--ln-gold)";
                 (e.currentTarget as HTMLElement).style.borderColor = "rgba(196,154,40,0.2)";
               }}
+              title="Prompt Generator"
             >
               <Zap size={12} style={{ color: "var(--ln-gold-dim)" }} />
-              <span>Prompt Gen</span>
+              <span className="hidden xl:inline">Prompt Gen</span>
             </button>
           )}
 
@@ -483,9 +484,9 @@ export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCoun
           {user && (
             <button
               onClick={() => goTo("/keeper-compose")}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-all"
               style={{
-                fontSize: "11px",
+                fontSize: "clamp(9px, 0.7vw, 11px)",
                 fontFamily: "'Cinzel', serif",
                 fontWeight: 500,
                 letterSpacing: "0.05em",
@@ -504,16 +505,16 @@ export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCoun
               title="Keeper Compose — Image & Music Generation"
             >
               <Sparkles size={12} style={{ color: "var(--ln-gold-dim)" }} />
-              <span>Compose</span>
+              <span className="hidden xl:inline">Compose</span>
             </button>
           )}
 
           {/* Register Work */}
           <button
             onClick={() => goTo("/upload")}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-all"
             style={{
-              fontSize: "11px",
+              fontSize: "clamp(9px, 0.7vw, 11px)",
               fontWeight: 700,
               background: "#C49A28",
               color: "#0A0806",

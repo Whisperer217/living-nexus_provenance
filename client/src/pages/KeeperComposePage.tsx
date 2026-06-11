@@ -231,7 +231,7 @@ function ArcPanel({ arc, previewArc, modeColor, hasContent }: {
   if (!hasContent && arc.length === 0) {
     return (
       <div className="flex-1 flex items-center justify-center px-4">
-        <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.55rem", color: "var(--ln-smoke)", textAlign: "center", opacity: 0.5, lineHeight: 1.8 }}>
+        <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "var(--compose-sm)", color: "var(--ln-smoke)", textAlign: "center", opacity: 0.5, lineHeight: 1.8 }}>
           Arc will build<br />as you write...
         </div>
       </div>
@@ -241,7 +241,7 @@ function ArcPanel({ arc, previewArc, modeColor, hasContent }: {
   return (
     <div className="px-4 pb-4 space-y-1.5">
       {isPreview && (
-        <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.45rem", color: "var(--ln-smoke)", opacity: 0.5, textAlign: "center", marginBottom: 8 }}>
+        <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "var(--compose-xs)", color: "var(--ln-smoke)", opacity: 0.5, textAlign: "center", marginBottom: 8 }}>
           PREVIEW — LIVE AS YOU TYPE
         </div>
       )}
@@ -269,11 +269,11 @@ function ArcPanel({ arc, previewArc, modeColor, hasContent }: {
       {!isPreview && (
         <div
           className="rounded p-3 mt-2"
-          style={{ background: "var(--ln-obsidian)", border: "1px solid var(--ln-panel-border)", fontFamily: "'Space Mono', monospace", fontSize: "0.6rem", lineHeight: 1.8 }}
+          style={{ background: "var(--ln-obsidian)", border: "1px solid var(--ln-panel-border)",           fontFamily: "'Space Mono', monospace", fontSize: "var(--compose-sm)", lineHeight: 1.8 }}
         >
           {displayArc.map((pt, i) => (
             <div key={i} className="flex items-center gap-2">
-              <span style={{ color: "var(--ln-smoke)", width: "6rem", flexShrink: 0, fontSize: "0.5rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              <span style={{ color: "var(--ln-smoke)", width: "6rem", flexShrink: 0, fontSize: "var(--compose-xs)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                 {pt.section.split(" – ")[0].slice(0, 10)}
               </span>
               <span style={{ color: modeColor }}>{levelToBar(pt.level)}</span>
@@ -288,9 +288,9 @@ function ArcPanel({ arc, previewArc, modeColor, hasContent }: {
           className="mt-3 py-2 px-3 rounded text-center"
           style={{ background: `${modeColor}0A`, border: `1px solid ${modeColor}30` }}
         >
-          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.5rem", color: "var(--ln-smoke)", letterSpacing: "0.1em" }}>ANCHOR TERM</div>
-          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.75rem", color: modeColor, marginTop: 2 }}>Arc</div>
-          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.45rem", color: "var(--ln-smoke)", opacity: 0.6, marginTop: 2 }}>
+          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "var(--compose-xs)", color: "var(--ln-smoke)", letterSpacing: "0.1em" }}>ANCHOR TERM</div>
+          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "var(--compose-md)", color: modeColor, marginTop: 2 }}>Arc</div>
+          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "var(--compose-xs)", color: "var(--ln-smoke)", opacity: 0.6, marginTop: 2 }}>
             arcus — bow, curve<br />tension → release
           </div>
         </div>
@@ -301,14 +301,14 @@ function ArcPanel({ arc, previewArc, modeColor, hasContent }: {
         <>
           <div
             className="text-xs uppercase tracking-widest mt-3 mb-1"
-            style={{ color: "var(--ln-smoke)", fontFamily: "'Space Mono', monospace", fontSize: "0.5rem" }}
+            style={{ color: "var(--ln-smoke)", fontFamily: "'Space Mono', monospace", fontSize: "var(--compose-xs)" }}
           >
             Sections
           </div>
           <div className="space-y-1">
             {displayArc.map((pt, i) => (
               <div key={i} className="flex items-center justify-between">
-                <span style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.5rem", color: "var(--ln-smoke)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "8rem" }}>
+                <span style={{ fontFamily: "'Space Mono', monospace", fontSize: "var(--compose-xs)", color: "var(--ln-smoke)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "8rem" }}>
                   {pt.section.split(" – ")[0]}
                 </span>
                 <div className="flex items-center gap-0.5">
@@ -1051,7 +1051,7 @@ Please respond in Suno-ready format:
                       border: `1px solid ${modeColor}33`,
                       color: "var(--ln-parchment)",
                       fontFamily: "'Space Mono', monospace",
-                      fontSize: "0.6rem",
+                      fontSize: "var(--compose-sm)",
                     }}
                   >
                     <option value="">No guide — freeform generation</option>
@@ -1064,7 +1064,7 @@ Please respond in Suno-ready format:
 
               {/* Multi-reference image upload (mobile) */}
               <div>
-                <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.5rem", color: modeColor, letterSpacing: "0.08em", marginBottom: 4 }}>REFERENCE IMAGES — UP TO 4 (OPTIONAL)</div>
+                <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "var(--compose-xs)", color: modeColor, letterSpacing: "0.08em", marginBottom: 4 }}>REFERENCE IMAGES — UP TO 4 (OPTIONAL)</div>
                 <div className="flex flex-wrap gap-2">
                   {Array.from({ length: 4 }).map((_, i) => {
                     const ref = referenceImages[i];
@@ -1073,15 +1073,15 @@ Please respond in Suno-ready format:
                       <div key={i} className="relative">
                         {ref ? (
                           <div className="relative">
-                            <img src={ref.preview} alt={`Ref ${i + 1}`} className="w-10 h-10 rounded object-cover" style={{ border: `1px solid ${modeColor}44` }} />
+                            <img src={ref.preview} alt={`Ref ${i + 1}`} className="rounded object-cover" style={{ width: "var(--compose-ref-tile-mobile)", height: "var(--compose-ref-tile-mobile)", border: `1px solid ${modeColor}44` }} />
                             <button onClick={() => handleRemoveReferenceImage(i)} className="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-xs" style={{ background: 'var(--ln-obsidian)', border: `1px solid ${modeColor}44`, color: modeColor }}>×</button>
                           </div>
                         ) : (
                           <button
                             onClick={() => { setPendingRefSlot(i); referenceInputRef.current?.click(); }}
                             disabled={isUploading}
-                            className="w-10 h-10 rounded flex items-center justify-center transition-all hover:opacity-80 disabled:opacity-40"
-                            style={{ background: `${modeColor}10`, border: `1px dashed ${modeColor}44`, color: modeColor }}
+                            className="rounded flex items-center justify-center transition-all hover:opacity-80 disabled:opacity-40"
+                            style={{ width: "var(--compose-ref-tile-mobile)", height: "var(--compose-ref-tile-mobile)", background: `${modeColor}10`, border: `1px dashed ${modeColor}44`, color: modeColor }}
                           >
                             {isUploading ? <Loader2 className="w-3 h-3 animate-spin" /> : <ImageIcon className="w-3 h-3" />}
                           </button>
@@ -1091,12 +1091,12 @@ Please respond in Suno-ready format:
                   })}
                 </div>
                 <input ref={referenceInputRef} type="file" accept="image/*" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) handleUploadReferenceImage(f, pendingRefSlot); e.target.value = ''; }} />
-                {referenceImages.length > 0 && <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.5rem", color: modeColor, opacity: 0.7, marginTop: 4 }}>{referenceImages.length} REFERENCE{referenceImages.length > 1 ? 'S' : ''} ACTIVE — model will merge all anchors</div>}
+                {referenceImages.length > 0 && <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "var(--compose-xs)", color: modeColor, opacity: 0.7, marginTop: 4 }}>{referenceImages.length} REFERENCE{referenceImages.length > 1 ? 'S' : ''} ACTIVE — model will merge all anchors</div>}
               </div>
 
               {/* Prompt input */}
               <div>
-                <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.5rem", color: modeColor, letterSpacing: "0.08em", marginBottom: 4 }}>VISION PROMPT</div>
+                <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "var(--compose-xs)", color: modeColor, letterSpacing: "0.08em", marginBottom: 4 }}>VISION PROMPT</div>
                 <textarea
                   value={imagePrompt}
                   onChange={e => setImagePrompt(e.target.value)}
@@ -1109,7 +1109,7 @@ Please respond in Suno-ready format:
                     border: `1px solid ${modeColor}33`,
                     color: "var(--ln-parchment)",
                     fontFamily: "'Space Mono', monospace",
-                    fontSize: "0.7rem",
+                    fontSize: "var(--compose-md)",
                     lineHeight: 1.6,
                   }}
                   disabled={isGeneratingImage}
@@ -1124,7 +1124,7 @@ Please respond in Suno-ready format:
                   border: `1px solid ${modeColor}66`,
                   color: modeColor,
                   fontFamily: "'Space Mono', monospace",
-                  fontSize: "0.6rem",
+                  fontSize: "var(--compose-sm)",
                   letterSpacing: "0.08em",
                 }}
               >
@@ -1135,7 +1135,7 @@ Please respond in Suno-ready format:
               {/* Session image history */}
               {imageHistory.length > 0 && (
                 <div className="space-y-4">
-                  <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.5rem", color: modeColor, letterSpacing: "0.08em" }}>SESSION VISIONS ({imageHistory.length})</div>
+                  <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "var(--compose-xs)", color: modeColor, letterSpacing: "0.08em" }}>SESSION VISIONS ({imageHistory.length})</div>
                   {imageHistory.map((img, i) => (
                     <div key={i} className="rounded overflow-hidden" style={{ border: `1px solid ${modeColor}30` }}>
                       <div className="relative">
@@ -1542,7 +1542,7 @@ Please respond in Suno-ready format:
                 {/* Guide selector */}
                 {myGuidesQuery.data && myGuidesQuery.data.length > 0 && (
                   <div>
-                    <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.5rem", color: modeColor, letterSpacing: "0.08em", marginBottom: 6 }}>GUIDE CONTEXT (OPTIONAL)</div>
+                    <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "var(--compose-xs)", color: modeColor, letterSpacing: "0.08em", marginBottom: 6 }}>GUIDE CONTEXT (OPTIONAL)</div>
                     <select
                       value={selectedGuideId ?? ""}
                       onChange={e => setSelectedGuideId(e.target.value ? parseInt(e.target.value) : undefined)}
@@ -1552,7 +1552,7 @@ Please respond in Suno-ready format:
                         border: `1px solid ${modeColor}33`,
                         color: "var(--ln-parchment)",
                         fontFamily: "'Space Mono', monospace",
-                        fontSize: "0.6rem",
+                        fontSize: "var(--compose-sm)",
                       }}
                     >
                       <option value="">No guide — freeform generation</option>
@@ -1565,7 +1565,7 @@ Please respond in Suno-ready format:
 
                 {/* Multi-reference image upload (desktop) */}
                 <div className="rounded p-4" style={{ background: 'var(--ln-panel)', border: `1px solid ${modeColor}30` }}>
-                  <div style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.5rem', color: modeColor, letterSpacing: '0.08em', marginBottom: 8 }}>REFERENCE IMAGES — MERGE ANCHORS (UP TO 4)</div>
+                  <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 'var(--compose-xs)', color: modeColor, letterSpacing: '0.08em', marginBottom: 8 }}>REFERENCE IMAGES — MERGE ANCHORS (UP TO 4)</div>
                   <div className="flex flex-wrap gap-3 mb-2">
                     {Array.from({ length: 4 }).map((_, i) => {
                       const ref = referenceImages[i];
@@ -1574,19 +1574,19 @@ Please respond in Suno-ready format:
                         <div key={i} className="relative">
                           {ref ? (
                             <div className="relative">
-                              <img src={ref.preview} alt={`Ref ${i + 1}`} className="w-14 h-14 rounded object-cover" style={{ border: `1px solid ${modeColor}66` }} />
-                              <div style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.45rem', color: modeColor, textAlign: 'center', marginTop: 2 }}>REF {i + 1}</div>
+                              <img src={ref.preview} alt={`Ref ${i + 1}`} className="rounded object-cover" style={{ width: "var(--compose-ref-tile)", height: "var(--compose-ref-tile)", border: `1px solid ${modeColor}66` }} />
+                              <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 'var(--compose-xs)', color: modeColor, textAlign: 'center', marginTop: 2 }}>REF {i + 1}</div>
                               <button onClick={() => handleRemoveReferenceImage(i)} className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full flex items-center justify-center text-xs" style={{ background: 'var(--ln-obsidian)', border: `1px solid ${modeColor}44`, color: modeColor }}>×</button>
                             </div>
                           ) : (
                             <button
                               onClick={() => { setPendingRefSlot(i); referenceInputRef.current?.click(); }}
                               disabled={isUploading}
-                              className="w-14 h-14 rounded flex flex-col items-center justify-center gap-1 transition-all hover:opacity-80 disabled:opacity-40"
-                              style={{ background: `${modeColor}10`, border: `1px dashed ${modeColor}44`, color: modeColor }}
+                              className="rounded flex flex-col items-center justify-center gap-1 transition-all hover:opacity-80 disabled:opacity-40"
+                              style={{ width: "var(--compose-ref-tile)", height: "var(--compose-ref-tile)", background: `${modeColor}10`, border: `1px dashed ${modeColor}44`, color: modeColor }}
                             >
                               {isUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ImageIcon className="w-4 h-4" />}
-                              <span style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.4rem' }}>REF {i + 1}</span>
+                              <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 'var(--compose-xs)' }}>REF {i + 1}</span>
                             </button>
                           )}
                         </div>
@@ -1595,7 +1595,7 @@ Please respond in Suno-ready format:
                   </div>
                   <input ref={referenceInputRef} type="file" accept="image/*" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) handleUploadReferenceImage(f, pendingRefSlot); e.target.value = ''; }} />
                   {referenceImages.length > 0 && (
-                    <div style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.5rem', color: modeColor, opacity: 0.7 }}>
+                    <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 'var(--compose-xs)', color: modeColor, opacity: 0.7 }}>
                       {referenceImages.length} ANCHOR{referenceImages.length > 1 ? 'S' : ''} ACTIVE — the model will blend all reference images with your prompt
                     </div>
                   )}
@@ -1603,7 +1603,7 @@ Please respond in Suno-ready format:
 
                 {/* Prompt + generate */}
                 <div className="rounded p-4" style={{ background: "var(--ln-panel)", border: `1px solid ${modeColor}30` }}>
-                  <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.5rem", color: modeColor, letterSpacing: "0.08em", marginBottom: 8 }}>VISION PROMPT</div>
+                  <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "var(--compose-xs)", color: modeColor, letterSpacing: "0.08em", marginBottom: 8 }}>VISION PROMPT</div>
                   <textarea
                     value={imagePrompt}
                     onChange={e => setImagePrompt(e.target.value)}
@@ -1616,7 +1616,7 @@ Please respond in Suno-ready format:
                       border: `1px solid ${modeColor}33`,
                       color: "var(--ln-parchment)",
                       fontFamily: "'Space Mono', monospace",
-                      fontSize: "0.7rem",
+                      fontSize: "var(--compose-md)",
                       lineHeight: 1.7,
                     }}
                     disabled={isGeneratingImage}
@@ -1630,7 +1630,7 @@ Please respond in Suno-ready format:
                       border: `1px solid ${modeColor}66`,
                       color: modeColor,
                       fontFamily: "'Space Mono', monospace",
-                      fontSize: "0.6rem",
+                      fontSize: "var(--compose-sm)",
                       letterSpacing: "0.08em",
                     }}
                   >
@@ -1644,7 +1644,7 @@ Please respond in Suno-ready format:
 
                 {imageHistory.length > 0 && (
                   <div className="space-y-5">
-                    <div style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.5rem', color: modeColor, letterSpacing: '0.08em' }}>SESSION VISIONS — {imageHistory.length} IMAGE{imageHistory.length !== 1 ? 'S' : ''}</div>
+                    <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 'var(--compose-xs)', color: modeColor, letterSpacing: '0.08em' }}>SESSION VISIONS — {imageHistory.length} IMAGE{imageHistory.length !== 1 ? 'S' : ''}</div>
                     {imageHistory.map((img, i) => (
                       <div key={i} className="rounded overflow-hidden" style={{ border: `1px solid ${modeColor}30` }}>
                         <div className="relative">
