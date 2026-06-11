@@ -1758,3 +1758,33 @@ export const collectionFollowers = mysqlTable("collectionFollowers", {
 }));
 export type CollectionFollower = typeof collectionFollowers.$inferSelect;
 export type InsertCollectionFollower = typeof collectionFollowers.$inferInsert;
+
+// ─── Quiver Images ─────────────────────────────────────────────────────────────
+// Private image vault: every image generated in Keeper Compose Image mode is
+// auto-saved here at the moment of generation. Only the generating user can see
+// their own quiver entries.
+export const quiverImages = mysqlTable("quiverImages", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  url: text("url").notNull(),
+  prompt: text("prompt").notNull(),
+  enrichedPrompt: text("enrichedPrompt"),
+  widId: varchar("widId", { length: 64 }),
+  guideId: int("guideId"),
+  referenceImageUrl: text("referenceImageUrl"),
+  isRemix: boolean("isRemix").default(false).notNull(),
+  // Search tags derived from prompt (comma-separated keywords)
+  tags: text("tags"),
+  // User-supplied title or alias for the image
+  title: varchar("title", { length: 255 }),
+  // Whether this image has been registered as a WID manifestation
+  registeredAsWid: boolean("registeredAsWid").default(false).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (t) => ({
+  userIdx: index("qi_userId_idx").on(t.userId),
+  widIdx: index("qi_widId_idx").on(t.widId),
+  guideIdx: index("qi_guideId_idx").on(t.guideId),
+  createdAtIdx: index("qi_createdAt_idx").on(t.createdAt),
+}));
+export type QuiverImage = typeof quiverImages.$inferSelect;
+export type InsertQuiverImage = typeof quiverImages.$inferInsert;

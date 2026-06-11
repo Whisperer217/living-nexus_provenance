@@ -5029,3 +5029,15 @@
 - [x] Add Reference Image upload button in Image mode (before prompt): upload → stored as referenceImageUrl state, shown as thumbnail, passed to generate/remix
 - [x] Add Remix button on each image card: pre-fills prompt with original prompt, passes that image as reference, triggers new generation
 - [x] TypeScript: 0 errors
+
+## Phase 200: Quiver — Private Image Vault
+- [x] Add quiverImages table to Drizzle schema (userId, url, prompt, enrichedPrompt, widId, guideId, referenceImageUrl, isRemix, title, registeredAsWid, createdAt)
+- [x] Run pnpm db:push — migration applied successfully
+- [x] Add quiver.save, quiver.list, quiver.delete, quiver.updateTitle tRPC procedures
+- [x] Auto-save every generated image to Quiver vault (handleGenerateImage)
+- [x] Auto-save every remixed image to Quiver vault (handleRemixImage)
+- [x] Add Quiver toggle button in mobile Image mode panel (collapsible)
+- [x] Add Quiver toggle button in desktop Image mode panel (collapsible)
+- [x] Quiver panel: search by prompt, 2-col mobile / 3-col desktop grid, DL/REMIX/DEL per card
+- [x] Quiver panel: WID badge, REMIX badge, date, pagination (20 per page)
+- [x] TypeScript: 0 errors

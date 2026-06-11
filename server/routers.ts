@@ -7015,8 +7015,107 @@ If a field cannot be determined from the document, use an empty string. For symb
          const key = `references/${ctx.user.id}/${Date.now()}-ref.${ext}`;
          const { url } = await storagePut(key, buffer, input.mimeType);
          return { url, key };
-       }),
-   }),
+              }),
+    }),
+
+  // ─── Quiver (Private Image Vault) ───────────────────────────────────────────────
+  quiver: router({
+    /**
+     * Save a generated image to the user's private Quiver vault.
+     * Called automatically by the client immediately after generation.
+     */
+    save: protectedProcedure
+      .input(z.object({
+        url: z.string().url(),
+        prompt: z.string().min(1).max(2000),
+        enrichedPrompt: z.string().optional(),
+        widId: z.string().optional(),
+        guideId: z.number().int().positive().optional(),
+        referenceImageUrl: z.string().url().optional(),
+        isRemix: z.boolean().default(false),
+        title: z.string().max(255).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const { quiverImages } = await import('../drizzle/schema');
+        const db = await getDb();
+        const [row] = await db.insert(quiverImages).values({
+          userId: ctx.user.id,
+          url: input.url,
+          prompt: input.prompt,
+          enrichedPrompt: input.enrichedPrompt,
+          widId: input.widId,
+          guideId: input.guideId,
+          referenceImageUrl: input.referenceImageUrl,
+          isRemix: input.isRemix,
+          title: input.title,
+        });
+        return { id: (row as any).insertId as number };
+      }),
+
+    /**
+     * List the authenticated user's quiver images with optional search.
+     * Results are paginated (newest first, 20 per page).
+     */
+    list: protectedProcedure
+      .input(z.object({
+        search: z.string().optional(),
+        guideId: z.number().int().positive().optional(),
+        page: z.number().int().min(0).default(0),
+        limit: z.number().int().min(1).max(50).default(20),
+      }))
+      .query(async ({ ctx, input }) => {
+        const { quiverImages } = await import('../drizzle/schema');
+        const { eq: eqOp, and: andOp, desc: descOp, like: likeOp } = await import('drizzle-orm');
+        const db = await getDb();
+        const { search, guideId, page, limit } = input;
+        const offset = page * limit;
+        const conditions = [
+          eqOp(quiverImages.userId, ctx.user.id),
+          ...(search ? [likeOp(quiverImages.prompt, `%${search}%`)] : []),
+          ...(guideId ? [eqOp(quiverImages.guideId, guideId)] : []),
+        ];
+        const rows = await db
+          .select()
+          .from(quiverImages)
+          .where(andOp(...conditions))
+          .orderBy(descOp(quiverImages.createdAt))
+          .limit(limit)
+          .offset(offset);
+        return rows;
+      }),
+
+    /**
+     * Delete a quiver image (owner only).
+     */
+    delete: protectedProcedure
+      .input(z.object({ id: z.number().int().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        const { quiverImages } = await import('../drizzle/schema');
+        const { eq: eqOp, and: andOp } = await import('drizzle-orm');
+        const db = await getDb();
+        const [img] = await db.select().from(quiverImages).where(
+          andOp(eqOp(quiverImages.id, input.id), eqOp(quiverImages.userId, ctx.user.id))
+        ).limit(1);
+        if (!img) throw new TRPCError({ code: 'NOT_FOUND', message: 'Image not found in your quiver.' });
+        await db.delete(quiverImages).where(eqOp(quiverImages.id, input.id));
+        return { ok: true };
+      }),
+
+    /**
+     * Update the title of a quiver image (owner only).
+     */
+    updateTitle: protectedProcedure
+      .input(z.object({ id: z.number().int().positive(), title: z.string().max(255) }))
+      .mutation(async ({ ctx, input }) => {
+        const { quiverImages } = await import('../drizzle/schema');
+        const { eq: eqOp, and: andOp } = await import('drizzle-orm');
+        const db = await getDb();
+        await db.update(quiverImages)
+          .set({ title: input.title })
+          .where(andOp(eqOp(quiverImages.id, input.id), eqOp(quiverImages.userId, ctx.user.id)));
+        return { ok: true };
+      }),
+  }),
 
   // ─── Global Search ─────────────────────────────────────────────────────────
   search: router({
