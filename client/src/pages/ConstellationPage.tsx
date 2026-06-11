@@ -96,12 +96,21 @@ export default function ConstellationPage() {
   const [, navigate] = useLocation();
   const songIdNum = parseInt(songId ?? "0", 10);
 
-  const { data, isLoading, error } = trpc.songs.constellation.useQuery(
+  const { data, isLoading, error, refetch } = trpc.songs.constellation.useQuery(
     { songId: songIdNum },
-    { enabled: !!songIdNum && !isNaN(songIdNum) }
+    { enabled: !!songIdNum && !isNaN(songIdNum), retry: 2, retryDelay: 1000 }
   );
 
+  // Timeout guard: if still loading after 12s, treat as error
+  const [loadTimeout, setLoadTimeout] = useState(false);
+  useEffect(() => {
+    if (!isLoading) { setLoadTimeout(false); return; }
+    const t = setTimeout(() => setLoadTimeout(true), 12000);
+    return () => clearTimeout(t);
+  }, [isLoading]);
+
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const animRef = useRef<number>(0);
   const nodesRef = useRef<CanvasNode[]>([]);
   const starsRef = useRef<Star[]>([]);
@@ -222,19 +231,58 @@ export default function ConstellationPage() {
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ro = new ResizeObserver(entries => {
-      const entry = entries[0];
-      const w = entry.contentRect.width;
-      const h = entry.contentRect.height;
-      canvas.width = w * window.devicePixelRatio;
-      canvas.height = h * window.devicePixelRatio;
+    const container = containerRef.current;
+    if (!canvas || !container) return;
+
+    const applySize = (w: number, h: number) => {
+      if (w < 10 || h < 10) return; // skip degenerate sizes
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = Math.round(w * dpr);
+      canvas.height = Math.round(h * dpr);
       canvas.style.width = `${w}px`;
       canvas.style.height = `${h}px`;
       setDims({ w, h });
+    };
+
+    // Initial measurement — use container bounds, fall back to window
+    const measure = () => {
+      const rect = container.getBoundingClientRect();
+      const w = rect.width > 10 ? rect.width : window.innerWidth;
+      const h = rect.height > 10 ? rect.height : window.innerHeight;
+      applySize(w, h);
+    };
+    measure();
+
+    // Fallback: if dims still 0 after 300ms (mobile paint delay), force from window
+    const fallbackTimer = setTimeout(() => {
+      if (!dims.w || !dims.h) {
+        applySize(window.innerWidth, window.innerHeight);
+      }
+    }, 300);
+
+    const ro = new ResizeObserver(entries => {
+      const entry = entries[0];
+      const w = entry.contentRect.width || window.innerWidth;
+      const h = entry.contentRect.height || window.innerHeight;
+      applySize(w, h);
     });
-    ro.observe(canvas.parentElement!);
-    return () => ro.disconnect();
+    ro.observe(container);
+
+    const onResize = () => {
+      const rect = container.getBoundingClientRect();
+      applySize(
+        rect.width > 10 ? rect.width : window.innerWidth,
+        rect.height > 10 ? rect.height : window.innerHeight
+      );
+    };
+    window.addEventListener('resize', onResize);
+
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', onResize);
+      clearTimeout(fallbackTimer);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ─── Re-layout when data or dims change ───────────────────────────────────
@@ -490,9 +538,9 @@ export default function ConstellationPage() {
 
   // ─── Render ───────────────────────────────────────────────────────────────
 
-  if (isLoading) {
+  if (isLoading && !loadTimeout) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center" style={{ background: "#000" }}>
+      <div className="fixed inset-0 flex items-center justify-center" style={{ background: "#000", height: "100dvh" }}>
         <div className="text-center">
           <div className="w-16 h-16 rounded-full border-2 border-[#D4AF37] border-t-transparent animate-spin mx-auto mb-4" />
           <p className="text-[13px] font-mono tracking-widest uppercase" style={{ color: "rgba(212,175,55,0.6)" }}>
@@ -503,27 +551,33 @@ export default function ConstellationPage() {
     );
   }
 
-  if (error || !data) {
+  if (error || !data || loadTimeout) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center" style={{ background: "#000" }}>
+      <div className="fixed inset-0 flex items-center justify-center" style={{ background: "#000", height: "100dvh" }}>
         <div className="text-center px-6">
           <p className="text-[#D4AF37] text-lg font-semibold mb-2">Constellation not found</p>
           <p className="text-white/50 text-sm mb-6">This work may not be publicly available.</p>
-          <button onClick={() => navigate(-1 as any)} className="px-4 py-2 rounded-lg text-sm" style={{ background: "rgba(212,175,55,0.15)", color: "#D4AF37", border: "1px solid rgba(212,175,55,0.3)" }}>
-            Go Back
-          </button>
+          <div className="flex gap-3 justify-center">
+            <button onClick={() => { setLoadTimeout(false); refetch(); }} className="px-4 py-2 rounded-lg text-sm" style={{ background: "rgba(212,175,55,0.15)", color: "#D4AF37", border: "1px solid rgba(212,175,55,0.3)" }}>
+              Retry
+            </button>
+            <button onClick={() => navigate(-1 as any)} className="px-4 py-2 rounded-lg text-sm" style={{ background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.1)" }}>
+              Go Back
+            </button>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="fixed inset-0 overflow-hidden" style={{ background: "#000", zIndex: 50 }}>
+    <div className="fixed inset-0 overflow-hidden" style={{ background: "#000", zIndex: 50, height: "100dvh" }}>
       {/* Canvas */}
-      <div className="absolute inset-0">
+      <div ref={containerRef} className="absolute inset-0" style={{ width: "100%", height: "100%" }}>
         <canvas
           ref={canvasRef}
-          className="w-full h-full cursor-crosshair"
+          className="cursor-crosshair"
+          style={{ display: "block", width: "100%", height: "100%" }}
           onMouseMove={handleMouseMove}
           onMouseLeave={handleMouseLeave}
           onClick={handleClick}
