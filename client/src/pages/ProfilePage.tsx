@@ -185,11 +185,11 @@ export default function ProfilePage() {
   // Read ?tab= URL param for deep-links from ContextDrawer and other navigation sources
   const search = useSearch();
   const tabFromUrl = new URLSearchParams(search).get("tab") as
-    | "overview" | "works" | "collections" | "liked" | "signals" | "field-notes" | "testimony" | "identity"
+    | "overview" | "works" | "collections" | "liked" | "signals" | "field-notes" | "testimony" | "identity" | "witness-network"
     | null;
-  const validTabs = ["overview", "works", "collections", "liked", "signals", "field-notes", "testimony", "identity"] as const;
+  const validTabs = ["overview", "works", "collections", "liked", "signals", "field-notes", "testimony", "identity", "witness-network"] as const;
   const initialTab = tabFromUrl && (validTabs as readonly string[]).includes(tabFromUrl) ? tabFromUrl : "overview";
-  const [activeTab, setActiveTab] = useState<"overview" | "works" | "collections" | "liked" | "signals" | "field-notes" | "testimony" | "identity">(initialTab);
+  const [activeTab, setActiveTab] = useState<"overview" | "works" | "collections" | "liked" | "signals" | "field-notes" | "testimony" | "identity" | "witness-network">(initialTab);
   // Sync tab when URL search changes (handles same-page navigation e.g. /profile → /profile?tab=works)
   useEffect(() => {
     const t = new URLSearchParams(search).get("tab") as typeof activeTab | null;
@@ -205,7 +205,7 @@ export default function ProfilePage() {
   // ── Identity data ────────────────────────────────────────────────
   const { data: myStats } = trpc.profile.myStats.useQuery(undefined, { enabled: !!user });
   const { data: myActivity = [] } = trpc.profile.myActivity.useQuery({ limit: 20 }, { enabled: !!user && activeTab === "overview" });
-  const { data: witnessNetwork } = trpc.witness.network.useQuery(undefined, { enabled: !!user && activeTab === "overview" });
+  const { data: witnessNetwork } = trpc.witness.network.useQuery(undefined, { enabled: !!user && (activeTab === "overview" || activeTab === "witness-network") });
   const { data: analytics } = trpc.profile.myAnalytics.useQuery(undefined, { enabled: !!user && activeTab === "overview", staleTime: 60_000 });
   // ── Command center tab data ───────────────────────────────────────
   const { data: likedSongs = [] } = trpc.songs.getLikedOrdered.useQuery(undefined, { enabled: !!user && activeTab === "liked" });
@@ -923,14 +923,15 @@ export default function ProfilePage() {
         {/* ── Command Center Tabs ── */}
         {(() => {
           const tabs: { id: typeof activeTab; label: string; badge?: string | null }[] = [
-            { id: "overview",     label: "Overview" },
-            { id: "collections",  label: "Collections & Playlists" },
-            { id: "works",        label: "Works" },
-            { id: "liked",        label: "Liked" },
-            { id: "signals",      label: "Signals", badge: (unreadCount as number) > 0 ? String(unreadCount) : null },
-            { id: "field-notes",  label: "Field Notes" },
-            { id: "testimony",     label: "Testimony" },
-            { id: "identity",      label: "Identity" },
+            { id: "overview",        label: "Overview" },
+            { id: "collections",     label: "Collections & Playlists" },
+            { id: "works",           label: "Works" },
+            { id: "liked",           label: "Liked" },
+            { id: "witness-network", label: "Witness Network", badge: (witnessNetwork?.witnessing?.length ?? 0) + (witnessNetwork?.witnessedBy?.length ?? 0) > 0 ? String((witnessNetwork?.witnessing?.length ?? 0) + (witnessNetwork?.witnessedBy?.length ?? 0)) : null },
+            { id: "signals",         label: "Signals", badge: (unreadCount as number) > 0 ? String(unreadCount) : null },
+            { id: "field-notes",     label: "Field Notes" },
+            { id: "testimony",       label: "Testimony" },
+            { id: "identity",        label: "Identity" },
           ];
           return (
             <div className="flex gap-0 mb-5 border-b border-white/[0.07] overflow-x-auto scrollbar-none">
@@ -1720,6 +1721,102 @@ export default function ProfilePage() {
         {/* ── Identity Tab ── */}
         {activeTab === "identity" && (
           <IdentityEditor profile={profile} />
+        )}
+
+        {/* ── Witness Network Tab ── */}
+        {activeTab === "witness-network" && (
+          <div className="space-y-6">
+            {/* Header */}
+            <div className="flex items-center gap-3 pb-3 border-b border-white/[0.07]">
+              <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: "rgba(96,165,250,0.12)", border: "1px solid rgba(96,165,250,0.25)" }}>
+                <Users size={14} style={{ color: "#60a5fa" }} />
+              </div>
+              <div>
+                <div className="text-[14px] font-heading tracking-wide" style={{ color: "var(--ln-parchment)" }}>Witness Network</div>
+                <div className="text-[11px] font-body" style={{ color: "var(--ln-smoke)" }}>Creators you witness and those who witness you</div>
+              </div>
+            </div>
+
+            {/* Witnessing — creators I watch */}
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <div className="text-[10px] font-heading tracking-widest" style={{ color: "rgba(96,165,250,0.7)" }}>WITNESSING</div>
+                <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold" style={{ background: "rgba(96,165,250,0.12)", color: "#60a5fa", border: "1px solid rgba(96,165,250,0.25)" }}>{witnessNetwork?.witnessing?.length ?? 0}</span>
+              </div>
+              {!witnessNetwork?.witnessing?.length ? (
+                <div className="py-6 text-center rounded-xl" style={{ background: "var(--ln-coal)", border: "1px solid rgba(255,255,255,0.05)" }}>
+                  <Users size={20} className="mx-auto mb-2" style={{ color: "rgba(96,165,250,0.3)" }} />
+                  <p className="text-[12px] font-body" style={{ color: "var(--ln-smoke)" }}>You haven't witnessed any creators yet</p>
+                  <p className="text-[11px] font-body mt-1" style={{ color: "rgba(255,255,255,0.3)" }}>Visit a creator's profile and click Witness</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 gap-2">
+                  {witnessNetwork.witnessing.map((person: any) => (
+                    <Link key={person.id} href={`/creator/${person.artistHandle || person.id}`}>
+                      <div className="flex items-center gap-3 p-3 rounded-xl transition-all cursor-pointer hover:bg-white/[0.03]" style={{ background: "var(--ln-coal)", border: "1px solid rgba(255,255,255,0.05)" }}>
+                        <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0" style={{ background: "rgba(96,165,250,0.08)", border: "1px solid rgba(96,165,250,0.15)" }}>
+                          {person.profilePhotoUrl
+                            ? <img src={person.profilePhotoUrl} alt="" className="w-full h-full object-cover" />
+                            : <div className="w-full h-full flex items-center justify-center text-[14px] font-heading" style={{ color: "#60a5fa" }}>{(person.artistHandle || person.name || "?")[0].toUpperCase()}</div>
+                          }
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-[13px] font-heading truncate" style={{ color: "var(--ln-parchment)" }}>{person.artistHandle || person.name || "Unknown"}</div>
+                          {person.artistHandle && person.name && person.artistHandle !== person.name && (
+                            <div className="text-[11px] font-body truncate" style={{ color: "var(--ln-smoke)" }}>{person.name}</div>
+                          )}
+                        </div>
+                        {person.licenseStatus === "active" && (
+                          <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold flex-shrink-0" style={{ background: "rgba(74,222,128,0.12)", color: "var(--ln-seal-bright)", border: "1px solid rgba(74,222,128,0.25)" }}>Licensed</span>
+                        )}
+                        <ExternalLink size={12} style={{ color: "rgba(255,255,255,0.2)", flexShrink: 0 }} />
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Witnessed By — creators watching me */}
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <div className="text-[10px] font-heading tracking-widest" style={{ color: "rgba(251,146,60,0.7)" }}>WITNESSED BY</div>
+                <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold" style={{ background: "rgba(251,146,60,0.12)", color: "#fb923c", border: "1px solid rgba(251,146,60,0.25)" }}>{witnessNetwork?.witnessedBy?.length ?? 0}</span>
+              </div>
+              {!witnessNetwork?.witnessedBy?.length ? (
+                <div className="py-6 text-center rounded-xl" style={{ background: "var(--ln-coal)", border: "1px solid rgba(255,255,255,0.05)" }}>
+                  <Eye size={20} className="mx-auto mb-2" style={{ color: "rgba(251,146,60,0.3)" }} />
+                  <p className="text-[12px] font-body" style={{ color: "var(--ln-smoke)" }}>No one is witnessing you yet</p>
+                  <p className="text-[11px] font-body mt-1" style={{ color: "rgba(255,255,255,0.3)" }}>Share your creator profile to grow your network</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 gap-2">
+                  {witnessNetwork.witnessedBy.map((person: any) => (
+                    <Link key={person.id} href={`/creator/${person.artistHandle || person.id}`}>
+                      <div className="flex items-center gap-3 p-3 rounded-xl transition-all cursor-pointer hover:bg-white/[0.03]" style={{ background: "var(--ln-coal)", border: "1px solid rgba(255,255,255,0.05)" }}>
+                        <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0" style={{ background: "rgba(251,146,60,0.08)", border: "1px solid rgba(251,146,60,0.15)" }}>
+                          {person.profilePhotoUrl
+                            ? <img src={person.profilePhotoUrl} alt="" className="w-full h-full object-cover" />
+                            : <div className="w-full h-full flex items-center justify-center text-[14px] font-heading" style={{ color: "#fb923c" }}>{(person.artistHandle || person.name || "?")[0].toUpperCase()}</div>
+                          }
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-[13px] font-heading truncate" style={{ color: "var(--ln-parchment)" }}>{person.artistHandle || person.name || "Unknown"}</div>
+                          {person.artistHandle && person.name && person.artistHandle !== person.name && (
+                            <div className="text-[11px] font-body truncate" style={{ color: "var(--ln-smoke)" }}>{person.name}</div>
+                          )}
+                        </div>
+                        {person.licenseStatus === "active" && (
+                          <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold flex-shrink-0" style={{ background: "rgba(74,222,128,0.12)", color: "var(--ln-seal-bright)", border: "1px solid rgba(74,222,128,0.25)" }}>Licensed</span>
+                        )}
+                        <ExternalLink size={12} style={{ color: "rgba(255,255,255,0.2)", flexShrink: 0 }} />
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
         )}
 
         {/* ── Settings utility bar ── */}

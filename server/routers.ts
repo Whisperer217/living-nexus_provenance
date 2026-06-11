@@ -1624,6 +1624,43 @@ export const appRouter = router({
     getRelated: publicProcedure.input(z.object({ songId: z.number(), genre: z.string().optional() })).query(async ({ input }) => {
       return getRelatedSongs(input.songId, input.genre, 6);
     }),
+    /**
+     * Constellation data: central song + inner ring (same creator) + outer ring (same genre, different creator).
+     * Used by /constellation/:songId page.
+     */
+    constellation: publicProcedure
+      .input(z.object({ songId: z.number().int().positive() }))
+      .query(async ({ input }) => {
+        const central = await getSongWithCreator(input.songId);
+        if (!central) throw new TRPCError({ code: "NOT_FOUND", message: "Song not found" });
+        // Inner ring: same creator, different song, published
+        const { songs: songsTable, users } = await import("../drizzle/schema");
+        const { getDb } = await import("./db");
+        const { eq, and, ne, desc } = await import("drizzle-orm");
+        const db = await getDb();
+        const innerRaw = db ? await db.select({
+          song: songsTable,
+          creator: { id: users.id, name: users.name, artistHandle: users.artistHandle, profilePhotoUrl: users.profilePhotoUrl },
+        }).from(songsTable)
+          .leftJoin(users, eq(songsTable.userId, users.id))
+          .where(and(
+            eq(songsTable.userId, central.creator?.id ?? 0),
+            ne(songsTable.id, input.songId),
+            eq(songsTable.isPublic, true),
+            eq(songsTable.status, "Published"),
+          ))
+          .orderBy(desc(songsTable.playCount))
+          .limit(8) : [];
+        // Outer ring: same genre, different creator
+        const outerRaw = central.song.genre
+          ? await getRelatedSongs(input.songId, central.song.genre, 8)
+          : await getRelatedSongs(input.songId, undefined, 8);
+        return {
+          central,
+          inner: innerRaw,
+          outer: outerRaw,
+        };
+      }),
 
     getLiked: protectedProcedure.query(async ({ ctx }) => {
       return getLikedSongs(ctx.user.id);

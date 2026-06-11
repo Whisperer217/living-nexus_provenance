@@ -91,6 +91,7 @@ const DistributionPage = lazy(() => import("./pages/DistributionPage"));
 const CreatorIdentityPage = lazy(() => import("./pages/CreatorIdentityPage"));
 const CreatorDomainPage = lazy(() => import("./pages/CreatorDomainPage"));
 const CollectionPage = lazy(() => import("./pages/CollectionPage"));
+const ConstellationPage = lazy(() => import("./pages/ConstellationPage"));
 
 // Minimal fallback shown while a page chunk loads (typically <200ms on CDN)
 function PageLoader() {
@@ -241,6 +242,7 @@ function Router() {
                 <Route path="/guides/upload" component={GuideUploadWizard} />
                 <Route path="/guide/:id" component={GuideDetailPage} />
                 <Route path="/collection/:slug" component={CollectionPage} />
+                <Route path="/constellation/:songId" component={ConstellationPage} />
                 {/* ── Stability redirects — dead routes → canonical destinations ── */}
                 <Route path="/prompt-studio"><Redirect to="/keeper-compose" /></Route>
                 <Route path="/archive/mine"><Redirect to="/archive" /></Route>

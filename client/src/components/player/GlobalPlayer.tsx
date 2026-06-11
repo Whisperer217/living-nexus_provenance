@@ -490,7 +490,12 @@ function GlobalPlayerInner() {
     const btn = volumeBtnRef.current;
     if (!btn) return;
     const rect = btn.getBoundingClientRect();
-    setVolumePopupPos({ bottom: window.innerHeight - rect.top + 8, right: window.innerWidth - rect.right - 4 });
+    // Clamp bottom so the popup never exceeds the viewport top
+    // Popup height is approximately 170px (header + slider + mute btn + padding)
+    const POPUP_H = 180;
+    const rawBottom = window.innerHeight - rect.top + 8;
+    const clampedBottom = Math.min(rawBottom, window.innerHeight - POPUP_H - 8);
+    setVolumePopupPos({ bottom: Math.max(clampedBottom, 8), right: window.innerWidth - rect.right - 4 });
     setShowVolume(true);
   }
 
@@ -1265,6 +1270,8 @@ function GlobalPlayerInner() {
         boxShadow: GOLD_SHADOW_MOBILE,
         padding: "12px 14px 10px",
         minWidth: "140px",
+        maxHeight: "calc(100vh - 16px)",
+        overflowY: "auto",
       }}
     >
       <div className="flex items-center justify-between mb-2">

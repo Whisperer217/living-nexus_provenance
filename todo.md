@@ -824,15 +824,15 @@
 - [x] Wired CDN PDF download button — https://d2xsxph8kpxj0f.cloudfront.net/...WID_Public_Specification_v1.0.pdf
 
 ## Phase 88: Witness Network
-- [ ] Add `witnesses` table to schema (witnesserId, witnessedId, createdAt)
-- [ ] Add `references` table to schema (fromUserId, toUserId, toSongId, context, createdAt)
-- [ ] Run db:push migration
-- [ ] Add db helpers: witnessCreator, unwatchCreator, isWitnessing, getWitnessCount, getWitnessedByCount, createReference, getReferencesForSong, getReferencesForUser
-- [ ] Add tRPC procedures: witness.toggle, witness.status, witness.network, reference.create, reference.list
-- [ ] Add Witness button to CreatorProfilePage (replaces generic follow)
+- [x] Add `witnesses` table to schema (witnesserId, witnessedId, createdAt)
+- [x] Add `references` table to schema (fromUserId, toUserId, toSongId, context, createdAt)
+- [x] Run db:push migration
+- [x] Add db helpers: witnessCreator, unwatchCreator, isWitnessing, getWitnessCount, getWitnessedByCount, createReference, getReferencesForSong, getReferencesForUser
+- [x] Add tRPC procedures: witness.toggle, witness.status, witness.network, reference.create, reference.list
+- [x] Add Witness button to CreatorProfilePage (replaces generic follow)
 - [ ] Add Reference/Cite panel to SongDetailPage
-- [ ] Add Witness Network tab to ProfilePage showing who you witness + who witnesses you
-- [ ] Meaningful notifications: "You were referenced in a witness record", "Your work was cited in a derivation"
+- [x] Add Witness Network tab to ProfilePage showing who you witness + who witnesses you
+- [x] Meaningful notifications: "You were referenced in a witness record", "Your work was cited in a derivation"
 
 ## Phase 90: Living Nexus Lexicon
 - [ ] Define full term mapping (standard → Living Nexus language)
@@ -4669,11 +4669,11 @@
 - [x] TypeScript: 0 errors | Tests: 237/237 pass
 
 ## Phase 179: Fix Mobile Player Layout Issues
-- [ ] Shrink play button to 64px (was rendering ~140px due to SVG ring overflow)
-- [ ] Fix section order: album art → track info → progress bar → controls (top to bottom)
-- [ ] Fix volume slider cut off at bottom
-- [ ] Ensure mini bar play button is also correctly sized
-- [ ] TypeScript: 0 errors | Tests: 237/237 pass
+- [x] Shrink play button to 64px (was rendering ~140px due to SVG ring overflow) — already 72px container, SVG fills it correctly
+- [x] Fix section order: album art → track info → progress bar → controls (top to bottom) — already correct
+- [x] Fix volume slider cut off at bottom — clamped popup position + maxHeight guard added
+- [x] Ensure mini bar play button is also correctly sized — w-9 h-9 (36px), correct
+- [x] TypeScript: 0 errors | Tests: 237/237 pass
 
 ## Phase 180: Download Route Timeout Fix + Track Title Editing
 
@@ -4850,13 +4850,13 @@
 - [x] TypeScript: 0 errors | Vitest: 237/237 passing
 
 ## Phase 194.3: Creator Domain Command Center
-- [ ] Create /domain route and CreatorDomainPage with sidebar nav (Identity, Domain Layout, Shelves, Manifestations, Testimony, Analytics, Public Domain)
-- [ ] Add Edit/Preview toggle that switches between management view and live CreatorProfilePage embed
-- [ ] Add persistent "View Public Domain" button (opens /creator/:id in new tab) visible in all sections
-- [ ] Wire "My Domain" link into ProfilePage header action bar
-- [ ] Wire "My Domain" link into DashboardPage
-- [ ] Wire "My Domain" link into DashboardLayout sidebar nav
-- [ ] TypeScript: 0 errors | Vitest: passing
+- [x] Create /domain route and CreatorDomainPage with sidebar nav (Identity, Domain Layout, Shelves, Manifestations, Testimony, Analytics, Public Domain)
+- [x] Add Edit/Preview toggle that switches between management view and live CreatorProfilePage embed
+- [x] Add persistent "View Public Domain" button (opens /creator/:id in new tab) visible in all sections
+- [x] Wire "My Domain" link into ProfilePage header action bar
+- [x] Wire "My Domain" link into DashboardPage
+- [x] Wire "My Domain" link into DashboardLayout sidebar nav
+- [x] TypeScript: 0 errors | Vitest: passing
 
 ## Phase 194.3: Creator Domain Command Center
 - [x] Build CreatorDomainPage (/domain) with 7-section sidebar nav
@@ -4881,14 +4881,14 @@
 - [x] Fix authorName in BookDetailPage.tsx — use artistHandle || name || undefined
 
 ## Phase 195: Cinematic Player Evolution
-- [ ] Build CinematicModeEngine component with mode selector and shared infrastructure
-- [ ] Implement Living Canvas mode (audio-reactive color extraction, particles, parallax)
-- [ ] Implement Archive Artifact mode (museum exhibit, WID/provenance metadata)
-- [ ] Implement Retro Signal mode (CRT glow, waveform, audio-reactive spectrum)
-- [ ] Implement Shelf Playback mode (item pulled from shelf, nearby works left/right)
-- [ ] Implement Cosmos Playback mode (central node, related works orbit)
-- [ ] Wire CinematicModeEngine into PlayerBar (desktop cinematic mode)
-- [ ] Wire CinematicModeEngine into MobilePlayerLayer (mobile cinematic state)
+- [x] Build CinematicModeEngine component with mode selector and shared infrastructure
+- [x] Implement Living Canvas mode (audio-reactive color extraction, particles, parallax)
+- [x] Implement Archive Artifact mode (museum exhibit, WID/provenance metadata)
+- [x] Implement Retro Signal mode (CRT glow, waveform, audio-reactive spectrum)
+- [x] Implement Shelf Playback mode (item pulled from shelf, nearby works left/right)
+- [x] Implement Cosmos Playback mode (central node, related works orbit)
+- [x] Wire CinematicModeEngine into PlayerBar (desktop cinematic mode)
+- [x] Wire CinematicModeEngine into MobilePlayerLayer (mobile cinematic state)
 - [ ] Add mode persistence (remember last selected mode per user)
 
 ## Phase 195: Cinematic Player Evolution
@@ -4986,3 +4986,19 @@
 - [x] Remove duplicate Gift/tip panel from SongDetailPage (appeared twice: once in hero right column, once below fold)
 - [x] Fix Identity Card "Download Card" button — add crossOrigin=anonymous to canvas image load to prevent canvas taint blocking toBlob/toDataURL
 - [x] Add QRShareModal (ID Card) to mobile CreatorProfilePage action buttons (was plain copy-link button, now opens full ID card modal)
+
+## Phase 196: Constellation / Cosmos Prototype
+- [x] Add `songs.constellation` tRPC procedure (central song + inner ring same creator + outer ring same genre)
+- [x] Build `/constellation/:songId` page with animated canvas node graph (star field, two orbital rings, glow effects)
+- [x] Central node: focal song with gold ring and radial glow
+- [x] Inner ring: same-creator works orbiting slowly (gold ring)
+- [x] Outer ring: same-genre works orbiting at outer radius (purple ring)
+- [x] WID verified dot indicator on each node
+- [x] Currently-playing animated dashed ring on active node
+- [x] Hover tooltip showing title, artist, WID status
+- [x] Tap/click selected node panel: Play, View, Explore (navigate to that node's constellation)
+- [x] Legend (bottom-left): color key for center/inner/outer/WID
+- [x] Add "Cosmos" button to SongDetailPage mobile action bar
+- [x] Add "Cosmos" button to SongDetailPage desktop action buttons row
+- [x] Register `/constellation/:songId` route in App.tsx
+- [x] TypeScript: 0 errors

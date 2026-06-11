@@ -24,7 +24,7 @@ import {
   Shield, Music, ChevronLeft, Download, Headphones,
   ExternalLink, Check, ChevronDown, ChevronUp, Twitter, Heart,
   Video, ImageIcon, History, Hash, FileText, Link2, StickyNote,
-  BookOpen, ShieldCheck,
+  BookOpen, ShieldCheck, Network,
 } from "lucide-react";
 import { useLike } from "@/hooks/useLike";
 import { useRef as _useRef } from "react";
@@ -482,6 +482,12 @@ export default function SongDetailPage() {
             <Shield size={18} />
             <span className="text-[10px]">WID</span>
           </button>
+          <Link href={`/constellation/${song?.id}`}>
+            <button type="button" className="flex flex-col items-center gap-1 px-3 py-1" style={{ color: "rgba(138,43,226,0.8)" }} aria-label="Constellation">
+              <Network size={18} />
+              <span className="text-[10px]">Cosmos</span>
+            </button>
+          </Link>
         </div>
       )}
 
@@ -844,6 +850,13 @@ export default function SongDetailPage() {
               <Button size="sm" variant="outline" onClick={() => setShareOpen(true)} style={{ borderColor: "#C3AB7D", color: "var(--ln-smoke)" }}>
                 <Share2 className="w-3.5 h-3.5 mr-1" />Share
               </Button>
+              {song && (
+                <Link href={`/constellation/${song.id}`}>
+                  <Button size="sm" variant="outline" style={{ borderColor: "rgba(138,43,226,0.4)", color: "rgba(192,132,252,0.85)" }}>
+                    <Network className="w-3.5 h-3.5 mr-1" />Cosmos
+                  </Button>
+                </Link>
+              )}
               {song && (
                 <QRShareModal entity={{ type: "song", id: song.id, slug: String(song.id), name: song.title, subtitle: song.artistHandle || song.creatorName || undefined, description: song.description ?? undefined, thumbnailUrl: song.coverArtUrl ?? undefined }}
                   trigger={
