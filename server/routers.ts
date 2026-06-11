@@ -6904,7 +6904,10 @@ If a field cannot be determined from the document, use an empty string. For symb
          prompt: z.string().min(1).max(1000),
          guideId: z.number().optional(),
          styleContext: z.string().max(500).optional(),
+         // Legacy single URL kept for backwards compat
          referenceImageUrl: z.string().url().optional(),
+         // New: up to 4 reference images for merging
+         referenceImageUrls: z.array(z.string().url()).max(4).optional(),
        }))
        .mutation(async ({ ctx, input }) => {
          let enrichedPrompt = input.prompt;
@@ -6923,9 +6926,14 @@ If a field cannot be determined from the document, use an empty string. For symb
          }
 
          const { generateImage } = await import('./_core/imageGeneration');
-         const originalImages = input.referenceImageUrl
-           ? [{ url: input.referenceImageUrl, mimeType: 'image/jpeg' }]
-           : [];
+         // Merge referenceImageUrls array + legacy single URL into originalImages
+         const allRefUrls: string[] = [
+           ...(input.referenceImageUrls ?? []),
+           ...(input.referenceImageUrl && !(input.referenceImageUrls ?? []).includes(input.referenceImageUrl)
+             ? [input.referenceImageUrl]
+             : []),
+         ];
+         const originalImages = allRefUrls.map(url => ({ url, mimeType: 'image/jpeg' }));
          const result = await generateImage({ prompt: enrichedPrompt, originalImages });
 
          // Auto-generate WID-VIS from hash of url + enrichedPrompt + timestamp + userId
@@ -6935,6 +6943,9 @@ If a field cannot be determined from the document, use an empty string. For symb
          const hash = crypto.createHash('sha256').update(hashInput).digest('hex');
          const widId = `WID-VIS-${hash.slice(0, 8).toUpperCase()}-${hash.slice(8, 16).toUpperCase()}`;
 
+         // Primary reference URL for display (first in array or legacy single)
+         const primaryRefUrl = allRefUrls[0] ?? null;
+
          return {
            url: result.url,
            prompt: input.prompt,
@@ -6943,7 +6954,8 @@ If a field cannot be determined from the document, use an empty string. For symb
            creatorId: ctx.user.id,
            guideId: input.guideId ?? null,
            widId,
-           referenceImageUrl: input.referenceImageUrl ?? null,
+           referenceImageUrl: primaryRefUrl,
+           referenceImageUrls: allRefUrls,
            isRemix: false,
          };
        }),

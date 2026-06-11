@@ -5060,3 +5060,9 @@
 - [ ] Wire EditTrackPanel into SongDetailPage — opens on Edit click, closes on save/close, invalidates getById query
 - [ ] Add missing cover art filter to ArchivePage (filter button "Missing Art" in status filter row)
 - [ ] TypeScript: 0 errors
+
+## Phase 204: Multi-Reference Image Compose + Quick Access Link
+- [x] Update generateImage procedure to accept referenceImageUrls array (max 4) instead of single referenceImageUrl
+- [ ] Update KeeperComposePage Image tab to support up to 4 reference image upload slots
+- [ ] Add quick access Compose link to sidebar navigation
+- [ ] TypeScript check and tests pass

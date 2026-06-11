@@ -368,10 +368,15 @@ export default function KeeperComposePage() {
   const [imageHistory, setImageHistory] = useState<GeneratedImage[]>([]);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [selectedGuideId, setSelectedGuideId] = useState<number | undefined>(undefined);
-  const [referenceImageUrl, setReferenceImageUrl] = useState<string | undefined>(undefined);
-  const [referenceImagePreview, setReferenceImagePreview] = useState<string | undefined>(undefined);
-  const [isUploadingRef, setIsUploadingRef] = useState(false);
+  // Multi-reference image support (up to 4)
+  const [referenceImages, setReferenceImages] = useState<Array<{ url: string; preview: string }>>([]);
+  const [uploadingRefIndex, setUploadingRefIndex] = useState<number | null>(null);
+  // Legacy single-ref compat (kept for remixImage which still uses single URL)
+  const referenceImageUrl = referenceImages[0]?.url;
+  const referenceImagePreview = referenceImages[0]?.preview;
+  const isUploadingRef = uploadingRefIndex !== null;
   const referenceInputRef = useRef<HTMLInputElement>(null);
+  const [pendingRefSlot, setPendingRefSlot] = useState<number>(0);
   const generateImageMutation = trpc.guides.generateImage.useMutation();
   const remixImageMutation = trpc.guides.remixImage.useMutation();
   const uploadReferenceImageMutation = trpc.guides.uploadReferenceImage.useMutation();
@@ -535,28 +540,35 @@ Please respond in Suno-ready format:
 
   // ── Image generation handler ─────────────────────────────────────────────────
 
-  const handleUploadReferenceImage = (file: File) => {
+  const handleUploadReferenceImage = (file: File, slotIndex: number = 0) => {
     if (!file) return;
-    setIsUploadingRef(true);
+    setUploadingRefIndex(slotIndex);
     const reader = new FileReader();
     reader.onload = async (e) => {
       const dataUrl = e.target?.result as string;
-      setReferenceImagePreview(dataUrl);
       const base64 = dataUrl.split(',')[1];
       try {
         const result = await uploadReferenceImageMutation.mutateAsync({
           base64,
           mimeType: file.type || 'image/jpeg',
         });
-        setReferenceImageUrl(result.url);
-        toast.success('Reference image uploaded — consistency anchor set.');
+        setReferenceImages(prev => {
+          const updated = [...prev];
+          updated[slotIndex] = { url: result.url, preview: dataUrl };
+          return updated;
+        });
+        toast.success(`Reference ${slotIndex + 1} uploaded — merge anchor set.`);
       } catch {
         toast.error('Failed to upload reference image.');
       } finally {
-        setIsUploadingRef(false);
+        setUploadingRefIndex(null);
       }
     };
     reader.readAsDataURL(file);
+  };
+
+  const handleRemoveReferenceImage = (slotIndex: number) => {
+    setReferenceImages(prev => prev.filter((_, i) => i !== slotIndex));
   };
 
   const handleGenerateImage = async () => {
@@ -567,7 +579,7 @@ Please respond in Suno-ready format:
       const result = await generateImageMutation.mutateAsync({
         prompt: msg,
         guideId: selectedGuideId,
-        referenceImageUrl,
+        referenceImageUrls: referenceImages.map(r => r.url),
       });
       const newImg: GeneratedImage = {
         url: result.url ?? '',
@@ -1050,32 +1062,36 @@ Please respond in Suno-ready format:
                 </div>
               )}
 
-              {/* Reference image upload */}
+              {/* Multi-reference image upload (mobile) */}
               <div>
-                <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.5rem", color: modeColor, letterSpacing: "0.08em", marginBottom: 4 }}>REFERENCE IMAGE (OPTIONAL)</div>
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => referenceInputRef.current?.click()}
-                    disabled={isUploadingRef}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded transition-all hover:opacity-80 disabled:opacity-40"
-                    style={{ background: `${modeColor}18`, border: `1px solid ${modeColor}44`, color: modeColor, fontFamily: "'Space Mono', monospace", fontSize: "0.55rem" }}
-                  >
-                    {isUploadingRef ? <Loader2 className="w-3 h-3 animate-spin" /> : <ImageIcon className="w-3 h-3" />}
-                    {isUploadingRef ? 'UPLOADING...' : referenceImageUrl ? 'CHANGE REFERENCE' : 'UPLOAD REFERENCE'}
-                  </button>
-                  {referenceImagePreview && (
-                    <div className="relative">
-                      <img src={referenceImagePreview} alt="Reference" className="w-10 h-10 rounded object-cover" style={{ border: `1px solid ${modeColor}44` }} />
-                      <button
-                        onClick={() => { setReferenceImageUrl(undefined); setReferenceImagePreview(undefined); }}
-                        className="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-xs"
-                        style={{ background: 'var(--ln-obsidian)', border: `1px solid ${modeColor}44`, color: modeColor }}
-                      >×</button>
-                    </div>
-                  )}
+                <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.5rem", color: modeColor, letterSpacing: "0.08em", marginBottom: 4 }}>REFERENCE IMAGES — UP TO 4 (OPTIONAL)</div>
+                <div className="flex flex-wrap gap-2">
+                  {Array.from({ length: 4 }).map((_, i) => {
+                    const ref = referenceImages[i];
+                    const isUploading = uploadingRefIndex === i;
+                    return (
+                      <div key={i} className="relative">
+                        {ref ? (
+                          <div className="relative">
+                            <img src={ref.preview} alt={`Ref ${i + 1}`} className="w-10 h-10 rounded object-cover" style={{ border: `1px solid ${modeColor}44` }} />
+                            <button onClick={() => handleRemoveReferenceImage(i)} className="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-xs" style={{ background: 'var(--ln-obsidian)', border: `1px solid ${modeColor}44`, color: modeColor }}>×</button>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => { setPendingRefSlot(i); referenceInputRef.current?.click(); }}
+                            disabled={isUploading}
+                            className="w-10 h-10 rounded flex items-center justify-center transition-all hover:opacity-80 disabled:opacity-40"
+                            style={{ background: `${modeColor}10`, border: `1px dashed ${modeColor}44`, color: modeColor }}
+                          >
+                            {isUploading ? <Loader2 className="w-3 h-3 animate-spin" /> : <ImageIcon className="w-3 h-3" />}
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
-                <input ref={referenceInputRef} type="file" accept="image/*" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) handleUploadReferenceImage(f); e.target.value = ''; }} />
-                {referenceImageUrl && <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.5rem", color: modeColor, opacity: 0.7, marginTop: 4 }}>CONSISTENCY ANCHOR ACTIVE — new generations will reference this image</div>}
+                <input ref={referenceInputRef} type="file" accept="image/*" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) handleUploadReferenceImage(f, pendingRefSlot); e.target.value = ''; }} />
+                {referenceImages.length > 0 && <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.5rem", color: modeColor, opacity: 0.7, marginTop: 4 }}>{referenceImages.length} REFERENCE{referenceImages.length > 1 ? 'S' : ''} ACTIVE — model will merge all anchors</div>}
               </div>
 
               {/* Prompt input */}
@@ -1547,35 +1563,42 @@ Please respond in Suno-ready format:
                   </div>
                 )}
 
-                {/* Reference image upload */}
+                {/* Multi-reference image upload (desktop) */}
                 <div className="rounded p-4" style={{ background: 'var(--ln-panel)', border: `1px solid ${modeColor}30` }}>
-                  <div style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.5rem', color: modeColor, letterSpacing: '0.08em', marginBottom: 8 }}>REFERENCE IMAGE — CONSISTENCY ANCHOR (OPTIONAL)</div>
-                  <div className="flex items-center gap-4">
-                    <button
-                      onClick={() => referenceInputRef.current?.click()}
-                      disabled={isUploadingRef}
-                      className="flex items-center gap-2 px-3 py-1.5 rounded transition-all hover:opacity-80 disabled:opacity-40"
-                      style={{ background: `${modeColor}18`, border: `1px solid ${modeColor}44`, color: modeColor, fontFamily: "'Space Mono', monospace", fontSize: '0.6rem' }}
-                    >
-                      {isUploadingRef ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ImageIcon className="w-3.5 h-3.5" />}
-                      {isUploadingRef ? 'UPLOADING...' : referenceImageUrl ? 'CHANGE REFERENCE' : 'UPLOAD REFERENCE'}
-                    </button>
-                    {referenceImagePreview && (
-                      <div className="relative">
-                        <img src={referenceImagePreview} alt="Reference" className="w-14 h-14 rounded object-cover" style={{ border: `1px solid ${modeColor}44` }} />
-                        <button
-                          onClick={() => { setReferenceImageUrl(undefined); setReferenceImagePreview(undefined); }}
-                          className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full flex items-center justify-center text-xs"
-                          style={{ background: 'var(--ln-obsidian)', border: `1px solid ${modeColor}44`, color: modeColor }}
-                        >×</button>
-                      </div>
-                    )}
-                    {referenceImageUrl && !referenceImagePreview && (
-                      <div style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.5rem', color: modeColor, opacity: 0.8 }}>ANCHOR ACTIVE</div>
-                    )}
+                  <div style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.5rem', color: modeColor, letterSpacing: '0.08em', marginBottom: 8 }}>REFERENCE IMAGES — MERGE ANCHORS (UP TO 4)</div>
+                  <div className="flex flex-wrap gap-3 mb-2">
+                    {Array.from({ length: 4 }).map((_, i) => {
+                      const ref = referenceImages[i];
+                      const isUploading = uploadingRefIndex === i;
+                      return (
+                        <div key={i} className="relative">
+                          {ref ? (
+                            <div className="relative">
+                              <img src={ref.preview} alt={`Ref ${i + 1}`} className="w-14 h-14 rounded object-cover" style={{ border: `1px solid ${modeColor}66` }} />
+                              <div style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.45rem', color: modeColor, textAlign: 'center', marginTop: 2 }}>REF {i + 1}</div>
+                              <button onClick={() => handleRemoveReferenceImage(i)} className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full flex items-center justify-center text-xs" style={{ background: 'var(--ln-obsidian)', border: `1px solid ${modeColor}44`, color: modeColor }}>×</button>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => { setPendingRefSlot(i); referenceInputRef.current?.click(); }}
+                              disabled={isUploading}
+                              className="w-14 h-14 rounded flex flex-col items-center justify-center gap-1 transition-all hover:opacity-80 disabled:opacity-40"
+                              style={{ background: `${modeColor}10`, border: `1px dashed ${modeColor}44`, color: modeColor }}
+                            >
+                              {isUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ImageIcon className="w-4 h-4" />}
+                              <span style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.4rem' }}>REF {i + 1}</span>
+                            </button>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
-                  <input ref={referenceInputRef} type="file" accept="image/*" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) handleUploadReferenceImage(f); e.target.value = ''; }} />
-                  {referenceImageUrl && <div style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.5rem', color: modeColor, opacity: 0.6, marginTop: 6 }}>All new generations will use this image as a visual consistency reference.</div>}
+                  <input ref={referenceInputRef} type="file" accept="image/*" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) handleUploadReferenceImage(f, pendingRefSlot); e.target.value = ''; }} />
+                  {referenceImages.length > 0 && (
+                    <div style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.5rem', color: modeColor, opacity: 0.7 }}>
+                      {referenceImages.length} ANCHOR{referenceImages.length > 1 ? 'S' : ''} ACTIVE — the model will blend all reference images with your prompt
+                    </div>
+                  )}
                 </div>
 
                 {/* Prompt + generate */}

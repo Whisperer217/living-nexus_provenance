@@ -16,7 +16,7 @@ import { useLightsMode } from "@/contexts/LightsModeContext";
 import {
   Upload, Bell, LogIn, LogOut, CheckCircle2, Zap, Search, User, Settings,
   SkipBack, SkipForward, Play, Pause, Shuffle, Repeat, PictureInPicture2,
-  ChevronDown, Music, ShieldCheck,
+  ChevronDown, Music, ShieldCheck, Sparkles,
 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 
@@ -476,6 +476,35 @@ export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCoun
             >
               <Zap size={12} style={{ color: "var(--ln-gold-dim)" }} />
               <span>Prompt Gen</span>
+            </button>
+          )}
+
+          {/* Compose quick access */}
+          {user && (
+            <button
+              onClick={() => goTo("/keeper-compose")}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all"
+              style={{
+                fontSize: "11px",
+                fontFamily: "'Cinzel', serif",
+                fontWeight: 500,
+                letterSpacing: "0.05em",
+                background: "transparent",
+                border: "1px solid rgba(196,154,40,0.2)",
+                color: "var(--ln-gold)",
+              }}
+              onMouseEnter={e => {
+                (e.currentTarget as HTMLElement).style.color = "var(--ln-parchment)";
+                (e.currentTarget as HTMLElement).style.borderColor = "rgba(196,154,40,0.4)";
+              }}
+              onMouseLeave={e => {
+                (e.currentTarget as HTMLElement).style.color = "var(--ln-gold)";
+                (e.currentTarget as HTMLElement).style.borderColor = "rgba(196,154,40,0.2)";
+              }}
+              title="Keeper Compose — Image & Music Generation"
+            >
+              <Sparkles size={12} style={{ color: "var(--ln-gold-dim)" }} />
+              <span>Compose</span>
             </button>
           )}
 

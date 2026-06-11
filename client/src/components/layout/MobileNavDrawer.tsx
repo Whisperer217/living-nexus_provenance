@@ -67,7 +67,7 @@ const ALL_SECTIONS: NavSection[] = [
     heading: "Creator Tools",
     links: [
       { icon: <Shield size={14} />, label: "Register Work", path: "/upload", gold: true, authOnly: true, description: "Issue a Witness ID" },
-      { icon: <Sparkles size={14} />, label: "Prompt Studio", path: "/keeper-compose", description: "Lyrics → AI music prompt" },
+      { icon: <Sparkles size={14} />, label: "Compose", path: "/keeper-compose", description: "Image & music generation" },
       { icon: <Users size={14} />, label: "Guide Directory", path: "/guides", description: "Browse guide characters" },
       { icon: <Shield size={14} />, label: "Register Guide Character", path: "/guides/upload", gold: true, authOnly: true, description: "Register a guide entity" },
     ],
