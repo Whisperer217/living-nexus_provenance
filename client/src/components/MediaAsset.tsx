@@ -90,10 +90,11 @@ function CardMedia({
   const ratio = aspectRatio ?? "1:1";
   const paddingBottom = RATIO_TO_PADDING[ratio];
   const objectPosition = `${focalX ?? 50}% ${focalY ?? 50}%`;
+  const [imgError, setImgError] = useState(false);
 
   return (
     <div className="relative w-full overflow-hidden" style={{ paddingBottom }}>
-      {src ? (
+      {src && !imgError ? (
         <img
           src={src}
           alt={alt ?? ""}
@@ -101,6 +102,7 @@ function CardMedia({
           style={{ objectPosition }}
           loading="lazy"
           draggable={false}
+          onError={() => setImgError(true)}
         />
       ) : (
         <div

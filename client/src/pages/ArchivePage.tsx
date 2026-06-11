@@ -293,6 +293,10 @@ export default function ArchivePage() {
   const draggedId = useRef<number | null>(null);
   const dragOverId = useRef<number | null>(null);
 
+  // Filter + sort state
+  const [statusFilter, setStatusFilter] = useState<"All" | "Published" | "Draft" | "Deleted">("All");
+  const [sortBy, setSortBy] = useState<"newest" | "oldest" | "title">("newest");
+
   const buildTrack = (song: any) => ({
     id: String(song.id),
     title: song.title ?? "Untitled Work",
@@ -493,6 +497,22 @@ export default function ArchivePage() {
   const displaySongs = localSongs.length > 0 ? localSongs : (songs ?? []);
   const nonDeletedCount = displaySongs.filter((s: any) => s.status !== "Deleted").length;
 
+  // Derived: filtered + sorted list for display
+  const filteredSongs = (() => {
+    let list = [...displaySongs];
+    if (statusFilter !== "All") {
+      list = list.filter((s: any) => s.status === statusFilter);
+    }
+    if (sortBy === "newest") {
+      list.sort((a: any, b: any) => new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime());
+    } else if (sortBy === "oldest") {
+      list.sort((a: any, b: any) => new Date(a.createdAt ?? 0).getTime() - new Date(b.createdAt ?? 0).getTime());
+    } else if (sortBy === "title") {
+      list.sort((a: any, b: any) => (a.title ?? "").localeCompare(b.title ?? ""));
+    }
+    return list;
+  })();
+
   return (
     <>
     <div className="min-h-screen" style={{ background: "#000000" }}>
@@ -611,6 +631,63 @@ export default function ArchivePage() {
           </div>
         )}
         {activeTab === "external" && <ExternalPlaylistsTab />}
+
+        {/* ── Filter + Sort bar ─────────────────────────────────── */}
+        {activeTab === "tracks" && !songsLoading && displaySongs.length > 0 && (
+          <div className="flex flex-wrap items-center gap-2 mb-3">
+            {/* Status filter pills */}
+            <div className="flex items-center gap-1 flex-wrap">
+              {(["All", "Published", "Draft", "Deleted"] as const).map((f) => {
+                const counts: Record<string, number> = {
+                  All: displaySongs.length,
+                  Published: displaySongs.filter((s: any) => s.status === "Published").length,
+                  Draft: displaySongs.filter((s: any) => s.status === "Draft").length,
+                  Deleted: displaySongs.filter((s: any) => s.status === "Deleted").length,
+                };
+                const active = statusFilter === f;
+                const colors: Record<string, { active: string; dot: string }> = {
+                  All: { active: "var(--ln-gold)", dot: "var(--ln-gold)" },
+                  Published: { active: "var(--lnx-green-soft)", dot: "var(--lnx-green-soft)" },
+                  Draft: { active: "var(--lnx-orange-soft)", dot: "var(--lnx-orange-soft)" },
+                  Deleted: { active: "var(--lnx-red-soft)", dot: "var(--lnx-red-soft)" },
+                };
+                return (
+                  <button
+                    key={f}
+                    onClick={() => setStatusFilter(f)}
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium transition-all"
+                    style={active
+                      ? { background: "rgba(196,154,40,0.12)", border: `1px solid ${colors[f].active}`, color: colors[f].active }
+                      : { background: "transparent", border: "1px solid rgba(255,255,255,0.12)", color: "var(--ln-smoke)" }
+                    }
+                  >
+                    {f !== "All" && (
+                      <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: active ? colors[f].dot : "rgba(255,255,255,0.25)" }} />
+                    )}
+                    {f} <span className="opacity-60">({counts[f]})</span>
+                  </button>
+                );
+              })}
+            </div>
+            {/* Sort dropdown */}
+            <div className="ml-auto flex items-center gap-1">
+              <span className="text-xs" style={{ color: "var(--ln-smoke)" }}>Sort:</span>
+              {(["newest", "oldest", "title"] as const).map((s) => (
+                <button
+                  key={s}
+                  onClick={() => setSortBy(s)}
+                  className="px-2 py-0.5 rounded text-xs transition-all"
+                  style={sortBy === s
+                    ? { background: "rgba(196,154,40,0.15)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.3)" }
+                    : { color: "var(--ln-smoke)", border: "1px solid transparent" }
+                  }
+                >
+                  {s === "newest" ? "Newest" : s === "oldest" ? "Oldest" : "A–Z"}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* ── Track toolbar ──────────────────────────────────────── */}
         {activeTab === "tracks" && !songsLoading && displaySongs.length > 0 && (
@@ -779,7 +856,12 @@ export default function ArchivePage() {
         {/* ── Track list ────────────────────────────────────────── */}
         {activeTab === "tracks" && !songsLoading && displaySongs.length > 0 && (
           <div className="space-y-2">
-            {displaySongs.map((song: any, idx: number) => {
+            {filteredSongs.length === 0 && (
+              <div className="text-center py-10 rounded-xl" style={{ background: "var(--ln-coal)", border: "1px dashed rgba(255,255,255,0.08)" }}>
+                <p className="text-sm" style={{ color: "var(--ln-smoke)" }}>No tracks match the current filter.</p>
+              </div>
+            )}
+            {filteredSongs.map((song: any, idx: number) => {
               const isPublished = song.status === "Published";
               const isPending = updateStatus.isPending && updateStatus.variables?.songId === song.id;
               const hasAudio = !!song.fileUrl;

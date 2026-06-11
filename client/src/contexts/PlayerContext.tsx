@@ -215,12 +215,38 @@ function loadSessionTracks(): {
 
 const PlayerContext = createContext<PlayerContextValue | null>(null);
 
+// ── Module-level audio singleton ─────────────────────────────────────────────
+// A single <audio> element that persists across React re-renders.
+// This prevents dual-audio when the PlayerProvider remounts (e.g. soft navigation).
+let _globalAudio: HTMLAudioElement | null = null;
+function getOrCreateAudio(): HTMLAudioElement {
+  if (!_globalAudio) {
+    _globalAudio = new Audio();
+    _globalAudio.crossOrigin = "anonymous";
+    // Stop audio cleanly on page unload to prevent ghost audio after navigation
+    if (typeof window !== "undefined") {
+      window.addEventListener("beforeunload", () => {
+        if (_globalAudio) {
+          _globalAudio.pause();
+          _globalAudio.src = "";
+        }
+      });
+      // Also stop on pagehide (mobile Safari / bfcache)
+      window.addEventListener("pagehide", () => {
+        if (_globalAudio) {
+          _globalAudio.pause();
+          _globalAudio.src = "";
+        }
+      });
+    }
+  }
+  return _globalAudio;
+}
+
 export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const audioRef = useRef<HTMLAudioElement>(null as unknown as HTMLAudioElement);
   if (!audioRef.current) {
-    const a = new Audio();
-    a.crossOrigin = "anonymous";
-    (audioRef as React.MutableRefObject<HTMLAudioElement>).current = a;
+    (audioRef as React.MutableRefObject<HTMLAudioElement>).current = getOrCreateAudio();
   }
 
   const [isNowPlayingPanelOpen, setIsNowPlayingPanelOpen] = useState(false);

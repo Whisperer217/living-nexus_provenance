@@ -5041,3 +5041,10 @@
 - [x] Quiver panel: search by prompt, 2-col mobile / 3-col desktop grid, DL/REMIX/DEL per card
 - [x] Quiver panel: WID badge, REMIX badge, date, pagination (20 per page)
 - [x] TypeScript: 0 errors
+
+## Phase 201: Bug Fixes + Archive Filter
+- [x] Fix Bug 1: Broken cover art on creator profile page — add onError fallback to all <img> tags showing coverArtUrl; filter songs with null coverArtUrl from Records/Featured sections
+- [x] Fix Bug 2: Dual audio overlap — enforce single global audio singleton; stop/destroy previous audio before starting new track in PlayerContext
+- [x] Fix Bug 3: Archive page reload breaks global player tracking — Archive should not auto-play on load; only play on explicit user click
+- [x] Add Archive filter: status filter buttons (All / Published / Draft / Deleted) + sort (Newest / Oldest / Title A-Z)
+- [x] TypeScript: 0 errors
