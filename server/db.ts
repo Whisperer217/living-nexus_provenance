@@ -4959,7 +4959,7 @@ export async function createManifestedCollection(data: {
     forkedFromWid: data.forkedFromWid ?? null,
     forkedFromOwnerName: data.forkedFromOwnerName ?? null,
   });
-  return { id: (result as any).insertId as number, wid, slug };
+  return { id: (result as any)[0]?.insertId as number, wid, slug };
 }
 
 export async function getManifestedCollectionBySlug(slug: string) {

@@ -1081,7 +1081,7 @@ export const appRouter = router({
       // Assign displayOrder so new songs append to the end of the creator's list
       const nextOrder = await getNextDisplayOrder(ctx.user.id);
       const insertResult = await createSong({ userId: ctx.user.id, title: input.title, genre: input.genre, bpm: input.bpm, keySignature: input.keySignature, moodTags: input.moodTags, coWriters: input.coWriters, albumName: input.albumName, creditsJson: input.creditsJson, releaseDate: input.releaseDate, isrc: input.isrc, aiConsent: input.aiConsent, ownershipStatus: input.ownershipStatus, lyricsText: input.lyricsText, lyricsHash: input.lyricsHash, isLyricsOnly: input.isLyricsOnly ?? false, contentType: input.contentType ?? (input.isLyricsOnly ? "lyrics" : "audio"), fileUrl, fileKey: audioKey, coverArtUrl, fileHash: input.fileHash, witnessId: input.witnessId, harmonicSignature: input.harmonicSignature, ecdsaPublicKey: input.ecdsaPublicKey, ecdsaSignature: input.ecdsaSignature, caption: input.caption, headlineCaption: input.headlineCaption, description: input.description, galleryImagesJson: input.galleryImagesJson, playerAssetType: input.playerAssetType ?? 'cover', aiToolSuno: input.aiToolSuno ?? false, aiToolUdio: input.aiToolUdio ?? false, aiToolSonato: input.aiToolSonato ?? false, aiToolOther: input.aiToolOther ?? false, aiToolOtherName: input.aiToolOtherName, durationSeconds: input.durationSeconds, sampleRate: input.sampleRate, bitDepth: input.bitDepth, aiDisclosure: input.aiDisclosure, haaiVisualConcept: input.haaiVisualConcept, haaiStyleLanguage: input.haaiStyleLanguage, haaiInstrumentation: input.haaiInstrumentation, haaiVocalConveyance: input.haaiVocalConveyance, haaiLyricalInspiration: input.haaiLyricalInspiration, haaiEmotionalTone: input.haaiEmotionalTone, haaiDeclaredAt, pagesJson: input.pagesJson, displayOrder: nextOrder } as any);
-       const songId = (insertResult as any).insertId as number;
+       const songId = (insertResult as any)[0]?.insertId as number;
       // Trigger visual generation pipeline (non-blocking)
       enqueueVisualJob(songId, isFounder).catch(err => console.error("[VisualQueue] Enqueue error:", err));
       // Generate share artifact (non-blocking) — precomputed OG HTML for Discord/X/iMessage
@@ -1220,7 +1220,7 @@ export const appRouter = router({
           displayOrder: batchDisplayOrder++,
         } as any);
         // Capture the auto-increment ID directly from the insert result to preserve upload order
-        const songId = (insertResult as any).insertId as number | undefined;
+        const songId = (insertResult as any)[0]?.insertId as number | undefined;
         results.push({ title: track.title, witnessId: track.witnessId, fileUrl, songId });
         // Trigger visual generation pipeline for each song (non-blocking)
         if (songId) {
@@ -1252,7 +1252,7 @@ export const appRouter = router({
           coverArtUrl,
           trackCount: allWids.length,
         });
-        collectionId = (insertResult as any).insertId as number;
+        collectionId = (insertResult as any)[0]?.insertId as number;
 
         // Back-link all newly created songs to this collection
         // Use insertId from each createSong call (upload order preserved)
@@ -5708,7 +5708,7 @@ Never collapse multiple sections into a single block. Always label clearly.
           { role: 'user' as const, content: userContent },
         ];
 
-        const response = await invokeLLM({ messages });
+        const response = await invokeLLM({ messages, maxTokens: 800 });
         const reply = response?.choices?.[0]?.message?.content ?? 'The Keeper is momentarily silent. Try again.';
         return { reply, persona: input.persona };
       }),
@@ -5953,7 +5953,7 @@ Never collapse multiple sections into a single block. Always label clearly.
           return { id: existing[0].id };
         } else {
           const result = await db.insert(keeperCharacterSheets).values({ ...sheetData, createdAt: new Date() });
-          return { id: (result as any).insertId ?? 0 };
+          return { id: (result as any)[0]?.insertId ?? 0 };
         }
       }),
 
@@ -6199,7 +6199,7 @@ Never collapse multiple sections into a single block. Always label clearly.
           featured: input.featured,
           active: true,
         });
-        return { id: (result as any).insertId };
+        return { id: (result as any)[0]?.insertId };
       }),
 
     // Protected: toggle item active status (owner only)

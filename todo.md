@@ -2247,7 +2247,7 @@
 - [ ] Make creator name clickable → /creator/:id in expanded state
 - [ ] Show witnessId WID badge even when no videoWitnessId (use track.witnessId)
 - [ ] Add desktop/web modal adaptation (TheaterPlayer uses same canonical structure)
-- [ ] TypeScript: 0 errors
+- [x] TypeScript: 0 errors
 - [ ] Vitest: all tests passing
 
 ## Canonical Player — Unified UI (Build Order)
@@ -5047,4 +5047,10 @@
 - [x] Fix Bug 2: Dual audio overlap — enforce single global audio singleton; stop/destroy previous audio before starting new track in PlayerContext
 - [x] Fix Bug 3: Archive page reload breaks global player tracking — Archive should not auto-play on load; only play on explicit user click
 - [x] Add Archive filter: status filter buttons (All / Published / Draft / Deleted) + sort (Newest / Oldest / Title A-Z)
+- [x] TypeScript: 0 errors
+## Phase 202: Bug Fixes — Batch Upload insertId, Collection Linking, Guide Verbosity
+- [x] Fix insertId extraction in routers.ts: (insertResult as any).insertId → (insertResult as any)[0]?.insertId (single upload line 1084, batch upload lines 1223+1255)
+- [x] Fix insertId extraction in routers.ts: keeperCharacterSheets line 5956, marketplaceItems line 6202
+- [x] Fix insertId extraction in db.ts: manifestedCollections line 4962
+- [x] Add maxTokens: 800 to keeper.chat invokeLLM call to reduce Guide verbosity
 - [x] TypeScript: 0 errors
