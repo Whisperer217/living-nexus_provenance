@@ -70,7 +70,7 @@ const SKINS: Array<{
   },
 ];
 
-const MODES = ["Guide", "Conductor", "Witness", "Custodian", "Archivist"] as const;
+const MODES = ["Guide", "Conductor", "Witness", "Custodian", "Archivist", "Image"] as const;
 type AgentMode = typeof MODES[number];
 
 const MODE_COLORS: Record<AgentMode, string> = {
@@ -79,6 +79,7 @@ const MODE_COLORS: Record<AgentMode, string> = {
   Witness:   "#D4956A",
   Custodian: "#7BA67B",
   Archivist: "#9B7B55",
+  Image:     "#8B5CF6",
 };
 
 const MODE_CAPABILITY: Record<AgentMode, string> = {
@@ -87,6 +88,7 @@ const MODE_CAPABILITY: Record<AgentMode, string> = {
   Witness:   "Testimony · Emotional Truth · Depth",
   Custodian: "Provenance · Archive · Legacy",
   Archivist: "Semantics · Pattern · Corpus",
+  Image:     "Vision · Generate · Manifest",
 };
 
 // ─── Archetype base attribute profiles ───────────────────────────────────────

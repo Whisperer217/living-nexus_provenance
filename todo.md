@@ -5002,3 +5002,21 @@
 - [x] Add "Cosmos" button to SongDetailPage desktop action buttons row
 - [x] Register `/constellation/:songId` route in App.tsx
 - [x] TypeScript: 0 errors
+
+## Phase 197: Image Generation in Guides Compose
+- [ ] Add "Image" AgentMode to KeeperComposePage (type, color, icon, description)
+- [ ] Add guides.generateImage tRPC procedure (prompt → generateImage() → return CDN URL)
+- [ ] Render Image mode UI: chatbot-style prompt input, generate button, image output with download + Register as Manifestation actions
+- [ ] Session-local image history (scrollable list of past generations in this session)
+- [ ] TypeScript: 0 errors | Tests passing
+
+## Phase 198: Image Generation in Guides / Keeper Compose
+- [x] Add guides.generateImage tRPC procedure (server/routers.ts): accepts prompt + optional guideId, enriches prompt with guide identity context, calls generateImage helper, returns url/prompt/enrichedPrompt/generatedAt
+- [x] Add Image mode to AgentMode type in KeeperAttrsContext (purple #8B5CF6 color, Sparkles icon, "Vision · Generate · Manifest" desc)
+- [x] Add Image mode to KeeperPage MODES/MODE_COLORS/MODE_CAPABILITY arrays
+- [x] Add image state (imagePrompt, imageHistory, isGeneratingImage, selectedGuideId) + generateImageMutation + myGuidesQuery to KeeperComposePage
+- [x] Add handleGenerateImage, handleImageKeyDown, handleDownloadImage, handleRegisterImage handlers
+- [x] Build Image mode UI panel (mobile): guide selector, prompt textarea, generate button, session history with download + register actions
+- [x] Build Image mode UI panel (desktop): same features, max-w-2xl centered, enriched prompt display, timestamp, full-size image display
+- [x] Hide composition input bar and Emotional Arc panel when Image mode is active
+- [x] TypeScript: 0 errors

@@ -8,11 +8,12 @@ import {
   ArrowLeft, Copy, Edit3, Send, FileText, Loader2,
   Maximize2, Minimize2, Music, BookOpen, ChevronRight,
   Zap, BarChart2, Layers, Archive, Eye, Film, ChevronDown,
+  Sparkles, Download, ImageIcon,
 } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type AgentMode = "Guide" | "Conductor" | "Witness" | "Custodian" | "Archivist";
+type AgentMode = "Guide" | "Conductor" | "Witness" | "Custodian" | "Archivist" | "Image";
 
 interface ComposedWork {
   style?: string;
@@ -34,7 +35,7 @@ interface ArcPoint {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const MODES: AgentMode[] = ["Guide", "Conductor", "Witness", "Custodian", "Archivist"];
+const MODES: AgentMode[] = ["Guide", "Conductor", "Witness", "Custodian", "Archivist", "Image"];
 
 const MODE_COLORS: Record<AgentMode, string> = {
   Guide:     "#C9A84C",
@@ -42,6 +43,7 @@ const MODE_COLORS: Record<AgentMode, string> = {
   Witness:   "#D4956A",
   Custodian: "#7BA67B",
   Archivist: "#9B7B55",
+  Image:     "#8B5CF6",
 };
 
 const MODE_ICONS: Record<AgentMode, React.FC<{ className?: string }>> = {
@@ -50,6 +52,7 @@ const MODE_ICONS: Record<AgentMode, React.FC<{ className?: string }>> = {
   Witness:   ({ className }) => <Eye className={className} />,
   Custodian: ({ className }) => <Layers className={className} />,
   Archivist: ({ className }) => <Archive className={className} />,
+  Image:     ({ className }) => <Sparkles className={className} />,
 };
 
 const MODE_DESC: Record<AgentMode, string> = {
@@ -58,7 +61,18 @@ const MODE_DESC: Record<AgentMode, string> = {
   Witness:   "Testimony · Emotional Truth · Depth",
   Custodian: "Provenance · Archive · Legacy",
   Archivist: "Semantics · Pattern · Corpus",
+  Image:     "Vision · Generate · Manifest",
 };
+
+// ─── Image generation types ───────────────────────────────────────────────────
+
+interface GeneratedImage {
+  url: string;
+  prompt: string;
+  enrichedPrompt: string;
+  generatedAt: string;
+  guideId: number | null;
+}
 
 const ARC_LEVELS: Record<string, number> = {
   "INTRO": 1,
@@ -346,6 +360,14 @@ export default function KeeperComposePage() {
   );
   const [draftsOpen, setDraftsOpen] = useState(false);
 
+  // ── Image generation state ──────────────────────────────────────────────────────
+  const [imagePrompt, setImagePrompt] = useState("");
+  const [imageHistory, setImageHistory] = useState<GeneratedImage[]>([]);
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+  const [selectedGuideId, setSelectedGuideId] = useState<number | undefined>(undefined);
+  const generateImageMutation = trpc.guides.generateImage.useMutation();
+  const myGuidesQuery = trpc.guides.listMine.useQuery(undefined, { enabled: isAuthenticated && activeMode === "Image" });
+
   const arc = composedWork ? deriveArc(composedWork.sections) : [];
   const previewArc = derivePreviewArc(prompt);
   const modeColor = MODE_COLORS[activeMode as AgentMode] ?? "#C9A84C";
@@ -489,6 +511,59 @@ Please respond in Suno-ready format:
       content: text,
       tag: "composition",
     });
+  };
+
+  // ── Image generation handler ─────────────────────────────────────────────────
+
+  const handleGenerateImage = async () => {
+    const msg = imagePrompt.trim();
+    if (!msg || isGeneratingImage) return;
+    setIsGeneratingImage(true);
+    try {
+      const result = await generateImageMutation.mutateAsync({
+        prompt: msg,
+        guideId: selectedGuideId,
+      });
+      setImageHistory(prev => [{
+        url: result.url ?? "",
+        prompt: result.prompt,
+        enrichedPrompt: result.enrichedPrompt,
+        generatedAt: result.generatedAt,
+        guideId: result.guideId,
+      }, ...prev]);
+      setImagePrompt("");
+    } catch {
+      toast.error("Image generation failed. Please try again.");
+    } finally {
+      setIsGeneratingImage(false);
+    }
+  };
+
+  const handleImageKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+      e.preventDefault();
+      handleGenerateImage();
+    }
+  };
+
+  const handleDownloadImage = async (url: string, index: number) => {
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = objectUrl;
+      a.download = `keeper-vision-${index + 1}.png`;
+      a.click();
+      URL.revokeObjectURL(objectUrl);
+    } catch {
+      // Fallback: open in new tab
+      window.open(url, "_blank");
+    }
+  };
+
+  const handleRegisterImage = (img: GeneratedImage) => {
+    navigate(`/upload?prefill=${encodeURIComponent(img.prompt.slice(0, 200))}`);
   };
 
   // ── Cinematic scroll reset ─────────────────────────────────────────────────
@@ -784,6 +859,127 @@ Please respond in Suno-ready format:
 
         {/* Output area */}
         <div ref={outputRef} className="flex-1 overflow-y-auto p-4">
+
+          {/* ── IMAGE MODE ── */}
+          {activeMode === "Image" && (
+            <div className="flex flex-col gap-4">
+              {/* Guide selector */}
+              {myGuidesQuery.data && myGuidesQuery.data.length > 0 && (
+                <div>
+                  <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.5rem", color: modeColor, letterSpacing: "0.08em", marginBottom: 4 }}>GUIDE CONTEXT (OPTIONAL)</div>
+                  <select
+                    value={selectedGuideId ?? ""}
+                    onChange={e => setSelectedGuideId(e.target.value ? parseInt(e.target.value) : undefined)}
+                    className="w-full rounded px-3 py-2 focus:outline-none"
+                    style={{
+                      background: "var(--ln-obsidian)",
+                      border: `1px solid ${modeColor}33`,
+                      color: "var(--ln-parchment)",
+                      fontFamily: "'Space Mono', monospace",
+                      fontSize: "0.6rem",
+                    }}
+                  >
+                    <option value="">No guide — freeform generation</option>
+                    {myGuidesQuery.data.map((g: any) => (
+                      <option key={g.id} value={g.id}>{g.canonicalName ?? `Guide #${g.id}`}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {/* Prompt input */}
+              <div>
+                <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.5rem", color: modeColor, letterSpacing: "0.08em", marginBottom: 4 }}>VISION PROMPT</div>
+                <textarea
+                  value={imagePrompt}
+                  onChange={e => setImagePrompt(e.target.value)}
+                  onKeyDown={handleImageKeyDown}
+                  placeholder="Describe the image you want to manifest..."
+                  rows={3}
+                  className="w-full resize-none rounded px-3 py-2 focus:outline-none"
+                  style={{
+                    background: "var(--ln-obsidian)",
+                    border: `1px solid ${modeColor}33`,
+                    color: "var(--ln-parchment)",
+                    fontFamily: "'Space Mono', monospace",
+                    fontSize: "0.7rem",
+                    lineHeight: 1.6,
+                  }}
+                  disabled={isGeneratingImage}
+                />
+              </div>
+              <button
+                onClick={handleGenerateImage}
+                disabled={isGeneratingImage || !imagePrompt.trim()}
+                className="flex items-center justify-center gap-2 w-full py-2.5 rounded transition-all hover:opacity-80 disabled:opacity-40"
+                style={{
+                  background: `${modeColor}22`,
+                  border: `1px solid ${modeColor}66`,
+                  color: modeColor,
+                  fontFamily: "'Space Mono', monospace",
+                  fontSize: "0.6rem",
+                  letterSpacing: "0.08em",
+                }}
+              >
+                {isGeneratingImage ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+                {isGeneratingImage ? "GENERATING..." : "GENERATE IMAGE"}
+              </button>
+
+              {/* Session image history */}
+              {imageHistory.length > 0 && (
+                <div className="space-y-4">
+                  <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.5rem", color: modeColor, letterSpacing: "0.08em" }}>SESSION VISIONS ({imageHistory.length})</div>
+                  {imageHistory.map((img, i) => (
+                    <div key={i} className="rounded overflow-hidden" style={{ border: `1px solid ${modeColor}30` }}>
+                      <img
+                        src={img.url}
+                        alt={img.prompt}
+                        className="w-full block"
+                        style={{ maxHeight: "300px", objectFit: "cover" }}
+                      />
+                      <div className="p-3" style={{ background: "var(--ln-panel)" }}>
+                        <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.55rem", color: "var(--ln-smoke)", lineHeight: 1.5, marginBottom: 8 }}>
+                          {img.prompt}
+                        </div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <button
+                            onClick={() => handleDownloadImage(img.url, i)}
+                            className="flex items-center gap-1 px-2.5 py-1.5 rounded transition-all hover:opacity-80"
+                            style={{ background: `${modeColor}18`, border: `1px solid ${modeColor}44`, color: modeColor, fontFamily: "'Space Mono', monospace", fontSize: "0.55rem" }}
+                          >
+                            <Download className="w-3 h-3" /> DOWNLOAD
+                          </button>
+                          <button
+                            onClick={() => handleRegisterImage(img)}
+                            className="flex items-center gap-1 px-2.5 py-1.5 rounded transition-all hover:opacity-80"
+                            style={{ background: `${modeColor}18`, border: `1px solid ${modeColor}44`, color: modeColor, fontFamily: "'Space Mono', monospace", fontSize: "0.55rem" }}
+                          >
+                            <FileText className="w-3 h-3" /> REGISTER
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {imageHistory.length === 0 && !isGeneratingImage && (
+                <div className="flex flex-col items-center justify-center py-12 gap-4 opacity-40">
+                  <ImageIcon className="w-10 h-10" style={{ color: modeColor }} />
+                  <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.65rem", color: "var(--ln-smoke)", textAlign: "center", lineHeight: 1.8 }}>
+                    VISION CHAMBER<br />
+                    <span style={{ opacity: 0.6 }}>Describe your creative vision<br />and manifest it as an image.</span>
+                  </div>
+                </div>
+              )}
+
+              {isGeneratingImage && <ThinkingDots color={modeColor} />}
+            </div>
+          )}
+
+          {/* ── COMPOSITION MODES ── */}
+          {activeMode !== "Image" && (
+            <>
           {!composedWork && !isGenerating && (
             <div className="flex flex-col items-center justify-center h-full gap-4 opacity-40 py-12">
               <Music className="w-10 h-10" style={{ color: modeColor }} />
@@ -894,8 +1090,11 @@ Please respond in Suno-ready format:
             </div>
           )}
 
-          {/* Mobile collapsible arc */}
-          {(composedWork || prompt.trim()) && (
+          </>
+          )}
+
+          {/* Mobile collapsible arc - only show in composition modes */}
+          {activeMode !== "Image" && (composedWork || prompt.trim()) && (
             <div className="mt-4 rounded overflow-hidden" style={{ border: `1px solid ${modeColor}30` }}>
               <button
                 onClick={() => setArcOpen(o => !o)}
@@ -1068,6 +1267,135 @@ Please respond in Suno-ready format:
 
           {/* Output area */}
           <div ref={outputRef} className="flex-1 overflow-y-auto p-5">
+
+            {/* ── IMAGE MODE ── */}
+            {activeMode === "Image" && (
+              <div className="flex flex-col gap-5 max-w-2xl mx-auto">
+                {/* Guide selector */}
+                {myGuidesQuery.data && myGuidesQuery.data.length > 0 && (
+                  <div>
+                    <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.5rem", color: modeColor, letterSpacing: "0.08em", marginBottom: 6 }}>GUIDE CONTEXT (OPTIONAL)</div>
+                    <select
+                      value={selectedGuideId ?? ""}
+                      onChange={e => setSelectedGuideId(e.target.value ? parseInt(e.target.value) : undefined)}
+                      className="w-full rounded px-3 py-2 focus:outline-none"
+                      style={{
+                        background: "var(--ln-obsidian)",
+                        border: `1px solid ${modeColor}33`,
+                        color: "var(--ln-parchment)",
+                        fontFamily: "'Space Mono', monospace",
+                        fontSize: "0.6rem",
+                      }}
+                    >
+                      <option value="">No guide — freeform generation</option>
+                      {myGuidesQuery.data.map((g: any) => (
+                        <option key={g.id} value={g.id}>{g.canonicalName ?? `Guide #${g.id}`}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                {/* Prompt + generate */}
+                <div className="rounded p-4" style={{ background: "var(--ln-panel)", border: `1px solid ${modeColor}30` }}>
+                  <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.5rem", color: modeColor, letterSpacing: "0.08em", marginBottom: 8 }}>VISION PROMPT</div>
+                  <textarea
+                    value={imagePrompt}
+                    onChange={e => setImagePrompt(e.target.value)}
+                    onKeyDown={handleImageKeyDown}
+                    placeholder="Describe the image you want to manifest... (Ctrl+Enter to generate)"
+                    rows={4}
+                    className="w-full resize-none rounded px-3 py-2.5 focus:outline-none mb-3"
+                    style={{
+                      background: "var(--ln-obsidian)",
+                      border: `1px solid ${modeColor}33`,
+                      color: "var(--ln-parchment)",
+                      fontFamily: "'Space Mono', monospace",
+                      fontSize: "0.7rem",
+                      lineHeight: 1.7,
+                    }}
+                    disabled={isGeneratingImage}
+                  />
+                  <button
+                    onClick={handleGenerateImage}
+                    disabled={isGeneratingImage || !imagePrompt.trim()}
+                    className="flex items-center gap-2 px-4 py-2 rounded transition-all hover:opacity-80 disabled:opacity-40"
+                    style={{
+                      background: `${modeColor}22`,
+                      border: `1px solid ${modeColor}66`,
+                      color: modeColor,
+                      fontFamily: "'Space Mono', monospace",
+                      fontSize: "0.6rem",
+                      letterSpacing: "0.08em",
+                    }}
+                  >
+                    {isGeneratingImage ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+                    {isGeneratingImage ? "GENERATING..." : "GENERATE IMAGE"}
+                  </button>
+                </div>
+
+                {/* Session image history */}
+                {isGeneratingImage && <ThinkingDots color={modeColor} />}
+
+                {imageHistory.length > 0 && (
+                  <div className="space-y-5">
+                    <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.5rem", color: modeColor, letterSpacing: "0.08em" }}>SESSION VISIONS — {imageHistory.length} IMAGE{imageHistory.length !== 1 ? "S" : ""}</div>
+                    {imageHistory.map((img, i) => (
+                      <div key={i} className="rounded overflow-hidden" style={{ border: `1px solid ${modeColor}30` }}>
+                        <img
+                          src={img.url}
+                          alt={img.prompt}
+                          className="w-full block"
+                          style={{ maxHeight: "480px", objectFit: "contain", background: "#0a0a0a" }}
+                        />
+                        <div className="p-4" style={{ background: "var(--ln-panel)" }}>
+                          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.6rem", color: "var(--ln-parchment)", lineHeight: 1.6, marginBottom: 4 }}>
+                            {img.prompt}
+                          </div>
+                          {img.enrichedPrompt !== img.prompt && (
+                            <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.5rem", color: "var(--ln-smoke)", lineHeight: 1.5, marginBottom: 10, opacity: 0.7 }}>
+                              enriched: {img.enrichedPrompt}
+                            </div>
+                          )}
+                          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.45rem", color: "var(--ln-smoke)", marginBottom: 10, opacity: 0.5 }}>
+                            {new Date(img.generatedAt).toLocaleTimeString()}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => handleDownloadImage(img.url, i)}
+                              className="flex items-center gap-1.5 px-3 py-1.5 rounded transition-all hover:opacity-80"
+                              style={{ background: `${modeColor}18`, border: `1px solid ${modeColor}44`, color: modeColor, fontFamily: "'Space Mono', monospace", fontSize: "0.6rem" }}
+                            >
+                              <Download className="w-3 h-3" /> DOWNLOAD
+                            </button>
+                            <button
+                              onClick={() => handleRegisterImage(img)}
+                              className="flex items-center gap-1.5 px-3 py-1.5 rounded transition-all hover:opacity-80"
+                              style={{ background: `${modeColor}18`, border: `1px solid ${modeColor}44`, color: modeColor, fontFamily: "'Space Mono', monospace", fontSize: "0.6rem" }}
+                            >
+                              <FileText className="w-3 h-3" /> REGISTER (WID)
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {imageHistory.length === 0 && !isGeneratingImage && (
+                  <div className="flex flex-col items-center justify-center py-16 gap-4 opacity-40">
+                    <ImageIcon className="w-12 h-12" style={{ color: modeColor }} />
+                    <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.65rem", color: "var(--ln-smoke)", textAlign: "center", lineHeight: 1.8 }}>
+                      VISION CHAMBER<br />
+                      <span style={{ opacity: 0.6 }}>Describe your creative vision above<br />and manifest it as an image.</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ── COMPOSITION MODES ── */}
+            {activeMode !== "Image" && (
+              <>
             {!composedWork && !isGenerating && (
               <div className="flex flex-col items-center justify-center h-full gap-4 opacity-40">
                 <Music className="w-10 h-10" style={{ color: modeColor }} />
@@ -1157,10 +1485,12 @@ Please respond in Suno-ready format:
                 )}
               </div>
             )}
+            </>
+            )}
           </div>
 
-          {/* Action buttons */}
-          {composedWork && !isGenerating && (
+          {/* Action buttons - only in composition modes */}
+          {activeMode !== "Image" && composedWork && !isGenerating && (
             <div
               className="flex items-center gap-2 px-5 py-3 flex-shrink-0 flex-wrap"
               style={{ borderTop: "1px solid var(--ln-panel-border)", background: "var(--ln-panel)" }}
@@ -1188,24 +1518,26 @@ Please respond in Suno-ready format:
             </div>
           )}
 
-          {/* Desktop input bar */}
-          {RecentDraftsStrip}
-          {InputBar}
+          {/* Desktop input bar - only in composition modes */}
+          {activeMode !== "Image" && RecentDraftsStrip}
+          {activeMode !== "Image" && InputBar}
         </div>
 
-        {/* RIGHT: Emotional Arc */}
-        <div
-          className="w-52 flex-shrink-0 flex flex-col border-l overflow-y-auto"
-          style={{ borderColor: "var(--ln-panel-border)", background: "var(--ln-panel)" }}
-        >
+        {/* RIGHT: Emotional Arc - only in composition modes */}
+        {activeMode !== "Image" && (
           <div
-            className="px-4 pt-4 pb-2 text-xs uppercase tracking-widest"
-            style={{ color: "var(--ln-gold)", fontFamily: "'Space Mono', monospace", fontSize: "0.55rem" }}
+            className="w-52 flex-shrink-0 flex flex-col border-l overflow-y-auto"
+            style={{ borderColor: "var(--ln-panel-border)", background: "var(--ln-panel)" }}
           >
-            Emotional Arc
+            <div
+              className="px-4 pt-4 pb-2 text-xs uppercase tracking-widest"
+              style={{ color: "var(--ln-gold)", fontFamily: "'Space Mono', monospace", fontSize: "0.55rem" }}
+            >
+              Emotional Arc
+            </div>
+            <ArcPanel arc={arc} previewArc={previewArc} modeColor={modeColor} hasContent={!!prompt.trim() || !!composedWork} />
           </div>
-          <ArcPanel arc={arc} previewArc={previewArc} modeColor={modeColor} hasContent={!!prompt.trim() || !!composedWork} />
-        </div>
+        )}
       </div>
     </div>
   );

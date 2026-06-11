@@ -7,7 +7,7 @@
  */
 import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
 
-export type AgentMode = "Guide" | "Conductor" | "Witness" | "Custodian" | "Archivist";
+export type AgentMode = "Guide" | "Conductor" | "Witness" | "Custodian" | "Archivist" | "Image";
 export type AttrKey = "voiceDepth" | "lyricalDensity" | "structuralLogic" | "emotionalRange" | "provenanceDepth" | "corpusSize";
 export type AttrState = Record<AttrKey, number>;
 
@@ -17,6 +17,7 @@ export const ARCHETYPE_BASES: Record<AgentMode, AttrState> = {
   Witness:    { voiceDepth: 95, lyricalDensity: 85, structuralLogic: 35, emotionalRange: 100, provenanceDepth: 60, corpusSize: 600 },
   Custodian:  { voiceDepth: 60, lyricalDensity: 40, structuralLogic: 70, emotionalRange: 50, provenanceDepth: 100, corpusSize: 400 },
   Archivist:  { voiceDepth: 55, lyricalDensity: 90, structuralLogic: 85, emotionalRange: 65, provenanceDepth: 95, corpusSize: 1000 },
+  Image:      { voiceDepth: 70, lyricalDensity: 60, structuralLogic: 50, emotionalRange: 80, provenanceDepth: 45, corpusSize: 600 },
 };
 
 interface KeeperAttrsContextValue {

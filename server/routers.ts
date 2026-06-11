@@ -6893,6 +6893,50 @@ If a field cannot be determined from the document, use an empty string. For symb
         }
         return deleteGuide(input.guideId, ctx.user.id);
       }),
+
+    /**
+     * Generate an image from a text prompt using the platform image generation service.
+     * Returns the CDN URL of the generated image.
+     * Optionally scoped to a guide's identity for style context.
+     */
+    generateImage: protectedProcedure
+      .input(z.object({
+        prompt: z.string().min(1).max(1000),
+        guideId: z.number().optional(),
+        styleContext: z.string().max(500).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        // If a guideId is provided, verify ownership and optionally enrich the prompt
+        let enrichedPrompt = input.prompt;
+        if (input.guideId) {
+          const guide = await getGuideById(input.guideId);
+          if (!guide || guide.creatorId !== ctx.user.id) {
+            throw new TRPCError({ code: "FORBIDDEN", message: "Guide not found or access denied" });
+          }
+          // Prepend guide identity context to the prompt for stylistic consistency
+          const identityContext = [
+            guide.canonicalName && `Character: ${guide.canonicalName}`,
+            guide.archetypeType && `Archetype: ${guide.archetypeType}`,
+            guide.domain && `Domain: ${guide.domain}`,
+            input.styleContext,
+          ].filter(Boolean).join('. ');
+          if (identityContext) {
+            enrichedPrompt = `${identityContext}. ${input.prompt}`;
+          }
+        }
+
+        const { generateImage } = await import('./_core/imageGeneration');
+        const result = await generateImage({ prompt: enrichedPrompt });
+
+        return {
+          url: result.url,
+          prompt: input.prompt,
+          enrichedPrompt,
+          generatedAt: new Date().toISOString(),
+          creatorId: ctx.user.id,
+          guideId: input.guideId ?? null,
+        };
+      }),
   }),
 
   // ─── Global Search ─────────────────────────────────────────────────────────
