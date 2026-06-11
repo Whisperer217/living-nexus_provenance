@@ -6899,45 +6899,124 @@ If a field cannot be determined from the document, use an empty string. For symb
      * Returns the CDN URL of the generated image.
      * Optionally scoped to a guide's identity for style context.
      */
-    generateImage: protectedProcedure
-      .input(z.object({
-        prompt: z.string().min(1).max(1000),
-        guideId: z.number().optional(),
-        styleContext: z.string().max(500).optional(),
-      }))
-      .mutation(async ({ ctx, input }) => {
-        // If a guideId is provided, verify ownership and optionally enrich the prompt
-        let enrichedPrompt = input.prompt;
-        if (input.guideId) {
-          const guide = await getGuideById(input.guideId);
-          if (!guide || guide.creatorId !== ctx.user.id) {
-            throw new TRPCError({ code: "FORBIDDEN", message: "Guide not found or access denied" });
-          }
-          // Prepend guide identity context to the prompt for stylistic consistency
-          const identityContext = [
-            guide.canonicalName && `Character: ${guide.canonicalName}`,
-            guide.archetypeType && `Archetype: ${guide.archetypeType}`,
-            guide.domain && `Domain: ${guide.domain}`,
-            input.styleContext,
-          ].filter(Boolean).join('. ');
-          if (identityContext) {
-            enrichedPrompt = `${identityContext}. ${input.prompt}`;
-          }
-        }
+     generateImage: protectedProcedure
+       .input(z.object({
+         prompt: z.string().min(1).max(1000),
+         guideId: z.number().optional(),
+         styleContext: z.string().max(500).optional(),
+         referenceImageUrl: z.string().url().optional(),
+       }))
+       .mutation(async ({ ctx, input }) => {
+         let enrichedPrompt = input.prompt;
+         if (input.guideId) {
+           const guide = await getGuideById(input.guideId);
+           if (!guide || guide.creatorId !== ctx.user.id) {
+             throw new TRPCError({ code: 'FORBIDDEN', message: 'Guide not found or access denied' });
+           }
+           const identityContext = [
+             guide.canonicalName && `Character: ${guide.canonicalName}`,
+             guide.archetypeType && `Archetype: ${guide.archetypeType}`,
+             guide.domain && `Domain: ${guide.domain}`,
+             input.styleContext,
+           ].filter(Boolean).join('. ');
+           if (identityContext) enrichedPrompt = `${identityContext}. ${input.prompt}`;
+         }
 
-        const { generateImage } = await import('./_core/imageGeneration');
-        const result = await generateImage({ prompt: enrichedPrompt });
+         const { generateImage } = await import('./_core/imageGeneration');
+         const originalImages = input.referenceImageUrl
+           ? [{ url: input.referenceImageUrl, mimeType: 'image/jpeg' }]
+           : [];
+         const result = await generateImage({ prompt: enrichedPrompt, originalImages });
 
-        return {
-          url: result.url,
-          prompt: input.prompt,
-          enrichedPrompt,
-          generatedAt: new Date().toISOString(),
-          creatorId: ctx.user.id,
-          guideId: input.guideId ?? null,
-        };
-      }),
-  }),
+         // Auto-generate WID-VIS from hash of url + enrichedPrompt + timestamp + userId
+         const crypto = await import('crypto');
+         const generatedAt = new Date().toISOString();
+         const hashInput = `${result.url ?? ''}|${enrichedPrompt}|${generatedAt}|${ctx.user.id}`;
+         const hash = crypto.createHash('sha256').update(hashInput).digest('hex');
+         const widId = `WID-VIS-${hash.slice(0, 8).toUpperCase()}-${hash.slice(8, 16).toUpperCase()}`;
+
+         return {
+           url: result.url,
+           prompt: input.prompt,
+           enrichedPrompt,
+           generatedAt,
+           creatorId: ctx.user.id,
+           guideId: input.guideId ?? null,
+           widId,
+           referenceImageUrl: input.referenceImageUrl ?? null,
+           isRemix: false,
+         };
+       }),
+
+     /**
+      * Remix an existing generated image: pass it as a reference image and apply a new/modified prompt.
+      * Enables visual consistency — the model uses the source image as a style/content anchor.
+      */
+     remixImage: protectedProcedure
+       .input(z.object({
+         sourceImageUrl: z.string().url(),
+         prompt: z.string().min(1).max(1000),
+         guideId: z.number().optional(),
+         styleContext: z.string().max(500).optional(),
+       }))
+       .mutation(async ({ ctx, input }) => {
+         let enrichedPrompt = input.prompt;
+         if (input.guideId) {
+           const guide = await getGuideById(input.guideId);
+           if (!guide || guide.creatorId !== ctx.user.id) {
+             throw new TRPCError({ code: 'FORBIDDEN', message: 'Guide not found or access denied' });
+           }
+           const identityContext = [
+             guide.canonicalName && `Character: ${guide.canonicalName}`,
+             guide.archetypeType && `Archetype: ${guide.archetypeType}`,
+             guide.domain && `Domain: ${guide.domain}`,
+             input.styleContext,
+           ].filter(Boolean).join('. ');
+           if (identityContext) enrichedPrompt = `${identityContext}. ${input.prompt}`;
+         }
+
+         const { generateImage } = await import('./_core/imageGeneration');
+         const result = await generateImage({
+           prompt: enrichedPrompt,
+           originalImages: [{ url: input.sourceImageUrl, mimeType: 'image/jpeg' }],
+         });
+
+         const crypto = await import('crypto');
+         const generatedAt = new Date().toISOString();
+         const hashInput = `${result.url ?? ''}|${enrichedPrompt}|${generatedAt}|${ctx.user.id}`;
+         const hash = crypto.createHash('sha256').update(hashInput).digest('hex');
+         const widId = `WID-VIS-${hash.slice(0, 8).toUpperCase()}-${hash.slice(8, 16).toUpperCase()}`;
+
+         return {
+           url: result.url,
+           prompt: input.prompt,
+           enrichedPrompt,
+           generatedAt,
+           creatorId: ctx.user.id,
+           guideId: input.guideId ?? null,
+           widId,
+           referenceImageUrl: input.sourceImageUrl,
+           isRemix: true,
+         };
+       }),
+
+     /**
+      * Upload a reference image to S3 for use as a consistency anchor in image generation.
+      * Returns the CDN URL to pass as referenceImageUrl to generateImage or remixImage.
+      */
+     uploadReferenceImage: protectedProcedure
+       .input(z.object({
+         base64: z.string().min(1),
+         mimeType: z.string().default('image/jpeg'),
+       }))
+       .mutation(async ({ ctx, input }) => {
+         const buffer = Buffer.from(input.base64, 'base64');
+         const ext = input.mimeType.includes('png') ? 'png' : input.mimeType.includes('webp') ? 'webp' : 'jpg';
+         const key = `references/${ctx.user.id}/${Date.now()}-ref.${ext}`;
+         const { url } = await storagePut(key, buffer, input.mimeType);
+         return { url, key };
+       }),
+   }),
 
   // ─── Global Search ─────────────────────────────────────────────────────────
   search: router({

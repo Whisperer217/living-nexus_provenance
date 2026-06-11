@@ -5020,3 +5020,12 @@
 - [x] Build Image mode UI panel (desktop): same features, max-w-2xl centered, enriched prompt display, timestamp, full-size image display
 - [x] Hide composition input bar and Emotional Arc panel when Image mode is active
 - [x] TypeScript: 0 errors
+
+## Phase 199: Image Generation — WID Auto-Register, Reference Upload, Remix
+- [x] Update guides.generateImage procedure: compute WID-VIS-* hash server-side from url+prompt+timestamp, return widId in response
+- [x] Add guides.remixImage procedure: accepts sourceImageUrl + prompt + optional guideId, passes sourceImageUrl as originalImages to generateImage, returns same shape as generateImage
+- [x] Add guides.uploadReferenceImage procedure: accepts base64 image, uploads to S3, returns url for use as reference
+- [x] Update Image mode UI: show auto-generated WID badge on each image card immediately after generation
+- [x] Add Reference Image upload button in Image mode (before prompt): upload → stored as referenceImageUrl state, shown as thumbnail, passed to generate/remix
+- [x] Add Remix button on each image card: pre-fills prompt with original prompt, passes that image as reference, triggers new generation
+- [x] TypeScript: 0 errors

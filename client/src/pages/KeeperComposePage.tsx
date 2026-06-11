@@ -72,6 +72,9 @@ interface GeneratedImage {
   enrichedPrompt: string;
   generatedAt: string;
   guideId: number | null;
+  widId?: string;
+  referenceImageUrl?: string | null;
+  isRemix?: boolean;
 }
 
 const ARC_LEVELS: Record<string, number> = {
@@ -365,7 +368,13 @@ export default function KeeperComposePage() {
   const [imageHistory, setImageHistory] = useState<GeneratedImage[]>([]);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [selectedGuideId, setSelectedGuideId] = useState<number | undefined>(undefined);
+  const [referenceImageUrl, setReferenceImageUrl] = useState<string | undefined>(undefined);
+  const [referenceImagePreview, setReferenceImagePreview] = useState<string | undefined>(undefined);
+  const [isUploadingRef, setIsUploadingRef] = useState(false);
+  const referenceInputRef = useRef<HTMLInputElement>(null);
   const generateImageMutation = trpc.guides.generateImage.useMutation();
+  const remixImageMutation = trpc.guides.remixImage.useMutation();
+  const uploadReferenceImageMutation = trpc.guides.uploadReferenceImage.useMutation();
   const myGuidesQuery = trpc.guides.listMine.useQuery(undefined, { enabled: isAuthenticated && activeMode === "Image" });
 
   const arc = composedWork ? deriveArc(composedWork.sections) : [];
@@ -515,6 +524,30 @@ Please respond in Suno-ready format:
 
   // ── Image generation handler ─────────────────────────────────────────────────
 
+  const handleUploadReferenceImage = (file: File) => {
+    if (!file) return;
+    setIsUploadingRef(true);
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const dataUrl = e.target?.result as string;
+      setReferenceImagePreview(dataUrl);
+      const base64 = dataUrl.split(',')[1];
+      try {
+        const result = await uploadReferenceImageMutation.mutateAsync({
+          base64,
+          mimeType: file.type || 'image/jpeg',
+        });
+        setReferenceImageUrl(result.url);
+        toast.success('Reference image uploaded — consistency anchor set.');
+      } catch {
+        toast.error('Failed to upload reference image.');
+      } finally {
+        setIsUploadingRef(false);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleGenerateImage = async () => {
     const msg = imagePrompt.trim();
     if (!msg || isGeneratingImage) return;
@@ -523,17 +556,48 @@ Please respond in Suno-ready format:
       const result = await generateImageMutation.mutateAsync({
         prompt: msg,
         guideId: selectedGuideId,
+        referenceImageUrl,
       });
       setImageHistory(prev => [{
-        url: result.url ?? "",
+        url: result.url ?? '',
         prompt: result.prompt,
         enrichedPrompt: result.enrichedPrompt,
         generatedAt: result.generatedAt,
         guideId: result.guideId,
+        widId: result.widId,
+        referenceImageUrl: result.referenceImageUrl,
+        isRemix: false,
       }, ...prev]);
-      setImagePrompt("");
+      setImagePrompt('');
     } catch {
-      toast.error("Image generation failed. Please try again.");
+      toast.error('Image generation failed. Please try again.');
+    } finally {
+      setIsGeneratingImage(false);
+    }
+  };
+
+  const handleRemixImage = async (sourceImg: GeneratedImage) => {
+    if (!sourceImg.url || isGeneratingImage) return;
+    setIsGeneratingImage(true);
+    setImagePrompt(sourceImg.prompt);
+    try {
+      const result = await remixImageMutation.mutateAsync({
+        sourceImageUrl: sourceImg.url,
+        prompt: sourceImg.prompt,
+        guideId: selectedGuideId ?? sourceImg.guideId ?? undefined,
+      });
+      setImageHistory(prev => [{
+        url: result.url ?? '',
+        prompt: result.prompt,
+        enrichedPrompt: result.enrichedPrompt,
+        generatedAt: result.generatedAt,
+        guideId: result.guideId,
+        widId: result.widId,
+        referenceImageUrl: result.referenceImageUrl,
+        isRemix: true,
+      }, ...prev]);
+    } catch {
+      toast.error('Remix failed. Please try again.');
     } finally {
       setIsGeneratingImage(false);
     }
@@ -887,6 +951,34 @@ Please respond in Suno-ready format:
                 </div>
               )}
 
+              {/* Reference image upload */}
+              <div>
+                <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.5rem", color: modeColor, letterSpacing: "0.08em", marginBottom: 4 }}>REFERENCE IMAGE (OPTIONAL)</div>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => referenceInputRef.current?.click()}
+                    disabled={isUploadingRef}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded transition-all hover:opacity-80 disabled:opacity-40"
+                    style={{ background: `${modeColor}18`, border: `1px solid ${modeColor}44`, color: modeColor, fontFamily: "'Space Mono', monospace", fontSize: "0.55rem" }}
+                  >
+                    {isUploadingRef ? <Loader2 className="w-3 h-3 animate-spin" /> : <ImageIcon className="w-3 h-3" />}
+                    {isUploadingRef ? 'UPLOADING...' : referenceImageUrl ? 'CHANGE REFERENCE' : 'UPLOAD REFERENCE'}
+                  </button>
+                  {referenceImagePreview && (
+                    <div className="relative">
+                      <img src={referenceImagePreview} alt="Reference" className="w-10 h-10 rounded object-cover" style={{ border: `1px solid ${modeColor}44` }} />
+                      <button
+                        onClick={() => { setReferenceImageUrl(undefined); setReferenceImagePreview(undefined); }}
+                        className="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-xs"
+                        style={{ background: 'var(--ln-obsidian)', border: `1px solid ${modeColor}44`, color: modeColor }}
+                      >×</button>
+                    </div>
+                  )}
+                </div>
+                <input ref={referenceInputRef} type="file" accept="image/*" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) handleUploadReferenceImage(f); e.target.value = ''; }} />
+                {referenceImageUrl && <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.5rem", color: modeColor, opacity: 0.7, marginTop: 4 }}>CONSISTENCY ANCHOR ACTIVE — new generations will reference this image</div>}
+              </div>
+
               {/* Prompt input */}
               <div>
                 <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.5rem", color: modeColor, letterSpacing: "0.08em", marginBottom: 4 }}>VISION PROMPT</div>
@@ -931,29 +1023,32 @@ Please respond in Suno-ready format:
                   <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.5rem", color: modeColor, letterSpacing: "0.08em" }}>SESSION VISIONS ({imageHistory.length})</div>
                   {imageHistory.map((img, i) => (
                     <div key={i} className="rounded overflow-hidden" style={{ border: `1px solid ${modeColor}30` }}>
-                      <img
-                        src={img.url}
-                        alt={img.prompt}
-                        className="w-full block"
-                        style={{ maxHeight: "300px", objectFit: "cover" }}
-                      />
-                      <div className="p-3" style={{ background: "var(--ln-panel)" }}>
-                        <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.55rem", color: "var(--ln-smoke)", lineHeight: 1.5, marginBottom: 8 }}>
+                      <div className="relative">
+                        <img src={img.url} alt={img.prompt} className="w-full block" style={{ maxHeight: '300px', objectFit: 'cover' }} />
+                        {img.isRemix && (
+                          <div className="absolute top-2 left-2 px-1.5 py-0.5 rounded text-xs" style={{ background: `${modeColor}cc`, color: '#fff', fontFamily: "'Space Mono', monospace", fontSize: '0.45rem', letterSpacing: '0.08em' }}>REMIX</div>
+                        )}
+                      </div>
+                      <div className="p-3" style={{ background: 'var(--ln-panel)' }}>
+                        {/* WID badge */}
+                        {img.widId && (
+                          <div className="mb-2 flex items-center gap-1.5">
+                            <div className="px-2 py-0.5 rounded" style={{ background: `${modeColor}18`, border: `1px solid ${modeColor}44`, fontFamily: "'Space Mono', monospace", fontSize: '0.45rem', color: modeColor, letterSpacing: '0.06em' }}>
+                              {img.widId}
+                            </div>
+                          </div>
+                        )}
+                        <div style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.55rem', color: 'var(--ln-smoke)', lineHeight: 1.5, marginBottom: 8 }}>
                           {img.prompt}
                         </div>
                         <div className="flex items-center gap-2 flex-wrap">
-                          <button
-                            onClick={() => handleDownloadImage(img.url, i)}
-                            className="flex items-center gap-1 px-2.5 py-1.5 rounded transition-all hover:opacity-80"
-                            style={{ background: `${modeColor}18`, border: `1px solid ${modeColor}44`, color: modeColor, fontFamily: "'Space Mono', monospace", fontSize: "0.55rem" }}
-                          >
+                          <button onClick={() => handleDownloadImage(img.url, i)} className="flex items-center gap-1 px-2.5 py-1.5 rounded transition-all hover:opacity-80" style={{ background: `${modeColor}18`, border: `1px solid ${modeColor}44`, color: modeColor, fontFamily: "'Space Mono', monospace", fontSize: '0.55rem' }}>
                             <Download className="w-3 h-3" /> DOWNLOAD
                           </button>
-                          <button
-                            onClick={() => handleRegisterImage(img)}
-                            className="flex items-center gap-1 px-2.5 py-1.5 rounded transition-all hover:opacity-80"
-                            style={{ background: `${modeColor}18`, border: `1px solid ${modeColor}44`, color: modeColor, fontFamily: "'Space Mono', monospace", fontSize: "0.55rem" }}
-                          >
+                          <button onClick={() => handleRemixImage(img)} disabled={isGeneratingImage} className="flex items-center gap-1 px-2.5 py-1.5 rounded transition-all hover:opacity-80 disabled:opacity-40" style={{ background: `${modeColor}18`, border: `1px solid ${modeColor}44`, color: modeColor, fontFamily: "'Space Mono', monospace", fontSize: '0.55rem' }}>
+                            <Sparkles className="w-3 h-3" /> REMIX
+                          </button>
+                          <button onClick={() => handleRegisterImage(img)} className="flex items-center gap-1 px-2.5 py-1.5 rounded transition-all hover:opacity-80" style={{ background: `${modeColor}18`, border: `1px solid ${modeColor}44`, color: modeColor, fontFamily: "'Space Mono', monospace", fontSize: '0.55rem' }}>
                             <FileText className="w-3 h-3" /> REGISTER
                           </button>
                         </div>
@@ -1295,6 +1390,37 @@ Please respond in Suno-ready format:
                   </div>
                 )}
 
+                {/* Reference image upload */}
+                <div className="rounded p-4" style={{ background: 'var(--ln-panel)', border: `1px solid ${modeColor}30` }}>
+                  <div style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.5rem', color: modeColor, letterSpacing: '0.08em', marginBottom: 8 }}>REFERENCE IMAGE — CONSISTENCY ANCHOR (OPTIONAL)</div>
+                  <div className="flex items-center gap-4">
+                    <button
+                      onClick={() => referenceInputRef.current?.click()}
+                      disabled={isUploadingRef}
+                      className="flex items-center gap-2 px-3 py-1.5 rounded transition-all hover:opacity-80 disabled:opacity-40"
+                      style={{ background: `${modeColor}18`, border: `1px solid ${modeColor}44`, color: modeColor, fontFamily: "'Space Mono', monospace", fontSize: '0.6rem' }}
+                    >
+                      {isUploadingRef ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ImageIcon className="w-3.5 h-3.5" />}
+                      {isUploadingRef ? 'UPLOADING...' : referenceImageUrl ? 'CHANGE REFERENCE' : 'UPLOAD REFERENCE'}
+                    </button>
+                    {referenceImagePreview && (
+                      <div className="relative">
+                        <img src={referenceImagePreview} alt="Reference" className="w-14 h-14 rounded object-cover" style={{ border: `1px solid ${modeColor}44` }} />
+                        <button
+                          onClick={() => { setReferenceImageUrl(undefined); setReferenceImagePreview(undefined); }}
+                          className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full flex items-center justify-center text-xs"
+                          style={{ background: 'var(--ln-obsidian)', border: `1px solid ${modeColor}44`, color: modeColor }}
+                        >×</button>
+                      </div>
+                    )}
+                    {referenceImageUrl && !referenceImagePreview && (
+                      <div style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.5rem', color: modeColor, opacity: 0.8 }}>ANCHOR ACTIVE</div>
+                    )}
+                  </div>
+                  <input ref={referenceInputRef} type="file" accept="image/*" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) handleUploadReferenceImage(f); e.target.value = ''; }} />
+                  {referenceImageUrl && <div style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.5rem', color: modeColor, opacity: 0.6, marginTop: 6 }}>All new generations will use this image as a visual consistency reference.</div>}
+                </div>
+
                 {/* Prompt + generate */}
                 <div className="rounded p-4" style={{ background: "var(--ln-panel)", border: `1px solid ${modeColor}30` }}>
                   <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.5rem", color: modeColor, letterSpacing: "0.08em", marginBottom: 8 }}>VISION PROMPT</div>
@@ -1338,40 +1464,44 @@ Please respond in Suno-ready format:
 
                 {imageHistory.length > 0 && (
                   <div className="space-y-5">
-                    <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.5rem", color: modeColor, letterSpacing: "0.08em" }}>SESSION VISIONS — {imageHistory.length} IMAGE{imageHistory.length !== 1 ? "S" : ""}</div>
+                    <div style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.5rem', color: modeColor, letterSpacing: '0.08em' }}>SESSION VISIONS — {imageHistory.length} IMAGE{imageHistory.length !== 1 ? 'S' : ''}</div>
                     {imageHistory.map((img, i) => (
                       <div key={i} className="rounded overflow-hidden" style={{ border: `1px solid ${modeColor}30` }}>
-                        <img
-                          src={img.url}
-                          alt={img.prompt}
-                          className="w-full block"
-                          style={{ maxHeight: "480px", objectFit: "contain", background: "#0a0a0a" }}
-                        />
-                        <div className="p-4" style={{ background: "var(--ln-panel)" }}>
-                          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.6rem", color: "var(--ln-parchment)", lineHeight: 1.6, marginBottom: 4 }}>
+                        <div className="relative">
+                          <img src={img.url} alt={img.prompt} className="w-full block" style={{ maxHeight: '480px', objectFit: 'contain', background: '#0a0a0a' }} />
+                          {img.isRemix && (
+                            <div className="absolute top-3 left-3 px-2 py-0.5 rounded" style={{ background: `${modeColor}dd`, color: '#fff', fontFamily: "'Space Mono', monospace", fontSize: '0.5rem', letterSpacing: '0.08em' }}>REMIX</div>
+                          )}
+                        </div>
+                        <div className="p-4" style={{ background: 'var(--ln-panel)' }}>
+                          {/* WID badge */}
+                          {img.widId && (
+                            <div className="mb-3 flex items-center gap-2">
+                              <div className="px-2.5 py-1 rounded" style={{ background: `${modeColor}18`, border: `1px solid ${modeColor}55`, fontFamily: "'Space Mono', monospace", fontSize: '0.5rem', color: modeColor, letterSpacing: '0.06em' }}>
+                                {img.widId}
+                              </div>
+                              <div style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.45rem', color: 'var(--ln-smoke)', opacity: 0.6 }}>AUTO-REGISTERED</div>
+                            </div>
+                          )}
+                          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.6rem', color: 'var(--ln-parchment)', lineHeight: 1.6, marginBottom: 4 }}>
                             {img.prompt}
                           </div>
                           {img.enrichedPrompt !== img.prompt && (
-                            <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.5rem", color: "var(--ln-smoke)", lineHeight: 1.5, marginBottom: 10, opacity: 0.7 }}>
+                            <div style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.5rem', color: 'var(--ln-smoke)', lineHeight: 1.5, marginBottom: 10, opacity: 0.7 }}>
                               enriched: {img.enrichedPrompt}
                             </div>
                           )}
-                          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.45rem", color: "var(--ln-smoke)", marginBottom: 10, opacity: 0.5 }}>
+                          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.45rem', color: 'var(--ln-smoke)', marginBottom: 10, opacity: 0.5 }}>
                             {new Date(img.generatedAt).toLocaleTimeString()}
                           </div>
-                          <div className="flex items-center gap-2">
-                            <button
-                              onClick={() => handleDownloadImage(img.url, i)}
-                              className="flex items-center gap-1.5 px-3 py-1.5 rounded transition-all hover:opacity-80"
-                              style={{ background: `${modeColor}18`, border: `1px solid ${modeColor}44`, color: modeColor, fontFamily: "'Space Mono', monospace", fontSize: "0.6rem" }}
-                            >
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <button onClick={() => handleDownloadImage(img.url, i)} className="flex items-center gap-1.5 px-3 py-1.5 rounded transition-all hover:opacity-80" style={{ background: `${modeColor}18`, border: `1px solid ${modeColor}44`, color: modeColor, fontFamily: "'Space Mono', monospace", fontSize: '0.6rem' }}>
                               <Download className="w-3 h-3" /> DOWNLOAD
                             </button>
-                            <button
-                              onClick={() => handleRegisterImage(img)}
-                              className="flex items-center gap-1.5 px-3 py-1.5 rounded transition-all hover:opacity-80"
-                              style={{ background: `${modeColor}18`, border: `1px solid ${modeColor}44`, color: modeColor, fontFamily: "'Space Mono', monospace", fontSize: "0.6rem" }}
-                            >
+                            <button onClick={() => handleRemixImage(img)} disabled={isGeneratingImage} className="flex items-center gap-1.5 px-3 py-1.5 rounded transition-all hover:opacity-80 disabled:opacity-40" style={{ background: `${modeColor}18`, border: `1px solid ${modeColor}44`, color: modeColor, fontFamily: "'Space Mono', monospace", fontSize: '0.6rem' }}>
+                              <Sparkles className="w-3 h-3" /> REMIX
+                            </button>
+                            <button onClick={() => handleRegisterImage(img)} className="flex items-center gap-1.5 px-3 py-1.5 rounded transition-all hover:opacity-80" style={{ background: `${modeColor}18`, border: `1px solid ${modeColor}44`, color: modeColor, fontFamily: "'Space Mono', monospace", fontSize: '0.6rem' }}>
                               <FileText className="w-3 h-3" /> REGISTER (WID)
                             </button>
                           </div>
