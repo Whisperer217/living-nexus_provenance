@@ -611,20 +611,20 @@ export default function ConstellationPage() {
           <p className="text-[10px]" style={{ color: "rgba(212,175,55,0.6)" }}>{creatorName}</p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 max-w-[90px]">
           {genre && (
-            <span className="px-2 py-0.5 rounded-full text-[9px] font-mono tracking-wider uppercase"
-              style={{ background: "rgba(138,43,226,0.2)", border: "1px solid rgba(138,43,226,0.4)", color: "rgba(192,132,252,0.9)" }}>
-              {genre}
+            <span className="px-2 py-0.5 rounded-full text-[9px] font-mono tracking-wider uppercase truncate block"
+              style={{ background: "rgba(138,43,226,0.2)", border: "1px solid rgba(138,43,226,0.4)", color: "rgba(192,132,252,0.9)", maxWidth: 88 }}>
+              {genre.split(',')[0].trim()}
             </span>
           )}
         </div>
       </div>
 
-      {/* Legend */}
+      {/* Legend — hidden when a node is selected */}
       <div
-        className="absolute bottom-24 left-4 z-20 flex flex-col gap-1.5 px-3 py-2 rounded-xl"
-        style={{ background: "rgba(0,0,0,0.6)", border: "1px solid rgba(255,255,255,0.08)", backdropFilter: "blur(8px)" }}
+        className="absolute bottom-24 left-4 z-20 flex flex-col gap-1.5 px-3 py-2 rounded-xl transition-opacity duration-200"
+        style={{ opacity: selectedNode ? 0 : 1, pointerEvents: selectedNode ? 'none' : 'auto', background: "rgba(0,0,0,0.6)", border: "1px solid rgba(255,255,255,0.08)", backdropFilter: "blur(8px)" }}
       >
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded-full" style={{ border: "1.5px solid #D4AF37" }} />
