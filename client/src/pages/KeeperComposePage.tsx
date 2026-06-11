@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react";
+import { format, isToday, isYesterday } from "date-fns";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -388,9 +389,10 @@ export default function KeeperComposePage() {
   const [quiverOpen, setQuiverOpen] = useState(false);
   const [quiverSearch, setQuiverSearch] = useState('');
   const [quiverPage, setQuiverPage] = useState(0);
+  // Always fetch Quiver when in Image mode (persistent right column on desktop)
   const quiverQuery = trpc.quiver.list.useQuery(
     { search: quiverSearch || undefined, page: quiverPage, limit: 20 },
-    { enabled: isAuthenticated && quiverOpen }
+    { enabled: isAuthenticated && activeMode === 'Image' }
   );
 
   const arc = composedWork ? deriveArc(composedWork.sections) : [];
@@ -663,20 +665,42 @@ Please respond in Suno-ready format:
     }
   };
 
-  const handleDownloadImage = async (url: string, index: number) => {
+  // Download with WID provenance metadata embedded via server-side sharp PNG processing.
+  // `index` is the quiver image DB id when downloading from Quiver, or a session index otherwise.
+  const handleDownloadImage = async (url: string, index: number | string) => {
+    // If index is a numeric DB id, use the metadata endpoint; otherwise fall back to plain download
+    const isDbId = typeof index === 'number' && index > 0;
     try {
+      if (isDbId) {
+        // Use the WID-metadata endpoint for provenance-tagged PNG
+        const response = await fetch(`/api/quiver/${index}/download`, { credentials: 'include' });
+        if (response.ok) {
+          const blob = await response.blob();
+          const objectUrl = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = objectUrl;
+          // Use Content-Disposition filename from server if available
+          const disposition = response.headers.get('Content-Disposition') ?? '';
+          const match = disposition.match(/filename="([^"]+)"/);
+          a.download = match ? match[1] : `keeper-vision-${Date.now()}.png`;
+          a.click();
+          URL.revokeObjectURL(objectUrl);
+          return;
+        }
+      }
+      // Fallback: plain fetch from CDN URL
       const response = await fetch(url);
       const blob = await response.blob();
       const objectUrl = URL.createObjectURL(blob);
-      const a = document.createElement("a");
+      const a = document.createElement('a');
       a.href = objectUrl;
       const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-      a.download = `keeper-vision-${ts}-${index + 1}.png`;
+      a.download = `keeper-vision-${ts}.png`;
       a.click();
       URL.revokeObjectURL(objectUrl);
     } catch {
-      // Fallback: open in new tab
-      window.open(url, "_blank");
+      // Last resort: open in new tab
+      window.open(url, '_blank');
     }
   };
 
@@ -1481,63 +1505,6 @@ Please respond in Suno-ready format:
             {/* ── IMAGE MODE ── */}
             {activeMode === 'Image' && (
               <div className="flex flex-col gap-5 max-w-2xl mx-auto">
-                {/* Quiver toggle */}
-                <button
-                  onClick={() => setQuiverOpen(v => !v)}
-                  className="flex items-center justify-between w-full px-4 py-2.5 rounded transition-all hover:opacity-80"
-                  style={{ background: quiverOpen ? `${modeColor}22` : `${modeColor}0a`, border: `1px solid ${modeColor}${quiverOpen ? '66' : '33'}`, color: modeColor, fontFamily: "'Space Mono', monospace", fontSize: '0.55rem', letterSpacing: '0.08em' }}
-                >
-                  <span className="flex items-center gap-2">
-                    <ImageIcon className="w-3.5 h-3.5" />
-                    QUIVER — YOUR IMAGE VAULT {quiverQuery.data ? `(${quiverQuery.data.length}${quiverQuery.data.length === 20 ? '+' : ''})` : ''}
-                  </span>
-                  <span style={{ fontSize: '0.65rem' }}>{quiverOpen ? '▲' : '▼'}</span>
-                </button>
-
-                {/* Quiver panel */}
-                {quiverOpen && (
-                  <div className="rounded p-4 space-y-4" style={{ background: 'var(--ln-panel)', border: `1px solid ${modeColor}30` }}>
-                    <input
-                      type="text"
-                      placeholder="Search your quiver by prompt..."
-                      value={quiverSearch}
-                      onChange={e => { setQuiverSearch(e.target.value); setQuiverPage(0); }}
-                      className="w-full rounded px-3 py-2 focus:outline-none"
-                      style={{ background: 'var(--ln-obsidian)', border: `1px solid ${modeColor}33`, color: 'var(--ln-parchment)', fontFamily: "'Space Mono', monospace", fontSize: '0.6rem' }}
-                    />
-                    {quiverQuery.isLoading && <div style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.5rem', color: modeColor, opacity: 0.6 }}>LOADING VAULT...</div>}
-                    {quiverQuery.data && quiverQuery.data.length === 0 && (
-                      <div style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.55rem', color: 'var(--ln-smoke)', opacity: 0.6, textAlign: 'center', padding: '20px 0' }}>Your quiver is empty. Generate an image to begin.</div>
-                    )}
-                    {quiverQuery.data && quiverQuery.data.length > 0 && (
-                      <div className="grid grid-cols-3 gap-3">
-                        {quiverQuery.data.map((qi: any) => (
-                          <div key={qi.id} className="rounded overflow-hidden relative group" style={{ border: `1px solid ${modeColor}22` }}>
-                            <img src={qi.url} alt={qi.prompt} className="w-full block" style={{ height: '130px', objectFit: 'cover' }} />
-                            {qi.isRemix && <div className="absolute top-1.5 left-1.5 px-1.5 rounded" style={{ background: `${modeColor}dd`, color: '#fff', fontFamily: "'Space Mono', monospace", fontSize: '0.4rem' }}>REMIX</div>}
-                            {qi.widId && <div className="absolute top-1.5 right-1.5 px-1.5 rounded" style={{ background: 'rgba(0,0,0,0.75)', color: modeColor, fontFamily: "'Space Mono', monospace", fontSize: '0.4rem' }}>WID</div>}
-                            <div className="p-2" style={{ background: 'var(--ln-obsidian)' }}>
-                              <div style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.45rem', color: 'var(--ln-smoke)', lineHeight: 1.4 }} className="line-clamp-2">{qi.title || qi.prompt}</div>
-                              <div style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.4rem', color: 'var(--ln-smoke)', opacity: 0.5, marginTop: 2 }}>{new Date(qi.createdAt).toLocaleDateString()}</div>
-                              <div className="flex gap-1 mt-2">
-                                <button onClick={() => handleDownloadImage(qi.url, qi.id)} className="flex-1 py-1 rounded text-center" style={{ background: `${modeColor}18`, color: modeColor, fontFamily: "'Space Mono', monospace", fontSize: '0.4rem', border: `1px solid ${modeColor}33` }}>DL</button>
-                                <button onClick={() => handleRemixImage({ url: qi.url, prompt: qi.prompt, enrichedPrompt: qi.enrichedPrompt, generatedAt: new Date(qi.createdAt).toISOString(), guideId: qi.guideId, widId: qi.widId, isRemix: qi.isRemix })} disabled={isGeneratingImage} className="flex-1 py-1 rounded text-center" style={{ background: `${modeColor}18`, color: modeColor, fontFamily: "'Space Mono', monospace", fontSize: '0.4rem', border: `1px solid ${modeColor}33` }}>REMIX</button>
-                                <button onClick={() => { quiverDeleteMutation.mutate({ id: qi.id }, { onSuccess: () => quiverUtils.quiver.list.invalidate() }); }} className="flex-1 py-1 rounded text-center" style={{ background: '#dc262618', color: '#dc2626', fontFamily: "'Space Mono', monospace", fontSize: '0.4rem', border: '1px solid #dc262633' }}>DEL</button>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    {/* Pagination */}
-                    {quiverQuery.data && quiverQuery.data.length === 20 && (
-                      <div className="flex gap-3 justify-center">
-                        {quiverPage > 0 && <button onClick={() => setQuiverPage(p => p - 1)} style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.5rem', color: modeColor }}>← PREV</button>}
-                        <button onClick={() => setQuiverPage(p => p + 1)} style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.5rem', color: modeColor }}>NEXT →</button>
-                      </div>
-                    )}
-                  </div>
-                )}
 
                 {/* Guide selector */}
                 {myGuidesQuery.data && myGuidesQuery.data.length > 0 && (
@@ -1833,7 +1800,7 @@ Please respond in Suno-ready format:
           {activeMode !== "Image" && InputBar}
         </div>
 
-        {/* RIGHT: Emotional Arc - only in composition modes */}
+        {/* RIGHT: Emotional Arc (composition modes) or Quiver (Image mode) */}
         {activeMode !== "Image" && (
           <div
             className="w-52 flex-shrink-0 flex flex-col border-l overflow-y-auto"
@@ -1846,6 +1813,132 @@ Please respond in Suno-ready format:
               Emotional Arc
             </div>
             <ArcPanel arc={arc} previewArc={previewArc} modeColor={modeColor} hasContent={!!prompt.trim() || !!composedWork} />
+          </div>
+        )}
+
+        {/* RIGHT: Quiver — persistent vault column in Image mode */}
+        {activeMode === "Image" && (
+          <div
+            className="w-72 flex-shrink-0 flex flex-col border-l overflow-hidden"
+            style={{ borderColor: `${modeColor}30`, background: "var(--ln-panel)" }}
+          >
+            {/* Quiver header */}
+            <div
+              className="px-3 pt-3 pb-2 flex-shrink-0 flex items-center justify-between"
+              style={{ borderBottom: `1px solid ${modeColor}22` }}
+            >
+              <div className="flex items-center gap-2">
+                <ImageIcon className="w-3 h-3" style={{ color: modeColor }} />
+                <span style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.55rem", color: modeColor, letterSpacing: "0.08em" }}>QUIVER</span>
+                {quiverQuery.data && (
+                  <span style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.45rem", color: modeColor, opacity: 0.6 }}>
+                    {quiverQuery.data.length}{quiverQuery.data.length === 20 ? '+' : ''}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Search */}
+            <div className="px-3 py-2 flex-shrink-0" style={{ borderBottom: `1px solid ${modeColor}18` }}>
+              <input
+                type="text"
+                placeholder="Search prompt or WID..."
+                value={quiverSearch}
+                onChange={e => { setQuiverSearch(e.target.value); setQuiverPage(0); }}
+                className="w-full rounded px-2.5 py-1.5 focus:outline-none"
+                style={{ background: 'var(--ln-obsidian)', border: `1px solid ${modeColor}33`, color: 'var(--ln-parchment)', fontFamily: "'Space Mono', monospace", fontSize: '0.55rem' }}
+              />
+            </div>
+
+            {/* Scrollable image list with day grouping */}
+            <div className="flex-1 overflow-y-auto px-2 py-2">
+              {quiverQuery.isLoading && (
+                <div className="flex items-center justify-center py-8" style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.5rem', color: modeColor, opacity: 0.6 }}>LOADING VAULT...</div>
+              )}
+              {quiverQuery.data && quiverQuery.data.length === 0 && (
+                <div className="flex flex-col items-center justify-center py-10 gap-3 opacity-40">
+                  <ImageIcon className="w-8 h-8" style={{ color: modeColor }} />
+                  <div style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.5rem', color: 'var(--ln-smoke)', textAlign: 'center', lineHeight: 1.7 }}>
+                    QUIVER EMPTY<br />
+                    <span style={{ opacity: 0.6 }}>Generate an image to begin.</span>
+                  </div>
+                </div>
+              )}
+              {quiverQuery.data && quiverQuery.data.length > 0 && (() => {
+                // Group images by day using date-fns
+                type QuiverItem = typeof quiverQuery.data[0];
+                const groups: { label: string; items: QuiverItem[] }[] = [];
+                let currentLabel = '';
+                for (const qi of quiverQuery.data) {
+                  const d = new Date(qi.createdAt);
+                  const label = isToday(d) ? 'TODAY' : isYesterday(d) ? 'YESTERDAY' : format(d, 'MMM d').toUpperCase();
+                  if (label !== currentLabel) {
+                    groups.push({ label, items: [] });
+                    currentLabel = label;
+                  }
+                  groups[groups.length - 1].items.push(qi);
+                }
+                return (
+                  <div className="space-y-3">
+                    {groups.map(group => (
+                      <div key={group.label}>
+                        {/* Day header */}
+                        <div
+                          className="px-1 py-1 mb-1.5"
+                          style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.45rem', color: modeColor, letterSpacing: '0.12em', opacity: 0.7, borderBottom: `1px solid ${modeColor}18` }}
+                        >
+                          {group.label}
+                        </div>
+                        {/* 2-column grid for this day */}
+                        <div className="grid grid-cols-2 gap-1.5">
+                          {group.items.map((qi: any) => (
+                            <div key={qi.id} className="rounded overflow-hidden relative group/qi" style={{ border: `1px solid ${modeColor}20` }}>
+                              <img src={qi.url} alt={qi.prompt} className="w-full block" style={{ height: '80px', objectFit: 'cover' }} />
+                              {qi.isRemix && <div className="absolute top-1 left-1 px-1 rounded" style={{ background: `${modeColor}dd`, color: '#fff', fontFamily: "'Space Mono', monospace", fontSize: '0.38rem' }}>RMX</div>}
+                              {qi.widId && <div className="absolute top-1 right-1 px-1 rounded" style={{ background: 'rgba(0,0,0,0.8)', color: modeColor, fontFamily: "'Space Mono', monospace", fontSize: '0.38rem' }}>WID</div>}
+                              <div className="p-1.5" style={{ background: 'var(--ln-obsidian)' }}>
+                                <div style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.42rem', color: 'var(--ln-smoke)', lineHeight: 1.4 }} className="line-clamp-2">{qi.title || qi.prompt}</div>
+                                <div className="flex gap-0.5 mt-1.5">
+                                  <button
+                                    onClick={() => handleDownloadImage(qi.url, qi.id)}
+                                    title="Download with WID provenance"
+                                    className="flex-1 py-0.5 rounded text-center transition-all hover:opacity-80"
+                                    style={{ background: `${modeColor}18`, color: modeColor, fontFamily: "'Space Mono', monospace", fontSize: '0.38rem', border: `1px solid ${modeColor}30` }}
+                                  >DL</button>
+                                  <button
+                                    onClick={() => handleRemixImage({ url: qi.url, prompt: qi.prompt, enrichedPrompt: qi.enrichedPrompt, generatedAt: new Date(qi.createdAt).toISOString(), guideId: qi.guideId, widId: qi.widId, isRemix: qi.isRemix })}
+                                    disabled={isGeneratingImage}
+                                    title="Remix this image"
+                                    className="flex-1 py-0.5 rounded text-center transition-all hover:opacity-80 disabled:opacity-40"
+                                    style={{ background: `${modeColor}18`, color: modeColor, fontFamily: "'Space Mono', monospace", fontSize: '0.38rem', border: `1px solid ${modeColor}30` }}
+                                  >RMX</button>
+                                  <button
+                                    onClick={() => { quiverDeleteMutation.mutate({ id: qi.id }, { onSuccess: () => quiverUtils.quiver.list.invalidate() }); }}
+                                    title="Remove from quiver"
+                                    className="flex-1 py-0.5 rounded text-center transition-all hover:opacity-80"
+                                    style={{ background: '#dc262618', color: '#dc2626', fontFamily: "'Space Mono', monospace", fontSize: '0.38rem', border: '1px solid #dc262630' }}
+                                  >DEL</button>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
+
+              {/* Pagination */}
+              {quiverQuery.data && quiverQuery.data.length === 20 && (
+                <div className="flex gap-3 justify-center pt-3 pb-1">
+                  {quiverPage > 0 && (
+                    <button onClick={() => setQuiverPage(p => p - 1)} style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.5rem', color: modeColor }}>← PREV</button>
+                  )}
+                  <button onClick={() => setQuiverPage(p => p + 1)} style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.5rem', color: modeColor }}>NEXT →</button>
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>

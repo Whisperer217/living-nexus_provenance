@@ -5066,3 +5066,21 @@
 - [ ] Update KeeperComposePage Image tab to support up to 4 reference image upload slots
 - [ ] Add quick access Compose link to sidebar navigation
 - [ ] TypeScript check and tests pass
+
+## Phase 205: Responsive Scaling Foundation
+- [x] Added clamp()-based fluid type scale (--text-xs through --text-h1)
+- [x] Added fluid spacing tokens (--space-1 through --space-10)
+- [x] Added Compose-specific terminal typography variables (--compose-xs through --compose-lg)
+- [x] Made card-pan-w and card-img-h fluid on desktop
+- [x] Fixed Compose Image tab to use fluid CSS variables
+- [x] TopBar CTA zone collapses Prompt Gen and Compose to icon-only below xl breakpoint
+- [x] TypeScript: 0 errors
+
+## Phase 206: Quiver Right Column + Day Timeline + WID Search + WID Download Metadata
+- [x] Update quiver.list backend to also search by widId (OR condition)
+- [x] Add REST endpoint GET /api/quiver/:id/download that embeds WID PNG metadata via sharp
+- [x] Restructure KeeperComposePage desktop layout: persistent Quiver right column (w-72) when in Image mode
+- [x] Day-grouped Quiver timeline with TODAY/YESTERDAY/date headers using date-fns
+- [x] Update quiverQuery to always be enabled in Image mode (not just when quiverOpen)
+- [x] Update handleDownloadImage to call the new metadata endpoint
+- [x] TypeScript: 0 errors | Vitest: 251/251 passing

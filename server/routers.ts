@@ -7077,13 +7077,17 @@ If a field cannot be determined from the document, use an empty string. For symb
       }))
       .query(async ({ ctx, input }) => {
         const { quiverImages } = await import('../drizzle/schema');
-        const { eq: eqOp, and: andOp, desc: descOp, like: likeOp } = await import('drizzle-orm');
+        const { eq: eqOp, and: andOp, or: orOp, desc: descOp, like: likeOp } = await import('drizzle-orm');
         const db = await getDb();
         const { search, guideId, page, limit } = input;
         const offset = page * limit;
+        // Search matches prompt text OR WID string (case-insensitive LIKE)
+        const searchFilter = search
+          ? orOp(likeOp(quiverImages.prompt, `%${search}%`), likeOp(quiverImages.widId, `%${search}%`))
+          : undefined;
         const conditions = [
           eqOp(quiverImages.userId, ctx.user.id),
-          ...(search ? [likeOp(quiverImages.prompt, `%${search}%`)] : []),
+          ...(searchFilter ? [searchFilter] : []),
           ...(guideId ? [eqOp(quiverImages.guideId, guideId)] : []),
         ];
         const rows = await db

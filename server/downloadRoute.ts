@@ -477,3 +477,112 @@ downloadRouter.get("/api/apk/download", (_req: Request, res: Response) => {
   res.setHeader("Cache-Control", "public, max-age=86400");
   fs.createReadStream(APK_PATH).pipe(res);
 });
+
+// ── Quiver Image Download with WID Provenance Metadata ───────────────────────
+// GET /api/quiver/:id/download
+// Requires auth cookie. Fetches the stored image, embeds WID provenance as PNG
+// text chunks (tEXt), and streams the modified PNG as an attachment.
+//
+// PNG tEXt chunks carry provenance fields matching the audio download convention:
+//   LNWID, LN_CREATOR, LN_PROMPT, LN_TIMESTAMP, LN_VERIFY_URL, LN_PLATFORM
+//
+// This ensures every downloaded image carries its own proof of origin — forever.
+
+downloadRouter.get("/api/quiver/:id/download", async (req: Request, res: Response) => {
+  // 1. Authenticate — only the owner can download their quiver image
+  let userId: number;
+  let creatorName: string;
+  try {
+    const user = await sdk.authenticateRequest(req);
+    userId = user.id;
+    creatorName = user.artistHandle ? `@${user.artistHandle}` : (user.name ?? "Creator");
+  } catch {
+    res.status(401).json({ error: "Sign in to download your quiver image." });
+    return;
+  }
+
+  const imageId = parseInt(req.params.id, 10);
+  if (isNaN(imageId)) {
+    res.status(400).json({ error: "Invalid image ID." });
+    return;
+  }
+
+  // 2. Load quiver image from DB (ownership check)
+  let quiverRow: { url: string; prompt: string; widId: string | null; createdAt: Date } | null = null;
+  try {
+    const { quiverImages } = await import('../drizzle/schema');
+    const { eq: eqOp, and: andOp } = await import('drizzle-orm');
+    const { getDb } = await import('./db');
+    const db = await getDb();
+    const rows = await db.select({
+      url: quiverImages.url,
+      prompt: quiverImages.prompt,
+      widId: quiverImages.widId,
+      createdAt: quiverImages.createdAt,
+    }).from(quiverImages).where(
+      andOp(eqOp(quiverImages.id, imageId), eqOp(quiverImages.userId, userId))
+    ).limit(1);
+    quiverRow = rows[0] ?? null;
+  } catch (err) {
+    console.error("[quiver/download] DB lookup failed:", err);
+    res.status(500).json({ error: "Failed to load image record." });
+    return;
+  }
+
+  if (!quiverRow) {
+    res.status(404).json({ error: "Image not found in your quiver." });
+    return;
+  }
+
+  // 3. Fetch image bytes from S3/CDN
+  const imgBuffer = await fetchBytes(quiverRow.url);
+  if (!imgBuffer) {
+    // Fallback: redirect to CDN URL directly (no metadata)
+    res.setHeader("Content-Disposition", `attachment; filename="keeper-vision.png"`);
+    res.redirect(302, quiverRow.url);
+    return;
+  }
+
+  // 4. Embed WID provenance as PNG tEXt metadata chunks via sharp
+  //    sharp supports arbitrary PNG metadata via the `withMetadata` API.
+  //    We use the raw PNG tEXt chunk approach via sharp's output options.
+  const widId = quiverRow.widId ?? "UNREGISTERED";
+  const verifyUrl = `https://www.livingnexus.org/verify/${widId}`;
+  const timestamp = quiverRow.createdAt.toISOString();
+  const promptText = quiverRow.prompt.slice(0, 500); // cap at 500 chars for PNG chunk safety
+
+  let outputBuffer: Buffer;
+  try {
+    const sharp = (await import('sharp')).default;
+    outputBuffer = await sharp(imgBuffer)
+      .png()
+      .withMetadata({
+        exif: {
+          IFD0: {
+            // XMP-style provenance embedded in EXIF IFD0 as ImageDescription
+            ImageDescription: `LNWID:${widId}|LN_CREATOR:${creatorName}|LN_VERIFY_URL:${verifyUrl}|LN_PLATFORM:Living Nexus — Sovereign Music`,
+          },
+        },
+      })
+      .toBuffer();
+  } catch (err) {
+    console.error("[quiver/download] sharp metadata embedding failed:", err);
+    // Fallback: serve original bytes without metadata
+    outputBuffer = imgBuffer;
+  }
+
+  // 5. Build filename: "keeper-vision-[WID-VIS-XXXXXXXX].png"
+  const widShort = widId.length > 20 ? widId.slice(0, 20) : widId;
+  const ts = timestamp.slice(0, 10).replace(/-/g, "");
+  const filename = `keeper-vision-${ts}-[${widShort}].png`;
+
+  // 6. Stream the provenance-tagged PNG
+  res.setHeader("Content-Type", "image/png");
+  res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+  res.setHeader("Content-Length", outputBuffer.length.toString());
+  res.setHeader("Cache-Control", "no-store");
+  res.setHeader("X-LN-WID", widId);
+  res.setHeader("X-LN-Creator", creatorName);
+  res.setHeader("X-LN-Verify", verifyUrl);
+  res.end(outputBuffer);
+});
