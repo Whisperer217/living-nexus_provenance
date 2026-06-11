@@ -458,27 +458,27 @@ export default function SongDetailPage() {
             display: "flex",
             alignItems: "center",
             justifyContent: "space-around",
-            padding: "10px 8px",
+            padding: "8px 4px",
             boxShadow: "0 8px 32px rgba(0,0,0,0.6)",
           }}
         >
-          <button type="button" onClick={() => toggleLike()} className="flex flex-col items-center gap-1 px-3 py-1" style={{ color: isLiked ? "rgba(239,68,68,0.9)" : "rgba(255,255,255,0.5)" }} aria-label="Resonate">
+          <button type="button" onClick={() => toggleLike()} className="flex flex-col items-center gap-1 px-2 py-1" style={{ color: isLiked ? "rgba(239,68,68,0.9)" : "rgba(255,255,255,0.5)" }} aria-label="Resonate">
             <Heart size={18} fill={isLiked ? "currentColor" : "none"} />
             <span className="text-[10px]">{likeCount > 0 ? likeCount : ""}</span>
           </button>
-          <button type="button" onClick={() => document.getElementById('comments-section')?.scrollIntoView({ behavior: 'smooth' })} className="flex flex-col items-center gap-1 px-3 py-1" style={{ color: "rgba(255,255,255,0.5)" }} aria-label="Witness">
+          <button type="button" onClick={() => document.getElementById('comments-section')?.scrollIntoView({ behavior: 'smooth' })} className="flex flex-col items-center gap-1 px-2 py-1" style={{ color: "rgba(255,255,255,0.5)" }} aria-label="Witness">
             <MessageSquare size={18} />
             <span className="text-[10px]">Witness</span>
           </button>
-          <button type="button" onClick={() => setTipOpen(true)} className="flex flex-col items-center gap-1 px-3 py-1" style={{ color: "rgba(196,154,40,0.8)" }} aria-label="Support">
+          <button type="button" onClick={() => setTipOpen(true)} className="flex flex-col items-center gap-1 px-2 py-1" style={{ color: "rgba(196,154,40,0.8)" }} aria-label="Support">
             <DollarSign size={18} />
             <span className="text-[10px]">Support</span>
           </button>
-          <button type="button" onClick={copyLink} className="flex flex-col items-center gap-1 px-3 py-1" style={{ color: "rgba(255,255,255,0.5)" }} aria-label="Share">
+          <button type="button" onClick={copyLink} className="flex flex-col items-center gap-1 px-2 py-1" style={{ color: "rgba(255,255,255,0.5)" }} aria-label="Share">
             <Share2 size={18} />
             <span className="text-[10px]">Share</span>
           </button>
-          <button type="button" onClick={() => document.getElementById('wid-section')?.scrollIntoView({ behavior: 'smooth' })} className="flex flex-col items-center gap-1 px-3 py-1" style={{ color: "rgba(74,222,128,0.7)" }} aria-label="WID">
+          <button type="button" onClick={() => document.getElementById('wid-section')?.scrollIntoView({ behavior: 'smooth' })} className="flex flex-col items-center gap-1 px-2 py-1" style={{ color: "rgba(74,222,128,0.7)" }} aria-label="WID">
             <Shield size={18} />
             <span className="text-[10px]">WID</span>
           </button>
