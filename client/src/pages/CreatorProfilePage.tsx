@@ -401,6 +401,7 @@ export default function CreatorProfilePage() {
   const [tipSuccess, setTipSuccess] = useState(false);
   const [showDomainEditor, setShowDomainEditor] = useState(false);
   const [tipAmount, setTipAmount] = useState("5");
+  const [avatarImgError, setAvatarImgError] = useState(false);
   const [witnessNetworkOpen, setWitnessNetworkOpen] = useState(false);
   const [witnessNetworkTab, setWitnessNetworkTab] = useState<"witnessing" | "witnesses">("witnesses");
   const [showBannerPositioner, setShowBannerPositioner] = useState(false);
@@ -919,11 +920,12 @@ export default function CreatorProfilePage() {
               boxShadow: "0 4px 24px rgba(0,0,0,0.6), 0 0 0 1px rgba(201,168,76,0.25)",
             }}
           >
-            {creator.profilePhotoUrl
+            {creator.profilePhotoUrl && !avatarImgError
               ? <img src={creator.profilePhotoUrl} alt={creator.name ?? ""} className="w-full h-full object-cover"
-                  style={{ objectPosition: (creator as any).avatarObjectPosition ?? "50% 50%" }} />
+                  style={{ objectPosition: (creator as any).avatarObjectPosition ?? "50% 50%" }}
+                  onError={() => setAvatarImgError(true)} />
               : <div className="w-full h-full flex items-center justify-center text-4xl font-bold" style={{ color: "var(--ln-gold)" }}>
-                  {(creator.artistHandle || creator.name || "?").charAt(0).toUpperCase()}
+                  {(creator.artistHandle || creator.name || "D").charAt(0).toUpperCase()}
                 </div>}
           </div>
         </div>
