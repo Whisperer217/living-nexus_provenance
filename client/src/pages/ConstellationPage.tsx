@@ -25,6 +25,7 @@ interface NodeData {
   title: string;
   artist: string;
   artUrl?: string | null;
+  audioUrl?: string | null;
   bg?: string;
   emoji?: string;
   ring: "center" | "inner" | "outer";
@@ -124,6 +125,7 @@ export default function ConstellationPage() {
       title: c.song.title,
       artist: c.creator?.artistHandle ?? c.creator?.name ?? "Unknown",
       artUrl: c.song.coverArtUrl,
+      audioUrl: c.song.fileUrl,
       bg: c.song.bg ?? "#1a0a2e",
       emoji: c.song.emoji ?? "🎵",
       ring: "center",
@@ -137,6 +139,7 @@ export default function ConstellationPage() {
         title: item.song.title,
         artist: item.creator?.artistHandle ?? item.creator?.name ?? "Unknown",
         artUrl: item.song.coverArtUrl,
+        audioUrl: item.song.fileUrl,
         bg: item.song.bg ?? "#0a1a2e",
         emoji: item.song.emoji ?? "🎵",
         ring: "inner",
@@ -152,6 +155,7 @@ export default function ConstellationPage() {
         title: item.song.title,
         artist: item.creator?.artistHandle ?? item.creator?.name ?? "Unknown",
         artUrl: item.song.coverArtUrl,
+        audioUrl: item.song.fileUrl,
         bg: item.song.bg ?? "#1a0a0a",
         emoji: item.song.emoji ?? "🎵",
         ring: "outer",
@@ -476,6 +480,7 @@ export default function ConstellationPage() {
         artist: node.artist,
         genre: "",
         artUrl: node.artUrl ?? undefined,
+        audioUrl: node.audioUrl ?? undefined,
         bg: node.bg,
         emoji: node.emoji,
         contentType: (node.contentType as Track["contentType"]) ?? "audio",
