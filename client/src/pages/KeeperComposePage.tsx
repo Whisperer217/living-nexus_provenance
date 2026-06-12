@@ -378,6 +378,9 @@ export default function KeeperComposePage() {
   const isUploadingRef = uploadingRefIndex !== null;
   const referenceInputRef = useRef<HTMLInputElement>(null);
   const [pendingRefSlot, setPendingRefSlot] = useState<number>(0);
+  const [dragOverSlot, setDragOverSlot] = useState<number | null>(null);
+  // Quiver lightbox
+  const [lightboxImage, setLightboxImage] = useState<{ url: string; prompt: string; widId?: string | null } | null>(null);
   const generateImageMutation = trpc.guides.generateImage.useMutation();
   const remixImageMutation = trpc.guides.remixImage.useMutation();
   const uploadReferenceImageMutation = trpc.guides.uploadReferenceImage.useMutation();
@@ -571,6 +574,36 @@ Please respond in Suno-ready format:
 
   const handleRemoveReferenceImage = (slotIndex: number) => {
     setReferenceImages(prev => prev.filter((_, i) => i !== slotIndex));
+  };
+
+  // Handle URL drop onto a REF slot (e.g. dragging an image URL from browser)
+  const handleRefUrlDrop = (url: string, slotIndex: number) => {
+    // Validate it looks like an image URL
+    if (!url.match(/\.(png|jpe?g|gif|webp|avif|svg)(\?.*)?$/i) && !url.startsWith('data:image')) {
+      toast.error('Dropped URL does not appear to be an image.');
+      return;
+    }
+    setReferenceImages(prev => {
+      const updated = [...prev];
+      updated[slotIndex] = { url, preview: url };
+      return updated;
+    });
+    toast.success(`Reference ${slotIndex + 1} set from URL.`);
+  };
+
+  // Handle drag-and-drop onto a REF slot (file or URL)
+  const handleRefDrop = (e: React.DragEvent, slotIndex: number) => {
+    e.preventDefault();
+    setDragOverSlot(null);
+    // File drop (from file manager)
+    const file = e.dataTransfer.files?.[0];
+    if (file && file.type.startsWith('image/')) {
+      handleUploadReferenceImage(file, slotIndex);
+      return;
+    }
+    // URL drop (from browser tab / image drag)
+    const url = e.dataTransfer.getData('text/uri-list') || e.dataTransfer.getData('text/plain');
+    if (url) handleRefUrlDrop(url.trim(), slotIndex);
   };
 
   const handleGenerateImage = async () => {
@@ -1037,7 +1070,14 @@ Please respond in Suno-ready format:
                     <div className="grid grid-cols-2 gap-2">
                       {quiverQuery.data.map((qi: any) => (
                         <div key={qi.id} className="rounded overflow-hidden relative group" style={{ border: `1px solid ${modeColor}22` }}>
-                          <img src={qi.url} alt={qi.prompt} className="w-full block" style={{ height: '100px', objectFit: 'cover' }} />
+                          <img
+                            src={qi.url}
+                            alt={qi.prompt}
+                            className="w-full block cursor-zoom-in"
+                            style={{ height: '100px', objectFit: 'cover' }}
+                            onClick={() => setLightboxImage({ url: qi.url, prompt: qi.title || qi.prompt, widId: qi.widId })}
+                            title="Click to enlarge"
+                          />
                           {qi.isRemix && <div className="absolute top-1 left-1 px-1 rounded" style={{ background: `${modeColor}cc`, color: '#fff', fontFamily: "'Space Mono', monospace", fontSize: '0.4rem' }}>REMIX</div>}
                           {qi.widId && <div className="absolute top-1 right-1 px-1 rounded" style={{ background: 'rgba(0,0,0,0.7)', color: modeColor, fontFamily: "'Space Mono', monospace", fontSize: '0.4rem' }}>WID</div>}
                           <div className="p-1.5" style={{ background: 'var(--ln-obsidian)' }}>
@@ -1104,8 +1144,11 @@ Please respond in Suno-ready format:
                           <button
                             onClick={() => { setPendingRefSlot(i); referenceInputRef.current?.click(); }}
                             disabled={isUploading}
+                            onDragOver={e => { e.preventDefault(); setDragOverSlot(i); }}
+                            onDragLeave={() => setDragOverSlot(null)}
+                            onDrop={e => handleRefDrop(e, i)}
                             className="rounded flex items-center justify-center transition-all hover:opacity-80 disabled:opacity-40"
-                            style={{ width: "var(--compose-ref-tile-mobile)", height: "var(--compose-ref-tile-mobile)", background: `${modeColor}10`, border: `1px dashed ${modeColor}44`, color: modeColor }}
+                            style={{ width: "var(--compose-ref-tile-mobile)", height: "var(--compose-ref-tile-mobile)", background: dragOverSlot === i ? `${modeColor}30` : `${modeColor}10`, border: `1px ${dragOverSlot === i ? 'solid' : 'dashed'} ${modeColor}${dragOverSlot === i ? 'bb' : '44'}`, color: modeColor, transition: 'all 0.15s' }}
                           >
                             {isUploading ? <Loader2 className="w-3 h-3 animate-spin" /> : <ImageIcon className="w-3 h-3" />}
                           </button>
@@ -1540,7 +1583,13 @@ Please respond in Suno-ready format:
                       return (
                         <div key={i} className="relative">
                           {ref ? (
-                            <div className="relative">
+                            <div
+                              className="relative"
+                              onDragOver={e => { e.preventDefault(); setDragOverSlot(i); }}
+                              onDragLeave={() => setDragOverSlot(null)}
+                              onDrop={e => handleRefDrop(e, i)}
+                              style={{ outline: dragOverSlot === i ? `2px solid ${modeColor}` : 'none', borderRadius: 4 }}
+                            >
                               <img src={ref.preview} alt={`Ref ${i + 1}`} className="rounded object-cover" style={{ width: "var(--compose-ref-tile)", height: "var(--compose-ref-tile)", border: `1px solid ${modeColor}66` }} />
                               <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 'var(--compose-xs)', color: modeColor, textAlign: 'center', marginTop: 2 }}>REF {i + 1}</div>
                               <button onClick={() => handleRemoveReferenceImage(i)} className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full flex items-center justify-center text-xs" style={{ background: 'var(--ln-obsidian)', border: `1px solid ${modeColor}44`, color: modeColor }}>×</button>
@@ -1549,8 +1598,11 @@ Please respond in Suno-ready format:
                             <button
                               onClick={() => { setPendingRefSlot(i); referenceInputRef.current?.click(); }}
                               disabled={isUploading}
+                              onDragOver={e => { e.preventDefault(); setDragOverSlot(i); }}
+                              onDragLeave={() => setDragOverSlot(null)}
+                              onDrop={e => handleRefDrop(e, i)}
                               className="rounded flex flex-col items-center justify-center gap-1 transition-all hover:opacity-80 disabled:opacity-40"
-                              style={{ width: "var(--compose-ref-tile)", height: "var(--compose-ref-tile)", background: `${modeColor}10`, border: `1px dashed ${modeColor}44`, color: modeColor }}
+                              style={{ width: "var(--compose-ref-tile)", height: "var(--compose-ref-tile)", background: dragOverSlot === i ? `${modeColor}30` : `${modeColor}10`, border: `1px ${dragOverSlot === i ? 'solid' : 'dashed'} ${modeColor}${dragOverSlot === i ? 'bb' : '44'}`, color: modeColor, transition: 'all 0.15s' }}
                             >
                               {isUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ImageIcon className="w-4 h-4" />}
                               <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 'var(--compose-xs)' }}>REF {i + 1}</span>
@@ -1893,7 +1945,14 @@ Please respond in Suno-ready format:
                         <div className="grid grid-cols-2 gap-1.5">
                           {group.items.map((qi: any) => (
                             <div key={qi.id} className="rounded overflow-hidden relative group/qi" style={{ border: `1px solid ${modeColor}20` }}>
-                              <img src={qi.url} alt={qi.prompt} className="w-full block" style={{ height: '80px', objectFit: 'cover' }} />
+                              <img
+                                src={qi.url}
+                                alt={qi.prompt}
+                                className="w-full block cursor-zoom-in"
+                                style={{ height: '80px', objectFit: 'cover' }}
+                                onClick={() => setLightboxImage({ url: qi.url, prompt: qi.title || qi.prompt, widId: qi.widId })}
+                                title="Click to enlarge"
+                              />
                               {qi.isRemix && <div className="absolute top-1 left-1 px-1 rounded" style={{ background: `${modeColor}dd`, color: '#fff', fontFamily: "'Space Mono', monospace", fontSize: '0.38rem' }}>RMX</div>}
                               {qi.widId && <div className="absolute top-1 right-1 px-1 rounded" style={{ background: 'rgba(0,0,0,0.8)', color: modeColor, fontFamily: "'Space Mono', monospace", fontSize: '0.38rem' }}>WID</div>}
                               <div className="p-1.5" style={{ background: 'var(--ln-obsidian)' }}>
@@ -1942,6 +2001,44 @@ Please respond in Suno-ready format:
           </div>
         )}
       </div>
+
+      {/* ── Quiver Lightbox ─────────────────────────────────────────────────── */}
+      {lightboxImage && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: 'rgba(0,0,0,0.88)', backdropFilter: 'blur(6px)' }}
+          onClick={() => setLightboxImage(null)}
+        >
+          <div
+            className="relative max-w-3xl w-full rounded-lg overflow-hidden"
+            style={{ border: `1px solid ${modeColor}44`, boxShadow: `0 0 40px ${modeColor}22` }}
+            onClick={e => e.stopPropagation()}
+          >
+            <img
+              src={lightboxImage.url}
+              alt={lightboxImage.prompt}
+              className="w-full block"
+              style={{ maxHeight: '70vh', objectFit: 'contain', background: 'var(--ln-obsidian)' }}
+            />
+            <div className="p-3" style={{ background: 'var(--ln-panel)' }}>
+              <div style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.6rem', color: 'var(--ln-parchment)', lineHeight: 1.5 }}>
+                {lightboxImage.prompt}
+              </div>
+              {lightboxImage.widId && (
+                <div className="mt-1.5" style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.5rem', color: modeColor, opacity: 0.8 }}>
+                  WID: {lightboxImage.widId}
+                </div>
+              )}
+            </div>
+            <button
+              onClick={() => setLightboxImage(null)}
+              className="absolute top-2 right-2 w-7 h-7 rounded-full flex items-center justify-center"
+              style={{ background: 'rgba(0,0,0,0.7)', border: `1px solid ${modeColor}44`, color: 'var(--ln-parchment)', fontSize: '1rem' }}
+              title="Close"
+            >×</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

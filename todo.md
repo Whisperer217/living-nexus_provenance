@@ -5105,3 +5105,11 @@
 - [x] Set MCP_READ_TOKEN env secret via webdev_request_secrets
 - [x] Done criteria: 401✅ 401✅ 401✅ robots✅ 5-tools✅ 613-works✅
 - [x] TypeScript: 0 errors | Vitest: 263/263 passing
+
+## Phase 209: Keeper Compose — Drag-and-Drop Ref Images + Quiver Lightbox
+- [x] Reference Images: each REF slot accepts drag-and-drop of local image files (uploads to S3, sets URL)
+- [x] Reference Images: each REF slot accepts drag-and-drop of image URLs (sets URL directly)
+- [x] Reference Images: visual drag-over highlight on each slot
+- [x] Quiver images: clicking image opens a lightbox/fullscreen modal with the full image
+- [x] Lightbox: shows WID, title, close button (click-outside)
+- [x] TypeScript: 0 errors | Vitest: 263/263 passing
