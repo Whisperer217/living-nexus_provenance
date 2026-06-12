@@ -184,8 +184,78 @@ const DEFAULT_OG = buildSongOgTags({
   siteName: "Living Nexus",
 });
 
+/**
+ * Build a visible static body block for the witness record (song pages).
+ * Rendered before #root — crawlers and no-JS users read the real proof.
+ * React removes it on mount via main.tsx.
+ */
+function buildWitnessBodyBlock(opts: {
+  title: string;
+  artistName: string;
+  artistId?: number | null;
+  genre?: string | null;
+  witnessId: string;
+  witnessDate?: Date | string | null;
+  verifyUrl: string;
+  lyrics?: string | null;
+}): string {
+  const { title, artistName, artistId, genre, witnessId, witnessDate, verifyUrl, lyrics } = opts;
+  const artistHref = artistId
+    ? `${CANONICAL_ORIGIN}/creator/${artistId}`
+    : `${CANONICAL_ORIGIN}/explore`;
+  const dateStr = witnessDate
+    ? new Date(witnessDate).toISOString().split("T")[0]
+    : "";
+  const lyricsBlock =
+    lyrics && lyrics.trim().length > 0
+      ? `\n  <pre id="ln-witness-lyrics">${escAttr(lyrics.trim())}</pre>`
+      : "";
+  return (
+    `<div id="ln-witness-record">` +
+    `<h1>${escAttr(title)}</h1>` +
+    `<p>Creator: <a href="${escAttr(artistHref)}">${escAttr(artistName)}</a></p>` +
+    (genre ? `<p>Genre: ${escAttr(genre)}</p>` : "") +
+    `<p>Witness ID: ${escAttr(witnessId)}</p>` +
+    (dateStr ? `<p>Witnessed: ${escAttr(dateStr)}</p>` : "") +
+    `<p><a href="${escAttr(verifyUrl)}">Verify this work on Living Nexus</a></p>` +
+    lyricsBlock +
+    `</div>`
+  );
+}
+
+/**
+ * Build a visible static body block for doctrine/static pages.
+ * Rendered before #root — crawlers and no-JS users read the content.
+ * React removes it on mount via main.tsx.
+ */
+function buildStaticBodyBlock(opts: {
+  title: string;
+  description: string;
+  canonicalUrl: string;
+}): string {
+  const { title, description, canonicalUrl } = opts;
+  return (
+    `<div id="ln-static-content">` +
+    `<h1>${escAttr(title)}</h1>` +
+    `<p>${escAttr(description)}</p>` +
+    `<p><a href="${escAttr(canonicalUrl)}">View on Living Nexus</a></p>` +
+    `</div>`
+  );
+}
+
 /** Inject OG tags into an HTML string, replacing the <title> and adding meta tags. */
-function injectOg(html: string, ogBlock: string, pageTitle: string, canonicalUrl?: string): string {
+function injectOg(
+  html: string,
+  ogBlock: string,
+  pageTitle: string,
+  canonicalUrl?: string,
+  opts?: {
+    /** Visible static body block inserted before #root (removed by React on mount) */
+    bodyBlock?: string;
+    /** Per-page meta description — replaces generic homepage boilerplate */
+    metaDescription?: string;
+  }
+): string {
   // Replace <title>
   let out = html.replace(/<title>[^<]*<\/title>/, `<title>${escAttr(pageTitle)}</title>`);
   // Remove any existing og: / twitter: meta tags to avoid duplicates
@@ -203,6 +273,30 @@ function injectOg(html: string, ogBlock: string, pageTitle: string, canonicalUrl
   out = out.replace(/<link\s+rel="canonical"[^>]*\/?>/gi, "");
   // Inject before </head>
   out = out.replace("</head>", `    ${ogBlock}${extraLinks}\n  </head>`);
+
+  // Swap per-page meta description (replaces generic homepage boilerplate)
+  if (opts?.metaDescription) {
+    const escaped = escAttr(opts.metaDescription);
+    // Replace existing <meta name="description" ...> if present
+    if (/<meta\s+name="description"[^>]*>/i.test(out)) {
+      out = out.replace(
+        /<meta\s+name="description"[^>]*>/i,
+        `<meta name="description" content="${escaped}" />`
+      );
+    } else {
+      // Insert before </head> if not present
+      out = out.replace("</head>", `    <meta name="description" content="${escaped}" />\n  </head>`);
+    }
+  }
+
+  // Inject visible body block before <div id="root"> (removed by React on mount)
+  if (opts?.bodyBlock) {
+    out = out.replace(
+      /<div\s+id="root"[^>]*>/,
+      `${opts.bodyBlock}\n<div id="root">`
+    );
+  }
+
   return out;
 }
 
@@ -340,7 +434,31 @@ export function registerOgRoutes(app: Express) {
       const html = await getHtmlTemplate(isDev);
       if (!html) return next();
 
-      const page = injectOg(html, ogBlock, ogTitle, ogUrl);
+      // Build visible witness body block — crawlers and no-JS users read the real proof
+      const witnessId = (song as any).witnessId as string | null;
+      const witnessDate = (song as any).createdAt ?? null;
+      const lyricsText = (song as any).lyricsText as string | null;
+      const isPublic = (song as any).status === "published";
+      const downloadPermission = (song as any).downloadPermission as boolean | null;
+      const creatorUserId = (creator as any)?.id as number | null;
+
+      const bodyBlock = witnessId
+        ? buildWitnessBodyBlock({
+            title: song.title,
+            artistName,
+            artistId: creatorUserId,
+            genre: (song as any).genre ?? null,
+            witnessId,
+            witnessDate,
+            verifyUrl: `${CANONICAL_ORIGIN}/verify/${encodeURIComponent(witnessId)}`,
+            lyrics: isPublic && downloadPermission ? lyricsText : null,
+          })
+        : undefined;
+
+      const page = injectOg(html, ogBlock, ogTitle, ogUrl, {
+        bodyBlock,
+        metaDescription: ogDescription,
+      });
       res.status(200).set({ "Content-Type": "text/html" }).end(page);
     } catch (err) {
       console.error("[OG] Error generating meta tags for song", songId, err);
@@ -429,6 +547,9 @@ export function registerOgRoutes(app: Express) {
     },
   ];
 
+  // Doctrine routes that get ln-static-content body injection
+  const DOCTRINE_PATHS = new Set(["/manifesto", "/doctrine/wid-spec", "/lexicon"]);
+
   for (const route of STATIC_OG_ROUTES) {
     app.get(route.path, async (req, res, next) => {
       // Only intercept for crawlers — regular browsers fall through to the React SPA.
@@ -449,7 +570,20 @@ export function registerOgRoutes(app: Express) {
         });
         const html = await getHtmlTemplate(isDev);
         if (!html) return next();
-        const page = injectOg(html, ogBlock, route.title, finalCanonical);
+
+        // Inject visible static body block for doctrine pages
+        const bodyBlock = DOCTRINE_PATHS.has(route.path)
+          ? buildStaticBodyBlock({
+              title: route.title,
+              description: route.description,
+              canonicalUrl: finalCanonical,
+            })
+          : undefined;
+
+        const page = injectOg(html, ogBlock, route.title, finalCanonical, {
+          bodyBlock,
+          metaDescription: route.description,
+        });
         res.status(200).set({ "Content-Type": "text/html" }).end(page);
       } catch (err) {
         console.error("[OG] Error generating meta tags for", route.path, err);

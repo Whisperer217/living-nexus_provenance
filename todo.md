@@ -5084,3 +5084,14 @@
 - [x] Update quiverQuery to always be enabled in Image mode (not just when quiverOpen)
 - [x] Update handleDownloadImage to call the new metadata endpoint
 - [x] TypeScript: 0 errors | Vitest: 251/251 passing
+
+## Phase 207: Witness Body Injection + Meta Description Swap
+- [x] server/og.ts: inject visible ln-witness-record block on /song/:id routes
+- [x] server/og.ts: inject visible ln-static-content block on /manifesto, /doctrine/wid-spec, /lexicon routes
+- [x] server/og.ts: swap meta name="description" to per-song content (reuse og:description variable)
+- [x] client/src/main.tsx: remove ln-witness-record and ln-static-content on React mount
+- [x] Verify: /song/30001 returns "Witness ID: WID-MUS-B653BAAF-8EE48064" in body
+- [x] Verify: /manifesto, /doctrine/wid-spec, /lexicon return id="ln-static-content" in body
+- [x] Verify: og:title still present (unfurl unchanged)
+- [x] Verify: meta name="description" is per-song (genre + WID + play count)
+- [x] TypeScript: 0 errors | Vitest: 251/251 passing

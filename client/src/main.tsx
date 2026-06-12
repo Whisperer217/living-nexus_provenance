@@ -74,6 +74,12 @@ const trpcClient = trpc.createClient({
   ],
 });
 
+// Phase 207: Remove server-injected witness/static body blocks before React mounts.
+// These blocks are visible to crawlers and no-JS users (provenance proof layer).
+// React replaces them with the full SPA experience.
+document.getElementById("ln-witness-record")?.remove();
+document.getElementById("ln-static-content")?.remove();
+
 createRoot(document.getElementById("root")!).render(
   <HelmetProvider>
     <trpc.Provider client={trpcClient} queryClient={queryClient}>
