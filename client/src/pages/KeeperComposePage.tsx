@@ -414,7 +414,14 @@ export default function KeeperComposePage() {
   const handleInputFocus = () => {
     window.dispatchEvent(new CustomEvent("ln:player-collapse"));
   };
-  const handleInputBlur = () => {
+  const handleInputBlur = (e: React.FocusEvent<HTMLTextAreaElement>) => {
+    // Only restore the player if focus genuinely left the page entirely.
+    // If focus moved to another element within the same document (e.g. a draft
+    // button, the generate button, or any other compose-page control), do NOT
+    // expand the player — that was the root cause of the draft-click bug where
+    // clicking a Recent Draft fired blur → ln:player-expand → player expanded.
+    const relatedTarget = e.relatedTarget as Element | null;
+    if (relatedTarget && document.contains(relatedTarget)) return;
     window.dispatchEvent(new CustomEvent("ln:player-expand"));
   };
 
