@@ -22,6 +22,7 @@ import { ogApiRouter } from "../ogApiRoutes";
 import { shareRouter } from "../shareRoute";
 import { workRouter } from "../workRoute";
 import { workerCallbackRouter } from "../workerCallbackRoute";
+import { mcpRouter } from "../mcp/index";
 import { sitemapRouter } from "../sitemapRoute";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
@@ -146,6 +147,8 @@ async function startServer() {
   // GET /api/work/:wid — read-only, immutable provenance record for any registered work
   // CORS open, external apps can call this directly
   app.use("/api/work", workRouter);
+  // POST /mcp — read-only MCP server (Streamable HTTP, bearer auth, 60 req/min)
+  app.use("/mcp", mcpRouter);
   // Cloud Worker Callbacks — HMAC-authenticated callbacks from the Layer 3 processing worker
   // Must be registered with raw body capture BEFORE express.json() processes the body
   app.use(workerCallbackRouter);

@@ -9,4 +9,5 @@ export const ENV = {
   forgeApiKey: process.env.BUILT_IN_FORGE_API_KEY ?? "",
   workerSecret: process.env.LN_WORKER_SECRET ?? "",
   cloudWorkerUrl: process.env.CLOUD_WORKER_URL ?? "",
+  mcpReadToken: process.env.MCP_READ_TOKEN ?? "",
 };

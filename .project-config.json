@@ -7,15 +7,16 @@
   ],
   "dev_command": "pnpm run dev",
   "env_vars": {
-    "DATABASE_URL": "mysql://4ArHJRmPMKBQTkw.2e571ac7914f:580udJF5SFeu3v3kSYzk@gateway02.us-east-1.prod.aws.tidbcloud.com:4000/7kHkqvMBX9Ci3pQfWTqqQr?ssl={\"rejectUnauthorized\":true}"
+    "DATABASE_URL": "mysql://4ArHJRmPMKBQTkw.2e571ac7914f:580udJF5SFeu3v3kSYzk@gateway02.us-east-1.prod.aws.tidbcloud.com:4000/7kHkqvMBX9Ci3pQfWTqqQr?ssl={\"rejectUnauthorized\":true}",
+    "DRIZZLE_DATABASE_URL": "mysql://4ArHJRmPMKBQTkw.2e571ac7914f:580udJF5SFeu3v3kSYzk@gateway02.us-east-1.prod.aws.tidbcloud.com:4000/7kHkqvMBX9Ci3pQfWTqqQr?ssl={\"rejectUnauthorized\":true}"
   },
   "experiments": null,
   "git_remote": {
     "repo_url": "s3://vida-prod-gitrepo/webdev-git/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr",
-    "access_key_id": "ASIAZV3A2ECZIKHCEU3K",
-    "secret_access_key": "lx6XRfafrFgDKnCvzE4+AZhOpkkpHXl0z2jmTrxp",
-    "session_token": "IQoJb3JpZ2luX2VjECkaCXVzLWVhc3QtMSJIMEYCIQDtod6Oak8JmT2FyKzjn1FxoKiYwZVWqQY/6R0Ds9DnxAIhAMGm1abaRUmp4TE1LWi8MFY6MiYOJazJU5EvbTDZdvC5Kv4DCPH//////////wEQBBoMNjY1Mzg2MDk4ODY2Igy0ME+WmaJHB4g3pXIq0gNNvYj2rbLA9tSpjKvswPxM80yMnbmDwUiCP7AtEBl75XNjeUfreo4do0XxriFtdroscScI+Ijxe5l43ltF7qcuFn1Skf7X0Qzt+qC/hj98VYZuctZYh+GvB/ldjYqdIjGCyTxer1bzhLRqkjKfrlVXPFl3XbXPjAFsR+CV4aTGtFX6B+9N2IretDzGEfsD5B8smdGzDyXlufbEHriX3TTwjIrQAze1jDhRIXw/nFavd3hIOSv21cSR60O8Ze3R1bw3uSN1JI8+NMa02ItX8V+DeHW3S9UpYV/tiqkQigFwxQbts0+gcBTdLWiKZqK2CgTxrGdS4NU5O3LMRPRYwangxqzSPjwjaBaSPR7WDduc3Nn0hi5J/L45hqj0j84jNyG4U3bZMVJTTQHOWHEQyERmHUv0f1hPCk2mul63svUr4QSxbj8F4NEk7PImucIdIrjMntulSly7pG37pqoWW9ezaxtbNJge0EGIP56TzxT17oNenqN/+MYkqesRVU8cQBOgub9oJHQZ6Ml8hrypFhtyWEdp7ylLmTeED0AGvqxGrNiTOlaNJvDvsacExBpmDKn3Z4l+uzeOMYMW2EchsxaHHisJvy/VjQTJvCHjdZ+psjIxMN3+p9EGOpwBv/TTjh+qE6LdG1JbW2/LuhqoGCSVL7+WJOsfm7f5mqHacpjecSmZ3cFnZz4wH08YohnprYugRbBnJinTWQ/6PuDHZ+56R9HQ/K6ALnkot9lkndQ3+t7T3tCvQvUSsP5v/B/K/w18Z3LSPtQ5aLeYUlmBe0KNTrqUhocpBXalHNEusMPU4e9EVt1rO2f7IXRRWqPIyzs3qZf4jhtr",
-    "expiration": "2026-06-11T12:20:45.000Z"
+    "access_key_id": "ASIAZV3A2ECZOROM6XZE",
+    "secret_access_key": "CYW/x5FrfIH5GbPqSAugcw4wOrpP1jPn780jGMz7",
+    "session_token": "IQoJb3JpZ2luX2VjEFMaCXVzLWVhc3QtMSJIMEYCIQC+FwwsthkFAy+RI9v5i+XG0WEWmYfHnWPojuExgMUoawIhAJTya4uDADkNORPrvbc7Enqz5jhTJYyJyCPbdPJSnXJWKvUDCBwQBBoMNjY1Mzg2MDk4ODY2IgzQLuioT9UnPTPDTIIq0gO5PFA3LqETf09i/wufeU3lhdA6W2+Ah8V3nFVuRlDUequJe9EoNv+wfxibn6z51j796kqZh2phXUVeHNfRJwrGz8HMUij6E+9vsUNcjihq5Ff5yxO7Ywdov32U+QgFG2+xSztBstS4Re5vj5vOKtdqRlTowuYkU6UuEbXU3ASVRwhvg3iuTnusTRsYxSM7dKFLeLqcinTrWk/CqTTuS1mxKQy3hGabgopTHJhVbxEFSPxWP7JXgZ4/F+qlVkVhndJ5cHbkeeQt9AlQ70iIIltzqanvwlA6TGMKgiamOAgXDEe08wl0LBIMgzcXtDXXqjwmeHQtWm7Mx9xrPx+m1qWBXinHkwJ2NFCXqZ9wJ9fCdsvG0BpUmDGql39FqZv93M/+QEIfqSPe4UAcJYRWbCCEXSKqMtwx3tKSBrIJoJi+sWTBjth/HQNLOUwy0GovrA4Ei7VXgDQNswSNUBDDevwaQS57U/i6RocTdq4mFeWsgfhczg6DNF60vOi+nRly9Vh5UEECm9o8eja1+cxDMG6X9ZhKBe9hw2WjaGveE75tFj7wV66upEM4evSNMV/gFkWs0DVtTDlG8f7ir6c+INIuVJi2gsKicjT9s9bTfjSlEIboMIGosdEGOpwBkpE7Si93PL/VsXvYiWE3dQ+tsGzZmtEcF2zFlJF3UMfPL8x4ITpHtzs6IXEQEPSO4YPY4OInouYQQ9QEZFCM0jDZkuHH5GPl/Qsgtijgc44VZo/3+ifpWPwogXsXMk9V4S6CeoqIxVImg+Sn8yD6Qnv2UsHx3+2CoKm93xoLdUmsUAOml21WgnaHtLAw0WjZy+ZuUOl/6F7OipdB",
+    "expiration": "2026-06-13T06:46:25.000Z"
   },
   "name": "living-nexus",
   "path": "/home/ubuntu/living-nexus",
@@ -25,12 +26,13 @@
     "BUILT_IN_FORGE_API_URL": "https://forge.manus.ai",
     "JWT_SECRET": "aspaymfKwsHnHXqgrGeaY6",
     "LN_WORKER_SECRET": "fd1b7a915be79c5366964187e8c5674f99d95a9f262624b4465fc4b1791a038e",
+    "MCP_READ_TOKEN": "$x@0#k0$AYs4^8:T!(]+",
     "OAUTH_SERVER_URL": "https://api.manus.im",
     "OWNER_NAME": "Doc Seraph Mercer",
     "OWNER_OPEN_ID": "JWw5hcQ8kTAsLfpBQ6HSZj",
     "SONAUTO_API_KEY": "sksonauto_agdRkwtOllrWAsctXI7JXR1F74XiKWnGmVyEvxbTL9ty7JcC",
     "STRIPE_SECRET_KEY": "sk_test_51TBf3dPGh4UIV43tLVI5v7ANHtvuWIY8hWhImLSjwDvPo07wXRtX3BzV434vVMNdHojX4C5FliBV0NfWjHgl8VFE00klSgtQHg",
-    "STRIPE_WEBHOOK_SECRET": "whsec_UNwWPes2EKVSJDrg76QxVw0BmGctiAVK",
+    "STRIPE_WEBHOOK_SECRET": "whsec_F2loOcvfrfiMgHeTzGwB9pTvPOPx9AeL",
     "VITE_ANALYTICS_ENDPOINT": "https://manus-analytics.com",
     "VITE_ANALYTICS_WEBSITE_ID": "1ededc1f-e8b6-49da-89ca-dbb3df59fc68",
     "VITE_APP_ID": "7kHkqvMBX9Ci3pQfWTqqQr",

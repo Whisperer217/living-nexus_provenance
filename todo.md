@@ -5095,3 +5095,13 @@
 - [x] Verify: og:title still present (unfurl unchanged)
 - [x] Verify: meta name="description" is per-song (genre + WID + play count)
 - [x] TypeScript: 0 errors | Vitest: 251/251 passing
+
+## Phase 208: Living Nexus MCP Server (Read Tier)
+- [x] Install @modelcontextprotocol/sdk (zod already present)
+- [x] Create server/mcp/tools.ts — five read-only tools: get_work, list_works, get_page_meta, get_seo_status, query_verify_chain
+- [x] Create server/mcp/index.ts — Streamable HTTP transport, bearer auth middleware, rate limit 60req/min, witness logging to logs/mcp-access.jsonl
+- [x] Mount /mcp in server/_core/index.ts (one line)
+- [x] Append Disallow: /mcp to client/public/robots.txt
+- [x] Set MCP_READ_TOKEN env secret via webdev_request_secrets
+- [x] Done criteria: 401✅ 401✅ 401✅ robots✅ 5-tools✅ 613-works✅
+- [x] TypeScript: 0 errors | Vitest: 263/263 passing

@@ -10,5 +10,6 @@ Disallow: /dashboard
 Disallow: /profile
 Disallow: /settings/
 Disallow: /prompt/
+Disallow: /mcp
 
 Sitemap: https://www.livingnexus.org/sitemap.xml
