@@ -5127,3 +5127,12 @@
 - [x] Pass `isNew` to StoreTrackCard in HomePage New Arrivals shelf
 - [x] Fix HomePage New Arrivals seeAllHref to point to /explore?sort=new instead of /explore
 - [x] TypeScript: 0 errors | Vitest: 270/270 passing
+
+## Feature: Animated Image Generation Ritual (Vision Chamber)
+- [x] Replace spinner with a living canvas ritual: particle field (CSS/canvas, no library) fills the Vision Chamber when generation starts — dark ink-like particles drift and coalesce
+- [x] Prompt text fragments float upward and dissolve into the particle field as generation runs — words becoming the image
+- [x] Radial gold seal (SVG stroke-dashoffset) traces itself closed at the center — represents the WID being forged
+- [x] On image arrival: particles collapse inward, seal completes with a brief gold flash, image materializes with a center-out reveal wipe
+- [x] First-appearance shimmer: generated image thumbnail border pulses once with a gold glow on mount — "being witnessed for the first time"
+- [x] Animation works on both mobile (sidebar panel) and desktop (right panel) Vision Chamber instances
+- [x] No external animation libraries — pure CSS + canvas + SVG

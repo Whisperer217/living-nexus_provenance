@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import { format, isToday, isYesterday } from "date-fns";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
@@ -11,6 +11,7 @@ import {
   Zap, BarChart2, Layers, Archive, Eye, Film, ChevronDown,
   Sparkles, Download, ImageIcon,
 } from "lucide-react";
+import { VisionChamberRitual, WitnessedImageReveal } from "@/components/VisionChamberRitual";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -368,6 +369,8 @@ export default function KeeperComposePage() {
   const [imagePrompt, setImagePrompt] = useState("");
   const [imageHistory, setImageHistory] = useState<GeneratedImage[]>([]);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+  // Track the index of the most-recently generated image for the first-appearance shimmer
+  const [latestImageIdx, setLatestImageIdx] = useState<number | null>(null);
   const [selectedGuideId, setSelectedGuideId] = useState<number | undefined>(undefined);
   // Multi-reference image support (up to 4)
   const [referenceImages, setReferenceImages] = useState<Array<{ url: string; preview: string }>>([]);
@@ -638,6 +641,7 @@ Please respond in Suno-ready format:
         isRemix: false,
       };
       setImageHistory(prev => [newImg, ...prev]);
+      setLatestImageIdx(0); // index 0 = newest (prepended)
       setImagePrompt('');
       // Auto-save to Quiver vault
       if (result.url) {
@@ -681,6 +685,7 @@ Please respond in Suno-ready format:
         isRemix: true,
       };
       setImageHistory(prev => [remixImg, ...prev]);
+      setLatestImageIdx(0); // index 0 = newest (prepended)
       // Auto-save remix to Quiver vault
       if (result.url) {
         quiverSaveMutation.mutate({
@@ -1218,10 +1223,16 @@ Please respond in Suno-ready format:
               {imageHistory.length > 0 && (
                 <div className="space-y-4">
                   <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "var(--compose-xs)", color: modeColor, letterSpacing: "0.08em" }}>SESSION VISIONS ({imageHistory.length})</div>
-                  {imageHistory.map((img, i) => (
+                    {imageHistory.map((img, i) => (
                     <div key={i} className="rounded overflow-hidden" style={{ border: `1px solid ${modeColor}30` }}>
                       <div className="relative">
-                        <img src={img.url} alt={img.prompt} className="w-full block" style={{ maxHeight: '300px', objectFit: 'cover' }} />
+                        {i === latestImageIdx ? (
+                          <WitnessedImageReveal style={{ display: 'block' }}>
+                            <img src={img.url} alt={img.prompt} className="w-full block" style={{ maxHeight: '300px', objectFit: 'cover' }} />
+                          </WitnessedImageReveal>
+                        ) : (
+                          <img src={img.url} alt={img.prompt} className="w-full block" style={{ maxHeight: '300px', objectFit: 'cover' }} />
+                        )}
                         {img.isRemix && (
                           <div className="absolute top-2 left-2 px-1.5 py-0.5 rounded text-xs" style={{ background: `${modeColor}cc`, color: '#fff', fontFamily: "'Space Mono', monospace", fontSize: '0.45rem', letterSpacing: '0.08em' }}>REMIX</div>
                         )}
@@ -1265,7 +1276,16 @@ Please respond in Suno-ready format:
                 </div>
               )}
 
-              {isGeneratingImage && <ThinkingDots color={modeColor} />}
+              {/* Vision Chamber Ritual — replaces ThinkingDots during generation */}
+              {isGeneratingImage && (
+                <div className="relative rounded overflow-hidden" style={{ minHeight: 200, border: `1px solid ${modeColor}22` }}>
+                  <VisionChamberRitual
+                    isGenerating={isGeneratingImage}
+                    prompt={imagePrompt}
+                    modeColor={modeColor}
+                  />
+                </div>
+              )}
             </div>
           )}
 
@@ -1678,7 +1698,16 @@ Please respond in Suno-ready format:
                 </div>
 
                 {/* Session image history */}
-                {isGeneratingImage && <ThinkingDots color={modeColor} />}
+                {/* Vision Chamber Ritual — desktop */}
+                {isGeneratingImage && (
+                  <div className="relative rounded overflow-hidden" style={{ minHeight: 260, border: `1px solid ${modeColor}22` }}>
+                    <VisionChamberRitual
+                      isGenerating={isGeneratingImage}
+                      prompt={imagePrompt}
+                      modeColor={modeColor}
+                    />
+                  </div>
+                )}
 
                 {imageHistory.length > 0 && (
                   <div className="space-y-5">
@@ -1686,7 +1715,13 @@ Please respond in Suno-ready format:
                     {imageHistory.map((img, i) => (
                       <div key={i} className="rounded overflow-hidden" style={{ border: `1px solid ${modeColor}30` }}>
                         <div className="relative">
-                          <img src={img.url} alt={img.prompt} className="w-full block" style={{ maxHeight: '480px', objectFit: 'contain', background: '#0a0a0a' }} />
+                          {i === latestImageIdx ? (
+                            <WitnessedImageReveal style={{ display: 'block' }}>
+                              <img src={img.url} alt={img.prompt} className="w-full block" style={{ maxHeight: '480px', objectFit: 'contain', background: '#0a0a0a' }} />
+                            </WitnessedImageReveal>
+                          ) : (
+                            <img src={img.url} alt={img.prompt} className="w-full block" style={{ maxHeight: '480px', objectFit: 'contain', background: '#0a0a0a' }} />
+                          )}
                           {img.isRemix && (
                             <div className="absolute top-3 left-3 px-2 py-0.5 rounded" style={{ background: `${modeColor}dd`, color: '#fff', fontFamily: "'Space Mono', monospace", fontSize: '0.5rem', letterSpacing: '0.08em' }}>REMIX</div>
                           )}
