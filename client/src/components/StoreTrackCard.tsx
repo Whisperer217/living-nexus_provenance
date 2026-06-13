@@ -51,6 +51,8 @@ interface StoreTrackCardProps {
   size?: "sm" | "md" | "lg";
   allSongs?: SongData[];
   songIndex?: number;
+  /** When true, renders a "NEW" badge on the top-left corner of the card */
+  isNew?: boolean;
 }
 
 function toTrack(s: SongData): Track {
@@ -179,7 +181,7 @@ function TrackContextMenu({ song, position, onClose }: {
 }
 
 // ── DUAL SURFACE CARD ─────────────────────────────────────────────────────────
-export function StoreTrackCard({ song, size = "md", allSongs, songIndex }: StoreTrackCardProps) {
+export function StoreTrackCard({ song, size = "md", allSongs, songIndex, isNew }: StoreTrackCardProps) {
   const { state, playQueueAt, addAndPlay } = usePlayer();
   const currentTrack = state.tracks[state.currentIdx];
   const isPlaying = currentTrack?.id === String(song.id) && state.isPlaying;
@@ -252,6 +254,22 @@ export function StoreTrackCard({ song, size = "md", allSongs, songIndex }: Store
             }}
           />
 
+          {/* ── NEW badge — top-left corner, only when isNew=true ── */}
+          {isNew && !isActive && (
+            <div
+              className="absolute top-2.5 left-2.5 z-20 text-[9px] px-1.5 py-0.5 rounded font-bold uppercase"
+              style={{
+                background: "rgba(74,222,128,0.18)",
+                border: "1px solid rgba(74,222,128,0.55)",
+                color: "#4ade80",
+                fontFamily: "'Space Mono', monospace",
+                letterSpacing: "0.12em",
+                backdropFilter: "blur(4px)",
+              }}
+            >
+              NEW
+            </div>
+          )}
           {/* ── LAYER 4: Play button — centered 56px gold ring ── */}
           {hasAudio && (
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">

@@ -648,9 +648,9 @@ function ShowcaseSection() {
   return (
     <div className="px-4 pt-6 pb-2">
       {hasNew && (
-        <ShowcaseRow title="New Arrivals" seeAllHref="/explore">
+        <ShowcaseRow title="New Arrivals" seeAllHref="/explore?sort=new">
           {newSongs.map((song: ReturnType<typeof mapToSongData>, idx: number) => (
-            <StoreTrackCard key={song.id} song={song} size="md" allSongs={newSongs} songIndex={idx} />
+            <StoreTrackCard key={song.id} song={song} size="md" allSongs={newSongs} songIndex={idx} isNew />
           ))}
         </ShowcaseRow>
       )}

@@ -5120,3 +5120,10 @@
 - [x] Fix: raise generateImage and remixImage prompt max from 1000 to 3000 characters — thiiirdgenkill's 1541-char prompt was silently rejected by Zod before reaching the server
 - [x] Add maxLength=3000 and live character counter (amber at 2700+, red at 3000) to both mobile and desktop image prompt textareas
 - [x] Regression test: thiiirdgenkill's exact 1541-char prompt now passes schema validation
+
+## Feature: New Arrivals "NEW" Badge Tag
+- [x] Add `isNew` prop to StoreTrackCard — renders a green "NEW" badge in the top-left corner of the card art
+- [x] Pass `isNew={mode === "new"}` to all StoreTrackCard instances in ExplorePage store view (top row + genre rows)
+- [x] Pass `isNew` to StoreTrackCard in HomePage New Arrivals shelf
+- [x] Fix HomePage New Arrivals seeAllHref to point to /explore?sort=new instead of /explore
+- [x] TypeScript: 0 errors | Vitest: 270/270 passing

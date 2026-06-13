@@ -1010,7 +1010,7 @@ export default function ExplorePage() {
                 rows.push(
                   <ShowcaseRow key="__all" title={mode === "trending" ? "Trending" : mode === "new" ? "New This Week" : "All Tracks"} seeAllHref="/explore" className="px-6">
                     {topSlice.map((song: ReturnType<typeof exploreMapToSongData>, idx: number) => (
-                      <StoreTrackCard key={song.id} song={song} size="md" allSongs={topSlice} songIndex={idx} />
+                      <StoreTrackCard key={song.id} song={song} size="md" allSongs={topSlice} songIndex={idx} isNew={mode === "new"} />
                     ))}
                   </ShowcaseRow>
                 );
@@ -1020,7 +1020,7 @@ export default function ExplorePage() {
                 rows.push(
                   <ShowcaseRow key={genre} title={genre} seeAllHref={`/explore?genre=${encodeURIComponent(genre)}`} className="px-6">
                     {genreSongs.map((song: ReturnType<typeof exploreMapToSongData>, idx: number) => (
-                      <StoreTrackCard key={song.id} song={song} size="md" allSongs={genreSongs} songIndex={idx} />
+                      <StoreTrackCard key={song.id} song={song} size="md" allSongs={genreSongs} songIndex={idx} isNew={mode === "new"} />
                     ))}
                   </ShowcaseRow>
                 );
