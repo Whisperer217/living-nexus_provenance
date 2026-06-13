@@ -76,32 +76,33 @@ export default function RightRail() {
   const isCreatorFocus = useIsCreatorFocusMode();
   useNow(); // refresh time labels every 30s
 
-  // Suppress on creator/editing routes
-  if (isCreatorFocus) return null;
-
   // Personal Signals — user's notification inbox (5 most recent, poll every 45s)
+  // NOTE: All hooks must be called before any conditional return (Rules of Hooks)
   const { data: signals, isLoading: signalsLoading } = trpc.notifications.list.useQuery(
     { limit: 5 },
-    { enabled: !!user, staleTime: 30_000, refetchInterval: 45_000 }
+    { enabled: !!user && !isCreatorFocus, staleTime: 30_000, refetchInterval: 45_000 }
   );
 
   // Public activity feed — for non-logged-in visitors (poll every 60s)
   const { data: publicFeed } = trpc.globalActivity.feed.useQuery(
     { limit: 8 },
-    { enabled: !user, staleTime: 45_000, refetchInterval: 60_000 }
+    { enabled: !user && !isCreatorFocus, staleTime: 45_000, refetchInterval: 60_000 }
   );
 
   // Provenance Verified — most recently registered works (guaranteed WIDs)
   const { data: provenanceData } = trpc.witnessRegistry.list.useQuery(
     { type: "all", cursor: 0, limit: 3 },
-    { staleTime: 60_000, refetchInterval: 120_000 }
+    { enabled: !isCreatorFocus, staleTime: 60_000, refetchInterval: 120_000 }
   );
 
   // Witness Registry — recent witnessed works (larger set for stats + recently witnessed)
   const { data: registryData } = trpc.witnessRegistry.list.useQuery(
     { type: "all", cursor: 0, limit: 8 },
-    { staleTime: 120_000 }
+    { enabled: !isCreatorFocus, staleTime: 120_000 }
   );
+
+  // Suppress on creator/editing routes — AFTER all hooks
+  if (isCreatorFocus) return null;
 
   const provenanceTracks = (provenanceData as any)?.items ?? [];
   const registryItems = (registryData as any)?.items ?? [];
