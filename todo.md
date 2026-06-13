@@ -5146,3 +5146,16 @@
 - [x] StoreCreatorCard: replace hover:scale with orbit ring + depth-of-field dimming on siblings
 - [x] ShowcaseRow: constellation formation reveal on scroll entry
 - [x] Remove generic animate-fade-up from homepage wrapper — replace with observatory entry
+
+## Feature: Player Queue Panel + Context Menu Oval Fix
+- [x] Fix large oval "+" Add to Collection button in StoreTrackCard context menu — replaced with proper menu row (icon + label) matching other rows
+- [x] Build PlayerQueuePanel component — horizontal panning strip (64×64 artwork cards, drag-to-pan, auto-scroll to current) + expandable full list mode
+- [x] Strip mode: artwork cards with animated playing bars on active card, gold/nebula border glow, title below
+- [x] List mode: full queue list with artwork + title + artist + duration, current track highlighted, scrollable (240px max-height)
+- [x] Strip/List toggle button in panel header
+- [x] Queue counter (current / total) in panel header
+- [x] My Collections link at bottom of panel → navigates to /profile?tab=collections
+- [x] Panel wired into GlobalPlayer expanded view — replaces old 3-track Up Next list with full queue
+- [x] Works on both mobile (nebula purple) and desktop (gold) color schemes
+- [x] Drag-to-pan on strip via Pointer Events API (mouse + touch)
+- [x] Auto-scroll strip to keep current card centered on track change

@@ -18,7 +18,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Link } from "wouter";
 import { Play, Pause, Shield, MoreVertical, FolderPlus, ExternalLink, Copy, SkipForward, Flame, Heart, Zap } from "lucide-react";
-import { AddToCollectionButton } from "@/components/AddToCollectionModal";
+import { AddToCollectionButton, AddToCollectionModal } from "@/components/AddToCollectionModal";
 import { createPortal } from "react-dom";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { toast } from "sonner";
@@ -97,6 +97,34 @@ function formatResonance(song: SongData) {
   return { plays, funding, tips };
 }
 
+// ── Collection menu item (proper row, not oval button) ──────────────────────
+function CollectionMenuItem({ songId, songTitle, onMenuClose }: {
+  songId: number;
+  songTitle: string;
+  onMenuClose: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <button
+        type="button"
+        onClick={(e) => { e.stopPropagation(); setOpen(true); }}
+        className="w-full flex items-center gap-3 px-4 py-2.5 text-xs hover:bg-white/5 transition-colors text-left"
+        style={{ color: "var(--ln-parchment)" }}
+      >
+        <FolderPlus className="w-3.5 h-3.5 opacity-60" />
+        Add to Collection
+      </button>
+      <AddToCollectionModal
+        songId={songId}
+        songTitle={songTitle}
+        open={open}
+        onClose={() => { setOpen(false); onMenuClose(); }}
+      />
+    </>
+  );
+}
+
 // ── Context menu ──────────────────────────────────────────────────────────────
 function TrackContextMenu({ song, position, onClose }: {
   song: SongData;
@@ -154,10 +182,7 @@ function TrackContextMenu({ song, position, onClose }: {
           <SkipForward className="w-3.5 h-3.5 opacity-60" /> Play Next
         </button>
       )}
-      <div className="w-full flex items-center gap-3 px-4 py-2.5 text-xs hover:bg-white/5 transition-colors text-left" style={{ color: "var(--ln-parchment)" }}>
-        <FolderPlus className="w-3.5 h-3.5 opacity-60" />
-        <AddToCollectionButton songId={song.id} songTitle={song.title} size={14} className="flex-1 text-left" />
-      </div>
+      <CollectionMenuItem songId={song.id} songTitle={song.title} onMenuClose={onClose} />
       <div className="border-t" style={{ borderColor: "rgba(196,154,40,0.12)" }} />
       <Link href={`/song/${song.id}`} onClick={onClose}>
         <button type="button" className="w-full flex items-center gap-3 px-4 py-2.5 text-xs hover:bg-white/5 transition-colors text-left" style={{ color: "var(--ln-parchment)" }}>

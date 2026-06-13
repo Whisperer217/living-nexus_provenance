@@ -25,6 +25,7 @@ import { useLocation } from "wouter";
 import React, { useState, useCallback, useRef, useEffect, useMemo, memo } from "react";
 import { createPortal } from "react-dom";
 import PlayerTipModal from "./PlayerTipModal";
+import { PlayerQueuePanel, type QueueTrack } from "./PlayerQueuePanel";
 import { toast } from "sonner";
 
 /* ── Gold design tokens ─────────────────────────────────────────── */
@@ -521,7 +522,7 @@ function GlobalPlayerInner() {
     return () => { clearTimeout(t); document.removeEventListener("click", handler); };
   }, [showVolume]);
 
-  /* ── Up Next queue (next 3 tracks) ── */
+  /* ── Up Next queue (next 3 tracks) — kept for legacy use ── */
   const upNext = useMemo(() => {
     if (!tracks.length || state.currentIdx < 0) return [];
     const result: typeof tracks = [];
@@ -531,6 +532,18 @@ function GlobalPlayerInner() {
     }
     return result;
   }, [tracks, state.currentIdx]);
+
+  /* ── Full queue for PlayerQueuePanel ── */
+  const queueTracks = useMemo((): QueueTrack[] =>
+    tracks.map(t => ({
+      id: t.id,
+      title: t.title,
+      artist: t.artist,
+      artUrl: t.artUrl ?? null,
+      bg: t.bg ?? null,
+      dur: t.dur,
+    })),
+  [tracks]);
 
   /* ── Gold glow shadow — desktop directional, mobile tight (decisions #1 + #9) ── */
   const baseShadow = isDesktop ? GOLD_SHADOW_DESKTOP : GOLD_SHADOW_MOBILE;
@@ -1194,59 +1207,14 @@ function GlobalPlayerInner() {
               </button>
             </div>
 
-            {/* Up Next */}
-            {upNext.length > 0 && (
-              <div>
-                <div className="flex items-center gap-2 mb-3">
-                  <List size={13} style={{ color: isDesktop ? GOLD : "rgba(192,132,252,0.7)" }} />
-                  <span
-                    className="text-[11px] font-bold tracking-widest uppercase"
-                    style={{ color: isDesktop ? GOLD : "rgba(192,132,252,0.7)", fontFamily: "'Cinzel', serif" }}
-                  >
-                    Up Next
-                  </span>
-                </div>
-                <div className="space-y-2">
-                  {upNext.map((t, i) => (
-                    <div
-                      key={t.id}
-                      className="flex items-center gap-3 rounded-xl px-3 py-2 transition-all hover:bg-white/5 cursor-pointer"
-                      style={{ border: isDesktop ? "1px solid rgba(212,175,55,0.08)" : "1px solid rgba(138,43,226,0.10)" }}
-                      onClick={() => {
-                        const idx = tracks.findIndex(tr => tr.id === t.id);
-                        if (idx >= 0) playTrack(idx);
-                      }}
-                    >
-                      <span className="text-[11px] w-4 text-center" style={{ color: isDesktop ? "rgba(212,175,55,0.4)" : "rgba(192,132,252,0.45)" }}>
-                        {i + 1}
-                      </span>
-                      <div
-                        className="w-9 h-9 rounded-lg flex-shrink-0 overflow-hidden flex items-center justify-center"
-                        style={{ background: t.bg || "#000000" }}
-                      >
-                        {t.artUrl
-                          ? <img src={t.artUrl} alt="" className="w-full h-full object-cover" />
-                          : <Music2 size={12} style={{ color: GOLD }} />
-                        }
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[12px] font-semibold truncate" style={{ color: "#F5EDD8" }}>
-                          {t.title}
-                        </p>
-                        <p className="text-[10px] truncate" style={{ color: isDesktop ? "rgba(212,175,55,0.6)" : "rgba(192,132,252,0.6)" }}>
-                          {t.artist}
-                        </p>
-                      </div>
-                      {t.dur && (
-                        <span className="text-[10px] flex-shrink-0 tabular-nums" style={{ color: isDesktop ? "rgba(212,175,55,0.5)" : "rgba(192,132,252,0.5)" }}>
-                          {t.dur}
-                        </span>
-                      )}
-                      <GripHorizontal size={12} style={{ color: "rgba(212,175,55,0.3)" }} />
-                    </div>
-                  ))}
-                </div>
-              </div>
+            {/* Queue Panel — horizontal strip + expandable list */}
+            {queueTracks.length > 0 && (
+              <PlayerQueuePanel
+                tracks={queueTracks}
+                currentIdx={state.currentIdx >= 0 ? state.currentIdx : 0}
+                isDesktop={isDesktop}
+                onPlayIdx={(idx) => playTrack(idx)}
+              />
             )}
 
           </div>
