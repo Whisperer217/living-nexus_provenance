@@ -5113,3 +5113,7 @@
 - [x] Quiver images: clicking image opens a lightbox/fullscreen modal with the full image
 - [x] Lightbox: shows WID, title, close button (click-outside)
 - [x] TypeScript: 0 errors | Vitest: 263/263 passing
+
+## Bug Fix: Image Generation Sparse Array (thiiirdgenkill report)
+- [x] Fix KeeperComposePage: filter undefined/falsy entries from referenceImages.map(r => r.url) before sending to server — sparse array holes from slot-indexed assignment cause Zod validation failure ("Invalid input: expected string, received undefined") making image generation fail immediately
+- [x] Add regression test: guides.generateImage with sparse referenceImageUrls array should not throw Zod validation error

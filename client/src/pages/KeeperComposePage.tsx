@@ -566,6 +566,8 @@ Please respond in Suno-ready format:
         });
         setReferenceImages(prev => {
           const updated = [...prev];
+          // Pad to slotIndex to avoid sparse array holes (which cause Zod validation failures)
+          while (updated.length <= slotIndex) updated.push({ url: '', preview: '' });
           updated[slotIndex] = { url: result.url, preview: dataUrl };
           return updated;
         });
@@ -592,6 +594,8 @@ Please respond in Suno-ready format:
     }
     setReferenceImages(prev => {
       const updated = [...prev];
+      // Pad to slotIndex to avoid sparse array holes (which cause Zod validation failures)
+      while (updated.length <= slotIndex) updated.push({ url: '', preview: '' });
       updated[slotIndex] = { url, preview: url };
       return updated;
     });
@@ -621,7 +625,7 @@ Please respond in Suno-ready format:
       const result = await generateImageMutation.mutateAsync({
         prompt: msg,
         guideId: selectedGuideId,
-        referenceImageUrls: referenceImages.map(r => r.url),
+        referenceImageUrls: referenceImages.map(r => r?.url).filter((u): u is string => !!u),
       });
       const newImg: GeneratedImage = {
         url: result.url ?? '',
