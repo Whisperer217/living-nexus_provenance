@@ -6901,7 +6901,7 @@ If a field cannot be determined from the document, use an empty string. For symb
      */
      generateImage: protectedProcedure
        .input(z.object({
-         prompt: z.string().min(1).max(1000),
+         prompt: z.string().min(1).max(3000),
          guideId: z.number().optional(),
          styleContext: z.string().max(500).optional(),
          // Legacy single URL kept for backwards compat
@@ -6967,7 +6967,7 @@ If a field cannot be determined from the document, use an empty string. For symb
      remixImage: protectedProcedure
        .input(z.object({
          sourceImageUrl: z.string().url(),
-         prompt: z.string().min(1).max(1000),
+         prompt: z.string().min(1).max(3000),
          guideId: z.number().optional(),
          styleContext: z.string().max(500).optional(),
        }))

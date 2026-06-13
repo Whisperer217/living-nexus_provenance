@@ -1181,6 +1181,7 @@ Please respond in Suno-ready format:
                   onKeyDown={handleImageKeyDown}
                   placeholder="Describe the image you want to manifest..."
                   rows={3}
+                  maxLength={3000}
                   className="w-full resize-none rounded px-3 py-2 focus:outline-none"
                   style={{
                     background: "var(--ln-obsidian)",
@@ -1192,6 +1193,9 @@ Please respond in Suno-ready format:
                   }}
                   disabled={isGeneratingImage}
                 />
+                <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.5rem", color: imagePrompt.length > 2700 ? (imagePrompt.length >= 3000 ? '#ef4444' : '#f59e0b') : "var(--ln-smoke)", textAlign: 'right', marginTop: 2, opacity: imagePrompt.length > 0 ? 1 : 0.4 }}>
+                  {imagePrompt.length}/3000
+                </div>
               </div>
               <button
                 onClick={handleGenerateImage}
@@ -1640,7 +1644,8 @@ Please respond in Suno-ready format:
                     onKeyDown={handleImageKeyDown}
                     placeholder="Describe the image you want to manifest... (Ctrl+Enter to generate)"
                     rows={4}
-                    className="w-full resize-none rounded px-3 py-2.5 focus:outline-none mb-3"
+                    maxLength={3000}
+                    className="w-full resize-none rounded px-3 py-2.5 focus:outline-none"
                     style={{
                       background: "var(--ln-obsidian)",
                       border: `1px solid ${modeColor}33`,
@@ -1651,6 +1656,9 @@ Please respond in Suno-ready format:
                     }}
                     disabled={isGeneratingImage}
                   />
+                  <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.5rem", color: imagePrompt.length > 2700 ? (imagePrompt.length >= 3000 ? '#ef4444' : '#f59e0b') : "var(--ln-smoke)", textAlign: 'right', marginTop: 2, marginBottom: 8, opacity: imagePrompt.length > 0 ? 1 : 0.4 }}>
+                    {imagePrompt.length}/3000
+                  </div>
                   <button
                     onClick={handleGenerateImage}
                     disabled={isGeneratingImage || !imagePrompt.trim()}

@@ -5117,3 +5117,6 @@
 ## Bug Fix: Image Generation Sparse Array (thiiirdgenkill report)
 - [x] Fix KeeperComposePage: filter undefined/falsy entries from referenceImages.map(r => r.url) before sending to server — sparse array holes from slot-indexed assignment cause Zod validation failure ("Invalid input: expected string, received undefined") making image generation fail immediately
 - [x] Add regression test: guides.generateImage with sparse referenceImageUrls array should not throw Zod validation error
+- [x] Fix: raise generateImage and remixImage prompt max from 1000 to 3000 characters — thiiirdgenkill's 1541-char prompt was silently rejected by Zod before reaching the server
+- [x] Add maxLength=3000 and live character counter (amber at 2700+, red at 3000) to both mobile and desktop image prompt textareas
+- [x] Regression test: thiiirdgenkill's exact 1541-char prompt now passes schema validation

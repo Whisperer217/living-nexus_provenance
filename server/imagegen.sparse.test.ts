@@ -17,7 +17,7 @@ import { z } from "zod";
 // ── Zod schema (mirrors server/routers.ts guides.generateImage input) ──────────
 
 const generateImageInputSchema = z.object({
-  prompt: z.string().min(1).max(1000),
+  prompt: z.string().min(1).max(3000),
   guideId: z.number().optional(),
   styleContext: z.string().max(500).optional(),
   referenceImageUrl: z.string().url().optional(),
@@ -115,6 +115,18 @@ describe("guides.generateImage — referenceImageUrls sparse array regression", 
     });
     expect(result.success).toBe(true);
     expect(urls).toHaveLength(1);
+  });
+
+  it("accepts prompts up to 3000 characters (raised from 1000)", () => {
+    const longPrompt = "A ".repeat(1000).trim(); // ~2000 chars
+    const result = generateImageInputSchema.safeParse({ prompt: longPrompt });
+    expect(result.success).toBe(true);
+
+    // The exact prompt thiiirdgenkill used (1541 chars) must pass
+    const thiiirdgenkillPrompt = `A vast cosmic archive suspended between reality and dream. At the center stands a lone observer on a circular stone platform floating in an endless sea of stars. Instead of constellations, the sky is woven from hundreds of thousands of glowing witness threads, each thread connecting distant memories, stories, creations, and lives.\n\nEvery connection forms living geometric structures resembling celestial circuitry, ancient roots, and galaxies simultaneously. Some threads lead to forgotten books, others to music, inventions, artwork, acts of kindness, and lost civilizations. The observer holds a luminous compass forged from sunlight and moonlight, not pointing north but pointing toward truth and origin.\n\nStyle: late-1990s to early-2000s anime film, hand-painted backgrounds, Makoto Shinkai-inspired lighting, extraordinary atmospheric perspective, celestial fantasy, intricate details, volumetric god rays, cinematic scale, masterpiece quality, emotional storytelling, ultra-detailed, dreamlike yet believable.`;
+    expect(thiiirdgenkillPrompt.length).toBeGreaterThan(1000);
+    const result2 = generateImageInputSchema.safeParse({ prompt: thiiirdgenkillPrompt });
+    expect(result2.success).toBe(true);
   });
 
   it("filters out empty-string URLs introduced by padding", () => {
