@@ -5136,3 +5136,13 @@
 - [x] First-appearance shimmer: generated image thumbnail border pulses once with a gold glow on mount — "being witnessed for the first time"
 - [x] Animation works on both mobile (sidebar panel) and desktop (right panel) Vision Chamber instances
 - [x] No external animation libraries — pure CSS + canvas + SVG
+
+## Motion Direction: Environmental Storytelling (Observatory Aesthetic)
+- [x] Observatory Background Canvas: persistent slow-moving 3-depth-layer starfield behind homepage (near/mid/far parallax drift, no flicker)
+- [x] Hero Parallax: Ken Burns slow drift on hero image, text content at different depth layer than background
+- [x] Scroll-Reveal Constellation Formation: section headers form like constellations (dots → connecting lines → content materializes) via IntersectionObserver, no library
+- [x] Creator Card Orbit Focus: on hover, surrounding cards dim (depth-of-field), hovered card gets faint orbit ring — entering a creator domain feels like locking onto a star
+- [x] Manifestation Reveal: track/work cards enter with slow cinematic translateY + opacity stagger by index (not bounce — slow archive surface)
+- [x] StoreCreatorCard: replace hover:scale with orbit ring + depth-of-field dimming on siblings
+- [x] ShowcaseRow: constellation formation reveal on scroll entry
+- [x] Remove generic animate-fade-up from homepage wrapper — replace with observatory entry

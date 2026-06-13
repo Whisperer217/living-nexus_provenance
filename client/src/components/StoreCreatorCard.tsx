@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "wouter";
 import { Music, Shield } from "lucide-react";
 
@@ -21,6 +22,8 @@ interface StoreCreatorCardProps {
 }
 
 export function StoreCreatorCard({ creator }: StoreCreatorCardProps) {
+  const [hovered, setHovered] = useState(false);
+
   const handle = creator.artistHandle && creator.artistHandle !== "NULL" && creator.artistHandle !== "" ? creator.artistHandle : null;
   const artistName = creator.artistName && creator.artistName !== "NULL" ? creator.artistName : null;
   const displayName = artistName || creator.name || handle || `Creator ${creator.id}`;
@@ -34,13 +37,18 @@ export function StoreCreatorCard({ creator }: StoreCreatorCardProps) {
   return (
     <Link href={`/creator/${creator.id}`}>
       <div
-        className="relative flex-shrink-0 rounded-xl overflow-hidden cursor-pointer group transition-all duration-200 hover:scale-[1.02] hover:shadow-2xl"
+        className="relative flex-shrink-0 rounded-xl overflow-hidden cursor-pointer"
         style={{
           width: "176px",
           background: "linear-gradient(160deg, #0e0c1c 0%, #13101e 100%)",
-          border: "1px solid rgba(196,154,40,0.18)",
-          boxShadow: "0 2px 16px rgba(0,0,0,0.5)",
+          border: `1px solid ${hovered ? "rgba(196,154,40,0.38)" : "rgba(196,154,40,0.18)"}`,
+          boxShadow: hovered
+            ? "0 4px 32px rgba(0,0,0,0.7), 0 0 0 1px rgba(196,154,40,0.12)"
+            : "0 2px 16px rgba(0,0,0,0.5)",
+          transition: "border-color 400ms ease, box-shadow 400ms ease",
         }}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
       >
         {/* Banner */}
         <div className="h-20 w-full overflow-hidden relative">
@@ -48,7 +56,11 @@ export function StoreCreatorCard({ creator }: StoreCreatorCardProps) {
             <img
               src={creator.bannerUrl}
               alt=""
-              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+              className="w-full h-full object-cover"
+              style={{
+                transform: hovered ? "scale(1.04)" : "scale(1)",
+                transition: "transform 600ms cubic-bezier(0.16,1,0.3,1)",
+              }}
               onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
             />
           ) : (
@@ -57,10 +69,14 @@ export function StoreCreatorCard({ creator }: StoreCreatorCardProps) {
               style={{ background: "linear-gradient(135deg, #1a1228 0%, #0e1a2e 50%, #1a0e28 100%)" }}
             />
           )}
-          {/* Gold shimmer overlay on hover */}
+          {/* Gold shimmer overlay — slow fade in, not instant */}
           <div
-            className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-            style={{ background: "linear-gradient(135deg, rgba(196,154,40,0.08) 0%, transparent 60%)" }}
+            className="absolute inset-0"
+            style={{
+              background: "linear-gradient(135deg, rgba(196,154,40,0.10) 0%, transparent 60%)",
+              opacity: hovered ? 1 : 0,
+              transition: "opacity 500ms ease",
+            }}
           />
         </div>
 
@@ -71,7 +87,10 @@ export function StoreCreatorCard({ creator }: StoreCreatorCardProps) {
               src={creator.profilePhotoUrl}
               alt={displayName}
               className="w-12 h-12 rounded-full object-cover shadow-lg"
-              style={{ border: "2px solid #0e0c1c" }}
+              style={{
+                border: `2px solid ${hovered ? "rgba(196,154,40,0.5)" : "#0e0c1c"}`,
+                transition: "border-color 400ms ease",
+              }}
               onError={(e) => {
                 const el = e.currentTarget as HTMLImageElement;
                 el.style.display = "none";
@@ -87,7 +106,11 @@ export function StoreCreatorCard({ creator }: StoreCreatorCardProps) {
           ) : (
             <div
               className="w-12 h-12 rounded-full flex items-center justify-center shadow-lg"
-              style={{ background: "linear-gradient(135deg, rgba(196,154,40,0.3), rgba(196,154,40,0.08))", border: "2px solid #0e0c1c" }}
+              style={{
+                background: "linear-gradient(135deg, rgba(196,154,40,0.3), rgba(196,154,40,0.08))",
+                border: `2px solid ${hovered ? "rgba(196,154,40,0.5)" : "#0e0c1c"}`,
+                transition: "border-color 400ms ease",
+              }}
             >
               <span style={{ color: "#C49A28", fontWeight: 700, fontSize: "18px" }}>{displayName[0]?.toUpperCase()}</span>
             </div>
@@ -96,7 +119,6 @@ export function StoreCreatorCard({ creator }: StoreCreatorCardProps) {
 
         {/* Info */}
         <div className="pt-8 pb-3 px-3">
-          {/* Name */}
           <p
             className="font-heading text-[13px] font-semibold leading-tight truncate"
             style={{ color: "var(--ln-parchment, #F5ECD7)" }}
@@ -108,8 +130,6 @@ export function StoreCreatorCard({ creator }: StoreCreatorCardProps) {
               @{handle}
             </p>
           )}
-
-          {/* Bio snippet */}
           {bioSnippet && (
             <p
               className="text-[10.5px] leading-snug mt-1.5 line-clamp-2"
@@ -118,8 +138,6 @@ export function StoreCreatorCard({ creator }: StoreCreatorCardProps) {
               {bioSnippet}
             </p>
           )}
-
-          {/* Stats row */}
           <div className="flex items-center gap-2 mt-2 flex-wrap">
             {isFounder && (
               <span
@@ -143,6 +161,33 @@ export function StoreCreatorCard({ creator }: StoreCreatorCardProps) {
             )}
           </div>
         </div>
+
+        {/* Orbit ring — dashed gold ring that appears on hover */}
+        {hovered && (
+          <svg
+            className="absolute inset-0 pointer-events-none"
+            style={{ width: "100%", height: "100%", zIndex: 20 }}
+            aria-hidden="true"
+          >
+            <rect
+              x="2" y="2"
+              width="calc(100% - 4px)" height="calc(100% - 4px)"
+              rx="10" ry="10"
+              fill="none"
+              stroke="rgba(196,154,40,0.28)"
+              strokeWidth="1"
+              strokeDasharray="8 5"
+              style={{ animation: "orbit-ring-spin 14s linear infinite" }}
+            />
+          </svg>
+        )}
+
+        <style>{`
+          @keyframes orbit-ring-spin {
+            from { stroke-dashoffset: 0; }
+            to   { stroke-dashoffset: -130; }
+          }
+        `}</style>
       </div>
     </Link>
   );

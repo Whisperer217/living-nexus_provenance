@@ -31,6 +31,8 @@ import { StoreTrackCard } from "@/components/StoreTrackCard";
 import { StoreCreatorCard } from "@/components/StoreCreatorCard";
 import { CinematicComicReader } from "@/components/reader/CinematicComicReader";
 import { DiscoverySection } from "@/components/DiscoverySection";
+import { ObservatoryCanvas } from "@/components/ObservatoryCanvas";
+import { ConstellationReveal } from "@/components/ConstellationReveal";
 
 /** Animated counter that counts up from 0 to `target` over ~1.2 s */
 function AnimatedCounter({ target }: { target: number }) {
@@ -975,7 +977,12 @@ export default function HomePage() {
         <meta name="description" content="Register your music, lyrics, manuscripts, and comics with cryptographic Witness IDs. Living Nexus anchors creative provenance so every work is witnessed, attributed, and protected." />
         <meta name="keywords" content="music provenance, witness ID, audio registration, creator platform, cryptographic provenance, music attribution, digital rights, creative ownership, WID, Living Nexus" />
       </Helmet>
-      <div className="animate-fade-up cosmic-bg min-h-screen">
+      <div className="cosmic-bg min-h-screen" style={{ position: "relative" }}>
+      {/* Observatory starfield — persistent, slow-moving 3-depth-layer parallax */}
+      <ObservatoryCanvas
+        className="fixed inset-0 w-full h-full"
+        style={{ zIndex: 0, pointerEvents: "none" } as React.CSSProperties}
+      />
 
       {/* ══════════════════════════════════════════════════════════════
           HERO CAROUSEL
@@ -988,7 +995,9 @@ export default function HomePage() {
       {/* ══════════════════════════════════════════════════════════════
           MANIFESTATION DISCOVERY ARCHITECTURE
       ══════════════════════════════════════════════════════════════ */}
-      <DiscoverySection />
+      <ConstellationReveal delay={100} dotCount={6} skipDots={false}>
+        <DiscoverySection />
+      </ConstellationReveal>
 
       {/* ══════════════════════════════════════════════════════════════
           FOUNDER'S ERA BLOCK
@@ -1246,7 +1255,9 @@ export default function HomePage() {
       {/* ══════════════════════════════════════════════════════════════
           FEATURED CREATORS — horizontal panning carousel
       ══════════════════════════════════════════════════════════════ */}
-      <FeaturedCreatorsCarousel />
+      <ConstellationReveal delay={0} dotCount={5}>
+        <FeaturedCreatorsCarousel />
+      </ConstellationReveal>
 
       {/* ── Sacred Geometry Divider ── */}
       <div className="sg-divider-wide px-6">
@@ -1258,7 +1269,9 @@ export default function HomePage() {
       {/* ══════════════════════════════════════════════════════════════
           NEW VOICES — recently joined creators
       ══════════════════════════════════════════════════════════════ */}
-      <NewVoicesCarousel />
+      <ConstellationReveal delay={0} dotCount={5}>
+        <NewVoicesCarousel />
+      </ConstellationReveal>
 
       {/* ── Sacred Geometry Divider ── */}
       <div className="sg-divider-wide px-6">

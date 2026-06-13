@@ -23,6 +23,7 @@ import { MediumManifestationCard } from "@/components/manifestation-cards/Medium
 import { MicroManifestationCard } from "@/components/manifestation-cards/MicroManifestationCard";
 import { SmartManifestationCard } from "@/components/manifestation-cards/MediumVariants";
 import type { ManifestationData } from "@/components/manifestation-cards/types";
+import { ManifestationReveal } from "@/components/ConstellationReveal";
 
 /** Section header with atmospheric styling */
 function SectionHeader({ title, subtitle, href }: { title: string; subtitle?: string; href?: string }) {
@@ -132,12 +133,13 @@ export function DiscoverySection() {
           <SectionHeader title="Featured Realms" subtitle="Curated manifestations" href="/explore" />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {featured.slice(0, 2).map((item: ManifestationData, i: number) => (
-              <LargeManifestationCard
-                key={item.id}
-                data={item}
-                allData={featured}
-                dataIndex={i}
-              />
+              <ManifestationReveal key={item.id} index={i}>
+                <LargeManifestationCard
+                  data={item}
+                  allData={featured}
+                  dataIndex={i}
+                />
+              </ManifestationReveal>
             ))}
           </div>
           {/* Secondary featured — fill remaining slots (up to 4 more) */}
@@ -166,12 +168,13 @@ export function DiscoverySection() {
           <SectionHeader title="New Arrivals" subtitle="Fresh manifestations" href="/explore?sort=newest" />
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
             {newArrivals.map((item: ManifestationData, i: number) => (
-              <MediumManifestationCard
-                key={item.id}
-                data={item}
-                allData={newArrivals}
-                dataIndex={i}
-              />
+              <ManifestationReveal key={item.id} index={i}>
+                <MediumManifestationCard
+                  data={item}
+                  allData={newArrivals}
+                  dataIndex={i}
+                />
+              </ManifestationReveal>
             ))}
           </div>
         </section>
@@ -187,12 +190,13 @@ export function DiscoverySection() {
           <SectionHeader title="Trending This Week" subtitle="Plays + likes + recency" href="/explore?sort=trending" />
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
             {trending.map((item: ManifestationData, i: number) => (
-              <SmartManifestationCard
-                key={item.id}
-                data={item}
-                allData={trending}
-                dataIndex={i}
-              />
+              <ManifestationReveal key={item.id} index={i}>
+                <SmartManifestationCard
+                  data={item}
+                  allData={trending}
+                  dataIndex={i}
+                />
+              </ManifestationReveal>
             ))}
           </div>
         </section>
@@ -208,12 +212,13 @@ export function DiscoverySection() {
           <SectionHeader title="Hidden Realms" subtitle="Underground · Experimental" href="/explore?sort=oldest" />
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
             {hidden.map((item: ManifestationData, i: number) => (
-              <MicroManifestationCard
-                key={item.id}
-                data={item}
-                allData={hidden}
-                dataIndex={i}
-              />
+              <ManifestationReveal key={item.id} index={i}>
+                <MicroManifestationCard
+                  data={item}
+                  allData={hidden}
+                  dataIndex={i}
+                />
+              </ManifestationReveal>
             ))}
           </div>
         </section>
