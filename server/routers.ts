@@ -133,6 +133,8 @@ import {
   isFollowingCollection,
   forkManifestedCollection,
   getPublicCollections,
+  getOnboardingProgress,
+  upsertOnboardingProgress,
 } from "./db";
 import { FOUNDER_PRICE_EARLY_CENTS, FOUNDER_PRICE_LATE_CENTS, FOUNDER_THRESHOLD, LICENSE_PRICE_CENTS, LICENSE_SLOTS, SLOT_PACKAGES, getSlotPackage, type SlotPackageId } from "./livingArchiveProducts";
 import { ENV } from "./_core/env";
@@ -2981,6 +2983,49 @@ ${workType === "manuscript" || workType === "comic" ? "Category" : "Genre"}: ${i
         notes: notes ?? null,
       };
     }),
+    /** Get the current user's onboarding progress (or null if not started). */
+    getProgress: protectedProcedure.query(async ({ ctx }) => {
+      return getOnboardingProgress(ctx.user.id);
+    }),
+    /** Save progress for a specific step. completedSteps is the full array of completed step IDs. */
+    saveStep: protectedProcedure
+      .input(z.object({
+        currentStep: z.enum(['covenant', 'identity', 'domain', 'presence', 'testimony', 'license', 'first_work']),
+        completedSteps: z.array(z.string()),
+        domainName: z.string().max(128).optional(),
+        avatarUrl: z.string().url().optional(),
+        bannerUrl: z.string().url().optional(),
+        originStatement: z.string().max(1000).optional(),
+        testimonyText: z.string().max(3000).optional(),
+        testimonyWid: z.string().max(64).optional(),
+        firstWorkWid: z.string().max(64).optional(),
+        isComplete: z.boolean().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const { currentStep, completedSteps, isComplete, ...profileFields } = input;
+        const now = new Date();
+        // Persist profile fields to the user record
+        const profilePatch: Record<string, unknown> = {};
+        if (profileFields.domainName) profilePatch.artistHandle = profileFields.domainName;
+        if (profileFields.avatarUrl) profilePatch.profilePhotoUrl = profileFields.avatarUrl;
+        if (profileFields.bannerUrl) profilePatch.bannerUrl = profileFields.bannerUrl;
+        if (profileFields.originStatement) profilePatch.originStatement = profileFields.originStatement;
+        if (Object.keys(profilePatch).length > 0) {
+          await updateUserProfile(ctx.user.id, profilePatch as any);
+        }
+        // Build progress patch
+        const progressPatch: Record<string, unknown> = {
+          currentStep,
+          completedSteps: completedSteps as any,
+        };
+        if (currentStep === 'covenant') progressPatch.covenantAcceptedAt = now;
+        if (currentStep === 'domain') progressPatch.domainSavedAt = now;
+        if (currentStep === 'presence') progressPatch.presenceSavedAt = now;
+        if (profileFields.testimonyWid) progressPatch.testimonyWid = profileFields.testimonyWid;
+        if (profileFields.firstWorkWid) progressPatch.firstWorkWid = profileFields.firstWorkWid;
+        if (isComplete) progressPatch.completedAt = now;
+        return upsertOnboardingProgress(ctx.user.id, progressPatch as any);
+      }),
   }),
 
   // ── Witness Network ────────────────────────────────────────────────────────
@@ -7333,7 +7378,7 @@ If a field cannot be determined from the document, use an empty string. For symb
         // Only allow if public, or if the requesting user owns it
         if (!col.isPublic && col.ownerId !== ctx.user?.id) throw new TRPCError({ code: "FORBIDDEN" });
         return getCollectionTracksWithSongs(input.collectionId);
-      }),
+            }),
   }),
 });
 export type AppRouter = typeof appRouter;

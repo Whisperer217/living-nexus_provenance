@@ -247,18 +247,20 @@ export default function WIDSpecPage() {
                 Download Full Specification
               </Button>
             </a>
-            <a href="/upload" rel="noopener noreferrer">
+            <a href="/onboarding" rel="noopener noreferrer">
               <Button
                 size="sm"
                 className="gap-2 text-xs"
                 style={{
-                  background: "rgba(196,154,40,0.08)",
+                  background: "rgba(196,154,40,0.15)",
                   color: "var(--ln-gold)",
-                  border: "1px solid rgba(196,154,40,0.25)",
+                  border: "1px solid rgba(196,154,40,0.5)",
+                  fontWeight: 700,
+                  letterSpacing: "0.08em",
                 }}
               >
                 <ExternalLink className="w-3 h-3" />
-                Register Your First WID
+                Begin Your Provenance
               </Button>
             </a>
           </div>

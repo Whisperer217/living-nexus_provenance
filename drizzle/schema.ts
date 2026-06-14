@@ -904,6 +904,26 @@ export const witnessTestimonies = mysqlTable("witnessTestimonies", {
 export type WitnessTestimony = typeof witnessTestimonies.$inferSelect;
 export type InsertWitnessTestimony = typeof witnessTestimonies.$inferInsert;
 
+// ─── Onboarding Progress ──────────────────────────────────────────────────────
+// Tracks each creator's progress through the 7-step onboarding manifest.
+// Steps: covenant | identity | domain | presence | testimony | license | first_work
+export const onboardingProgress = mysqlTable("onboardingProgress", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().unique(),
+  currentStep: varchar("currentStep", { length: 32 }).notNull().default("covenant"),
+  completedSteps: json("completedSteps").$type<string[]>(),
+  covenantAcceptedAt: timestamp("covenantAcceptedAt"),
+  domainSavedAt: timestamp("domainSavedAt"),
+  presenceSavedAt: timestamp("presenceSavedAt"),
+  testimonyWid: varchar("testimonyWid", { length: 64 }),
+  licensePurchasedAt: timestamp("licensePurchasedAt"),
+  firstWorkWid: varchar("firstWorkWid", { length: 64 }),
+  completedAt: timestamp("completedAt"),
+  startedAt: timestamp("startedAt").defaultNow().notNull(),
+});
+export type OnboardingProgress = typeof onboardingProgress.$inferSelect;
+export type InsertOnboardingProgress = typeof onboardingProgress.$inferInsert;
+
 // ─── Visual Queue ─────────────────────────────────────────────────────────────
 // Background queue for automatic visual (MP4 loop video) generation.
 // Every work is enqueued on creation/WID issuance/publish.

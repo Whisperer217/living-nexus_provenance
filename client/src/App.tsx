@@ -92,6 +92,7 @@ const CreatorIdentityPage = lazy(() => import("./pages/CreatorIdentityPage"));
 const CreatorDomainPage = lazy(() => import("./pages/CreatorDomainPage"));
 const CollectionPage = lazy(() => import("./pages/CollectionPage"));
 const ConstellationPage = lazy(() => import("./pages/ConstellationPage"));
+const OnboardingManifest = lazy(() => import("./pages/OnboardingManifest"));
 
 // Minimal fallback shown while a page chunk loads (typically <200ms on CDN)
 function PageLoader() {
@@ -238,6 +239,7 @@ function Router() {
                 <Route path="/identity/:id" component={CreatorIdentityPage} />
                 <Route path="/domain" component={CreatorDomainPage} />
                 <Route path="/creator-surface" component={CreatorSurface} />
+                <Route path="/onboarding" component={OnboardingManifest} />
                 <Route path="/guides" component={GuideDirectoryPage} />
                 <Route path="/guides/upload" component={GuideUploadWizard} />
                 <Route path="/guide/:id" component={GuideDetailPage} />

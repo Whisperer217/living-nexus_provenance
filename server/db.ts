@@ -49,6 +49,9 @@ import {
   type ManifestedCollection,
   type InsertManifestedCollection,
   type CollectionTrack,
+  onboardingProgress,
+  type OnboardingProgress,
+  type InsertOnboardingProgress,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 import type { SearchResults } from "../shared/searchTypes";
@@ -5162,3 +5165,27 @@ export async function getPublicCollections(limit = 20, offset = 0) {
 }
 
 export type { ManifestedCollection, InsertManifestedCollection, CollectionTrack };
+
+// ─── Onboarding Progress ──────────────────────────────────────────────────────
+export async function getOnboardingProgress(userId: number): Promise<OnboardingProgress | null> {
+  const db = await getDb();
+  if (!db) return null;
+  const rows = await db.select().from(onboardingProgress).where(eq(onboardingProgress.userId, userId)).limit(1);
+  return rows[0] ?? null;
+}
+
+export async function upsertOnboardingProgress(
+  userId: number,
+  patch: Partial<Omit<InsertOnboardingProgress, 'id' | 'userId' | 'startedAt'>>
+): Promise<OnboardingProgress | null> {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  const existing = await getOnboardingProgress(userId);
+  if (!existing) {
+    await db.insert(onboardingProgress).values({ userId, ...patch });
+  } else {
+    await db.update(onboardingProgress).set(patch).where(eq(onboardingProgress.userId, userId));
+  }
+  return getOnboardingProgress(userId);
+}
+export type { OnboardingProgress, InsertOnboardingProgress };

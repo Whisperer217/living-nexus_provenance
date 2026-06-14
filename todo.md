@@ -5159,3 +5159,20 @@
 - [x] Works on both mobile (nebula purple) and desktop (gold) color schemes
 - [x] Drag-to-pan on strip via Pointer Events API (mouse + touch)
 - [x] Auto-scroll strip to keep current card centered on track change
+
+## Feature: Creator Onboarding Manifest Pipeline
+- [x] Add onboarding_progress table to drizzle/schema.ts
+- [x] Push DB migration: pnpm db:push
+- [x] Add onboarding tRPC procedures: getProgress, saveStep, completeOnboarding
+- [x] Build /onboarding route — 7-step manifest ceremony page
+- [x] Step 1: COVENANT — read and accept the creator covenant
+- [x] Step 2: IDENTITY — sign in / create account via OAuth (skip if already logged in)
+- [x] Step 3: DOMAIN — creator handle, origin statement, active mediums
+- [x] Step 4: PRESENCE — upload profile photo + cover art (S3 upload with crop/position)
+- [x] Step 5: TESTIMONY — write your creator testimony (gets a WID-TST anchor)
+- [x] Step 6: LICENSE — choose tier: Founder / Creator License / Micro Pack — Stripe checkout
+- [x] Step 7: FIRST WORK — upload first manifestation and receive first WID (or skip)
+- [x] Progress is persistent — resume from last completed step on return visit
+- [x] Observatory motion direction applied to onboarding — constellation transitions between steps
+- [x] Add "Begin Your Provenance" CTA at bottom of WID Spec page
+- [x] Register /onboarding route in App.tsx

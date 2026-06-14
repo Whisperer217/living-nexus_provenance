@@ -1,0 +1,1 @@
+ALTER TABLE `onboardingProgress` MODIFY COLUMN `completedSteps` json;
