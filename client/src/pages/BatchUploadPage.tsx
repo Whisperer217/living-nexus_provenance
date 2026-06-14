@@ -88,6 +88,7 @@ interface TrackCard {
   expanded: boolean;
   audioDragging: boolean;
   coverDragging: boolean;
+  fileType: "full_mix" | "vocal_stem" | "instrumental_stem" | "bass_stem" | "drum_stem" | "other_stem";
   // New provenance fields from batch upload sketch
   releaseDate: string;
   aiDisclosure: "original" | "ai_assisted" | "human_authored_ai_instrument" | "ai_generated";
@@ -111,6 +112,7 @@ function stripTrackPrefix(raw: string): string {
 function makeEmptyCard(overrides?: Partial<TrackCard>): TrackCard {
   return {
     id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+    fileType: "full_mix",
     releaseDate: "",
     aiDisclosure: "original",
     aiToolSuno: false,
@@ -189,9 +191,22 @@ function TrackCardUI({
   const coverInputRef = useRef<HTMLInputElement>(null);
   const { extractMetadata } = useAudioMetadata();
 
+  const MAX_BATCH_AUDIO_MB = 200;
   const handleAudioFile = (file: File) => {
+    if (file.size > MAX_BATCH_AUDIO_MB * 1024 * 1024) {
+      toast.error(`File too large: ${(file.size / 1024 / 1024).toFixed(0)} MB. Batch upload limit is ${MAX_BATCH_AUDIO_MB} MB per track. For files over ${MAX_BATCH_AUDIO_MB} MB, use Single Upload.`);
+      return;
+    }
     const fallbackTitle = stripTrackPrefix(file.name.replace(/\.[^.]+$/, ""));
-    onChange(card.id, { audioFile: file, title: card.title || fallbackTitle, audioStatus: "hashing" });
+    // Auto-detect stem type from filename
+    const nameLower = file.name.toLowerCase();
+    const detectedType: TrackCard["fileType"] =
+      nameLower.includes("vocal") ? "vocal_stem" :
+      nameLower.includes("instrument") ? "instrumental_stem" :
+      nameLower.includes("bass") ? "bass_stem" :
+      nameLower.includes("drum") || nameLower.includes("perc") ? "drum_stem" :
+      "full_mix";
+    onChange(card.id, { audioFile: file, title: card.title || fallbackTitle, audioStatus: "hashing", fileType: detectedType });
     onGenerateWid(card.id, file);
     // Auto-populate card fields from embedded ID3 metadata
     extractMetadata(file).then(meta => {
@@ -420,6 +435,24 @@ function TrackCardUI({
                 className="h-9 text-sm"
                 style={{ background: "var(--ln-coal)", border: "1px solid #C49A28", color: "#FFFFFF" }}
               />
+
+              {/* File Type */}
+              <div>
+                <label className="text-[10px] font-heading tracking-widest uppercase mb-1 block" style={{ color: "rgba(232,223,200,0.6)" }}>File Type</label>
+                <Select value={card.fileType} onValueChange={v => onChange(card.id, { fileType: v as TrackCard["fileType"] })}>
+                  <SelectTrigger className="h-9 text-xs" style={{ background: "var(--ln-coal)", border: "1px solid #C49A28", color: "#FFFFFF" }}>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent style={{ background: "#0A0A0A", border: "1px solid rgba(196,154,40,0.5)", color: "var(--ln-parchment)" }}>
+                    <SelectItem value="full_mix" style={{ color: "var(--ln-parchment)", fontSize: "12px" }}>Full Mix</SelectItem>
+                    <SelectItem value="vocal_stem" style={{ color: "var(--ln-parchment)", fontSize: "12px" }}>Vocal Stem</SelectItem>
+                    <SelectItem value="instrumental_stem" style={{ color: "var(--ln-parchment)", fontSize: "12px" }}>Instrumental Stem</SelectItem>
+                    <SelectItem value="bass_stem" style={{ color: "var(--ln-parchment)", fontSize: "12px" }}>Bass Stem</SelectItem>
+                    <SelectItem value="drum_stem" style={{ color: "var(--ln-parchment)", fontSize: "12px" }}>Drum Stem</SelectItem>
+                    <SelectItem value="other_stem" style={{ color: "var(--ln-parchment)", fontSize: "12px" }}>Other Stem</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
               {/* Genre + AI consent */}
               <div className="grid grid-cols-2 gap-2">
@@ -791,6 +824,7 @@ export default function BatchUploadPage() {
         aiDisclosure?: TrackCard["aiDisclosure"];
         aiToolSuno?: boolean; aiToolUdio?: boolean; aiToolSonato?: boolean;
         aiToolOther?: boolean; aiToolOtherName?: string;
+        fileType?: string;
       }[] = [];
 
       for (const card of readyCards) {
@@ -825,6 +859,7 @@ export default function BatchUploadPage() {
           aiToolSonato: card.aiToolSonato,
           aiToolOther: card.aiToolOther,
           aiToolOtherName: card.aiToolOtherName || undefined,
+          fileType: card.fileType,
         });
       }
 

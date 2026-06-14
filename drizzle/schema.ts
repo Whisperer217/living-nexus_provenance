@@ -311,6 +311,11 @@ export const songs = mysqlTable("songs", {
   haaiEmotionalTone: text("haaiEmotionalTone"),        // The emotional tone and MUT-alignment the creator was pursuing
   haaiDeclaredAt: timestamp("haaiDeclaredAt"),         // Timestamp when the HAAI declaration was completed
 
+  // File Type — classifies the audio file within an album/collection
+  // "full_mix" = the complete mixed-down track (default)
+  // "*_stem" = individual stem exports (vocal, instrumental, bass, drum, other)
+  fileType: mysqlEnum("fileType", ["full_mix", "vocal_stem", "instrumental_stem", "bass_stem", "drum_stem", "other_stem"]).default("full_mix"),
+
   // Song Credits — JSON array of { role: string; name: string } objects
   // Roles: songwriter, producer, featured, mixing, mastering, etc.
   creditsJson: text("creditsJson"),

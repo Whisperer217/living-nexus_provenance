@@ -5231,3 +5231,6 @@
 - [x] MarketplacePage: 3D READY badge + download link when model3dUrl is set
 - [x] MarketplacePage: 3D model fields reserved in schema for future API integration (model3dStatus enum: none/pending/processing/ready/failed)
 - [ ] Keeper skin slot (creator-customizable avatar) — future: wire to marketplace equip flow
+
+## Future: Stem File Type Visibility on Profiles
+- [ ] Show fileType label (Full Mix / Vocal Stem / Instrumental Stem / Bass Stem / Drum Stem / Other Stem) on creator profile track listings so visitors can see the full stem architecture of a registered work alongside the WID
