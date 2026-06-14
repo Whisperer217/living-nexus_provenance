@@ -10,14 +10,27 @@ import {
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 
-const CURRENT_VERSION = "v2.46.0";
+const CURRENT_VERSION = "v2.47.0";
 const STORAGE_KEY = `living-nexus-whats-new-seen-${CURRENT_VERSION}`;
 
 const UPDATES = [
   {
+    version: "v2.47.0",
+    date: "Jun 14, 2026",
+    label: "Latest",
+    items: [
+      { icon: Music, text: "Seamless Playback Engine — No more silence between tracks. Choose your transition mode: Standard (clean cut), Crossfade (overlap current + next with configurable 1–12s fade), Gapless (next track preloads 15s early, zero gap), or Album Blend (gapless + per-track fade metadata for conceptual album sequencing)." },
+      { icon: Zap, text: "Playback Settings page — Go to Settings → Playback to configure your transition preferences. Crossfade duration slider, global fade-in/out controls, per-track fade respect toggle, and preload toggle. Settings persist to your account." },
+      { icon: ArrowUpFromLine, text: "Per-track fade metadata — When uploading a work, you can now set Fade In (seconds) and Fade Out (seconds) for that specific track. When \"Respect per-track fades\" is enabled in Playback Settings, these override your global settings — essential for conceptual albums." },
+      { icon: Scroll, text: "Creator Onboarding Manifest — A 7-step ceremony at /onboarding: Covenant → Identity → Domain → Presence (avatar + cover art upload) → Testimony → License → First Work. Progress is persistent — return and resume from your last completed step." },
+      { icon: Shield, text: "Creator Covenant expanded — The covenant scroll now features real founding creator profiles (Doc Seraph Mercer, Mannon The Conquerer) as living examples. Article II includes a real WID anchor. Article VI closes: \"The archive is not the company. The archive is the record.\"" },
+      { icon: Star, text: "Testimony anchor — Your creator testimony written during onboarding receives a WID-TST provenance anchor, making your origin statement part of the permanent record." },
+    ],
+  },
+  {
     version: "v2.46.0",
     date: "Jun 8, 2026",
-    label: "Latest",
+    label: "",
     items: [
       { icon: Shield, text: "Trust Restoration — Four confirmed bugs repaired: TopBar guide links now resolve correctly, /settings no longer 404s, duplicate archive routes removed, and Explore deep links (?medium=, ?sort=) now drive page state." },
       { icon: Users, text: "Creator Identity — The Identity tab is fully rebuilt. Origin Statement now carries its proper prompt: \"What truth, experience, mission, or curiosity gave rise to this creator identity?\" with a live 300-word counter." },
