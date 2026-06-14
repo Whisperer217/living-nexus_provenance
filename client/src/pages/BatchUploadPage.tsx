@@ -72,6 +72,7 @@ interface TrackCard {
   id: string;
   audioFile: File | null;
   audioStatus: "empty" | "hashing" | "ready" | "uploading" | "done" | "error";
+  uploadProgress?: number; // 0-100 during "uploading" status
   errorMsg?: string;
   wid?: string;
   fileHash?: string;
@@ -132,11 +133,38 @@ function makeEmptyCard(overrides?: Partial<TrackCard>): TrackCard {
 }
 
 // ── S3 upload helper ──────────────────────────────────────────────────────────
-async function uploadFileToS3(file: File, type: "audio" | "cover"): Promise<{ url: string; key: string }> {
+async function uploadFileToS3(
+  file: File,
+  type: "audio" | "cover",
+  onProgress?: (pct: number) => void
+): Promise<{ url: string; key: string }> {
   const formData = new FormData();
   formData.append("file", file);
   formData.append("type", type);
   formData.append("filename", file.name);
+  if (onProgress) {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", "/api/upload-file");
+      xhr.withCredentials = true;
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) onProgress(Math.round((e.loaded * 100) / e.total));
+      };
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          try { resolve(JSON.parse(xhr.responseText)); }
+          catch { reject(new Error("Invalid server response")); }
+        } else {
+          try {
+            const err = JSON.parse(xhr.responseText);
+            reject(new Error((err as { error?: string }).error || `Upload failed (${xhr.status})`));
+          } catch { reject(new Error(`Upload failed (${xhr.status})`)); }
+        }
+      };
+      xhr.onerror = () => reject(new Error("Network error during upload"));
+      xhr.send(formData);
+    });
+  }
   const res = await fetch("/api/upload-file", { method: "POST", credentials: "include", body: formData });
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: res.statusText }));
@@ -347,6 +375,22 @@ function TrackCardUI({
                   </button>
                 )}
               </div>
+
+              {/* Upload progress bar — shown during audio upload */}
+              {card.audioStatus === "uploading" && (
+                <div className="space-y-1">
+                  <div className="flex justify-between text-[10px]" style={{ color: "rgba(184,168,138,0.8)" }}>
+                    <span>Uploading{card.audioFile && card.audioFile.size > 50 * 1024 * 1024 ? ` (${(card.audioFile.size / 1024 / 1024).toFixed(0)} MB — please wait)` : ""}…</span>
+                    <span style={{ color: "var(--ln-gold)" }}>{card.uploadProgress ?? 0}%</span>
+                  </div>
+                  <div className="w-full rounded-full h-1.5" style={{ background: "rgba(196,154,40,0.12)" }}>
+                    <div
+                      className="h-1.5 rounded-full transition-all duration-200"
+                      style={{ width: `${card.uploadProgress ?? 0}%`, background: "linear-gradient(90deg, #C49A28, #D4AF37)" }}
+                    />
+                  </div>
+                </div>
+              )}
 
               {/* WID display */}
               {card.wid && (
@@ -750,8 +794,12 @@ export default function BatchUploadPage() {
       }[] = [];
 
       for (const card of readyCards) {
-        updateCard(card.id, { audioStatus: "uploading" });
-        const { url: audioUrl, key: audioKey } = await uploadFileToS3(card.audioFile!, "audio");
+        updateCard(card.id, { audioStatus: "uploading", uploadProgress: 0 });
+        const { url: audioUrl, key: audioKey } = await uploadFileToS3(
+          card.audioFile!,
+          "audio",
+          (pct) => updateCard(card.id, { uploadProgress: pct })
+        );
         let trackCoverUrl: string | undefined;
         if (card.coverFile) {
           const { url } = await uploadFileToS3(card.coverFile, "cover");

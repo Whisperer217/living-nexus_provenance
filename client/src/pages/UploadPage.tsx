@@ -428,8 +428,8 @@ export default function UploadPage() {
     setAudioDragging(false);
     const file = e.dataTransfer.files[0];
     if (file && file.type.startsWith("audio/")) {
-      if (file.size > 375 * 1024 * 1024) {
-        toast.error(`File too large (${(file.size/1024/1024).toFixed(0)} MB). Maximum size is 375 MB. Consider converting WAV to MP3 first.`);
+      if (file.size > 800 * 1024 * 1024) {
+        toast.error(`File too large (${(file.size/1024/1024).toFixed(0)} MB). Maximum size is 800 MB. For faster uploads, consider converting WAV to MP3.`);
         return;
       }
       setAudioFile(file);
@@ -1043,7 +1043,7 @@ export default function UploadPage() {
                     color: "var(--ln-gold)",
                     title: "Before You Register Music",
                     items: [
-                      { label: "Audio file (MP3, WAV, FLAC, M4A, OGG)", note: "Up to 375 MB", required: true },
+                      { label: "Audio file (MP3, WAV, FLAC, M4A, OGG)", note: "Up to 800 MB — WAV stems supported", required: true },
                       { label: "Cover art image (JPG, PNG, WebP)", note: "Square preferred — 1:1 or 4:5", required: true },
                       { label: "Track title", required: true },
                       { label: "ISRC code", note: "If you have one — leave blank if not", required: false },
@@ -1142,7 +1142,7 @@ export default function UploadPage() {
                   className="rounded-xl p-8 text-center cursor-pointer transition-all"
                   style={{ border: `2px dashed ${audioFile ? "var(--ln-seal-bright)" : audioDragging ? "var(--ln-gold)" : "rgba(196,154,40,0.2)"}`, background: audioFile ? "rgba(74,222,128,0.05)" : audioDragging ? "rgba(196,154,40,0.04)" : "var(--ln-coal)" }}>
                   <input ref={audioInputRef} type="file" accept="audio/*,audio/mpeg,audio/mp3,audio/wav,audio/x-wav,audio/flac,audio/x-flac,audio/aac,audio/ogg,audio/x-m4a,audio/mp4,.mp3,.wav,.flac,.aac,.ogg,.m4a,.aiff,.aif" className="hidden"
-                    onChange={e => { const f = e.target.files?.[0]; if (f) { if (f.size > 375 * 1024 * 1024) { toast.error(`File too large (${(f.size/1024/1024).toFixed(0)} MB). Maximum size is 375 MB. Consider converting WAV to MP3 first.`); e.target.value = ""; return; } setAudioFile(f); if (!title) setTitle(f.name.replace(/\.[^/.]+$/, "")); extractMetadata(f).then(meta => { if (meta.title) setTitle(meta.title); if (meta.album && !albumName) setAlbumName(meta.album); if (meta.genre && !genre) setGenre(meta.genre); if (meta.lyrics && !lyrics) setLyrics(meta.lyrics); if (meta.coverArtBlob && !coverFile) { const ext = meta.coverArtBlob.type.includes("png") ? "png" : "jpg"; setCoverFile(new File([meta.coverArtBlob], `cover.${ext}`, { type: meta.coverArtBlob.type })); toast.success("Cover art extracted from audio file"); } if (meta.title || meta.album || meta.genre || meta.lyrics) toast.success("Metadata loaded from audio file"); }); } }} />
+                    onChange={e => { const f = e.target.files?.[0]; if (f) { if (f.size > 800 * 1024 * 1024) { toast.error(`File too large (${(f.size/1024/1024).toFixed(0)} MB). Maximum size is 800 MB. For faster uploads, consider converting WAV to MP3.`); e.target.value = ""; return; } setAudioFile(f); if (!title) setTitle(f.name.replace(/\.[^/.]+$/, "")); extractMetadata(f).then(meta => { if (meta.title) setTitle(meta.title); if (meta.album && !albumName) setAlbumName(meta.album); if (meta.genre && !genre) setGenre(meta.genre); if (meta.lyrics && !lyrics) setLyrics(meta.lyrics); if (meta.coverArtBlob && !coverFile) { const ext = meta.coverArtBlob.type.includes("png") ? "png" : "jpg"; setCoverFile(new File([meta.coverArtBlob], `cover.${ext}`, { type: meta.coverArtBlob.type })); toast.success("Cover art extracted from audio file"); } if (meta.title || meta.album || meta.genre || meta.lyrics) toast.success("Metadata loaded from audio file"); }); } }} />
                   {audioFile ? (
                     <div className="flex flex-col items-center gap-2">
                       <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: "rgba(74,222,128,0.18)" }}>
@@ -2112,6 +2112,11 @@ export default function UploadPage() {
                       }}
                     />
                   </div>
+                  {uploadPhase === "uploading" && uploadProgress < 30 && audioFile && audioFile.size > 50 * 1024 * 1024 && (
+                    <p className="text-xs text-center" style={{ color: "rgba(184,168,138,0.7)" }}>
+                      Large file detected ({(audioFile.size / 1024 / 1024).toFixed(0)} MB) — do not close this tab. WAV files may take 2–5 minutes.
+                    </p>
+                  )}
                   {uploadPhase === "processing" && (
                     <p className="text-xs text-center" style={{ color: "var(--ln-seal-bright)" }}>
                       ✦ Embedding Witness ID into file metadata…
