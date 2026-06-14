@@ -127,6 +127,9 @@ export const users = mysqlTable("users", {
 
   // Provenance keypair — Ed25519 public key (hex). Private key stored client-side only.
   publicKey: text("publicKey"),
+  // Avatar marketplace — which marketplace skin item is currently equipped as profile avatar
+  // null = using uploaded photo; set to marketplaceItems.id when user equips a skin
+  equippedAvatarItemId: int("equippedAvatarItemId"),
 });
 
 export type User = typeof users.$inferSelect;
@@ -1451,6 +1454,18 @@ export const marketplaceItems = mysqlTable("marketplace_items", {
   stock: int("stock"),
   active: boolean("active").notNull().default(true),
   featured: boolean("featured").notNull().default(false),
+  // Avatar/skin provenance fields
+  aiPrompt: text("ai_prompt"),           // For AI-generated avatars: the generation prompt
+  artistCredit: varchar("artist_credit", { length: 256 }), // For hand-drawn: artist name/handle
+  artStyle: varchar("art_style", { length: 128 }),         // e.g. "digital concept art", "hand-drawn"
+  // ── 3D Model Generation (future: API hook for 2D→3D avatar conversion) ──────
+  // Workflow: artworkUrl → 3D generation API → stlUrl stored here
+  // STL is downloadable by the equipping user; persistent per avatar asset
+  model3dStatus: mysqlEnum("model3d_status", ["none", "pending", "processing", "ready", "failed"]).default("none"),
+  model3dJobId: varchar("model3d_job_id", { length: 256 }),  // External job/task ID from 3D gen API
+  model3dUrl: text("model3d_url"),                            // S3 URL of generated .glb or .stl file
+  model3dFormat: varchar("model3d_format", { length: 16 }),  // "glb" | "stl" | "obj"
+  model3dGeneratedAt: timestamp("model3d_generated_at"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
 });

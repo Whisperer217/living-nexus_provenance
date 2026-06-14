@@ -5216,3 +5216,18 @@
 - [x] Add "Add Version / Lineage" button on song detail page for creators
 - [x] Add "Invite Witness" button on song detail page for creators
 - [x] Write vitest tests for provenance tRPC procedures
+
+## Phase N: Avatar Marketplace — Curated Submission + Equip + Tip
+- [x] DB schema: add ai_prompt, artist_credit, art_style, model3d_status, model3d_job_id, model3d_url, model3d_format, model3d_generated_at to marketplace_items
+- [x] DB schema: add equippedAvatarItemId to users table
+- [x] tRPC: marketplace.createAvatarItem — founder-gated (role=founder only), uploads to CDN, stores WID + AI prompt or artist credit
+- [x] tRPC: marketplace.equipAvatar — sets equippedAvatarItemId + updates profilePhotoUrl to item artworkUrl
+- [x] tRPC: marketplace.unequipAvatar — clears equippedAvatarItemId
+- [x] tRPC: marketplace.createAvatarTip — Stripe tip checkout for marketplace skin creators
+- [x] tRPC: marketplace.listItems — extended to return aiPrompt, artistCredit, artStyle, model3dStatus, model3dUrl, model3dFormat
+- [x] MarketplacePage: founder-only Submit Avatar modal with inline style guide (existing skins as reference), art style selector, AI prompt vs artist credit field, WID field, featured toggle
+- [x] MarketplacePage: EQUIP button on skin cards — equips avatar, shows EQUIPPED badge + gold glow
+- [x] MarketplacePage: GIFT button on skin cards — opens tip modal with $1/$3/$5/$10/$25 amounts
+- [x] MarketplacePage: 3D READY badge + download link when model3dUrl is set
+- [x] MarketplacePage: 3D model fields reserved in schema for future API integration (model3dStatus enum: none/pending/processing/ready/failed)
+- [ ] Keeper skin slot (creator-customizable avatar) — future: wire to marketplace equip flow

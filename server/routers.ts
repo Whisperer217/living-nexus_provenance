@@ -6183,6 +6183,12 @@ Never collapse multiple sections into a single block. Always label clearly.
             creatorName: users.name,
             creatorHandle: users.artistHandle,
             creatorAvatarUrl: users.profilePhotoUrl,
+            aiPrompt: marketplaceItems.aiPrompt,
+            artistCredit: marketplaceItems.artistCredit,
+            artStyle: marketplaceItems.artStyle,
+            model3dStatus: marketplaceItems.model3dStatus,
+            model3dUrl: marketplaceItems.model3dUrl,
+            model3dFormat: marketplaceItems.model3dFormat,
           })
           .from(marketplaceItems)
           .leftJoin(users, eq(marketplaceItems.creatorId, users.id))
@@ -6495,6 +6501,125 @@ Never collapse multiple sections into a single block. Always label clearly.
       await db.insert(marketplaceItems).values(seeds);
       return { seeded: seeds.length, message: `${seeds.length} default marketplace items created.` };
     }),
+
+    // Founder-only: submit a new avatar/skin to the marketplace
+    // Gate: role === "founder" only. artworkUrl must be a CDN URL (uploaded before calling).
+    createAvatarItem: protectedProcedure
+      .input(z.object({
+        title: z.string().min(1).max(256),
+        description: z.string().max(1000).optional(),
+        artworkUrl: z.string().url(),
+        priceCents: z.number().min(0).default(0),
+        wid: z.string().max(128).optional(),
+        aiPrompt: z.string().max(4000).optional(),
+        artistCredit: z.string().max(256).optional(),
+        artStyle: z.string().max(128).optional(),
+        featured: z.boolean().default(false),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'DB unavailable' });
+        // Founder gate
+        const { users } = await import('../drizzle/schema');
+        const { eq } = await import('drizzle-orm');
+        const [me] = await db.select({ role: users.role }).from(users).where(eq(users.id, ctx.user.id)).limit(1);
+        if (!me || me.role !== 'founder') {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Only founders may submit avatars to the marketplace.' });
+        }
+        const { marketplaceItems } = await import('../drizzle/schema');
+        const result = await db.insert(marketplaceItems).values({
+          type: 'skin',
+          title: input.title,
+          description: input.description,
+          artworkUrl: input.artworkUrl,
+          priceCents: input.priceCents,
+          royaltyPct: 80,
+          creatorId: ctx.user.id,
+          wid: input.wid,
+          aiPrompt: input.aiPrompt,
+          artistCredit: input.artistCredit,
+          artStyle: input.artStyle,
+          featured: input.featured,
+          active: true,
+          model3dStatus: 'none',
+        });
+        return { id: (result as any)[0]?.insertId };
+      }),
+
+    // Protected: equip a marketplace skin as your profile avatar
+    // Sets equippedAvatarItemId and updates profilePhotoUrl to the item's artworkUrl
+    equipAvatar: protectedProcedure
+      .input(z.object({ itemId: z.number().int().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'DB unavailable' });
+        const { marketplaceItems, users } = await import('../drizzle/schema');
+        const { eq } = await import('drizzle-orm');
+        const [item] = await db.select({ artworkUrl: marketplaceItems.artworkUrl, type: marketplaceItems.type, active: marketplaceItems.active })
+          .from(marketplaceItems).where(eq(marketplaceItems.id, input.itemId)).limit(1);
+        if (!item) throw new TRPCError({ code: 'NOT_FOUND', message: 'Avatar not found' });
+        if (!item.active) throw new TRPCError({ code: 'BAD_REQUEST', message: 'This avatar is no longer available' });
+        if (item.type !== 'skin') throw new TRPCError({ code: 'BAD_REQUEST', message: 'Only skin items can be equipped as avatars' });
+        await db.update(users)
+          .set({ equippedAvatarItemId: input.itemId, profilePhotoUrl: item.artworkUrl ?? undefined })
+          .where(eq(users.id, ctx.user.id));
+        return { ok: true, artworkUrl: item.artworkUrl };
+      }),
+
+    // Protected: unequip marketplace avatar (revert to uploaded photo)
+    unequipAvatar: protectedProcedure
+      .mutation(async ({ ctx }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'DB unavailable' });
+        const { users } = await import('../drizzle/schema');
+        const { eq } = await import('drizzle-orm');
+        await db.update(users)
+          .set({ equippedAvatarItemId: null })
+          .where(eq(users.id, ctx.user.id));
+        return { ok: true };
+      }),
+
+    // Public: tip the creator of a marketplace avatar item
+    createAvatarTip: protectedProcedure
+      .input(z.object({
+        itemId: z.number().int().positive(),
+        amountCents: z.number().min(100).max(50000),
+        origin: z.string().url(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'DB unavailable' });
+        const { marketplaceItems, users } = await import('../drizzle/schema');
+        const { eq } = await import('drizzle-orm');
+        const [item] = await db.select({
+          id: marketplaceItems.id,
+          title: marketplaceItems.title,
+          creatorId: marketplaceItems.creatorId,
+          artworkUrl: marketplaceItems.artworkUrl,
+        }).from(marketplaceItems).where(eq(marketplaceItems.id, input.itemId)).limit(1);
+        if (!item) throw new TRPCError({ code: 'NOT_FOUND', message: 'Avatar not found' });
+        const [creator] = await db.select({ stripeAccountId: users.stripeAccountId, name: users.name, artistHandle: users.artistHandle })
+          .from(users).where(eq(users.id, item.creatorId)).limit(1);
+        if (!creator?.stripeAccountId) throw new TRPCError({ code: 'BAD_REQUEST', message: 'This creator has not enabled gifts yet.' });
+        try {
+          const acct = await stripe.accounts.retrieve(creator.stripeAccountId);
+          if (!acct.charges_enabled) throw new TRPCError({ code: 'BAD_REQUEST', message: "This creator's Stripe account is still being verified." });
+        } catch (e: any) {
+          if (e instanceof TRPCError) throw e;
+          throw new TRPCError({ code: 'BAD_REQUEST', message: "This creator's payment account is not yet active." });
+        }
+        const feeAmount = Math.round(input.amountCents * PLATFORM_FEE_PERCENT / 100);
+        const creatorHandle = creator.artistHandle || creator.name || 'this creator';
+        const session = await stripe.checkout.sessions.create({
+          mode: 'payment', payment_method_types: ['card'],
+          line_items: [{ price_data: { currency: 'usd', product_data: { name: `Gift for "${item.title}" by ${creatorHandle}`, description: `Supporting ${creatorHandle} on Living Nexus` }, unit_amount: input.amountCents }, quantity: 1 }],
+          metadata: { type: 'tip', songId: '0', userId: ctx.user.id.toString(), tipperName: ctx.user.name || '', creatorId: item.creatorId.toString() },
+          payment_intent_data: { application_fee_amount: feeAmount, transfer_data: { destination: creator.stripeAccountId } },
+          success_url: `${input.origin}/marketplace?tip=success&item=${item.id}`,
+          cancel_url: `${input.origin}/marketplace`,
+        });
+        return { url: session.url };
+      }),
   }),
 
   // ─── Satchel (Provenance Event Ledger for CreatorSurface/Writer) ─────────────
