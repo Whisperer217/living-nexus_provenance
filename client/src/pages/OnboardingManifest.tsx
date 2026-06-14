@@ -129,50 +129,132 @@ function CovenantStep({ onAccept }: { onAccept: () => void }) {
   };
 
   return (
-    <div className="space-y-6">
-      <div
-        ref={scrollRef}
-        onScroll={handleScroll}
-        className="h-72 overflow-y-auto rounded-lg p-6 text-sm leading-relaxed space-y-4"
-        style={{ background: "rgba(196,154,40,0.04)", border: "1px solid rgba(196,154,40,0.15)", color: "var(--ln-parchment)" }}
-      >
-        <p className="font-semibold" style={{ color: "var(--ln-gold)" }}>Article I — What You Are Entering</p>
-        <p>Living Nexus is not a platform. It is an archive. When you register here, you are not signing up for a service — you are anchoring your creative identity to a permanent, immutable record of origin.</p>
+    <div className="space-y-8">
 
-        <p className="font-semibold" style={{ color: "var(--ln-gold)" }}>Article II — What the WID Guarantees</p>
-        <p>Every work you register receives a Witness ID (WID) — a cryptographic provenance anchor that records: the work itself, the creator identity, the timestamp, and the context of creation. This record cannot be altered, deleted, or transferred without your explicit action.</p>
+      {/* Founding voices — real creators who entered before you */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div
+          className="rounded-xl p-5 space-y-3"
+          style={{ background: "rgba(124,58,237,0.06)", border: "1px solid rgba(124,58,237,0.18)" }}
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full flex items-center justify-center text-base font-bold shrink-0"
+              style={{ background: "rgba(124,58,237,0.18)", color: "#A78BFA" }}>D</div>
+            <div>
+              <p className="text-sm font-semibold" style={{ color: "var(--ln-parchment)" }}>Doc Seraph Mercer</p>
+              <p className="text-xs opacity-50">Founder · Combat Medic · Architect of the Witness</p>
+            </div>
+          </div>
+          <blockquote className="text-xs leading-relaxed italic border-l-2 pl-3" style={{ borderColor: "rgba(124,58,237,0.4)", color: "var(--ln-smoke)" }}>
+            "The platform exists because I recognized a problem the technology industry had not named. Truth enters through witnesses, survives through return, and collapses when systems sever it from its origin. Living Nexus is the system that cannot sever it."
+          </blockquote>
+          <p className="text-xs opacity-40 font-mono">Entered the archive · January 2026</p>
+        </div>
 
-        <p className="font-semibold" style={{ color: "var(--ln-gold)" }}>Article III — What You Are Responsible For</p>
-        <p>You attest that every work you register is your original creation, or that you have the legal right to register it. You understand that false registration is a violation of the covenant and may result in revocation of your WIDs.</p>
+        <div
+          className="rounded-xl p-5 space-y-3"
+          style={{ background: "rgba(180,83,9,0.06)", border: "1px solid rgba(180,83,9,0.2)" }}
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full flex items-center justify-center text-base font-bold shrink-0"
+              style={{ background: "rgba(180,83,9,0.18)", color: "#F59E0B" }}>M</div>
+            <div>
+              <p className="text-sm font-semibold" style={{ color: "var(--ln-parchment)" }}>Mannon The Conquerer</p>
+              <p className="text-xs opacity-50">thiiirdgenkill · First Witness · Gospel Warrior</p>
+            </div>
+          </div>
+          <blockquote className="text-xs leading-relaxed italic border-l-2 pl-3" style={{ borderColor: "rgba(180,83,9,0.4)", color: "var(--ln-smoke)" }}>
+            "First to catch the missing tip confirmation on the song page — reported it immediately after donating. Every request was precise, practical, and creator-first. He built this platform by using it."
+          </blockquote>
+          <p className="text-xs opacity-40 font-mono">First Witness · Catalog Pioneer · April 2026</p>
+        </div>
+      </div>
 
-        <p className="font-semibold" style={{ color: "var(--ln-gold)" }}>Article IV — What Living Nexus Will Never Do</p>
-        <p>Living Nexus will never claim ownership of your work. We will never sell your creative data. We will never remove your WID record without your explicit request. Your provenance is yours.</p>
+      {/* Covenant scroll */}
+      <div>
+        <p className="text-xs font-mono uppercase tracking-widest mb-3 opacity-50" style={{ color: "var(--ln-gold)" }}>The Creator Covenant</p>
+        <div
+          ref={scrollRef}
+          onScroll={handleScroll}
+          className="overflow-y-auto rounded-xl text-sm leading-relaxed"
+          style={{
+            height: "340px",
+            background: "rgba(196,154,40,0.03)",
+            border: "1px solid rgba(196,154,40,0.15)",
+            color: "var(--ln-parchment)",
+            scrollbarWidth: "thin",
+            scrollbarColor: "rgba(196,154,40,0.2) transparent",
+          }}
+        >
+          <div className="p-7 space-y-7">
+            <div className="space-y-3">
+              <p className="text-xs font-mono uppercase tracking-widest" style={{ color: "var(--ln-gold)" }}>Article I — What You Are Entering</p>
+              <p className="leading-loose">Living Nexus is not a platform. It is an archive. When you register here, you are not signing up for a service — you are anchoring your creative identity to a permanent, immutable record of origin. The distinction matters: platforms come and go. Archives endure.</p>
+            </div>
 
-        <p className="font-semibold" style={{ color: "var(--ln-gold)" }}>Article V — The Testimony Obligation</p>
-        <p>As a creator in this archive, you are encouraged — not required — to leave testimony. Testimony is a statement about your work, your process, or your creative identity. It becomes part of the permanent record.</p>
+            <div className="space-y-3">
+              <p className="text-xs font-mono uppercase tracking-widest" style={{ color: "var(--ln-gold)" }}>Article II — What the WID Guarantees</p>
+              <p className="leading-loose">Every work you register receives a Witness ID (WID) — a cryptographic provenance anchor that records: the work itself, the creator identity, the timestamp, and the context of creation. This record cannot be altered, deleted, or transferred without your explicit action.</p>
+              <div className="rounded-lg px-4 py-3 text-xs font-mono" style={{ background: "rgba(196,154,40,0.06)", border: "1px solid rgba(196,154,40,0.12)", color: "var(--ln-gold)" }}>
+                WID-FB13-1FB049D8 · Doc Seraph Mercer · Jan 2026 · Immutable
+              </div>
+            </div>
 
-        <p className="font-semibold" style={{ color: "var(--ln-gold)" }}>Article VI — The Living Archive</p>
-        <p>This archive is designed to outlast any single platform. Your WIDs are anchored to a provenance chain that exists independently of Living Nexus as a business. If Living Nexus ceases to operate, your provenance records remain valid and verifiable.</p>
+            <div className="space-y-3">
+              <p className="text-xs font-mono uppercase tracking-widest" style={{ color: "var(--ln-gold)" }}>Article III — What You Are Responsible For</p>
+              <p className="leading-loose">You attest that every work you register is your original creation, or that you have the legal right to register it. You understand that false registration is a violation of the covenant and may result in revocation of your WIDs. The archive is only as sovereign as the truth that enters it.</p>
+            </div>
 
-        <p className="text-xs opacity-60 mt-4">Scroll to the bottom to accept the covenant.</p>
+            <div className="space-y-3">
+              <p className="text-xs font-mono uppercase tracking-widest" style={{ color: "var(--ln-gold)" }}>Article IV — What Living Nexus Will Never Do</p>
+              <p className="leading-loose">Living Nexus will never claim ownership of your work. We will never sell your creative data. We will never remove your WID record without your explicit request. We will never use your testimony to train AI systems without your consent. Your provenance is yours — unconditionally.</p>
+            </div>
+
+            <div className="space-y-3">
+              <p className="text-xs font-mono uppercase tracking-widest" style={{ color: "var(--ln-gold)" }}>Article V — The Testimony Obligation</p>
+              <p className="leading-loose">As a creator in this archive, you are encouraged — not required — to leave testimony. Testimony is a statement about your work, your process, or your creative identity. It becomes part of the permanent record. Future witnesses of your work will read it. Write with intention.</p>
+            </div>
+
+            <div className="space-y-3">
+              <p className="text-xs font-mono uppercase tracking-widest" style={{ color: "var(--ln-gold)" }}>Article VI — The Living Archive</p>
+              <p className="leading-loose">This archive is designed to outlast any single platform. Your WIDs are anchored to a provenance chain that exists independently of Living Nexus as a business. If Living Nexus ceases to operate, your provenance records remain valid and verifiable. The archive is not the company. The archive is the record.</p>
+            </div>
+
+            <div className="pt-2 pb-1">
+              <p className="text-xs opacity-40 text-center font-mono">— End of Creator Covenant v1.0 · BDDT Publishing / Command Domains LLC —</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Scroll progress indicator */}
+        <div className="flex items-center justify-between mt-2 px-1">
+          <p className="text-xs opacity-30">Scroll to read the full covenant</p>
+          {scrolled && (
+            <div className="flex items-center gap-1.5 text-xs" style={{ color: "#34D399" }}>
+              <Check className="w-3 h-3" />
+              <span>Covenant read</span>
+            </div>
+          )}
+        </div>
       </div>
 
       <Button
         onClick={onAccept}
         disabled={!scrolled}
-        className="w-full gap-2 font-semibold"
+        className="w-full gap-2 font-semibold py-3 text-sm"
         style={{
-          background: scrolled ? "rgba(196,154,40,0.15)" : "rgba(196,154,40,0.05)",
-          border: `1px solid ${scrolled ? "rgba(196,154,40,0.5)" : "rgba(196,154,40,0.15)"}`,
-          color: scrolled ? "var(--ln-gold)" : "rgba(196,154,40,0.4)",
-          transition: "all 0.4s ease",
+          background: scrolled ? "rgba(196,154,40,0.15)" : "rgba(196,154,40,0.04)",
+          border: `1px solid ${scrolled ? "rgba(196,154,40,0.6)" : "rgba(196,154,40,0.12)"}`,
+          color: scrolled ? "var(--ln-gold)" : "rgba(196,154,40,0.3)",
+          transition: "all 0.5s ease",
+          letterSpacing: scrolled ? "0.06em" : "0",
         }}
       >
         <Shield className="w-4 h-4" />
         I Accept the Creator Covenant
       </Button>
       {!scrolled && (
-        <p className="text-center text-xs opacity-40">Read the full covenant to continue</p>
+        <p className="text-center text-xs opacity-30">Read the full covenant above to continue</p>
       )}
     </div>
   );
@@ -693,7 +775,7 @@ export default function OnboardingManifest() {
 
         {/* Main content */}
         <div className="flex-1 flex items-start justify-center px-6 py-8">
-          <div className="w-full max-w-lg">
+          <div className="w-full max-w-2xl">
             {/* Step header */}
             <div className="mb-8">
               <div className="flex items-center gap-3 mb-2">
