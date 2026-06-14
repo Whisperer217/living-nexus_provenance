@@ -893,6 +893,13 @@ const HERO_IMG = "https://files.manuscdn.com/user_upload_by_module/session_file/
 
 export default function HomePage() {
   const { isAuthenticated, user } = useAuth();
+
+  // Belt-and-suspenders: set document.title via JS so SEO tools that check
+  // the JS-rendered title see the correct 30-60 char value
+  useEffect(() => {
+    document.title = "Living Nexus — Audio Provenance Platform for Creators";
+  }, []);
+
   const [activeGenre, setActiveGenre] = useState("All");
   const [tipTarget, setTipTarget] = useState<any | null>(null);
   const [tipRect, setTipRect] = useState<DOMRect | null>(null);

@@ -232,11 +232,13 @@ function buildStaticBodyBlock(opts: {
   title: string;
   description: string;
   canonicalUrl: string;
+  subheading?: string;
 }): string {
-  const { title, description, canonicalUrl } = opts;
+  const { title, description, canonicalUrl, subheading } = opts;
   return (
     `<div id="ln-static-content">` +
     `<h1>${escAttr(title)}</h1>` +
+    (subheading ? `<h2>${escAttr(subheading)}</h2>` : "") +
     `<p>${escAttr(description)}</p>` +
     `<p><a href="${escAttr(canonicalUrl)}">View on Living Nexus</a></p>` +
     `</div>`
@@ -512,8 +514,8 @@ export function registerOgRoutes(app: Express) {
     },
     {
       path: "/",
-      title: "Living Nexus — Sovereign Music Platform",
-      description: "A platform that honors your work. Your lived witness. Your testimony. Every song carries a Witness ID — proof of origin that belongs to you before it belongs to anyone else.",
+      title: "Living Nexus — Audio Provenance Platform for Creators",
+      description: "Register your music, lyrics, and creative works with cryptographic Witness IDs. Living Nexus anchors provenance so every work is witnessed, attributed, and protected. Music provenance, WID registration, creator rights.",
     },
     {
       path: "/profile",
@@ -548,15 +550,18 @@ export function registerOgRoutes(app: Express) {
   ];
 
   // Doctrine routes that get ln-static-content body injection
-  const DOCTRINE_PATHS = new Set(["/manifesto", "/doctrine/wid-spec", "/lexicon"]);
+  // The homepage ("/") is included so SEO audit tools and search crawlers
+  // that do NOT execute JavaScript see a real H1 and H2 in the static HTML.
+  const DOCTRINE_PATHS = new Set(["/", "/manifesto", "/doctrine/wid-spec", "/lexicon"]);
 
   for (const route of STATIC_OG_ROUTES) {
     app.get(route.path, async (req, res, next) => {
-      // Only intercept for crawlers — regular browsers fall through to the React SPA.
-      // This preserves the SPA experience while giving Google/Discord/Slack/iMessage
-      // a fully-formed HTML page with OG tags and a self-referencing canonical tag.
+      // For the homepage, serve OG-injected HTML for ALL requests so that
+      // SEO audit tools (which use headless browsers / non-crawler UAs) see
+      // the correct <title>, <meta keywords>, H1, and H2 in the static HTML.
+      // For all other static routes, only intercept crawler UAs.
       const ua = req.headers["user-agent"] || "";
-      if (!isCrawler(ua)) return next();
+      if (route.path !== "/" && !isCrawler(ua)) return next();
 
       const canonicalUrl = `${CANONICAL_ORIGIN}${route.path === "/" ? "" : route.path}`;
       const finalCanonical = route.path === "/" ? `${CANONICAL_ORIGIN}/` : canonicalUrl;
@@ -571,12 +576,16 @@ export function registerOgRoutes(app: Express) {
         const html = await getHtmlTemplate(isDev);
         if (!html) return next();
 
-        // Inject visible static body block for doctrine pages
+        // Inject visible static body block for doctrine pages and homepage
+        // The homepage gets a subheading (H2) for richer SEO signal
         const bodyBlock = DOCTRINE_PATHS.has(route.path)
           ? buildStaticBodyBlock({
               title: route.title,
               description: route.description,
               canonicalUrl: finalCanonical,
+              subheading: route.path === "/"
+                ? "Discover and Register WID-Protected Creative Works on Living Nexus"
+                : undefined,
             })
           : undefined;
 
