@@ -146,7 +146,7 @@ export default function ProfilePage() {
   const isOwn = !!user;
   const [, navigate] = useLocation();
   const utils = trpc.useUtils();
-  const { addAndPlay, currentTrackId, state: playerState } = usePlayer();
+  const { addAndPlay, playQueueAt, currentTrackId, state: playerState } = usePlayer();
   // ── Lights mode ────────────────────────────────────────────────
   const { mode: lightsMode, setMode: setLightsModeLocal } = useLightsMode();
   const setLightsModeMutation = trpc.profile.setLightsMode.useMutation({
@@ -1218,6 +1218,37 @@ export default function ProfilePage() {
                         <p className="text-[11px] font-body text-white/40 mt-0.5">{col.trackCount ?? 0} tracks</p>
                       </div>
                       {isExpanded ? <ChevronDown size={13} className="text-white/30 flex-shrink-0" /> : <ChevronRight size={13} className="text-white/30 flex-shrink-0" />}
+                      {/* Play All button — only when expanded and tracks loaded */}
+                      {isExpanded && expandedCollectionTracks && (expandedCollectionTracks as any[]).length > 0 && (
+                        <button
+                          onClick={e => {
+                            e.stopPropagation();
+                            const playerTracks: Track[] = (expandedCollectionTracks as any[])
+                              .map((item: any) => {
+                                const s = item.song ?? item;
+                                return {
+                                  id: String(s.id),
+                                  title: s.title ?? "Untitled",
+                                  artist: s.artistHandle ? `@${s.artistHandle}` : (s.creatorName ?? ""),
+                                  genre: s.genre ?? "",
+                                  audioUrl: s.fileUrl ?? s.audioUrl ?? "",
+                                  artUrl: s.coverArtUrl ?? undefined,
+                                  witnessId: s.witnessId ?? undefined,
+                                };
+                              })
+                              .filter((t: Track) => !!t.audioUrl);
+                            if (playerTracks.length === 0) { toast.error("No playable tracks in this collection"); return; }
+                            playQueueAt(playerTracks, 0, "PLAYLIST");
+                            toast.success(`Playing "${col.name}" — ${playerTracks.length} tracks`);
+                          }}
+                          className="flex items-center gap-1 px-2.5 py-1 rounded-lg transition-all flex-shrink-0"
+                          style={{ background: "rgba(196,154,40,0.12)", border: "1px solid rgba(196,154,40,0.3)", color: "#C49A28" }}
+                          title="Play all tracks"
+                        >
+                          <Play size={10} style={{ marginLeft: 1 }} />
+                          <span className="text-[10px] font-medium">Play All</span>
+                        </button>
+                      )}
                       <button
                         onClick={e => { e.stopPropagation(); if (confirm(`Delete "${col.name}"?`)) deleteCollection.mutate({ collectionId: col.id }); }}
                         className="p-1.5 rounded-lg text-white/20 hover:text-red-400 hover:bg-red-400/10 transition-all flex-shrink-0"
@@ -1235,12 +1266,44 @@ export default function ProfilePage() {
                         ) : (
                           (expandedCollectionTracks as any[]).map((item) => {
                             const s = item.song ?? item;
+                            const allPlayerTracks: Track[] = (expandedCollectionTracks as any[])
+                              .map((it: any) => {
+                                const ts = it.song ?? it;
+                                return {
+                                  id: String(ts.id),
+                                  title: ts.title ?? "Untitled",
+                                  artist: ts.artistHandle ? `@${ts.artistHandle}` : (ts.creatorName ?? ""),
+                                  genre: ts.genre ?? "",
+                                  audioUrl: ts.fileUrl ?? ts.audioUrl ?? "",
+                                  artUrl: ts.coverArtUrl ?? undefined,
+                                  witnessId: ts.witnessId ?? undefined,
+                                };
+                              })
+                              .filter((t: Track) => !!t.audioUrl);
+                            const playableIdx = allPlayerTracks.findIndex((t: Track) => t.id === String(s.id));
                             return (
-                              <div key={s.id} className="flex items-center gap-3 px-3 py-2.5 hover:bg-white/[0.02] transition-all border-b border-white/[0.03] last:border-0">
-                                <div className="w-8 h-8 rounded-lg flex-shrink-0 overflow-hidden bg-[#0a0a08]">
+                              <div key={s.id} className="flex items-center gap-3 px-3 py-2.5 hover:bg-white/[0.02] transition-all border-b border-white/[0.03] last:border-0 group">
+                                <div className="w-8 h-8 rounded-lg flex-shrink-0 overflow-hidden bg-[#0a0a08] relative">
                                   {s.coverArtUrl
                                     ? <img src={s.coverArtUrl} alt="" className="w-full h-full object-cover" />
                                     : <div className="w-full h-full flex items-center justify-center"><Music size={11} className="text-white/30" /></div>}
+                                  {/* Play overlay on art */}
+                                  {(s.fileUrl || s.audioUrl) && (
+                                    <button
+                                      onClick={() => {
+                                        if (allPlayerTracks.length > 0 && playableIdx >= 0) {
+                                          playQueueAt(allPlayerTracks, playableIdx, "PLAYLIST");
+                                        } else {
+                                          addAndPlay({ id: String(s.id), title: s.title ?? "Untitled", artist: s.artistHandle ? `@${s.artistHandle}` : (s.creatorName ?? ""), genre: s.genre ?? "", audioUrl: s.fileUrl ?? s.audioUrl ?? "", artUrl: s.coverArtUrl ?? undefined, witnessId: s.witnessId ?? undefined });
+                                        }
+                                      }}
+                                      className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                      style={{ background: "rgba(0,0,0,0.55)" }}
+                                      title="Play"
+                                    >
+                                      <Play size={12} style={{ color: "#D4AF37", marginLeft: 1 }} />
+                                    </button>
+                                  )}
                                 </div>
                                 <div className="flex-1 min-w-0">
                                   <p className="text-[12px] font-body text-white/75 truncate">{s.title}</p>
@@ -1248,7 +1311,7 @@ export default function ProfilePage() {
                                 </div>
                                 <button
                                   onClick={() => removeFromCollection.mutate({ collectionId: col.id, songId: s.id })}
-                                  className="p-1.5 rounded text-white/20 hover:text-red-400 transition-colors flex-shrink-0"
+                                  className="p-1.5 rounded text-white/20 hover:text-red-400 transition-colors flex-shrink-0 opacity-0 group-hover:opacity-100"
                                 ><X size={10} /></button>
                               </div>
                             );
@@ -1261,7 +1324,7 @@ export default function ProfilePage() {
               })
             )}
 
-            {/* ── Legacy Playlists section ── */}
+            {/* ── Playlists section ── */}
             {(myLegacyPlaylists as any[]).length > 0 && (
               <div className="mt-6">
                 <div className="flex items-center gap-2 mb-3 pt-4 border-t border-white/[0.06]">
@@ -1270,6 +1333,7 @@ export default function ProfilePage() {
                 </div>
                 {(myLegacyPlaylists as any[]).map((pl: any) => {
                   const isExpanded = expandedLegacyPlaylistId === pl.id;
+                  const plTracks = isExpanded ? expandedLegacyPlaylistTracks : [];
                   return (
                     <div key={pl.id} className="rounded-xl border border-white/[0.06] bg-[#000000] overflow-hidden mb-2">
                       <div
@@ -1281,33 +1345,98 @@ export default function ProfilePage() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-[13px] font-body text-white/80 truncate">{pl.name}</p>
-                          <p className="text-[11px] font-body text-white/40 mt-0.5">Playlist</p>
+                          <p className="text-[11px] font-body text-white/40 mt-0.5">{pl.isPublic ? "Public" : "Private"} Playlist</p>
                         </div>
                         {isExpanded ? <ChevronDown size={13} className="text-white/30 flex-shrink-0" /> : <ChevronRight size={13} className="text-white/30 flex-shrink-0" />}
+                        {/* Play All — visible when expanded and tracks are loaded */}
+                        {isExpanded && plTracks.length > 0 && (
+                          <button
+                            onClick={e => {
+                              e.stopPropagation();
+                              const playerTracks: Track[] = plTracks
+                                .map((item: any) => {
+                                  const s = item.song ?? item;
+                                  return {
+                                    id: String(s.id),
+                                    title: s.title ?? "Untitled",
+                                    artist: s.artistHandle ? `@${s.artistHandle}` : (s.creatorName ?? ""),
+                                    genre: s.genre ?? "",
+                                    audioUrl: s.fileUrl ?? s.audioUrl ?? "",
+                                    artUrl: s.coverArtUrl ?? undefined,
+                                    witnessId: s.witnessId ?? undefined,
+                                  };
+                                })
+                                .filter((t: Track) => !!t.audioUrl);
+                              if (playerTracks.length === 0) { toast.error("No playable tracks in this playlist"); return; }
+                              playQueueAt(playerTracks, 0, "PLAYLIST");
+                              toast.success(`Playing "${pl.name}" — ${playerTracks.length} tracks`);
+                            }}
+                            className="flex items-center gap-1 px-2.5 py-1 rounded-lg transition-all flex-shrink-0"
+                            style={{ background: "rgba(167,139,250,0.12)", border: "1px solid rgba(167,139,250,0.3)", color: "#A78BFA" }}
+                            title="Play all tracks"
+                          >
+                            <Play size={10} style={{ marginLeft: 1 }} />
+                            <span className="text-[10px] font-medium">Play All</span>
+                          </button>
+                        )}
                       </div>
                       {isExpanded && (
                         <div className="border-t border-white/[0.04]">
-                          {expandedLegacyPlaylistTracks.length === 0 ? (
+                          {plTracks.length === 0 ? (
                             <div className="text-center py-6">
                               <p className="text-white/30 font-body text-[11px]">No tracks in this playlist</p>
                             </div>
                           ) : (
-                            (expandedLegacyPlaylistTracks as any[]).map((item: any) => {
-                              const s = item.song ?? item;
-                              return (
-                                <div key={s.id} className="flex items-center gap-3 px-3 py-2.5 hover:bg-white/[0.02] transition-all border-b border-white/[0.03] last:border-0">
-                                  <div className="w-8 h-8 rounded-lg flex-shrink-0 overflow-hidden bg-[#0a0a08]">
-                                    {s.coverArtUrl
-                                      ? <img src={s.coverArtUrl} alt="" className="w-full h-full object-cover" />
-                                      : <div className="w-full h-full flex items-center justify-center"><Music size={11} className="text-white/30" /></div>}
+                            (() => {
+                              const allPlayerTracks: Track[] = plTracks
+                                .map((item: any) => {
+                                  const ts = item.song ?? item;
+                                  return {
+                                    id: String(ts.id),
+                                    title: ts.title ?? "Untitled",
+                                    artist: ts.artistHandle ? `@${ts.artistHandle}` : (ts.creatorName ?? ""),
+                                    genre: ts.genre ?? "",
+                                    audioUrl: ts.fileUrl ?? ts.audioUrl ?? "",
+                                    artUrl: ts.coverArtUrl ?? undefined,
+                                    witnessId: ts.witnessId ?? undefined,
+                                  };
+                                })
+                                .filter((t: Track) => !!t.audioUrl);
+                              return plTracks.map((item: any) => {
+                                const s = item.song ?? item;
+                                const playableIdx = allPlayerTracks.findIndex((t: Track) => t.id === String(s.id));
+                                return (
+                                  <div key={s.id} className="flex items-center gap-3 px-3 py-2.5 hover:bg-white/[0.02] transition-all border-b border-white/[0.03] last:border-0 group">
+                                    <div className="w-8 h-8 rounded-lg flex-shrink-0 overflow-hidden bg-[#0a0a08] relative">
+                                      {s.coverArtUrl
+                                        ? <img src={s.coverArtUrl} alt="" className="w-full h-full object-cover" />
+                                        : <div className="w-full h-full flex items-center justify-center"><Music size={11} className="text-white/30" /></div>}
+                                      {/* Play overlay on art */}
+                                      {(s.fileUrl || s.audioUrl) && (
+                                        <button
+                                          onClick={() => {
+                                            if (allPlayerTracks.length > 0 && playableIdx >= 0) {
+                                              playQueueAt(allPlayerTracks, playableIdx, "PLAYLIST");
+                                            } else {
+                                              addAndPlay({ id: String(s.id), title: s.title ?? "Untitled", artist: s.artistHandle ? `@${s.artistHandle}` : (s.creatorName ?? ""), genre: s.genre ?? "", audioUrl: s.fileUrl ?? s.audioUrl ?? "", artUrl: s.coverArtUrl ?? undefined, witnessId: s.witnessId ?? undefined });
+                                            }
+                                          }}
+                                          className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                          style={{ background: "rgba(0,0,0,0.55)" }}
+                                          title="Play"
+                                        >
+                                          <Play size={12} style={{ color: "#A78BFA", marginLeft: 1 }} />
+                                        </button>
+                                      )}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                      <p className="text-[12px] font-body text-white/75 truncate">{s.title}</p>
+                                      <p className="text-[10px] font-body text-white/40 truncate">{s.artistHandle ?? s.creatorName ?? ""}</p>
+                                    </div>
                                   </div>
-                                  <div className="flex-1 min-w-0">
-                                    <p className="text-[12px] font-body text-white/75 truncate">{s.title}</p>
-                                    <p className="text-[10px] font-body text-white/40 truncate">{s.artistHandle ?? s.creatorName ?? ""}</p>
-                                  </div>
-                                </div>
-                              );
-                            })
+                                );
+                              });
+                            })()
                           )}
                         </div>
                       )}
