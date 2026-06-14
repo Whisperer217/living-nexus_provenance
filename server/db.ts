@@ -52,6 +52,9 @@ import {
   onboardingProgress,
   type OnboardingProgress,
   type InsertOnboardingProgress,
+  workEvents,
+  workLineage,
+  workWitnesses,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 import type { SearchResults } from "../shared/searchTypes";
@@ -5243,4 +5246,178 @@ export async function updateSongFade(songId: number, userId: number, fadeInSecon
   const db = await getDb();
   if (!db) throw new Error("Database unavailable");
   await db.update(songs).set({ fadeInSeconds, fadeOutSeconds } as any).where(eq(songs.id, songId));
+}
+
+// ─── Provenance: Work Events ──────────────────────────────────────────────────
+
+export async function getWorkEvents(songId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db
+    .select()
+    .from(workEvents)
+    .where(eq(workEvents.songId, songId))
+    .orderBy(asc(workEvents.occurredAt));
+  return rows;
+}
+
+export async function addWorkEvent(data: {
+  songId: number;
+  eventType: string;
+  eventLabel?: string;
+  eventData?: Record<string, unknown>;
+  actorId?: number;
+  actorName?: string;
+  platformName?: string;
+  platformUrl?: string;
+  isSystemEvent?: boolean;
+  occurredAt?: Date;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  const [result] = await db.insert(workEvents).values({
+    songId: data.songId,
+    eventType: data.eventType,
+    eventLabel: data.eventLabel,
+    eventData: data.eventData as any,
+    actorId: data.actorId,
+    actorName: data.actorName,
+    platformName: data.platformName,
+    platformUrl: data.platformUrl,
+    isSystemEvent: data.isSystemEvent ?? false,
+    occurredAt: data.occurredAt ?? new Date(),
+  } as any);
+  return result;
+}
+
+// ─── Provenance: Work Lineage ─────────────────────────────────────────────────
+
+export async function getWorkLineage(songId: number) {
+  const db = await getDb();
+  if (!db) return { parents: [], children: [] };
+
+  const parentSong = alias(songs, 'parentSong');
+  const childSong  = alias(songs, 'childSong');
+  const parentUser = alias(users, 'parentUser');
+  const childUser  = alias(users, 'childUser');
+
+  const parents = await db
+    .select({
+      id: workLineage.id,
+      parentSongId: workLineage.parentSongId,
+      childSongId: workLineage.childSongId,
+      relationshipType: workLineage.relationshipType,
+      versionLabel: workLineage.versionLabel,
+      notes: workLineage.notes,
+      createdAt: workLineage.createdAt,
+      parentTitle: parentSong.title,
+      parentArtistHandle: parentUser.artistHandle,
+    })
+    .from(workLineage)
+    .leftJoin(parentSong, eq(parentSong.id, workLineage.parentSongId))
+    .leftJoin(parentUser, eq(parentUser.id, parentSong.userId))
+    .where(eq(workLineage.childSongId, songId))
+    .orderBy(asc(workLineage.createdAt));
+
+  const children = await db
+    .select({
+      id: workLineage.id,
+      parentSongId: workLineage.parentSongId,
+      childSongId: workLineage.childSongId,
+      relationshipType: workLineage.relationshipType,
+      versionLabel: workLineage.versionLabel,
+      notes: workLineage.notes,
+      createdAt: workLineage.createdAt,
+      childTitle: childSong.title,
+      childArtistHandle: childUser.artistHandle,
+    })
+    .from(workLineage)
+    .leftJoin(childSong, eq(childSong.id, workLineage.childSongId))
+    .leftJoin(childUser, eq(childUser.id, childSong.userId))
+    .where(eq(workLineage.parentSongId, songId))
+    .orderBy(asc(workLineage.createdAt));
+
+  return { parents, children };
+}
+
+export async function addLineageRelationship(data: {
+  parentSongId: number;
+  childSongId: number;
+  relationshipType: string;
+  versionLabel?: string;
+  notes?: string;
+  createdByUserId: number;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  await db.insert(workLineage).values(data as any);
+}
+
+// ─── Provenance: Work Witnesses ───────────────────────────────────────────────
+
+export async function getWorkWitnesses(songId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db
+    .select()
+    .from(workWitnesses)
+    .where(eq(workWitnesses.songId, songId))
+    .orderBy(asc(workWitnesses.invitedAt));
+  return rows;
+}
+
+export async function inviteWitness(data: {
+  songId: number;
+  invitedByUserId: number;
+  role: string;
+  customRole?: string;
+  contributionPercent?: number;
+  inviteEmail?: string;
+  inviteeName?: string;
+  expiresAt?: Date;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  const { randomUUID } = await import("crypto");
+  const token = randomUUID();
+  const expiresAt = data.expiresAt ?? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+  await db.insert(workWitnesses).values({
+    ...data,
+    inviteToken: token,
+    expiresAt,
+    status: "pending",
+  } as any);
+  return token;
+}
+
+export async function acceptWitnessInvite(token: string, witnessUserId: number, testimony?: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  const [row] = await db
+    .select()
+    .from(workWitnesses)
+    .where(eq(workWitnesses.inviteToken, token))
+    .limit(1);
+  if (!row) throw new Error("Invite not found");
+  if (row.status !== "pending") throw new Error("Invite already used");
+  if (row.expiresAt && row.expiresAt < new Date()) throw new Error("Invite expired");
+  await db
+    .update(workWitnesses)
+    .set({
+      witnessUserId,
+      status: "accepted",
+      testimony: testimony ?? null,
+      witnessedAt: new Date(),
+    } as any)
+    .where(eq(workWitnesses.inviteToken, token));
+  // Add a provenance event for the witness acceptance
+  await addWorkEvent({
+    songId: row.songId,
+    eventType: "witnessed",
+    eventLabel: `Witnessed by ${row.inviteeName ?? "a collaborator"} as ${row.role}`,
+    actorId: witnessUserId,
+    actorName: row.inviteeName ?? undefined,
+    isSystemEvent: false,
+  });
+  return row;
 }

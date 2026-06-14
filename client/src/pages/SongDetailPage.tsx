@@ -33,6 +33,9 @@ import AddToPlaylistButton from "@/components/AddToPlaylistButton";
 import AddToNamedPlaylistPopover from "@/components/AddToNamedPlaylistPopover";
 import { WIDPanel } from "@/components/WIDPanel";
 import { ActivationPanel } from "@/components/ActivationPanel";
+import { ProvenanceTimeline } from "@/components/ProvenanceTimeline";
+import { LineageGraph } from "@/components/LineageGraph";
+import { WitnessesPanel } from "@/components/WitnessesPanel";
 import { EvidencePanel } from "@/components/EvidencePanel";
 import { FlagContentButton } from "@/components/FlagContentButton";
 import { VersionHistoryModal } from "@/components/VersionHistoryModal";
@@ -1237,6 +1240,25 @@ export default function SongDetailPage() {
 
         {/* ── ACTIVATION — stage-based funding progress ── */}
         <ActivationPanel songId={songId} songTitle={song.title} />
+        {/* ── PROVENANCE TIMELINE ── */}
+        <ProvenanceTimeline
+          songId={songId}
+          ownerId={song.userId}
+          className="mt-6"
+        />
+        {/* ── LINEAGE GRAPH ── */}
+        <LineageGraph
+          songId={songId}
+          songTitle={song.title}
+          ownerId={song.userId}
+          className="mt-4"
+        />
+        {/* ── WITNESSES PANEL ── */}
+        <WitnessesPanel
+          songId={songId}
+          ownerId={song.userId}
+          className="mt-4"
+        />
         {/* ── WITNESSED WORK — proof attachment layer ── */}
         <EvidencePanel
           songId={songId}

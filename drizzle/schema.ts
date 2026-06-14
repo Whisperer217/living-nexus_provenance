@@ -1828,3 +1828,67 @@ export const quiverImages = mysqlTable("quiverImages", {
 }));
 export type QuiverImage = typeof quiverImages.$inferSelect;
 export type InsertQuiverImage = typeof quiverImages.$inferInsert;
+
+// ─── Work Events (Provenance Timeline) ───────────────────────────────────────
+// Every significant moment in a work's life is recorded as an immutable event.
+// Event types: created | wid_assigned | mastered | distributed | published |
+//              remastered | re_released | licensed | witnessed | imported |
+//              version_created | credential_attached | rights_registered
+export const workEvents = mysqlTable("workEvents", {
+  id: int("id").autoincrement().primaryKey(),
+  songId: int("songId").notNull(),
+  eventType: varchar("eventType", { length: 64 }).notNull(),
+  eventLabel: varchar("eventLabel", { length: 256 }),           // Human-readable label, e.g. "Published to Spotify"
+  eventData: json("eventData").$type<Record<string, unknown>>(), // Arbitrary metadata (platform, ISRC, version, etc.)
+  actorId: int("actorId"),                                       // userId who triggered the event (null = system)
+  actorName: varchar("actorName", { length: 256 }),             // Denormalized for display without joins
+  platformName: varchar("platformName", { length: 128 }),       // e.g. "Spotify", "DistroKid", "Apple Music"
+  platformUrl: text("platformUrl"),                              // Deep link to the work on the platform
+  isSystemEvent: boolean("isSystemEvent").default(false).notNull(), // true = auto-generated, false = user-created
+  occurredAt: timestamp("occurredAt").defaultNow().notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type WorkEvent = typeof workEvents.$inferSelect;
+export type InsertWorkEvent = typeof workEvents.$inferInsert;
+
+// ─── Work Lineage ─────────────────────────────────────────────────────────────
+// Parent/child relationships between works.
+// Relationship types: version | remix | remaster | sample | derivative | translation
+// Example: Draft v0.1 (parent) → Final Release (child), type: "version"
+export const workLineage = mysqlTable("workLineage", {
+  id: int("id").autoincrement().primaryKey(),
+  parentSongId: int("parentSongId").notNull(),
+  childSongId: int("childSongId").notNull(),
+  relationshipType: varchar("relationshipType", { length: 64 }).notNull().default("version"),
+  versionLabel: varchar("versionLabel", { length: 128 }),       // e.g. "v0.1", "Remaster 2024", "Radio Edit"
+  notes: text("notes"),
+  createdByUserId: int("createdByUserId").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type WorkLineage = typeof workLineage.$inferSelect;
+export type InsertWorkLineage = typeof workLineage.$inferInsert;
+
+// ─── Work Witnesses ───────────────────────────────────────────────────────────
+// Co-signers who testify to a work's authenticity, creation, or contribution.
+// Roles: producer | mix_engineer | mastering_engineer | artist | publisher |
+//        songwriter | featured_artist | label | distributor | manager | custom
+// Status: pending | accepted | declined
+export const workWitnesses = mysqlTable("workWitnesses", {
+  id: int("id").autoincrement().primaryKey(),
+  songId: int("songId").notNull(),
+  invitedByUserId: int("invitedByUserId").notNull(),
+  witnessUserId: int("witnessUserId"),                           // null until they accept
+  role: varchar("role", { length: 64 }).notNull().default("witness"),
+  customRole: varchar("customRole", { length: 128 }),           // if role = "custom"
+  contributionPercent: int("contributionPercent"),              // optional: 0-100
+  status: mysqlEnum("status", ["pending", "accepted", "declined"]).default("pending").notNull(),
+  inviteToken: varchar("inviteToken", { length: 128 }).unique(), // UUID token for invite link
+  inviteEmail: varchar("inviteEmail", { length: 256 }),         // email if inviting non-user
+  inviteeName: varchar("inviteeName", { length: 256 }),         // display name for pending invites
+  testimony: text("testimony"),                                  // optional witness statement
+  witnessedAt: timestamp("witnessedAt"),
+  invitedAt: timestamp("invitedAt").defaultNow().notNull(),
+  expiresAt: timestamp("expiresAt"),                            // invite link expiry
+});
+export type WorkWitness = typeof workWitnesses.$inferSelect;
+export type InsertWorkWitness = typeof workWitnesses.$inferInsert;

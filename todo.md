@@ -5198,3 +5198,21 @@
 - [x] Register /settings/playback route in App.tsx
 - [x] Add "Playback" link to settings navigation
 - [x] Write vitest tests for playback settings procedures
+
+## Feature: Provenance & Lineage System — Phase 1
+- [x] Add work_events table to drizzle/schema.ts (songId, eventType, eventData, actorId, timestamp)
+- [x] Add work_lineage table to drizzle/schema.ts (parentSongId, childSongId, relationshipType, versionLabel)
+- [x] Add work_witnesses table to drizzle/schema.ts (songId, witnessUserId, role, status, witnessedAt, inviteToken)
+- [x] Push DB migration: pnpm db:push
+- [x] Add DB helpers: getWorkEvents, addWorkEvent, getWorkLineage, addLineageRelationship, getWorkWitnesses, inviteWitness, acceptWitnessInvite
+- [x] Add tRPC procedures: provenance.getTimeline, provenance.getLineage, provenance.getWitnesses, provenance.inviteWitness, provenance.acceptWitness
+- [x] Auto-create work_events entry on song upload (eventType: "created")
+- [x] Auto-create work_events entry on WID assignment (eventType: "witnessed")
+- [x] Build ProvenanceTimeline component — vertical event log with icons per event type
+- [x] Build LineageGraph component — tree visualization of parent/child works
+- [x] Build WitnessesPanel component — list of co-signers with roles and invite flow
+- [ ] Build ContributionMap component — donut chart showing contributor percentages (Phase 2)
+- [x] Wire all provenance components into song detail page (/song/:id)
+- [x] Add "Add Version / Lineage" button on song detail page for creators
+- [x] Add "Invite Witness" button on song detail page for creators
+- [x] Write vitest tests for provenance tRPC procedures
