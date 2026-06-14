@@ -20,7 +20,7 @@ import {
   Star, TrendingUp, Sparkles,
   FolderOpen, Settings, LogOut, LogIn,
   Shield, BookMarked,
-  LayoutGrid, LayoutDashboard, X,
+  LayoutGrid, LayoutDashboard, X, ExternalLink,
 } from "lucide-react";
 
 // ── Types ─────────────────────────────────────────────────────────
@@ -73,6 +73,12 @@ const PANELS: Record<NavMode, ModePanel> = {
         links: [
           { icon: <Shield size={14} />, label: "Founder's Era", path: "/founder-era", description: "Earliest provenance anchors" },
           { icon: <Users size={14} />, label: "Founding Creators", path: "/founders", description: "View the founding registry" },
+        ],
+      },
+      {
+        heading: "Companion Tools",
+        links: [
+          { icon: <ExternalLink size={14} />, label: "Celestial Codex", path: "__external__https://bardsgrim-qmts67ka.manus.space/", description: "Music wheel — spin the seals", gold: true },
         ],
       },
     ],
@@ -220,6 +226,11 @@ export default function ContextDrawer({
         logout().finally(() => { onClose(); navigate("/"); });
         return;
       }
+      if (path.startsWith("__external__")) {
+        window.open(path.replace("__external__", ""), "_blank", "noopener,noreferrer");
+        onClose();
+        return;
+      }
       navigate(path);
       onClose();
     },
@@ -333,7 +344,7 @@ export default function ContextDrawer({
                       </div>
                     )}
                     {visibleLinks.map((link, li) => {
-                      const active = link.path !== "__logout__" && isActive(link.path);
+                      const active = link.path !== "__logout__" && !link.path.startsWith("__external__") && isActive(link.path);
                       return (
                         <button
                           key={li}

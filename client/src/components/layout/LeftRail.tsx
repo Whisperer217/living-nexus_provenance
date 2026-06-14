@@ -13,7 +13,7 @@
        else → set activeMode = clickedMode, open
 ═══════════════════════════════════════════════════════════════════ */
 import { useLocation } from "wouter";
-import { Home, Compass, User, Upload, Archive } from "lucide-react";
+import { Home, Compass, User, Upload, Archive, ExternalLink } from "lucide-react";
 
 export type NavMode = "home" | "explore" | "profile" | "upload" | "archive";
 
@@ -133,6 +133,40 @@ export default function LeftRail({ drawerOpen, activeMode, onRailClick }: LeftRa
           </button>
         );
       })}
+
+      {/* Divider before companion tools */}
+      <div className="w-8 h-px mt-2 mb-2" style={{ background: "rgba(196,154,40,0.12)" }} />
+
+      {/* Celestial Codex — companion external tool */}
+      <a
+        href="https://bardsgrim-qmts67ka.manus.space/"
+        target="_blank"
+        rel="noopener noreferrer"
+        title="Celestial Codex"
+        aria-label="Celestial Codex — open companion tool"
+        onClick={e => e.stopPropagation()}
+        className="relative flex flex-col items-center justify-center gap-0.5 transition-all duration-150 rounded-xl no-underline"
+        style={{
+          width: 60,
+          height: 56,
+          color: "rgba(212,175,55,0.45)",
+          background: "transparent",
+          textDecoration: "none",
+        }}
+        onMouseEnter={e => {
+          (e.currentTarget as HTMLElement).style.color = "rgba(212,175,55,0.80)";
+          (e.currentTarget as HTMLElement).style.background = "rgba(212,175,55,0.06)";
+        }}
+        onMouseLeave={e => {
+          (e.currentTarget as HTMLElement).style.color = "rgba(212,175,55,0.45)";
+          (e.currentTarget as HTMLElement).style.background = "transparent";
+        }}
+      >
+        <ExternalLink size={15} />
+        <span style={{ fontSize: 8, fontWeight: 600, letterSpacing: "0.04em", lineHeight: 1, textAlign: "center" }}>
+          CODEX
+        </span>
+      </a>
     </aside>
   );
 }

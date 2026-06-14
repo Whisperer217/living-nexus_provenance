@@ -19,7 +19,7 @@ import {
   Music, FileText, BookOpen, Image, Users,
   Star,
   Settings,
-  Shield, BookMarked, LayoutDashboard, LayoutGrid,
+  Shield, BookMarked, LayoutDashboard, LayoutGrid, ExternalLink,
 } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
@@ -70,6 +70,7 @@ const ALL_SECTIONS: NavSection[] = [
       { icon: <Sparkles size={14} />, label: "Compose", path: "/keeper-compose", description: "Image & music generation" },
       { icon: <Users size={14} />, label: "Guide Directory", path: "/guides", description: "Browse guide characters" },
       { icon: <Shield size={14} />, label: "Register Guide Character", path: "/guides/upload", gold: true, authOnly: true, description: "Register a guide entity" },
+      { icon: <ExternalLink size={14} />, label: "Celestial Codex", path: "__external__https://bardsgrim-qmts67ka.manus.space/", gold: true, description: "Music wheel — spin the seals" },
     ],
   },
   {
@@ -131,6 +132,11 @@ export default function MobileNavDrawer({ open, onClose, onOpenWhatsNew }: Mobil
   };
 
   const handleNav = (path: string) => {
+    if (path.startsWith("__external__")) {
+      window.open(path.replace("__external__", ""), "_blank", "noopener,noreferrer");
+      onClose();
+      return;
+    }
     navigate(path);
     onClose();
   };
