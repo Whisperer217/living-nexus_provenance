@@ -5176,3 +5176,25 @@
 - [x] Observatory motion direction applied to onboarding — constellation transitions between steps
 - [x] Add "Begin Your Provenance" CTA at bottom of WID Spec page
 - [x] Register /onboarding route in App.tsx
+
+## Feature: Seamless Playback & Transition Engine (Phase 212)
+- [x] Add playbackSettings JSON column to users table in drizzle/schema.ts
+- [x] Add per-track fadeInSeconds / fadeOutSeconds fields to songs table
+- [x] Push DB migration: pnpm db:push
+- [x] Add tRPC procedures: getPlaybackSettings, savePlaybackSettings
+- [x] Upgrade PlayerContext with Web Audio API GainNode crossfade engine
+- [x] Implement gapless mode: preload next track while current is playing
+- [x] Implement crossfade mode: overlap current + next track with gain ramp
+- [x] Implement per-track fade-in: ramp gain from 0 on track start
+- [x] Implement per-track fade-out: ramp gain to 0 before track ends
+- [x] Implement "no silence" mode: instant cut with no gap between tracks
+- [x] Build /settings/playback page with all transition toggles
+- [x] Settings: Crossfade toggle + duration slider (1-12 seconds)
+- [x] Settings: Gapless playback toggle (no silence between tracks)
+- [x] Settings: Per-track fade-in/out respect toggle
+- [x] Settings: Transition mode selector (crossfade / gapless / standard)
+- [x] Settings: Conceptual album mode (blend tracks, no gap, honor per-track fades)
+- [x] Add fade-in/fade-out fields to CreatorStudio upload form
+- [x] Register /settings/playback route in App.tsx
+- [x] Add "Playback" link to settings navigation
+- [x] Write vitest tests for playback settings procedures

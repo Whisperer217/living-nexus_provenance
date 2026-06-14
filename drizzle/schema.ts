@@ -97,6 +97,19 @@ export const users = mysqlTable("users", {
   // Global display mode — 'dim' = default dark lantern; 'on' = lights-on warm parchment
   lightsMode: mysqlEnum("lightsMode", ["dim", "on"]).default("dim").notNull(),
 
+  // ─── Playback Preferences ──────────────────────────────────────────────
+  // JSON blob storing the user's playback transition preferences.
+  // Schema: PlaybackSettings (see shared/types.ts)
+  // null = use platform defaults (gapless off, crossfade off, standard mode)
+  playbackSettings: json("playbackSettings").$type<{
+    transitionMode: "standard" | "gapless" | "crossfade" | "album_blend";
+    crossfadeDuration: number;       // seconds, 1–12, only used when transitionMode = crossfade
+    respectTrackFades: boolean;      // honor per-track fadeInSeconds / fadeOutSeconds
+    globalFadeIn: number;            // seconds, 0 = off; applied when respectTrackFades = false
+    globalFadeOut: number;           // seconds, 0 = off; applied when respectTrackFades = false
+    preloadNext: boolean;            // preload next track audio before current ends
+  }>(),
+
   // Activity delta tracking — used for "new since last visit" badges
   lastVisitedActivityAt: timestamp("lastVisitedActivityAt"),
   lastVisitedDashboardAt: timestamp("lastVisitedDashboardAt"),
@@ -376,6 +389,13 @@ export const songs = mysqlTable("songs", {
   // soundtrackCuesJson: JSON array mapping pages/regions to soundtrack tracks.
   // Structure: [{ page: number; region?: string; trackId: string; startTime: number; label?: string }]
   soundtrackCuesJson: text("soundtrackCuesJson"),
+
+  // ─── Seamless Playback Metadata ──────────────────────────────────────────────
+  // Per-track fade-in/out durations set by the creator at upload or edit time.
+  // null = use global player settings; 0 = no fade; positive float = seconds to fade.
+  // These are ADVISORY — the player respects them when the user has per-track fades enabled.
+  fadeInSeconds: float("fadeInSeconds"),   // e.g. 2.5 = 2.5 second fade in from silence
+  fadeOutSeconds: float("fadeOutSeconds"), // e.g. 3.0 = 3.0 second fade out to silence
 
   // ─── Sovereign Stamp ─────────────────────────────────────────────────────────
   // Authorship tone injection system — BDDT Publishing / Command Domains LLC
@@ -911,7 +931,7 @@ export const onboardingProgress = mysqlTable("onboardingProgress", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull().unique(),
   currentStep: varchar("currentStep", { length: 32 }).notNull().default("covenant"),
-  completedSteps: json("completedSteps").$type<string[]>(),
+  completedSteps: text("completedSteps"),  // JSON string array, parsed in application layer (TiDB json DEFAULT not supported)
   covenantAcceptedAt: timestamp("covenantAcceptedAt"),
   domainSavedAt: timestamp("domainSavedAt"),
   presenceSavedAt: timestamp("presenceSavedAt"),

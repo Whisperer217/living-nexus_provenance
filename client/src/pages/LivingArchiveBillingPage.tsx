@@ -8,7 +8,8 @@ import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { toast } from "sonner";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Zap, Package, Star, ChevronRight, Info, CheckCircle2, Shield } from "lucide-react";
+import { Zap, Package, Star, ChevronRight, Info, CheckCircle2, Shield, Music2 } from "lucide-react";
+import { Link, useLocation } from "wouter";
 
 // ── Design tokens ──────────────────────────────────────────────────────────────
 const GOLD       = "#C49A28";
@@ -154,6 +155,36 @@ function BulkCard({
 }
 
 // ── Main page ──────────────────────────────────────────────────────────────────
+function SettingsSubNav() {
+  const [location] = useLocation();
+  const TABS = [
+    { path: "/settings/billing", label: "Billing", icon: <Zap size={13} /> },
+    { path: "/settings/playback", label: "Playback", icon: <Music2 size={13} /> },
+  ];
+  return (
+    <div className="flex gap-1">
+      {TABS.map(tab => {
+        const active = location === tab.path;
+        return (
+          <Link key={tab.path} href={tab.path}>
+            <button
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[12px] font-bold uppercase tracking-widest transition-all"
+              style={{
+                background: active ? `rgba(196,154,40,0.18)` : "transparent",
+                color: active ? GOLD : SMOKE,
+                border: active ? `1px solid rgba(196,154,40,0.35)` : "1px solid transparent",
+                fontFamily: "'Cinzel', serif",
+              }}
+            >
+              {tab.icon} {tab.label}
+            </button>
+          </Link>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function LivingArchiveBillingPage() {
   const { isAuthenticated } = useAuth();
   const [purchasing, setPurchasing] = useState<PackageId | null>(null);
@@ -195,6 +226,9 @@ export default function LivingArchiveBillingPage() {
     <TooltipProvider>
       <div className="min-h-screen py-12 px-4" style={{ background: COAL }}>
         <div className="max-w-3xl mx-auto space-y-12">
+
+          {/* ── Settings sub-nav ── */}
+          <SettingsSubNav />
 
           {/* ── Page header ── */}
           <div>

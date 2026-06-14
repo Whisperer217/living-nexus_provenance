@@ -639,7 +639,14 @@ export default function OnboardingManifest() {
     if (!progress) return;
     const stepIdx = STEPS.findIndex(s => s.id === progress.currentStep);
     if (stepIdx > 0) setCurrentStepIdx(stepIdx);
-    if (progress.completedSteps) setCompletedSteps(progress.completedSteps as StepId[]);
+    if (progress.completedSteps) {
+      try {
+        const parsed = typeof progress.completedSteps === 'string'
+          ? JSON.parse(progress.completedSteps)
+          : progress.completedSteps;
+        setCompletedSteps(parsed as StepId[]);
+      } catch { /* ignore parse errors */ }
+    }
   }, [progress]);
 
   // Redirect to login if not authenticated

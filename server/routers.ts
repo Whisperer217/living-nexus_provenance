@@ -135,6 +135,9 @@ import {
   getPublicCollections,
   getOnboardingProgress,
   upsertOnboardingProgress,
+  getPlaybackSettings,
+  savePlaybackSettings,
+  updateSongFade,
 } from "./db";
 import { FOUNDER_PRICE_EARLY_CENTS, FOUNDER_PRICE_LATE_CENTS, FOUNDER_THRESHOLD, LICENSE_PRICE_CENTS, LICENSE_SLOTS, SLOT_PACKAGES, getSlotPackage, type SlotPackageId } from "./livingArchiveProducts";
 import { ENV } from "./_core/env";
@@ -467,9 +470,42 @@ export async function handleStripeWebhook(req: any, res: any) {
   }
 }
 
+// ── Playback Settings Router ────────────────────────────────────────────────
+const playbackRouter = router({
+  getSettings: protectedProcedure.query(async ({ ctx }) => {
+    return getPlaybackSettings(ctx.user.id);
+  }),
+  saveSettings: protectedProcedure
+    .input(z.object({
+      transitionMode: z.enum(["standard", "gapless", "crossfade", "album_blend"]).optional(),
+      crossfadeDuration: z.number().min(1).max(12).optional(),
+      globalFadeIn: z.number().min(0).max(8).optional(),
+      globalFadeOut: z.number().min(0).max(8).optional(),
+      respectTrackFades: z.boolean().optional(),
+      preloadNext: z.boolean().optional(),
+      albumMode: z.boolean().optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      return savePlaybackSettings(ctx.user.id, input as any);
+    }),
+  updateTrackFade: protectedProcedure
+    .input(z.object({
+      songId: z.number().int().positive(),
+      fadeInSeconds: z.number().min(0).max(30).nullable(),
+      fadeOutSeconds: z.number().min(0).max(30).nullable(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const song = await getSongById(input.songId);
+      if (!song || song.userId !== ctx.user.id) throw new TRPCError({ code: 'FORBIDDEN' });
+      await updateSongFade(input.songId, ctx.user.id, input.fadeInSeconds, input.fadeOutSeconds);
+      return { success: true };
+    }),
+});
+
 export const appRouter = router({
   system: systemRouter,
   qr: qrRouter,
+  playback: playbackRouter,
   platform: router({
     /** Public — returns build stats shown on the founder's creator card */
     getBuildStats: publicProcedure.query(() => ({
@@ -7381,4 +7417,5 @@ If a field cannot be determined from the document, use an empty string. For symb
             }),
   }),
 });
+
 export type AppRouter = typeof appRouter;

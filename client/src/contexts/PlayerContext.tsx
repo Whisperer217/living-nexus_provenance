@@ -12,7 +12,7 @@
    • setQueue (DB seed): only seeds when queueId is null (first load).
 ═══════════════════════════════════════════════════════════════════ */
 
-import React, { createContext, useContext, useRef, useState, useCallback, useEffect } from "react";
+import React, { createContext, useContext, useRef, useState, useCallback, useEffect, useMemo } from "react";
 import { safeAudioUrl } from "@shared/const";
 import { getCache, setCache, CACHE_KEYS, TTL } from "@/lib/lnxCache";
 import { trpc } from "@/lib/trpc";
@@ -62,6 +62,9 @@ export interface Track {
   creatorRole?: string;
   contentType?: "audio" | "lyrics" | "manuscript" | "comic" | "guide";
   testimony?: string;
+  albumName?: string;
+  fadeInSeconds?: number | null;
+  fadeOutSeconds?: number | null;
 }
 
 /** Describes WHERE the current queue was built from */
@@ -288,6 +291,69 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
 
   const allTracks = useCallback(() => state.tracks.filter(t => !!t.audioUrl), [state.tracks]);
 
+  // ── Playback Settings (crossfade / gapless / fade) ──────────────────────────
+  const { data: playbackSettingsData } = trpc.playback.getSettings.useQuery(undefined, {
+    staleTime: 60_000,
+    retry: false,
+  });
+
+  const playbackSettings = useMemo(() => ({
+    transitionMode: (playbackSettingsData as any)?.transitionMode ?? "standard",
+    crossfadeDuration: (playbackSettingsData as any)?.crossfadeDuration ?? 5,
+    globalFadeIn: (playbackSettingsData as any)?.globalFadeIn ?? 0,
+    globalFadeOut: (playbackSettingsData as any)?.globalFadeOut ?? 0,
+    respectTrackFades: (playbackSettingsData as any)?.respectTrackFades ?? true,
+    preloadNext: (playbackSettingsData as any)?.preloadNext ?? true,
+    albumMode: (playbackSettingsData as any)?.albumMode ?? false,
+  }), [playbackSettingsData]);
+
+  // Refs for crossfade/fade engine
+  const fadeRafRef = useRef<number | null>(null);
+  const nextAudioRef = useRef<HTMLAudioElement | null>(null);
+  const crossfadeActiveRef = useRef(false);
+
+  /** Cancel any in-progress fade animation frame */
+  const cancelFade = useCallback(() => {
+    if (fadeRafRef.current !== null) {
+      cancelAnimationFrame(fadeRafRef.current);
+      fadeRafRef.current = null;
+    }
+  }, []);
+
+  /** Fade audio element volume from `from` to `to` over `durationMs` ms */
+  const fadeVolume = useCallback((
+    audioEl: HTMLAudioElement,
+    from: number,
+    to: number,
+    durationMs: number,
+    onComplete?: () => void,
+  ) => {
+    const startTime = performance.now();
+    audioEl.volume = from;
+    const tick = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / durationMs, 1);
+      audioEl.volume = from + (to - from) * progress;
+      if (progress < 1) {
+        fadeRafRef.current = requestAnimationFrame(tick);
+      } else {
+        audioEl.volume = to;
+        fadeRafRef.current = null;
+        onComplete?.();
+      }
+    };
+    fadeRafRef.current = requestAnimationFrame(tick);
+  }, []);
+
+  // Keep a stable ref to playback settings so the audio engine (which runs in a
+  // closed-over useEffect with [] deps) can always read the latest preferences.
+  const playbackSettingsRef = useRef(playbackSettings);
+  useEffect(() => { playbackSettingsRef.current = playbackSettings; }, [playbackSettings]);
+
+  // Keep a stable ref to current state for use inside the audio engine
+  const stateRef = useRef(state);
+  useEffect(() => { stateRef.current = state; }, [state]);
+
   // Restore audio.src on mount after page reload
   useEffect(() => {
     const audio = audioRef.current;
@@ -334,51 +400,187 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     if (!audio) return;
     audio.volume = state.volume;
 
-    const onTimeUpdate = () => setState(s => ({ ...s, currentTime: audio.currentTime }));
+    const onTimeUpdate = () => {
+      setState(s => ({ ...s, currentTime: audio.currentTime }));
+
+      // ── Crossfade / fade-out trigger ──────────────────────────────────────────────────
+      const settings = playbackSettingsRef.current;
+      const s = stateRef.current;
+      const dur = audio.duration;
+      const cur = audio.currentTime;
+      if (!isFinite(dur) || dur === 0) return;
+
+      const tracks = s.tracks.filter(t => !!t.audioUrl);
+      const currentTrack = tracks[s.currentIdx];
+
+      // Determine fade-out duration for current track
+      const trackFadeOut = settings.respectTrackFades && currentTrack?.fadeOutSeconds
+        ? currentTrack.fadeOutSeconds
+        : settings.globalFadeOut;
+
+      // Crossfade mode: start fading out current + fading in next
+      if (settings.transitionMode === "crossfade" && !crossfadeActiveRef.current) {
+        const xfadeSec = settings.crossfadeDuration;
+        const timeLeft = dur - cur;
+        if (timeLeft <= xfadeSec && timeLeft > 0) {
+          crossfadeActiveRef.current = true;
+          // Fade out current track
+          cancelFade();
+          fadeVolume(audio, audio.volume, 0, timeLeft * 1000, () => {
+            crossfadeActiveRef.current = false;
+          });
+          // Start next track and fade it in
+          const nextIdx = s.isShuffle
+            ? (() => { let r = Math.floor(Math.random() * (tracks.length - 1)); if (r >= s.currentIdx) r++; return r; })()
+            : s.currentIdx + 1;
+          if (nextIdx < tracks.length) {
+            const nextT = tracks[nextIdx];
+            if (nextT?.audioUrl) {
+              const nextAudio = new Audio(safeAudioUrl(nextT.audioUrl));
+              nextAudio.volume = 0;
+              nextAudioRef.current = nextAudio;
+              nextAudio.play().catch(() => {});
+              // Fade next in over the crossfade window
+              const doXfadeIn = () => {
+                fadeVolume(nextAudio, 0, s.volume, timeLeft * 1000, () => {
+                  // Transition complete: swap sources
+                  audio.pause();
+                  audio.src = safeAudioUrl(nextT.audioUrl);
+                  audio.currentTime = nextAudio.currentTime;
+                  audio.volume = s.volume;
+                  nextAudio.pause();
+                  nextAudioRef.current = null;
+                  setState(prev => ({
+                    ...prev,
+                    currentIdx: nextIdx,
+                    isPlaying: true,
+                    isReady: true,
+                    duration: nextAudio.duration || 0,
+                    currentTime: nextAudio.currentTime,
+                  }));
+                  audio.play().catch(() => {});
+                });
+              };
+              if (nextAudio.readyState >= 2) doXfadeIn();
+              else nextAudio.addEventListener("canplay", doXfadeIn, { once: true });
+            }
+          }
+        }
+      } else if (settings.transitionMode !== "crossfade" && trackFadeOut > 0 && !crossfadeActiveRef.current) {
+        // Standard fade-out near end of track
+        const timeLeft = dur - cur;
+        if (timeLeft <= trackFadeOut && timeLeft > 0.1) {
+          crossfadeActiveRef.current = true;
+          cancelFade();
+          fadeVolume(audio, audio.volume, 0, (timeLeft - 0.05) * 1000, () => {
+            crossfadeActiveRef.current = false;
+            audio.volume = s.volume; // restore for next track
+          });
+        }
+      }
+
+      // Preload next track for gapless mode
+      if ((settings.transitionMode === "gapless" || settings.transitionMode === "album_blend") && settings.preloadNext) {
+        const timeLeft = dur - cur;
+        if (timeLeft <= 15 && !nextAudioRef.current) {
+          const nextIdx = s.currentIdx + 1;
+          if (nextIdx < tracks.length) {
+            const nextT = tracks[nextIdx];
+            if (nextT?.audioUrl) {
+              const preload = new Audio(safeAudioUrl(nextT.audioUrl));
+              preload.preload = "auto";
+              preload.load();
+              nextAudioRef.current = preload;
+            }
+          }
+        }
+      }
+    };
     const onDurationChange = () => setState(s => ({
       ...s,
       duration: isFinite(audio.duration) && !isNaN(audio.duration) ? audio.duration : 0,
     }));
     const onCanPlay = () => setState(s => ({ ...s, isReady: true }));
 
-    const onEnded = () => {
-      // Read current state snapshot synchronously via a ref-based approach:
-      // We use a functional setState to read state, but we set audio.src DIRECTLY
-      // here (outside setState) to avoid the React 19 concurrent-mode race where
-      // pendingAudioAction.current might be consumed before setState commits.
-      setState(s => {
-        // Navigate strictly within the frozen snapshot
-        const tracks = s.tracks.filter(t => !!t.audioUrl);
-        if (s.isRepeat) {
-          audio.currentTime = 0;
-          audio.play().catch(() => {});
-          return s;
+    /** Advance to the next track, applying crossfade/gapless/standard transition */
+    const advanceToNext = (s: typeof stateRef.current, fromEnded: boolean) => {
+      const settings = playbackSettingsRef.current;
+      const tracks = s.tracks.filter(t => !!t.audioUrl);
+      if (s.isRepeat) {
+        audio.currentTime = 0;
+        audio.play().catch(() => {});
+        return s;
+      }
+      let next = s.currentIdx + 1;
+      if (s.isShuffle) {
+        if (tracks.length > 1) {
+          let rand = Math.floor(Math.random() * (tracks.length - 1));
+          if (rand >= s.currentIdx) rand += 1;
+          next = rand;
+        } else {
+          next = 0;
         }
-        let next = s.currentIdx + 1;
-        if (s.isShuffle) {
-          if (tracks.length > 1) {
-            let rand = Math.floor(Math.random() * (tracks.length - 1));
-            if (rand >= s.currentIdx) rand += 1;
-            next = rand;
-          } else {
-            next = 0;
-          }
-        }
-        if (next >= tracks.length) {
+      }
+      if (next >= tracks.length) {
+        audio.pause();
+        audio.currentTime = 0;
+        return { ...s, isPlaying: false, isReady: false, duration: 0, currentTime: 0 };
+      }
+      const nextTrackData = tracks[next];
+      if (!nextTrackData?.audioUrl) {
+        return { ...s, currentIdx: next, isPlaying: false, isReady: false, duration: 0, currentTime: 0 };
+      }
+
+      const mode = settings.transitionMode;
+
+      if (mode === "crossfade" && fromEnded === false) {
+        // Crossfade: already handled by the timeupdate crossfade trigger — just update state
+        return { ...s, currentIdx: next, isPlaying: true, isReady: false, duration: 0, currentTime: 0 };
+      }
+
+      if (mode === "gapless" || mode === "album_blend") {
+        // Gapless: preloaded next audio is already buffered, swap immediately
+        if (nextAudioRef.current && nextAudioRef.current.src === safeAudioUrl(nextTrackData.audioUrl)) {
+          const preloaded = nextAudioRef.current;
+          // Swap: make preloaded the main audio
           audio.pause();
-          audio.currentTime = 0;
-          return { ...s, isPlaying: false, isReady: false, duration: 0, currentTime: 0 };
-        }
-        const t = tracks[next];
-        if (t?.audioUrl) {
-          // Set audio.src directly inside setState callback — this is synchronous
-          // and avoids the deferred-ref race condition in React 19 concurrent mode.
-          audio.src = safeAudioUrl(t.audioUrl);
+          audio.src = safeAudioUrl(nextTrackData.audioUrl);
+          audio.currentTime = preloaded.currentTime;
+          audio.volume = s.volume;
+          audio.play().catch(() => {});
+          nextAudioRef.current = null;
+        } else {
+          audio.src = safeAudioUrl(nextTrackData.audioUrl);
           audio.load();
           audio.play().catch(() => {});
         }
-        return { ...s, currentIdx: next, isPlaying: !!t?.audioUrl, isReady: false, duration: 0, currentTime: 0 };
-      });
+      } else {
+        // Standard: apply global fade-in if configured
+        const fadeIn = settings.respectTrackFades && nextTrackData.fadeInSeconds
+          ? nextTrackData.fadeInSeconds
+          : settings.globalFadeIn;
+        audio.src = safeAudioUrl(nextTrackData.audioUrl);
+        audio.load();
+        if (fadeIn > 0) {
+          audio.volume = 0;
+          audio.play().catch(() => {});
+          // Fade in after canplay
+          const doFadeIn = () => {
+            cancelFade();
+            fadeVolume(audio, 0, s.volume, fadeIn * 1000);
+            audio.removeEventListener("canplay", doFadeIn);
+          };
+          audio.addEventListener("canplay", doFadeIn, { once: true });
+        } else {
+          audio.volume = s.volume;
+          audio.play().catch(() => {});
+        }
+      }
+      return { ...s, currentIdx: next, isPlaying: true, isReady: false, duration: 0, currentTime: 0 };
+    };
+
+    const onEnded = () => {
+      setState(s => advanceToNext(s, true));
     };
 
     const onError = () => {
@@ -424,20 +626,41 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const playTrack = useCallback((idx: number) => {
     const audio = audioRef.current;
     if (!audio) return;
+    // Cancel any in-progress crossfade/fade when manually selecting a track
+    cancelFade();
+    crossfadeActiveRef.current = false;
+    if (nextAudioRef.current) {
+      nextAudioRef.current.pause();
+      nextAudioRef.current = null;
+    }
     setState(s => {
       const tracks = s.tracks.filter(t => !!t.audioUrl);
       const t = tracks[idx];
       if (!t) return s;
       if (t.audioUrl) {
+        audio.volume = s.volume;
         audio.src = safeAudioUrl(t.audioUrl);
         audio.load();
-        audio.play().catch(() => {});
+        // Apply fade-in if configured
+        const settings = playbackSettingsRef.current;
+        const fadeIn = settings.respectTrackFades && t.fadeInSeconds
+          ? t.fadeInSeconds
+          : settings.globalFadeIn;
+        if (fadeIn > 0) {
+          audio.volume = 0;
+          audio.play().catch(() => {});
+          audio.addEventListener("canplay", () => {
+            fadeVolume(audio, 0, s.volume, fadeIn * 1000);
+          }, { once: true });
+        } else {
+          audio.play().catch(() => {});
+        }
       } else {
         audio.pause();
       }
       return { ...s, currentIdx: idx, isPlaying: !!t.audioUrl, isReady: false, duration: 0, currentTime: 0 };
     });
-  }, []);
+  }, [cancelFade, fadeVolume]);
 
   const togglePlay = useCallback(() => {
     const audio = audioRef.current;

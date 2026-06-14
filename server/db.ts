@@ -5189,3 +5189,58 @@ export async function upsertOnboardingProgress(
   return getOnboardingProgress(userId);
 }
 export type { OnboardingProgress, InsertOnboardingProgress };
+
+// ── Playback Settings ────────────────────────────────────────────────────────
+
+export interface PlaybackSettings {
+  /** "gapless" | "crossfade" | "fade_out_in" | "standard" */
+  transitionMode: "gapless" | "crossfade" | "fade_out_in" | "standard";
+  /** Crossfade overlap in seconds (1–12). Used when transitionMode === "crossfade" */
+  crossfadeDuration: number;
+  /** Global fade-in duration in seconds (0 = off). Applied when track has no per-track override */
+  globalFadeIn: number;
+  /** Global fade-out duration in seconds (0 = off). Applied when track has no per-track override */
+  globalFadeOut: number;
+  /** Whether to pre-buffer the next track while current is playing */
+  preBuffer: boolean;
+  /** Album mode: treat tracks in the same albumName as a conceptual album (no gap, honour per-track fades) */
+  albumMode: boolean;
+}
+
+export const DEFAULT_PLAYBACK_SETTINGS: PlaybackSettings = {
+  transitionMode: "standard",
+  crossfadeDuration: 5,
+  globalFadeIn: 0,
+  globalFadeOut: 0,
+  preBuffer: true,
+  albumMode: false,
+};
+
+export async function getPlaybackSettings(userId: number): Promise<PlaybackSettings> {
+  const db = await getDb();
+  if (!db) return DEFAULT_PLAYBACK_SETTINGS;
+  const result = await db.select({ playbackSettings: users.playbackSettings }).from(users).where(eq(users.id, userId)).limit(1);
+  const raw = result[0]?.playbackSettings;
+  if (!raw) return DEFAULT_PLAYBACK_SETTINGS;
+  try {
+    const parsed = typeof raw === "string" ? JSON.parse(raw) : raw;
+    return { ...DEFAULT_PLAYBACK_SETTINGS, ...parsed };
+  } catch {
+    return DEFAULT_PLAYBACK_SETTINGS;
+  }
+}
+
+export async function savePlaybackSettings(userId: number, settings: Partial<PlaybackSettings>): Promise<PlaybackSettings> {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  const current = await getPlaybackSettings(userId);
+  const merged = { ...current, ...settings };
+  await db.update(users).set({ playbackSettings: JSON.stringify(merged) } as any).where(eq(users.id, userId));
+  return merged;
+}
+
+export async function updateSongFade(songId: number, userId: number, fadeInSeconds: number | null, fadeOutSeconds: number | null): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  await db.update(songs).set({ fadeInSeconds, fadeOutSeconds } as any).where(eq(songs.id, songId));
+}
