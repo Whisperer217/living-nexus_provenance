@@ -5825,6 +5825,10 @@ Response Length: target approximately ${Math.round(50 + (a.corpusSize / 1000) * 
         // ── Detect lyrics/instrumentation request ────────────────────────────
         const lyricsKeywords = /\b(lyric|verse|chorus|bridge|hook|pre.?chorus|outro|intro|refrain|bar|rhyme|syllable|cadence|flow|rap|sing|song structure|instrumentation|arrangement|beat|chord|melody|progression|bpm|key signature|time signature|breakdown|drop|build|section|stanza|couplet)\b/i;
         const isLyricsRequest = lyricsKeywords.test(input.message);
+        // Detect if user is REQUESTING lyrics to be written/provided vs submitting lyrics for analysis
+        // Analysis annotations should only fire when user submits their own lyrics for critique
+        const isLyricsGenerationRequest = /\b(provide|give me|write|generate|create|compose|show me|just the|only the|lyrics to|lyrics for|paraphrase|metrical|scripture|psalm|verse from|chapter)\b/i.test(input.message);
+        const isLyricsAnalysisRequest = isLyricsRequest && !isLyricsGenerationRequest;
         const lyricsFormatInstruction = isLyricsRequest ? `
 
 --- LYRICS / INSTRUMENTATION FORMAT RULE ---
@@ -5843,8 +5847,11 @@ When writing or analyzing lyrics, ALWAYS use this labeled section format:
 For each section, if instrumentation is relevant, add an indented note immediately after the section label:
   ↳ Instrumentation: [describe key instruments, texture, BPM feel, key, mood]
 
-If analyzing existing lyrics, annotate each section with:
-  ↳ Analysis: [syllable count per line, rhyme scheme, emotional register, what works, what to improve]
+${isLyricsAnalysisRequest
+  ? `If analyzing existing lyrics, annotate each section with:
+  ↳ Analysis: [syllable count per line, rhyme scheme, emotional register, what works, what to improve]`
+  : `CRITICAL INSTRUCTION: The user has requested lyrics to be written or provided. Deliver ONLY the lyrics in the labeled section format above. Do NOT add analysis annotations, structural commentary, cadence notes, or explanations of any kind unless the user explicitly asks for them. Silence is the correct response to unrequested analysis.`
+}
 
 Never collapse multiple sections into a single block. Always label clearly.
 --- END FORMAT RULE ---` : '';

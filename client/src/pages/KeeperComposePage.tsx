@@ -361,7 +361,7 @@ export default function KeeperComposePage() {
   const autoSaveMutation = trpc.keeper.saveNote.useMutation(); // silent auto-save
   const recentDraftsQuery = trpc.keeper.listNotes.useQuery(
     { tag: "composition", limit: 5 },
-    { enabled: isAuthenticated }
+    { enabled: isAuthenticated, staleTime: 0, refetchOnWindowFocus: true, refetchOnMount: true }
   );
   const [draftsOpen, setDraftsOpen] = useState(false);
 
@@ -994,7 +994,7 @@ Please respond in Suno-ready format:
   if (isMobile) {
     return (
       <div
-        className="min-h-screen flex flex-col"
+        className="h-[100dvh] flex flex-col overflow-hidden"
         style={{ background: "var(--ln-obsidian)" }}
       >
         {/* Mobile top bar */}
