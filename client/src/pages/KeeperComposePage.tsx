@@ -1351,30 +1351,53 @@ Please respond in Suno-ready format:
                 composedWork.sections.map((s, i) => (
                   <div
                     key={i}
-                    className="rounded p-3 mb-2"
-                    style={{ background: "var(--ln-panel)", border: "1px solid var(--ln-panel-border)" }}
+                    className="rounded-lg mb-4 overflow-hidden"
+                    style={{
+                      background: "var(--ln-panel)",
+                      border: `1px solid ${modeColor}30`,
+                      borderLeft: `3px solid ${modeColor}`,
+                    }}
                   >
+                    {/* Section header row */}
                     <div
-                      className="text-xs uppercase tracking-widest mb-1.5"
-                      style={{ color: modeColor, fontFamily: "'Space Mono', monospace", fontSize: "0.55rem" }}
+                      className="flex items-center justify-between px-4 pt-3 pb-2"
+                      style={{ borderBottom: `1px solid ${modeColor}18` }}
                     >
-                      [{s.label}]
-                    </div>
-                    {(s.tone || s.delivery) && (
                       <div
-                        className="mb-1.5 italic"
-                        style={{ color: "var(--ln-smoke)", fontFamily: "'Space Mono', monospace", fontSize: "0.5rem" }}
+                        className="uppercase tracking-widest"
+                        style={{ color: modeColor, fontFamily: "'Space Mono', monospace", fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.12em" }}
                       >
-                        {s.tone && <span>tone: {s.tone}</span>}
-                        {s.tone && s.delivery && <span>  ·  </span>}
-                        {s.delivery && <span>delivery: {s.delivery}</span>}
+                        [{s.label}]
                       </div>
-                    )}
-                    <div
-                      className="whitespace-pre-line leading-relaxed"
-                      style={{ color: "var(--ln-parchment)", fontFamily: "'Space Mono', monospace", fontSize: "0.7rem", lineHeight: 1.9 }}
-                    >
-                      {s.lyrics || <span style={{ opacity: 0.3 }}>(instrumental)</span>}
+                      <button
+                        onClick={() => {
+                          const text = [s.tone ? `tone: ${s.tone}` : '', s.delivery ? `delivery: ${s.delivery}` : '', s.lyrics].filter(Boolean).join('\n');
+                          navigator.clipboard.writeText(text).then(() => toast.success(`${s.label} copied`));
+                        }}
+                        className="flex items-center gap-1 px-2 py-1 rounded transition-all hover:opacity-80 active:scale-95"
+                        style={{ background: `${modeColor}18`, border: `1px solid ${modeColor}33`, color: modeColor }}
+                        title={`Copy ${s.label}`}
+                      >
+                        <Copy className="w-3 h-3" />
+                      </button>
+                    </div>
+                    <div className="px-4 py-3">
+                      {(s.tone || s.delivery) && (
+                        <div
+                          className="mb-2 italic"
+                          style={{ color: "var(--ln-smoke)", fontFamily: "'Space Mono', monospace", fontSize: "0.6rem", lineHeight: 1.6 }}
+                        >
+                          {s.tone && <span>tone: {s.tone}</span>}
+                          {s.tone && s.delivery && <span>  ·  </span>}
+                          {s.delivery && <span>delivery: {s.delivery}</span>}
+                        </div>
+                      )}
+                      <div
+                        className="whitespace-pre-line"
+                        style={{ color: "var(--ln-parchment)", fontFamily: "'Georgia', serif", fontSize: "0.9rem", lineHeight: 2.0 }}
+                      >
+                        {s.lyrics || <span style={{ opacity: 0.3, fontFamily: "'Space Mono', monospace", fontSize: "0.65rem" }}>(instrumental)</span>}
+                      </div>
                     </div>
                   </div>
                 ))
