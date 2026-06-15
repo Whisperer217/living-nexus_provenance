@@ -5234,3 +5234,7 @@
 
 ## Future: Stem File Type Visibility on Profiles
 - [ ] Show fileType label (Full Mix / Vocal Stem / Instrumental Stem / Bass Stem / Drum Stem / Other Stem) on creator profile track listings so visitors can see the full stem architecture of a registered work alongside the WID
+- [x] GuideDetailPage: add "Gift the Creator" tip button with Stripe Checkout (guides.createTip procedure)
+- [x] GuideDetailPage: add "Use This Guide in Keeper" button that navigates to /keeper?guideId=N
+- [x] KeeperComposePage: read ?guideId= URL param on mount and pre-select guide + switch to Image mode
+- [x] guides.createTip: new tRPC procedure — Stripe Checkout for guide tips, mirrors song tip flow

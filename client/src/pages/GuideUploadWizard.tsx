@@ -603,7 +603,7 @@ function Step4Rights({
               <div className="flex items-center gap-2">
                 <input
                   type="number"
-                  min={50} max={100}
+                  min={0} max={100}
                   value={form.revenueCreatorPct}
                   onChange={e => setForm({ ...form, revenueCreatorPct: Number(e.target.value) })}
                   className="w-16 bg-[#1a1508] border border-[#3a3020] text-[#e8d5a0] text-sm rounded px-2 py-1 text-right"
@@ -730,8 +730,8 @@ function Step5Connect({
           <div>
             <h3 className="text-[#C9A84C]/70 text-xs font-bold tracking-wider uppercase mb-3">PAYOUT SUMMARY</h3>
             <div className="bg-[#1a1508]/60 border border-[#2a2010] rounded-lg p-4 space-y-2 text-sm">
-              <div className="flex justify-between"><span className="text-[#6b5f3e]">Your Share</span><span className="text-[#e8d5a0] font-semibold">90%</span></div>
-              <div className="flex justify-between"><span className="text-[#6b5f3e]">Platform Share</span><span className="text-[#e8d5a0]">10%</span></div>
+              <div className="flex justify-between"><span className="text-[#6b5f3e]">Your Share</span><span className="text-[#e8d5a0] font-semibold">{form.revenueCreatorPct}%</span></div>
+              <div className="flex justify-between"><span className="text-[#6b5f3e]">Platform Share</span><span className="text-[#e8d5a0]">{100 - form.revenueCreatorPct}%</span></div>
               <div className="flex justify-between"><span className="text-[#6b5f3e]">Payout Method</span><span className="text-green-400">Stripe Connected</span></div>
               <div className="flex justify-between"><span className="text-[#6b5f3e]">Next Payout</span><span className="text-[#e8d5a0]">End of Month</span></div>
             </div>

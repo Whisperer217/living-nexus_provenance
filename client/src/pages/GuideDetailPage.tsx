@@ -1,4 +1,4 @@
-import { useParams, Link } from "wouter";
+import { useParams, Link, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Badge } from "@/components/ui/badge";
@@ -6,19 +6,29 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Shield, ArrowLeft, ExternalLink, Copy, Check,
-  Star, Layers, Users, Zap, BookOpen
+  Gift, BookOpen
 } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
+
+const TIP_AMOUNTS = [100, 300, 500, 1000, 2500, 5000]; // cents
 
 export default function GuideDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
+  const [, navigate] = useLocation();
   const [copied, setCopied] = useState(false);
+  const [tipOpen, setTipOpen] = useState(false);
+  const [tipAmount, setTipAmount] = useState(500);
+  const [tipLoading, setTipLoading] = useState(false);
+  const [useGuideLoading, setUseGuideLoading] = useState(false);
 
   const { data: guide, isLoading } = trpc.guides.getById.useQuery(
     { id: Number(id) },
     { enabled: !!id }
   );
+
+  const createTip = trpc.guides.createTip.useMutation();
 
   const copyWid = () => {
     if (guide?.widCode) {
@@ -26,6 +36,30 @@ export default function GuideDetailPage() {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
+  };
+
+  const handleTip = async () => {
+    if (!guide) return;
+    setTipLoading(true);
+    try {
+      const result = await createTip.mutateAsync({
+        guideId: guide.id,
+        amountCents: tipAmount,
+        origin: window.location.origin,
+      });
+      if (result.url) window.location.href = result.url;
+    } catch (err: any) {
+      toast.error(err?.message ?? "Unable to process gift. Try again.");
+    } finally {
+      setTipLoading(false);
+    }
+  };
+
+  const handleUseGuide = () => {
+    if (!guide) return;
+    setUseGuideLoading(true);
+    // Navigate to Keeper with this guide pre-selected via URL param
+    navigate(`/keeper?guideId=${guide.id}`);
   };
 
   if (isLoading) {
@@ -74,6 +108,7 @@ export default function GuideDetailPage() {
   })();
 
   const isOwner = user && guide.creatorId === (user as any).id;
+  const isLoggedIn = !!user;
 
   return (
     <div className="min-h-screen bg-[#080600] text-[#e8d5a3]">
@@ -118,6 +153,68 @@ export default function GuideDetailPage() {
                   PROVENANCE VERIFIED
                 </Badge>
               </div>
+            </div>
+
+            {/* Action buttons — tip + use guide */}
+            <div className="mt-4 space-y-2">
+              {/* Use This Guide — for non-owners who are logged in */}
+              {isLoggedIn && !isOwner && (
+                <Button
+                  className="w-full bg-[#C9A84C] hover:bg-[#b8973b] text-black font-bold gap-2"
+                  onClick={handleUseGuide}
+                  disabled={useGuideLoading}
+                >
+                  <BookOpen className="w-4 h-4" />
+                  Use This Guide in Keeper
+                </Button>
+              )}
+
+              {/* Tip / Gift button — for non-owners */}
+              {isLoggedIn && !isOwner && (
+                <Button
+                  variant="outline"
+                  className="w-full border-[#C9A84C]/40 text-[#C9A84C] hover:bg-[#C9A84C]/10 gap-2"
+                  onClick={() => setTipOpen(v => !v)}
+                >
+                  <Gift className="w-4 h-4" />
+                  Gift the Creator
+                </Button>
+              )}
+
+              {/* Tip amount picker */}
+              {tipOpen && !isOwner && (
+                <div className="bg-[#0d0b06] border border-[#2a2010] rounded-xl p-4 space-y-3">
+                  <div className="text-[#C9A84C] text-xs font-bold tracking-wider">SELECT GIFT AMOUNT</div>
+                  <div className="grid grid-cols-3 gap-2">
+                    {TIP_AMOUNTS.map(amt => (
+                      <button
+                        key={amt}
+                        onClick={() => setTipAmount(amt)}
+                        className={`py-2 rounded text-sm font-semibold border transition-colors ${tipAmount === amt ? "bg-[#C9A84C] border-[#C9A84C] text-black" : "bg-[#1a1508] border-[#3a3020] text-[#e8d5a0] hover:border-[#C9A84C]/60"}`}
+                      >
+                        ${(amt / 100).toFixed(0)}
+                      </button>
+                    ))}
+                  </div>
+                  <Button
+                    className="w-full bg-[#C9A84C] hover:bg-[#b8973b] text-black font-bold"
+                    onClick={handleTip}
+                    disabled={tipLoading}
+                  >
+                    {tipLoading ? "Processing…" : `Send $${(tipAmount / 100).toFixed(0)} Gift`}
+                  </Button>
+                  <p className="text-[#6b5f3e] text-xs text-center">Processed securely via Stripe</p>
+                </div>
+              )}
+
+              {/* Owner: link to edit */}
+              {isOwner && (
+                <Link href={`/guides/upload?edit=${guide.id}`}>
+                  <Button variant="outline" className="w-full border-[#3a3020] text-[#a89060] hover:bg-[#2a2010] gap-2">
+                    Edit Guide
+                  </Button>
+                </Link>
+              )}
             </div>
 
             {/* WID block */}
@@ -250,7 +347,7 @@ export default function GuideDetailPage() {
                 <div className="text-[#C9A84C] text-xs font-bold tracking-wider mb-4">REVENUE SPLIT</div>
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-[#e8d5a3] text-sm">Creator (You)</span>
+                    <span className="text-[#e8d5a3] text-sm">Creator</span>
                     <span className="text-white font-bold">{guide.revenueCreatorPct}%</span>
                   </div>
                   <div className="w-full bg-[#1e1a0e] rounded-full h-2">

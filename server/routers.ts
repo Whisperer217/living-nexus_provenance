@@ -7061,9 +7061,8 @@ Return ONLY valid JSON matching this exact schema:
   "loreDescription": string,
   "firstManifested": string,
   "symbols": [{"name": string, "label": string}],
-  "widSuggestion": string
 }
-If a field cannot be determined from the document, use an empty string. For symbols, extract any iconographic symbols, emblems, or sacred objects mentioned or visible. For widSuggestion, suggest a WID code like LN-GUIDE-XXX-0001 based on the character name.`;
+If a field cannot be determined from the document, use an empty string. For symbols, extract any iconographic symbols, emblems, or sacred objects mentioned or visible.`;
 
         let extracted: Record<string, unknown> = {};
         try {
@@ -7092,9 +7091,8 @@ If a field cannot be determined from the document, use an empty string. For symb
                     loreDescription: { type: "string" },
                     firstManifested: { type: "string" },
                     symbols: { type: "array", items: { type: "object", properties: { name: { type: "string" }, label: { type: "string" } }, required: ["name", "label"], additionalProperties: false } },
-                    widSuggestion: { type: "string" },
                   },
-                  required: ["canonicalName", "tagline", "archetypeType", "role", "alignment", "domain", "testimony", "loreDescription", "firstManifested", "symbols", "widSuggestion"],
+                  required: ["canonicalName", "tagline", "archetypeType", "role", "alignment", "domain", "testimony", "loreDescription", "firstManifested", "symbols"],
                   additionalProperties: false,
                 },
               },
@@ -7119,7 +7117,12 @@ If a field cannot be determined from the document, use an empty string. For symb
           loreDescription: (extracted.loreDescription as string) || undefined,
           firstManifested: (extracted.firstManifested as string) || undefined,
           symbolsJson: extracted.symbols || [],
-          widCode: (extracted.widSuggestion as string) || undefined,
+          widCode: (() => {
+            const name = (extracted.canonicalName as string) || guide.canonicalName || "";
+            if (!name) return undefined;
+            const slug = name.toUpperCase().replace(/[^A-Z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 16);
+            return `LN-GUIDE-${slug}-${String(input.guideId).padStart(4, "0")}`;
+          })(),
           canonicalStatus: "review",
         });
         return { guide: updated, extracted };
@@ -7213,6 +7216,50 @@ If a field cannot be determined from the document, use an empty string. For symb
           throw new TRPCError({ code: "BAD_REQUEST", message: "Cannot delete a published guide" });
         }
         return deleteGuide(input.guideId, ctx.user.id);
+      }),
+
+    /** Tip/gift a guide creator via Stripe Checkout. */
+    createTip: protectedProcedure
+      .input(z.object({
+        guideId: z.number().int().positive(),
+        amountCents: z.number().min(100).max(50000),
+        origin: z.string().url(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const guide = await getGuideById(input.guideId);
+        if (!guide || guide.canonicalStatus !== "published") {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Guide not found" });
+        }
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+        const { users } = await import("../drizzle/schema");
+        const { eq } = await import("drizzle-orm");
+        const [creator] = await db.select({
+          stripeAccountId: users.stripeAccountId,
+          name: users.name,
+          artistHandle: users.artistHandle,
+        }).from(users).where(eq(users.id, guide.creatorId)).limit(1);
+        if (!creator?.stripeAccountId) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "This creator has not enabled tips yet." });
+        }
+        try {
+          const acct = await stripe.accounts.retrieve(creator.stripeAccountId);
+          if (!acct.charges_enabled) throw new TRPCError({ code: "BAD_REQUEST", message: "This creator's Stripe account is still being verified." });
+        } catch (e: any) {
+          if (e instanceof TRPCError) throw e;
+          throw new TRPCError({ code: "BAD_REQUEST", message: "This creator's payment account is not yet active." });
+        }
+        const feeAmount = Math.round(input.amountCents * PLATFORM_FEE_PERCENT / 100);
+        const creatorHandle = creator.artistHandle || creator.name || "this creator";
+        const session = await stripe.checkout.sessions.create({
+          mode: "payment", payment_method_types: ["card"],
+          line_items: [{ price_data: { currency: "usd", product_data: { name: `Gift for "${guide.canonicalName}" by ${creatorHandle}`, description: `Supporting ${creatorHandle} on Living Nexus` }, unit_amount: input.amountCents }, quantity: 1 }],
+          metadata: { type: "tip", songId: "0", userId: ctx.user.id.toString(), tipperName: ctx.user.name || "", creatorId: guide.creatorId.toString() },
+          payment_intent_data: { application_fee_amount: feeAmount, transfer_data: { destination: creator.stripeAccountId } },
+          success_url: `${input.origin}/guide/${guide.id}?tip=success`,
+          cancel_url: `${input.origin}/guide/${guide.id}`,
+        });
+        return { url: session.url };
       }),
 
     /**

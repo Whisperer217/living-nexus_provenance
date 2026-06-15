@@ -517,6 +517,20 @@ Please respond in Suno-ready format:
     return () => window.removeEventListener("keydown", handler);
   }, []);
 
+  // ── Pre-select guide from URL param (?guideId=N) ──────────────────────────
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const gid = params.get("guideId");
+    if (gid) {
+      const parsed = parseInt(gid, 10);
+      if (!isNaN(parsed)) {
+        setSelectedGuideId(parsed);
+        handleModeChange("Image");
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // ── Action buttons ─────────────────────────────────────────────────────────
 
   const handleCopy = () => {
