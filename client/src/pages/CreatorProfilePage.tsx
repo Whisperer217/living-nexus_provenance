@@ -1681,6 +1681,9 @@ export default function CreatorProfilePage() {
                       aiConsent: s.aiConsent ?? null,
                       contentType: s.contentType ?? null,
                       trackOrder: s.trackOrder ?? null,
+                      playCount: s.playCount ?? null,
+                      composerNote: s.composerNote ?? null,
+                      downloadPermission: s.downloadPermission ?? null,
                     })),
                   };
                   return (
@@ -1699,8 +1702,8 @@ export default function CreatorProfilePage() {
           );
         })()}
 
-        {/* ── Registered Collections ── */}
-        {creatorCollections && creatorCollections.length > 0 && (
+        {/* ── Registered Collections (owner-only: visitors see published works already) ── */}
+        {isOwner && creatorCollections && creatorCollections.length > 0 && (
           <section className="py-4">
             <h2 className="text-base font-bold mb-4" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-gold)" }}>
               <Library className="inline w-4 h-4 mr-2 mb-0.5" />
@@ -1757,6 +1760,9 @@ export default function CreatorProfilePage() {
             aiConsent: s.aiConsent ?? null,
             contentType: s.contentType ?? null,
             trackOrder: s.trackOrder ?? null,
+            playCount: s.playCount ?? null,
+            composerNote: s.composerNote ?? null,
+            downloadPermission: s.downloadPermission ?? null,
           }));
           return (
             <section className="py-4 pb-32">
