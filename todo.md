@@ -5238,3 +5238,9 @@
 - [x] GuideDetailPage: add "Use This Guide in Keeper" button that navigates to /keeper?guideId=N
 - [x] KeeperComposePage: read ?guideId= URL param on mount and pre-select guide + switch to Image mode
 - [x] guides.createTip: new tRPC procedure — Stripe Checkout for guide tips, mirrors song tip flow
+
+## Bug Fixes — Play/Pause Restart + Modal Centering (2026-06-15)
+- [x] Fix TrackCard handleCoverClick: toggle play/pause when track is already active (Trending Now, Discover Tracks)
+- [x] Fix Witnessed Voices handleVoicePlay: toggle instead of restart when track is already active; show live-wave icon when playing
+- [x] Fix WorkCarousel (Witnessed Music): toggle play/pause when active; remove Link wrapper from audio cards to prevent auto-redirect to song page on play
+- [x] Fix Dialog centering on mobile: add fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 to DialogContent base classes (was missing, caused modal to appear at bottom with black void above)

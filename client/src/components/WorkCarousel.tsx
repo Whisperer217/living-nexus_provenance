@@ -4,6 +4,11 @@
  *        <WorkCarousel type="manuscript" title="Witnessed Manuscripts" />
  *        <WorkCarousel type="lyrics" title="Witnessed Lyrics" />
  *        <WorkCarousel type="comic" title="Witnessed Comics" />
+ *
+ * Play/Pause fix:
+ *  - Audio cards: clicking the card plays the track OR toggles pause if already active.
+ *    The cover image is NOT wrapped in a Link — no auto-navigation on play.
+ *  - Non-audio cards: clicking navigates to the song/book/game page.
  */
 
 import { useRef } from "react";
@@ -53,7 +58,7 @@ interface WorkCarouselProps {
 
 export function WorkCarousel({ type, title, limit = 12, viewAllHref, onOpenReader }: WorkCarouselProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const { addAndPlay, playQueueAt, currentTrackId, state: playerState } = usePlayer();
+  const { addAndPlay, playQueueAt, togglePlay, currentTrackId, state: playerState } = usePlayer();
 
   const { data: works, isLoading } = trpc.songs.discover.useQuery(
     { contentType: type, limit, randomize: false },
@@ -64,9 +69,10 @@ export function WorkCarousel({ type, title, limit = 12, viewAllHref, onOpenReade
   const widColor = WID_TYPE_COLOR[type];
   const Icon = CONTENT_ICON[type];
 
-  const handlePlay = (item: any) => {
-    if (type !== "audio") {
-      // Non-audio: navigate to song detail page
+  const handleAudioPlay = (item: any) => {
+    // If already active, toggle play/pause instead of restarting
+    if (currentTrackId === String(item.song.id)) {
+      togglePlay();
       return;
     }
     if (!item.song.fileUrl) { toast.error("No audio file available"); return; }
@@ -92,7 +98,6 @@ export function WorkCarousel({ type, title, limit = 12, viewAllHref, onOpenReade
     if (audioWorks.length > 0) {
       playQueueAt(audioWorks, startIdx, "NONE");
     } else {
-      // Fallback: single-track play (no queue available)
       addAndPlay({
         id: String(item.song.id),
         title: item.song.title,
@@ -150,7 +155,12 @@ export function WorkCarousel({ type, title, limit = 12, viewAllHref, onOpenReade
           {(works as any[]).map((item: any) => {
             const isActive = type === "audio" && currentTrackId === String(item.song.id);
             const isPlaying = isActive && playerState.isPlaying;
-            const href = (type === "manuscript" || type === "comic") ? `/book/${item.song.id}` : type === "game" ? `/game/${item.song.id}` : `/song/${item.song.id}`;
+            const href = (type === "manuscript" || type === "comic")
+              ? `/book/${item.song.id}`
+              : type === "game"
+              ? `/game/${item.song.id}`
+              : `/song/${item.song.id}`;
+
             return (
               <div
                 key={item.song.id}
@@ -159,13 +169,15 @@ export function WorkCarousel({ type, title, limit = 12, viewAllHref, onOpenReade
                 }`}
                 style={{ width: "var(--card-pan-w)" }}
                 onClick={() => {
-                  if (type === "audio") { handlePlay(item); return; }
+                  if (type === "audio") { handleAudioPlay(item); return; }
                   if ((type === "comic" || type === "manuscript") && onOpenReader) { onOpenReader(item.song); return; }
                   if (type === "game") { window.location.href = `/game/${item.song.id}`; return; }
                 }}
               >
-                {/* Cover / thumbnail */}
-                <Link href={href}>
+                {/* Cover / thumbnail
+                    Audio: plain div wrapper (no Link) — click handled by outer onClick, no navigation.
+                    Others: Link wrapper for navigation. */}
+                {type === "audio" ? (
                   <div className="prov-card-img-wrap">
                     {item.song.coverArtUrl ? (
                       <MediaAsset
@@ -181,21 +193,22 @@ export function WorkCarousel({ type, title, limit = 12, viewAllHref, onOpenReade
                         <Icon size={32} style={{ color: widColor + "66" }} />
                       </div>
                     )}
-                    {/* Gradient overlay — always present per card standard */}
                     <div className="prov-card-gradient" />
-                    {/* Play indicator for audio */}
-                    {type === "audio" && (
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-opacity ${isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
-                          style={{ background: widColor }}>
-                          {isPlaying ? (
-                            <Pause className="w-4 h-4" style={{ color: "#0a0815" }} />
-                          ) : (
-                            <Play className="w-4 h-4 fill-current" style={{ color: "#0a0815" }} />
-                          )}
-                        </div>
+                    {/* Play/Pause indicator */}
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div
+                        className={`w-10 h-10 rounded-full flex items-center justify-center transition-opacity ${
+                          isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                        }`}
+                        style={{ background: widColor }}
+                      >
+                        {isPlaying ? (
+                          <Pause className="w-4 h-4" style={{ color: "#0a0815" }} />
+                        ) : (
+                          <Play className="w-4 h-4 fill-current" style={{ color: "#0a0815" }} />
+                        )}
                       </div>
-                    )}
+                    </div>
                     {/* WID type badge */}
                     {item.song.witnessId && (
                       <div className="absolute top-1.5 right-1.5">
@@ -208,7 +221,39 @@ export function WorkCarousel({ type, title, limit = 12, viewAllHref, onOpenReade
                       </div>
                     )}
                   </div>
-                </Link>
+                ) : (
+                  <Link href={href}>
+                    <div className="prov-card-img-wrap">
+                      {item.song.coverArtUrl ? (
+                        <MediaAsset
+                          src={item.song.coverArtUrl}
+                          alt={item.song.title}
+                          mode="card"
+                          aspectRatio={(item.song.artAspectRatio as "1:1" | "4:5" | "16:9" | null) ?? "4:5"}
+                          focalX={item.song.coverPositionX ?? 50}
+                          focalY={item.song.coverPositionY ?? 50}
+                        />
+                      ) : (
+                        <div className="absolute inset-0 flex items-center justify-center" style={{ background: "#0f0d22" }}>
+                          <Icon size={32} style={{ color: widColor + "66" }} />
+                        </div>
+                      )}
+                      <div className="prov-card-gradient" />
+                      {/* WID type badge */}
+                      {item.song.witnessId && (
+                        <div className="absolute top-1.5 right-1.5">
+                          <span
+                            className="font-mono text-[8px] px-1.5 py-0.5 rounded"
+                            style={{ background: `${widColor}33`, color: widColor, border: `1px solid ${widColor}66` }}
+                          >
+                            {widLabel}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </Link>
+                )}
+
                 {/* Meta */}
                 <div className="p-2.5">
                   <p className="text-[12px] font-semibold truncate" style={{ color: "#FFFFFF", fontFamily: "'Cinzel', serif" }}>{item.song.title}</p>

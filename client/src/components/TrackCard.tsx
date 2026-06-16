@@ -91,7 +91,7 @@ function GenrePills({ genre, maxVisible = 4, chipBg, chipBorder, textColor }: {
 // AiDisclosureBadge replaced by shared AiDisclosurePill component
 
 export default function TrackCard({ track, index, onTip, prefetchedLikeCount, prefetchedLiked, onPlay }: Props) {
-  const { state, addAndPlay, playNext, openNowPlayingPanel, currentTrackId } = usePlayer();
+  const { state, addAndPlay, playNext, togglePlay, openNowPlayingPanel, currentTrackId } = usePlayer();
   const [showAddToList, setShowAddToList] = useState(false);
   const [addToListRect, setAddToListRect] = useState<DOMRect | null>(null);
   const [, navigate] = useLocation();
@@ -99,10 +99,13 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
   const isPlaying = isActive && state.isPlaying;
 
   // Zone 1: Cover art click — load into global player only, no navigation
+  // If this track is already the active track, toggle play/pause instead of restarting.
   const handleCoverClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (onPlay) {
+    if (isActive) {
+      togglePlay();
+    } else if (onPlay) {
       onPlay(track);
     } else {
       addAndPlay(track);

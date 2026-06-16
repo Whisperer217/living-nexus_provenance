@@ -18,7 +18,7 @@ import TrackCard from "@/components/TrackCard";
 import BookCard from "@/components/BookCard";
 import TipModal from "@/components/TipModal";
 // Card width is now responsive via CSS variable --card-pan-w (see index.css)
-import { Sparkles, ShieldCheck, Upload, Compass, Star, Lock, Fingerprint, Shield, Users, Play, Heart, DollarSign, Cpu, CheckCircle2, ChevronLeft, ChevronRight, Send } from "lucide-react";
+import { Sparkles, ShieldCheck, Upload, Compass, Star, Lock, Fingerprint, Shield, Users, Play, Pause, Heart, DollarSign, Cpu, CheckCircle2, ChevronLeft, ChevronRight, Send } from "lucide-react";
 import { Link } from "wouter";
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
@@ -69,7 +69,7 @@ function WIDTrustLayer() {
     staleTime: 60_000,
     refetchOnWindowFocus: false,
   });
-  const { addAndPlay, playQueueAt, openNowPlayingPanel } = usePlayer();
+  const { addAndPlay, playQueueAt, togglePlay, openNowPlayingPanel, currentTrackId, state } = usePlayer();
 
   const total = countData?.count ?? 0;
 
@@ -85,6 +85,12 @@ function WIDTrustLayer() {
   }));
 
   const handleVoicePlay = (songId: number) => {
+    // If this track is already active, toggle play/pause instead of restarting
+    if (currentTrackId === String(songId)) {
+      togglePlay();
+      openNowPlayingPanel();
+      return;
+    }
     if (voiceQueue.length > 1) {
       const startIdx = voiceQueue.findIndex((t: { id: string }) => t.id === String(songId));
       playQueueAt(voiceQueue, startIdx >= 0 ? startIdx : 0, "HOME");
@@ -250,26 +256,40 @@ function WIDTrustLayer() {
                   />
                 )}
 
-                {/* Play button — center, appears on hover/tap */}
-                <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleVoicePlay(v.songId);
-                  }}
-                  className="absolute inset-0 flex items-center justify-center z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                  style={{ background: "rgba(0,0,0,0.15)" }}
-                >
-                  <div
-                    className="w-12 h-12 rounded-full flex items-center justify-center transition-transform active:scale-90"
-                    style={{
-                      background: "#0A0A0A",
-                      boxShadow: "0 0 24px rgba(196,154,40,0.30)",
-                    }}
-                  >
-                    <Play size={20} fill="#0A0806" style={{ color: "#0A0806", marginLeft: "2px" }} />
-                  </div>
-                </button>
+                {/* Play/Pause button — center, appears on hover/tap or when active */}
+                {(() => {
+                  const isVoiceActive = currentTrackId === String(v.songId);
+                  const isVoicePlaying = isVoiceActive && state.isPlaying;
+                  return (
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleVoicePlay(v.songId);
+                      }}
+                      className={`absolute inset-0 flex items-center justify-center z-20 transition-opacity duration-200 ${
+                        isVoiceActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                      }`}
+                      style={{ background: "rgba(0,0,0,0.15)" }}
+                    >
+                      <div
+                        className="w-12 h-12 rounded-full flex items-center justify-center transition-transform active:scale-90"
+                        style={{
+                          background: isVoiceActive ? "rgba(196,154,40,0.22)" : "#0A0A0A",
+                          border: isVoiceActive ? "2px solid rgba(196,154,40,0.9)" : "none",
+                          boxShadow: isVoiceActive ? "0 0 0 6px rgba(196,154,40,0.15), 0 0 24px rgba(196,154,40,0.4)" : "0 0 24px rgba(196,154,40,0.30)",
+                          animation: isVoicePlaying ? "pulse-gold 1.8s ease-in-out infinite" : "none",
+                        }}
+                      >
+                        {isVoicePlaying ? (
+                          <div className="live-wave scale-[0.65]"><span /><span /><span /></div>
+                        ) : (
+                          <Play size={20} fill="#C9A84C" style={{ color: "#C9A84C", marginLeft: "2px" }} />
+                        )}
+                      </div>
+                    </button>
+                  );
+                })()}
 
                 {/* Navigate to song page on card tap */}
                 <Link href={`/song/${v.songId}`}>
