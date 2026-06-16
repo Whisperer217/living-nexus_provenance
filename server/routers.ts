@@ -145,6 +145,13 @@ import {
   getWorkWitnesses,
   inviteWitness,
   acceptWitnessInvite,
+  witnessSubscribe,
+  witnessUnsubscribe,
+  getWitnessSubscription,
+  getSubscriberCount,
+  publishToFeed,
+  getWitnessArchive,
+  getWitnessArchiveCount,
 } from "./db";
 import { FOUNDER_PRICE_EARLY_CENTS, FOUNDER_PRICE_LATE_CENTS, FOUNDER_THRESHOLD, LICENSE_PRICE_CENTS, LICENSE_SLOTS, SLOT_PACKAGES, getSlotPackage, type SlotPackageId } from "./livingArchiveProducts";
 import { ENV } from "./_core/env";
@@ -1501,10 +1508,24 @@ export const appRouter = router({
       status: z.enum(["Draft", "Published", "Unlisted", "Deleted"]),
     })).mutation(async ({ ctx, input }) => {
       await updateSongStatus(input.songId, ctx.user.id, input.status);
-      // On publish: ensure visual pipeline is triggered
+      // On publish: ensure visual pipeline is triggered + fan out to witnesses
       if (input.status === "Published") {
         const isFounder = (ctx.user as any).role === "founder";
         enqueueVisualJob(input.songId, isFounder).catch(err => console.error("[VisualQueue] Enqueue error:", err));
+        // Publish to witness feed (fire-and-forget)
+        getSongById(input.songId).then(song => {
+          if (!song) return;
+          publishToFeed({
+            creatorId: ctx.user.id,
+            manifestationId: song.id,
+            contentType: (song.contentType as any) ?? "audio",
+            wid: song.witnessId ?? undefined,
+            title: song.title,
+            coverArtUrl: song.coverArtUrl ?? undefined,
+            slug: song.witnessId ?? undefined,
+            visibility: "public",
+          }).catch(err => console.error("[WitnessFeed] publishToFeed error:", err));
+        }).catch(err => console.error("[WitnessFeed] getSongById error:", err));
       }
       return { success: true };
     }),
@@ -3228,6 +3249,54 @@ ${workType === "manuscript" || workType === "comic" ? "Category" : "Genre"}: ${i
       .input(z.object({ creatorId: z.number().int().positive() }))
       .query(async ({ input }) => {
         return getWitnessNetwork(input.creatorId);
+      }),
+  }),
+
+  // ── Witness Subscription System ───────────────────────────────────────────
+  witnessSubscription: router({
+    /** Subscribe to a creator's publication feed at a given tier */
+    subscribe: protectedProcedure
+      .input(z.object({
+        creatorId: z.number().int().positive(),
+        tier: z.enum(["witness", "reserve", "steward"]).default("witness"),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.id === input.creatorId) throw new TRPCError({ code: "BAD_REQUEST", message: "You cannot subscribe to yourself" });
+        const result = await witnessSubscribe(ctx.user.id, input.creatorId, input.tier);
+        return { ok: true, tier: result.tier };
+      }),
+    /** Unsubscribe from a creator's publication feed */
+    unsubscribe: protectedProcedure
+      .input(z.object({ creatorId: z.number().int().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        await witnessUnsubscribe(ctx.user.id, input.creatorId);
+        return { ok: true };
+      }),
+    /** Get the current user's subscription to a creator (null if not subscribed) */
+    getSubscription: protectedProcedure
+      .input(z.object({ creatorId: z.number().int().positive() }))
+      .query(async ({ ctx, input }) => {
+        return getWitnessSubscription(ctx.user.id, input.creatorId);
+      }),
+    /** Public subscriber count for a creator */
+    getCreatorSubscriberCount: publicProcedure
+      .input(z.object({ creatorId: z.number().int().positive() }))
+      .query(async ({ input }) => {
+        const count = await getSubscriberCount(input.creatorId);
+        return { count };
+      }),
+    /** Get the current user's archive (reserved manifestations) */
+    getMyArchive: protectedProcedure
+      .input(z.object({
+        limit: z.number().int().min(1).max(50).default(20),
+        offset: z.number().int().min(0).default(0),
+      }))
+      .query(async ({ ctx, input }) => {
+        const [items, total] = await Promise.all([
+          getWitnessArchive(ctx.user.id, input.limit, input.offset),
+          getWitnessArchiveCount(ctx.user.id),
+        ]);
+        return { items, total };
       }),
   }),
 

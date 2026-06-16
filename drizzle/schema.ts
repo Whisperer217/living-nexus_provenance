@@ -1912,3 +1912,68 @@ export const workWitnesses = mysqlTable("workWitnesses", {
 });
 export type WorkWitness = typeof workWitnesses.$inferSelect;
 export type InsertWorkWitness = typeof workWitnesses.$inferInsert;
+
+// ─── Creator Publication Feed ─────────────────────────────────────────────────
+// Canonical fan-out source: every published manifestation enters this feed.
+// Notification engine, reservation engine, and vault sync all subscribe to it.
+export const creatorPublicationFeed = mysqlTable("creatorPublicationFeed", {
+  id: int("id").autoincrement().primaryKey(),
+  creatorId: int("creatorId").notNull(),          // user.id of the creator
+  manifestationId: int("manifestationId").notNull(), // songs.id, projects.id, etc.
+  contentType: mysqlEnum("contentType", [
+    "audio", "lyrics", "manuscript", "comic", "video", "guide", "project"
+  ]).notNull(),
+  wid: varchar("wid", { length: 64 }),             // WID if already issued
+  title: varchar("title", { length: 512 }).notNull(),
+  coverArtUrl: text("coverArtUrl"),
+  slug: varchar("slug", { length: 256 }),          // for project/guide links
+  visibility: mysqlEnum("visibility", ["public", "unlisted"]).default("public").notNull(),
+  publishedAt: timestamp("publishedAt").defaultNow().notNull(),
+});
+export type CreatorPublicationFeed = typeof creatorPublicationFeed.$inferSelect;
+export type InsertCreatorPublicationFeed = typeof creatorPublicationFeed.$inferInsert;
+
+// ─── Witness Subscriptions ────────────────────────────────────────────────────
+// A user's intentional relationship with a creator across three tiers:
+//   witness  → receive notifications when creator publishes
+//   reserve  → auto-reserve new manifestations into personal archive queue
+//   steward  → auto-download copies by content type (vault sync)
+export const witnessSubscriptions = mysqlTable("witnessSubscriptions", {
+  id: int("id").autoincrement().primaryKey(),
+  witnessId: int("witnessId").notNull(),           // user.id of the subscriber
+  creatorId: int("creatorId").notNull(),           // user.id of the creator
+  tier: mysqlEnum("tier", ["witness", "reserve", "steward"]).default("witness").notNull(),
+  // Notification settings (Witness tier+)
+  notifyOnPublish: boolean("notifyOnPublish").default(true).notNull(),
+  // Auto-reserve settings (Reserve tier+)
+  autoReserveMusic: boolean("autoReserveMusic").default(true).notNull(),
+  autoReserveManuscripts: boolean("autoReserveManuscripts").default(false).notNull(),
+  autoReserveComics: boolean("autoReserveComics").default(false).notNull(),
+  autoReserveVideos: boolean("autoReserveVideos").default(false).notNull(),
+  autoReserveGuides: boolean("autoReserveGuides").default(false).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().notNull(),
+});
+export type WitnessSubscription = typeof witnessSubscriptions.$inferSelect;
+export type InsertWitnessSubscription = typeof witnessSubscriptions.$inferInsert;
+
+// ─── Witness Reservations ─────────────────────────────────────────────────────
+// A reserved manifestation in a witness's personal archive queue.
+// Created automatically by the reservation engine for Reserve+ subscribers.
+export const witnessReservations = mysqlTable("witnessReservations", {
+  id: int("id").autoincrement().primaryKey(),
+  witnessId: int("witnessId").notNull(),           // user.id of the subscriber
+  publicationFeedId: int("publicationFeedId").notNull(), // creatorPublicationFeed.id
+  // Denormalized for fast archive queries (no join needed for list view)
+  creatorId: int("creatorId").notNull(),
+  manifestationId: int("manifestationId").notNull(),
+  contentType: varchar("contentType", { length: 32 }).notNull(),
+  title: varchar("title", { length: 512 }).notNull(),
+  coverArtUrl: text("coverArtUrl"),
+  wid: varchar("wid", { length: 64 }),
+  slug: varchar("slug", { length: 256 }),
+  reservedAt: timestamp("reservedAt").defaultNow().notNull(),
+  downloadedAt: timestamp("downloadedAt"),         // null = not yet downloaded (Steward)
+});
+export type WitnessReservation = typeof witnessReservations.$inferSelect;
+export type InsertWitnessReservation = typeof witnessReservations.$inferInsert;

@@ -55,6 +55,9 @@ import {
   workEvents,
   workLineage,
   workWitnesses,
+  witnessSubscriptions,
+  witnessReservations,
+  creatorPublicationFeed,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 import type { SearchResults } from "../shared/searchTypes";
@@ -5420,4 +5423,127 @@ export async function acceptWitnessInvite(token: string, witnessUserId: number, 
     isSystemEvent: false,
   });
   return row;
+}
+
+// ─── Witness Subscription Helpers ────────────────────────────────────────────
+
+/** Subscribe (or upgrade tier) a user to a creator's publication feed. */
+export async function witnessSubscribe(
+  witnessId: number,
+  creatorId: number,
+  tier: "witness" | "reserve" | "steward" = "witness"
+) {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  const tierRank: Record<string, number> = { witness: 1, reserve: 2, steward: 3 };
+  const existing = await db
+    .select()
+    .from(witnessSubscriptions)
+    .where(and(eq(witnessSubscriptions.witnessId, witnessId), eq(witnessSubscriptions.creatorId, creatorId)))
+    .limit(1);
+  if (existing.length > 0) {
+    const current = existing[0];
+    const newTier = (tierRank[tier] ?? 0) > (tierRank[current.tier] ?? 0) ? tier : current.tier;
+    await db.update(witnessSubscriptions).set({ tier: newTier, updatedAt: new Date() }).where(eq(witnessSubscriptions.id, current.id));
+    return { ...current, tier: newTier };
+  }
+  const [result] = await db.insert(witnessSubscriptions).values({ witnessId, creatorId, tier });
+  return { id: (result as any).insertId, witnessId, creatorId, tier };
+}
+
+/** Unsubscribe a user from a creator's publication feed. */
+export async function witnessUnsubscribe(witnessId: number, creatorId: number) {
+  const db = await getDb();
+  if (!db) return;
+  await db.delete(witnessSubscriptions).where(and(eq(witnessSubscriptions.witnessId, witnessId), eq(witnessSubscriptions.creatorId, creatorId)));
+}
+
+/** Get the subscription record for a witness/creator pair. */
+export async function getWitnessSubscription(witnessId: number, creatorId: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const rows = await db.select().from(witnessSubscriptions).where(and(eq(witnessSubscriptions.witnessId, witnessId), eq(witnessSubscriptions.creatorId, creatorId))).limit(1);
+  return rows[0] ?? null;
+}
+
+/** Count how many subscribers (all tiers) a creator has in the Witness Subscription system. */
+export async function getSubscriberCount(creatorId: number): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  const rows = await db.select({ count: sql<number>`COUNT(*)` }).from(witnessSubscriptions).where(eq(witnessSubscriptions.creatorId, creatorId));
+  return Number(rows[0]?.count ?? 0);
+}
+
+/** Insert a publication feed entry and fan out reservations to Reserve+ subscribers. */
+export async function publishToFeed(entry: {
+  creatorId: number;
+  manifestationId: number;
+  contentType: "audio" | "lyrics" | "manuscript" | "comic" | "video" | "guide" | "project";
+  wid?: string;
+  title: string;
+  coverArtUrl?: string;
+  slug?: string;
+  visibility?: "public" | "unlisted";
+}): Promise<number> {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  const [result] = await db.insert(creatorPublicationFeed).values({
+    creatorId: entry.creatorId,
+    manifestationId: entry.manifestationId,
+    contentType: entry.contentType,
+    wid: entry.wid,
+    title: entry.title,
+    coverArtUrl: entry.coverArtUrl,
+    slug: entry.slug,
+    visibility: entry.visibility ?? "public",
+  });
+  const feedId = (result as any).insertId as number;
+  // Fan out reservations to Reserve+ subscribers
+  const reserveSubscribers = await db
+    .select()
+    .from(witnessSubscriptions)
+    .where(and(eq(witnessSubscriptions.creatorId, entry.creatorId), sql`${witnessSubscriptions.tier} IN ('reserve', 'steward')`));
+  type SubRow = typeof reserveSubscribers[0];
+  const contentTypeMap: Record<string, keyof SubRow> = {
+    audio: "autoReserveMusic",
+    lyrics: "autoReserveManuscripts",
+    manuscript: "autoReserveManuscripts",
+    comic: "autoReserveComics",
+    video: "autoReserveVideos",
+    guide: "autoReserveGuides",
+    project: "autoReserveMusic",
+  };
+  const prefKey = contentTypeMap[entry.contentType];
+  const toReserve = reserveSubscribers.filter((sub: SubRow) => !prefKey || sub[prefKey as keyof SubRow]);
+  if (toReserve.length > 0) {
+    await db.insert(witnessReservations).values(
+      toReserve.map((sub: SubRow) => ({
+        witnessId: sub.witnessId,
+        publicationFeedId: feedId,
+        creatorId: entry.creatorId,
+        manifestationId: entry.manifestationId,
+        contentType: entry.contentType,
+        title: entry.title,
+        coverArtUrl: entry.coverArtUrl ?? null,
+        wid: entry.wid ?? null,
+        slug: entry.slug ?? null,
+      }))
+    );
+  }
+  return feedId;
+}
+
+/** Get paginated reservations for a witness (My Archive). */
+export async function getWitnessArchive(witnessId: number, limit = 20, offset = 0) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(witnessReservations).where(eq(witnessReservations.witnessId, witnessId)).orderBy(desc(witnessReservations.reservedAt)).limit(limit).offset(offset);
+}
+
+/** Count total reservations for a witness. */
+export async function getWitnessArchiveCount(witnessId: number): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  const rows = await db.select({ count: sql<number>`COUNT(*)` }).from(witnessReservations).where(eq(witnessReservations.witnessId, witnessId));
+  return Number(rows[0]?.count ?? 0);
 }

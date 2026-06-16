@@ -5244,3 +5244,39 @@
 - [x] Fix Witnessed Voices handleVoicePlay: toggle instead of restart when track is already active; show live-wave icon when playing
 - [x] Fix WorkCarousel (Witnessed Music): toggle play/pause when active; remove Link wrapper from audio cards to prevent auto-redirect to song page on play
 - [x] Fix Dialog centering on mobile: add fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 to DialogContent base classes (was missing, caused modal to appear at bottom with black void above)
+
+## Witness Subscription System
+
+### Schema
+- [ ] Add creatorPublicationFeed table
+- [ ] Add witnessSubscriptions table
+- [ ] Add witnessReservations table
+- [ ] Run pnpm db:push migration
+
+### Phase 1 — Witness (notifications)
+- [ ] tRPC: witness.subscribe / witness.unsubscribe / witness.getSubscription / witness.getWitnessCount
+- [ ] Fan-out on publish: insert into creatorPublicationFeed, notify all Witness+ subscribers
+- [ ] Witness button on creator profile page
+- [ ] Witness count displayed on creator profile
+
+### Phase 2 — Reserve (archive queue)
+- [ ] Fan-out: create witnessReservations for all Reserve+ subscribers on publish
+- [ ] tRPC: witness.myArchive (paginated reserved manifestations)
+- [ ] My Archive page at /witness-archive
+- [ ] Archive entry card: cover, title, creator, WID, reserved date, download button
+- [ ] Add Witness Archive nav link to sidebar
+
+### Phase 3 — Steward (vault sync)
+- [ ] Steward settings panel on witness subscription modal
+- [ ] Per-content-type auto-download toggles
+- [ ] tRPC: witness.stewardStats
+- [ ] Archive Health display on creator profile
+
+## Witness Subscription System — Completed
+- [x] Schema: witnessSubscriptions, witnessReservations, creatorPublicationFeed tables added to schema.ts
+- [x] DB helpers: witnessSubscribe, witnessUnsubscribe, getWitnessSubscription, getSubscriberCount, publishToFeed, getWitnessArchive, getWitnessArchiveCount added to db.ts
+- [x] tRPC router: witnessSubscription (subscribe, unsubscribe, getSubscription, getCreatorSubscriberCount, getMyArchive) added to routers.ts
+- [x] Fan-out on publish: publishToFeed called in songs.updateStatus when status = Published
+- [x] Witness Subscription button on creator profile page (desktop + mobile) — Witness/Reserve/Steward tier selector
+- [x] My Archive tab added to existing /archive page — shows reserved manifestations with tier badges, WID, pagination
+- [x] TypeScript: 0 errors after all changes

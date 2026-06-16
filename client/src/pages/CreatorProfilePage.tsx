@@ -21,6 +21,7 @@ import {
   Copy, Heart, Share2, MoreHorizontal, Download, Trash2,
   ChevronRight, Headphones, Twitter, Instagram, Youtube, Eye, EyeOff,
   Library, Move, Upload, Loader2, Crown, Sparkles, Wand2, ClipboardCopy, ChevronDown, BookOpen, Camera,
+  Bell, BellPlus,
 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { ImagePositioner } from "@/components/ImagePositioner";
@@ -534,6 +535,37 @@ export default function CreatorProfilePage() {
   });
   const isWitnessingCreator = witnessStatusQuery.data?.witnessing ?? false;
   const witnessCount = witnessStatusQuery.data?.count ?? 0;
+
+  // ── Witness Subscription System ─────────────────────────────────────────────
+  const [showSubscribeTierMenu, setShowSubscribeTierMenu] = useState(false);
+  const { data: mySubscription, refetch: refetchSubscription } = trpc.witnessSubscription.getSubscription.useQuery(
+    { creatorId: creatorIdForWitness },
+    { enabled: !!user && !!data && user.id !== data?.creator?.id && creatorIdForWitness > 0, staleTime: 30_000 }
+  );
+  const { data: subscriberCountData } = trpc.witnessSubscription.getCreatorSubscriberCount.useQuery(
+    { creatorId: creatorIdForWitness },
+    { enabled: creatorIdForWitness > 0, staleTime: 60_000 }
+  );
+  const subscriberCount = subscriberCountData?.count ?? 0;
+  const subscribeMutation = trpc.witnessSubscription.subscribe.useMutation({
+    onSuccess: (result) => {
+      refetchSubscription();
+      utils.witnessSubscription.getCreatorSubscriberCount.invalidate({ creatorId: creatorIdForWitness });
+      const tierLabel = result.tier === "witness" ? "Witness" : result.tier === "reserve" ? "Reserve" : "Steward";
+      toast.success(`You are now a ${tierLabel} of ${data?.creator?.artistHandle || data?.creator?.name}`);
+      setShowSubscribeTierMenu(false);
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+  const unsubscribeMutation = trpc.witnessSubscription.unsubscribe.useMutation({
+    onSuccess: () => {
+      refetchSubscription();
+      utils.witnessSubscription.getCreatorSubscriberCount.invalidate({ creatorId: creatorIdForWitness });
+      toast.success("Unsubscribed from creator feed");
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
   // Public witness network for this creator (witnessing list + witnesses list)
   const { data: witnessNetwork } = trpc.witness.publicNetwork.useQuery(
     { creatorId },
@@ -1207,6 +1239,56 @@ export default function CreatorProfilePage() {
                       {isWitnessingCreator ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   )}
+                  {/* Witness Subscription button — desktop */}
+                  {user && !isOwner && (
+                    <div className="relative">
+                      {mySubscription ? (
+                        <button
+                          onClick={() => unsubscribeMutation.mutate({ creatorId: creator.id })}
+                          disabled={unsubscribeMutation.isPending}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
+                          style={{ background: "rgba(99,102,241,0.12)", border: "1px solid rgba(99,102,241,0.35)", color: "#a5b4fc" }}
+                          title={`Subscribed as ${mySubscription.tier} — click to unsubscribe`}
+                        >
+                          <Bell className="w-3 h-3" />
+                          {mySubscription.tier === "witness" ? "Witness" : mySubscription.tier === "reserve" ? "Reserve" : "Steward"}
+                        </button>
+                      ) : (
+                        <div className="relative">
+                          <button
+                            onClick={() => setShowSubscribeTierMenu(v => !v)}
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
+                            style={{ background: "rgba(99,102,241,0.08)", border: "1px solid rgba(99,102,241,0.2)", color: "var(--ln-smoke)" }}
+                            title="Subscribe to this creator's publication feed"
+                          >
+                            <BellPlus className="w-3 h-3" />
+                            Subscribe
+                          </button>
+                          {showSubscribeTierMenu && (
+                            <div
+                              className="absolute right-0 top-full mt-1 z-50 rounded-lg overflow-hidden shadow-xl"
+                              style={{ background: "var(--ln-coal)", border: "1px solid rgba(99,102,241,0.25)", minWidth: "160px" }}
+                            >
+                              {(["witness", "reserve", "steward"] as const).map((tier) => (
+                                <button
+                                  key={tier}
+                                  onClick={() => subscribeMutation.mutate({ creatorId: creator.id, tier })}
+                                  disabled={subscribeMutation.isPending}
+                                  className="w-full text-left px-4 py-2.5 text-xs transition-colors hover:brightness-110"
+                                  style={{ color: "var(--ln-parchment)", borderBottom: tier !== "steward" ? "1px solid rgba(255,255,255,0.05)" : "none" }}
+                                >
+                                  <span className="font-semibold">{tier === "witness" ? "Witness" : tier === "reserve" ? "Reserve" : "Steward"}</span>
+                                  <span className="block text-[10px] mt-0.5" style={{ color: "var(--ln-smoke)" }}>
+                                    {tier === "witness" ? "Get notified on publish" : tier === "reserve" ? "Archive new works" : "Local vault sync"}
+                                  </span>
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
                   <QRShareModal
                     entity={{
                       type: "creator",
@@ -1417,6 +1499,36 @@ export default function CreatorProfilePage() {
                   >
                     {isWitnessingCreator ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
+                )}
+                {/* Witness Subscription button — mobile */}
+                {user && !isOwner && (
+                  mySubscription ? (
+                    <button
+                      onClick={() => unsubscribeMutation.mutate({ creatorId: creator.id })}
+                      disabled={unsubscribeMutation.isPending}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
+                      style={{ background: "rgba(99,102,241,0.12)", border: "1px solid rgba(99,102,241,0.35)", color: "#a5b4fc" }}
+                      title={`Subscribed as ${mySubscription.tier} — click to unsubscribe`}
+                    >
+                      <Bell className="w-3 h-3" />
+                      {mySubscription.tier === "witness" ? "Witness" : mySubscription.tier === "reserve" ? "Reserve" : "Steward"}
+                    </button>
+                  ) : (
+                    <>
+                      {(["witness", "reserve", "steward"] as const).map((tier) => (
+                        <button
+                          key={tier}
+                          onClick={() => subscribeMutation.mutate({ creatorId: creator.id, tier })}
+                          disabled={subscribeMutation.isPending}
+                          className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs transition-all"
+                          style={{ background: "rgba(99,102,241,0.08)", border: "1px solid rgba(99,102,241,0.2)", color: "var(--ln-smoke)" }}
+                        >
+                          <BellPlus className="w-3 h-3" />
+                          {tier === "witness" ? "Witness" : tier === "reserve" ? "Reserve" : "Steward"}
+                        </button>
+                      ))}
+                    </>
+                  )
                 )}
                 <QRShareModal
                   entity={{

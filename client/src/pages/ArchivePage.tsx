@@ -12,7 +12,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import {
-  Music, Upload, Globe, EyeOff, Pencil, ExternalLink,
+  Music, Upload, Globe, EyeOff, Eye, Pencil, ExternalLink,
   Play, ListMusic, Trash2, GripVertical, Shield, CheckSquare, Square,
   Download, Lock, Coins, Layers, AlertTriangle, X,
   Library, ChevronRight, Layers2,
@@ -279,7 +279,17 @@ export default function ArchivePage() {
   const utils = trpc.useUtils();
   const [editingSong, setEditingSong] = useState<any | null>(null);
   const [deletingSong, setDeletingSong] = useState<any | null>(null);
-  const [activeTab, setActiveTab] = useState<"tracks" | "collections" | "external">("tracks");
+  const [activeTab, setActiveTab] = useState<"tracks" | "collections" | "external" | "witnessed">("tracks");
+
+  // ── Witnessed Works (Witness Subscription Archive) ────────────────────────────────────────────
+  const [witnessArchivePage, setWitnessArchivePage] = useState(0);
+  const WITNESS_PAGE_SIZE = 20;
+  const { data: witnessArchiveData, isLoading: witnessArchiveLoading } = trpc.witnessSubscription.getMyArchive.useQuery(
+    { limit: WITNESS_PAGE_SIZE, offset: witnessArchivePage * WITNESS_PAGE_SIZE },
+    { enabled: isAuthenticated && activeTab === "witnessed", staleTime: 30_000 }
+  );
+  const witnessArchiveItems = witnessArchiveData?.items ?? [];
+  const witnessArchiveTotal = witnessArchiveData?.total ?? 0;
   const { playQueueAt } = usePlayer();
   const { user } = useAuth();
   const myArtistName = user?.artistHandle || user?.name || "Unknown Creator";
@@ -602,9 +612,9 @@ export default function ArchivePage() {
           );
         })()}
 
-        {/* ── Tab switcher ───────────────────────────────────────── */}
-        <div className="flex gap-1 mb-6 p-1 rounded-xl" style={{ background: "var(--ln-coal)" }}>
-          {(["tracks", "collections", "external"] as const).map((tab) => (
+        {/* ── Tab switcher ──────────────────────────────────────────────────── */}
+        <div className="flex gap-1 mb-6 p-1 rounded-xl flex-wrap" style={{ background: "var(--ln-coal)" }}>
+          {(["tracks", "collections", "external", "witnessed"] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -616,6 +626,7 @@ export default function ArchivePage() {
               {tab === "tracks" && <><Music size={13} /> My Tracks</>}
               {tab === "collections" && <><Layers2 size={13} /> Collections &amp; Playlists</>}
               {tab === "external" && <><Globe size={13} /> External</>}
+              {tab === "witnessed" && <><Eye size={13} /> My Archive</>}
             </button>
           ))}
         </div>
@@ -635,6 +646,141 @@ export default function ArchivePage() {
           </div>
         )}
         {activeTab === "external" && <ExternalPlaylistsTab />}
+
+        {/* ── My Archive (Witness Subscription reserved works) ─────────────────────────────────────────────────── */}
+        {activeTab === "witnessed" && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-xs font-bold tracking-widest flex items-center gap-2"
+                style={{ color: "var(--ln-smoke)", fontFamily: "'Cinzel', serif" }}>
+                <Eye size={13} /> MY ARCHIVE
+              </h2>
+              {witnessArchiveTotal > 0 && (
+                <span className="text-xs" style={{ color: "var(--ln-smoke)" }}>
+                  {witnessArchiveTotal} reserved {witnessArchiveTotal === 1 ? "work" : "works"}
+                </span>
+              )}
+            </div>
+
+            {/* Description */}
+            <p className="text-sm mb-4" style={{ color: "var(--ln-smoke)" }}>
+              Works reserved from creators you subscribe to. These are preserved in your archive as they are published.
+            </p>
+
+            {witnessArchiveLoading && (
+              <div className="space-y-2">
+                {[1,2,3].map(i => (
+                  <div key={i} className="h-16 rounded-xl animate-pulse" style={{ background: "var(--ln-coal)" }} />
+                ))}
+              </div>
+            )}
+
+            {!witnessArchiveLoading && witnessArchiveItems.length === 0 && (
+              <div className="text-center py-12 rounded-xl" style={{ background: "var(--ln-coal)", border: "1px dashed rgba(255,255,255,0.08)" }}>
+                <Eye className="w-8 h-8 mx-auto mb-3 opacity-30" style={{ color: "var(--ln-smoke)" }} />
+                <p className="text-sm font-medium mb-1" style={{ color: "var(--ln-parchment)" }}>No reserved works yet</p>
+                <p className="text-xs" style={{ color: "var(--ln-smoke)" }}>
+                  Subscribe to creators at the Reserve or Steward tier to automatically archive their new publications.
+                </p>
+              </div>
+            )}
+
+            {!witnessArchiveLoading && witnessArchiveItems.length > 0 && (
+              <div className="space-y-2">
+                {witnessArchiveItems.map((item: any) => (
+                  <div
+                    key={item.id}
+                    className="flex items-center gap-3 p-3 rounded-xl transition-colors"
+                    style={{ background: "var(--ln-coal)", border: "1px solid rgba(99,102,241,0.15)" }}
+                  >
+                    {/* Cover art */}
+                    {item.coverArtUrl ? (
+                      <img
+                        src={item.coverArtUrl}
+                        alt={item.title}
+                        className="w-10 h-10 rounded-lg object-cover flex-shrink-0"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 rounded-lg flex-shrink-0 flex items-center justify-center"
+                        style={{ background: "rgba(99,102,241,0.1)" }}>
+                        <Eye size={16} style={{ color: "#a5b4fc" }} />
+                      </div>
+                    )}
+
+                    {/* Info */}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate" style={{ color: "var(--ln-parchment)" }}>
+                        {item.title}
+                      </p>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        {item.wid && (
+                          <span className="text-[10px] font-mono" style={{ color: "var(--ln-gold)" }}>
+                            {item.wid}
+                          </span>
+                        )}
+                        <span className="text-[10px]" style={{ color: "var(--ln-smoke)" }}>
+                          {item.contentType}
+                        </span>
+                        <span className="text-[10px]" style={{ color: "var(--ln-smoke)" }}>
+                          Reserved {new Date(item.reservedAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Tier badge */}
+                    <span
+                      className="text-[10px] px-2 py-0.5 rounded-full font-semibold flex-shrink-0"
+                      style={{
+                        background: item.tier === "steward" ? "rgba(16,185,129,0.12)" : item.tier === "reserve" ? "rgba(99,102,241,0.12)" : "rgba(196,154,40,0.08)",
+                        color: item.tier === "steward" ? "#6ee7b7" : item.tier === "reserve" ? "#a5b4fc" : "var(--ln-gold)",
+                        border: `1px solid ${item.tier === "steward" ? "rgba(16,185,129,0.25)" : item.tier === "reserve" ? "rgba(99,102,241,0.25)" : "rgba(196,154,40,0.2)"}`,
+                      }}
+                    >
+                      {item.tier === "witness" ? "Witness" : item.tier === "reserve" ? "Reserve" : "Steward"}
+                    </span>
+
+                    {/* Link to work */}
+                    {item.slug && (
+                      <a
+                        href={`/w/${item.slug}`}
+                        className="flex-shrink-0 opacity-50 hover:opacity-100 transition-opacity"
+                        style={{ color: "var(--ln-parchment)" }}
+                        title="View work"
+                      >
+                        <ExternalLink size={14} />
+                      </a>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Pagination */}
+            {witnessArchiveTotal > WITNESS_PAGE_SIZE && (
+              <div className="flex items-center justify-between pt-2">
+                <button
+                  onClick={() => setWitnessArchivePage(p => Math.max(0, p - 1))}
+                  disabled={witnessArchivePage === 0}
+                  className="px-4 py-1.5 rounded-lg text-xs transition-colors disabled:opacity-40"
+                  style={{ border: "1px solid rgba(255,255,255,0.08)", color: "var(--ln-smoke)" }}
+                >
+                  Previous
+                </button>
+                <span className="text-xs" style={{ color: "var(--ln-smoke)" }}>
+                  Page {witnessArchivePage + 1} of {Math.ceil(witnessArchiveTotal / WITNESS_PAGE_SIZE)}
+                </span>
+                <button
+                  onClick={() => setWitnessArchivePage(p => p + 1)}
+                  disabled={(witnessArchivePage + 1) * WITNESS_PAGE_SIZE >= witnessArchiveTotal}
+                  className="px-4 py-1.5 rounded-lg text-xs transition-colors disabled:opacity-40"
+                  style={{ border: "1px solid rgba(255,255,255,0.08)", color: "var(--ln-smoke)" }}
+                >
+                  Next
+                </button>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* ── Filter + Sort bar ─────────────────────────────────── */}
         {activeTab === "tracks" && !songsLoading && displaySongs.length > 0 && (
