@@ -5280,3 +5280,13 @@
 - [x] Witness Subscription button on creator profile page (desktop + mobile) — Witness/Reserve/Steward tier selector
 - [x] My Archive tab added to existing /archive page — shows reserved manifestations with tier badges, WID, pagination
 - [x] TypeScript: 0 errors after all changes
+
+## Image Gallery as First-Class Medium Type — Completed
+- [x] Add 'image' to songs.contentType enum (schema + direct SQL ALTER)
+- [x] Add 'image' to creatorPublicationFeed.contentType enum
+- [x] Add autoReserveImages column to witnessSubscriptions
+- [x] Add getCreatorGallery, getCreatorGalleryCount, getMyQuiverImages, updateQuiverImage helpers to db.ts
+- [x] Add imageGallery tRPC router (forCreator, myVault, update procedures)
+- [x] Add quiver.setPublished procedure to existing quiver router
+- [x] Add Image Gallery shelf to CreatorProfilePage (gold-rim grid, hover title/WID overlay)
+- [x] TypeScript: 0 errors

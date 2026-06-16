@@ -152,6 +152,10 @@ import {
   publishToFeed,
   getWitnessArchive,
   getWitnessArchiveCount,
+  getCreatorGallery,
+  getCreatorGalleryCount,
+  getMyQuiverImages,
+  updateQuiverImage,
 } from "./db";
 import { FOUNDER_PRICE_EARLY_CENTS, FOUNDER_PRICE_LATE_CENTS, FOUNDER_THRESHOLD, LICENSE_PRICE_CENTS, LICENSE_SLOTS, SLOT_PACKAGES, getSlotPackage, type SlotPackageId } from "./livingArchiveProducts";
 import { ENV } from "./_core/env";
@@ -3297,6 +3301,47 @@ ${workType === "manuscript" || workType === "comic" ? "Category" : "Genre"}: ${i
           getWitnessArchiveCount(ctx.user.id),
         ]);
         return { items, total };
+      }),
+  }),
+
+  // ── Image Gallery ──────────────────────────────────────────────────────────
+  imageGallery: router({
+    /** Public gallery for a creator — only WID-registered images with titles */
+    forCreator: publicProcedure
+      .input(z.object({
+        creatorId: z.number().int().positive(),
+        limit: z.number().int().min(1).max(48).default(24),
+        offset: z.number().int().min(0).default(0),
+      }))
+      .query(async ({ input }) => {
+        const [items, total] = await Promise.all([
+          getCreatorGallery(input.creatorId, input.limit, input.offset),
+          getCreatorGalleryCount(input.creatorId),
+        ]);
+        return { items, total };
+      }),
+    /** Get the current user's full quiver (private vault) */
+    myVault: protectedProcedure
+      .input(z.object({
+        limit: z.number().int().min(1).max(96).default(48),
+        offset: z.number().int().min(0).default(0),
+      }))
+      .query(async ({ ctx, input }) => {
+        return getMyQuiverImages(ctx.user.id, input.limit, input.offset);
+      }),
+    /** Publish (register as WID) or update title for a quiver image */
+    update: protectedProcedure
+      .input(z.object({
+        id: z.number().int().positive(),
+        title: z.string().min(1).max(255).optional(),
+        registeredAsWid: z.boolean().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        await updateQuiverImage(input.id, ctx.user.id, {
+          title: input.title,
+          registeredAsWid: input.registeredAsWid,
+        });
+        return { ok: true };
       }),
   }),
 
@@ -7566,6 +7611,34 @@ If a field cannot be determined from the document, use an empty string. For symb
         await db.update(quiverImages)
           .set({ title: input.title })
           .where(andOp(eqOp(quiverImages.id, input.id), eqOp(quiverImages.userId, ctx.user.id)));
+        return { ok: true };
+      }),
+
+    /**
+     * Publish a quiver image to the creator's public gallery.
+     * Sets registeredAsWid=true and requires a title.
+     * Also unpublishes if registeredAsWid=false.
+     */
+    setPublished: protectedProcedure
+      .input(z.object({
+        id: z.number().int().positive(),
+        published: z.boolean(),
+        title: z.string().min(1).max(255).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const { quiverImages } = await import('../drizzle/schema');
+        const { eq: eqOp, and: andOp } = await import('drizzle-orm');
+        const db = await getDb();
+        const [img] = await db.select().from(quiverImages).where(
+          andOp(eqOp(quiverImages.id, input.id), eqOp(quiverImages.userId, ctx.user.id))
+        ).limit(1);
+        if (!img) throw new TRPCError({ code: 'NOT_FOUND', message: 'Image not found in your quiver.' });
+        if (input.published && !input.title && !img.title) {
+          throw new TRPCError({ code: 'BAD_REQUEST', message: 'A title is required to publish an image to your gallery.' });
+        }
+        const updates: Record<string, unknown> = { registeredAsWid: input.published };
+        if (input.title) updates.title = input.title;
+        await db.update(quiverImages).set(updates).where(eqOp(quiverImages.id, input.id));
         return { ok: true };
       }),
   }),

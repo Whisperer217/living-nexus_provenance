@@ -58,6 +58,8 @@ import {
   witnessSubscriptions,
   witnessReservations,
   creatorPublicationFeed,
+  quiverImages,
+  type QuiverImage,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 import type { SearchResults } from "../shared/searchTypes";
@@ -5546,4 +5548,70 @@ export async function getWitnessArchiveCount(witnessId: number): Promise<number>
   if (!db) return 0;
   const rows = await db.select({ count: sql<number>`COUNT(*)` }).from(witnessReservations).where(eq(witnessReservations.witnessId, witnessId));
   return Number(rows[0]?.count ?? 0);
+}
+
+// ─── Image Gallery (quiverImages as published visual works) ───────────────────
+
+/** Get published gallery images for a creator's public profile. */
+export async function getCreatorGallery(creatorId: number, limit = 24, offset = 0): Promise<QuiverImage[]> {
+  const db = await getDb();
+  if (!db) return [];
+  // Published gallery images: registered as WID and have a title
+  return db
+    .select()
+    .from(quiverImages)
+    .where(
+      and(
+        eq(quiverImages.userId, creatorId),
+        eq(quiverImages.registeredAsWid, true),
+        isNotNull(quiverImages.title),
+      )
+    )
+    .orderBy(desc(quiverImages.createdAt))
+    .limit(limit)
+    .offset(offset);
+}
+
+/** Count published gallery images for a creator. */
+export async function getCreatorGalleryCount(creatorId: number): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  const rows = await db
+    .select({ count: sql<number>`COUNT(*)` })
+    .from(quiverImages)
+    .where(
+      and(
+        eq(quiverImages.userId, creatorId),
+        eq(quiverImages.registeredAsWid, true),
+        isNotNull(quiverImages.title),
+      )
+    );
+  return Number(rows[0]?.count ?? 0);
+}
+
+/** Get all quiver images for the authenticated user (their private vault). */
+export async function getMyQuiverImages(userId: number, limit = 48, offset = 0): Promise<QuiverImage[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db
+    .select()
+    .from(quiverImages)
+    .where(eq(quiverImages.userId, userId))
+    .orderBy(desc(quiverImages.createdAt))
+    .limit(limit)
+    .offset(offset);
+}
+
+/** Update a quiver image's title and/or registeredAsWid flag. */
+export async function updateQuiverImage(
+  id: number,
+  userId: number,
+  updates: { title?: string; registeredAsWid?: boolean }
+): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db
+    .update(quiverImages)
+    .set(updates)
+    .where(and(eq(quiverImages.id, id), eq(quiverImages.userId, userId)));
 }

@@ -1,0 +1,3 @@
+ALTER TABLE `creatorPublicationFeed` MODIFY COLUMN `contentType` enum('audio','lyrics','manuscript','comic','video','guide','project','image') NOT NULL;--> statement-breakpoint
+ALTER TABLE `songs` MODIFY COLUMN `contentType` enum('audio','lyrics','manuscript','comic','game','image') NOT NULL DEFAULT 'audio';--> statement-breakpoint
+ALTER TABLE `witnessSubscriptions` ADD `autoReserveImages` boolean DEFAULT false NOT NULL;

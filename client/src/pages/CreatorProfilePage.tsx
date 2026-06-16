@@ -641,6 +641,11 @@ export default function CreatorProfilePage() {
     { userId: creatorId },
     { enabled: creatorId > 0, staleTime: 60_000 }
   );
+  const { data: galleryData } = trpc.imageGallery.forCreator.useQuery(
+    { creatorId, limit: 24 },
+    { enabled: creatorId > 0, staleTime: 60_000 }
+  );
+  const galleryImages = galleryData?.items ?? [];
 
   const handlePlay = (song: any) => {
     // Books and comics are not audio — navigate to their reader page
@@ -1904,6 +1909,48 @@ export default function CreatorProfilePage() {
               </Link>
             )}
           </div>
+        )}
+
+        {/* ── Image Gallery Shelf ── */}
+        {galleryImages.length > 0 && (
+          <section className="py-6 pb-8">
+            <div className="flex items-center gap-2 mb-4">
+              <Camera className="w-4 h-4" style={{ color: "var(--ln-gold)" }} />
+              <h2 className="text-base font-bold" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>
+                Image Gallery
+              </h2>
+              <span className="text-xs ml-1" style={{ color: "var(--ln-smoke)" }}>{galleryImages.length} work{galleryImages.length !== 1 ? 's' : ''}</span>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+              {galleryImages.map((img: any) => (
+                <div
+                  key={img.id}
+                  className="group relative rounded-xl overflow-hidden cursor-pointer"
+                  style={{ aspectRatio: '1/1', border: '1px solid rgba(196,154,40,0.25)', background: 'var(--ln-coal)' }}
+                  onClick={() => window.open(img.url, '_blank')}
+                >
+                  <img
+                    src={img.url}
+                    alt={img.title ?? 'Gallery image'}
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  />
+                  {/* Gold rim overlay — IP protection marker */}
+                  <div className="absolute inset-0 rounded-xl pointer-events-none" style={{ boxShadow: 'inset 0 0 0 1.5px rgba(196,154,40,0.55)' }} />
+                  {/* Title overlay on hover */}
+                  <div className="absolute inset-x-0 bottom-0 px-2 py-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                    style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 100%)' }}
+                  >
+                    {img.title && (
+                      <p className="text-xs font-medium truncate" style={{ color: 'var(--ln-parchment)', fontFamily: "'Cinzel', serif" }}>{img.title}</p>
+                    )}
+                    {img.widId && (
+                      <p className="font-mono text-[9px] truncate mt-0.5" style={{ color: 'var(--ln-gold)' }}>{img.widId}</p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
         )}
 
         {/* ── Witness Testimonies ── */}

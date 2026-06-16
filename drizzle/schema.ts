@@ -270,7 +270,7 @@ export const songs = mysqlTable("songs", {
   // "lyrics"     = standalone lyric sheet (WID-LYR only, no audio)
   // "manuscript" = novel, short story, essay, academic paper
   // "comic"      = comic book, graphic novel, illustrated story
-  contentType: mysqlEnum("contentType", ["audio", "lyrics", "manuscript", "comic", "game"]).default("audio").notNull(),
+  contentType: mysqlEnum("contentType", ["audio", "lyrics", "manuscript", "comic", "game", "image"]).default("audio").notNull(),
 
   // ─── Game Manifestation (contentType = "game") ────────────────────────────────
   // gameEngine: the engine/format used to build the game
@@ -1921,7 +1921,7 @@ export const creatorPublicationFeed = mysqlTable("creatorPublicationFeed", {
   creatorId: int("creatorId").notNull(),          // user.id of the creator
   manifestationId: int("manifestationId").notNull(), // songs.id, projects.id, etc.
   contentType: mysqlEnum("contentType", [
-    "audio", "lyrics", "manuscript", "comic", "video", "guide", "project"
+    "audio", "lyrics", "manuscript", "comic", "video", "guide", "project", "image"
   ]).notNull(),
   wid: varchar("wid", { length: 64 }),             // WID if already issued
   title: varchar("title", { length: 512 }).notNull(),
@@ -1951,6 +1951,7 @@ export const witnessSubscriptions = mysqlTable("witnessSubscriptions", {
   autoReserveComics: boolean("autoReserveComics").default(false).notNull(),
   autoReserveVideos: boolean("autoReserveVideos").default(false).notNull(),
   autoReserveGuides: boolean("autoReserveGuides").default(false).notNull(),
+  autoReserveImages: boolean("autoReserveImages").default(false).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().notNull(),
 });
