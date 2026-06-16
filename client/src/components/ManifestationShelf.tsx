@@ -1,6 +1,6 @@
 import { useRef, useState, useCallback, useEffect } from "react";
 import { Link } from "wouter";
-import { Play, Pause, ChevronLeft, ChevronRight, Shield, Music, BookOpen, FileText, Film, Package, Layers } from "lucide-react";
+import { Play, Pause, ChevronLeft, ChevronRight, Shield, Music, BookOpen, FileText, Film, Package, Layers, LayoutGrid, List, ChevronDown, ChevronUp as ChevronUpIcon, Clock } from "lucide-react";
 import { MediaAsset } from "@/components/MediaAsset";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -185,6 +185,113 @@ function TrackCard({
   );
 }
 
+// ─── List Row (compact track row for list view) ──────────────────────────────
+function TrackListRow({
+  track,
+  index,
+  isPlaying,
+  onPlay,
+}: {
+  track: ShelfTrack;
+  index: number;
+  isPlaying: boolean;
+  onPlay: () => void;
+}) {
+  const duration = track.durationSeconds
+    ? `${Math.floor(track.durationSeconds / 60)}:${String(Math.round(track.durationSeconds % 60)).padStart(2, "0")}`
+    : null;
+
+  return (
+    <div
+      className="group flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-all"
+      style={{
+        background: isPlaying ? "rgba(196,154,40,0.08)" : "transparent",
+        border: isPlaying ? "1px solid rgba(196,154,40,0.25)" : "1px solid transparent",
+      }}
+      onClick={onPlay}
+    >
+      {/* Index / playing indicator */}
+      <div className="w-7 flex-shrink-0 flex items-center justify-center">
+        {isPlaying ? (
+          <div className="flex items-end gap-0.5 h-4">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="w-0.5 rounded-full"
+                style={{
+                  height: `${6 + i * 2}px`,
+                  background: "var(--ln-gold)",
+                  animation: `pulse 2s cubic-bezier(0.4,0,0.6,1) infinite`,
+                  animationDelay: `${i * 0.15}s`,
+                }}
+              />
+            ))}
+          </div>
+        ) : (
+          <>
+            <span
+              className="text-xs group-hover:hidden"
+              style={{ color: "var(--ln-smoke)", fontFamily: "monospace" }}
+            >
+              {index + 1}
+            </span>
+            <Play
+              className="w-3.5 h-3.5 hidden group-hover:block"
+              style={{ color: "var(--ln-gold)" }}
+            />
+          </>
+        )}
+      </div>
+
+      {/* Cover thumbnail */}
+      <div className="w-9 h-9 rounded-md overflow-hidden flex-shrink-0 relative">
+        {track.coverArtUrl ? (
+          <img
+            src={track.coverArtUrl}
+            alt={track.title}
+            className="w-full h-full object-cover"
+            style={{ objectPosition: `${track.coverPositionX ?? 50}% ${track.coverPositionY ?? 50}%` }}
+          />
+        ) : (
+          <div
+            className="w-full h-full flex items-center justify-center"
+            style={{ background: "rgba(196,154,40,0.08)" }}
+          >
+            <Music className="w-4 h-4" style={{ color: "var(--ln-gold)" }} />
+          </div>
+        )}
+      </div>
+
+      {/* Title + genre */}
+      <div className="flex-1 min-w-0">
+        <Link href={`/song/${track.id}`} onClick={(e: React.MouseEvent) => e.stopPropagation()}>
+          <p
+            className="text-sm font-semibold truncate hover:text-[#C49A28] transition-colors"
+            style={{ fontFamily: "'Cinzel', serif", color: isPlaying ? "var(--ln-gold)" : "var(--ln-parchment)" }}
+          >
+            {track.title}
+          </p>
+        </Link>
+        {track.genre && (
+          <p className="text-[10px] truncate" style={{ color: "var(--ln-smoke)" }}>{track.genre}</p>
+        )}
+      </div>
+
+      {/* WID badge */}
+      {track.witnessId && (
+        <Shield className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "rgba(196,154,40,0.5)" }} />
+      )}
+
+      {/* Duration */}
+      {duration && (
+        <span className="text-xs flex-shrink-0" style={{ color: "var(--ln-smoke)", fontFamily: "monospace" }}>
+          {duration}
+        </span>
+      )}
+    </div>
+  );
+}
+
 // ─── Manifestation Shelf ──────────────────────────────────────────────────────
 export function ManifestationShelf({
   album,
@@ -198,6 +305,12 @@ export function ManifestationShelf({
   const [canScrollRight, setCanScrollRight] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const dragStart = useRef({ x: 0, scrollLeft: 0 });
+  // View mode: auto-default to list when there are many tracks
+  const [viewMode, setViewMode] = useState<"carousel" | "list">(
+    album.tracks.length >= 8 ? "list" : "carousel"
+  );
+  const LIST_INITIAL = 12;
+  const [listExpanded, setListExpanded] = useState(false);
 
   const updateScrollState = useCallback(() => {
     const el = scrollRef.current;
@@ -300,106 +413,189 @@ export function ManifestationShelf({
           </p>
         </div>
 
-        {/* Scroll arrows (desktop) */}
-        <div className="hidden sm:flex items-center gap-1 flex-shrink-0">
+        {/* View toggle + scroll arrows */}
+        <div className="flex items-center gap-1 flex-shrink-0">
+          {/* List / Carousel toggle */}
           <button
             className="w-8 h-8 rounded-full flex items-center justify-center transition-all"
             style={{
-              background: canScrollLeft ? "rgba(196,154,40,0.12)" : "rgba(255,255,255,0.03)",
-              color: canScrollLeft ? "var(--ln-gold)" : "rgba(255,255,255,0.2)",
-              border: "1px solid rgba(196,154,40,0.15)",
-              cursor: canScrollLeft ? "pointer" : "default",
+              background: viewMode === "list" ? "rgba(196,154,40,0.18)" : "rgba(255,255,255,0.04)",
+              color: viewMode === "list" ? "var(--ln-gold)" : "rgba(255,255,255,0.35)",
+              border: `1px solid ${viewMode === "list" ? "rgba(196,154,40,0.4)" : "rgba(196,154,40,0.12)"}`,
             }}
-            onClick={() => scrollBy("left")}
-            disabled={!canScrollLeft}
-            aria-label="Scroll left"
+            onClick={() => setViewMode("list")}
+            aria-label="List view"
+            title="List view"
           >
-            <ChevronLeft className="w-4 h-4" />
+            <List className="w-3.5 h-3.5" />
           </button>
           <button
             className="w-8 h-8 rounded-full flex items-center justify-center transition-all"
             style={{
-              background: canScrollRight ? "rgba(196,154,40,0.12)" : "rgba(255,255,255,0.03)",
-              color: canScrollRight ? "var(--ln-gold)" : "rgba(255,255,255,0.2)",
-              border: "1px solid rgba(196,154,40,0.15)",
-              cursor: canScrollRight ? "pointer" : "default",
+              background: viewMode === "carousel" ? "rgba(196,154,40,0.18)" : "rgba(255,255,255,0.04)",
+              color: viewMode === "carousel" ? "var(--ln-gold)" : "rgba(255,255,255,0.35)",
+              border: `1px solid ${viewMode === "carousel" ? "rgba(196,154,40,0.4)" : "rgba(196,154,40,0.12)"}`,
             }}
-            onClick={() => scrollBy("right")}
-            disabled={!canScrollRight}
-            aria-label="Scroll right"
+            onClick={() => setViewMode("carousel")}
+            aria-label="Carousel view"
+            title="Carousel view"
           >
-            <ChevronRight className="w-4 h-4" />
+            <LayoutGrid className="w-3.5 h-3.5" />
           </button>
+
+          {/* Scroll arrows — only in carousel mode on desktop */}
+          {viewMode === "carousel" && (
+            <>
+              <button
+                className="w-8 h-8 rounded-full flex items-center justify-center transition-all"
+                style={{
+                  background: canScrollLeft ? "rgba(196,154,40,0.12)" : "rgba(255,255,255,0.03)",
+                  color: canScrollLeft ? "var(--ln-gold)" : "rgba(255,255,255,0.2)",
+                  border: "1px solid rgba(196,154,40,0.15)",
+                  cursor: canScrollLeft ? "pointer" : "default",
+                }}
+                onClick={() => scrollBy("left")}
+                disabled={!canScrollLeft}
+                aria-label="Scroll left"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <button
+                className="w-8 h-8 rounded-full flex items-center justify-center transition-all"
+                style={{
+                  background: canScrollRight ? "rgba(196,154,40,0.12)" : "rgba(255,255,255,0.03)",
+                  color: canScrollRight ? "var(--ln-gold)" : "rgba(255,255,255,0.2)",
+                  border: "1px solid rgba(196,154,40,0.15)",
+                  cursor: canScrollRight ? "pointer" : "default",
+                }}
+                onClick={() => scrollBy("right")}
+                disabled={!canScrollRight}
+                aria-label="Scroll right"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </>
+          )}
         </div>
       </div>
 
-      {/* ── Horizontal track rack ── */}
-      <div className="relative overflow-hidden"> {/* Phase 194.2: overflow-hidden clips card bleed */}
-        {/* Left fade */}
-        {canScrollLeft && (
+      {/* ── List view ── */}
+      {viewMode === "list" && (
+        <div className="px-3 py-3">
+          {/* Column header */}
           <div
-            className="absolute left-0 top-0 bottom-0 w-12 z-10 pointer-events-none"
-            style={{ background: "linear-gradient(to right, var(--ln-coal), transparent)" }}
-          />
-        )}
-        {/* Right fade */}
-        {canScrollRight && (
-          <div
-            className="absolute right-0 top-0 bottom-0 w-12 z-10 pointer-events-none"
-            style={{ background: "linear-gradient(to left, var(--ln-coal), transparent)" }}
-          />
-        )}
+            className="flex items-center gap-3 px-3 pb-2 mb-1"
+            style={{ borderBottom: "1px solid rgba(196,154,40,0.08)" }}
+          >
+            <div className="w-7" />
+            <div className="w-9" />
+            <div className="flex-1 text-[10px] font-semibold uppercase tracking-widest" style={{ color: "var(--ln-smoke)" }}>Title</div>
+            <Clock className="w-3 h-3 flex-shrink-0" style={{ color: "var(--ln-smoke)" }} />
+          </div>
 
-        <div
-          ref={scrollRef}
-          className="flex gap-3 overflow-x-auto px-5 py-4 pb-5"
-          style={{
-            scrollbarWidth: "none",
-            msOverflowStyle: "none",
-            cursor: "grab",
-            WebkitOverflowScrolling: "touch",
-          }}
-          onMouseDown={onMouseDown}
-          onMouseMove={onMouseMove}
-          onMouseUp={onMouseUp}
-          onMouseLeave={onMouseUp}
-        >
-          {album.tracks.map((track) => (
-            <TrackCard
+          {/* Track rows */}
+          {(listExpanded ? album.tracks : album.tracks.slice(0, LIST_INITIAL)).map((track, i) => (
+            <TrackListRow
               key={track.id}
               track={track}
+              index={i}
               isPlaying={playingId === track.id}
               onPlay={() => onPlayTrack(track, album.tracks)}
             />
           ))}
-        </div>
-      </div>
 
-      {/* ── Scroll indicator dots (mobile) ── */}
-      {trackCount > 3 && (
-        <div className="flex justify-center gap-1 pb-3 sm:hidden">
-          <div
-            className="h-0.5 rounded-full transition-all"
-            style={{
-              width: canScrollLeft ? "8px" : "20px",
-              background: canScrollLeft ? "rgba(196,154,40,0.3)" : "var(--ln-gold)",
-            }}
-          />
-          <div
-            className="h-0.5 rounded-full transition-all"
-            style={{
-              width: !canScrollLeft && !canScrollRight ? "20px" : "8px",
-              background: !canScrollLeft && !canScrollRight ? "var(--ln-gold)" : "rgba(196,154,40,0.3)",
-            }}
-          />
-          <div
-            className="h-0.5 rounded-full transition-all"
-            style={{
-              width: canScrollRight ? "20px" : "8px",
-              background: canScrollRight ? "var(--ln-gold)" : "rgba(196,154,40,0.3)",
-            }}
-          />
+          {/* Show all / Collapse */}
+          {trackCount > LIST_INITIAL && (
+            <button
+              className="w-full mt-2 py-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all"
+              style={{
+                background: "rgba(196,154,40,0.06)",
+                color: "var(--ln-gold)",
+                border: "1px solid rgba(196,154,40,0.15)",
+              }}
+              onClick={() => setListExpanded(!listExpanded)}
+            >
+              {listExpanded ? (
+                <><ChevronUpIcon className="w-3.5 h-3.5" /> Show less</>
+              ) : (
+                <><ChevronDown className="w-3.5 h-3.5" /> Show all {trackCount} tracks</>
+              )}
+            </button>
+          )}
         </div>
+      )}
+
+      {/* ── Carousel view ── */}
+      {viewMode === "carousel" && (
+        <>
+          <div className="relative overflow-hidden">
+            {/* Left fade */}
+            {canScrollLeft && (
+              <div
+                className="absolute left-0 top-0 bottom-0 w-12 z-10 pointer-events-none"
+                style={{ background: "linear-gradient(to right, var(--ln-coal), transparent)" }}
+              />
+            )}
+            {/* Right fade */}
+            {canScrollRight && (
+              <div
+                className="absolute right-0 top-0 bottom-0 w-12 z-10 pointer-events-none"
+                style={{ background: "linear-gradient(to left, var(--ln-coal), transparent)" }}
+              />
+            )}
+
+            <div
+              ref={scrollRef}
+              className="flex gap-3 overflow-x-auto px-5 py-4 pb-5"
+              style={{
+                scrollbarWidth: "none",
+                msOverflowStyle: "none",
+                cursor: "grab",
+                WebkitOverflowScrolling: "touch",
+              }}
+              onMouseDown={onMouseDown}
+              onMouseMove={onMouseMove}
+              onMouseUp={onMouseUp}
+              onMouseLeave={onMouseUp}
+            >
+              {album.tracks.map((track) => (
+                <TrackCard
+                  key={track.id}
+                  track={track}
+                  isPlaying={playingId === track.id}
+                  onPlay={() => onPlayTrack(track, album.tracks)}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Scroll indicator dots (mobile) */}
+          {trackCount > 3 && (
+            <div className="flex justify-center gap-1 pb-3 sm:hidden">
+              <div
+                className="h-0.5 rounded-full transition-all"
+                style={{
+                  width: canScrollLeft ? "8px" : "20px",
+                  background: canScrollLeft ? "rgba(196,154,40,0.3)" : "var(--ln-gold)",
+                }}
+              />
+              <div
+                className="h-0.5 rounded-full transition-all"
+                style={{
+                  width: !canScrollLeft && !canScrollRight ? "20px" : "8px",
+                  background: !canScrollLeft && !canScrollRight ? "var(--ln-gold)" : "rgba(196,154,40,0.3)",
+                }}
+              />
+              <div
+                className="h-0.5 rounded-full transition-all"
+                style={{
+                  width: canScrollRight ? "20px" : "8px",
+                  background: canScrollRight ? "var(--ln-gold)" : "rgba(196,154,40,0.3)",
+                }}
+              />
+            </div>
+          )}
+        </>
       )}
     </div>
   );

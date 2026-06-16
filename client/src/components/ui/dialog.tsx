@@ -100,6 +100,33 @@ function DialogContent({
 }) {
   const { isComposing } = useDialogComposition();
 
+  // ── Body position fix ────────────────────────────────────────────────────
+  // react-remove-scroll-bar injects `body[data-scroll-locked] { position: relative !important }`
+  // as an unlayered <style> tag AFTER our CSS file loads, so it wins the cascade.
+  // When body is position:relative, position:fixed children resolve against body
+  // (not the viewport), breaking dialog centering on mobile.
+  // Fix: set body.style.position = 'static' as an inline style (always wins over
+  // any stylesheet rule) while the dialog is open, then restore on close.
+  React.useEffect(() => {
+    const observer = new MutationObserver(() => {
+      if (document.body.hasAttribute('data-scroll-locked')) {
+        document.body.style.setProperty('position', 'static', 'important');
+      }
+    });
+    observer.observe(document.body, { attributes: true, attributeFilter: ['data-scroll-locked'] });
+    // Also apply immediately in case the attribute is already set
+    if (document.body.hasAttribute('data-scroll-locked')) {
+      document.body.style.setProperty('position', 'static', 'important');
+    }
+    return () => {
+      observer.disconnect();
+      // Only clear if no other dialog is open
+      if (!document.body.hasAttribute('data-scroll-locked')) {
+        document.body.style.removeProperty('position');
+      }
+    };
+  }, []);
+
   const handleEscapeKeyDown = React.useCallback(
     (e: KeyboardEvent) => {
       // Check both the native isComposing property and our context state
