@@ -1,7 +1,9 @@
-import { useRef, useState, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { Link } from "wouter";
-import { Play, Pause, ChevronLeft, ChevronRight, Shield, Music, BookOpen, FileText, Film, Package, Layers, LayoutGrid, List, ChevronDown, ChevronUp as ChevronUpIcon, Clock, Headphones } from "lucide-react";
+import { Play, Pause, ChevronLeft, ChevronRight, Shield, Music, BookOpen, FileText, Film, Package, Layers, LayoutGrid, List, ChevronDown, ChevronUp as ChevronUpIcon, Clock, Headphones, Download } from "lucide-react";
 import { MediaAsset } from "@/components/MediaAsset";
+import { trpc } from "@/lib/trpc";
+import { toast } from "sonner";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 export interface ShelfTrack {
@@ -30,6 +32,7 @@ export interface ShelfAlbum {
   coverPositionY?: number | null;
   tracks: ShelfTrack[];
   medium?: "music" | "books" | "comics" | "manuscripts" | "artifacts" | "merch" | "video" | "other";
+  projectSlug?: string | null;
 }
 
 interface ManifestationShelfProps {
@@ -200,6 +203,27 @@ function TrackListRow({
   isPlaying: boolean;
   onPlay: () => void;
 }) {
+  const downloadMutation = trpc.songs.download.useMutation({
+    onSuccess: (_data: { url: string }, vars: { songId: number }) => {
+      const a = document.createElement("a");
+      a.href = `/api/download/${vars.songId}`;
+      a.style.display = "none";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
+  const handleDownload = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!track.downloadPermission || track.downloadPermission === "none") {
+      toast.error("Downloads are not enabled for this track.");
+      return;
+    }
+    downloadMutation.mutate({ songId: track.id });
+  };
+
   const duration = track.durationSeconds
     ? `${Math.floor(track.durationSeconds / 60)}:${String(Math.round(track.durationSeconds % 60)).padStart(2, "0")}`
     : null;
@@ -320,6 +344,18 @@ function TrackListRow({
           <Shield className="w-3 h-3 flex-shrink-0" style={{ color: "rgba(196,154,40,0.6)" }} aria-label={`WID: ${track.witnessId}`} />
         </Link>
       )}
+
+      {/* Download button */}
+      <button
+        onClick={handleDownload}
+        className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+        title={!track.downloadPermission || track.downloadPermission === 'none' ? 'Download not available' : 'Download track'}
+        style={{ color: (!track.downloadPermission || track.downloadPermission === 'none') ? 'rgba(255,255,255,0.2)' : 'rgba(196,154,40,0.6)' }}
+      >
+        {downloadMutation.isPending
+          ? <span className="text-[9px]" style={{ color: 'var(--ln-gold)' }}>...</span>
+          : <Download className="w-3 h-3" />}
+      </button>
 
       {/* Duration */}
       {duration && (
@@ -454,6 +490,28 @@ export function ManifestationShelf({
             {trackCount} {trackCount === 1 ? "track" : "tracks"}
           </p>
         </div>
+
+        {/* Download Album button — only shown when project slug is available */}
+        {album.projectSlug && (
+          <Link
+            href={`/project/${album.projectSlug}`}
+            onClick={(e: React.MouseEvent) => e.stopPropagation()}
+            className="flex-shrink-0"
+          >
+            <button
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition-all hover:opacity-90"
+              style={{
+                background: "rgba(196,154,40,0.12)",
+                color: "var(--ln-gold)",
+                border: "1px solid rgba(196,154,40,0.3)",
+              }}
+              title="Download album"
+            >
+              <Download className="w-3 h-3" />
+              <span className="hidden sm:inline">Album</span>
+            </button>
+          </Link>
+        )}
 
         {/* View toggle + scroll arrows */}
         <div className="flex items-center gap-1 flex-shrink-0">

@@ -1661,12 +1661,17 @@ export default function CreatorProfilePage() {
                     : firstContentType === "manuscript" ? "manuscripts"
                     : firstContentType === "comic" ? "comics"
                     : "music";
+                  // Find matching project slug for album download button
+                  const matchingProject = (creatorProjects as any[]).find(
+                    (p: any) => p.title?.toLowerCase() === albumName.toLowerCase()
+                  );
                   const shelfAlbum = {
                     name: albumName,
                     coverArtUrl: albumCoverUrl ?? undefined,
                     coverPositionX: albumCoverX,
                     coverPositionY: albumCoverY,
                     medium,
+                    projectSlug: matchingProject?.slug ?? null,
                     tracks: albumSongs.map((s: any) => ({
                       id: s.id,
                       title: s.title,
