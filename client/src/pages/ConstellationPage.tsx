@@ -183,7 +183,7 @@ export default function ConstellationPage() {
   const [selectedNode, setSelectedNode] = useState<CanvasNode | null>(null);
   const [dims, setDims] = useState({ w: 0, h: 0 });
 
-  const { state: playerState, addAndPlay, togglePlay } = usePlayer();
+  const { state: playerState, addAndPlay, togglePlay, playQueueAt } = usePlayer();
   const currentTrack = playerState.currentIdx >= 0 ? playerState.tracks[playerState.currentIdx] : null;
 
   // ─── Build node list from data ─────────────────────────────────────────────
@@ -585,20 +585,31 @@ export default function ConstellationPage() {
   const handlePlayNode = useCallback((node: CanvasNode) => {
     if (currentTrack?.id === String(node.id)) {
       togglePlay();
-    } else {
-      addAndPlay({
-        id: String(node.id),
-        title: node.title,
-        artist: node.artist,
-        genre: "",
-        artUrl: node.artUrl ?? undefined,
-        audioUrl: node.audioUrl ?? undefined,
-        bg: node.bg,
-        emoji: node.emoji,
-        contentType: (node.contentType as Track["contentType"]) ?? "audio",
-      });
+      return;
     }
-  }, [currentTrack?.id, togglePlay, addAndPlay]);
+    // Build an audio-only queue from all constellation nodes.
+    // Order: center first, then inner ring (same creator), then outer ring (same genre).
+    // Non-audio nodes (comics, manuscripts, images) are excluded from the queue
+    // but remain visible on the canvas.
+    const audioNodes = nodesRef.current.filter(n => !!n.audioUrl);
+    const startIdx = audioNodes.findIndex(n => n.id === node.id);
+    if (startIdx === -1) {
+      // Clicked node has no audio — show it as selected but don't play
+      return;
+    }
+    const queueTracks: Track[] = audioNodes.map(n => ({
+      id: String(n.id),
+      title: n.title,
+      artist: n.artist,
+      genre: genre ?? "",
+      artUrl: n.artUrl ?? undefined,
+      audioUrl: n.audioUrl ?? undefined,
+      bg: n.bg,
+      emoji: n.emoji,
+      contentType: (n.contentType as Track["contentType"]) ?? "audio",
+    }));
+    playQueueAt(queueTracks, startIdx, "NONE", "cosmos");
+  }, [currentTrack?.id, togglePlay, playQueueAt, genre]);
 
   // ─── Render ───────────────────────────────────────────────────────────────
 

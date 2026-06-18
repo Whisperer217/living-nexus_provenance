@@ -5343,3 +5343,8 @@
 - [x] Fix Cosmos blank-page race condition: page renders empty on first click, requires second click to load
 - [x] Implement all Cosmos UI changes in live ConstellationPage (ring labels, tooltip, content type badges, legend icon)
 - [x] Remove song title and artist name from Cosmos top bar — keep only Back button, "Constellation" label, and genre tag
+
+## Cosmos Autoplay Queue (2026-06-18)
+- [x] When a track finishes playing in the Cosmos, auto-advance to the next audio node in the constellation
+- [x] Skip non-audio nodes (comics, manuscripts, images) in the queue — show in Cosmos but do not play
+- [x] Queue order: center node first, then inner ring (same creator), then outer ring (same genre)
