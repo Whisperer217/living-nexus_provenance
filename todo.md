@@ -5317,3 +5317,8 @@
 - [x] Updated /developers page with new endpoints (wid, search), OpenAPI spec link
 - [x] Enhanced Python SDK example: register, verify, search functions with comments
 - [x] Enhanced JavaScript SDK example: registerWork, getProvenanceRecord, searchRegistry functions
+
+## Slimdoggy Bug Reports (2026-06-18)
+- [x] BUG: Clicking a song in the archive plays the wrong track — positional index mismatch with Singles/Standalones or Records queue
+- [x] BUG: Play button in archive does not register click reliably
+- [x] LAYOUT: Duplicate About section on creator profile — bio text appears both in the banner hero and again as a plain About block below it

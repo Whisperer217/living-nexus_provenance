@@ -86,13 +86,7 @@ function HeroBlock({ userId, config }: { userId: number; config: HeroBlockConfig
           )}
         </div>
 
-        {/* Origin statement */}
-        {config.showOriginStatement !== false && creator.bio && (
-          <p className="max-w-xl text-sm text-white/50 leading-relaxed"
-            style={{ fontFamily: "var(--font-body)" }}>
-            {creator.bio}
-          </p>
-        )}
+        {/* Origin statement — suppressed here; bio is shown in the BioBlock About section below to avoid duplication */}
 
         {/* Active mediums */}
         {config.showActiveMediums !== false && creator.activeMediums && (

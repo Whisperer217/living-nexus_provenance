@@ -1042,7 +1042,7 @@ export default function ArchivePage() {
                   onDragEnd={handleDragEnd}
                   onClick={(e) => {
                     if (batchMode && !isDeleted) { toggleSelect(song.id); return; }
-                    if (hasAudio && !isDeleted) handlePlay(e, displaySongs, idx);
+                    if (hasAudio && !isDeleted) handlePlay(e, filteredSongs, idx);
                   }}
                   className="flex items-center gap-3 p-3 rounded-xl transition-colors hover:brightness-110"
                   style={{
@@ -1131,12 +1131,16 @@ export default function ArchivePage() {
                   {/* Action buttons — hidden in batch mode */}
                   {!batchMode && (
                     <div className="flex items-center gap-1 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
-                      {/* Play indicator */}
+                      {/* Play button */}
                       {hasAudio && !isDeleted && (
-                        <div className="w-7 h-7 rounded-full flex items-center justify-center"
-                          style={{ color: "var(--ln-gold)" }} title="Click row to play">
+                        <button
+                          className="w-7 h-7 rounded-full flex items-center justify-center transition-colors hover:bg-white/10"
+                          style={{ color: "var(--ln-gold)" }}
+                          title="Play track"
+                          onClick={(e) => { e.stopPropagation(); handlePlay(e, filteredSongs, idx); }}
+                        >
                           <Play className="w-3 h-3" />
-                        </div>
+                        </button>
                       )}
 
                       {/* View page — route books/manuscripts/comics to /book/:id */}
