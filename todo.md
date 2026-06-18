@@ -5332,3 +5332,8 @@
 - [x] Call updateSongLyricsWithWid after song creation when lyricsText is provided in batch upload
 - [x] Surface lyricsWid in SongDetailPage lyrics panel (gold badge below WID certificate block)
 - [x] Surface lyricsWid in ArchivePage collection track list rows (below witnessId, handles both flat and nested data shapes)
+
+## Sidebar Typography Brightness Fix (2026-06-18)
+- [x] Increase inactive nav item color from rgba(255,255,255,0.40) to rgba(255,255,255,0.62) (~45% brightness increase)
+- [x] Increase Codex link color from rgba(212,175,55,0.45) to rgba(212,175,55,0.65) (~45% brightness increase)
+- [x] Restore-on-leave handlers updated to match new base values

@@ -101,7 +101,7 @@ export default function LeftRail({ drawerOpen, activeMode, onRailClick }: LeftRa
               width: 60,   /* wider hit area — fills most of the 72px rail */
               height: 56,  /* taller hit area — easier to tap/click */
               background: active ? "rgba(212,175,55,0.10)" : "transparent",
-              color: active ? "#D4AF37" : "rgba(255,255,255,0.40)",
+              color: active ? "#D4AF37" : "rgba(255,255,255,0.62)",
               boxShadow: active
                 ? "0 0 12px rgba(212,175,55,0.20), inset 0 0 8px rgba(212,175,55,0.05)"
                 : "none",
@@ -114,7 +114,7 @@ export default function LeftRail({ drawerOpen, activeMode, onRailClick }: LeftRa
             }}
             onMouseLeave={e => {
               if (!active) {
-                (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.40)";
+                (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.62)";
                 (e.currentTarget as HTMLElement).style.background = "transparent";
               }
             }}
@@ -149,7 +149,7 @@ export default function LeftRail({ drawerOpen, activeMode, onRailClick }: LeftRa
         style={{
           width: 60,
           height: 56,
-          color: "rgba(212,175,55,0.45)",
+          color: "rgba(212,175,55,0.65)",
           background: "transparent",
           textDecoration: "none",
         }}
@@ -158,7 +158,7 @@ export default function LeftRail({ drawerOpen, activeMode, onRailClick }: LeftRa
           (e.currentTarget as HTMLElement).style.background = "rgba(212,175,55,0.06)";
         }}
         onMouseLeave={e => {
-          (e.currentTarget as HTMLElement).style.color = "rgba(212,175,55,0.45)";
+          (e.currentTarget as HTMLElement).style.color = "rgba(212,175,55,0.65)";
           (e.currentTarget as HTMLElement).style.background = "transparent";
         }}
       >
