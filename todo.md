@@ -5290,3 +5290,16 @@
 - [x] Add quiver.setPublished procedure to existing quiver router
 - [x] Add Image Gallery shelf to CreatorProfilePage (gold-rim grid, hover title/WID overlay)
 - [x] TypeScript: 0 errors
+
+## Public Provenance Registration API
+
+- [x] apiKeys table added to schema (creatorId, keyHash, keyPrefix, name, tier, dailyLimit, usageToday, usageTotal, isActive, revokedAt)
+- [x] pnpm db:push applied — apiKeys table live in database
+- [x] REST endpoints: POST /api/v1/works/register, GET /api/v1/works/:wid, GET /api/v1/creator/:handle/works, GET /api/v1/verify/:wid, GET /api/v1/badge/:wid, GET /api/v1/catalog, GET /api/v1/health
+- [x] API key authentication middleware (Bearer token, bcrypt hash comparison)
+- [x] Rate limiting per key (daily limit enforced, X-RateLimit-* headers returned)
+- [x] DB helpers: createApiKey, listApiKeys, revokeApiKey, validateApiKey, incrementApiKeyUsage
+- [x] tRPC apiKey router: create, list, revoke procedures (protectedProcedure)
+- [x] Developer Dashboard page at /developer — generate/revoke keys, usage stats, code snippet
+- [x] Public API documentation page at /developers — endpoints, auth, code examples, tier table
+- [x] Vitest tests: 17 new tests covering key creation, validation, rate limiting, WID format, content type mapping (288 total passing)

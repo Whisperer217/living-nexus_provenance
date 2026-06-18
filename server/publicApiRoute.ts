@@ -345,3 +345,277 @@ publicApiRouter.get("/api/v1/jellyfin/catalog", async (req: Request, res: Respon
   }
 });
 
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// PROVENANCE REGISTRATION API  (key-authenticated)
+// ═══════════════════════════════════════════════════════════════════════════════
+import { validateApiKey, registerWorkViaApi } from "./db";
+
+// CORS: allow POST and Authorization header for the registration endpoints
+publicApiRouter.use("/api/v1/works", (_req: Request, res: Response, next: NextFunction) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  if (_req.method === "OPTIONS") { res.status(204).end(); return; }
+  next();
+});
+
+/** Middleware: extract and validate Bearer API key. */
+async function requireApiKey(req: Request, res: Response, next: NextFunction) {
+  const auth = req.headers["authorization"] ?? "";
+  const rawKey = auth.startsWith("Bearer ") ? auth.slice(7).trim() : "";
+  if (!rawKey) {
+    res.status(401).json({ error: "Missing API key. Pass Authorization: Bearer ln_..." });
+    return;
+  }
+  const keyRecord = await validateApiKey(rawKey);
+  if (!keyRecord) {
+    res.status(401).json({ error: "Invalid or revoked API key, or daily rate limit exceeded." });
+    return;
+  }
+  (req as any).apiKeyUserId = keyRecord.userId;
+  (req as any).apiKeyTier = keyRecord.tier;
+  next();
+}
+
+// ── POST /api/v1/works/register ───────────────────────────────────────────────
+/**
+ * Register a creative work and receive a WID (Work Identity Document).
+ *
+ * Body (JSON):
+ *   title        string  required
+ *   contentType  "audio" | "lyrics" | "manuscript" | "comic" | "image"  required
+ *   fileUrl      string  optional — S3/CDN URL of the primary file
+ *   coverArtUrl  string  optional
+ *   description  string  optional
+ *   aiDisclosure "original" | "ai_assisted" | "ai_generated" | "human_authored_ai_instrument"
+ *   externalId   string  optional — your tool's internal ID (for deduplication)
+ *   metadata     object  optional — arbitrary key/value pairs (stored, not indexed)
+ *
+ * Returns:
+ *   { wid, songId, registeredAt, verifyUrl, provenanceUrl }
+ */
+publicApiRouter.post("/api/v1/works/register", requireApiKey, async (req: Request, res: Response) => {
+  try {
+    const { title, contentType, fileUrl, coverArtUrl, description, aiDisclosure, externalId, metadata } = req.body ?? {};
+
+    if (!title || typeof title !== "string" || title.trim().length === 0) {
+      res.status(400).json({ error: "title is required" }); return;
+    }
+    const validTypes = ["audio", "lyrics", "manuscript", "comic", "image"];
+    if (!contentType || !validTypes.includes(contentType)) {
+      res.status(400).json({ error: `contentType must be one of: ${validTypes.join(", ")}` }); return;
+    }
+
+    const userId = (req as any).apiKeyUserId as number;
+    const result = await registerWorkViaApi({
+      userId,
+      title: title.trim(),
+      contentType,
+      fileUrl: typeof fileUrl === "string" ? fileUrl : undefined,
+      coverArtUrl: typeof coverArtUrl === "string" ? coverArtUrl : undefined,
+      description: typeof description === "string" ? description : undefined,
+      aiDisclosure: aiDisclosure ?? "original",
+      externalId: typeof externalId === "string" ? externalId : undefined,
+      metadata: typeof metadata === "object" ? metadata : undefined,
+    });
+
+    const base = "https://www.livingnexus.org";
+    res.status(201).json({
+      wid: result.wid,
+      songId: result.songId,
+      registeredAt: result.registeredAt,
+      verifyUrl: `${base}/api/v1/verify/${result.wid}`,
+      provenanceUrl: `${base}/verify/${result.wid}`,
+      badge: {
+        label: "Registered on Living Nexus",
+        widShort: result.wid.slice(-9),
+        badgeUrl: `${base}/api/v1/badge/${result.wid}`,
+      },
+      platform: "Living Nexus — Provenance Engine",
+      doctrine: "Command Domains LLC · BDDT Publishing · Sovereign Shutter Framework",
+    });
+  } catch (err) {
+    console.error("[API] /works/register error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// ── GET /api/v1/works/:wid ────────────────────────────────────────────────────
+/**
+ * Look up a registered work by its WID.
+ * Public endpoint — no API key required.
+ */
+publicApiRouter.get("/api/v1/works/:wid", async (req: Request, res: Response) => {
+  try {
+    const { wid } = req.params;
+    if (!wid || !wid.startsWith("WID-")) {
+      res.status(400).json({ error: "Invalid WID format. Expected WID-XXX-XXXXXXXX-XXXXXXXX" }); return;
+    }
+
+    const database = await (await import("./db")).getDb();
+    if (!database) { res.status(503).json({ error: "Database unavailable" }); return; }
+
+    const { songs, users } = await import("../drizzle/schema");
+    const { eq } = await import("drizzle-orm");
+
+    const result = await database
+      .select({
+        song: songs,
+        creator: {
+          id: users.id,
+          name: users.name,
+          artistHandle: users.artistHandle,
+          profilePhotoUrl: users.profilePhotoUrl,
+        },
+      })
+      .from(songs)
+      .leftJoin(users, eq(songs.userId, users.id))
+      .where(eq(songs.witnessId, wid))
+      .limit(1);
+
+    if (!result.length) {
+      res.status(404).json({ verified: false, wid, error: "No work found with this WID" }); return;
+    }
+
+    const { song, creator } = result[0];
+    res.json({
+      verified: true,
+      wid,
+      work: {
+        id: song.id,
+        title: song.title,
+        contentType: song.contentType,
+        artist: creator?.artistHandle ? `@${creator.artistHandle}` : (creator?.name ?? "Unknown"),
+        artistId: creator?.id,
+        genre: (song as any).genre,
+        coverArtUrl: song.coverArtUrl,
+        fileUrl: (song as any).downloadPermission === "free" ? (song as any).fileUrl : undefined,
+        aiDisclosure: song.aiDisclosure,
+        registeredAt: song.createdAt,
+        streamUrl: `/api/v1/stream/${song.id}`,
+        verifyUrl: `https://www.livingnexus.org/verify/${wid}`,
+      },
+      platform: "Living Nexus — Provenance Engine",
+      doctrine: "Command Domains LLC · BDDT Publishing · Sovereign Shutter Framework",
+    });
+  } catch (err) {
+    console.error("[API] /works/:wid error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// ── GET /api/v1/creator/:handle/works ────────────────────────────────────────
+/**
+ * List all registered works for a creator by their @handle.
+ * Public endpoint — no API key required.
+ * Query params: limit (max 100), offset, contentType
+ */
+publicApiRouter.get("/api/v1/creator/:handle/works", async (req: Request, res: Response) => {
+  try {
+    const { handle } = req.params;
+    const limit = Math.min(parseInt(req.query.limit as string || "50", 10), 100);
+    const offset = parseInt(req.query.offset as string || "0", 10);
+    const contentTypeFilter = req.query.contentType as string | undefined;
+
+    const database = await (await import("./db")).getDb();
+    if (!database) { res.status(503).json({ error: "Database unavailable" }); return; }
+
+    const { songs, users } = await import("../drizzle/schema");
+    const { eq, and, isNotNull } = await import("drizzle-orm");
+
+    // Find creator by handle
+    const creatorRows = await database
+      .select({ id: users.id, name: users.name, artistHandle: users.artistHandle, profilePhotoUrl: users.profilePhotoUrl })
+      .from(users)
+      .where(eq(users.artistHandle, handle))
+      .limit(1);
+
+    if (!creatorRows.length) {
+      res.status(404).json({ error: `Creator @${handle} not found` }); return;
+    }
+    const creator = creatorRows[0];
+
+    // Build where clause
+    const conditions: any[] = [
+      eq(songs.userId, creator.id),
+      eq(songs.status, "Published" as any),
+      eq(songs.isPublic, true),
+      isNotNull(songs.witnessId),
+    ];
+    if (contentTypeFilter) {
+      conditions.push(eq(songs.contentType, contentTypeFilter as any));
+    }
+
+    const works = await database
+      .select({
+        id: songs.id,
+        title: songs.title,
+        contentType: songs.contentType,
+        witnessId: songs.witnessId,
+        coverArtUrl: songs.coverArtUrl,
+        aiDisclosure: songs.aiDisclosure,
+        createdAt: songs.createdAt,
+      })
+      .from(songs)
+      .where(and(...conditions))
+      .orderBy(songs.createdAt)
+      .limit(limit)
+      .offset(offset);
+
+    res.json({
+      creator: {
+        id: creator.id,
+        handle: `@${creator.artistHandle}`,
+        name: creator.name,
+        profilePhotoUrl: creator.profilePhotoUrl,
+      },
+      total: works.length,
+      limit,
+      offset,
+      works: works.map((w: any) => ({
+        id: w.id,
+        title: w.title,
+        contentType: w.contentType,
+        wid: w.witnessId,
+        coverArtUrl: w.coverArtUrl,
+        aiDisclosure: w.aiDisclosure,
+        registeredAt: w.createdAt,
+        verifyUrl: w.witnessId ? `https://www.livingnexus.org/verify/${w.witnessId}` : null,
+        widLookupUrl: w.witnessId ? `/api/v1/works/${w.witnessId}` : null,
+      })),
+      platform: "Living Nexus — Provenance Engine",
+    });
+  } catch (err) {
+    console.error("[API] /creator/:handle/works error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// ── GET /api/v1/badge/:wid ────────────────────────────────────────────────────
+/**
+ * Returns an SVG badge for embedding in third-party tools.
+ * "Registered on Living Nexus · WID-MUS-XXXXXXXX"
+ */
+publicApiRouter.get("/api/v1/badge/:wid", (req: Request, res: Response) => {
+  const { wid } = req.params;
+  const widShort = wid?.slice(-9) ?? "UNKNOWN";
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="220" height="20">
+  <linearGradient id="s" x2="0" y2="100%">
+    <stop offset="0" stop-color="#bbb" stop-opacity=".1"/>
+    <stop offset="1" stop-opacity=".1"/>
+  </linearGradient>
+  <rect rx="3" width="220" height="20" fill="#555"/>
+  <rect rx="3" x="140" width="80" height="20" fill="#c8a84b"/>
+  <rect rx="3" width="220" height="20" fill="url(#s)"/>
+  <g fill="#fff" text-anchor="middle" font-family="DejaVu Sans,Verdana,Geneva,sans-serif" font-size="11">
+    <text x="70" y="15" fill="#010101" fill-opacity=".3">Living Nexus</text>
+    <text x="70" y="14">Living Nexus</text>
+    <text x="180" y="15" fill="#010101" fill-opacity=".3">${widShort}</text>
+    <text x="180" y="14">${widShort}</text>
+  </g>
+</svg>`;
+  res.setHeader("Content-Type", "image/svg+xml");
+  res.setHeader("Cache-Control", "public, max-age=86400");
+  res.send(svg);
+});

@@ -799,6 +799,13 @@
       "when": 1781634065119,
       "tag": "0114_stormy_scorpion",
       "breakpoints": true
+    },
+    {
+      "idx": 115,
+      "version": "5",
+      "when": 1781749301333,
+      "tag": "0115_green_hellcat",
+      "breakpoints": true
     }
   ]
 }

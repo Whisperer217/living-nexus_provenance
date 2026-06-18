@@ -1978,3 +1978,26 @@ export const witnessReservations = mysqlTable("witnessReservations", {
 });
 export type WitnessReservation = typeof witnessReservations.$inferSelect;
 export type InsertWitnessReservation = typeof witnessReservations.$inferInsert;
+
+// ─── Public Provenance API Keys ───────────────────────────────────────────────
+// Developers and third-party AI tools use these keys to register works via
+// the Living Nexus public REST API (/api/v1/works/register).
+export const apiKeys = mysqlTable("apiKeys", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),                    // owner (creator account)
+  keyHash: varchar("keyHash", { length: 128 }).notNull().unique(), // bcrypt hash of the key
+  keyPrefix: varchar("keyPrefix", { length: 12 }).notNull(),       // first 8 chars for display (ln_xxxxxxxx)
+  name: varchar("name", { length: 128 }).notNull(),  // human label e.g. "Suno Integration"
+  tier: mysqlEnum("tier", ["free", "pro", "enterprise"]).default("free").notNull(),
+  // Rate limits (requests per day; null = unlimited for enterprise)
+  dailyLimit: int("dailyLimit").default(100).notNull(),
+  usageToday: int("usageToday").default(0).notNull(),
+  usageTotal: bigint("usageTotal", { mode: "number" }).default(0).notNull(),
+  lastUsedAt: timestamp("lastUsedAt"),
+  resetAt: timestamp("resetAt"),                      // when usageToday last reset (daily)
+  isActive: boolean("isActive").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  revokedAt: timestamp("revokedAt"),
+});
+export type ApiKey = typeof apiKeys.$inferSelect;
+export type InsertApiKey = typeof apiKeys.$inferInsert;

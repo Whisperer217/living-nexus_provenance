@@ -60,6 +60,8 @@ import {
   creatorPublicationFeed,
   quiverImages,
   type QuiverImage,
+  apiKeys,
+  type ApiKey,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 import type { SearchResults } from "../shared/searchTypes";
@@ -5614,4 +5616,162 @@ export async function updateQuiverImage(
     .update(quiverImages)
     .set(updates)
     .where(and(eq(quiverImages.id, id), eq(quiverImages.userId, userId)));
+}
+
+// ─── Public Provenance API Key Helpers ────────────────────────────────────────
+
+/** Generate a new API key, store its hash, return the plaintext key (shown once). */
+export async function createApiKey(
+  userId: number,
+  name: string,
+  tier: "free" | "pro" | "enterprise" = "free"
+): Promise<{ key: string; record: ApiKey }> {
+  const db = await getDb();
+  const { randomBytes } = await import("crypto");
+  const bcrypt = await import("bcryptjs");
+
+  // Generate: ln_ + 32 random hex chars
+  const raw = `ln_${randomBytes(16).toString("hex")}`;
+  const keyPrefix = raw.slice(0, 11); // "ln_" + 8 chars
+  const keyHash = await bcrypt.hash(raw, 10);
+
+  const dailyLimit = tier === "free" ? 100 : tier === "pro" ? 5000 : 2147483647;
+
+  await db.insert(apiKeys).values({
+    userId,
+    keyHash,
+    keyPrefix,
+    name,
+    tier,
+    dailyLimit,
+    usageToday: 0,
+    usageTotal: 0,
+    isActive: true,
+  });
+
+  // Fetch the newly created record
+  const rows = await db
+    .select()
+    .from(apiKeys)
+    .where(and(eq(apiKeys.userId, userId), eq(apiKeys.keyPrefix, keyPrefix)))
+    .orderBy(desc(apiKeys.createdAt))
+    .limit(1);
+
+  return { key: raw, record: rows[0] };
+}
+
+/** Validate an API key from the Authorization header. Returns the key record or null. */
+export async function validateApiKey(rawKey: string): Promise<ApiKey | null> {
+  if (!rawKey || !rawKey.startsWith("ln_")) return null;
+  const db = await getDb();
+  const bcrypt = await import("bcryptjs");
+
+  const prefix = rawKey.slice(0, 11);
+  const candidates = await db
+    .select()
+    .from(apiKeys)
+    .where(and(eq(apiKeys.keyPrefix, prefix), eq(apiKeys.isActive, true)))
+    .limit(5);
+
+  for (const candidate of candidates) {
+    const match = await bcrypt.compare(rawKey, candidate.keyHash);
+    if (match) {
+      // Check daily rate limit
+      const now = new Date();
+      const resetAt = candidate.resetAt;
+      const needsReset = !resetAt || now.getTime() - resetAt.getTime() > 86_400_000;
+      if (needsReset) {
+        await db.update(apiKeys).set({ usageToday: 0, resetAt: now }).where(eq(apiKeys.id, candidate.id));
+        candidate.usageToday = 0;
+      }
+      if (candidate.usageToday >= candidate.dailyLimit) return null; // rate limited
+      // Increment usage
+      await db.update(apiKeys).set({
+        usageToday: candidate.usageToday + 1,
+        usageTotal: candidate.usageTotal + 1,
+        lastUsedAt: now,
+      }).where(eq(apiKeys.id, candidate.id));
+      return candidate;
+    }
+  }
+  return null;
+}
+
+/** List all API keys for a user (without exposing the hash). */
+export async function listApiKeys(userId: number): Promise<Omit<ApiKey, "keyHash">[]> {
+  const db = await getDb();
+  const rows = await db
+    .select({
+      id: apiKeys.id,
+      userId: apiKeys.userId,
+      keyPrefix: apiKeys.keyPrefix,
+      name: apiKeys.name,
+      tier: apiKeys.tier,
+      dailyLimit: apiKeys.dailyLimit,
+      usageToday: apiKeys.usageToday,
+      usageTotal: apiKeys.usageTotal,
+      lastUsedAt: apiKeys.lastUsedAt,
+      resetAt: apiKeys.resetAt,
+      isActive: apiKeys.isActive,
+      createdAt: apiKeys.createdAt,
+      revokedAt: apiKeys.revokedAt,
+    })
+    .from(apiKeys)
+    .where(eq(apiKeys.userId, userId))
+    .orderBy(desc(apiKeys.createdAt));
+  return rows as Omit<ApiKey, "keyHash">[];
+}
+
+/** Revoke an API key (soft delete). */
+export async function revokeApiKey(id: number, userId: number): Promise<void> {
+  const db = await getDb();
+  await db
+    .update(apiKeys)
+    .set({ isActive: false, revokedAt: new Date() })
+    .where(and(eq(apiKeys.id, id), eq(apiKeys.userId, userId)));
+}
+
+/** Register a work via the public API — creates a song record and issues a WID. */
+export async function registerWorkViaApi(params: {
+  userId: number;
+  title: string;
+  contentType: "audio" | "lyrics" | "manuscript" | "comic" | "image";
+  fileUrl?: string;
+  coverArtUrl?: string;
+  description?: string;
+  aiDisclosure?: "original" | "ai_assisted" | "ai_generated" | "human_authored_ai_instrument";
+  externalId?: string; // third-party tool's own ID for deduplication
+  metadata?: Record<string, unknown>;
+}): Promise<{ songId: number; wid: string; registeredAt: string }> {
+  const db = await getDb();
+  const { randomBytes, createHash } = await import("crypto");
+
+  // Generate WID based on content type prefix
+  const prefixMap: Record<string, string> = {
+    audio: "MUS", lyrics: "LYR", manuscript: "MSS", comic: "COM", image: "IMG",
+  };
+  const prefix = prefixMap[params.contentType] ?? "WRK";
+  const seed = `${params.userId}-${params.title}-${Date.now()}-${randomBytes(8).toString("hex")}`;
+  const hash = createHash("sha256").update(seed).digest("hex");
+  const wid = `WID-${prefix}-${hash.slice(0, 8).toUpperCase()}-${hash.slice(8, 16).toUpperCase()}`;
+
+  // Insert the song record
+  const result = await db.insert(songs).values({
+    userId: params.userId,
+    title: params.title,
+    contentType: params.contentType as any,
+    fileUrl: params.fileUrl ?? null,
+    coverArtUrl: params.coverArtUrl ?? null,
+    description: params.description ?? null,
+    aiDisclosure: (params.aiDisclosure as any) ?? "original",
+    witnessId: wid,
+    status: "Published",
+    isPublic: true,
+    registeredViaApi: true,
+  } as any);
+
+  const songId = (result as any).insertId as number;
+  const registeredAt = new Date().toISOString();
+
+  return { songId, wid, registeredAt };
 }
