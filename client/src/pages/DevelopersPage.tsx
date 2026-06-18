@@ -139,50 +139,97 @@ const PYTHON_EXAMPLE = `import requests
 API_KEY = "lnk_your_key_here"
 BASE_URL = "https://www.livingnexus.org/api/v1"
 
-def register_work(title, content_type, file_url=None, ai_disclosure="ai_generated"):
+headers = {"Authorization": f"Bearer {API_KEY}", "Content-Type": "application/json"}
+
+# ── Register a work ───────────────────────────────────────────────────────────
+def register_work(title, content_type, file_url=None, creator_handle=None, ai_disclosure="ai_generated"):
     response = requests.post(
         f"{BASE_URL}/works/register",
-        headers={"Authorization": f"Bearer {API_KEY}"},
+        headers=headers,
         json={
             "title": title,
             "contentType": content_type,
             "fileUrl": file_url,
+            "creatorHandle": creator_handle,
             "aiDisclosure": ai_disclosure
         }
     )
-    data = response.json()
-    return data["wid"]  # e.g. "WID-MUS-A1B2C3D4-E5F6G7H8"
+    return response.json()  # { wid, verifyUrl, badge, ... }
 
-# Register a generated track
-wid = register_work("Midnight Drift", "audio", "https://cdn.example.com/track.mp3")
-print(f"Registered: {wid}")`;
+# ── Verify a WID ─────────────────────────────────────────────────────────────
+def verify_wid(wid):
+    response = requests.get(f"{BASE_URL}/wid/{wid}")
+    return response.json()  # { wid, status, verificationStatus, creator, work, provenance }
 
-const JS_EXAMPLE = `// Node.js / browser
+# ── Search the registry ───────────────────────────────────────────────────────
+def search(query, content_type=None):
+    params = {"q": query}
+    if content_type:
+        params["contentType"] = content_type
+    response = requests.get(f"{BASE_URL}/search", params=params)
+    return response.json()  # { results: [...] }
+
+# Example usage
+result = register_work("Midnight Drift", "audio",
+    file_url="https://cdn.example.com/track.mp3",
+    creator_handle="greg-speed")
+print(f"Registered: {result['wid']}")
+print(f"Verify: {result['verifyUrl']}")
+
+# Verify it
+record = verify_wid(result["wid"])
+print(f"Creator: {record['creator']['handle']}")
+print(f"Status: {record['verificationStatus']}")`;
+
+const JS_EXAMPLE = `// Node.js / browser — Living Nexus Provenance SDK
 const API_KEY = "lnk_your_key_here";
 const BASE_URL = "https://www.livingnexus.org/api/v1";
 
-async function registerWork({ title, contentType, fileUrl, aiDisclosure = "ai_generated" }) {
+// ── Register a work ───────────────────────────────────────────────────────────
+async function registerWork({ title, contentType, fileUrl, creatorHandle, aiDisclosure = "ai_generated" }) {
   const res = await fetch(\`\${BASE_URL}/works/register\`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       "Authorization": \`Bearer \${API_KEY}\`
     },
-    body: JSON.stringify({ title, contentType, fileUrl, aiDisclosure })
+    body: JSON.stringify({ title, contentType, fileUrl, creatorHandle, aiDisclosure })
   });
-  const data = await res.json();
-  return data; // { wid, verifyUrl, badge, ... }
+  return res.json(); // { wid, verifyUrl, badge, registeredAt }
 }
 
-// Register a generated image
+// ── Canonical provenance lookup ───────────────────────────────────────────────
+async function getProvenanceRecord(wid) {
+  const res = await fetch(\`\${BASE_URL}/wid/\${wid}\`);
+  return res.json(); // { wid, status, verificationStatus, creator, work, provenance }
+}
+
+// ── Search the registry ───────────────────────────────────────────────────────
+async function searchRegistry(query, options = {}) {
+  const params = new URLSearchParams({ q: query, ...options });
+  const res = await fetch(\`\${BASE_URL}/search?\${params}\`);
+  return res.json(); // { results: [...] }
+}
+
+// Example: register a generated image, then verify
 const result = await registerWork({
   title: "Neon Horizon",
   contentType: "image",
   fileUrl: "https://cdn.example.com/image.png",
+  creatorHandle: "slimdoggy",
   aiDisclosure: "ai_generated"
 });
-console.log(result.wid); // "WID-IMG-..."
-console.log(result.badge.embedHtml); // paste into your UI`;
+console.log(result.wid);           // "WID-IMG-..."
+console.log(result.badge.embedHtml); // paste into your UI
+
+// Verify the record
+const record = await getProvenanceRecord(result.wid);
+console.log(record.verificationStatus); // "verified"
+console.log(record.creator.handle);     // "@slimdoggy"
+
+// Search for works
+const search = await searchRegistry("midnight", { contentType: "audio" });
+console.log(search.results.length);     // number of matching works`;
 
 export default function DevelopersPage() {
   return (
@@ -335,9 +382,61 @@ export default function DevelopersPage() {
             />
             <EndpointCard
               method="GET"
+              path="/api/v1/wid/:wid"
+              auth={false}
+              desc="Canonical provenance lookup. Single endpoint that returns the complete provenance record for any WID or numeric song ID. Returns creator, work metadata, registration timestamp, and verification status. This is the endpoint Custom GPTs and MCP servers should use."
+              response={`{
+  "wid": "WID-MUS-A1B2C3D4-E5F6G7H8",
+  "status": "active",
+  "verificationStatus": "verified",
+  "creator": {
+    "id": 12,
+    "name": "Greg Speed",
+    "handle": "@greg-speed",
+    "profileUrl": "https://www.livingnexus.org/creator/greg-speed"
+  },
+  "work": {
+    "id": 4821,
+    "title": "My Track",
+    "contentType": "audio",
+    "genre": "Hip Hop",
+    "aiDisclosure": "ai_generated"
+  },
+  "provenance": {
+    "registeredAt": "2026-06-17T14:30:00.000Z",
+    "platform": "Living Nexus",
+    "badgeUrl": "/api/v1/badge/WID-MUS-A1B2C3D4-E5F6G7H8",
+    "verifyUrl": "/api/v1/verify/WID-MUS-A1B2C3D4-E5F6G7H8"
+  }
+}`}
+            />
+            <EndpointCard
+              method="GET"
+              path="/api/v1/search"
+              auth={false}
+              desc="Search the Living Nexus registry by title, creator handle, or genre. Supports ?q= (required, min 2 chars), ?contentType=, ?limit= (max 50), ?offset=. No authentication required."
+              response={`{
+  "query": "midnight",
+  "total": 3,
+  "limit": 20,
+  "offset": 0,
+  "results": [
+    {
+      "wid": "WID-MUS-A1B2C3D4-E5F6G7H8",
+      "title": "Midnight Drift",
+      "contentType": "audio",
+      "creator": { "name": "Greg Speed", "handle": "@greg-speed" },
+      "registeredAt": "2026-06-17T14:30:00.000Z",
+      "verifyUrl": "/api/v1/verify/WID-MUS-A1B2C3D4-E5F6G7H8"
+    }
+  ]
+}`}
+            />
+            <EndpointCard
+              method="GET"
               path="/api/v1/verify/:wid"
               auth={false}
-              desc="Verify a WID and return its provenance record. Identical to /works/:wid — provided for legacy compatibility."
+              desc="Verify a WID and return its provenance record. Returns verified: true/false plus creator attribution."
               response={WID_LOOKUP_RESPONSE}
             />
             <EndpointCard

@@ -5309,3 +5309,11 @@
 - [x] When global player expands, page content behind it should recede (dim overlay or slide under)
 - [x] Expanded player panel should sit above all page content with correct z-index
 - [x] Guide/shelf content must not bleed through the expanded player view on mobile
+
+## API Ecosystem Completion (2026-06-18)
+- [x] GET /api/v1/wid/:wid — canonical provenance lookup endpoint (accepts WID or numeric ID)
+- [x] GET /api/v1/search — registry search by title, handle, or genre with contentType filter
+- [x] GET /api/v1/openapi.json — OpenAPI 3.1.0 spec served at stable URL for GPT Actions and MCP
+- [x] Updated /developers page with new endpoints (wid, search), OpenAPI spec link
+- [x] Enhanced Python SDK example: register, verify, search functions with comments
+- [x] Enhanced JavaScript SDK example: registerWork, getProvenanceRecord, searchRegistry functions

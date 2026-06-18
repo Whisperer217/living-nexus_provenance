@@ -619,3 +619,445 @@ publicApiRouter.get("/api/v1/badge/:wid", (req: Request, res: Response) => {
   res.setHeader("Cache-Control", "public, max-age=86400");
   res.send(svg);
 });
+
+
+// ── GET /api/v1/wid/:wid — Canonical provenance record ───────────────────────
+/**
+ * Single canonical lookup endpoint. Returns the full provenance record for a WID.
+ * Used by Custom GPTs, MCP servers, and connector integrations.
+ */
+publicApiRouter.get("/api/v1/wid/:wid", async (req: Request, res: Response) => {
+  try {
+    const { wid } = req.params;
+    if (!wid) { res.status(400).json({ error: "Missing WID" }); return; }
+
+    const database = await getDb();
+    if (!database) { res.status(503).json({ error: "Database unavailable" }); return; }
+
+    const { songs, users } = await import("../drizzle/schema");
+    const { eq, or } = await import("drizzle-orm");
+
+    // Accept both witnessId (WID-MUS-...) and numeric song id
+    const isNumeric = /^\d+$/.test(wid);
+    const condition = isNumeric
+      ? eq(songs.id, parseInt(wid, 10))
+      : or(eq(songs.witnessId, wid), eq(songs.witnessId, wid.toUpperCase()));
+
+    const result = await database.select({
+      song: songs,
+      creator: {
+        id: users.id,
+        name: users.name,
+        artistHandle: users.artistHandle,
+        profilePhotoUrl: users.profilePhotoUrl,
+      },
+    }).from(songs)
+      .leftJoin(users, eq(songs.userId, users.id))
+      .where(condition!)
+      .limit(1);
+
+    if (!result.length) {
+      res.status(404).json({
+        status: "not_found",
+        wid,
+        error: "No work found with this identifier",
+      });
+      return;
+    }
+
+    const { song, creator } = result[0];
+    const base = `${req.protocol}://${req.get("host")}`;
+
+    res.json({
+      wid: song.witnessId ?? null,
+      status: "active",
+      verificationStatus: song.witnessId ? "verified" : "unverified",
+      creator: {
+        id: creator?.id,
+        name: creator?.name ?? "Unknown",
+        handle: creator?.artistHandle ? `@${creator.artistHandle}` : null,
+        avatarUrl: creator?.profilePhotoUrl ?? null,
+        profileUrl: creator?.artistHandle ? `${base}/creator/${creator.artistHandle}` : null,
+      },
+      work: {
+        id: song.id,
+        title: song.title,
+        contentType: song.contentType ?? "audio",
+        genre: song.genre ?? null,
+        status: song.status ?? null,
+        coverArtUrl: song.coverArtUrl ?? null,
+        fileUrl: song.fileUrl ?? null,
+        aiDisclosure: song.aiConsent ?? null,
+      },
+      provenance: {
+        registeredAt: song.createdAt,
+        platform: "Living Nexus",
+        doctrine: "Command Domains LLC · BDDT Publishing · Sovereign Shutter Framework",
+        badgeUrl: song.witnessId ? `${base}/api/v1/badge/${song.witnessId}` : null,
+        verifyUrl: song.witnessId ? `${base}/api/v1/verify/${song.witnessId}` : null,
+      },
+    });
+  } catch (err) {
+    console.error("[API] /wid error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// ── GET /api/v1/search — Registry search ─────────────────────────────────────
+/**
+ * Search the Living Nexus registry by title, creator handle, or genre.
+ * Query params: q (required), contentType, limit (max 50), offset
+ */
+publicApiRouter.get("/api/v1/search", async (req: Request, res: Response) => {
+  try {
+    const q = (req.query.q as string)?.trim();
+    if (!q || q.length < 2) {
+      res.status(400).json({ error: "Query parameter 'q' must be at least 2 characters" });
+      return;
+    }
+
+    const limit = Math.min(parseInt(req.query.limit as string) || 20, 50);
+    const offset = parseInt(req.query.offset as string) || 0;
+    const contentTypeFilter = req.query.contentType as string | undefined;
+
+    const database = await getDb();
+    if (!database) { res.status(503).json({ error: "Database unavailable" }); return; }
+
+    const { songs, users } = await import("../drizzle/schema");
+    const { eq, like, or, and } = await import("drizzle-orm");
+
+    const searchPattern = `%${q}%`;
+    const conditions: any[] = [
+      or(
+        like(songs.title, searchPattern),
+        like(users.artistHandle, searchPattern),
+        like(users.name, searchPattern),
+        like(songs.genre, searchPattern),
+      ),
+      eq(songs.status, "Published"),
+    ];
+
+    if (contentTypeFilter) {
+      conditions.push(eq(songs.contentType, contentTypeFilter as any));
+    }
+
+    const results = await database.select({
+      song: {
+        id: songs.id,
+        title: songs.title,
+        witnessId: songs.witnessId,
+        contentType: songs.contentType,
+        genre: songs.genre,
+        coverArtUrl: songs.coverArtUrl,
+        createdAt: songs.createdAt,
+      },
+      creator: {
+        id: users.id,
+        name: users.name,
+        artistHandle: users.artistHandle,
+      },
+    }).from(songs)
+      .leftJoin(users, eq(songs.userId, users.id))
+      .where(and(...conditions))
+      .limit(limit)
+      .offset(offset);
+
+    const base = `${req.protocol}://${req.get("host")}`;
+
+    res.json({
+      query: q,
+      total: results.length,
+      limit,
+      offset,
+      results: results.map((r: typeof results[0]) => ({
+        wid: r.song.witnessId,
+        title: r.song.title,
+        contentType: r.song.contentType,
+        genre: r.song.genre,
+        coverArtUrl: r.song.coverArtUrl,
+        registeredAt: r.song.createdAt,
+        creator: {
+          name: r.creator?.name ?? "Unknown",
+          handle: r.creator?.artistHandle ? `@${r.creator.artistHandle}` : null,
+        },
+        verifyUrl: r.song.witnessId ? `${base}/api/v1/verify/${r.song.witnessId}` : null,
+        widUrl: r.song.witnessId ? `${base}/api/v1/wid/${r.song.witnessId}` : null,
+      })),
+    });
+  } catch (err) {
+    console.error("[API] /search error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// ── GET /api/v1/openapi.json — OpenAPI 3.1.0 Specification ───────────────────
+/**
+ * Machine-readable OpenAPI spec. Used by Custom GPTs, MCP servers, and developer tools.
+ * Hosted at a stable URL so integrations can reference it directly.
+ */
+publicApiRouter.get("/api/v1/openapi.json", (req: Request, res: Response) => {
+  const base = `${req.protocol}://${req.get("host")}`;
+
+  const spec = {
+    openapi: "3.1.0",
+    info: {
+      title: "Living Nexus Provenance API",
+      version: "1.0.0",
+      description: "Register, verify, and discover creative works on the Living Nexus provenance registry. Every registered work receives a Witness ID (WID) — a permanent, verifiable record of authorship and creation.",
+      contact: {
+        name: "Living Nexus Developer Support",
+        url: `${base}/developers`,
+      },
+      license: {
+        name: "Proprietary",
+        url: `${base}/developers`,
+      },
+    },
+    servers: [{ url: base, description: "Living Nexus Production" }],
+    security: [{ BearerAuth: [] }],
+    components: {
+      securitySchemes: {
+        BearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "API Key (lnk_...)",
+          description: "API key obtained from the Living Nexus Developer Dashboard at /developer",
+        },
+      },
+      schemas: {
+        ProvenanceRecord: {
+          type: "object",
+          properties: {
+            wid: { type: "string", example: "WID-MUS-A1B2C3D4", description: "Witness ID — permanent provenance identifier" },
+            status: { type: "string", enum: ["active", "revoked"], description: "Current status of the provenance record" },
+            verificationStatus: { type: "string", enum: ["verified", "unverified"] },
+            creator: {
+              type: "object",
+              properties: {
+                id: { type: "integer" },
+                name: { type: "string" },
+                handle: { type: "string", example: "@slimdoggy" },
+                profileUrl: { type: "string", format: "uri" },
+              },
+            },
+            work: {
+              type: "object",
+              properties: {
+                id: { type: "integer" },
+                title: { type: "string" },
+                contentType: { type: "string", enum: ["audio", "lyrics", "manuscript", "comic", "image", "video"] },
+                genre: { type: "string" },
+                coverArtUrl: { type: "string", format: "uri" },
+                aiDisclosure: { type: "string" },
+              },
+            },
+            provenance: {
+              type: "object",
+              properties: {
+                registeredAt: { type: "string", format: "date-time" },
+                platform: { type: "string", example: "Living Nexus" },
+                badgeUrl: { type: "string", format: "uri" },
+                verifyUrl: { type: "string", format: "uri" },
+              },
+            },
+          },
+        },
+        RegisterRequest: {
+          type: "object",
+          required: ["title", "contentType", "creatorHandle"],
+          properties: {
+            title: { type: "string", description: "Title of the creative work" },
+            contentType: { type: "string", enum: ["audio", "lyrics", "manuscript", "comic", "image", "video"], description: "Type of creative work" },
+            fileUrl: { type: "string", format: "uri", description: "URL to the work file (optional — URL is stored as provenance reference)" },
+            creatorHandle: { type: "string", description: "Creator's Living Nexus handle (without @)" },
+            genre: { type: "string", description: "Genre or category" },
+            aiDisclosure: { type: "string", description: "AI tool disclosure (e.g., 'Generated with Suno AI')" },
+            metadata: { type: "object", description: "Additional metadata key-value pairs" },
+          },
+        },
+        RegisterResponse: {
+          type: "object",
+          properties: {
+            wid: { type: "string", example: "WID-MUS-A1B2C3D4" },
+            title: { type: "string" },
+            contentType: { type: "string" },
+            registeredAt: { type: "string", format: "date-time" },
+            verifyUrl: { type: "string", format: "uri" },
+            badgeUrl: { type: "string", format: "uri" },
+            badgeHtml: { type: "string", description: "Ready-to-embed HTML badge" },
+          },
+        },
+        Error: {
+          type: "object",
+          properties: {
+            error: { type: "string" },
+          },
+        },
+      },
+    },
+    paths: {
+      "/api/v1/health": {
+        get: {
+          operationId: "healthCheck",
+          summary: "API health check",
+          description: "Returns platform status and version. No authentication required.",
+          security: [],
+          responses: {
+            "200": {
+              description: "Platform is healthy",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    properties: {
+                      status: { type: "string", example: "ok" },
+                      platform: { type: "string", example: "Living Nexus" },
+                      version: { type: "string", example: "1.0.0" },
+                      timestamp: { type: "string", format: "date-time" },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      "/api/v1/works/register": {
+        post: {
+          operationId: "registerWork",
+          summary: "Register a creative work",
+          description: "Register a creative work on the Living Nexus provenance registry. Returns a Witness ID (WID) that permanently anchors the work's authorship and creation timestamp. Requires an API key.",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/RegisterRequest" },
+              },
+            },
+          },
+          responses: {
+            "200": {
+              description: "Work registered successfully",
+              content: {
+                "application/json": {
+                  schema: { $ref: "#/components/schemas/RegisterResponse" },
+                },
+              },
+            },
+            "400": { description: "Invalid request", content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } } },
+            "401": { description: "Missing or invalid API key", content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } } },
+            "429": { description: "Rate limit exceeded", content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } } },
+          },
+        },
+      },
+      "/api/v1/works/{wid}": {
+        get: {
+          operationId: "getWorkByWid",
+          summary: "Get a registered work by WID",
+          description: "Retrieve a registered work's provenance record using its Witness ID. No authentication required.",
+          security: [],
+          parameters: [{ name: "wid", in: "path", required: true, schema: { type: "string" }, description: "Witness ID (e.g., WID-MUS-A1B2C3D4)" }],
+          responses: {
+            "200": { description: "Work found", content: { "application/json": { schema: { $ref: "#/components/schemas/ProvenanceRecord" } } } },
+            "404": { description: "Work not found", content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } } },
+          },
+        },
+      },
+      "/api/v1/wid/{wid}": {
+        get: {
+          operationId: "getCanonicalRecord",
+          summary: "Canonical provenance lookup",
+          description: "Single canonical endpoint for retrieving a complete provenance record. Accepts WID or numeric song ID. Returns full creator, work, and provenance metadata. No authentication required.",
+          security: [],
+          parameters: [{ name: "wid", in: "path", required: true, schema: { type: "string" }, description: "Witness ID or numeric song ID" }],
+          responses: {
+            "200": { description: "Provenance record found", content: { "application/json": { schema: { $ref: "#/components/schemas/ProvenanceRecord" } } } },
+            "404": { description: "Not found", content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } } },
+          },
+        },
+      },
+      "/api/v1/verify/{witnessId}": {
+        get: {
+          operationId: "verifyWid",
+          summary: "Verify a Witness ID",
+          description: "Verify that a Witness ID exists and is active in the Living Nexus registry. Returns verification status and creator attribution. No authentication required.",
+          security: [],
+          parameters: [{ name: "witnessId", in: "path", required: true, schema: { type: "string" }, description: "Witness ID to verify" }],
+          responses: {
+            "200": {
+              description: "Verification result",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    properties: {
+                      verified: { type: "boolean" },
+                      witnessId: { type: "string" },
+                      track: { type: "object" },
+                    },
+                  },
+                },
+              },
+            },
+            "404": { description: "WID not found", content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } } },
+          },
+        },
+      },
+      "/api/v1/creator/{handle}/works": {
+        get: {
+          operationId: "getCreatorWorks",
+          summary: "Get all works by a creator",
+          description: "Retrieve all published works registered by a creator on Living Nexus. No authentication required.",
+          security: [],
+          parameters: [
+            { name: "handle", in: "path", required: true, schema: { type: "string" }, description: "Creator's Living Nexus handle (without @)" },
+            { name: "limit", in: "query", schema: { type: "integer", default: 20, maximum: 100 } },
+            { name: "offset", in: "query", schema: { type: "integer", default: 0 } },
+          ],
+          responses: {
+            "200": { description: "Creator works list" },
+            "404": { description: "Creator not found" },
+          },
+        },
+      },
+      "/api/v1/search": {
+        get: {
+          operationId: "searchRegistry",
+          summary: "Search the provenance registry",
+          description: "Search published works by title, creator handle, or genre. No authentication required.",
+          security: [],
+          parameters: [
+            { name: "q", in: "query", required: true, schema: { type: "string", minLength: 2 }, description: "Search query" },
+            { name: "contentType", in: "query", schema: { type: "string", enum: ["audio", "lyrics", "manuscript", "comic", "image", "video"] } },
+            { name: "limit", in: "query", schema: { type: "integer", default: 20, maximum: 50 } },
+            { name: "offset", in: "query", schema: { type: "integer", default: 0 } },
+          ],
+          responses: {
+            "200": { description: "Search results" },
+            "400": { description: "Invalid query" },
+          },
+        },
+      },
+      "/api/v1/badge/{wid}": {
+        get: {
+          operationId: "getWidBadge",
+          summary: "Get SVG badge for a WID",
+          description: "Returns an SVG badge for embedding in third-party tools, websites, or documentation. No authentication required.",
+          security: [],
+          parameters: [{ name: "wid", in: "path", required: true, schema: { type: "string" } }],
+          responses: {
+            "200": {
+              description: "SVG badge",
+              content: { "image/svg+xml": { schema: { type: "string" } } },
+            },
+          },
+        },
+      },
+    },
+  };
+
+  res.setHeader("Content-Type", "application/json");
+  res.setHeader("Cache-Control", "public, max-age=3600");
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.json(spec);
+});
