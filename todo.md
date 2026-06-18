@@ -5303,3 +5303,9 @@
 - [x] Developer Dashboard page at /developer — generate/revoke keys, usage stats, code snippet
 - [x] Public API documentation page at /developers — endpoints, auth, code examples, tier table
 - [x] Vitest tests: 17 new tests covering key creation, validation, rate limiting, WID format, content type mapping (288 total passing)
+
+## Player Expanded View — Background Overlay Fix
+
+- [x] When global player expands, page content behind it should recede (dim overlay or slide under)
+- [x] Expanded player panel should sit above all page content with correct z-index
+- [x] Guide/shelf content must not bleed through the expanded player view on mobile

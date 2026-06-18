@@ -1619,8 +1619,25 @@ function GlobalPlayerInner() {
     </>
   );
 
+  // Dim backdrop — covers page content when player is expanded on mobile
+  const expandedBackdrop = isExpanded && !isDesktop ? (
+    <div
+      onClick={() => { setZone("MINI"); setDragHeight(null); }}
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 8998,
+        background: "rgba(0,0,0,0.72)",
+        backdropFilter: "blur(3px)",
+        WebkitBackdropFilter: "blur(3px)",
+        transition: "opacity 0.3s ease",
+      }}
+    />
+  ) : null;
+
   return createPortal(
     <>
+      {expandedBackdrop}
       {content}
       {volumePortal}
       {contextMenuPortal}
