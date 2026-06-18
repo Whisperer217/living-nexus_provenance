@@ -165,6 +165,7 @@ function CollectionsSection() {
                             <div className="flex-1 min-w-0">
                               <p className="text-sm truncate" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>{t.title}</p>
                               {t.witnessId && <p className="text-[11px] font-mono truncate" style={{ color: "rgba(196,154,40,0.5)" }}>{t.witnessId}</p>}
+                              {(t.lyricsWid || t.song?.lyricsWid) && <p className="text-[10px] font-mono truncate" style={{ color: "rgba(196,154,40,0.35)" }}>{t.lyricsWid ?? t.song?.lyricsWid}</p>}
                             </div>
                             <Link href={`/song/${t.id}`}>
                               <button className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-white/10 flex-shrink-0">

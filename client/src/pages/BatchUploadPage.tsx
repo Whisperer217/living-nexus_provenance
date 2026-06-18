@@ -97,6 +97,8 @@ interface TrackCard {
   aiToolSonato: boolean;
   aiToolOther: boolean;
   aiToolOtherName: string;
+  lyricsText: string;
+  lyricsExpanded: boolean;
 }
 
 /** Strip leading track-number prefix from a filename-derived title.
@@ -120,6 +122,8 @@ function makeEmptyCard(overrides?: Partial<TrackCard>): TrackCard {
     aiToolSonato: false,
     aiToolOther: false,
     aiToolOtherName: "",
+    lyricsText: "",
+    lyricsExpanded: false,
     audioFile: null,
     audioStatus: "empty",
     coverFile: null,
@@ -563,6 +567,47 @@ function TrackCardUI({
                 </div>
               )}
             </div>
+
+              {/* Lyrics section */}
+              <div>
+                <button
+                  type="button"
+                  onClick={() => onChange(card.id, { lyricsExpanded: !card.lyricsExpanded })}
+                  className="flex items-center gap-2 text-[10px] font-heading tracking-widest uppercase transition-colors hover:opacity-80"
+                  style={{ color: card.lyricsText.trim() ? "var(--ln-gold)" : "var(--ln-parchment)" }}
+                >
+                  {card.lyricsExpanded ? <ChevronUp size={11} /> : <ChevronDown size={11} />}
+                  Lyrics
+                  {card.lyricsText.trim() && (
+                    <span className="text-[9px] font-mono ml-1" style={{ color: "rgba(196,154,40,0.7)" }}>
+                      {card.lyricsText.trim().split(/\s+/).length}w
+                    </span>
+                  )}
+                </button>
+                {card.lyricsExpanded && (
+                  <div className="mt-2 space-y-1.5">
+                    <textarea
+                      value={card.lyricsText}
+                      onChange={e => onChange(card.id, { lyricsText: e.target.value })}
+                      placeholder="Paste lyrics here — a WID-LYR will be generated automatically on upload..."
+                      rows={6}
+                      className="w-full text-xs rounded-lg px-3 py-2 resize-y font-mono leading-relaxed"
+                      style={{
+                        background: "var(--ln-coal)",
+                        border: "1px solid rgba(196,154,40,0.4)",
+                        color: "#FFFFFF",
+                        outline: "none",
+                        minHeight: 96,
+                      }}
+                    />
+                    {card.lyricsText.trim() && (
+                      <p className="text-[9px]" style={{ color: "rgba(196,154,40,0.6)" }}>
+                        WID-LYR will be generated server-side and tied to this track's WID on upload.
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
           </div>
 
             {/* Right: per-track cover art */}
@@ -825,6 +870,7 @@ export default function BatchUploadPage() {
         aiToolSuno?: boolean; aiToolUdio?: boolean; aiToolSonato?: boolean;
         aiToolOther?: boolean; aiToolOtherName?: string;
         fileType?: string;
+        lyricsText?: string;
       }[] = [];
 
       for (const card of readyCards) {
@@ -860,6 +906,7 @@ export default function BatchUploadPage() {
           aiToolOther: card.aiToolOther,
           aiToolOtherName: card.aiToolOtherName || undefined,
           fileType: card.fileType,
+          lyricsText: card.lyricsText.trim() || undefined,
         });
       }
 

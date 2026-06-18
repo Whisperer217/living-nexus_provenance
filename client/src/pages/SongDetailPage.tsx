@@ -1333,6 +1333,18 @@ export default function SongDetailPage() {
                     ].join("\n")}</pre>
                   </div>
                 )}
+                {(song as any).lyricsWid && (
+                  <div className="mt-3 px-3 py-2 rounded-lg flex items-center gap-2" style={{ background: "rgba(196,154,40,0.04)", border: "1px solid rgba(196,154,40,0.15)" }}>
+                    <Shield className="w-3 h-3 flex-shrink-0" style={{ color: "var(--ln-gold)" }} />
+                    <div className="min-w-0">
+                      <p className="text-[9px] font-heading tracking-widest uppercase mb-0.5" style={{ color: "rgba(196,154,40,0.6)" }}>Lyrics Witness ID (WID-LYR)</p>
+                      <p className="text-[11px] font-mono truncate" style={{ color: "var(--ln-gold)" }}>{(song as any).lyricsWid}</p>
+                      {(song as any).lyricsFileName && (
+                        <p className="text-[9px] mt-0.5" style={{ color: "var(--ln-smoke)" }}>{(song as any).lyricsFileName}</p>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>

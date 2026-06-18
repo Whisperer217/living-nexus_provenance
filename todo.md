@@ -5322,3 +5322,13 @@
 - [x] BUG: Clicking a song in the archive plays the wrong track — positional index mismatch with Singles/Standalones or Records queue
 - [x] BUG: Play button in archive does not register click reliably
 - [x] LAYOUT: Duplicate About section on creator profile — bio text appears both in the banner hero and again as a plain About block below it
+
+## Batch Upload Lyrics + WID-LYR (2026-06-18)
+- [x] Add lyricsText + lyricsExpanded fields to TrackCard interface and makeEmptyCard in BatchUploadPage
+- [x] Add collapsible lyrics textarea to each track card in BatchUploadPage (shows word count badge when filled)
+- [x] Pass lyricsText through trackPayloads type and submission loop in BatchUploadPage
+- [x] Add lyricsText to batchUpload tRPC input schema (z.string().max(50000).optional() per track)
+- [x] Generate WID-LYR server-side in batchUpload procedure: SHA-256 of lyrics text combined with witnessId and userId
+- [x] Call updateSongLyricsWithWid after song creation when lyricsText is provided in batch upload
+- [x] Surface lyricsWid in SongDetailPage lyrics panel (gold badge below WID certificate block)
+- [x] Surface lyricsWid in ArchivePage collection track list rows (below witnessId, handles both flat and nested data shapes)

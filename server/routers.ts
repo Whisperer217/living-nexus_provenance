@@ -1337,6 +1337,7 @@ export const appRouter = router({
         aiToolSonato: z.boolean().optional(),
         aiToolOther: z.boolean().optional(),
         aiToolOtherName: z.string().max(128).optional(),
+        lyricsText: z.string().max(50000).optional(),
       })).min(1).max(50),
     })).mutation(async ({ ctx, input }) => {
       const user = await getUserById(ctx.user.id);
@@ -1392,11 +1393,33 @@ export const appRouter = router({
           aiToolSonato: track.aiToolSonato ?? false,
           aiToolOther: track.aiToolOther ?? false,
           aiToolOtherName: track.aiToolOtherName,
+          lyricsText: track.lyricsText,
           displayOrder: batchDisplayOrder++,
         } as any);
         // Capture the auto-increment ID directly from the insert result to preserve upload order
         const songId = (insertResult as any)[0]?.insertId as number | undefined;
         results.push({ title: track.title, witnessId: track.witnessId, fileUrl, songId });
+        // Generate WID-LYR if lyrics were provided
+        if (songId && track.lyricsText && track.lyricsText.trim()) {
+          try {
+            const { createHash: createHashLyr } = await import("crypto");
+            // Hash the lyrics text itself (no file bytes in batch flow)
+            const lyricsHash = createHashLyr("sha256").update(track.lyricsText.trim()).digest("hex");
+            const combinedHash = createHashLyr("sha256")
+              .update(`${lyricsHash}:${track.witnessId ?? songId}:${ctx.user.id}`)
+              .digest("hex");
+            const lyricsWid = `WID-LYR-${combinedHash.slice(0, 8).toUpperCase()}-${combinedHash.slice(8, 16).toUpperCase()}`;
+            await updateSongLyricsWithWid(songId, ctx.user.id, {
+              lyricsText: track.lyricsText.trim(),
+              lyricsWid,
+              lyricsFileName: `${track.title || "lyrics"}.txt`,
+              lyricsFileHash: lyricsHash,
+              lyricsAddedAt: new Date(),
+            });
+          } catch (lyrErr) {
+            console.error("[BatchUpload] WID-LYR generation failed for song", songId, lyrErr);
+          }
+        }
         // Trigger visual generation pipeline for each song (non-blocking)
         if (songId) {
           const isBatchFounder = (ctx.user as any).role === "founder";
