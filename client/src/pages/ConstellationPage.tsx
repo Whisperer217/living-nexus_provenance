@@ -670,15 +670,9 @@ export default function ConstellationPage() {
           </button>
         </Link>
 
-        <div className="text-center">
-          <p className="text-[11px] font-mono tracking-[0.2em] uppercase" style={{ color: "rgba(212,175,55,0.6)" }}>
-            Constellation
-          </p>
-          <p className="text-[13px] font-semibold" style={{ color: "#F5EDD8", fontFamily: "'Cinzel', serif" }}>
-            {songTitle}
-          </p>
-          <p className="text-[10px]" style={{ color: "rgba(212,175,55,0.6)" }}>{creatorName}</p>
-        </div>
+        <p className="text-[10px] font-mono tracking-[0.22em] uppercase" style={{ color: "rgba(212,175,55,0.40)" }}>
+          Constellation
+        </p>
 
         <div className="flex items-center gap-2 max-w-[90px]">
           {genre && (

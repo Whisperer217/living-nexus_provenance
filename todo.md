@@ -5342,3 +5342,4 @@
 - [x] Shrink Cosmos legend to minimal collapsible icon — collapsed by default, expands on hover/tap
 - [x] Fix Cosmos blank-page race condition: page renders empty on first click, requires second click to load
 - [x] Implement all Cosmos UI changes in live ConstellationPage (ring labels, tooltip, content type badges, legend icon)
+- [x] Remove song title and artist name from Cosmos top bar — keep only Back button, "Constellation" label, and genre tag
