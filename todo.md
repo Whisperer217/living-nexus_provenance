@@ -5337,3 +5337,8 @@
 - [x] Increase inactive nav item color from rgba(255,255,255,0.40) to rgba(255,255,255,0.62) (~45% brightness increase)
 - [x] Increase Codex link color from rgba(212,175,55,0.45) to rgba(212,175,55,0.65) (~45% brightness increase)
 - [x] Restore-on-leave handlers updated to match new base values
+
+## Cosmos UI Polish + Bug Fix (2026-06-18)
+- [x] Shrink Cosmos legend to minimal collapsible icon — collapsed by default, expands on hover/tap
+- [x] Fix Cosmos blank-page race condition: page renders empty on first click, requires second click to load
+- [x] Implement all Cosmos UI changes in live ConstellationPage (ring labels, tooltip, content type badges, legend icon)

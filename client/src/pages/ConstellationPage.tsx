@@ -89,6 +89,70 @@ interface TooltipState {
   y: number;
 }
 
+// ─── Legend Icon ─────────────────────────────────────────────────────────────
+// Minimal collapsible legend — collapsed to a 32px icon by default,
+// expands on hover/tap to show the full key. Bottom-right, clear of sidebar.
+
+function LegendIcon() {
+  const [open, setOpen] = useState(false);
+  return (
+    <div
+      className="absolute bottom-5 right-5 z-20 flex flex-col items-end gap-2"
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
+    >
+      {/* Expanded panel — shown on hover/tap */}
+      {open && (
+        <div
+          className="flex flex-col gap-1.5 px-3 py-2.5 rounded-xl"
+          style={{
+            background: "rgba(6,4,14,0.92)",
+            border: "1px solid rgba(212,175,55,0.12)",
+            backdropFilter: "blur(10px)",
+            minWidth: 158,
+          }}
+        >
+          <p className="text-[8px] font-mono tracking-[0.18em] uppercase mb-1" style={{ color: "rgba(232,223,200,0.30)" }}>Legend</p>
+          <div className="flex items-center gap-2">
+            <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ border: "1.5px solid #D4AF37", boxShadow: "0 0 5px rgba(212,175,55,0.45)" }} />
+            <span className="text-[9.5px]" style={{ color: "rgba(232,223,200,0.70)" }}>This work</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ border: "1.5px solid rgba(212,175,55,0.65)" }} />
+            <span className="text-[9.5px]" style={{ color: "rgba(232,223,200,0.70)" }}>Same creator</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ border: "1.5px solid rgba(138,43,226,0.60)" }} />
+            <span className="text-[9.5px]" style={{ color: "rgba(232,223,200,0.70)" }}>Same genre</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: "#4ade80" }} />
+            <span className="text-[9.5px]" style={{ color: "rgba(232,223,200,0.70)" }}>WID verified</span>
+          </div>
+        </div>
+      )}
+      {/* Icon button */}
+      <button
+        onClick={() => setOpen(v => !v)}
+        className="w-8 h-8 rounded-full flex items-center justify-center transition-all"
+        style={{
+          background: "rgba(6,4,14,0.88)",
+          border: `1px solid ${open ? "rgba(212,175,55,0.45)" : "rgba(212,175,55,0.18)"}`,
+          backdropFilter: "blur(8px)",
+          color: "rgba(212,175,55,0.65)",
+        }}
+        aria-label="Toggle legend"
+      >
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="8" x2="12" y2="12" />
+          <line x1="12" y1="16" x2="12.01" y2="16" />
+        </svg>
+      </button>
+    </div>
+  );
+}
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function ConstellationPage() {
@@ -538,37 +602,12 @@ export default function ConstellationPage() {
 
   // ─── Render ───────────────────────────────────────────────────────────────
 
-  if (isLoading && !loadTimeout) {
-    return (
-      <div className="fixed inset-0 flex items-center justify-center" style={{ background: "#000", height: "100dvh" }}>
-        <div className="text-center">
-          <div className="w-16 h-16 rounded-full border-2 border-[#D4AF37] border-t-transparent animate-spin mx-auto mb-4" />
-          <p className="text-[13px] font-mono tracking-widest uppercase" style={{ color: "rgba(212,175,55,0.6)" }}>
-            Mapping Constellation
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error || !data || loadTimeout) {
-    return (
-      <div className="fixed inset-0 flex items-center justify-center" style={{ background: "#000", height: "100dvh" }}>
-        <div className="text-center px-6">
-          <p className="text-[#D4AF37] text-lg font-semibold mb-2">Constellation not found</p>
-          <p className="text-white/50 text-sm mb-6">This work may not be publicly available.</p>
-          <div className="flex gap-3 justify-center">
-            <button onClick={() => { setLoadTimeout(false); refetch(); }} className="px-4 py-2 rounded-lg text-sm" style={{ background: "rgba(212,175,55,0.15)", color: "#D4AF37", border: "1px solid rgba(212,175,55,0.3)" }}>
-              Retry
-            </button>
-            <button onClick={() => navigate(-1 as any)} className="px-4 py-2 rounded-lg text-sm" style={{ background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.1)" }}>
-              Go Back
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // NOTE: Canvas is always rendered so the ResizeObserver fires on first mount.
+  // Loading and error states are shown as overlays on top of the canvas,
+  // which prevents the blank-page race condition where dims stayed {0,0}
+  // because the canvas container wasn't in the DOM during the first load.
+  const showLoading = isLoading && !loadTimeout;
+  const showError = !isLoading && (error || !data || loadTimeout);
 
   return (
     <div className="fixed inset-0 overflow-hidden" style={{ background: "#000", zIndex: 50, height: "100dvh" }}>
@@ -584,6 +623,36 @@ export default function ConstellationPage() {
           onTouchEnd={handleTouchEnd}
         />
       </div>
+
+      {/* Loading overlay */}
+      {showLoading && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center" style={{ background: "#000" }}>
+          <div className="text-center">
+            <div className="w-16 h-16 rounded-full border-2 border-[#D4AF37] border-t-transparent animate-spin mx-auto mb-4" />
+            <p className="text-[13px] font-mono tracking-widest uppercase" style={{ color: "rgba(212,175,55,0.6)" }}>
+              Mapping Constellation
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Error overlay */}
+      {showError && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center" style={{ background: "#000" }}>
+          <div className="text-center px-6">
+            <p className="text-[#D4AF37] text-lg font-semibold mb-2">Constellation not found</p>
+            <p className="text-white/50 text-sm mb-6">This work may not be publicly available.</p>
+            <div className="flex gap-3 justify-center">
+              <button onClick={() => { setLoadTimeout(false); refetch(); }} className="px-4 py-2 rounded-lg text-sm" style={{ background: "rgba(212,175,55,0.15)", color: "#D4AF37", border: "1px solid rgba(212,175,55,0.3)" }}>
+                Retry
+              </button>
+              <button onClick={() => navigate(-1 as any)} className="px-4 py-2 rounded-lg text-sm" style={{ background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.1)" }}>
+                Go Back
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Top bar */}
       <div
@@ -621,28 +690,10 @@ export default function ConstellationPage() {
         </div>
       </div>
 
-      {/* Legend — hidden when a node is selected */}
-      <div
-        className="absolute bottom-24 left-4 z-20 flex flex-col gap-1.5 px-3 py-2 rounded-xl transition-opacity duration-200"
-        style={{ opacity: selectedNode ? 0 : 1, pointerEvents: selectedNode ? 'none' : 'auto', background: "rgba(0,0,0,0.6)", border: "1px solid rgba(255,255,255,0.08)", backdropFilter: "blur(8px)" }}
-      >
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded-full" style={{ border: "1.5px solid #D4AF37" }} />
-          <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.6)" }}>This work</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded-full" style={{ border: "1.5px solid rgba(212,175,55,0.7)" }} />
-          <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.6)" }}>Same creator</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded-full" style={{ border: "1.5px solid rgba(138,43,226,0.6)" }} />
-          <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.6)" }}>Same genre</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full" style={{ background: "#4ade80" }} />
-          <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.6)" }}>WID verified</span>
-        </div>
-      </div>
+      {/* Legend — minimal collapsible icon, bottom-right, hidden when node selected */}
+      {!selectedNode && (
+        <LegendIcon />
+      )}
 
       {/* Tooltip */}
       {tooltip && (
