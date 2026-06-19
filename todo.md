@@ -5348,3 +5348,11 @@
 - [x] When a track finishes playing in the Cosmos, auto-advance to the next audio node in the constellation
 - [x] Skip non-audio nodes (comics, manuscripts, images) in the queue — show in Cosmos but do not play
 - [x] Queue order: center node first, then inner ring (same creator), then outer ring (same genre)
+
+## Mobile Glow Optimization (2026-06-19)
+- [x] Rewrite useFrequencyGlow: replace React setBands state with direct DOM boxShadow mutation (eliminates 60fps re-renders)
+- [x] Throttle glow RAF loop to 30fps on mobile (halves CPU/GPU load)
+- [x] Reduce fftSize from 2048 to 512 on mobile (75% fewer frequency bins to process)
+- [x] Cut box-shadow from 8 layers to 3 on mobile (less GPU compositing)
+- [x] Remove canvas shadowBlur from useWaveformVisualizer on mobile (eliminates GPU blur pass)
+- [x] Throttle waveform RAF loop to 30fps on mobile

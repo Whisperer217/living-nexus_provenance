@@ -311,9 +311,19 @@ function GlobalPlayerInner() {
     try { localStorage.setItem("ln-player-glow", next ? "on" : "off"); } catch {}
     return next;
   });
-  const { glowShadow } = useFrequencyGlow(audioRef, glowEnabled, state.isPlaying);
+  // Mobile optimization: pass playerBarRef so the glow hook can mutate boxShadow
+  // directly on the DOM element instead of triggering a React re-render every frame.
+  const playerBarRef = useRef<HTMLDivElement | null>(null);
+  const isMobileDevice = !isDesktop;
+  const { glowShadow } = useFrequencyGlow(
+    audioRef,
+    glowEnabled,
+    state.isPlaying,
+    isMobileDevice ? playerBarRef : undefined,
+    isMobileDevice,
+  );
   const waveCanvasRef = useRef<HTMLCanvasElement | null>(null);
-  useWaveformVisualizer(audioRef, waveCanvasRef, glowEnabled, state.isPlaying);
+  useWaveformVisualizer(audioRef, waveCanvasRef, glowEnabled, state.isPlaying, isMobileDevice);
 
   /* ── Track data ── */
   const tracks = allTracks();
@@ -603,7 +613,11 @@ function GlobalPlayerInner() {
 
   const content = (
     <div
-      ref={containerRef}
+      ref={(el) => {
+        // Attach both containerRef (for drag) and playerBarRef (for direct glow mutation on mobile)
+        (containerRef as React.MutableRefObject<HTMLDivElement | null>).current = el;
+        playerBarRef.current = el;
+      }}
       style={{
         position: "fixed",
         bottom: 0,
