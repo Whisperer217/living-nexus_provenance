@@ -39,6 +39,7 @@ interface ManifestationShelfProps {
   album: ShelfAlbum;
   playingId: number | null;
   onPlayTrack: (track: ShelfTrack, albumTracks: ShelfTrack[]) => void;
+  onPlayAll?: (albumTracks: ShelfTrack[]) => void;
   isOwner?: boolean;
   onDeleteTrack?: (id: number) => void;
 }
@@ -375,6 +376,7 @@ export function ManifestationShelf({
   album,
   playingId,
   onPlayTrack,
+  onPlayAll,
   isOwner: _isOwner,
   onDeleteTrack: _onDeleteTrack,
 }: ManifestationShelfProps) {
@@ -486,32 +488,48 @@ export function ManifestationShelf({
           >
             {album.name}
           </p>
-          <p className="text-xs mt-0.5" style={{ color: "var(--ln-smoke)" }}>
-            {trackCount} {trackCount === 1 ? "track" : "tracks"}
-          </p>
+          <div className="flex items-center gap-2 mt-0.5">
+            <span className="text-xs" style={{ color: "var(--ln-smoke)" }}>
+              {trackCount} {trackCount === 1 ? "track" : "tracks"}
+            </span>
+            {/* Play All — inline icon button */}
+            {album.tracks.some(t => !!t.fileUrl) && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (onPlayAll) {
+                    onPlayAll(album.tracks);
+                  } else {
+                    const first = album.tracks.find(t => !!t.fileUrl);
+                    if (first) onPlayTrack(first, album.tracks);
+                  }
+                }}
+                className="flex items-center justify-center w-5 h-5 rounded-full transition-all hover:scale-110"
+                style={{ background: "rgba(167,139,250,0.15)", color: "#A78BFA", border: "1px solid rgba(167,139,250,0.3)" }}
+                title="Play all tracks"
+              >
+                <Play className="w-2.5 h-2.5" fill="currentColor" />
+              </button>
+            )}
+            {/* Download Album — inline icon button, only when project slug available */}
+            {album.projectSlug && (
+              <Link
+                href={`/project/${album.projectSlug}`}
+                onClick={(e: React.MouseEvent) => e.stopPropagation()}
+              >
+                <button
+                  type="button"
+                  className="flex items-center justify-center w-5 h-5 rounded-full transition-all hover:scale-110"
+                  style={{ background: "rgba(196,154,40,0.12)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.3)" }}
+                  title="Download album"
+                >
+                  <Download className="w-2.5 h-2.5" />
+                </button>
+              </Link>
+            )}
+          </div>
         </div>
-
-        {/* Download Album button — only shown when project slug is available */}
-        {album.projectSlug && (
-          <Link
-            href={`/project/${album.projectSlug}`}
-            onClick={(e: React.MouseEvent) => e.stopPropagation()}
-            className="flex-shrink-0"
-          >
-            <button
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition-all hover:opacity-90"
-              style={{
-                background: "rgba(196,154,40,0.12)",
-                color: "var(--ln-gold)",
-                border: "1px solid rgba(196,154,40,0.3)",
-              }}
-              title="Download album"
-            >
-              <Download className="w-3 h-3" />
-              <span className="hidden sm:inline">Album</span>
-            </button>
-          </Link>
-        )}
 
         {/* View toggle + scroll arrows */}
         <div className="flex items-center gap-1 flex-shrink-0">

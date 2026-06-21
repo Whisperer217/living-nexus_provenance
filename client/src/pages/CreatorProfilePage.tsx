@@ -746,6 +746,32 @@ export default function CreatorProfilePage() {
     openNowPlayingPanel();
   };
 
+  // ── Play All handler: queues entire album from track 0 ──────────────────────
+  const handleShelfPlayAll = (albumTracks: ShelfTrack[]) => {
+    const playableTracks = albumTracks.filter((t) => !!t.fileUrl);
+    if (!playableTracks.length) { toast.error("No playable tracks in this album"); return; }
+    const artistName = data?.creator?.artistHandle || data?.creator?.name || "Unknown";
+    const queue = playableTracks.map((t) => ({
+      id: String(t.id),
+      title: t.title,
+      artist: artistName,
+      genre: t.genre || "",
+      audioUrl: t.fileUrl!,
+      artUrl: t.coverArtUrl || undefined,
+      witnessId: t.witnessId || undefined,
+      aiDisclosure: (data?.creator as any)?.aiDisclosure || undefined,
+      creatorId: (data?.creator as any)?.id ?? undefined,
+      coverPositionX: t.coverPositionX ?? 50,
+      coverPositionY: t.coverPositionY ?? 50,
+      visualReady: false,
+      autoVideoUrl: undefined,
+      creatorRole: (data?.creator as any)?.role ?? undefined,
+      contentType: ((t.contentType ?? "audio") as "audio" | "lyrics" | "manuscript" | "comic"),
+    }));
+    playQueueAt(queue, 0, "CREATOR_PAGE");
+    openNowPlayingPanel();
+  };
+
   const handleTip = () => {
     const cents = Math.round(parseFloat(tipAmount) * 100);
     if (!cents || cents < 100) { toast.error("Minimum gift is $1.00"); return; }
@@ -1814,6 +1840,7 @@ export default function CreatorProfilePage() {
                       album={shelfAlbum}
                       playingId={playingId}
                       onPlayTrack={(track, albumTracks) => handleShelfPlay(track, albumTracks)}
+                      onPlayAll={(albumTracks) => handleShelfPlayAll(albumTracks)}
                       isOwner={isOwner}
                       onDeleteTrack={(id) => deleteMutation.mutate({ songId: id })}
                     />

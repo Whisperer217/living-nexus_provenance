@@ -5368,3 +5368,10 @@
 - [x] Fix Witness Network badge persistent red pulse — mark as seen in localStorage when tab is opened; reset when witness count increases
 - [x] Add filter bar to My Works tab (search by title/genre, filter by status, filter by content type, sort by date/plays/title)
 - [x] Add Play button per track and Play All button to My Works tab
+
+## Feature — Album Play All + Download Icons (Jun 21 2026)
+- [x] Add inline Play All icon button next to track count in album header (ManifestationShelf)
+- [x] Add inline Download icon button next to track count in album header (ManifestationShelf)
+- [x] Add onPlayAll prop to ManifestationShelfProps interface
+- [x] Add handleShelfPlayAll function in CreatorProfilePage
+- [x] Wire onPlayAll prop in CreatorProfilePage ManifestationShelf usage
