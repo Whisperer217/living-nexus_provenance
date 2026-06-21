@@ -147,6 +147,7 @@ export default function ProfilePage() {
   const [, navigate] = useLocation();
   const utils = trpc.useUtils();
   const { addAndPlay, playQueueAt, currentTrackId, state: playerState } = usePlayer();
+  const isPlayerPlaying = playerState.isPlaying;
   // ── Lights mode ────────────────────────────────────────────────
   const { mode: lightsMode, setMode: setLightsModeLocal } = useLightsMode();
   const setLightsModeMutation = trpc.profile.setLightsMode.useMutation({
@@ -360,6 +361,25 @@ export default function ProfilePage() {
   const [bannerPos, setBannerPos] = useState({ x: 50, y: 50 });
   // AI focal point returned from uploadBanner — auto-populates position sliders
   const [aiFocalPos, setAiFocalPos] = useState<{ x: number; y: number } | null>(null);
+  // Works tab filter state
+  const [worksSearch, setWorksSearch] = useState("");
+  const [worksStatusFilter, setWorksStatusFilter] = useState<"all" | "Published" | "Draft" | "Unlisted" | "Deleted">("all");
+  const [worksTypeFilter, setWorksTypeFilter] = useState<"all" | "audio" | "lyrics" | "manuscript" | "comic">("all");
+  const [worksSort, setWorksSort] = useState<"date" | "plays" | "title">("date");
+  // Witness Network — track whether user has seen the badge (persisted in localStorage)
+  const [witnessNetworkSeen, setWitnessNetworkSeen] = useState(() => {
+    return localStorage.getItem("ln-witness-network-seen") === "1";
+  });
+  // Reset "seen" when the witness count increases (new witness joined)
+  const witnessCount = (witnessNetwork?.witnessing?.length ?? 0) + (witnessNetwork?.witnessedBy?.length ?? 0);
+  const prevWitnessCountRef = useRef(witnessCount);
+  useEffect(() => {
+    if (witnessCount > prevWitnessCountRef.current) {
+      setWitnessNetworkSeen(false);
+      localStorage.removeItem("ln-witness-network-seen");
+    }
+    prevWitnessCountRef.current = witnessCount;
+  }, [witnessCount]);
   // Sync banner position from DB on load
   useEffect(() => {
     if (profile?.bannerPositionX !== undefined && profile?.bannerPositionY !== undefined) {
@@ -927,7 +947,7 @@ export default function ProfilePage() {
             { id: "collections",     label: "Collections & Playlists" },
             { id: "works",           label: "Works" },
             { id: "liked",           label: "Liked" },
-            { id: "witness-network", label: "Witness Network", badge: (witnessNetwork?.witnessing?.length ?? 0) + (witnessNetwork?.witnessedBy?.length ?? 0) > 0 ? String((witnessNetwork?.witnessing?.length ?? 0) + (witnessNetwork?.witnessedBy?.length ?? 0)) : null },
+            { id: "witness-network", label: "Witness Network", badge: !witnessNetworkSeen && ((witnessNetwork?.witnessing?.length ?? 0) + (witnessNetwork?.witnessedBy?.length ?? 0) > 0) ? String((witnessNetwork?.witnessing?.length ?? 0) + (witnessNetwork?.witnessedBy?.length ?? 0)) : null },
             { id: "signals",         label: "Signals", badge: (unreadCount as number) > 0 ? String(unreadCount) : null },
             { id: "field-notes",     label: "Field Notes" },
             { id: "testimony",       label: "Testimony" },
@@ -938,7 +958,13 @@ export default function ProfilePage() {
               {tabs.map(tab => (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
+                  onClick={() => {
+                    setActiveTab(tab.id);
+                    if (tab.id === "witness-network" && !witnessNetworkSeen) {
+                      setWitnessNetworkSeen(true);
+                      localStorage.setItem("ln-witness-network-seen", "1");
+                    }
+                  }}
                   className={`relative flex items-center gap-1.5 px-4 py-2.5 text-[12px] font-heading tracking-wider whitespace-nowrap transition-all border-b-2 -mb-px flex-shrink-0
                     ${activeTab === tab.id
                       ? "border-[#C49A28] text-[#C49A28]"
@@ -1073,18 +1099,129 @@ export default function ProfilePage() {
         {/* ═══════════════════════════════════════════════════════════
              WORKS TAB — My uploaded tracks
         ═══════════════════════════════════════════════════════════ */}
-        {activeTab === "works" && (
+        {activeTab === "works" && (() => {
+          // ── Filter + sort logic ──────────────────────────────────
+          const filteredSongs = (dbSongs as any[])
+            .filter(s => {
+              if (worksStatusFilter !== "all" && s.status !== worksStatusFilter) return false;
+              if (worksTypeFilter !== "all" && s.contentType !== worksTypeFilter) return false;
+              if (worksSearch.trim()) {
+                const q = worksSearch.toLowerCase();
+                if (!s.title?.toLowerCase().includes(q) && !s.genre?.toLowerCase().includes(q)) return false;
+              }
+              return true;
+            })
+            .sort((a, b) => {
+              if (worksSort === "plays") return (b.playCount || 0) - (a.playCount || 0);
+              if (worksSort === "title") return (a.title || "").localeCompare(b.title || "");
+              // default: date desc
+              return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+            });
+
+          const handlePlayAll = () => {
+            const playable = filteredSongs.filter((s: any) => s.fileUrl);
+            if (!playable.length) { toast.error("No playable tracks in this view"); return; }
+            const tracks: Track[] = playable.map((s: any) => ({
+              id: String(s.id),
+              title: s.title,
+              artist: profile?.name || user?.name || "Unknown",
+              genre: s.genre || "",
+              audioUrl: s.fileUrl,
+              artUrl: s.coverArtUrl || undefined,
+              witnessId: s.witnessId || undefined,
+              aiDisclosure: s.aiDisclosure || undefined,
+              creatorHandle: profile?.artistHandle || undefined,
+              creatorId: user?.id,
+              isOwn: true,
+              plays: s.playCount || 0,
+              coverPositionX: s.coverPositionX ?? 50,
+              coverPositionY: s.coverPositionY ?? 50,
+            }));
+            playQueueAt(tracks, 0);
+          };
+
+          return (
           <div className="space-y-3">
+            {/* Header row */}
             <div className="flex items-center justify-between mb-1">
-              <span className="text-[11px] font-heading tracking-widest text-white/50">{dbSongs.length} TRACKS</span>
-              <button
-                onClick={() => navigate("/upload")}
-                className="flex items-center gap-1.5 text-[11px] font-body px-3 py-1.5 rounded-lg transition-all"
-                style={{ background: "var(--ln-coal)", border: "1px solid #C49A28", color: "#A78BFA" }}
-              >
-                <Upload size={11} /> Upload
-              </button>
+              <span className="text-[11px] font-heading tracking-widest text-white/50">
+                {filteredSongs.length !== dbSongs.length ? `${filteredSongs.length} / ${dbSongs.length} TRACKS` : `${dbSongs.length} TRACKS`}
+              </span>
+              <div className="flex items-center gap-2">
+                {filteredSongs.filter((s: any) => s.fileUrl).length > 0 && (
+                  <button
+                    type="button"
+                    onClick={handlePlayAll}
+                    className="flex items-center gap-1.5 text-[11px] font-body px-3 py-1.5 rounded-lg transition-all"
+                    style={{ background: "rgba(167,139,250,0.1)", border: "1px solid rgba(167,139,250,0.3)", color: "#A78BFA" }}
+                    title="Play all filtered tracks"
+                  >
+                    <Play size={11} /> Play All
+                  </button>
+                )}
+                <button
+                  onClick={() => navigate("/upload")}
+                  className="flex items-center gap-1.5 text-[11px] font-body px-3 py-1.5 rounded-lg transition-all"
+                  style={{ background: "var(--ln-coal)", border: "1px solid #C49A28", color: "#A78BFA" }}
+                >
+                  <Upload size={11} /> Upload
+                </button>
+              </div>
             </div>
+
+            {/* Filter bar */}
+            <div className="flex flex-wrap gap-2 pb-2">
+              {/* Search */}
+              <div className="relative flex-1 min-w-[140px] max-w-[240px]">
+                <input
+                  type="text"
+                  value={worksSearch}
+                  onChange={e => setWorksSearch(e.target.value)}
+                  placeholder="Search title or genre…"
+                  className="w-full pl-3 pr-7 py-1.5 rounded-lg text-[11px] font-body text-white/70 bg-white/[0.04] border border-white/[0.08] outline-none placeholder:text-white/25 focus:border-white/20 transition-colors"
+                />
+                {worksSearch && (
+                  <button type="button" onClick={() => setWorksSearch("")} className="absolute right-2 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60">
+                    <X size={10} />
+                  </button>
+                )}
+              </div>
+              {/* Status filter */}
+              <select
+                value={worksStatusFilter}
+                onChange={e => setWorksStatusFilter(e.target.value as typeof worksStatusFilter)}
+                className="px-2 py-1.5 rounded-lg text-[11px] font-body text-white/60 bg-white/[0.04] border border-white/[0.08] outline-none cursor-pointer"
+              >
+                <option value="all">All Status</option>
+                <option value="Published">Published</option>
+                <option value="Draft">Draft</option>
+                <option value="Unlisted">Unlisted</option>
+                <option value="Deleted">Deleted</option>
+              </select>
+              {/* Type filter */}
+              <select
+                value={worksTypeFilter}
+                onChange={e => setWorksTypeFilter(e.target.value as typeof worksTypeFilter)}
+                className="px-2 py-1.5 rounded-lg text-[11px] font-body text-white/60 bg-white/[0.04] border border-white/[0.08] outline-none cursor-pointer"
+              >
+                <option value="all">All Types</option>
+                <option value="audio">Audio</option>
+                <option value="lyrics">Lyrics</option>
+                <option value="manuscript">Manuscript</option>
+                <option value="comic">Comic</option>
+              </select>
+              {/* Sort */}
+              <select
+                value={worksSort}
+                onChange={e => setWorksSort(e.target.value as typeof worksSort)}
+                className="px-2 py-1.5 rounded-lg text-[11px] font-body text-white/60 bg-white/[0.04] border border-white/[0.08] outline-none cursor-pointer"
+              >
+                <option value="date">Newest First</option>
+                <option value="plays">Most Played</option>
+                <option value="title">A → Z</option>
+              </select>
+            </div>
+
             {songsLoading ? (
               <div className="space-y-2">
                 {Array.from({ length: 5 }).map((_, i) => (
@@ -1097,18 +1234,69 @@ export default function ProfilePage() {
                   </div>
                 ))}
               </div>
-            ) : dbSongs.length === 0 ? (
+            ) : filteredSongs.length === 0 ? (
               <div className="text-center py-12 text-white/40 font-body text-[13px]">
-                No tracks yet.{" "}
-                <button type="button" onClick={() => navigate("/upload")} className="text-[#A78BFA] hover:underline">Register your first work</button>
+                {dbSongs.length === 0 ? (
+                  <>
+                    No tracks yet.{" "}
+                    <button type="button" onClick={() => navigate("/upload")} className="text-[#A78BFA] hover:underline">Register your first work</button>
+                  </>
+                ) : (
+                  <>
+                    No tracks match your filters.{" "}
+                    <button type="button" onClick={() => { setWorksSearch(""); setWorksStatusFilter("all"); setWorksTypeFilter("all"); }} className="text-[#A78BFA] hover:underline">Clear filters</button>
+                  </>
+                )}
               </div>
             ) : (
-              (dbSongs as any[]).map((song) => (
+              filteredSongs.map((song: any) => {
+                const isPlaying = currentTrackId === String(song.id) && isPlayerPlaying;
+                return (
                 <div key={song.id} className="flex items-center gap-3 p-3 rounded-xl border border-white/[0.06] bg-[#000000] hover:border-white/[0.12] transition-all group">
-                  <div className="w-11 h-11 rounded-lg flex-shrink-0 overflow-hidden bg-[#000000]">
+                  {/* Cover / play button */}
+                  <div
+                    className="w-11 h-11 rounded-lg flex-shrink-0 overflow-hidden bg-[#000000] relative cursor-pointer"
+                    onClick={() => {
+                      if (!song.fileUrl) { navigate(`/song/${song.id}`); return; }
+                      if (isPlaying) return;
+                      const tracks: Track[] = filteredSongs
+                        .filter((s: any) => s.fileUrl)
+                        .map((s: any) => ({
+                          id: String(s.id),
+                          title: s.title,
+                          artist: profile?.name || user?.name || "Unknown",
+                          genre: s.genre || "",
+                          audioUrl: s.fileUrl,
+                          artUrl: s.coverArtUrl || undefined,
+                          witnessId: s.witnessId || undefined,
+                          aiDisclosure: s.aiDisclosure || undefined,
+                          creatorHandle: profile?.artistHandle || undefined,
+                          creatorId: user?.id,
+                          isOwn: true,
+                          plays: s.playCount || 0,
+                          coverPositionX: s.coverPositionX ?? 50,
+                          coverPositionY: s.coverPositionY ?? 50,
+                        }));
+                      const idx = tracks.findIndex(t => t.id === String(song.id));
+                      playQueueAt(tracks, idx >= 0 ? idx : 0);
+                    }}
+                    title={song.fileUrl ? (isPlaying ? "Now playing" : "Play") : "No audio file"}
+                  >
                     {song.coverArtUrl
-                      ? <img src={song.coverArtUrl} alt="" className="w-full h-full object-cover" style={{ objectPosition: `${(song as any).coverPositionX ?? 50}% ${(song as any).coverPositionY ?? 50}%` }} />
+                      ? <img src={song.coverArtUrl} alt="" className="w-full h-full object-cover" style={{ objectPosition: `${song.coverPositionX ?? 50}% ${song.coverPositionY ?? 50}%` }} />
                       : <div className="w-full h-full flex items-center justify-center text-white/60"><Music size={16} /></div>}
+                    {/* Play overlay */}
+                    {song.fileUrl && (
+                      <div className={`absolute inset-0 flex items-center justify-center rounded-lg transition-opacity ${
+                        isPlaying ? "opacity-100 bg-black/50" : "opacity-0 group-hover:opacity-100 bg-black/50"
+                      }`}>
+                        {isPlaying
+                          ? <div className="flex gap-0.5 items-end h-4">
+                              {[3,5,4].map((h,i) => <div key={i} className="w-1 bg-[#A78BFA] rounded-sm animate-pulse" style={{ height: `${h*3}px`, animationDelay: `${i*0.15}s` }} />)}
+                            </div>
+                          : <Play size={14} className="text-white fill-white" />}
+                      </div>
+                    )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
@@ -1120,6 +1308,9 @@ export default function ProfilePage() {
                     </div>
                     <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                       {song.genre && <span className="text-[10px] text-white/50 font-body truncate max-w-[100px]">{song.genre}</span>}
+                      {song.contentType && song.contentType !== "audio" && (
+                        <span className="text-[9px] px-1 py-0.5 rounded font-body text-white/40" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}>{song.contentType}</span>
+                      )}
                       <span className="text-[10px] text-white/40 font-body flex-shrink-0 flex items-center gap-0.5">
                         <Play size={8} className="inline" />{(song.playCount || 0).toLocaleString()}
                       </span>
@@ -1156,10 +1347,12 @@ export default function ProfilePage() {
                     <button type="button" onClick={() => { const url = `${window.location.origin}/song/${song.id}`; navigator.clipboard.writeText(url).then(() => toast.success("Song link copied!")); }} className="p-2 rounded-lg bg-white/[0.06] text-white/60 hover:text-[#C49A28] hover:bg-white/[0.1] transition-all" title="Copy song link"><Copy size={12} /></button>
                   </div>
                 </div>
-              ))
+                );
+              })
             )}
           </div>
-        )}
+          );
+        })()}
 
         {/* ═══════════════════════════════════════════════════════════
              COLLECTIONS TAB — User-created named collections

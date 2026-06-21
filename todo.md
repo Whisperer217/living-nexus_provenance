@@ -5363,3 +5363,8 @@
 - [x] Fix Home → New Arrivals showing "Nothing new this week" — expand getNewThisWeek from 7-day to 90-day window with fallback to most-recent works when window is empty
 - [x] Fix Home → New Arrivals highlighting Explore icon — change New Arrivals link from /explore?sort=new to /discover (DiscoverPage already shows latest releases and correctly keeps Home icon active)
 - [x] Fix Explore → Music navigation not resetting sort filter when already on /explore?sort=new — add else branch to URL sync useEffect to reset mode to "infinite" when no sort param is present; also clear contentType when no medium param is present
+
+## Bug Fixes & Features — Jun 21 2026 (Slimdoggy session)
+- [x] Fix Witness Network badge persistent red pulse — mark as seen in localStorage when tab is opened; reset when witness count increases
+- [x] Add filter bar to My Works tab (search by title/genre, filter by status, filter by content type, sort by date/plays/title)
+- [x] Add Play button per track and Play All button to My Works tab
