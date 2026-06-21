@@ -66,7 +66,12 @@ export function TosAcceptanceModal() {
   return (
     <Dialog open={open} onOpenChange={() => {/* intentionally non-dismissible */}}>
       <DialogContent
-        className="max-w-2xl bg-[#0d0d0d] border border-[#2a2a2a] text-[#e8dcc8] shadow-2xl"
+        className="max-w-2xl bg-[#0d0d0d] border border-[#2a2a2a] text-[#e8dcc8] shadow-2xl flex flex-col"
+        style={{
+          maxHeight: 'min(90dvh, 90vh)',
+          paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom, 1.5rem))',
+          overflowY: 'auto',
+        }}
         onInteractOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
       >
@@ -87,7 +92,7 @@ export function TosAcceptanceModal() {
         </DialogHeader>
 
         {/* Scrollable TOS summary */}
-        <ScrollArea className="h-64 rounded-md border border-white/[0.08] bg-[#000] px-4 py-3 text-sm text-[#b0a090] leading-relaxed">
+        <ScrollArea className="h-40 sm:h-64 rounded-md border border-white/[0.08] bg-[#000] px-4 py-3 text-sm text-[#b0a090] leading-relaxed">
           <div className="space-y-4">
             <section>
               <h3 className="text-[#e8dcc8] font-semibold mb-1">1. Platform Purpose</h3>
@@ -221,8 +226,8 @@ export function TosAcceptanceModal() {
           </p>
         )}
 
-        {/* Actions */}
-        <div className="flex gap-3 pt-1">
+        {/* Actions — sticky on mobile so buttons are always reachable */}
+        <div className="flex gap-3 pt-1 sticky bottom-0 bg-[#0d0d0d] pb-1">
           <Button
             onClick={handleAccept}
             disabled={!checked || acceptTos.isPending}

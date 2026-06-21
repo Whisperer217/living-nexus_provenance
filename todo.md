@@ -5375,3 +5375,12 @@
 - [x] Add onPlayAll prop to ManifestationShelfProps interface
 - [x] Add handleShelfPlayAll function in CreatorProfilePage
 - [x] Wire onPlayAll prop in CreatorProfilePage ManifestationShelf usage
+
+## Bug Fix — iOS TOS Modal (Jun 21 2026)
+- [x] TOS modal max-height: min(90dvh, 90vh) to prevent overflow on small iPhone screens
+- [x] TOS modal overflowY: auto so entire modal scrolls if needed on mobile
+- [x] TOS modal safe-area-inset-bottom padding for iOS notch/home indicator
+- [x] Reduce ScrollArea height from h-64 to h-40 on mobile (sm:h-64 on larger screens)
+- [x] Sticky action buttons at bottom of modal so Accept/Read Full TOS always reachable
+- [x] Confirmed TosAcceptanceModal only fires for authenticated users (no guest blocking)
+- [x] Confirmed WhatsNewModal already has maxHeight constraint
