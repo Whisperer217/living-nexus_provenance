@@ -553,6 +553,11 @@ html body[data-scroll-locked] {
   padding-right: 0 !important;
 }
 
+/* Belt-and-suspenders: also target the body element directly with maximum specificity */
+body[data-scroll-locked] {
+  position: static !important;
+}
+
 /* ── Dialog centering ───────────────────────────────────────────────────────────────
    Tailwind v4 translate-x-[-50%] / translate-y-[-50%] utilities may not
    generate CSS in all build configurations. This unlayered rule guarantees
@@ -561,13 +566,14 @@ html body[data-scroll-locked] {
    ─────────────────────────────────────────────────────────────── */
 [data-slot="dialog-content"] {
   position: fixed !important;
-  inset: auto !important;       /* reset any inset shorthand that might override top/left */
-  top: 50% !important;
-  left: 50% !important;
+  inset: auto !important;
+  /* Use viewport units as the anchor — immune to body position changes */
+  top: 50dvh !important;
+  left: 50dvw !important;
   right: auto !important;
   bottom: auto !important;
-  margin: 0 !important;         /* prevent any margin-based offset */
-  translate: none !important;   /* cancel Tailwind v4 CSS translate property */
+  margin: 0 !important;
+  translate: none !important;
   transform: translate(-50%, -50%) !important;
   /* Ensure the dialog is always viewport-centered regardless of body position */
 }
