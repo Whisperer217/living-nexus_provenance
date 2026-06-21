@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
+import { usePullToRefresh } from "@/hooks/usePullToRefresh";
+import { PullToRefreshIndicator } from "@/components/PullToRefreshIndicator";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Music, FileText, Video, Image, ChevronDown, ExternalLink, ShieldCheck } from "lucide-react";
@@ -156,8 +158,24 @@ export default function WitnessRegistryPage() {
 
   const displayItems = allItems.length > 0 ? allItems : (data?.items ?? []);
 
+  // Pull-to-refresh — resets pagination and re-fetches from cursor 0
+  const utils = trpc.useUtils();
+  const { pullProgress, isRefreshing, indicatorY } = usePullToRefresh({
+    onRefresh: async () => {
+      setCursor(0);
+      setAllItems([]);
+      setHasMore(true);
+      await utils.witnessRegistry.list.invalidate();
+    },
+  });
+
   return (
     <div className="min-h-screen bg-black text-zinc-100">
+      <PullToRefreshIndicator
+        pullProgress={pullProgress}
+        isRefreshing={isRefreshing}
+        indicatorY={indicatorY}
+      />
       {/* Header */}
       <div className="border-b border-zinc-800 px-4 sm:px-6 py-6">
         <div className="max-w-4xl mx-auto">

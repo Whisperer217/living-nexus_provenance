@@ -33,6 +33,8 @@ import { CinematicComicReader } from "@/components/reader/CinematicComicReader";
 import { DiscoverySection } from "@/components/DiscoverySection";
 import { ObservatoryCanvas } from "@/components/ObservatoryCanvas";
 import { ConstellationReveal } from "@/components/ConstellationReveal";
+import { usePullToRefresh } from "@/hooks/usePullToRefresh";
+import { PullToRefreshIndicator } from "@/components/PullToRefreshIndicator";
 
 /** Animated counter that counts up from 0 to `target` over ~1.2 s */
 function AnimatedCounter({ target }: { target: number }) {
@@ -997,6 +999,21 @@ export default function HomePage() {
   const tipTrack = tipTarget ?? null;
   const handleTip = (track: any, rect: DOMRect) => { setTipTarget(track); setTipRect(rect); };
 
+  // Pull-to-refresh — invalidates all home feed queries
+  const utils = trpc.useUtils();
+  const { pullProgress, isRefreshing, indicatorY } = usePullToRefresh({
+    onRefresh: async () => {
+      await Promise.all([
+        utils.songs.trending.invalidate(),
+        utils.songs.discover.invalidate(),
+        utils.songs.newThisWeek.invalidate(),
+        utils.songs.getWitnessedCount.invalidate(),
+        utils.songs.getWitnessedVoices.invalidate(),
+        utils.profile.featuredCreators.invalidate(),
+      ]);
+    },
+  });
+
   return (
     <>
       <Helmet>
@@ -1004,6 +1021,11 @@ export default function HomePage() {
         <meta name="description" content="Register your music, lyrics, manuscripts, and comics with cryptographic Witness IDs. Living Nexus anchors creative provenance so every work is witnessed, attributed, and protected." />
         <meta name="keywords" content="music provenance, witness ID, audio registration, creator platform, cryptographic provenance, music attribution, digital rights, creative ownership, WID, Living Nexus" />
       </Helmet>
+      <PullToRefreshIndicator
+        pullProgress={pullProgress}
+        isRefreshing={isRefreshing}
+        indicatorY={indicatorY}
+      />
       <div className="cosmic-bg min-h-screen" style={{ position: "relative" }}>
       {/* Observatory starfield — persistent, slow-moving 3-depth-layer parallax */}
       <ObservatoryCanvas

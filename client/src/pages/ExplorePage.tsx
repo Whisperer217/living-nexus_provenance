@@ -24,6 +24,8 @@ import { ShowcaseRow } from "@/components/ShowcaseRow";
 import { StoreTrackCard } from "@/components/StoreTrackCard";
 import { StoreCreatorCard } from "@/components/StoreCreatorCard";
 import { CinematicComicReader } from "@/components/reader/CinematicComicReader";
+import { usePullToRefresh } from "@/hooks/usePullToRefresh";
+import { PullToRefreshIndicator } from "@/components/PullToRefreshIndicator";
 
 const GENRE_CARDS = [
   { label: "All",        icon: null,    color: "#A78BFA" },
@@ -731,11 +733,29 @@ export default function ExplorePage() {
         creatorRole: song.creator?.role ?? undefined,
       });
     }
-    openNowPlayingPanel();
+        openNowPlayingPanel();
   };
+
+  // Pull-to-refresh — invalidates all explore queries
+  const utils = trpc.useUtils();
+  const { pullProgress, isRefreshing, indicatorY } = usePullToRefresh({
+    onRefresh: async () => {
+      await Promise.all([
+        utils.songs.trending.invalidate(),
+        utils.songs.discover.invalidate(),
+        utils.songs.newThisWeek.invalidate(),
+        utils.profile.allCreators.invalidate(),
+      ]);
+    },
+  });
 
   return (
     <div className="animate-fade-up">
+      <PullToRefreshIndicator
+        pullProgress={pullProgress}
+        isRefreshing={isRefreshing}
+        indicatorY={indicatorY}
+      />
       {/* ── Compact Explore Header ─────────────────────────────────────────────────────────────── */}
       <div className="relative w-full overflow-hidden" style={{ height: "120px" }}>
         <img

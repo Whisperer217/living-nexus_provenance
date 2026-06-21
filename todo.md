@@ -5390,3 +5390,12 @@
 - [x] New score formula: weeklyPlays×3 + weeklyLikes×5 + allTimePlays×0.1
 - [x] Align staleTime on Home (60s) and Explore (120s) trending queries to same value (60s)
 - [x] Write vitest test for new trending scoring logic (9 tests passing)
+
+## Phase N+1: Pull-to-Refresh (Mobile — Comet Cosmos Spinner)
+- [ ] Build CometSpinner SVG component (comet chasing its tail, gold/violet cosmos theme)
+- [ ] Build usePullToRefresh hook (touch events, threshold 64px, overscroll-behavior guard)
+- [ ] Wire pull-to-refresh into Home/Discover feed
+- [ ] Wire pull-to-refresh into Explore page
+- [ ] Wire pull-to-refresh into Witness Registry page
+- [ ] Wire pull-to-refresh into My Archive page
+- [ ] Verify overscroll-behavior-y: contain on all wired scroll containers

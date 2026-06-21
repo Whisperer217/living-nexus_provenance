@@ -8,6 +8,8 @@
 import { useEffect, useState, useRef } from "react";
 import { Link, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
+import { usePullToRefresh } from "@/hooks/usePullToRefresh";
+import { PullToRefreshIndicator } from "@/components/PullToRefreshIndicator";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -528,8 +530,24 @@ export default function ArchivePage() {
     return list;
   })();
 
+  // Pull-to-refresh — invalidates all archive queries
+  const { pullProgress, isRefreshing, indicatorY } = usePullToRefresh({
+    onRefresh: async () => {
+      await Promise.all([
+        utils.songs.mySongs.invalidate(),
+        utils.userCollections.list.invalidate(),
+        utils.witnessSubscription.getMyArchive.invalidate(),
+      ]);
+    },
+  });
+
   return (
     <>
+    <PullToRefreshIndicator
+      pullProgress={pullProgress}
+      isRefreshing={isRefreshing}
+      indicatorY={indicatorY}
+    />
     <div className="min-h-screen" style={{ background: "#000000" }}>
       {/* ── Hero Banner ─────────────────────────────────────────────────── */}
       <div className="relative w-full overflow-hidden" style={{ height: "200px" }}>
