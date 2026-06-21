@@ -551,11 +551,20 @@ html body[data-scroll-locked] {
   position: static !important;
   margin-right: 0 !important;
   padding-right: 0 !important;
+  /* Prevent background body scroll when any Radix Dialog/Sheet is open.
+     overflow:hidden stops desktop scroll; touch-action:none stops iOS Safari
+     rubber-band scroll through the modal overlay. */
+  overflow: hidden !important;
+  touch-action: none !important;
+  overscroll-behavior: none !important;
 }
 
 /* Belt-and-suspenders: also target the body element directly with maximum specificity */
 body[data-scroll-locked] {
   position: static !important;
+  overflow: hidden !important;
+  touch-action: none !important;
+  overscroll-behavior: none !important;
 }
 
 /* ── Dialog centering ───────────────────────────────────────────────────────────────
@@ -564,6 +573,12 @@ body[data-scroll-locked] {
    the dialog is always viewport-centered using raw CSS, regardless of
    Tailwind utility output or CSS variable resolution.
    ─────────────────────────────────────────────────────────────── */
+/* Prevent touches on the backdrop from scrolling the background on iOS */
+[data-slot="dialog-overlay"] {
+  touch-action: none !important;
+  overscroll-behavior: none !important;
+}
+
 [data-slot="dialog-content"] {
   position: fixed !important;
   inset: auto !important;
@@ -576,6 +591,10 @@ body[data-scroll-locked] {
   translate: none !important;
   transform: translate(-50%, -50%) !important;
   /* Ensure the dialog is always viewport-centered regardless of body position */
+  /* Re-enable touch scrolling inside the modal even though body has touch-action:none.
+     -webkit-overflow-scrolling:touch enables momentum scrolling on iOS Safari. */
+  touch-action: auto !important;
+  -webkit-overflow-scrolling: touch;
 }
 
 @layer components {
