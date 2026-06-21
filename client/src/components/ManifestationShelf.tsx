@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { Link } from "wouter";
-import { Play, Pause, ChevronLeft, ChevronRight, Shield, Music, BookOpen, FileText, Film, Package, Layers, LayoutGrid, List, ChevronDown, ChevronUp as ChevronUpIcon, Clock, Headphones, Download } from "lucide-react";
+import { Play, Pause, ChevronLeft, ChevronRight, Shield, Music, BookOpen, FileText, Film, Package, Layers, LayoutGrid, List, ChevronDown, ChevronUp as ChevronUpIcon, Clock, Headphones, Download, Share2 } from "lucide-react";
 import { MediaAsset } from "@/components/MediaAsset";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
@@ -528,6 +528,26 @@ export function ManifestationShelf({
                 </button>
               </Link>
             )}
+            {/* Share — copies album or project link to clipboard */}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                const url = album.projectSlug
+                  ? `${window.location.origin}/project/${album.projectSlug}`
+                  : window.location.href;
+                navigator.clipboard.writeText(url).then(() => {
+                  toast.success("Album link copied!");
+                }).catch(() => {
+                  toast.error("Could not copy link");
+                });
+              }}
+              className="flex items-center justify-center w-5 h-5 rounded-full transition-all hover:scale-110"
+              style={{ background: "rgba(99,179,237,0.12)", color: "#63B3ED", border: "1px solid rgba(99,179,237,0.3)" }}
+              title="Share album"
+            >
+              <Share2 className="w-2.5 h-2.5" />
+            </button>
           </div>
         </div>
 
