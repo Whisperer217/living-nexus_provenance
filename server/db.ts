@@ -2581,7 +2581,9 @@ export async function toggleSongReaction(
 }
 
 // ── Trending Works ─────────────────────────────────────────────────────────
-// Score: playCount * 1 + likeCount * 3 + recency bonus (7d=+50, 30d=+20)
+// Score: weeklyPlays×3 + weeklyLikes×5 + allTimePlays×0.1
+// Uses playEvents table for a true 7-day windowed play count.
+// Falls back gracefully: tracks with no play events still appear via allTimePlays tiebreaker.
 export async function getTrendingWorks(opts?: { genre?: string; limit?: number; contentType?: string }) {
   const db = await getDb();
   if (!db) return [];
@@ -2597,6 +2599,9 @@ export async function getTrendingWorks(opts?: { genre?: string; limit?: number; 
     conditions.push(eq(songs.contentType, opts.contentType as "audio" | "lyrics" | "manuscript" | "comic"));
   }
 
+  // 7-day cutoff for windowed counts
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
   const rows = await db.select({
     song: songs,
     creator: {
@@ -2608,6 +2613,19 @@ export async function getTrendingWorks(opts?: { genre?: string; limit?: number; 
       primaryGenre: users.primaryGenre,
       stripeAccountStatus: users.stripeAccountStatus,
     },
+    // Weekly plays: distinct play events in the last 7 days
+    weeklyPlays: sql<number>`(
+      SELECT COUNT(*) FROM playEvents
+      WHERE playEvents.songId = ${songs.id}
+      AND playEvents.createdAt >= ${sevenDaysAgo}
+    )`,
+    // Weekly likes: likes created in the last 7 days
+    weeklyLikes: sql<number>`(
+      SELECT COUNT(*) FROM likes
+      WHERE likes.songId = ${songs.id}
+      AND likes.createdAt >= ${sevenDaysAgo}
+    )`,
+    // All-time like count for display in the UI
     likeCount: sql<number>`(SELECT COUNT(*) FROM likes WHERE likes.songId = ${songs.id})`,
   })
     .from(songs)
@@ -2615,18 +2633,18 @@ export async function getTrendingWorks(opts?: { genre?: string; limit?: number; 
     .where(and(...conditions))
     .limit(limit * 5);
 
-  const now = Date.now();
-  const DAY = 86_400_000;
   type RowType = (typeof rows)[number];
   type ScoredRow = RowType & { score: number };
   const scored: ScoredRow[] = rows.map((r: RowType) => {
-    const age = now - new Date(r.song.createdAt).getTime();
-    const recency = age < 7 * DAY ? 50 : age < 30 * DAY ? 20 : 0;
-    const score = (r.song.playCount ?? 0) * 1 + (Number(r.likeCount) ?? 0) * 3 + recency;
+    const weeklyPlays = Number(r.weeklyPlays) || 0;
+    const weeklyLikes = Number(r.weeklyLikes) || 0;
+    const allTimePlays = r.song.playCount ?? 0;
+    // Primary drivers: this week's engagement. Secondary: all-time plays as a tiebreaker.
+    const score = weeklyPlays * 3 + weeklyLikes * 5 + allTimePlays * 0.1;
     return { ...r, score };
   });
   scored.sort((a: ScoredRow, b: ScoredRow) => b.score - a.score);
-  return scored.slice(0, limit).map(({ score: _score, ...rest }: ScoredRow) => rest);
+  return scored.slice(0, limit).map(({ score: _score, weeklyPlays: _wp, weeklyLikes: _wl, ...rest }: ScoredRow) => rest);
 }
 
 /** Returns all published songs that don't yet have an embedVideoUrl, for batch pre-generation. */

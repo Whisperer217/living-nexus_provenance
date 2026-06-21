@@ -5384,3 +5384,9 @@
 - [x] Sticky action buttons at bottom of modal so Accept/Read Full TOS always reachable
 - [x] Confirmed TosAcceptanceModal only fires for authenticated users (no guest blocking)
 - [x] Confirmed WhatsNewModal already has maxHeight constraint
+
+## Phase N: Trending Algorithm Rebuild (True 7-Day Window)
+- [x] Rebuild getTrendingWorks to use playEvents 7-day window for weekly plays
+- [x] New score formula: weeklyPlays×3 + weeklyLikes×5 + allTimePlays×0.1
+- [x] Align staleTime on Home (60s) and Explore (120s) trending queries to same value (60s)
+- [x] Write vitest test for new trending scoring logic (9 tests passing)

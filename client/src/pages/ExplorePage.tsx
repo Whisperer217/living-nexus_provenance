@@ -453,7 +453,7 @@ export default function ExplorePage() {
   // Trending query — respects the active content-type chip
   const { data: trendingData, isLoading: trendingLoading } = trpc.songs.trending.useQuery(
     { genre: activeGenre === "All" ? undefined : activeGenre, limit: 500, contentType: serverContentType },
-    { enabled: mode === "trending", refetchOnWindowFocus: false, staleTime: 120_000 }
+    { enabled: mode === "trending", refetchOnWindowFocus: false, staleTime: 60_000 }
   );
 
   // ── Infinite scroll — fetch one page at a time ────────────────────
