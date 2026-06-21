@@ -335,9 +335,15 @@ export default function MobileNavDrawer({ open, onClose, onOpenWhatsNew }: Mobil
         </div>
 
         {/* Footer */}
+        {/* paddingBottom accounts for MiniBar (--player-height ~64px) + BottomNavBar (--nav-total ~64px)
+            so What's New and Log Out are never hidden behind the global player/nav stack.
+            --bottom-stack = --nav-total + --player-height, defined in index.css */}
         <div
-          className="flex-shrink-0 px-3 pb-5 pt-2"
-          style={{ borderTop: "1px solid rgba(212,175,55,0.08)" }}
+          className="flex-shrink-0 px-3 pt-2"
+          style={{
+            borderTop: "1px solid rgba(212,175,55,0.08)",
+            paddingBottom: "calc(var(--bottom-stack, 128px) + 12px)",
+          }}
         >
           <button
             onClick={handleWhatsNew}
