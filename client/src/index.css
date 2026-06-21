@@ -567,6 +567,21 @@ body[data-scroll-locked] {
   overscroll-behavior: none !important;
 }
 
+/* ── overlayController fix ───────────────────────────────────────────────────
+   overlayController sets body.overlay-active-full { position: fixed } to prevent
+   iOS Safari rubber-band scroll behind expanded player / menus. When body is
+   position:fixed it becomes the containing block for ALL position:fixed children,
+   including Radix Dialog portals — causing modals to anchor to body top-left
+   instead of the viewport center.
+   Fix: force body back to position:static when a dialog is open. The dialog
+   overlay itself blocks background interaction, so the iOS rubber-band issue
+   doesn't apply while a modal is visible.
+   ─────────────────────────────────────────────────────────────────────────── */
+body.overlay-active-full:has([data-slot="dialog-content"]) {
+  position: static !important;
+  top: auto !important;
+}
+
 /* ── Dialog centering ───────────────────────────────────────────────────────────────
    Tailwind v4 translate-x-[-50%] / translate-y-[-50%] utilities may not
    generate CSS in all build configurations. This unlayered rule guarantees

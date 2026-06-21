@@ -13,10 +13,22 @@ if (typeof document !== 'undefined') {
   if (!document.getElementById(styleId)) {
     const s = document.createElement('style');
     s.id = styleId;
-    // Use !important + high specificity selector to beat react-remove-scroll-bar
-    s.textContent = 'html body[data-scroll-locked] { position: static !important; }';
-    // Insert as first child of <head> so it loads before other styles
-    document.head.insertBefore(s, document.head.firstChild);
+    // Use !important + high specificity selector to beat:
+    //   1. react-remove-scroll-bar: body[data-scroll-locked] { position: relative }
+    //   2. overlayController: body.overlay-active-full { position: fixed; top: -Npx }
+    // Both break position:fixed portal children by making body the containing block.
+    // This style tag is inserted as the LAST child of <head> so it wins the cascade
+    // over any other stylesheet rules without needing !important on everything.
+    s.textContent = [
+      // Radix scroll-lock: body gets position:relative
+      'html body[data-scroll-locked] { position: static !important; }',
+      // overlayController scroll-lock: body gets position:fixed + top:-Npx
+      // Only override when a dialog portal is actually present in the DOM
+      'body.overlay-active-full:has([data-radix-dialog-content]) { position: static !important; top: auto !important; }',
+      'body.overlay-active-full:has([data-slot="dialog-content"]) { position: static !important; top: auto !important; }',
+    ].join('\n');
+    // Insert as LAST child of <head> so it wins the cascade
+    document.head.appendChild(s);
   }
 }
 
@@ -126,20 +138,58 @@ function DialogContent({
   // any stylesheet rule) synchronously via useLayoutEffect so it takes effect
   // before the first paint, preventing the upper-left flash.
   React.useLayoutEffect(() => {
-    // Apply immediately — before first paint — so the dialog is never mispositioned
-    document.body.style.setProperty('position', 'static', 'important');
-    // Also watch for the attribute being re-applied (e.g. nested dialogs)
+    // Apply immediately — before first paint — so the dialog is never mispositioned.
+    // Two scroll-lock systems can set body to position:fixed/relative, both of which
+    // break position:fixed children (Radix portal) resolving against the viewport:
+    //   1. react-remove-scroll-bar: sets body[data-scroll-locked] { position: relative }
+    //   2. overlayController: sets body.overlay-active-full { position: fixed } with
+    //      body.style.top = -scrollY (for iOS rubber-band prevention)
+    // We neutralize both by:
+    //   a) forcing position:static via inline style (highest priority)
+    //   b) removing overlay-active-full class (prevents CSS position:fixed from re-applying)
+    //   c) saving/restoring state so overlayController can still restore scrollY on close
+    const savedTop = document.body.style.top;
+    const hadOverlayFull = document.body.classList.contains('overlay-active-full');
+
+    // Helper: force body back to static positioning so Radix portal resolves against viewport
+    const applyBodyFix = (obs: MutationObserver) => {
+      // Disconnect before mutating to avoid re-entrant MutationObserver callbacks
+      obs.disconnect();
+      document.body.style.setProperty('position', 'static', 'important');
+      document.body.style.setProperty('top', 'auto', 'important');
+      // Remove overlay-active-full so the CSS rule body.overlay-active-full { position:fixed }
+      // doesn't fight our inline style override
+      document.body.classList.remove('overlay-active-full');
+      // Reconnect after mutations are done
+      obs.observe(document.body, {
+        attributes: true,
+        attributeFilter: ['data-scroll-locked', 'class', 'style'],
+      });
+    };
+
+    // Watch for the class/attribute being re-applied (e.g. overlayController called while dialog is open)
     const observer = new MutationObserver(() => {
-      if (document.body.hasAttribute('data-scroll-locked')) {
-        document.body.style.setProperty('position', 'static', 'important');
-      }
+      applyBodyFix(observer);
     });
-    observer.observe(document.body, { attributes: true, attributeFilter: ['data-scroll-locked'] });
+
+    // Apply immediately before first paint
+    applyBodyFix(observer);
+
     return () => {
       observer.disconnect();
       // Only clear if no other dialog is open
       if (!document.body.hasAttribute('data-scroll-locked')) {
         document.body.style.removeProperty('position');
+        // Restore the top offset so overlayController can still restore scrollY
+        if (savedTop) {
+          document.body.style.top = savedTop;
+        } else {
+          document.body.style.removeProperty('top');
+        }
+        // Restore overlay-active-full class if it was present before the dialog opened
+        if (hadOverlayFull) {
+          document.body.classList.add('overlay-active-full');
+        }
       }
     };
   }, []);

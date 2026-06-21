@@ -60,9 +60,23 @@ function _lockScroll(mode: LockMode) {
     _savedScrollY = window.scrollY;
     document.body.style.overflow = "hidden";
     document.body.style.touchAction = "none";
-    document.body.style.top = `-${_savedScrollY}px`;
-    // overlay-active-full adds position:fixed (iOS Safari rubber-band prevention)
-    document.body.classList.add("overlay-active", "overlay-active-full");
+    // Only apply position:fixed if no Radix Dialog is currently open.
+    // When body is position:fixed it becomes the containing block for ALL
+    // position:fixed children (including Radix Dialog portals), causing
+    // modals to anchor to body top-left instead of the viewport center.
+    // When a dialog is open, the dialog overlay blocks background interaction
+    // so the iOS rubber-band issue doesn't apply.
+    const hasOpenDialog = !!document.querySelector(
+      '[data-slot="dialog-content"], [data-radix-dialog-content]'
+    );
+    if (!hasOpenDialog) {
+      document.body.style.top = `-${_savedScrollY}px`;
+      // overlay-active-full adds position:fixed (iOS Safari rubber-band prevention)
+      document.body.classList.add("overlay-active", "overlay-active-full");
+    } else {
+      // Dialog is open — skip position:fixed to avoid breaking modal centering
+      document.body.classList.add("overlay-active");
+    }
   } else {
     // light: overflow only — no touchAction, no position:fixed
     // Do NOT add overlay-active-full — that would apply position:fixed via CSS
