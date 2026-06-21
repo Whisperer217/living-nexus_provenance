@@ -3,6 +3,23 @@ import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { XIcon } from "lucide-react";
 import * as React from "react";
 
+// ── Module-level body position guard ─────────────────────────────────────────
+// react-remove-scroll-bar injects `body[data-scroll-locked] { position: relative !important }`
+// as an unlayered <style> tag that wins the cascade over our CSS file.
+// We inject a <style> tag with higher specificity at module load time (synchronous,
+// before any React render) so it always wins — no race condition possible.
+if (typeof document !== 'undefined') {
+  const styleId = '__ln-dialog-body-fix';
+  if (!document.getElementById(styleId)) {
+    const s = document.createElement('style');
+    s.id = styleId;
+    // Use !important + high specificity selector to beat react-remove-scroll-bar
+    s.textContent = 'html body[data-scroll-locked] { position: static !important; }';
+    // Insert as first child of <head> so it loads before other styles
+    document.head.insertBefore(s, document.head.firstChild);
+  }
+}
+
 // Context to track composition state across dialog children
 const DialogCompositionContext = React.createContext<{
   isComposing: () => boolean;
@@ -151,7 +168,7 @@ function DialogContent({
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
-          "bg-background parchment-grain data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[9999] grid w-full max-w-[calc(100%-2rem)] gap-4 rounded-lg border p-6 shadow-lg duration-200 sm:max-w-lg",
+          "bg-background parchment-grain data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed z-[9999] grid w-full max-w-[calc(100%-2rem)] gap-4 rounded-lg border p-6 shadow-lg duration-200 sm:max-w-lg",
           className
         )}
         onEscapeKeyDown={handleEscapeKeyDown}
