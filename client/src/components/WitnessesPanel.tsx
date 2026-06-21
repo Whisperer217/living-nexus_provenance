@@ -73,7 +73,7 @@ function InviteDialog({ songId, open, onClose, onInvited }: InviteDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="bg-[#0d1117] border border-amber-900/30 text-stone-200 max-w-md">
+      <DialogContent className="bg-[#0d1117] border border-amber-900/30 text-stone-200 max-w-md flex flex-col" style={{ maxHeight: "min(90dvh, 90vh)", overflowY: "auto", paddingBottom: "max(1.5rem, env(safe-area-inset-bottom, 1.5rem))" }}>
         <DialogHeader>
           <DialogTitle className="font-mono text-amber-400 tracking-widest uppercase text-sm">
             Invite a Witness

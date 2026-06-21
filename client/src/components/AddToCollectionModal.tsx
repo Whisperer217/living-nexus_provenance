@@ -74,11 +74,14 @@ export function AddToCollectionModal({ songId, songTitle, open, onClose }: AddTo
   return (
     <Dialog open={open} onOpenChange={(v) => !v && handleClose()}>
       <DialogContent
-        className="max-w-sm"
+        className="max-w-sm flex flex-col"
         style={{
           background: "var(--ln-panel, #0d1117)",
           border: "1px solid rgba(255,215,0,0.2)",
           color: "#e8e0d0",
+          maxHeight: "min(90dvh, 90vh)",
+          overflowY: "auto",
+          paddingBottom: "max(1.5rem, env(safe-area-inset-bottom, 1.5rem))",
         }}
       >
         <DialogHeader>

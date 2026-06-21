@@ -75,7 +75,7 @@ export function FlagContentButton({
       </button>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-md bg-zinc-950 border border-zinc-800">
+        <DialogContent className="max-w-md bg-zinc-950 border border-zinc-800 flex flex-col" style={{ maxHeight: "min(90dvh, 90vh)", overflowY: "auto", paddingBottom: "max(1.5rem, env(safe-area-inset-bottom, 1.5rem))" }}>
           <DialogHeader>
             <DialogTitle className="text-amber-400 font-serif">Report Content</DialogTitle>
             <DialogDescription className="text-zinc-400 text-sm">

@@ -122,11 +122,13 @@ export function VersionHistoryModal({
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent
-        className="max-w-2xl max-h-[85vh] overflow-y-auto"
+        className="max-w-2xl overflow-y-auto"
         style={{
           background: "var(--ln-coal)",
           border: "1px solid rgba(196,154,40,0.2)",
           color: "#f1f5f9",
+          maxHeight: "min(90dvh, 90vh)",
+          paddingBottom: "max(1.5rem, env(safe-area-inset-bottom, 1.5rem))",
         }}
       >
         <DialogHeader>

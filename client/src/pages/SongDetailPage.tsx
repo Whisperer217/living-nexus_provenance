@@ -1390,7 +1390,7 @@ export default function SongDetailPage() {
 
       {/* Gift Modal */}
       <Dialog open={tipOpen} onOpenChange={setTipOpen}>
-        <DialogContent style={{ background: "var(--ln-coal)", border: "1px solid #C3AB7D" }}>
+        <DialogContent style={{ background: "var(--ln-coal)", border: "1px solid #C3AB7D", maxHeight: "min(90dvh, 90vh)", overflowY: "auto", paddingBottom: "max(1.5rem, env(safe-area-inset-bottom, 1.5rem))" }}>
           <DialogHeader>
             <DialogTitle style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>
               Gift {creator?.artistHandle || creator?.name}
@@ -1447,7 +1447,7 @@ export default function SongDetailPage() {
 
       {/* Share Modal */}
       <Dialog open={shareOpen} onOpenChange={setShareOpen}>
-        <DialogContent style={{ background: "var(--ln-coal)", border: "1px solid #C3AB7D", maxWidth: "480px" }}>
+        <DialogContent style={{ background: "var(--ln-coal)", border: "1px solid #C3AB7D", maxWidth: "480px", maxHeight: "min(90dvh, 90vh)", overflowY: "auto", paddingBottom: "max(1.5rem, env(safe-area-inset-bottom, 1.5rem))" }}>
           <DialogHeader>
             <DialogTitle style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>Share Track</DialogTitle>
           </DialogHeader>

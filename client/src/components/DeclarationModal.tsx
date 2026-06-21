@@ -76,7 +76,7 @@ export function DeclarationModal({ open, onOpenChange, onSigned }: DeclarationMo
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl bg-zinc-950 border border-amber-900/40 max-h-[90vh] flex flex-col">
+      <DialogContent className="max-w-2xl bg-zinc-950 border border-amber-900/40 flex flex-col" style={{ maxHeight: "min(90dvh, 90vh)", overflowY: "auto", paddingBottom: "max(1.5rem, env(safe-area-inset-bottom, 1.5rem))" }}>
         <DialogHeader className="flex-shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center">

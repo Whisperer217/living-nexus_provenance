@@ -2021,7 +2021,7 @@ export default function CreatorProfilePage() {
 
       {/* ── Tip Modal ── */}
       <Dialog open={tipOpen} onOpenChange={setTipOpen}>
-        <DialogContent style={{ background: "var(--ln-coal)", border: "1px solid #C3AB7D" }}>
+        <DialogContent style={{ background: "var(--ln-coal)", border: "1px solid #C3AB7D", maxHeight: "min(90dvh, 90vh)", overflowY: "auto", paddingBottom: "max(1.5rem, env(safe-area-inset-bottom, 1.5rem))" }}>
           <DialogHeader>
             <DialogTitle style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>
               Gift {creator.artistHandle || creator.name}
@@ -2071,8 +2071,8 @@ export default function CreatorProfilePage() {
       {/* ─── Witness Network Modal ───────────────────────────────── */}
       <Dialog open={witnessNetworkOpen} onOpenChange={setWitnessNetworkOpen}>
         <DialogContent
-          className="max-w-md w-full max-h-[80vh] overflow-hidden flex flex-col"
-          style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.2)" }}
+          className="max-w-md w-full overflow-y-auto flex flex-col"
+          style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.2)", maxHeight: "min(90dvh, 90vh)", paddingBottom: "max(1.5rem, env(safe-area-inset-bottom, 1.5rem))" }}
         >
           <DialogHeader className="flex-shrink-0">
             <DialogTitle style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>
@@ -2155,8 +2155,8 @@ export default function CreatorProfilePage() {
        {/* ─── Provenance Prompt Generator Modal ───────────────────── */}
       <Dialog open={showPromptStudio} onOpenChange={(open) => { setShowPromptStudio(open); if (!open) { setPsTab("identity_regen"); setPsResult(null); } }}>
         <DialogContent
-          className="max-w-2xl w-full max-h-[90vh] overflow-y-auto"
-          style={{ background: "var(--ln-coal)", border: "1px solid rgba(139,92,246,0.25)" }}
+          className="max-w-2xl w-full overflow-y-auto"
+          style={{ background: "var(--ln-coal)", border: "1px solid rgba(139,92,246,0.25)", maxHeight: "min(90dvh, 90vh)", paddingBottom: "max(1.5rem, env(safe-area-inset-bottom, 1.5rem))" }}
         >
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2" style={{ fontFamily: "'Cinzel', serif", color: "#a78bfa" }}>

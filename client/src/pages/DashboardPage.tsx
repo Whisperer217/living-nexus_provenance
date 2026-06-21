@@ -336,7 +336,7 @@ export default function DashboardPage() {
 
         {/* Pre-Onboarding Checklist Modal */}
         <Dialog open={showChecklist} onOpenChange={setShowChecklist}>
-          <DialogContent style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.10)", color: "var(--ln-parchment)" }}>
+          <DialogContent style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.10)", color: "var(--ln-parchment)", maxHeight: "min(90dvh, 90vh)", overflowY: "auto", paddingBottom: "max(1.5rem, env(safe-area-inset-bottom, 1.5rem))" }}>
             <DialogHeader>
               <DialogTitle style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-gold)" }}>
                 Before You Start — Have These Ready

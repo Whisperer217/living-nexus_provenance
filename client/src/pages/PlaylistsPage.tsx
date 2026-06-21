@@ -47,7 +47,7 @@ function CreatePlaylistDialog({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="bg-[#000000] border border-white/[0.08] text-white max-w-md">
+      <DialogContent className="bg-[#000000] border border-white/[0.08] text-white max-w-md overflow-y-auto" style={{ maxHeight: "min(90dvh, 90vh)", paddingBottom: "max(1.5rem, env(safe-area-inset-bottom, 1.5rem))" }}>
         <DialogHeader>
           <DialogTitle className="font-heading text-[#C49A28]">New Playlist</DialogTitle>
         </DialogHeader>

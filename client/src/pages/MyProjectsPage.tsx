@@ -118,7 +118,7 @@ function ProjectFormDialog({
 
   return (
     <Dialog open={open} onOpenChange={() => onClose()}>
-      <DialogContent className="max-w-lg bg-[#0d0d1a] border border-white/10 max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-lg bg-[#0d0d1a] border border-white/10 overflow-y-auto" style={{ maxHeight: "min(90dvh, 90vh)", paddingBottom: "max(1.5rem, env(safe-area-inset-bottom, 1.5rem))" }}>
         <DialogHeader>
           <DialogTitle className="text-white">
             {isEdit ? "Edit Project" : "New Project"}
@@ -289,7 +289,7 @@ function PostUpdateDialog({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-md bg-[#0d0d1a] border border-white/10">
+      <DialogContent className="max-w-md bg-[#0d0d1a] border border-white/10 overflow-y-auto" style={{ maxHeight: "min(90dvh, 90vh)", paddingBottom: "max(1.5rem, env(safe-area-inset-bottom, 1.5rem))" }}>
         <DialogHeader>
           <DialogTitle className="text-white">Post Progress Update</DialogTitle>
         </DialogHeader>

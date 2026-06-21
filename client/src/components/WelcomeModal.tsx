@@ -64,8 +64,8 @@ export default function WelcomeModal() {
     return (
       <Dialog open={open} onOpenChange={(v) => { if (!v) handleDismiss(); }}>
         <DialogContent
-          className="max-w-md w-full rounded-2xl border p-0 overflow-hidden"
-          style={{ background: "var(--ln-coal)", borderColor: "rgba(196,154,40,0.3)" }}
+          className="max-w-md w-full rounded-2xl border p-0 overflow-y-auto"
+          style={{ background: "var(--ln-coal)", borderColor: "rgba(196,154,40,0.3)", maxHeight: "min(90dvh, 90vh)", paddingBottom: "max(0px, env(safe-area-inset-bottom, 0px))" }}
         >
           <DialogDescription className="sr-only">
             Welcome back, Founder's Era supporter.
@@ -123,8 +123,8 @@ export default function WelcomeModal() {
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) handleDismiss(); }}>
       <DialogContent
-        className="max-w-md w-full rounded-2xl border p-0 overflow-hidden"
-        style={{ background: "var(--ln-coal)", borderColor: "var(--ln-coal)" }}
+          className="max-w-md w-full rounded-2xl border p-0 overflow-y-auto"
+          style={{ background: "var(--ln-coal)", borderColor: "var(--ln-coal)", maxHeight: "min(90dvh, 90vh)", paddingBottom: "max(0px, env(safe-area-inset-bottom, 0px))" }}
       >
         {/* Hidden accessibility description */}
         <DialogDescription className="sr-only">

@@ -73,7 +73,7 @@ function ShareModal({ project, open, onClose }: {
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="bg-[#0d0d0d] border border-white/10 text-white max-w-sm">
+      <DialogContent className="bg-[#0d0d0d] border border-white/10 text-white max-w-sm overflow-y-auto" style={{ maxHeight: "min(90dvh, 90vh)", paddingBottom: "max(1.5rem, env(safe-area-inset-bottom, 1.5rem))" }}>
         <DialogHeader>
           <DialogTitle className="text-white">Share Project</DialogTitle>
         </DialogHeader>
@@ -833,7 +833,7 @@ function DonateDialog({ project, open, onClose }: {
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-md bg-[#0d0d1a] border border-white/10">
+      <DialogContent className="max-w-md bg-[#0d0d1a] border border-white/10 overflow-y-auto" style={{ maxHeight: "min(90dvh, 90vh)", paddingBottom: "max(1.5rem, env(safe-area-inset-bottom, 1.5rem))" }}>
         <DialogHeader>
           <DialogTitle className="text-white">Support this project</DialogTitle>
         </DialogHeader>
