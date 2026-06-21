@@ -366,7 +366,7 @@ export default function ExplorePage() {
   });
   // "store" = StoreTrackCard shelf rows; "classic" = creator-grouped pan-rows
   const [viewMode, setViewMode] = useState<"store" | "classic">("store");
-  const [contentType, setContentType] = useState<ContentType>(() => {
+  const [contentType, setContentType] = useState<ContentType | undefined>(() => {
     const p = new URLSearchParams(typeof window !== "undefined" ? window.location.search : "");
     const m = p.get("medium");
     const mediumMap: Record<string, ContentType> = {
@@ -392,11 +392,17 @@ export default function ExplorePage() {
     const s = p.get("sort");
     if (s === "new") setMode("new");
     else if (s === "trending") setMode("trending");
+    else {
+      // No sort param — reset to infinite so navigating from /explore?sort=new to
+      // /explore?medium=music (via the Explore drawer) shows the full infinite feed.
+      setMode("infinite");
+    }
     const m = p.get("medium");
     const mediumMap: Record<string, ContentType> = {
       music: "audio", lyrics: "lyrics", manuscripts: "manuscript", comics: "comic",
     };
     if (m && mediumMap[m]) setContentType(mediumMap[m]);
+    else if (!m) setContentType(undefined); // clear medium filter when not present
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search]);
 

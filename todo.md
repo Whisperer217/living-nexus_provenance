@@ -5356,3 +5356,10 @@
 - [x] Cut box-shadow from 8 layers to 3 on mobile (less GPU compositing)
 - [x] Remove canvas shadowBlur from useWaveformVisualizer on mobile (eliminates GPU blur pass)
 - [x] Throttle waveform RAF loop to 30fps on mobile
+
+## Bug Fixes — Jun 21 2026 (Slimdoggy report)
+
+- [x] Fix What's New modal appearing in upper-left corner (desktop + mobile) — switch dialog body position fix from useEffect to useLayoutEffect so position:static is applied before first paint
+- [x] Fix Home → New Arrivals showing "Nothing new this week" — expand getNewThisWeek from 7-day to 90-day window with fallback to most-recent works when window is empty
+- [x] Fix Home → New Arrivals highlighting Explore icon — change New Arrivals link from /explore?sort=new to /discover (DiscoverPage already shows latest releases and correctly keeps Home icon active)
+- [x] Fix Explore → Music navigation not resetting sort filter when already on /explore?sort=new — add else branch to URL sync useEffect to reset mode to "infinite" when no sort param is present; also clear contentType when no medium param is present

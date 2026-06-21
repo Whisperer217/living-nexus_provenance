@@ -105,19 +105,19 @@ function DialogContent({
   // as an unlayered <style> tag AFTER our CSS file loads, so it wins the cascade.
   // When body is position:relative, position:fixed children resolve against body
   // (not the viewport), breaking dialog centering on mobile.
-  // Fix: set body.style.position = 'static' as an inline style (always wins over
-  // any stylesheet rule) while the dialog is open, then restore on close.
-  React.useEffect(() => {
+  // Fix: apply body.style.position = 'static' as an inline style (always wins over
+  // any stylesheet rule) synchronously via useLayoutEffect so it takes effect
+  // before the first paint, preventing the upper-left flash.
+  React.useLayoutEffect(() => {
+    // Apply immediately — before first paint — so the dialog is never mispositioned
+    document.body.style.setProperty('position', 'static', 'important');
+    // Also watch for the attribute being re-applied (e.g. nested dialogs)
     const observer = new MutationObserver(() => {
       if (document.body.hasAttribute('data-scroll-locked')) {
         document.body.style.setProperty('position', 'static', 'important');
       }
     });
     observer.observe(document.body, { attributes: true, attributeFilter: ['data-scroll-locked'] });
-    // Also apply immediately in case the attribute is already set
-    if (document.body.hasAttribute('data-scroll-locked')) {
-      document.body.style.setProperty('position', 'static', 'important');
-    }
     return () => {
       observer.disconnect();
       // Only clear if no other dialog is open

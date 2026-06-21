@@ -3738,31 +3738,43 @@ export async function getNewThisWeek(opts?: { genre?: string; contentType?: "aud
   const db = await getDb();
   if (!db) return [];
   const limit = opts?.limit ?? 24;
-  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-  const conditions: ReturnType<typeof eq>[] = [
+  // Use a 90-day window; fall back to most-recent works if nothing falls in the window
+  // (platform is still growing — a strict 7-day window returns nothing when no one uploaded this week)
+  const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
+  const creatorFields = {
+    id: users.id, name: users.name, artistHandle: users.artistHandle,
+    profilePhotoUrl: users.profilePhotoUrl, aiDisclosure: users.aiDisclosure,
+    primaryGenre: users.primaryGenre, stripeAccountStatus: users.stripeAccountStatus,
+    role: users.role,
+  };
+  const baseConditions: ReturnType<typeof eq>[] = [
     eq(songs.isPublic, true) as ReturnType<typeof eq>,
     eq(songs.status, "Published") as ReturnType<typeof eq>,
-    sql`${songs.createdAt} >= ${sevenDaysAgo}` as unknown as ReturnType<typeof eq>,
   ];
-  if (opts?.genre) conditions.push(eq(songs.genre, opts.genre) as ReturnType<typeof eq>);
+  if (opts?.genre) baseConditions.push(eq(songs.genre, opts.genre) as ReturnType<typeof eq>);
   if (opts?.contentType === "written") {
-    conditions.push(or(eq(songs.contentType, "manuscript"), eq(songs.contentType, "comic")) as unknown as ReturnType<typeof eq>);
+    baseConditions.push(or(eq(songs.contentType, "manuscript"), eq(songs.contentType, "comic")) as unknown as ReturnType<typeof eq>);
   } else if (opts?.contentType) {
-    conditions.push(eq(songs.contentType, opts.contentType) as ReturnType<typeof eq>);
+    baseConditions.push(eq(songs.contentType, opts.contentType) as ReturnType<typeof eq>);
   }
-  return db.select({
-    song: songs,
-    creator: {
-      id: users.id, name: users.name, artistHandle: users.artistHandle,
-      profilePhotoUrl: users.profilePhotoUrl, aiDisclosure: users.aiDisclosure,
-      primaryGenre: users.primaryGenre, stripeAccountStatus: users.stripeAccountStatus,
-      role: users.role,
-    },
-  })
+  // First attempt: 90-day window, newest first
+  const windowConditions = [
+    ...baseConditions,
+    sql`${songs.createdAt} >= ${ninetyDaysAgo}` as unknown as ReturnType<typeof eq>,
+  ];
+  const windowResults = await db.select({ song: songs, creator: creatorFields })
     .from(songs)
     .leftJoin(users, eq(songs.userId, users.id))
-    .where(and(...conditions))
-    .orderBy(desc(songs.playCount), desc(songs.createdAt))
+    .where(and(...windowConditions))
+    .orderBy(desc(songs.createdAt))
+    .limit(limit);
+  if (windowResults.length > 0) return windowResults;
+  // Fallback: return the most recently registered works (no time restriction)
+  return db.select({ song: songs, creator: creatorFields })
+    .from(songs)
+    .leftJoin(users, eq(songs.userId, users.id))
+    .where(and(...baseConditions))
+    .orderBy(desc(songs.createdAt))
     .limit(limit);
 }
 
