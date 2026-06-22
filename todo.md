@@ -5411,3 +5411,5 @@
 - [x] Creator Card: reorder hierarchy - Creator > Bio > Works Count > Genres
 - [x] Creator Card: increase spacing/padding for typography readability
 - [x] Creator Card: add hover animation to View Profile button (glow/shimmer/arrow)
+- [x] Song Page: Move Reactions/Activity/Related to upper-right column
+- [x] Song Page: Fix artwork parallax scroll shift
