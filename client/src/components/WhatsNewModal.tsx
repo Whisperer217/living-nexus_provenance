@@ -10,14 +10,23 @@ import {
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 
-const CURRENT_VERSION = "v2.48.0";
+const CURRENT_VERSION = "v2.49.0";
 const STORAGE_KEY = `living-nexus-whats-new-seen-${CURRENT_VERSION}`;
 
 const UPDATES = [
   {
+    version: "v2.49.0",
+    date: "Jun 22, 2026",
+    label: "Latest",
+    items: [
+      { icon: Zap, text: "Hamburger menu fix — Tapping the menu icon on Android was freezing the entire app. Root cause: the overlay system was setting touchAction:none on document.body, which kills all touch events in Android Chrome. Fixed — menus, buttons, and drawers are fully responsive again." },
+      { icon: Shield, text: "Pull to Refresh stability — The PTR gesture no longer interferes with any other touch interactions. All event listeners are now scoped to the scroll container only, never the document." },
+    ],
+  },
+  {
     version: "v2.48.0",
     date: "Jun 21, 2026",
-    label: "Latest",
+    label: "",
     items: [
       { icon: TrendingUp, text: "Pull to Refresh — On mobile, drag down from the top of any page to refresh the feed. A comet-chasing-its-tail animation marks the gesture. Works on Home, Explore, Witness Registry, and My Archive." },
       { icon: Zap, text: "Trending This Week rebuilt — The algorithm now counts only plays and likes from the last 7 days using the live event log, not all-time totals. Newly uploaded works with real weekly momentum will surface correctly. Both the Home feed and Explore → Trending now share the same data window." },
