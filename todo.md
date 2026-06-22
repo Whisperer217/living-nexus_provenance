@@ -5474,3 +5474,7 @@
 - [x] Fix overlayController single-panel race: when menu opens while player-expanded is active, closing the menu calls overlayClose("menu") which is a no-op (player-expanded is active panel), leaving body.overlay-active-full + position:fixed stuck on the body — screen frozen
 - [x] Replace single-panel model with reference-counted stack so each panel independently locks/unlocks scroll
 - [x] Fix z-index bleed: MobilePlayerLayer BottomNavBar/MiniBar/ExpandedSheet used hardcoded z-9000/9001/9010 — sitting above MobileNavDrawer (z-450) and MOBILE_HEADER (z-300), blocking all touch events on the drawer. Fixed to z-90/91/500 per registry hierarchy.
+
+## Strip to Bone — Mobile Nav Casualty Assessment (Jun 22 2026)
+- [x] Build /diag/strip-to-bone diagnostic page — zero nav infrastructure, raw React only, timestamped event log, body state monitor
+- [x] Wire as standalone route in App.tsx (outside MainLayout, no PlayerProvider, no overlayController)

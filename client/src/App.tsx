@@ -62,6 +62,7 @@ const PlaylistsPage = lazy(() => import("./pages/PlaylistsPage"));
 const NotificationsPage = lazy(() => import("./pages/NotificationsPage"));
 const WitnessRegistryPage = lazy(() => import("./pages/WitnessRegistryPage"));
 const DownloadPage = lazy(() => import("./pages/DownloadPage"));
+const StripToBone = lazy(() => import("./pages/StripToBone"));
 const FoundersPage = lazy(() => import("./pages/FoundersPage"));
 const FounderEraPage = lazy(() => import("./pages/FounderEraPage"));
 const ArtworkNormalizationPage = lazy(() => import("./pages/ArtworkNormalizationPage"));
@@ -169,6 +170,8 @@ function Router() {
         <Route path="/verify" component={VerifyPage} />
         <Route path="/verify/:witnessId" component={VerifyPage} />
         <Route path="/download" component={DownloadPage} />
+        {/* DIAGNOSTIC — Strip to Bone: zero nav infrastructure, raw React only */}
+        <Route path="/diag/strip-to-bone" component={StripToBone} />
 
         {/* App pages inside MainLayout */}
         <Route>
