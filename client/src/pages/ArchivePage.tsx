@@ -17,7 +17,7 @@ import {
   Music, Upload, Globe, EyeOff, Eye, Pencil, ExternalLink,
   Play, ListMusic, Trash2, GripVertical, Shield, CheckSquare, Square,
   Download, Lock, Coins, Layers, AlertTriangle, X,
-  Library, ChevronRight, Layers2,
+  Library, ChevronRight, Layers2, Search,
 } from "lucide-react";
 import { EditTrackPanel } from "@/components/EditTrackPanel";
 import { getLoginUrl } from "@/const";
@@ -310,6 +310,7 @@ export default function ArchivePage() {
   const [statusFilter, setStatusFilter] = useState<"All" | "Published" | "Draft" | "Deleted">("All");
   const [missingArtFilter, setMissingArtFilter] = useState(false);
   const [sortBy, setSortBy] = useState<"newest" | "oldest" | "title">("newest");
+  const [trackSearch, setTrackSearch] = useState("");
 
   const buildTrack = (song: any) => ({
     id: String(song.id),
@@ -519,6 +520,10 @@ export default function ArchivePage() {
     }
     if (missingArtFilter) {
       list = list.filter((s: any) => !s.coverArtUrl);
+    }
+    if (trackSearch.trim()) {
+      const q = trackSearch.trim().toLowerCase();
+      list = list.filter((s: any) => (s.title ?? "").toLowerCase().includes(q));
     }
     if (sortBy === "newest") {
       list.sort((a: any, b: any) => new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime());
@@ -804,6 +809,31 @@ export default function ArchivePage() {
         {/* ── Filter + Sort bar ─────────────────────────────────── */}
         {activeTab === "tracks" && !songsLoading && displaySongs.length > 0 && (
           <div className="flex flex-wrap items-center gap-2 mb-3">
+            {/* Search box */}
+            <div className="relative flex items-center" style={{ minWidth: 180, maxWidth: 260, flex: "1 1 180px" }}>
+              <Search className="absolute left-2.5 w-3.5 h-3.5 pointer-events-none" style={{ color: "var(--ln-smoke)" }} />
+              <input
+                type="text"
+                value={trackSearch}
+                onChange={e => setTrackSearch(e.target.value)}
+                placeholder="Search my works…"
+                className="w-full pl-8 pr-7 py-1.5 rounded-lg text-xs outline-none transition-all"
+                style={{
+                  background: "rgba(255,255,255,0.05)",
+                  border: trackSearch ? "1px solid rgba(196,154,40,0.45)" : "1px solid rgba(255,255,255,0.1)",
+                  color: "#E2E8F0",
+                }}
+              />
+              {trackSearch && (
+                <button
+                  onClick={() => setTrackSearch("")}
+                  className="absolute right-2 flex items-center justify-center w-4 h-4 rounded-full transition-opacity hover:opacity-100 opacity-60"
+                  style={{ color: "var(--ln-smoke)" }}
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              )}
+            </div>
             {/* Status filter pills */}
             <div className="flex items-center gap-1 flex-wrap">
               {(["All", "Published", "Draft", "Deleted"] as const).map((f) => {
@@ -1041,7 +1071,14 @@ export default function ArchivePage() {
           <div className="space-y-2">
             {filteredSongs.length === 0 && (
               <div className="text-center py-10 rounded-xl" style={{ background: "var(--ln-coal)", border: "1px dashed rgba(255,255,255,0.08)" }}>
-                <p className="text-sm" style={{ color: "var(--ln-smoke)" }}>No tracks match the current filter.</p>
+                {trackSearch.trim() ? (
+                  <>
+                    <p className="text-sm mb-1" style={{ color: "var(--ln-smoke)" }}>No works found for “{trackSearch.trim()}”</p>
+                    <button onClick={() => setTrackSearch("")} className="text-xs underline" style={{ color: "var(--ln-gold)" }}>Clear search</button>
+                  </>
+                ) : (
+                  <p className="text-sm" style={{ color: "var(--ln-smoke)" }}>No tracks match the current filter.</p>
+                )}
               </div>
             )}
             {filteredSongs.map((song: any, idx: number) => {

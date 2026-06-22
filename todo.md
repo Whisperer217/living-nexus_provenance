@@ -5402,3 +5402,4 @@
 
 - [x] BUG: Trending This Week on home page not visibly updating after trending algorithm fix — investigate whether 7-day windowed query returns stale/flat data or scoring weights produce no visible re-ordering
 - [x] BUG (CRITICAL): Edit Works on a Song Page causes full page lock-up / browser unresponsive — requires closing tab to recover. Reproducible on "The (Beat)itudes" and "Tunnel Vision (Symphonic Power Metal)". Also: searching for "The (Beat)itudes" in the archive after a fresh session returned "Page Unresponsive" without loading song content.
+- [x] Add search box to My Works/My Tracks section of ArchivePage — beside the status filter select, filters the displayed tracks by title in real-time
