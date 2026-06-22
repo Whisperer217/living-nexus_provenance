@@ -2539,3 +2539,54 @@ h1, h2, h3, h4, h5, h6,
   animation: lnSkeletonSweep 1.6s ease-in-out infinite;
   border-radius: 6px;
 }
+
+/* ══════════════════════════════════════════════════════════════════
+   CREATOR CARD CTA — View Profile button hover animation
+   Gold shimmer sweep + arrow nudge on hover
+   ══════════════════════════════════════════════════════════════════ */
+@keyframes creatorCtaShimmer {
+  0%   { background-position: -320px 0; }
+  100% { background-position: 320px 0; }
+}
+
+.creator-card-cta {
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
+}
+
+.creator-card-cta::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(196, 154, 40, 0.18) 50%,
+    transparent 100%
+  );
+  background-size: 640px 100%;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.creator-card-cta:hover {
+  border-color: rgba(196, 154, 40, 0.55) !important;
+  box-shadow: 0 0 14px rgba(196, 154, 40, 0.22), 0 0 0 1px rgba(196, 154, 40, 0.12);
+  color: #D4A84B !important;
+}
+
+.creator-card-cta:hover::after {
+  opacity: 1;
+  animation: creatorCtaShimmer 1.2s ease-in-out infinite;
+}
+
+.creator-card-cta:hover .creator-card-cta-icon {
+  transform: translateX(2px);
+  transition: transform 0.2s ease;
+}
+
+.creator-card-cta .creator-card-cta-icon {
+  transition: transform 0.2s ease;
+}

@@ -3,21 +3,19 @@
  * ─────────────────────────────────────────────────────────────────────────────
  * Renders a creator's handle as a styled interactive chip.
  *
- * Desktop: hover → mini profile card floats above the chip via a React portal
+ * Desktop: hover → creator card floats above/below the chip via a React portal
  * Mobile:  tap   → same card appears, tap outside to dismiss
  *
  * The pop-up is rendered via createPortal(…, document.body) so it escapes
  * any overflow-hidden ancestor (e.g. TrackCard, WorkCarousel cards).
  * Position is calculated from getBoundingClientRect on the chip element.
  *
- * Props:
- *   userId      — numeric user ID (required for pop-up data fetch)
- *   handle      — artistHandle string (e.g. "picklesmith")
- *   displayName — fallback display text if handle is null
- *   role        — "founder" | "admin" | "user" — controls badge
- *   size        — "sm" | "md" (default "sm")
- *   noPopup     — disable the pop-up (e.g. inside the pop-up itself)
- *   className   — extra class names
+ * Card hierarchy (Slimdoggy v2):
+ *   1. Creator identity — avatar + name + role badge + works count
+ *   2. Bio — 3 lines max, creator-mission focused
+ *   3. Works count — already in header, reinforced visually
+ *   4. Genres — single line, max 3, de-emphasised
+ *   5. View Profile CTA — full-width, gold shimmer on hover
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
@@ -43,6 +41,29 @@ interface PopupPos {
   left: number;
   /** true → render above the chip; false → render below */
   above: boolean;
+  /** anchor x of the chip centre — used to clamp the card */
+  anchorX: number;
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+/** Parse the primaryGenre field — may be a comma-separated string or JSON array */
+function parseGenres(raw: string | null | undefined): string[] {
+  if (!raw) return [];
+  // Try JSON array first
+  if (raw.trim().startsWith("[")) {
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed.map(String).filter(Boolean);
+    } catch {
+      // fall through
+    }
+  }
+  // Comma-separated string
+  return raw
+    .split(",")
+    .map(g => g.trim())
+    .filter(Boolean);
 }
 
 // ── Mini pop-up card (portal-rendered) ───────────────────────────────────────
@@ -61,7 +82,6 @@ function CreatorMiniCard({
   onMouseEnter: () => void;
   onMouseLeave: () => void;
   navigate: (to: string) => void;
-  /** ref forwarded so the parent's outside-click handler can exclude this node */
   cardRef: React.RefObject<HTMLDivElement | null>;
 }) {
   const { data, isLoading } = trpc.profile.getCreatorMini.useQuery(
@@ -69,16 +89,13 @@ function CreatorMiniCard({
     { staleTime: 60_000 }
   );
 
-  // Always navigate by numeric ID — CreatorProfilePage uses parseInt(id) to query the DB.
-  // Using artistHandle (a string) causes parseInt to return NaN → "Creator not found".
   const profileUrl = `/creator/${data?.id ?? userId}`;
 
-  const CARD_WIDTH = 256; // w-64
+  const CARD_WIDTH = 320; // wider than before — banner-width feel
 
-  // Clamp left so the card never overflows the viewport
   const viewportWidth = typeof window !== "undefined" ? window.innerWidth : 1024;
   const clampedLeft = Math.min(
-    Math.max(8, pos.left - CARD_WIDTH / 2),
+    Math.max(8, pos.anchorX - CARD_WIDTH / 2),
     viewportWidth - CARD_WIDTH - 8
   );
 
@@ -88,14 +105,21 @@ function CreatorMiniCard({
     width: CARD_WIDTH,
     left: clampedLeft,
     ...(pos.above
-      ? { bottom: `calc(100vh - ${pos.top}px + 6px)` }
-      : { top: pos.top + 6 }),
-    background: "var(--ln-coal)",
-    border: "1px solid rgba(196,154,40,0.25)",
-    boxShadow: "0 8px 32px rgba(0,0,0,0.6), 0 0 0 1px rgba(196,154,40,0.1)",
-    borderRadius: "0.75rem",
+      ? { bottom: `calc(100vh - ${pos.top}px + 8px)` }
+      : { top: pos.top + 8 }),
+    background: "linear-gradient(160deg, #111111 0%, #0a0a0a 100%)",
+    border: "1px solid rgba(196,154,40,0.28)",
+    boxShadow:
+      "0 12px 40px rgba(0,0,0,0.75), 0 0 0 1px rgba(196,154,40,0.08), 0 0 24px rgba(196,154,40,0.06)",
+    borderRadius: "1rem",
     overflow: "hidden",
   };
+
+  const isFounder = data?.role === "founder";
+  const isAdmin = data?.role === "admin";
+
+  const genres = parseGenres(data?.primaryGenre).slice(0, 3);
+  const publishedCount = data?.publishedCount ?? 0;
 
   return createPortal(
     <div
@@ -106,24 +130,33 @@ function CreatorMiniCard({
       onMouseLeave={onMouseLeave}
     >
       {isLoading ? (
-        <div className="p-4 flex items-center justify-center">
-          <div
-            className="w-5 h-5 rounded-full border-2 border-t-transparent animate-spin"
-            style={{ borderColor: "rgba(196,154,40,0.4)", borderTopColor: "transparent" }}
-          />
+        /* ── Loading state ── */
+        <div className="p-5 flex flex-col gap-3">
+          <div className="flex items-center gap-3">
+            <div className="ln-skeleton w-12 h-12 rounded-full flex-shrink-0" />
+            <div className="flex-1 flex flex-col gap-2">
+              <div className="ln-skeleton h-4 w-32 rounded" />
+              <div className="ln-skeleton h-3 w-20 rounded" />
+            </div>
+          </div>
+          <div className="ln-skeleton h-3 w-full rounded" />
+          <div className="ln-skeleton h-3 w-4/5 rounded" />
+          <div className="ln-skeleton h-8 w-full rounded-lg mt-1" />
         </div>
       ) : data ? (
         <>
-          {/* Header row */}
-          <div className="flex items-center gap-3 p-3 pb-2">
+          {/* ── 1. IDENTITY HEADER ── */}
+          <div className="flex items-start gap-3 px-4 pt-4 pb-3">
             {/* Avatar */}
             <div
-              className="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-sm font-bold overflow-hidden"
+              className="w-12 h-12 rounded-full flex-shrink-0 flex items-center justify-center text-base font-bold overflow-hidden"
               style={{
                 background: data.profilePhotoUrl
                   ? "transparent"
-                  : "linear-gradient(135deg, #7C3AED, #A78BFA)",
-                color: "#fff",
+                  : "linear-gradient(135deg, rgba(196,154,40,0.3), rgba(196,154,40,0.1))",
+                color: "var(--ln-gold)",
+                border: "1.5px solid rgba(196,154,40,0.3)",
+                boxShadow: "0 0 12px rgba(196,154,40,0.12)",
               }}
             >
               {data.profilePhotoUrl ? (
@@ -137,20 +170,25 @@ function CreatorMiniCard({
               )}
             </div>
 
-            {/* Name + handle */}
+            {/* Name + handle + works count */}
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-1.5 flex-wrap">
+              {/* Row 1: name + badge */}
+              <div className="flex items-center gap-2 flex-wrap mb-0.5">
                 <span
-                  className="font-semibold text-sm truncate"
-                  style={{ color: "#E2E8F0" }}
+                  className="font-bold text-sm leading-tight"
+                  style={{
+                    color: "#EDE5D0",
+                    fontFamily: "'Cinzel', serif",
+                    letterSpacing: "0.02em",
+                  }}
                 >
                   {data.name || data.artistHandle || "Creator"}
                 </span>
-                {data.role === "founder" && (
+                {isFounder && (
                   <span
-                    className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[8px] font-bold tracking-widest flex-shrink-0"
+                    className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold tracking-widest flex-shrink-0"
                     style={{
-                      background: "rgba(245,196,81,0.15)",
+                      background: "rgba(245,196,81,0.14)",
                       color: "#F5C451",
                       border: "1px solid rgba(245,196,81,0.35)",
                     }}
@@ -159,11 +197,11 @@ function CreatorMiniCard({
                     FOUNDER
                   </span>
                 )}
-                {data.role === "admin" && (
+                {isAdmin && !isFounder && (
                   <span
-                    className="inline-flex items-center px-1.5 py-0.5 rounded text-[8px] font-bold tracking-widest flex-shrink-0"
+                    className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold tracking-widest flex-shrink-0"
                     style={{
-                      background: "rgba(239,68,68,0.15)",
+                      background: "rgba(239,68,68,0.14)",
                       color: "#F87171",
                       border: "1px solid rgba(239,68,68,0.3)",
                     }}
@@ -172,108 +210,117 @@ function CreatorMiniCard({
                   </span>
                 )}
               </div>
-              {data.artistHandle && (
-                <div
-                  className="text-[11px] truncate"
-                  style={{ color: "var(--ln-gold)" }}
-                >
-                  @{data.artistHandle}
-                </div>
-              )}
+
+              {/* Row 2: handle + works count */}
+              <div className="flex items-center justify-between gap-2">
+                {data.artistHandle && (
+                  <span
+                    className="text-[11px] font-medium"
+                    style={{ color: "var(--ln-gold)", letterSpacing: "0.01em" }}
+                  >
+                    @{data.artistHandle}
+                  </span>
+                )}
+                {publishedCount > 0 && (
+                  <span
+                    className="flex items-center gap-1 text-[11px] font-semibold flex-shrink-0"
+                    style={{ color: "rgba(196,154,40,0.75)" }}
+                  >
+                    <Music className="w-3 h-3" />
+                    {publishedCount} {publishedCount === 1 ? "Work" : "Works"}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
 
-          {/* Bio snippet */}
+          {/* ── Divider ── */}
+          <div style={{ height: "1px", background: "rgba(196,154,40,0.10)", margin: "0 16px" }} />
+
+          {/* ── 2. BIO ── */}
           {data.bio && (
-            <div className="px-3 pb-2">
+            <div className="px-4 pt-3 pb-2">
               <p
-                className="text-[11px] leading-relaxed line-clamp-2"
-                style={{ color: "#94A3B8" }}
+                className="text-[12px] leading-[1.7] line-clamp-3"
+                style={{ color: "rgba(237,229,208,0.72)" }}
               >
                 {data.bio}
               </p>
             </div>
           )}
 
-          {/* Witness Identity glimpse */}
+          {/* ── 3. WITNESS IDENTITY glimpse (optional) ── */}
           {(data.witnessEpitaph || data.witnessPhilosophy) && (
-            <div className="mx-3 mb-2 p-2 rounded-lg" style={{ background: "rgba(196,154,40,0.06)", border: "1px solid rgba(196,154,40,0.12)" }}>
-              <div className="flex items-center gap-1 mb-1">
-                <Fingerprint className="w-2.5 h-2.5" style={{ color: "var(--ln-gold)" }} />
-                <span className="text-[8px] font-bold tracking-widest" style={{ color: "var(--ln-gold)" }}>WITNESS IDENTITY</span>
+            <div
+              className="mx-4 mb-3 px-3 py-2 rounded-lg"
+              style={{
+                background: "rgba(196,154,40,0.05)",
+                border: "1px solid rgba(196,154,40,0.12)",
+              }}
+            >
+              <div className="flex items-center gap-1.5 mb-1">
+                <Fingerprint className="w-3 h-3 flex-shrink-0" style={{ color: "var(--ln-gold)" }} />
+                <span
+                  className="text-[9px] font-bold tracking-widest"
+                  style={{ color: "var(--ln-gold)" }}
+                >
+                  WITNESS IDENTITY
+                </span>
               </div>
-              <p className="text-[10px] leading-relaxed line-clamp-2 italic" style={{ color: "rgba(196,154,40,0.7)" }}>
-                {data.witnessEpitaph ? `"${data.witnessEpitaph}"` : data.witnessPhilosophy}
+              <p
+                className="text-[11px] leading-relaxed line-clamp-2 italic"
+                style={{ color: "rgba(196,154,40,0.65)" }}
+              >
+                {data.witnessEpitaph
+                  ? `"${data.witnessEpitaph}"`
+                  : data.witnessPhilosophy}
               </p>
             </div>
           )}
 
-          {/* View Identity Page link */}
-          {(data.witnessPhilosophy || data.witnessOriginStory || data.witnessDoctrine) && (
-            <div className="px-3 pb-1">
-              <button
-                onPointerDown={e => e.stopPropagation()}
-                onClick={e => { e.stopPropagation(); navigate(`/identity/${data.id ?? userId}`); onClose(); }}
-                className="flex items-center gap-1 text-[9px] font-semibold tracking-wider transition-all hover:opacity-80"
-                style={{ color: "var(--ln-gold)" }}
-              >
-                <Fingerprint className="w-2.5 h-2.5" /> VIEW FULL IDENTITY
-              </button>
+          {/* ── 4. GENRES — single line, max 3, de-emphasised ── */}
+          {genres.length > 0 && (
+            <div className="px-4 pb-3 flex items-center gap-1.5 flex-wrap">
+              {genres.map(g => (
+                <span
+                  key={g}
+                  className="text-[10px] px-2 py-0.5 rounded-full"
+                  style={{
+                    background: "rgba(196,154,40,0.07)",
+                    color: "rgba(196,154,40,0.55)",
+                    border: "1px solid rgba(196,154,40,0.14)",
+                    letterSpacing: "0.01em",
+                  }}
+                >
+                  {g}
+                </span>
+              ))}
             </div>
           )}
 
-          {/* Stats row */}
-          <div className="px-3 pb-2 flex items-center gap-3">
-            {data.primaryGenre && (
-              <span
-                className="text-[10px] px-2 py-0.5 rounded-full"
-                style={{
-                  background: "rgba(196,154,40,0.1)",
-                  color: "var(--ln-gold)",
-                  border: "1px solid rgba(196,154,40,0.2)",
-                }}
-              >
-                {data.primaryGenre}
-              </span>
-            )}
-            {(data.songSlotsUsed ?? 0) > 0 && (
-              <span
-                className="flex items-center gap-1 text-[10px]"
-                style={{ color: "#64748B" }}
-              >
-                <Music className="w-3 h-3" />
-                {data.songSlotsUsed} works
-              </span>
-            )}
-          </div>
-
-          {/* CTA — navigate FIRST, then close so the route change isn't cancelled */}
-          <div className="px-3 pb-3">
+          {/* ── 5. VIEW PROFILE CTA ── */}
+          <div className="px-4 pb-4">
             <button
-              onPointerDown={e => {
-                // Prevent the document mousedown/pointerdown outside-click handler
-                // from firing before this button's click handler runs.
-                e.stopPropagation();
-              }}
+              onPointerDown={e => e.stopPropagation()}
               onClick={e => {
                 e.stopPropagation();
                 navigate(profileUrl);
                 onClose();
               }}
-              className="flex items-center justify-center gap-1.5 w-full py-1.5 rounded-lg text-xs font-semibold transition-all hover:brightness-110 active:scale-95"
+              className="creator-card-cta flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-[12px] font-semibold tracking-wide transition-all"
               style={{
-                background: "rgba(196,154,40,0.15)",
+                background: "rgba(196,154,40,0.12)",
                 color: "var(--ln-gold)",
                 border: "1px solid rgba(196,154,40,0.3)",
               }}
             >
-              <ExternalLink className="w-3 h-3" />
+              <ExternalLink className="w-3.5 h-3.5 creator-card-cta-icon" />
               View Profile
             </button>
           </div>
         </>
       ) : (
-        <div className="p-4 text-xs text-center" style={{ color: "#64748B" }}>
+        <div className="p-5 text-xs text-center" style={{ color: "#64748B" }}>
           Profile unavailable
         </div>
       )}
@@ -297,13 +344,9 @@ export function CreatorHandle({
   const chipRef = useRef<HTMLSpanElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  // navigate is captured here (inside the Router context) and passed to the
-  // portal-rendered CreatorMiniCard, which is outside the Router subtree.
   const [, navigate] = useLocation();
 
   const label = handle ? `@${handle}` : (displayName ?? "Unknown");
-  // Always use numeric userId for navigation — CreatorProfilePage uses parseInt(id).
-  // Passing the handle string causes parseInt to return NaN → "Creator not found".
   const profileUrl = userId ? `/creator/${userId}` : undefined;
 
   const isFounder = role === "founder";
@@ -315,12 +358,13 @@ export function CreatorHandle({
     if (closeTimer.current) clearTimeout(closeTimer.current);
 
     const rect = chipRef.current.getBoundingClientRect();
-    const CARD_HEIGHT_APPROX = 220;
+    const CARD_HEIGHT_APPROX = 260;
     const above = rect.top > CARD_HEIGHT_APPROX + 16;
 
     setPopupPos({
       top: above ? rect.top : rect.bottom,
       left: rect.left + rect.width / 2,
+      anchorX: rect.left + rect.width / 2,
       above,
     });
     setOpen(true);
@@ -349,7 +393,6 @@ export function CreatorHandle({
         setPopupPos(null);
       }
     };
-    // Use capture so we see the event before stopPropagation on inner elements
     document.addEventListener("mousedown", handler, true);
     document.addEventListener("touchstart", handler, { capture: true, passive: true });
     return () => {
@@ -358,7 +401,7 @@ export function CreatorHandle({
     };
   }, [open]);
 
-  // Close on scroll (repositioning would be complex; just close)
+  // Close on scroll
   useEffect(() => {
     if (!open) return;
     const handler = () => {
@@ -372,7 +415,6 @@ export function CreatorHandle({
   const handleClick = useCallback(
     (e: React.MouseEvent) => {
       if (noPopup || !userId) return;
-      // On touch devices, toggle pop-up instead of navigating
       if (window.matchMedia("(hover: none)").matches) {
         e.preventDefault();
         if (open) {

@@ -5433,3 +5433,14 @@
 - [x] Always log to console (name, message, stack, componentStack) so .manus-logs/browserConsole.log captures every crash
 - [x] Inline variant updated to show the same diagnostic summary line
 - [x] LN palette applied to full-page variant (coal background, gold border, Cinzel header)
+
+## Creator Card Pop-out Redesign (Slimdoggy v2)
+- [x] Expand card width from 256px to 320px — banner-width feel
+- [x] Hierarchy: Creator identity header → Bio (3 lines) → Witness Identity glimpse → Genres (max 3, de-emphasised) → View Profile CTA
+- [x] Works count moved to identity header row beside handle (@handle · N Works)
+- [x] Bio expanded to line-clamp-3 (was 2)
+- [x] Genres capped at 3, rendered as small de-emphasised chips (opacity 0.55 vs 1.0)
+- [x] parseGenres() helper handles both comma-string and JSON-array primaryGenre values
+- [x] Loading state replaced with ln-skeleton shimmer blocks matching card layout
+- [x] View Profile CTA: full-width rounded-xl, gold shimmer sweep on hover (creatorCtaShimmer keyframe), ExternalLink icon nudges right 2px on hover
+- [x] LN palette: coal gradient background, Cinzel name font, gold border/glow
