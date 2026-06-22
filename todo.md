@@ -5420,3 +5420,8 @@
 - [x] Verify ArchivePage.tsx — utils at line 282 is already before all useMutation hooks (line 369+), no TDZ risk
 - [x] Verify ExplorePage.tsx and HomePage.tsx — neither has useMutation hooks, no TDZ risk
 - [x] Add global window.addEventListener("error") and window.addEventListener("unhandledrejection") handlers to main.tsx for better crash visibility in .manus-logs/browserConsole.log
+
+## SongDetailPage Loading Skeleton
+- [x] Create SongDetailPageSkeleton component (client/src/components/SongDetailPageSkeleton.tsx) — pixel-accurate shimmer matching the real two-column layout: square cover art, play button, stats row, title/chips, reactions panel, activity panel, WID provenance panel
+- [x] Add ln-skeleton CSS class to index.css — gold-tinted shimmer sweep animation (lnSkeletonSweep keyframe, 1.6s ease-in-out, Living Nexus coal/gold palette)
+- [x] Wire skeleton into SongDetailPage — replace spinner with <SongDetailPageSkeleton /> on isLoading

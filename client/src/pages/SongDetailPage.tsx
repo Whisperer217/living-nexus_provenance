@@ -45,6 +45,7 @@ import { QRShareModal } from "@/components/QRIdentityCard";
 import { CinematicComicReader, type BookPage } from "@/components/reader/CinematicComicReader";
 import { CreatorHandle } from "@/components/CreatorHandle";
 import { EditTrackPanel } from "@/components/EditTrackPanel";
+import { SongDetailPageSkeleton } from "@/components/SongDetailPageSkeleton";
 
 // Slug keys stored in DB (safe ASCII, no charset issues); emoji shown in UI
 const REACTION_SLUGS = ["fire", "love", "wow", "clap", "thumbsup", "thumbsdown", "mindblown", "+"];
@@ -374,14 +375,7 @@ export default function SongDetailPage() {
     setShareOpen(false);
   };
 
-  if (isLoading) return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--ln-coal)" }}>
-      <div className="text-center space-y-3">
-        <div className="w-16 h-16 rounded-2xl mx-auto animate-pulse" style={{ background: "rgba(196,154,40,0.15)" }} />
-        <p className="text-sm" style={{ color: "var(--ln-smoke)" }}>Loading track...</p>
-      </div>
-    </div>
-  );
+  if (isLoading) return <SongDetailPageSkeleton />;
 
   if (!song || !songData) return (
     <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--ln-coal)" }}>
