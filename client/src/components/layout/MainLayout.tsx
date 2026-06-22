@@ -1,27 +1,24 @@
 /* ===================================================================
-   LIVING NEXUS -- MainLayout v6 (Render Layer Separation + Isomorphic Nav)
+   LIVING NEXUS -- MainLayout v7 (Unified Navigation Authority)
 
-   Render Layer Ownership (no shared layout dependencies):
-   - ContentLayer  : scrollable page content (contain: layout paint)
-   - PlayerLayer   : GlobalPlayer + TheaterPlayer (contain: layout paint)
-   - GuideLayer    : FloatingAvatar / KeeperAvatarWidget (contain: layout paint)
-   - DrawerLayer   : ContextDrawer + MobileNavDrawer (portal, contain: layout paint)
-   Each layer: will-change: transform; position: fixed or isolated stacking context
+   NAVIGATION DOCTRINE:
+   - The LeftRail is the sole navigation component across all viewports.
+   - Mobile shows the same LeftRail off-canvas via transform only.
+   - MobileNavDrawer is removed. overlayController is NOT used for nav.
+   - The backdrop in LeftRail owns dismissal only — no body manipulation.
+
+   Render Layer Ownership:
+   - ContentLayer  : scrollable page content
+   - PlayerLayer   : GlobalPlayer + TheaterPlayer
+   - GuideLayer    : FloatingAvatar / KeeperAvatarWidget
    Desktop: LeftRail (72px fixed) + ContextDrawer + MainColumn + RightRail
-   Mobile:  Hamburger + MobileNavDrawer (full-screen portal)
-
-   Navigation Contract:
-   - Desktop: Rail icon → ContextDrawer → navigate
-   - Mobile:  Hamburger → MobileNavDrawer → navigate
-   - TopBar:  NO navigation links (search + actions only)
-   - Single NAV_ITEMS source of truth (shared/navItems.ts)
+   Mobile:  LeftRail (off-canvas) + mobile header (hamburger + logo + bell)
 =================================================================== */
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect } from "react";
 import LeftRail from "@/components/layout/LeftRail";
 import type { NavMode } from "@/components/layout/LeftRail";
 import RightRail from "@/components/layout/RightRail";
 import ContextDrawer from "@/components/layout/ContextDrawer";
-import MobileNavDrawer from "@/components/layout/MobileNavDrawer";
 import { useLocation } from "wouter";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -32,18 +29,15 @@ import TheaterPlayer from "@/components/player/TheaterPlayer";
 import MarketplaceDrawer from "@/components/MarketplaceDrawer";
 import ScrollToTopButton from "@/components/layout/ScrollToTopButton";
 import TopBar from "@/components/layout/TopBar";
-
 import { WhatsNewModal } from "@/components/WhatsNewModal";
 import { trpc } from "@/lib/trpc";
 import { useLightsMode } from "@/contexts/LightsModeContext";
 import { Menu, X, Bell } from "lucide-react";
-import { overlayOpen, overlayCloseAll } from "@/lib/overlayController";
-import { navLog, diagNoAnim, installBodyClassObserver } from "@/lib/navDiag";
 import { Z } from "@/lib/viewportLayers";
 
 const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/HMNMkWUWAfVdTbRj3YmPCF/ln-navbar-icon-180_b914f927.png";
 
-/** Routes where the RightRail is suppressed — must match RightRail.tsx CREATOR_FOCUS_ROUTES */
+/** Routes where the RightRail is suppressed */
 const CREATOR_FOCUS_ROUTES = [
   "/upload",
   "/batch-upload",
@@ -53,7 +47,6 @@ const CREATOR_FOCUS_ROUTES = [
   "/keeper-compose",
   "/admin",
   "/guides/upload",
-  // Transactional Focus State — conversion-critical routes
   "/redeem",
   "/pricing",
   "/checkout",
@@ -65,7 +58,6 @@ const CREATOR_FOCUS_ROUTES = [
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   const [location, navigate] = useLocation();
   const { state } = usePlayer();
-  // Creator Focus Mode: right rail is hidden, content expands to full-width
   const isCreatorFocus = CREATOR_FOCUS_ROUTES.some(
     (r) => location === r || location.startsWith(r + "/") || location.startsWith(r + "?")
   ) || location.includes("/studio");
@@ -75,52 +67,33 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   // ── Desktop: ContextDrawer two-state model ──────────────────────────
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [activeMode, setActiveMode] = useState<NavMode | null>(null);
-  const drawerOpenRef = useRef(drawerOpen);
-  const activeModeRef = useRef(activeMode);
-  drawerOpenRef.current = drawerOpen;
-  activeModeRef.current = activeMode;
-  // Rail click: set activeMode + open drawer; clicking same mode toggles visibility
-  // Exclusivity guard: opening the context drawer closes all right-side drawers
-  // (PlaylistDrawer, MarketplaceDrawer) via a custom event so they can self-close.
+
   const handleRailClick = useCallback((mode: NavMode) => {
-    const wasOpen = drawerOpenRef.current;
-    const wasMode = activeModeRef.current;
     setActiveMode(mode);
-    // If already open on the same mode → close; otherwise open + close right drawers
-    if (wasOpen && wasMode === mode) {
+    if (drawerOpen && activeMode === mode) {
       setDrawerOpen(false);
     } else {
       setDrawerOpen(true);
-      // Signal right-side drawers to close so only one drawer surface is active at a time
       window.dispatchEvent(new CustomEvent("ln:close-right-drawers"));
     }
-  }, []);
+  }, [drawerOpen, activeMode]);
 
-  // ── Mobile: MobileNavDrawer state ─────────────────────────────────
+  // ── Mobile: sidebar open state ─────────────────────────────────────
+  // DOCTRINE: This is pure React state. No overlayController. No body lock.
+  // The LeftRail component handles the off-canvas transform presentation.
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  // Install body-class MutationObserver once on mount (diagnostic mode only)
-  useEffect(() => { installBodyClassObserver(); }, []);
 
-  const openMobileMenu = useCallback(() => {
-    navLog("STATE_CHANGE_START", { action: "open", mobileMenuOpen: false });
-    setMobileMenuOpen(true);
-    overlayOpen("menu");
-  }, []);
-  const closeMobileMenu = useCallback(() => {
-    navLog("STATE_CHANGE_START", { action: "close", mobileMenuOpen: true });
+  const openMobileMenu = useCallback(() => setMobileMenuOpen(true), []);
+  const closeMobileMenu = useCallback(() => setMobileMenuOpen(false), []);
+
+  // Close mobile menu on route change
+  useEffect(() => {
     setMobileMenuOpen(false);
-    // Use overlayCloseAll as a safety valve — guarantees body scroll lock is
-    // always released when the menu closes, regardless of which panel the
-    // controller currently considers active. This prevents the freeze where
-    // overlayClose("menu") was a no-op because another panel had taken over
-    // as the active panel while the menu was open.
-    overlayCloseAll();
-  }, []);
+  }, [location]);
 
   // ── What's New modal ───────────────────────────────────────────────
   const [whatsNewOpen, setWhatsNewOpen] = useState(false);
 
-  // Listen for ln:open-whats-new custom event (dispatched by ContextDrawer / MobileNavDrawer)
   useEffect(() => {
     const handler = () => setWhatsNewOpen(true);
     window.addEventListener("ln:open-whats-new", handler);
@@ -142,7 +115,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   });
   const archiveSongCount = mySongs ? mySongs.filter((s: any) => s.status !== "Deleted").length : 0;
 
-  // ── Warm theme tokens (mobile chrome only) ─────────────────────────
+  // ── Warm theme tokens ──────────────────────────────────────────────
   const { mode: lightsMode } = useLightsMode();
   const isWarm = lightsMode === "on";
   const MOBILE_HEADER_BG = isWarm ? "rgba(55,68,85,0.72)" : "rgba(0,0,0,0.97)";
@@ -153,10 +126,16 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       className="noise-overlay flex flex-col h-dvh overflow-hidden bg-background relative"
       style={{ overscrollBehavior: "none" }}
     >
-      {/* ── LeftRail -- fixed 72px column, desktop only ── */}
-      <LeftRail drawerOpen={drawerOpen} activeMode={activeMode} onRailClick={handleRailClick} />
+      {/* ── LeftRail — unified navigation authority (desktop + mobile) ── */}
+      <LeftRail
+        drawerOpen={drawerOpen}
+        activeMode={activeMode}
+        onRailClick={handleRailClick}
+        mobileOpen={mobileMenuOpen}
+        onMobileClose={closeMobileMenu}
+      />
 
-      {/* ── ContextDrawer -- portaled overlay, desktop only ── */}
+      {/* ── ContextDrawer — desktop only ── */}
       <ContextDrawer
         open={drawerOpen}
         activeMode={activeMode}
@@ -164,12 +143,13 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         onOpenWhatsNew={() => setWhatsNewOpen(true)}
       />
 
-      {/* ── TopBar -- desktop only (hidden on mobile) ── */}
+      {/* ── TopBar — desktop only (hidden on mobile) ── */}
       <TopBar archiveSongCount={archiveSongCount} unreadCount={unreadCount as number} />
 
       {/* ==============================================
           MOBILE HEADER (< lg)
-          Hamburger + Logo + Bell
+          Hamburger toggles LeftRail off-canvas state.
+          No overlayController. No body lock.
       ============================================== */}
       <div
         className="lg:hidden fixed top-0 left-0 right-0 flex items-center gap-3 px-4 py-3"
@@ -180,17 +160,14 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           transition: "background 0.4s ease",
         }}
       >
-        {/* Hamburger -- opens MobileNavDrawer */}
+        {/* Hamburger — toggles LeftRail mobile state only */}
         <button
-          onTouchStart={() => navLog("TOUCH_START", { mobileMenuOpen })}
-          onTouchEnd={() => navLog("TOUCH_END", { mobileMenuOpen })}
-          onClick={() => {
-            navLog("HAMBURGER_CLICK", { mobileMenuOpen, bodyClass: document.body.className, dataScrollLocked: document.body.getAttribute("data-scroll-locked") });
-            if (mobileMenuOpen) closeMobileMenu(); else openMobileMenu();
-          }}
+          onClick={mobileMenuOpen ? closeMobileMenu : openMobileMenu}
           className="p-2 rounded-lg transition-all"
-          style={{ color: "rgba(255,255,255,0.6)" }}
-          aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+          style={{ color: "rgba(255,255,255,0.6)", WebkitTapHighlightColor: "transparent" }}
+          aria-label={mobileMenuOpen ? "Close navigation" : "Open navigation"}
+          aria-expanded={mobileMenuOpen}
+          aria-controls="mobile-nav-rail"
         >
           {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
         </button>
@@ -201,12 +178,12 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           <span className="font-display text-base gold-shimmer">Living Nexus</span>
         </div>
 
-        {/* Bell -- opens Notifications page */}
+        {/* Bell */}
         {!!user && (
           <button
             onClick={() => navigate("/notifications")}
             className="relative flex items-center justify-center rounded-lg transition-all"
-            style={{ minWidth: 44, minHeight: 44, color: "rgba(255,255,255,0.4)" }}
+            style={{ minWidth: 44, minHeight: 44, color: "rgba(255,255,255,0.4)", WebkitTapHighlightColor: "transparent" }}
             aria-label="Notifications"
           >
             <Bell size={18} />
@@ -220,20 +197,13 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         )}
       </div>
 
-      {/* ── MobileNavDrawer -- full-screen, portal-based, mobile only ── */}
-      <MobileNavDrawer
-        open={mobileMenuOpen}
-        onClose={closeMobileMenu}
-        onOpenWhatsNew={() => setWhatsNewOpen(true)}
-      />
-
-      {/* ── WSP (Witness Surface Player) -- bottom-floating glass capsule, mobile only ── */}
+      {/* ── WSP (Witness Surface Player) — mobile only ── */}
       <WitnessSurfacePlayer />
 
       {/* ==============================================
           PAGE CONTENT
           Desktop: lg:pl-[72px] to clear LeftRail
-          Mobile:  pt-14 (56px) to clear mobile header only (WSP surface bar removed)
+          Mobile:  pt-14 (56px) to clear mobile header
       ============================================== */}
       <div
         className={`flex-1 flex overflow-hidden pt-14 lg:pt-[56px] ${drawerOpen ? "lg:pl-[372px]" : "lg:pl-[72px]"}`}
@@ -244,16 +214,11 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       >
         <main className="flex-1 flex overflow-hidden" style={{ overscrollBehavior: "none" }}>
           <style>{`
-            /* Desktop: player spans MainColumn only, 110px bottom clearance */
             @media (min-width: 1024px) { .player-scroll-area { padding-bottom: 130px !important; } }
-            /* Tablet md: full-width player, 72px clearance */
             @media (min-width: 768px) and (max-width: 1023px) { .player-scroll-area { padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important; } }
-            /* Mobile: nav (56px + safe-area) + mini player (64px) = full bottom stack */
             @media (max-width: 767px) { .player-scroll-area { padding-bottom: var(--bottom-stack) !important; } }
           `}</style>
 
-          {/* MainColumn -- fluid, scrollable. lg:pr-[300px] reserves space for the fixed RightRail.
-               On creator-focus routes the RightRail is hidden so we remove the right padding. */}
           <div
             className={`flex-1 overflow-y-auto overflow-x-hidden player-scroll-area ${rightRailOpen && !isCreatorFocus ? "lg:pr-[300px]" : ""}`}
             style={{ overscrollBehaviorX: "none", overscrollBehaviorY: "none", touchAction: "pan-y" }}
@@ -263,11 +228,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         </main>
       </div>
 
-      {/* ==============================================
-          PLAYER LAYER -- isolated, no layout dependency
-          GlobalPlayer: desktop floating card + expanded modal (createPortal to body)
-          TheaterPlayer: desktop cinematic theater mode
-      ============================================== */}
+      {/* ── PLAYER LAYER ── */}
       <div
         style={{
           position: "fixed",
@@ -278,33 +239,17 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           zIndex: 0,
         }}
       >
-        {/* GlobalPlayer — desktop floating card + expanded modal (uses createPortal internally, z-9000) */}
-        <div style={{ pointerEvents: "auto" }}>
-          <GlobalPlayer />
-        </div>
-        {/* Theater Player */}
-        <div style={{ pointerEvents: "auto" }}>
-          <TheaterPlayer />
-        </div>
+        <div style={{ pointerEvents: "auto" }}><GlobalPlayer /></div>
+        <div style={{ pointerEvents: "auto" }}><TheaterPlayer /></div>
       </div>
 
-      {/* ==============================================
-          RIGHT RAIL -- fixed, right: 0, z-index: 80
-          Anchored independently so ContextDrawer (z:300) always wins.
-          Content area has lg:pr-[300px] to prevent overlap.
-      ============================================== */}
+      {/* ── RIGHT RAIL ── */}
       <RightRail />
 
-      {/* ==============================================
-          DRAWER LAYER -- portal-based, isolated
-      ============================================== */}
-      {/* Marketplace Drawer */}
+      {/* ── DRAWER LAYER ── */}
       <MarketplaceDrawer />
-
-      {/* Scroll to top */}
       <ScrollToTopButton />
 
-      {/* What's New Modal */}
       {whatsNewOpen && (
         <WhatsNewModal forceOpen={true} onClose={() => setWhatsNewOpen(false)} />
       )}

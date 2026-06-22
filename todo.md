@@ -5478,3 +5478,16 @@
 ## Strip to Bone — Mobile Nav Casualty Assessment (Jun 22 2026)
 - [x] Build /diag/strip-to-bone diagnostic page — zero nav infrastructure, raw React only, timestamped event log, body state monitor
 - [x] Wire as standalone route in App.tsx (outside MainLayout, no PlayerProvider, no overlayController)
+
+## Unified Sidebar Navigation Reconstruction (Jun 22 2026)
+- [x] Audit Sidebar.tsx and MainLayout.tsx — document current structure, state, and mobile/desktop split
+- [x] Rebuild Sidebar with unified mobile/desktop state: sidebarOpen (mobile off-canvas), sidebarCollapsed (desktop icon-only)
+- [x] Mobile: sidebar off-canvas via transform:translateX(-100%) only — no body lock, no position:fixed, no overlayController
+- [x] Desktop: sidebar pinned, collapsible to icon-only mode — unchanged behavior
+- [x] Remove MobileNavDrawer.tsx entirely
+- [x] Remove hamburger-triggered overlayController calls from MainLayout
+- [x] Implement pure backdrop component: semi-transparent div, pointer-events only when sidebar open, onClick=close only, zero body manipulation
+- [x] Clean index.css: nav-related overlay rules preserved for player/dialog use; navigation path fully clean of scroll lock
+- [x] Update MainLayout content padding for unified sidebar width
+- [x] Run pnpm test — 297/297 tests passing
+- [ ] Manual mobile test: play song → open sidebar → navigate → confirm no freeze
