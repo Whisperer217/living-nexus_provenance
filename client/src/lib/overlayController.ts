@@ -1,30 +1,46 @@
 /**
- * LIVING NEXUS — Global Overlay Controller
+ * LIVING NEXUS — Global Overlay Controller v2
  *
  * Single source of truth for:
  *   - Body scroll lock (prevents background scroll when any panel is open)
- *   - Backdrop visibility (one shared backdrop, not per-component)
- *   - Active panel tracking (only one panel open at a time)
+ *   - Active panel tracking (reference-counted stack — multiple panels can
+ *     independently lock/unlock without stepping on each other)
+ *
+ * ── Why reference counting? ──────────────────────────────────────────────────
+ * v1 tracked only ONE active panel. If panel A opened, then panel B opened,
+ * closing panel B would call overlayClose("B") — but if the controller had
+ * already replaced B with A as the active panel (or vice-versa), the guard
+ * `if (_activePanel !== panel) return` made the close a silent no-op.
+ * Result: body.overlay-active-full + position:fixed stayed on the body
+ * permanently → every touch event absorbed → screen frozen, nothing tappable.
+ *
+ * v2 maintains a Set of open panels. The body is locked while ANY panel is
+ * open and unlocked only when ALL panels have been closed. Each panel
+ * independently calls overlayOpen/overlayClose without interfering with others.
  *
  * Usage:
- *   import { overlayOpen, overlayClose, overlayActive } from "@/lib/overlayController";
+ *   import { overlayOpen, overlayClose, overlayCloseAll, overlayActive } from "@/lib/overlayController";
  *
- *   overlayOpen("menu");       // locks scroll, shows backdrop, sets active panel
- *   overlayClose("menu");      // unlocks scroll, hides backdrop (if no other panel open)
- *   overlayActive()            // returns current active panel name or null
- *   overlayIsOpen("menu")      // returns true if this panel is the active one
+ *   overlayOpen("menu");          // locks scroll, adds "menu" to open set
+ *   overlayClose("menu");         // removes "menu"; unlocks only if set is now empty
+ *   overlayCloseAll();            // clears all panels, always unlocks
+ *   overlayActive()               // returns first open panel name or null (legacy compat)
+ *   overlayIsOpen("menu")         // returns true if "menu" is in the open set
  *
  * Panel names (extend as needed):
  *   "menu" | "quickplay" | "player-expanded" | "player-cinematic" | "gift" | "edit-track"
  *
  * Lock modes:
- *   "full"  — full-screen takeover (expanded player, modals): sets overflow:hidden + position:fixed
- *             NOTE: touchAction is intentionally NOT set on body — it kills Android Chrome touch
- *             events for the entire page, making all buttons/menus unresponsive. Individual
- *             overlay components (player, drawer) manage their own touchAction on their own elements.
+ *   "full"  — full-screen takeover (expanded player, modals, menus):
+ *             sets overflow:hidden + position:fixed (iOS Safari rubber-band prevention).
+ *             NOTE: touchAction is intentionally NOT set on body — it kills Android Chrome
+ *             touch events for the entire page. Individual overlay components manage their
+ *             own touchAction on their own container elements.
  *   "light" — transient drag gesture: sets overflow:hidden only.
  *             Use for mini-bar drag-to-expand so the scroll div behind it stays responsive.
  */
+
+import { useState, useEffect } from "react";
 
 type PanelName =
   | "menu"
@@ -40,8 +56,8 @@ type PanelName =
 type LockMode = "full" | "light";
 
 // ── Internal state ──────────────────────────────────────────────────────────
-let _activePanel: PanelName | null = null;
-let _lockMode: LockMode = "full";
+// Reference-counted set: body stays locked while _openPanels.size > 0
+const _openPanels: Map<PanelName, LockMode> = new Map();
 let _savedScrollY = 0; // saved before position:fixed to restore on unlock
 const _listeners: Set<() => void> = new Set();
 
@@ -61,8 +77,11 @@ function _notify() {
 //
 // "light" mode: used for transient drag gestures (mini-bar swipe-up).
 // Only sets overflow:hidden — no position:fixed.
-function _lockScroll(mode: LockMode) {
-  _lockMode = mode;
+function _applyLock() {
+  // Determine the strongest lock mode currently needed
+  const hasFullMode = Array.from(_openPanels.values()).some(m => m === "full");
+  const mode: LockMode = hasFullMode ? "full" : "light";
+
   if (mode === "full") {
     _savedScrollY = window.scrollY;
     document.body.style.overflow = "hidden";
@@ -76,7 +95,6 @@ function _lockScroll(mode: LockMode) {
     );
     if (!hasOpenDialog) {
       document.body.style.top = `-${_savedScrollY}px`;
-      // overlay-active-full adds position:fixed (iOS Safari rubber-band prevention)
       document.body.classList.add("overlay-active", "overlay-active-full");
     } else {
       // Dialog is open — skip position:fixed to avoid breaking modal centering
@@ -89,66 +107,70 @@ function _lockScroll(mode: LockMode) {
   }
 }
 
-function _unlockScroll() {
+function _removeLock() {
   document.body.style.overflow = "";
   // ── DO NOT clear touchAction here — we never set it ──
   document.body.style.top = "";
   document.body.classList.remove("overlay-active", "overlay-active-full");
-  if (_lockMode === "full") {
-    // Restore scroll position — position:fixed resets it to 0
-    window.scrollTo(0, _savedScrollY);
-  }
-  _lockMode = "full"; // reset to default
+  // Restore scroll position — position:fixed resets it to 0
+  window.scrollTo(0, _savedScrollY);
 }
 
 // ── Public API ──────────────────────────────────────────────────────────────
 
 /**
- * Open a panel. Closes any previously open panel first.
- * Locks body scroll and marks the backdrop as visible.
+ * Open a panel. Adds it to the open set and locks body scroll.
+ * Safe to call multiple times for the same panel (idempotent).
  *
  * @param panel  Panel name
  * @param mode   "full" (default) for full-screen overlays; "light" for transient drags
  */
 export function overlayOpen(panel: PanelName, mode: LockMode = "full") {
-  if (_activePanel && _activePanel !== panel) {
-    // Close the previous panel silently (no unlock — we're about to re-lock)
-    _activePanel = null;
-  }
-  _activePanel = panel;
-  _lockScroll(mode);
+  _openPanels.set(panel, mode);
+  _applyLock();
   _notify();
 }
 
 /**
- * Close a specific panel. If it was the active one, unlocks scroll.
- * Calling close on a panel that isn't active is a no-op.
+ * Close a specific panel. Removes it from the open set.
+ * Body scroll is unlocked only when ALL panels have been closed.
+ * Calling close on a panel that was never opened is a safe no-op.
  */
 export function overlayClose(panel: PanelName) {
-  if (_activePanel !== panel) return;
-  _activePanel = null;
-  _unlockScroll();
+  if (!_openPanels.has(panel)) return;
+  _openPanels.delete(panel);
+  if (_openPanels.size === 0) {
+    _removeLock();
+  } else {
+    // Re-apply lock in case the strongest mode changed
+    _applyLock();
+  }
   _notify();
 }
 
 /**
- * Force-close all panels and unlock scroll.
- * Use when navigating away or on unmount cleanup.
+ * Force-close ALL panels and unconditionally unlock scroll.
+ * Use when navigating away, on unmount cleanup, or as a safety valve
+ * when the exact open panel name is unknown (e.g., closeMobileMenu).
  */
 export function overlayCloseAll() {
-  _activePanel = null;
-  _unlockScroll();
+  _openPanels.clear();
+  _removeLock();
   _notify();
 }
 
-/** Returns the name of the currently active panel, or null. */
+/**
+ * Returns the name of the first open panel (insertion order), or null.
+ * Kept for backwards compatibility with components that read overlayActive().
+ */
 export function overlayActive(): PanelName | null {
-  return _activePanel;
+  const first = _openPanels.keys().next();
+  return first.done ? null : first.value;
 }
 
-/** Returns true if the given panel is currently the active one. */
+/** Returns true if the given panel is currently open. */
 export function overlayIsOpen(panel: PanelName): boolean {
-  return _activePanel === panel;
+  return _openPanels.has(panel);
 }
 
 /**
@@ -161,15 +183,13 @@ export function overlaySubscribe(fn: () => void): () => void {
 }
 
 /**
- * React hook — returns the current active panel name.
+ * React hook — returns the current active panel name (first open panel).
  * Re-renders the component whenever the overlay state changes.
  */
-import { useState, useEffect } from "react";
-
 export function useOverlayActive(): PanelName | null {
-  const [active, setActive] = useState<PanelName | null>(_activePanel);
+  const [active, setActive] = useState<PanelName | null>(overlayActive());
   useEffect(() => {
-    return overlaySubscribe(() => setActive(_activePanel));
+    return overlaySubscribe(() => setActive(overlayActive()));
   }, []);
   return active;
 }

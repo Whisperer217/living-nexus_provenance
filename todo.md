@@ -5469,3 +5469,7 @@
 - [x] Fix rgba() unsigned integer overflow bug in harmonicRoute.ts (waveform PNG returns 500 JSON error)
 - [x] Add creator-only auth guard to /api/harmonic/:songId/audio and /api/harmonic/:songId/image
 - [x] Hide Harmonic Signature download buttons from non-creator visitors on SongDetailPage
+
+## Hamburger Menu Freeze — Regression Fix (Jun 22 2026)
+- [x] Fix overlayController single-panel race: when menu opens while player-expanded is active, closing the menu calls overlayClose("menu") which is a no-op (player-expanded is active panel), leaving body.overlay-active-full + position:fixed stuck on the body — screen frozen
+- [x] Replace single-panel model with reference-counted stack so each panel independently locks/unlocks scroll

@@ -37,7 +37,7 @@ import { WhatsNewModal } from "@/components/WhatsNewModal";
 import { trpc } from "@/lib/trpc";
 import { useLightsMode } from "@/contexts/LightsModeContext";
 import { Menu, X, Bell } from "lucide-react";
-import { overlayOpen, overlayClose } from "@/lib/overlayController";
+import { overlayOpen, overlayCloseAll } from "@/lib/overlayController";
 import { Z } from "@/lib/viewportLayers";
 
 const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/HMNMkWUWAfVdTbRj3YmPCF/ln-navbar-icon-180_b914f927.png";
@@ -103,7 +103,12 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   }, []);
   const closeMobileMenu = useCallback(() => {
     setMobileMenuOpen(false);
-    overlayClose("menu");
+    // Use overlayCloseAll as a safety valve — guarantees body scroll lock is
+    // always released when the menu closes, regardless of which panel the
+    // controller currently considers active. This prevents the freeze where
+    // overlayClose("menu") was a no-op because another panel had taken over
+    // as the active panel while the menu was open.
+    overlayCloseAll();
   }, []);
 
   // ── What's New modal ───────────────────────────────────────────────
