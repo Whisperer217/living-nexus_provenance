@@ -38,6 +38,7 @@ import { trpc } from "@/lib/trpc";
 import { useLightsMode } from "@/contexts/LightsModeContext";
 import { Menu, X, Bell } from "lucide-react";
 import { overlayOpen, overlayCloseAll } from "@/lib/overlayController";
+import { navLog, diagNoAnim, installBodyClassObserver } from "@/lib/navDiag";
 import { Z } from "@/lib/viewportLayers";
 
 const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/HMNMkWUWAfVdTbRj3YmPCF/ln-navbar-icon-180_b914f927.png";
@@ -97,11 +98,16 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
   // ── Mobile: MobileNavDrawer state ─────────────────────────────────
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  // Install body-class MutationObserver once on mount (diagnostic mode only)
+  useEffect(() => { installBodyClassObserver(); }, []);
+
   const openMobileMenu = useCallback(() => {
+    navLog("STATE_CHANGE_START", { action: "open", mobileMenuOpen: false });
     setMobileMenuOpen(true);
     overlayOpen("menu");
   }, []);
   const closeMobileMenu = useCallback(() => {
+    navLog("STATE_CHANGE_START", { action: "close", mobileMenuOpen: true });
     setMobileMenuOpen(false);
     // Use overlayCloseAll as a safety valve — guarantees body scroll lock is
     // always released when the menu closes, regardless of which panel the
@@ -176,7 +182,12 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       >
         {/* Hamburger -- opens MobileNavDrawer */}
         <button
-          onClick={mobileMenuOpen ? closeMobileMenu : openMobileMenu}
+          onTouchStart={() => navLog("TOUCH_START", { mobileMenuOpen })}
+          onTouchEnd={() => navLog("TOUCH_END", { mobileMenuOpen })}
+          onClick={() => {
+            navLog("HAMBURGER_CLICK", { mobileMenuOpen, bodyClass: document.body.className, dataScrollLocked: document.body.getAttribute("data-scroll-locked") });
+            if (mobileMenuOpen) closeMobileMenu(); else openMobileMenu();
+          }}
           className="p-2 rounded-lg transition-all"
           style={{ color: "rgba(255,255,255,0.6)" }}
           aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}

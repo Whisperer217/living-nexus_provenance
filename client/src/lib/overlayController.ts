@@ -41,6 +41,7 @@
  */
 
 import { useState, useEffect } from "react";
+import { navLog, diagNoOverlay } from "@/lib/navDiag";
 
 type PanelName =
   | "menu"
@@ -96,14 +97,17 @@ function _applyLock() {
     if (!hasOpenDialog) {
       document.body.style.top = `-${_savedScrollY}px`;
       document.body.classList.add("overlay-active", "overlay-active-full");
+      navLog("OVERLAY_BODY_LOCKED", { mode: "full", classes: document.body.className, scrollY: _savedScrollY });
     } else {
       // Dialog is open — skip position:fixed to avoid breaking modal centering
       document.body.classList.add("overlay-active");
+      navLog("OVERLAY_BODY_LOCKED", { mode: "full-dialog-exception", classes: document.body.className });
     }
   } else {
     // light: overflow only — no position:fixed
     document.body.style.overflow = "hidden";
     document.body.classList.add("overlay-active");
+    navLog("OVERLAY_BODY_LOCKED", { mode: "light", classes: document.body.className });
   }
 }
 
@@ -114,6 +118,7 @@ function _removeLock() {
   document.body.classList.remove("overlay-active", "overlay-active-full");
   // Restore scroll position — position:fixed resets it to 0
   window.scrollTo(0, _savedScrollY);
+  navLog("OVERLAY_BODY_UNLOCKED", { classes: document.body.className, dataScrollLocked: document.body.getAttribute("data-scroll-locked") });
 }
 
 // ── Public API ──────────────────────────────────────────────────────────────
@@ -126,6 +131,8 @@ function _removeLock() {
  * @param mode   "full" (default) for full-screen overlays; "light" for transient drags
  */
 export function overlayOpen(panel: PanelName, mode: LockMode = "full") {
+  if (diagNoOverlay()) { navLog("OVERLAY_OPEN_CALLED", { panel, mode, skipped: true }); return; }
+  navLog("OVERLAY_OPEN_CALLED", { panel, mode, openPanelsBefore: Array.from(_openPanels.keys()) });
   _openPanels.set(panel, mode);
   _applyLock();
   _notify();
@@ -137,7 +144,8 @@ export function overlayOpen(panel: PanelName, mode: LockMode = "full") {
  * Calling close on a panel that was never opened is a safe no-op.
  */
 export function overlayClose(panel: PanelName) {
-  if (!_openPanels.has(panel)) return;
+  if (!_openPanels.has(panel)) { navLog("OVERLAY_CLOSE_CALLED", { panel, noop: true, openPanels: Array.from(_openPanels.keys()) }); return; }
+  navLog("OVERLAY_CLOSE_CALLED", { panel, openPanelsBefore: Array.from(_openPanels.keys()) });
   _openPanels.delete(panel);
   if (_openPanels.size === 0) {
     _removeLock();
@@ -154,6 +162,7 @@ export function overlayClose(panel: PanelName) {
  * when the exact open panel name is unknown (e.g., closeMobileMenu).
  */
 export function overlayCloseAll() {
+  navLog("OVERLAY_CLOSE_CALLED", { panel: "ALL", openPanelsBefore: Array.from(_openPanels.keys()) });
   _openPanels.clear();
   _removeLock();
   _notify();

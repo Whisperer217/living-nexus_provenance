@@ -550,6 +550,21 @@
    correctly. The margin-right scrollbar-gap compensation is also zeroed
    to prevent layout-shift ghost-clicks on the PlaylistDrawer tab.
    ─────────────────────────────────────────────────────────────────── */
+/* ── Diagnostic mode: disable all animations/transitions ──────────────────
+   Set via: document.documentElement.setAttribute("data-ln-noanim","1")
+   Activated automatically when localStorage.LN_DIAG_NOANIM=1 is set.
+   This isolates whether the freeze is caused by rendering/animation vs
+   interaction/state management layers.
+   ─────────────────────────────────────────────────────────────────────── */
+html[data-ln-noanim="1"] *,
+html[data-ln-noanim="1"] *::before,
+html[data-ln-noanim="1"] *::after {
+  animation-duration: 0.001ms !important;
+  animation-delay: 0ms !important;
+  transition-duration: 0.001ms !important;
+  transition-delay: 0ms !important;
+}
+
 html body[data-scroll-locked] {
   position: static !important;
   margin-right: 0 !important;

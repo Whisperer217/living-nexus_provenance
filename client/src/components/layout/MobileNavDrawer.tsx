@@ -13,6 +13,7 @@
 import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useLocation } from "wouter";
+import { navLog, diagNoAnim } from "@/lib/navDiag";
 import {
   X, LogIn, LogOut, Sparkles,
   Home, Compass, User, Archive,
@@ -106,6 +107,28 @@ export default function MobileNavDrawer({ open, onClose, onOpenWhatsNew }: Mobil
   const { user, logout } = useAuth();
   const drawerRef = useRef<HTMLDivElement>(null);
 
+  // ── Diagnostic: log mount/unmount and animation lifecycle ──────────
+  useEffect(() => {
+    navLog("DRAWER_MOUNT", { open, bodyClass: document.body.className, dataScrollLocked: document.body.getAttribute("data-scroll-locked") });
+    return () => {
+      navLog("DRAWER_UNMOUNT", { open, bodyClass: document.body.className });
+    };
+  }, [open]);
+
+  // Attach transitionstart / transitionend to the drawer panel element
+  useEffect(() => {
+    const el = drawerRef.current;
+    if (!el) return;
+    const onStart = (e: TransitionEvent) => navLog("DRAWER_ANIM_START", { property: e.propertyName, elapsedTime: e.elapsedTime });
+    const onEnd   = (e: TransitionEvent) => navLog("DRAWER_ANIM_END",   { property: e.propertyName, elapsedTime: e.elapsedTime, bodyClass: document.body.className });
+    el.addEventListener("transitionstart", onStart);
+    el.addEventListener("transitionend",   onEnd);
+    return () => {
+      el.removeEventListener("transitionstart", onStart);
+      el.removeEventListener("transitionend",   onEnd);
+    };
+  }, []);
+
   // Close on route change
   useEffect(() => {
     onClose();
@@ -169,7 +192,7 @@ export default function MobileNavDrawer({ open, onClose, onOpenWhatsNew }: Mobil
           background: "rgba(0,0,0,0.65)",
           opacity: open ? 1 : 0,
           pointerEvents: open ? "auto" : "none",
-          transition: "opacity 220ms cubic-bezier(0.22,1,0.36,1)",
+          transition: diagNoAnim() ? "none" : "opacity 220ms cubic-bezier(0.22,1,0.36,1)",
         }}
       />
 
@@ -193,7 +216,7 @@ export default function MobileNavDrawer({ open, onClose, onOpenWhatsNew }: Mobil
           background: "#0a0812",
           borderRight: "1px solid rgba(196,154,40,0.14)",
           transform: open ? "translateX(0)" : "translateX(-100%)",
-          transition: "transform 220ms cubic-bezier(0.22,1,0.36,1)",
+          transition: diagNoAnim() ? "none" : "transform 220ms cubic-bezier(0.22,1,0.36,1)",
           boxShadow: open ? "8px 0 40px rgba(0,0,0,0.80)" : "none",
           pointerEvents: open ? "auto" : "none",
         }}
