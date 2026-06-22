@@ -67,6 +67,7 @@ export const EDIT_GENRES = [
   "Heavy Metal",
   "Power Metal",
   "Symphonic Power Metal",
+  "Symphonic Metal",
   "Punk",
   "Hardcore",
   // ── Pop & Mainstream ──
