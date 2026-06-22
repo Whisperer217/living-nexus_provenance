@@ -18,8 +18,11 @@
  *   "menu" | "quickplay" | "player-expanded" | "player-cinematic" | "gift" | "edit-track"
  *
  * Lock modes:
- *   "full"  — full-screen takeover (expanded player, modals): sets overflow + touchAction:none + position:fixed
- *   "light" — transient drag gesture: sets overflow only, NO touchAction change.
+ *   "full"  — full-screen takeover (expanded player, modals): sets overflow:hidden + position:fixed
+ *             NOTE: touchAction is intentionally NOT set on body — it kills Android Chrome touch
+ *             events for the entire page, making all buttons/menus unresponsive. Individual
+ *             overlay components (player, drawer) manage their own touchAction on their own elements.
+ *   "light" — transient drag gesture: sets overflow:hidden only.
  *             Use for mini-bar drag-to-expand so the scroll div behind it stays responsive.
  */
 
@@ -50,22 +53,24 @@ function _notify() {
 // "full" mode: iOS Safari requires position:fixed to prevent rubber-band scroll.
 // We save/restore scrollY to prevent page jump on unlock.
 //
+// CRITICAL: Do NOT set touchAction:none on document.body.
+// On Android Chrome, body.style.touchAction = "none" kills ALL touch events
+// for the entire page — buttons, menus, drawers all become unresponsive.
+// Individual overlay elements (GlobalPlayer, MobileNavDrawer) manage their
+// own touchAction on their own container elements instead.
+//
 // "light" mode: used for transient drag gestures (mini-bar swipe-up).
-// Only sets overflow:hidden — does NOT set touchAction:none or position:fixed.
-// This prevents the body from scrolling during the gesture without killing
-// touch events on the scroll div behind the mini bar.
+// Only sets overflow:hidden — no position:fixed.
 function _lockScroll(mode: LockMode) {
   _lockMode = mode;
   if (mode === "full") {
     _savedScrollY = window.scrollY;
     document.body.style.overflow = "hidden";
-    document.body.style.touchAction = "none";
+    // ── DO NOT set touchAction on body — it kills Android Chrome touch events ──
     // Only apply position:fixed if no Radix Dialog is currently open.
     // When body is position:fixed it becomes the containing block for ALL
     // position:fixed children (including Radix Dialog portals), causing
     // modals to anchor to body top-left instead of the viewport center.
-    // When a dialog is open, the dialog overlay blocks background interaction
-    // so the iOS rubber-band issue doesn't apply.
     const hasOpenDialog = !!document.querySelector(
       '[data-slot="dialog-content"], [data-radix-dialog-content]'
     );
@@ -78,9 +83,7 @@ function _lockScroll(mode: LockMode) {
       document.body.classList.add("overlay-active");
     }
   } else {
-    // light: overflow only — no touchAction, no position:fixed
-    // Do NOT add overlay-active-full — that would apply position:fixed via CSS
-    // which freezes the scroll position and blocks the scroll div behind the mini bar.
+    // light: overflow only — no position:fixed
     document.body.style.overflow = "hidden";
     document.body.classList.add("overlay-active");
   }
@@ -88,7 +91,7 @@ function _lockScroll(mode: LockMode) {
 
 function _unlockScroll() {
   document.body.style.overflow = "";
-  document.body.style.touchAction = "";
+  // ── DO NOT clear touchAction here — we never set it ──
   document.body.style.top = "";
   document.body.classList.remove("overlay-active", "overlay-active-full");
   if (_lockMode === "full") {
