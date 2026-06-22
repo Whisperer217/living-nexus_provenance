@@ -427,7 +427,10 @@
   body.overlay-active-full {
     position: fixed;
     width: 100%;
-    touch-action: none;
+    /* CRITICAL: touch-action must NOT be set on body — it kills ALL pointer/touch
+       events on Android Chrome and touch-capable browsers, making every button,
+       menu, and overlay completely unresponsive. overlayController.ts intentionally
+       never sets touchAction on body for this reason. */
   }
 
   /* Graceful Lights On transition */

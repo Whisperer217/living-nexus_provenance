@@ -2639,8 +2639,12 @@ export async function getTrendingWorks(opts?: { genre?: string; limit?: number; 
     const weeklyPlays = Number(r.weeklyPlays) || 0;
     const weeklyLikes = Number(r.weeklyLikes) || 0;
     const allTimePlays = r.song.playCount ?? 0;
-    // Primary drivers: this week's engagement. Secondary: all-time plays as a tiebreaker.
-    const score = weeklyPlays * 3 + weeklyLikes * 5 + allTimePlays * 0.1;
+    // Primary drivers: this week's engagement. Secondary: all-time plays as a very small tiebreaker.
+    // Weight is intentionally tiny (0.01) so historical play counts cannot override recent weekly
+    // activity — a song with 2 weekly plays (score: 6.0) must outrank a song with 118 all-time
+    // plays and 0 weekly plays (score: 1.18). Previously 0.1 caused stale high-play-count songs
+    // to dominate the trending list even with zero recent engagement.
+    const score = weeklyPlays * 3 + weeklyLikes * 5 + allTimePlays * 0.01;
     return { ...r, score };
   });
   scored.sort((a: ScoredRow, b: ScoredRow) => b.score - a.score);
