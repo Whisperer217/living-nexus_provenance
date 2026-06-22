@@ -5499,3 +5499,16 @@
 - [ ] Wire GlobalPlayerView into MainLayout — replace MobilePlayerLayer and desktop player bar
 - [ ] Remove MobilePlayerLayer.tsx — no longer needed
 - [ ] Run pnpm test — confirm all tests pass
+
+## Global Player Cinematic Mode — Waveform as Primary Visual Authority (Jun 22 2026)
+- [x] Fix 3 TypeScript errors in cinematic portal Layer 3 (likeStatus→isLiked, handleLike→toggleLikeMutation.mutate)
+- [x] Rebuild cinematic portal: waveform stage is primary visual authority (flex-1, fills remaining height)
+- [x] Cinematic portal layout: Top bar → Layer 1 (context: 64px art + title + provenance) → Progress bar → Layer 2 (primary controls, 72px play) → Layer 3 (secondary: Like/Comment/Share/Tip/Volume) → Waveform Stage → Speed controls
+- [x] Add cinematicCanvasRef — dedicated canvas for cinematic waveform (separate from waveCanvasRef)
+- [x] waveformActive = zone === "EXPANDED" || cinematic — waveform always on in expanded/cinematic, not gated by glowEnabled
+- [x] Harmonic Active pulsing chip in waveform stage (conditional on songDetail?.harmonicSignature)
+- [x] Background: deep coal/purple gradient + very dim ambient art blur (brightness 0.08)
+- [x] All touch targets ≥ 44px minWidth/minHeight
+- [x] Delete MobilePlayerLayer.tsx — confirmed dead code (not mounted anywhere)
+- [x] Update viewportLayers.ts — remove stale BOTTOM_NAV_BAR/MOBILE_NAV entries, correct CINEMATIC_PORTAL to 99995, add navigation doctrine comment
+- [x] 0 TypeScript errors, 297/297 tests passing

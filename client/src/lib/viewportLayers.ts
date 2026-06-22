@@ -5,30 +5,35 @@
  * Every fixed/absolute overlay MUST pull its z-index from this file.
  * Never hardcode z-index values in component files.
  *
+ * NAVIGATION DOCTRINE (established session 2025-03):
+ * "The Sidebar is the navigation authority across all viewport sizes.
+ *  Functionality may adapt. Authority may not."
+ * - Navigation: LeftRail only (off-canvas on mobile via transform, no body lock)
+ * - MobileNavDrawer: DELETED — LeftRail is the sole nav authority
+ * - MobilePlayerLayer: DELETED — GlobalPlayer is the sole player authority
+ *
  * Layer hierarchy (lowest → highest):
  *
- *  0   BASE_CONTENT       — page content, scrollable areas
+ *   0  BASE_CONTENT       — page content, scrollable areas
  *  10  RIGHT_RAIL         — RightRail (fixed, right side)
- *  20  LEFT_RAIL          — LeftRail (fixed, left side)
+ *  20  LEFT_RAIL          — LeftRail (fixed, left side; off-canvas on mobile via transform)
  *  30  TOP_BAR            — TopBar / mobile header
- *  40  SURFACE_PLAYER     — WitnessSurfacePlayer SurfaceBar (mobile)
+ *  40  SURFACE_PLAYER     — WitnessSurfacePlayer SurfaceBar (mobile, partially retired)
  *  50  EDIT_PANEL         — EditTrackPanel, sheet overlays
  *  60  THEATER_PLAYER     — TheaterPlayer cinematic mode
  *  80  GLOBAL_PLAYER      — GlobalPlayer floating card + expanded modal
- *  90  BOTTOM_NAV_BAR     — MobilePlayerLayer BottomNavBar
- *  91  MINI_PLAYER_BAR    — MobilePlayerLayer MiniBar (above BottomNavBar)
- *  100 CONTEXT_DRAWER     — ContextDrawer (desktop left panel)
- *  200 MOBILE_NAV         — MobileNavDrawer (full-screen) — MUST be above player layers
- *  300 MOBILE_HEADER      — Mobile top header bar — MUST be above MobileNavDrawer
- *  400 EXPANDED_PLAYER    — WitnessSurfacePlayer ExpandedPanel (full-viewport)
- *  500 EXPANDED_SHEET     — MobilePlayerLayer ExpandedSheet (full-screen, below drawers)
- *  500 PLAYLIST_DRAWER    — PlaylistDrawer
- *  600 MARKETPLACE_DRAWER — MarketplaceDrawer
- *  700 MODAL              — Generic modals, dialogs
- *  800 TOAST              — Toast notifications (Sonner)
- *  900 TOOLTIP            — Tooltips, popovers
- * 9000 CINEMATIC_PORTAL   — GlobalPlayer cinematic portal (must be above all)
- * 9999 DEBUG_OVERLAY      — Debug overlays (dev only)
+ *  91  MINI_PLAYER_BAR    — GlobalPlayer MiniBar (above nav bar)
+ * 100  CONTEXT_DRAWER     — ContextDrawer (desktop left panel)
+ * 300  MOBILE_HEADER      — Mobile top header bar (hamburger button)
+ * 400  EXPANDED_PLAYER    — WitnessSurfacePlayer ExpandedPanel (full-viewport, partially retired)
+ * 500  EXPANDED_SHEET     — GlobalPlayer ExpandedSheet (full-screen, below modals)
+ * 500  PLAYLIST_DRAWER    — PlaylistDrawer
+ * 600  MARKETPLACE_DRAWER — MarketplaceDrawer
+ * 700  MODAL              — Generic modals, dialogs
+ * 800  TOAST              — Toast notifications (Sonner)
+ * 900  TOOLTIP            — Tooltips, popovers
+ * 99995 CINEMATIC_PORTAL  — GlobalPlayer cinematic portal (must be above all)
+ * 99999 DEBUG_OVERLAY     — Debug overlays (dev only)
  */
 
 export const Z = {
@@ -40,19 +45,18 @@ export const Z = {
   EDIT_PANEL: 50,
   THEATER_PLAYER: 60,
   GLOBAL_PLAYER: 80,
-  BOTTOM_NAV_BAR: 90,
   MINI_PLAYER_BAR: 91,
   CONTEXT_DRAWER: 100,
-  MOBILE_NAV: 200,
   MOBILE_HEADER: 300,
   EXPANDED_PLAYER: 400,
+  EXPANDED_SHEET: 500,
   PLAYLIST_DRAWER: 500,
   MARKETPLACE_DRAWER: 600,
   MODAL: 700,
   TOAST: 800,
   TOOLTIP: 900,
-  CINEMATIC_PORTAL: 9000,
-  DEBUG_OVERLAY: 9999,
+  CINEMATIC_PORTAL: 99995,
+  DEBUG_OVERLAY: 99999,
 } as const;
 
 export type ZLayer = keyof typeof Z;
