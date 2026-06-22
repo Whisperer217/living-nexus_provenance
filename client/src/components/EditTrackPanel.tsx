@@ -306,6 +306,16 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
     },
   });
 
+  // Dedicated mutation for cover art replacement — does NOT close the panel (no onSaved call)
+  const saveCoverArtMutation = trpc.songs.updateMetadata.useMutation({
+    onSuccess: () => {
+      utils.songs.mySongs.invalidate();
+    },
+    onError: (err: { message?: string }) => {
+      toast.error(err.message || "Cover art save failed");
+    },
+  });
+
   // Close on Escape
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
@@ -403,8 +413,9 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
         throw new Error(errBody?.error || `Upload failed (${res.status})`);
       }
       const { url } = await res.json() as { url: string; key: string };
-      // Persist the new cover URL and position
-      await updateMetadata.mutateAsync({
+      // Persist the new cover URL and position using the dedicated mutation
+      // (does NOT call onSaved / close the panel — user stays in edit mode)
+      await saveCoverArtMutation.mutateAsync({
         songId: song.id,
         coverArtUrl: url,
         coverPositionX: pos.x,
