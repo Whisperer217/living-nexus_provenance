@@ -523,7 +523,27 @@ export default function ArchivePage() {
     }
     if (trackSearch.trim()) {
       const q = trackSearch.trim().toLowerCase();
-      list = list.filter((s: any) => (s.title ?? "").toLowerCase().includes(q));
+      list = list.filter((s: any) => {
+        // Title
+        if ((s.title ?? "").toLowerCase().includes(q)) return true;
+        // Genre
+        if ((s.genre ?? "").toLowerCase().includes(q)) return true;
+        // Mood tags (JSON array of strings)
+        if (Array.isArray(s.moodTags) && s.moodTags.some((t: string) => t.toLowerCase().includes(q))) return true;
+        // Co-writers (JSON array of strings)
+        if (Array.isArray(s.coWriters) && s.coWriters.some((w: string) => w.toLowerCase().includes(q))) return true;
+        // Credits JSON — array of { role, name } — search both name and role
+        if (s.creditsJson) {
+          try {
+            const credits: { role: string; name: string }[] = typeof s.creditsJson === "string" ? JSON.parse(s.creditsJson) : s.creditsJson;
+            if (Array.isArray(credits) && credits.some(c =>
+              (c.name ?? "").toLowerCase().includes(q) ||
+              (c.role ?? "").toLowerCase().includes(q)
+            )) return true;
+          } catch { /* malformed JSON — skip */ }
+        }
+        return false;
+      });
     }
     if (sortBy === "newest") {
       list.sort((a: any, b: any) => new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime());
