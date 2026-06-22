@@ -870,8 +870,8 @@ export default function SongDetailPage() {
               </div>
             )}
 
-            {/* ── Harmonic Signature ── */}
-            {(song as any).harmonicSignature && (
+            {/* ── Harmonic Signature ── creator-only download buttons */}
+            {isOwner && (song as any).harmonicSignature && (
               <div className="flex flex-wrap gap-2">
                 <a href={`/api/harmonic/${song.id}/audio`} download className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full hover:opacity-80 transition-opacity" style={{ background: "rgba(196,154,40,0.12)", border: "1px solid rgba(196,154,40,0.3)", color: "var(--ln-gold)" }}>
                   <Download className="w-3 h-3" />Harmonic Tone (.wav)

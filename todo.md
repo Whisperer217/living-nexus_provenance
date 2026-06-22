@@ -5464,3 +5464,8 @@
 - [x] Remove "Edit Work" button from SongDetailPage (causes page lockup; editing available in Archive)
 - [x] Restore Reactions/Activity/Related panels to right column (beside artwork), not below the action buttons row
 - [x] Keep Witnessed Work + Download/Versions/Share/Cosmos/ID Card action buttons in correct position below left column
+
+## Harmonic Signature Security & Bug Fix
+- [x] Fix rgba() unsigned integer overflow bug in harmonicRoute.ts (waveform PNG returns 500 JSON error)
+- [x] Add creator-only auth guard to /api/harmonic/:songId/audio and /api/harmonic/:songId/image
+- [x] Hide Harmonic Signature download buttons from non-creator visitors on SongDetailPage

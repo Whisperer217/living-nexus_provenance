@@ -3,8 +3,9 @@
  * GET /api/harmonic/:songId/audio  → streams a .wav file derived from the song's harmonic frequencies
  * GET /api/harmonic/:songId/image  → streams a waveform .png derived from the same frequencies
  *
- * These are the downloadable "sonic fingerprint" files for each registered artifact.
- * The frequencies are derived from the SHA-256 file hash at upload time — deterministic and unique.
+ * CREATOR-ONLY: Both endpoints require the authenticated user to be the song's creator.
+ * The harmonic signature is a registerable provenance artifact — public download is restricted
+ * to prevent fraudulent re-registration on external platforms.
  *
  * NOTE: PNG generation uses jimp (pure JS) — no native binaries required for deployment.
  */
@@ -14,6 +15,7 @@ import { Jimp } from "jimp";
 import { getDb } from "./db.js";
 import { songs } from "../drizzle/schema.js";
 import { eq } from "drizzle-orm";
+import { sdk } from "./_core/sdk.js";
 
 export const harmonicRouter = Router();
 
@@ -79,9 +81,13 @@ function buildWavBuffer(frequencies: number[]): Buffer {
   return buf;
 }
 
-/** Convert RGBA components (0–255 each) to a 32-bit RGBA integer for jimp. */
+/**
+ * Convert RGBA components (0–255 each) to an unsigned 32-bit RGBA integer for jimp.
+ * The `>>> 0` coerces the signed bitwise result to an unsigned 32-bit integer,
+ * preventing RangeError when the high bit is set (e.g. r=196 → 196<<24 is negative).
+ */
 function rgba(r: number, g: number, b: number, a: number): number {
-  return ((r & 0xff) << 24) | ((g & 0xff) << 16) | ((b & 0xff) << 8) | (a & 0xff);
+  return (((r & 0xff) << 24) | ((g & 0xff) << 16) | ((b & 0xff) << 8) | (a & 0xff)) >>> 0;
 }
 
 /** Frequency palette — gold gradient, 6 entries */
@@ -163,10 +169,23 @@ async function buildWaveformPng(frequencies: number[], _songTitle: string): Prom
 }
 
 // ---------------------------------------------------------------------------
+// Auth helper — resolve session user from cookie
+// ---------------------------------------------------------------------------
+
+async function resolveSessionUserId(req: import("express").Request): Promise<number | null> {
+  try {
+    const user = await sdk.authenticateRequest(req);
+    return user?.id ?? null;
+  } catch {
+    return null;
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Routes
 // ---------------------------------------------------------------------------
 
-/** GET /api/harmonic/:songId/audio — download the harmonic signature as a .wav file */
+/** GET /api/harmonic/:songId/audio — creator-only download of the harmonic signature as a .wav file */
 harmonicRouter.get("/:songId/audio", async (req, res) => {
   try {
     const songId = parseInt(req.params.songId);
@@ -176,12 +195,19 @@ harmonicRouter.get("/:songId/audio", async (req, res) => {
     if (!db) return res.status(503).json({ error: "Database unavailable" });
     const [song] = await db.select({
       id: songs.id,
+      userId: songs.userId,
       title: songs.title,
       harmonicSignature: songs.harmonicSignature,
       witnessId: songs.witnessId,
     }).from(songs).where(eq(songs.id, songId)).limit(1);
 
     if (!song) return res.status(404).json({ error: "Song not found" });
+
+    // Creator-only guard — harmonic signature is a registerable provenance artifact
+    const sessionUserId = await resolveSessionUserId(req);
+    if (!sessionUserId || sessionUserId !== song.userId) {
+      return res.status(403).json({ error: "Access restricted to the creator of this work" });
+    }
 
     const frequencies = (song.harmonicSignature as number[] | null) ?? [];
     if (frequencies.length === 0) {
@@ -196,7 +222,7 @@ harmonicRouter.get("/:songId/audio", async (req, res) => {
     res.setHeader("Content-Type", "audio/wav");
     res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
     res.setHeader("Content-Length", wavBuffer.length);
-    res.setHeader("Cache-Control", "public, max-age=86400");
+    res.setHeader("Cache-Control", "private, no-store");
     res.send(wavBuffer);
   } catch (err) {
     console.error("[harmonicRoute] audio error:", err);
@@ -204,7 +230,7 @@ harmonicRouter.get("/:songId/audio", async (req, res) => {
   }
 });
 
-/** GET /api/harmonic/:songId/image — download the waveform visualization as a .png file */
+/** GET /api/harmonic/:songId/image — creator-only download of the waveform visualization as a .png file */
 harmonicRouter.get("/:songId/image", async (req, res) => {
   try {
     const songId = parseInt(req.params.songId);
@@ -214,12 +240,19 @@ harmonicRouter.get("/:songId/image", async (req, res) => {
     if (!db) return res.status(503).json({ error: "Database unavailable" });
     const [song] = await db.select({
       id: songs.id,
+      userId: songs.userId,
       title: songs.title,
       harmonicSignature: songs.harmonicSignature,
       witnessId: songs.witnessId,
     }).from(songs).where(eq(songs.id, songId)).limit(1);
 
     if (!song) return res.status(404).json({ error: "Song not found" });
+
+    // Creator-only guard — harmonic signature is a registerable provenance artifact
+    const sessionUserId = await resolveSessionUserId(req);
+    if (!sessionUserId || sessionUserId !== song.userId) {
+      return res.status(403).json({ error: "Access restricted to the creator of this work" });
+    }
 
     const frequencies = (song.harmonicSignature as number[] | null) ?? [];
     if (frequencies.length === 0) {
@@ -234,7 +267,7 @@ harmonicRouter.get("/:songId/image", async (req, res) => {
     res.setHeader("Content-Type", "image/png");
     res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
     res.setHeader("Content-Length", pngBuffer.length);
-    res.setHeader("Cache-Control", "public, max-age=86400");
+    res.setHeader("Cache-Control", "private, no-store");
     res.send(pngBuffer);
   } catch (err) {
     console.error("[harmonicRoute] image error:", err);
