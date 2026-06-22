@@ -5454,3 +5454,8 @@
 - [x] Injected into CreatorIdentityPage — below name/handle/badges, above Quick Stats Strip (noLink=true)
 - [x] Injected into ProfilePage — below bio EditableField, inside identity block
 - [x] 0 TypeScript errors, 297 tests passing
+
+## Mobile Hamburger Menu Freeze Fix (Pixel 6 / Android Chrome)
+- [x] Fix GlobalPlayer touchAction:none covering entire container — change to pan-y, restrict none to drag handle only
+- [x] Remove duplicate body.overflow scroll lock in MobileNavDrawer (conflicts with overlayController)
+- [x] Remove backdropFilter blur(24px) from MobileNavDrawer panel (GPU-expensive on Tensor G1)

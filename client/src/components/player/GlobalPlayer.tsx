@@ -642,7 +642,11 @@ function GlobalPlayerInner() {
         display: "flex",
         flexDirection: "column",
         userSelect: "none",
-        touchAction: "none",
+        // pan-y allows vertical scrolling to pass through on Android Chrome.
+        // touchAction:"none" on the full container kills ALL touch events on Android,
+        // freezing the hamburger menu and other fixed UI elements. The drag-to-expand
+        // gesture is handled by the drag handle below which sets touchAction:none locally.
+        touchAction: "pan-y",
         /* Apply desktop overrides */
         ...desktopFloatStyle,
         ...desktopExpandedStyle,
@@ -655,7 +659,11 @@ function GlobalPlayerInner() {
       {/* ── DRAG HANDLE (mobile) / CLICK TOGGLE HEADER (desktop) ── */}
       <div
         className="flex items-center justify-center flex-shrink-0 cursor-grab active:cursor-grabbing"
-        style={{ height: "20px", paddingTop: "6px", position: "relative" }}
+        style={{ height: "20px", paddingTop: "6px", position: "relative",
+          // touchAction:none here (on the drag handle only) enables the vertical
+          // drag-to-expand gesture without blocking touch events on the rest of the player.
+          touchAction: "none",
+        }}
       >
         {/* Mobile: pill handle — nebula purple */}
         {!isDesktop && (

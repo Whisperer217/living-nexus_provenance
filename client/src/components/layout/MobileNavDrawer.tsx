@@ -120,11 +120,10 @@ export default function MobileNavDrawer({ open, onClose, onOpenWhatsNew }: Mobil
     return () => document.removeEventListener("keydown", handler);
   }, [onClose]);
 
-  // Prevent body scroll when open
-  useEffect(() => {
-    document.body.style.overflow = open ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
-  }, [open]);
+  // NOTE: Body scroll lock is handled by overlayController in MainLayout
+  // (overlayOpen("menu") / overlayClose("menu")). Do NOT add a second
+  // document.body.style.overflow here — it creates a race condition on close
+  // that leaves the body locked on Android Chrome, freezing all touch events.
 
   const isActive = (path: string) => {
     if (path === "/" && (location === "/" || location === "/home")) return true;
@@ -188,9 +187,11 @@ export default function MobileNavDrawer({ open, onClose, onOpenWhatsNew }: Mobil
           bottom: 0,
           width: "min(340px, 92vw)",
           zIndex: 450,
-          background: "rgba(0,0,0,0.99)",
+          // Solid background — no backdropFilter blur. blur(24px) is GPU-expensive on
+          // Android mid-range chips (e.g. Pixel 6 Tensor G1) and can freeze the UI
+          // when combined with the player's existing compositing layers.
+          background: "#0a0812",
           borderRight: "1px solid rgba(196,154,40,0.14)",
-          backdropFilter: "blur(24px)",
           transform: open ? "translateX(0)" : "translateX(-100%)",
           transition: "transform 220ms cubic-bezier(0.22,1,0.36,1)",
           boxShadow: open ? "8px 0 40px rgba(0,0,0,0.80)" : "none",
