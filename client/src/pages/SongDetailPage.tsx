@@ -129,7 +129,7 @@ export default function SongDetailPage() {
   const [versionHistoryOpen, setVersionHistoryOpen] = useState(false);
   const [editingOpen, setEditingOpen] = useState(false);
   // Derive play state from global player — this page is a remote control only
-  const isThisTrackActive = currentTrackId === `song-${songId}`;
+  const isThisTrackActive = currentTrackId === String(songId);
   const isPlaying = isThisTrackActive && playerState.isPlaying;
 
   // Live waveform visualizer — driven by the global audio element
@@ -316,7 +316,7 @@ export default function SongDetailPage() {
     }
     // Build queue: this song + related songs as the immutable snapshot
     const thisTrack = {
-      id: `song-${song.id}`,
+      id: String(song.id),
       title: song.title,
       artist: creator?.artistHandle || creator?.name || "Unknown",
       genre: song.genre || "",
@@ -333,7 +333,7 @@ export default function SongDetailPage() {
       creatorRole: song.creator?.role ?? undefined,
     };
     const relatedTracks = (relatedData ?? []).map((item: any) => ({
-      id: `song-${item.song.id}`,
+      id: String(item.song.id),
       title: item.song.title,
       artist: item.creator?.artistHandle || item.creator?.name || "Unknown",
       genre: item.song.genre || "",
