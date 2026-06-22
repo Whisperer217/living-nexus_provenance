@@ -1,14 +1,21 @@
 /* ══════════════════════════════════════════════════════════════════
-   LIVING NEXUS — CreatorCard
-   A compact, hover/tap-capable identity card that appears on track
-   cards, discover feeds, and archive surfaces. Shows the creator's
-   avatar, name, role, and a glimpse of their witness identity.
-   Links to their full Identity Page (/identity/:id).
+   LIVING NEXUS — CreatorCard  (v2)
+   A hover/tap-capable identity card that appears on track cards,
+   discover feeds, and archive surfaces.
+
+   Changes in v2:
+   - Full banner-width panel (no oval bubble)
+   - Hierarchy: Creator → Bio → Works Count → Genres
+   - Bio expanded to 2–3 lines
+   - Published works count in upper-right beside Founder badge
+   - Genres reduced to single-line metadata field (3 max)
+   - Increased spacing/padding for typography readability
+   - Hover animation on "View Profile" button (shimmer + arrow)
 ═══════════════════════════════════════════════════════════════════ */
 
 import { useState, useRef, useEffect } from "react";
 import { Link } from "wouter";
-import { Fingerprint, ExternalLink } from "lucide-react";
+import { Fingerprint, ArrowRight } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 
 interface CreatorCardProps {
@@ -33,6 +40,7 @@ export function CreatorCard({
 }: CreatorCardProps) {
   const [hovered, setHovered] = useState(false);
   const [cardVisible, setCardVisible] = useState(false);
+  const [btnHovered, setBtnHovered] = useState(false);
   const hoverTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
 
@@ -71,6 +79,14 @@ export function CreatorCard({
   const name = displayName || creator?.name || creator?.artistHandle || "Creator";
   const avatar = avatarUrl || creator?.profilePhotoUrl;
 
+  // Parse genres — primaryGenre may be comma-separated; cap at 3
+  const genres = creator?.primaryGenre
+    ? creator.primaryGenre.split(",").map((g: string) => g.trim()).filter(Boolean).slice(0, 3)
+    : [];
+
+  const isFounder = !!creator?.founderWid;
+  const publishedCount = creator?.publishedCount ?? 0;
+
   if (inline) {
     return (
       <Link href={`/creator/${creatorId}`} className={`inline-flex items-center gap-1.5 group ${className}`}>
@@ -103,77 +119,143 @@ export function CreatorCard({
         </span>
       </Link>
 
-      {/* Hover Card */}
+      {/* Hover Card — full-width panel, no oval bubble */}
       {cardVisible && creator && (
         <div
-          className="absolute z-50 bottom-full left-0 mb-2 w-72 rounded-xl p-4 shadow-2xl animate-in fade-in slide-in-from-bottom-2 duration-200"
+          className="absolute z-50 bottom-full left-0 mb-2 rounded-xl shadow-2xl animate-in fade-in slide-in-from-bottom-2 duration-200 overflow-hidden"
           style={{
-            background: "linear-gradient(145deg, #0d0b07 0%, #1a1408 100%)",
-            border: "1px solid rgba(196,154,40,0.25)",
-            backdropFilter: "blur(12px)",
+            width: "320px",
+            background: "linear-gradient(160deg, #0f0c06 0%, #1c1508 60%, #0d0b07 100%)",
+            border: "1px solid rgba(196,154,40,0.22)",
+            backdropFilter: "blur(16px)",
           }}
         >
-          {/* Header */}
-          <div className="flex items-start gap-3 mb-3">
+          {/* ── Top strip: Avatar + Name + Founder badge + Works count ── */}
+          <div
+            className="flex items-center gap-3 px-4 pt-4 pb-3"
+            style={{ borderBottom: "1px solid rgba(196,154,40,0.10)" }}
+          >
+            {/* Avatar */}
             {creator.profilePhotoUrl ? (
-              <img src={creator.profilePhotoUrl} alt="" className="w-10 h-10 rounded-full object-cover ring-2 ring-[#C49A28]/30" />
+              <img
+                src={creator.profilePhotoUrl}
+                alt=""
+                className="w-11 h-11 rounded-full object-cover flex-shrink-0"
+                style={{ boxShadow: "0 0 0 2px rgba(196,154,40,0.35)" }}
+              />
             ) : (
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#C49A28]/30 to-[#7A5A1E]/30 ring-2 ring-[#C49A28]/30" />
+              <div
+                className="w-11 h-11 rounded-full flex-shrink-0 bg-gradient-to-br from-[#C49A28]/30 to-[#7A5A1E]/30"
+                style={{ boxShadow: "0 0 0 2px rgba(196,154,40,0.35)" }}
+              />
             )}
+
+            {/* Name + handle */}
             <div className="flex-1 min-w-0">
-              <div className="text-[13px] font-heading text-white/90 truncate">{creator.name || creator.artistHandle}</div>
-              {creator.artistHandle && (
-                <div className="text-[10px] font-body text-white/40">@{creator.artistHandle}</div>
+              <div className="text-[14px] font-heading text-white/92 leading-tight truncate">
+                {creator.name || creator.artistHandle}
+              </div>
+              {creator.artistHandle && creator.name && (
+                <div className="text-[10px] font-body text-white/38 mt-0.5">@{creator.artistHandle}</div>
               )}
               {creator.role && (
-                <div className="text-[10px] font-body text-white/30 mt-0.5 italic">{creator.role}</div>
+                <div className="text-[10px] font-body text-white/28 italic mt-0.5">{creator.role}</div>
+              )}
+            </div>
+
+            {/* Upper-right: Founder badge + Works count */}
+            <div className="flex flex-col items-end gap-1 flex-shrink-0">
+              {isFounder && (
+                <div
+                  className="flex items-center gap-1 px-1.5 py-0.5 rounded"
+                  style={{ background: "rgba(196,154,40,0.12)", border: "1px solid rgba(196,154,40,0.28)" }}
+                >
+                  <Fingerprint size={8} style={{ color: "var(--ln-gold)" }} />
+                  <span className="text-[8px] font-heading tracking-widest" style={{ color: "var(--ln-gold)" }}>FOUNDER</span>
+                </div>
+              )}
+              {publishedCount > 0 && (
+                <div className="text-right">
+                  <span className="text-[13px] font-heading text-white/80">{publishedCount}</span>
+                  <span className="text-[9px] font-body text-white/30 ml-1">Works</span>
+                </div>
               )}
             </div>
           </div>
 
-          {/* Witness Identity glimpse */}
-          {(creator.witnessPhilosophy || creator.witnessEpitaph) && (
-            <div className="mb-3 p-2.5 rounded-lg" style={{ background: "rgba(196,154,40,0.06)", border: "1px solid rgba(196,154,40,0.12)" }}>
-              <div className="flex items-center gap-1 mb-1.5">
-                <Fingerprint size={10} style={{ color: "var(--ln-gold)" }} />
-                <span className="text-[9px] font-heading tracking-widest" style={{ color: "var(--ln-gold)" }}>WITNESS IDENTITY</span>
-              </div>
-              {creator.witnessEpitaph && (
-                <p className="text-[11px] font-body text-white/60 italic leading-relaxed line-clamp-2">
-                  "{creator.witnessEpitaph}"
-                </p>
-              )}
-              {!creator.witnessEpitaph && creator.witnessPhilosophy && (
-                <p className="text-[11px] font-body text-white/50 leading-relaxed line-clamp-2">
-                  {creator.witnessPhilosophy}
-                </p>
-              )}
+          {/* ── Bio — 2–3 lines ── */}
+          {(creator.bio || creator.witnessEpitaph || creator.witnessPhilosophy) && (
+            <div className="px-4 py-3" style={{ borderBottom: "1px solid rgba(196,154,40,0.08)" }}>
+              <p className="text-[11.5px] font-body text-white/58 leading-relaxed line-clamp-3">
+                {creator.bio || creator.witnessEpitaph || creator.witnessPhilosophy}
+              </p>
             </div>
           )}
 
-          {/* Stats row */}
-          <div className="flex items-center gap-4 mb-3">
-            {(creator.songSlotsUsed ?? 0) > 0 && (
-              <div className="text-center">
-                <div className="text-[12px] font-heading text-white/80">{creator.songSlotsUsed}</div>
-                <div className="text-[9px] font-body text-white/30">works</div>
+          {/* ── Genres — single-line metadata, 3 max ── */}
+          {genres.length > 0 && (
+            <div
+              className="px-4 py-2.5 flex items-center gap-2"
+              style={{ borderBottom: "1px solid rgba(196,154,40,0.08)" }}
+            >
+              <span className="text-[9px] font-heading tracking-widest text-white/25 flex-shrink-0">GENRE</span>
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {genres.map((g: string) => (
+                  <span
+                    key={g}
+                    className="text-[9.5px] font-body text-white/50 px-1.5 py-0.5 rounded"
+                    style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}
+                  >
+                    {g}
+                  </span>
+                ))}
               </div>
-            )}
-            {creator.primaryGenre && (
-              <div className="text-center">
-                <div className="text-[10px] font-heading text-white/60 px-2 py-0.5 rounded-full" style={{ background: "rgba(196,154,40,0.1)", border: "1px solid rgba(196,154,40,0.2)" }}>{creator.primaryGenre}</div>
-              </div>
-            )}
-          </div>
+            </div>
+          )}
 
-          {/* View full identity link */}
-          <Link
-            href={`/identity/${creatorId}`}
-            className="flex items-center justify-center gap-1.5 w-full py-2 rounded-lg text-[10px] font-heading tracking-wider transition-all hover:opacity-80"
-            style={{ background: "rgba(196,154,40,0.12)", border: "1px solid rgba(196,154,40,0.2)", color: "var(--ln-gold)" }}
-          >
-            <ExternalLink size={10} /> VIEW FULL IDENTITY
-          </Link>
+          {/* ── View Profile button with shimmer + arrow hover ── */}
+          <div className="px-4 py-3">
+            <Link
+              href={`/creator/${creatorId}`}
+              className="relative flex items-center justify-between w-full px-4 py-2.5 rounded-lg overflow-hidden transition-all duration-300 group/btn"
+              style={{
+                background: btnHovered
+                  ? "rgba(196,154,40,0.18)"
+                  : "rgba(196,154,40,0.09)",
+                border: `1px solid rgba(196,154,40,${btnHovered ? "0.45" : "0.22"})`,
+                boxShadow: btnHovered
+                  ? "0 0 16px rgba(196,154,40,0.18), inset 0 0 12px rgba(196,154,40,0.06)"
+                  : "none",
+                transition: "all 0.25s ease",
+              }}
+              onMouseEnter={() => setBtnHovered(true)}
+              onMouseLeave={() => setBtnHovered(false)}
+            >
+              {/* Shimmer sweep */}
+              <span
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                  background: "linear-gradient(105deg, transparent 40%, rgba(196,154,40,0.12) 50%, transparent 60%)",
+                  transform: btnHovered ? "translateX(100%)" : "translateX(-100%)",
+                  transition: "transform 0.5s ease",
+                }}
+              />
+              <span
+                className="text-[10px] font-heading tracking-wider relative z-10"
+                style={{ color: "var(--ln-gold)" }}
+              >
+                VIEW PROFILE
+              </span>
+              <ArrowRight
+                size={12}
+                className="relative z-10 transition-transform duration-300"
+                style={{
+                  color: "var(--ln-gold)",
+                  transform: btnHovered ? "translateX(3px)" : "translateX(0)",
+                }}
+              />
+            </Link>
+          </div>
         </div>
       )}
     </div>

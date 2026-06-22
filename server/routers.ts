@@ -43,7 +43,7 @@ import {
   createCollection, updateCollectionPdf, linkSongsToCollection,
   getCollectionByWid, getSongsByCollectionId, getCollectionForSong,
   getCollectionsByCreator, updateCollectionCover,
-  getAllSupporters, getSupporterByUserId, recordPlatformGift,
+  getAllSupporters, getSupporterByUserId, recordPlatformGift, getPublishedCountByUser,
   getNewEventCountForCreator, touchActivityVisit, touchDashboardVisit, getDashboardDeltas,
   getSongReactions, toggleSongReaction,
   getTrendingWorks,
@@ -726,6 +726,7 @@ export const appRouter = router({
     getCreatorMini: publicProcedure.input(z.object({ userId: z.number().int().positive() })).query(async ({ input }) => {
       const user = await getUserById(input.userId);
       if (!user) return null;
+      const publishedCount = await getPublishedCountByUser(input.userId);
       return {
         id: user.id,
         name: user.name,
@@ -735,6 +736,7 @@ export const appRouter = router({
         role: user.role,
         primaryGenre: user.primaryGenre,
         songSlotsUsed: user.songSlotsUsed,
+        publishedCount,
         // Witness Identity fields for creator card
         originStatement: user.originStatement,
         activeMediums: user.activeMediums as string[] | null,

@@ -5809,3 +5809,14 @@ export async function registerWorkViaApi(params: {
 
   return { songId, wid, registeredAt };
 }
+
+/** Return the number of Published works for a given user. Used by CreatorCard. */
+export async function getPublishedCountByUser(userId: number): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  const result = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(songs)
+    .where(and(eq(songs.userId, userId), eq(songs.status, "Published")));
+  return Number(result[0]?.count ?? 0);
+}
