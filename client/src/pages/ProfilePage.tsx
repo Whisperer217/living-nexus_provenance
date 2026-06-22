@@ -29,6 +29,7 @@ import { IdentityEditor } from "@/components/IdentityEditor";
 import { usePlayer, Track } from "@/contexts/PlayerContext";
 
 import { EDIT_GENRES } from "@shared/contentTypes";
+import { CreatorIdentityStrip } from "@/components/CreatorIdentityStrip";
 const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/HMNMkWUWAfVdTbRj3YmPCF/ln-navbar-icon-180_b914f927.png";
 
 /* ── Editable inline field ─────────────────────────────────────── */
@@ -732,6 +733,16 @@ export default function ProfilePage() {
                 multiline
                 placeholder="Tell the world about your music…"
               />
+            {/* ── Identity Strip — mediums + origin blurb, links to /identity/:id ── */}
+            {profile && (
+              <CreatorIdentityStrip
+                creatorId={profile.id}
+                activeMediums={(profile as any).activeMediums}
+                originStatement={(profile as any).originStatement}
+                creativeMission={(profile as any).creativeMission}
+                className="mt-2"
+              />
+            )}
             </div>
 
             {/* ── Right column: signals + actions ── */}

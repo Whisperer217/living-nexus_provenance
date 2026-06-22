@@ -18,6 +18,7 @@ import {
   ChevronRight, Copy, Check, MapPin
 } from "lucide-react";
 import { toast } from "sonner";
+import { CreatorIdentityStrip } from "@/components/CreatorIdentityStrip";
 
 /* ─── Medium Icons ─────────────────────────────────────────────────────────── */
 const MEDIUM_ICONS: Record<string, React.ReactNode> = {

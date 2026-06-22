@@ -5444,3 +5444,13 @@
 - [x] Loading state replaced with ln-skeleton shimmer blocks matching card layout
 - [x] View Profile CTA: full-width rounded-xl, gold shimmer sweep on hover (creatorCtaShimmer keyframe), ExternalLink icon nudges right 2px on hover
 - [x] LN palette: coal gradient background, Cinzel name font, gold border/glow
+
+## Creator Identity Strip in Profile Headers
+- [x] Create shared CreatorIdentityStrip component (client/src/components/CreatorIdentityStrip.tsx)
+- [x] Strip shows Active Mediums chips (colour-coded) + Origin Statement/Creative Mission one-liner (truncated 100 chars)
+- [x] On mobile: medium chips only (blurb hidden); on desktop: chips + blurb
+- [x] Strip links to /identity/:creatorId (noLink prop for identity page itself)
+- [x] Injected into CreatorProfilePage — below bio/badges row, above action buttons
+- [x] Injected into CreatorIdentityPage — below name/handle/badges, above Quick Stats Strip (noLink=true)
+- [x] Injected into ProfilePage — below bio EditableField, inside identity block
+- [x] 0 TypeScript errors, 297 tests passing

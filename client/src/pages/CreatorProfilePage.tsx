@@ -38,6 +38,7 @@ import { DomainEditor } from "@/components/domain/DomainEditor";
 import { CreatorIdentitySection } from "@/components/CreatorIdentitySection";
 import { ManifestationShelf, StandaloneShelf, type ShelfTrack } from "@/components/ManifestationShelf";
 import { LayoutGrid } from "lucide-react";
+import { CreatorIdentityStrip } from "@/components/CreatorIdentityStrip";
 
 // ─── Context Menu ─────────────────────────────────────────────────────────────
 interface ContextMenuProps {
