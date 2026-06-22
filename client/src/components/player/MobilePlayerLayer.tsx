@@ -845,7 +845,7 @@ export default function MobilePlayerLayer() {
     ];
     return (
       <div
-        className="md:hidden fixed bottom-0 left-0 right-0 z-[9000]"
+        className="md:hidden fixed bottom-0 left-0 right-0 z-[90]"
         style={{
           height: `calc(56px + max(env(safe-area-inset-bottom, 0px), 8px))`,
           paddingBottom: "max(env(safe-area-inset-bottom, 0px), 8px)",
@@ -912,7 +912,7 @@ export default function MobilePlayerLayer() {
 
   const MiniBar = () => (
     <div
-      className="md:hidden fixed left-0 right-0 z-[9001]"
+      className="md:hidden fixed left-0 right-0 z-[91]"
       style={{
         /* Sits above BottomNavBar — uses --nav-total token */
         bottom: `calc(var(--nav-height, 56px) + max(env(safe-area-inset-bottom, 0px), 8px))`,
@@ -1152,7 +1152,7 @@ export default function MobilePlayerLayer() {
   // ══════════════════════════════════════════════════════════════
   const ExpandedSheet = () => (
     <div
-      className="md:hidden fixed inset-0 z-[9010] flex flex-col"
+      className="md:hidden fixed inset-0 z-[500] flex flex-col"
       style={{
         background: "#000000",
         transform: `translateY(${expandedDragOffset}px)`,

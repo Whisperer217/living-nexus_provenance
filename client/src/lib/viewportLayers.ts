@@ -15,10 +15,13 @@
  *  50  EDIT_PANEL         — EditTrackPanel, sheet overlays
  *  60  THEATER_PLAYER     — TheaterPlayer cinematic mode
  *  80  GLOBAL_PLAYER      — GlobalPlayer floating card + expanded modal
+ *  90  BOTTOM_NAV_BAR     — MobilePlayerLayer BottomNavBar
+ *  91  MINI_PLAYER_BAR    — MobilePlayerLayer MiniBar (above BottomNavBar)
  *  100 CONTEXT_DRAWER     — ContextDrawer (desktop left panel)
- *  200 MOBILE_NAV         — MobileNavDrawer (full-screen)
- *  300 MOBILE_HEADER      — Mobile top header bar
+ *  200 MOBILE_NAV         — MobileNavDrawer (full-screen) — MUST be above player layers
+ *  300 MOBILE_HEADER      — Mobile top header bar — MUST be above MobileNavDrawer
  *  400 EXPANDED_PLAYER    — WitnessSurfacePlayer ExpandedPanel (full-viewport)
+ *  500 EXPANDED_SHEET     — MobilePlayerLayer ExpandedSheet (full-screen, below drawers)
  *  500 PLAYLIST_DRAWER    — PlaylistDrawer
  *  600 MARKETPLACE_DRAWER — MarketplaceDrawer
  *  700 MODAL              — Generic modals, dialogs
@@ -37,6 +40,8 @@ export const Z = {
   EDIT_PANEL: 50,
   THEATER_PLAYER: 60,
   GLOBAL_PLAYER: 80,
+  BOTTOM_NAV_BAR: 90,
+  MINI_PLAYER_BAR: 91,
   CONTEXT_DRAWER: 100,
   MOBILE_NAV: 200,
   MOBILE_HEADER: 300,
