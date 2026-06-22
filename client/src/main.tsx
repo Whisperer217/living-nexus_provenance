@@ -74,6 +74,17 @@ const trpcClient = trpc.createClient({
   ],
 });
 
+// Global error capture — surfaces uncaught JS errors and unhandled promise rejections
+// to the console so they appear in .manus-logs/browserConsole.log for debugging.
+// These do NOT suppress the errors; they only ensure they are logged before React
+// catches them (or before they silently disappear in production).
+window.addEventListener("error", (e) => {
+  console.error("[global-error]", e.error ?? e.message);
+});
+window.addEventListener("unhandledrejection", (e) => {
+  console.error("[global-unhandled-promise]", e.reason);
+});
+
 // Phase 207: Remove server-injected witness/static body blocks before React mounts.
 // These blocks are visible to crawlers and no-JS users (provenance proof layer).
 // React replaces them with the full SPA experience.

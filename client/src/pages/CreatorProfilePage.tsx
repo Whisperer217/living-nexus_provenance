@@ -398,6 +398,7 @@ export default function CreatorProfilePage() {
   const { user } = useAuth();
   const [, navigate] = useLocation();
   const creatorId = parseInt(id || "0");
+  const utils = trpc.useUtils();
   const [tipOpen, setTipOpen] = useState(false);
   const [tipSuccess, setTipSuccess] = useState(false);
   const [showDomainEditor, setShowDomainEditor] = useState(false);
@@ -481,7 +482,6 @@ export default function CreatorProfilePage() {
   });
 
   // ── Witness Network — MUST be before any early returns (Rules of Hooks) ──────
-  const utils = trpc.useUtils();
   const creatorIdForWitness = data?.creator?.id ?? 0;
   const witnessStatusQuery = trpc.witness.status.useQuery(
     { creatorId: creatorIdForWitness },

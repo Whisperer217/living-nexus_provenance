@@ -5413,3 +5413,10 @@
 - [x] Creator Card: add hover animation to View Profile button (glow/shimmer/arrow)
 - [x] Song Page: Move Reactions/Activity/Related to upper-right column
 - [x] Song Page: Fix artwork parallax scroll shift
+
+## Navigation Crash Fix (Session Continuation)
+- [x] Fix site-wide "An Unexpected Error Occurred" crash on page navigation — root cause: TDZ (Temporal Dead Zone) violation in SongDetailPage.tsx where `const utils = trpc.useUtils()` was declared on line 247 but referenced inside `toggleReactionMutation.onMutate` callback on line 102. Fix: moved utils declaration to line 85, immediately after songId calculation, before any hooks that reference it.
+- [x] Audit CreatorProfilePage.tsx for same TDZ pattern — found duplicate utils declaration; moved to top of main component (line 401), removed duplicate at line 484
+- [x] Verify ArchivePage.tsx — utils at line 282 is already before all useMutation hooks (line 369+), no TDZ risk
+- [x] Verify ExplorePage.tsx and HomePage.tsx — neither has useMutation hooks, no TDZ risk
+- [x] Add global window.addEventListener("error") and window.addEventListener("unhandledrejection") handlers to main.tsx for better crash visibility in .manus-logs/browserConsole.log

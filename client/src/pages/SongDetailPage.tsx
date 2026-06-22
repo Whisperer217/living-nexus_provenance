@@ -82,6 +82,7 @@ export default function SongDetailPage() {
   const { addAndPlay, playQueueAt, togglePlay, state: playerState, currentTrackId, openNowPlayingPanel, audioRef } = usePlayer();
   const waveCanvasRef = _useRef<HTMLCanvasElement>(null);
   const songId = parseInt(id || "0");
+  const utils = trpc.useUtils();
 
   const [tipOpen, setTipOpen] = useState(false);
   const [tipSuccess, setTipSuccess] = useState(false);
@@ -243,8 +244,6 @@ export default function SongDetailPage() {
   useEffect(() => {
     if (song?.lyricsText) setLyricsEdit(song.lyricsText);
   }, [song?.lyricsText]);
-
-  const utils = trpc.useUtils();
 
   // Handle Stripe tip/download success redirect
   useEffect(() => {
