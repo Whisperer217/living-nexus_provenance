@@ -10,14 +10,24 @@ import {
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 
-const CURRENT_VERSION = "v2.47.0";
+const CURRENT_VERSION = "v2.48.0";
 const STORAGE_KEY = `living-nexus-whats-new-seen-${CURRENT_VERSION}`;
 
 const UPDATES = [
   {
+    version: "v2.48.0",
+    date: "Jun 21, 2026",
+    label: "Latest",
+    items: [
+      { icon: TrendingUp, text: "Pull to Refresh — On mobile, drag down from the top of any page to refresh the feed. A comet-chasing-its-tail animation marks the gesture. Works on Home, Explore, Witness Registry, and My Archive." },
+      { icon: Zap, text: "Trending This Week rebuilt — The algorithm now counts only plays and likes from the last 7 days using the live event log, not all-time totals. Newly uploaded works with real weekly momentum will surface correctly. Both the Home feed and Explore → Trending now share the same data window." },
+      { icon: Shield, text: "Drawer menu fix — The Log Out and What\u2019s New options at the bottom of the left-pane menu were hidden behind the global player bar on mobile. The footer now clears the full player + nav stack." },
+    ],
+  },
+  {
     version: "v2.47.0",
     date: "Jun 14, 2026",
-    label: "Latest",
+    label: "",
     items: [
       { icon: Music, text: "Seamless Playback Engine — No more silence between tracks. Choose your transition mode: Standard (clean cut), Crossfade (overlap current + next with configurable 1–12s fade), Gapless (next track preloads 15s early, zero gap), or Album Blend (gapless + per-track fade metadata for conceptual album sequencing)." },
       { icon: Zap, text: "Playback Settings page — Go to Settings → Playback to configure your transition preferences. Crossfade duration slider, global fade-in/out controls, per-track fade respect toggle, and preload toggle. Settings persist to your account." },
