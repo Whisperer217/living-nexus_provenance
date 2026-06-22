@@ -5425,3 +5425,11 @@
 - [x] Create SongDetailPageSkeleton component (client/src/components/SongDetailPageSkeleton.tsx) — pixel-accurate shimmer matching the real two-column layout: square cover art, play button, stats row, title/chips, reactions panel, activity panel, WID provenance panel
 - [x] Add ln-skeleton CSS class to index.css — gold-tinted shimmer sweep animation (lnSkeletonSweep keyframe, 1.6s ease-in-out, Living Nexus coal/gold palette)
 - [x] Wire skeleton into SongDetailPage — replace spinner with <SongDetailPageSkeleton /> on isLoading
+
+## ErrorBoundary Diagnostic Upgrade
+- [x] Rewrite ErrorBoundary to surface crash reason in both dev and production: shows ErrorName + message + first component frame as a monospace blurb always visible on the crash screen
+- [x] Store componentStack in state (captured in componentDidCatch) so it is available for display
+- [x] Add collapsible "Full stack trace" panel (ChevronDown/Up toggle) showing full JS stack + React component tree — available in all environments, not just dev
+- [x] Always log to console (name, message, stack, componentStack) so .manus-logs/browserConsole.log captures every crash
+- [x] Inline variant updated to show the same diagnostic summary line
+- [x] LN palette applied to full-page variant (coal background, gold border, Cinzel header)
