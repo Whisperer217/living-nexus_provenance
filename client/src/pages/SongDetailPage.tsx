@@ -704,6 +704,233 @@ export default function SongDetailPage() {
               )}
             </div>
 
+            {/* ══ WITNESSED WORK — Inline, front and center ══ */}
+            <div className="rounded-2xl overflow-hidden" style={{ background: "rgba(196,154,40,0.03)", border: "1px solid rgba(196,154,40,0.25)" }}>
+              {/* Header */}
+              <div className="flex items-center gap-2.5 px-5 py-3.5" style={{ borderBottom: "1px solid rgba(196,154,40,0.12)" }}>
+                <ShieldCheck className="w-4 h-4 flex-shrink-0" style={{ color: "rgba(196,154,40,0.8)" }} />
+                <span className="text-sm font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>Witnessed Work</span>
+                {evidenceItems.length > 0 && (
+                  <span className="text-xs px-1.5 py-0.5 rounded ml-1" style={{ background: "rgba(196,154,40,0.1)", color: "rgba(196,154,40,0.7)", border: "1px solid rgba(196,154,40,0.2)" }}>
+                    {evidenceItems.length} artifact{evidenceItems.length !== 1 ? "s" : ""}
+                  </span>
+                )}
+                {song.witnessId && (
+                  <WIDPanel
+                    witnessId={song.witnessId}
+                    songTitle={song.title}
+                    creatorName={creator?.artistHandle || creator?.name}
+                    registeredAt={song.createdAt}
+                    coverArtUrl={song.coverArtUrl}
+                    certificateUrl={song.certificateUrl}
+                    haaiVisualConcept={(song as any).haaiVisualConcept}
+                    haaiStyleLanguage={(song as any).haaiStyleLanguage}
+                    haaiInstrumentation={(song as any).haaiInstrumentation}
+                    haaiVocalConveyance={(song as any).haaiVocalConveyance}
+                    haaiLyricalInspiration={(song as any).haaiLyricalInspiration}
+                    haaiEmotionalTone={(song as any).haaiEmotionalTone}
+                    haaiDeclaredAt={(song as any).haaiDeclaredAt}
+                  />
+                )}
+              </div>
+
+              <div className="px-5 py-4 space-y-3">
+                {/* WID hash + content type inline */}
+                <div className="flex flex-wrap gap-2">
+                  {song.witnessId && (
+                    <div className="flex items-center gap-1 px-2.5 py-1 rounded-full font-mono" style={{ background: "rgba(74,222,128,0.06)", border: "1px solid rgba(74,222,128,0.2)" }}>
+                      <Hash size={10} style={{ color: "rgba(74,222,128,0.7)" }} />
+                      <span className="text-[11px]" style={{ color: "rgba(74,222,128,0.7)" }}>{song.witnessId.slice(0, 24)}…</span>
+                    </div>
+                  )}
+                  {song.witnessId && song.createdAt && (
+                    <span className="text-[11px] flex items-center" style={{ color: "rgba(255,255,255,0.3)" }}>
+                      Registered {new Date(song.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}
+                    </span>
+                  )}
+                </div>
+
+                {/* Testimony excerpt */}
+                {((song as any).headlineCaption || (song as any).description) && (
+                  <p className="text-sm leading-relaxed" style={{ color: "var(--ln-smoke)", fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic" }}>
+                    "{((song as any).headlineCaption || (song as any).description || "").slice(0, 220)}{(((song as any).headlineCaption || (song as any).description || "").length > 220 ? "…" : "")}"
+                  </p>
+                )}
+
+                {/* Framing statement */}
+                <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.22)" }}>
+                  The manifestation itself is the primary evidence of this work's existence and authorship. Supplementary proof artifacts can be attached by the creator.
+                </p>
+
+                {/* ── Supplementary Artifacts — inline list ── */}
+                {evidenceItems.length > 0 && (
+                  <div className="space-y-2 pt-1">
+                    <p className="text-[10px] font-heading tracking-widest uppercase" style={{ color: "rgba(196,154,40,0.5)" }}>Proof Artifacts</p>
+                    {evidenceItems.map((item: any) => {
+                      const iconMap: Record<string, any> = { file: FileText, link: Link2, note: StickyNote };
+                      const colorMap: Record<string, string> = { file: "rgba(196,154,40,0.8)", link: "rgba(96,165,250,0.8)", note: "rgba(167,243,208,0.8)" };
+                      const labelMap: Record<string, string> = { file: "File", link: "Link", note: "Note" };
+                      const Icon = iconMap[item.type] ?? FileText;
+                      const color = colorMap[item.type] ?? "rgba(196,154,40,0.8)";
+                      return (
+                        <div key={item.id} className="flex items-start gap-3 rounded-xl px-4 py-3" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(196,154,40,0.1)" }}>
+                          <div className="flex-shrink-0 mt-0.5 p-1.5 rounded-lg" style={{ background: "rgba(196,154,40,0.07)" }}>
+                            <Icon className="w-3.5 h-3.5" style={{ color }} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-sm font-medium truncate" style={{ color: "var(--ln-parchment)" }}>{item.title}</span>
+                              <span className="text-[10px] px-1.5 py-0.5 rounded uppercase tracking-wide" style={{ background: "rgba(196,154,40,0.06)", color, border: `1px solid ${color.replace("0.8", "0.25")}` }}>{labelMap[item.type] ?? item.type}</span>
+                            </div>
+                            {item.type === "note" && item.noteBody && (
+                              <p className="text-xs mt-1 leading-relaxed" style={{ color: "var(--ln-smoke)" }}>{item.noteBody}</p>
+                            )}
+                            {item.url && item.type !== "note" && (
+                              <a href={item.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs mt-1 hover:underline" style={{ color: "rgba(96,165,250,0.8)" }}>
+                                <ExternalLink className="w-3 h-3" />
+                                {item.type === "file" ? "View file" : item.url.slice(0, 48) + (item.url.length > 48 ? "…" : "")}
+                              </a>
+                            )}
+                            {item.hash && (
+                              <div className="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded text-[10px] font-mono" style={{ background: "rgba(74,222,128,0.06)", border: "1px solid rgba(74,222,128,0.2)", color: "rgba(74,222,128,0.7)" }} title={`SHA-256: ${item.hash}`}>
+                                <Hash className="w-2.5 h-2.5" />{item.hash.slice(0, 16)}…
+                              </div>
+                            )}
+                            <p className="text-[10px] mt-1" style={{ color: "rgba(255,255,255,0.25)" }}>Added {new Date(item.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}</p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* Certificate link */}
+                {song.certificateUrl && (
+                  <a href={song.certificateUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-xs hover:underline" style={{ color: "var(--ln-gold)" }}>
+                    <ExternalLink className="w-3 h-3" />View Provenance Certificate
+                  </a>
+                )}
+              </div>
+            </div>
+
+            {/* ── Action Buttons ── */}
+            <div className="flex flex-wrap gap-2">
+              {!isOwner && (
+                <Button size="sm" variant="outline" onClick={e => toggleLike(e)}
+                  style={isLiked ? { borderColor: "rgba(239,68,68,0.6)", color: "var(--ln-ember)" } : { borderColor: "#C3AB7D", color: "var(--ln-smoke)" }}>
+                  <Heart className="w-3.5 h-3.5 mr-1" fill={isLiked ? "currentColor" : "none"} />
+                  {isLiked ? "Liked" : "Like"}
+                  {likeCount > 0 && <span className="ml-1 text-[11px] tabular-nums opacity-70">{likeCount >= 1000 ? `${(likeCount / 1000).toFixed(1)}k` : likeCount}</span>}
+                </Button>
+              )}
+              {!isOwner && <AddToPlaylistButton songId={song.id} variant="full" />}
+              {!isOwner && <AddToNamedPlaylistPopover songId={song.id} songTitle={song.title} variant="full" />}
+              {/* Download */}
+              {(() => {
+                const dlPerm = (song as any).downloadPermission as string | undefined;
+                const tipCents = (song as any).downloadTipThresholdCents as number | undefined;
+                if (!dlPerm || dlPerm === "none") return null;
+                if (dlPerm === "free") return (
+                  <Button size="sm" variant="outline" onClick={() => downloadMutation.mutate({ songId: song.id })} disabled={downloadMutation.isPending} style={{ borderColor: "#C3AB7D", color: "var(--ln-smoke)" }}>
+                    <Download className="w-3.5 h-3.5 mr-1" />{downloadMutation.isPending ? "…" : "Download"}
+                  </Button>
+                );
+                if (dlPerm === "tipped") return (
+                  <Button size="sm" variant="outline" onClick={() => tipDownloadMutation.mutate({ songId: song.id, origin: window.location.origin })} disabled={tipDownloadMutation.isPending} title={`Tip $${((tipCents ?? 179) / 100).toFixed(2)} to unlock download`} style={{ borderColor: "rgba(196,154,40,0.3)", color: "var(--ln-gold)" }}>
+                    <Download className="w-3.5 h-3.5 mr-1" />{tipDownloadMutation.isPending ? "Processing…" : `Download ($${((tipCents ?? 179) / 100).toFixed(2)} tip)`}
+                  </Button>
+                );
+                return null;
+              })()}
+              <Button size="sm" variant="outline" onClick={() => setVersionHistoryOpen(true)} style={{ borderColor: "rgba(196,154,40,0.25)", color: "var(--ln-gold)" }}>
+                <History className="w-3.5 h-3.5 mr-1" />Versions
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => setShareOpen(true)} style={{ borderColor: "#C3AB7D", color: "var(--ln-smoke)" }}>
+                <Share2 className="w-3.5 h-3.5 mr-1" />Share
+              </Button>
+              {song && (
+                <Link href={`/constellation/${song.id}`}>
+                  <Button size="sm" variant="outline" style={{ borderColor: "rgba(138,43,226,0.4)", color: "rgba(192,132,252,0.85)" }}>
+                    <Network className="w-3.5 h-3.5 mr-1" />Cosmos
+                  </Button>
+                </Link>
+              )}
+              {song && (
+                <QRShareModal entity={{ type: "song", id: song.id, slug: String(song.id), name: song.title, subtitle: song.artistHandle || song.creatorName || undefined, description: song.description ?? undefined, thumbnailUrl: song.coverArtUrl ?? undefined }}
+                  trigger={
+                    <Button size="sm" variant="outline" style={{ borderColor: "rgba(196,154,40,0.25)", color: "rgba(232,223,200,0.6)" }} className="gap-1.5">
+                      <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h2v2h-2zm4 0h3v3h-3zm0 4v3h-3v-3"/></svg>
+                      ID Card
+                    </Button>
+                  }
+                />
+              )}
+              {!isOwner && (
+                <FlagContentButton workId={song.id} workType="audio" workTitle={song.title} size="sm" className="px-2 py-1 rounded border border-zinc-800 hover:border-red-800/60" />
+              )}
+                            {/* Edit Work removed — edit via Archive */}
+            </div>
+
+            {/* ── Missing cover art alert (owner only) ── */}
+            {isOwner && !song.coverArtUrl && (
+              <div className="flex items-start gap-3 rounded-xl px-4 py-3" style={{ background: "rgba(234,179,8,0.06)", border: "1px solid rgba(234,179,8,0.35)" }}>
+                <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: "#eab308" }} />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold" style={{ color: "#eab308", fontFamily: "'Cinzel', serif" }}>Missing Cover Art</p>
+                  <p className="text-xs mt-0.5" style={{ color: "rgba(234,179,8,0.7)" }}>This work has no cover art. Add one so it displays correctly across the platform.</p>
+                </div>
+                <Button size="sm" variant="outline" onClick={() => setEditingOpen(true)}
+                  style={{ borderColor: "rgba(234,179,8,0.4)", color: "#eab308", flexShrink: 0, fontSize: "11px" }}>
+                  Add Art
+                </Button>
+              </div>
+            )}
+
+            {/* ── Tip panel ── */}
+            {tipsEnabled && !isOwner && (
+              <div className="rounded-2xl p-5" style={{ background: "linear-gradient(135deg, rgba(44,52,56,0.6), #000000)", border: "1px solid rgba(196,154,40,0.3)" }}>
+                <div className="flex items-center gap-2 mb-3">
+                  <DollarSign className="w-4 h-4" style={{ color: "var(--ln-gold)" }} />
+                  <p className="text-sm font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-gold)" }}>Gift {creator?.artistHandle || creator?.name}</p>
+                  <span className="text-xs ml-auto" style={{ color: "var(--ln-iron)" }}>90% to artist</span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {["1", "2", "5", "10", "25"].map(amt => (
+                    <button key={amt} onClick={() => { setTipAmount(amt); tipMutation.mutate({ songId: song.id, amountCents: Math.round(parseFloat(amt) * 100), origin: window.location.origin }); }} disabled={tipMutation.isPending}
+                      className="px-4 py-2 rounded-lg text-sm font-bold transition-all hover:scale-105 active:scale-95 disabled:opacity-60"
+                      style={{ background: "var(--ln-gold)", color: "var(--ln-parchment)" }}>${amt}</button>
+                  ))}
+                  <button onClick={() => setTipOpen(true)} className="px-4 py-2 rounded-lg text-sm font-medium transition-all hover:scale-105 active:scale-95" style={{ background: "var(--ln-coal)", color: "var(--ln-parchment)", border: "1px solid #C3AB7D" }}>Custom</button>
+                </div>
+              </div>
+            )}
+
+            {/* ── Sovereign Stamp ── */}
+            {(song as any).sovereignStampId && (
+              <div className="rounded-2xl p-4" style={{ background: "rgba(196,154,40,0.04)", border: "1px solid rgba(196,154,40,0.3)" }}>
+                <div className="flex items-start gap-3">
+                  <span style={{ fontSize: "18px", lineHeight: 1 }}>🔏</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold mb-1" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-gold)" }}>Sovereign Stamp Applied</p>
+                    <p className="text-xs font-mono break-all" style={{ color: "#E2E8F0" }}>{(song as any).sovereignStampId}</p>
+                    <p className="text-[11px] mt-1" style={{ color: "var(--ln-smoke)" }}>Near-ultrasonic tone embedded — 17 U.S.C. § 102(a)</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ── Harmonic Signature ── */}
+            {(song as any).harmonicSignature && (
+              <div className="flex flex-wrap gap-2">
+                <a href={`/api/harmonic/${song.id}/audio`} download className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full hover:opacity-80 transition-opacity" style={{ background: "rgba(196,154,40,0.12)", border: "1px solid rgba(196,154,40,0.3)", color: "var(--ln-gold)" }}>
+                  <Download className="w-3 h-3" />Harmonic Tone (.wav)
+                </a>
+                <a href={`/api/harmonic/${song.id}/image`} download className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full hover:opacity-80 transition-opacity" style={{ background: "rgba(196,154,40,0.12)", border: "1px solid rgba(196,154,40,0.3)", color: "var(--ln-gold)" }}>
+                  <Download className="w-3 h-3" />Waveform Image (.png)
+                </a>
+              </div>
+            )}
+
             {/* ══ RESONANCE FIELD — Reactions, Activity, Related ══ */}
             {/* ══ RESONANCE FIELD — Reactions (right column, desktop) ══ */}
             {/* Emoji Reactions */}
@@ -879,238 +1106,6 @@ export default function SongDetailPage() {
                 </div>
               </div>
             )}
-            {/* ══ WITNESSED WORK — Inline, front and center ══ */}
-            <div className="rounded-2xl overflow-hidden" style={{ background: "rgba(196,154,40,0.03)", border: "1px solid rgba(196,154,40,0.25)" }}>
-              {/* Header */}
-              <div className="flex items-center gap-2.5 px-5 py-3.5" style={{ borderBottom: "1px solid rgba(196,154,40,0.12)" }}>
-                <ShieldCheck className="w-4 h-4 flex-shrink-0" style={{ color: "rgba(196,154,40,0.8)" }} />
-                <span className="text-sm font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>Witnessed Work</span>
-                {evidenceItems.length > 0 && (
-                  <span className="text-xs px-1.5 py-0.5 rounded ml-1" style={{ background: "rgba(196,154,40,0.1)", color: "rgba(196,154,40,0.7)", border: "1px solid rgba(196,154,40,0.2)" }}>
-                    {evidenceItems.length} artifact{evidenceItems.length !== 1 ? "s" : ""}
-                  </span>
-                )}
-                {song.witnessId && (
-                  <WIDPanel
-                    witnessId={song.witnessId}
-                    songTitle={song.title}
-                    creatorName={creator?.artistHandle || creator?.name}
-                    registeredAt={song.createdAt}
-                    coverArtUrl={song.coverArtUrl}
-                    certificateUrl={song.certificateUrl}
-                    haaiVisualConcept={(song as any).haaiVisualConcept}
-                    haaiStyleLanguage={(song as any).haaiStyleLanguage}
-                    haaiInstrumentation={(song as any).haaiInstrumentation}
-                    haaiVocalConveyance={(song as any).haaiVocalConveyance}
-                    haaiLyricalInspiration={(song as any).haaiLyricalInspiration}
-                    haaiEmotionalTone={(song as any).haaiEmotionalTone}
-                    haaiDeclaredAt={(song as any).haaiDeclaredAt}
-                  />
-                )}
-              </div>
-
-              <div className="px-5 py-4 space-y-3">
-                {/* WID hash + content type inline */}
-                <div className="flex flex-wrap gap-2">
-                  {song.witnessId && (
-                    <div className="flex items-center gap-1 px-2.5 py-1 rounded-full font-mono" style={{ background: "rgba(74,222,128,0.06)", border: "1px solid rgba(74,222,128,0.2)" }}>
-                      <Hash size={10} style={{ color: "rgba(74,222,128,0.7)" }} />
-                      <span className="text-[11px]" style={{ color: "rgba(74,222,128,0.7)" }}>{song.witnessId.slice(0, 24)}…</span>
-                    </div>
-                  )}
-                  {song.witnessId && song.createdAt && (
-                    <span className="text-[11px] flex items-center" style={{ color: "rgba(255,255,255,0.3)" }}>
-                      Registered {new Date(song.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}
-                    </span>
-                  )}
-                </div>
-
-                {/* Testimony excerpt */}
-                {((song as any).headlineCaption || (song as any).description) && (
-                  <p className="text-sm leading-relaxed" style={{ color: "var(--ln-smoke)", fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic" }}>
-                    "{((song as any).headlineCaption || (song as any).description || "").slice(0, 220)}{(((song as any).headlineCaption || (song as any).description || "").length > 220 ? "…" : "")}"
-                  </p>
-                )}
-
-                {/* Framing statement */}
-                <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.22)" }}>
-                  The manifestation itself is the primary evidence of this work's existence and authorship. Supplementary proof artifacts can be attached by the creator.
-                </p>
-
-                {/* ── Supplementary Artifacts — inline list ── */}
-                {evidenceItems.length > 0 && (
-                  <div className="space-y-2 pt-1">
-                    <p className="text-[10px] font-heading tracking-widest uppercase" style={{ color: "rgba(196,154,40,0.5)" }}>Proof Artifacts</p>
-                    {evidenceItems.map((item: any) => {
-                      const iconMap: Record<string, any> = { file: FileText, link: Link2, note: StickyNote };
-                      const colorMap: Record<string, string> = { file: "rgba(196,154,40,0.8)", link: "rgba(96,165,250,0.8)", note: "rgba(167,243,208,0.8)" };
-                      const labelMap: Record<string, string> = { file: "File", link: "Link", note: "Note" };
-                      const Icon = iconMap[item.type] ?? FileText;
-                      const color = colorMap[item.type] ?? "rgba(196,154,40,0.8)";
-                      return (
-                        <div key={item.id} className="flex items-start gap-3 rounded-xl px-4 py-3" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(196,154,40,0.1)" }}>
-                          <div className="flex-shrink-0 mt-0.5 p-1.5 rounded-lg" style={{ background: "rgba(196,154,40,0.07)" }}>
-                            <Icon className="w-3.5 h-3.5" style={{ color }} />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <span className="text-sm font-medium truncate" style={{ color: "var(--ln-parchment)" }}>{item.title}</span>
-                              <span className="text-[10px] px-1.5 py-0.5 rounded uppercase tracking-wide" style={{ background: "rgba(196,154,40,0.06)", color, border: `1px solid ${color.replace("0.8", "0.25")}` }}>{labelMap[item.type] ?? item.type}</span>
-                            </div>
-                            {item.type === "note" && item.noteBody && (
-                              <p className="text-xs mt-1 leading-relaxed" style={{ color: "var(--ln-smoke)" }}>{item.noteBody}</p>
-                            )}
-                            {item.url && item.type !== "note" && (
-                              <a href={item.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs mt-1 hover:underline" style={{ color: "rgba(96,165,250,0.8)" }}>
-                                <ExternalLink className="w-3 h-3" />
-                                {item.type === "file" ? "View file" : item.url.slice(0, 48) + (item.url.length > 48 ? "…" : "")}
-                              </a>
-                            )}
-                            {item.hash && (
-                              <div className="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded text-[10px] font-mono" style={{ background: "rgba(74,222,128,0.06)", border: "1px solid rgba(74,222,128,0.2)", color: "rgba(74,222,128,0.7)" }} title={`SHA-256: ${item.hash}`}>
-                                <Hash className="w-2.5 h-2.5" />{item.hash.slice(0, 16)}…
-                              </div>
-                            )}
-                            <p className="text-[10px] mt-1" style={{ color: "rgba(255,255,255,0.25)" }}>Added {new Date(item.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}</p>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-
-                {/* Certificate link */}
-                {song.certificateUrl && (
-                  <a href={song.certificateUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-xs hover:underline" style={{ color: "var(--ln-gold)" }}>
-                    <ExternalLink className="w-3 h-3" />View Provenance Certificate
-                  </a>
-                )}
-              </div>
-            </div>
-
-            {/* ── Action Buttons ── */}
-            <div className="flex flex-wrap gap-2">
-              {!isOwner && (
-                <Button size="sm" variant="outline" onClick={e => toggleLike(e)}
-                  style={isLiked ? { borderColor: "rgba(239,68,68,0.6)", color: "var(--ln-ember)" } : { borderColor: "#C3AB7D", color: "var(--ln-smoke)" }}>
-                  <Heart className="w-3.5 h-3.5 mr-1" fill={isLiked ? "currentColor" : "none"} />
-                  {isLiked ? "Liked" : "Like"}
-                  {likeCount > 0 && <span className="ml-1 text-[11px] tabular-nums opacity-70">{likeCount >= 1000 ? `${(likeCount / 1000).toFixed(1)}k` : likeCount}</span>}
-                </Button>
-              )}
-              {!isOwner && <AddToPlaylistButton songId={song.id} variant="full" />}
-              {!isOwner && <AddToNamedPlaylistPopover songId={song.id} songTitle={song.title} variant="full" />}
-              {/* Download */}
-              {(() => {
-                const dlPerm = (song as any).downloadPermission as string | undefined;
-                const tipCents = (song as any).downloadTipThresholdCents as number | undefined;
-                if (!dlPerm || dlPerm === "none") return null;
-                if (dlPerm === "free") return (
-                  <Button size="sm" variant="outline" onClick={() => downloadMutation.mutate({ songId: song.id })} disabled={downloadMutation.isPending} style={{ borderColor: "#C3AB7D", color: "var(--ln-smoke)" }}>
-                    <Download className="w-3.5 h-3.5 mr-1" />{downloadMutation.isPending ? "…" : "Download"}
-                  </Button>
-                );
-                if (dlPerm === "tipped") return (
-                  <Button size="sm" variant="outline" onClick={() => tipDownloadMutation.mutate({ songId: song.id, origin: window.location.origin })} disabled={tipDownloadMutation.isPending} title={`Tip $${((tipCents ?? 179) / 100).toFixed(2)} to unlock download`} style={{ borderColor: "rgba(196,154,40,0.3)", color: "var(--ln-gold)" }}>
-                    <Download className="w-3.5 h-3.5 mr-1" />{tipDownloadMutation.isPending ? "Processing…" : `Download ($${((tipCents ?? 179) / 100).toFixed(2)} tip)`}
-                  </Button>
-                );
-                return null;
-              })()}
-              <Button size="sm" variant="outline" onClick={() => setVersionHistoryOpen(true)} style={{ borderColor: "rgba(196,154,40,0.25)", color: "var(--ln-gold)" }}>
-                <History className="w-3.5 h-3.5 mr-1" />Versions
-              </Button>
-              <Button size="sm" variant="outline" onClick={() => setShareOpen(true)} style={{ borderColor: "#C3AB7D", color: "var(--ln-smoke)" }}>
-                <Share2 className="w-3.5 h-3.5 mr-1" />Share
-              </Button>
-              {song && (
-                <Link href={`/constellation/${song.id}`}>
-                  <Button size="sm" variant="outline" style={{ borderColor: "rgba(138,43,226,0.4)", color: "rgba(192,132,252,0.85)" }}>
-                    <Network className="w-3.5 h-3.5 mr-1" />Cosmos
-                  </Button>
-                </Link>
-              )}
-              {song && (
-                <QRShareModal entity={{ type: "song", id: song.id, slug: String(song.id), name: song.title, subtitle: song.artistHandle || song.creatorName || undefined, description: song.description ?? undefined, thumbnailUrl: song.coverArtUrl ?? undefined }}
-                  trigger={
-                    <Button size="sm" variant="outline" style={{ borderColor: "rgba(196,154,40,0.25)", color: "rgba(232,223,200,0.6)" }} className="gap-1.5">
-                      <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h2v2h-2zm4 0h3v3h-3zm0 4v3h-3v-3"/></svg>
-                      ID Card
-                    </Button>
-                  }
-                />
-              )}
-              {!isOwner && (
-                <FlagContentButton workId={song.id} workType="audio" workTitle={song.title} size="sm" className="px-2 py-1 rounded border border-zinc-800 hover:border-red-800/60" />
-              )}
-              {isOwner && (
-                <Button size="sm" variant="outline" onClick={() => setEditingOpen(true)}
-                  style={{ borderColor: "rgba(196,154,40,0.5)", color: "var(--ln-gold)", background: "rgba(196,154,40,0.06)" }}>
-                  <Pencil className="w-3.5 h-3.5 mr-1" />Edit Work
-                </Button>
-              )}
-            </div>
-
-            {/* ── Missing cover art alert (owner only) ── */}
-            {isOwner && !song.coverArtUrl && (
-              <div className="flex items-start gap-3 rounded-xl px-4 py-3" style={{ background: "rgba(234,179,8,0.06)", border: "1px solid rgba(234,179,8,0.35)" }}>
-                <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: "#eab308" }} />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold" style={{ color: "#eab308", fontFamily: "'Cinzel', serif" }}>Missing Cover Art</p>
-                  <p className="text-xs mt-0.5" style={{ color: "rgba(234,179,8,0.7)" }}>This work has no cover art. Add one so it displays correctly across the platform.</p>
-                </div>
-                <Button size="sm" variant="outline" onClick={() => setEditingOpen(true)}
-                  style={{ borderColor: "rgba(234,179,8,0.4)", color: "#eab308", flexShrink: 0, fontSize: "11px" }}>
-                  Add Art
-                </Button>
-              </div>
-            )}
-
-            {/* ── Tip panel ── */}
-            {tipsEnabled && !isOwner && (
-              <div className="rounded-2xl p-5" style={{ background: "linear-gradient(135deg, rgba(44,52,56,0.6), #000000)", border: "1px solid rgba(196,154,40,0.3)" }}>
-                <div className="flex items-center gap-2 mb-3">
-                  <DollarSign className="w-4 h-4" style={{ color: "var(--ln-gold)" }} />
-                  <p className="text-sm font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-gold)" }}>Gift {creator?.artistHandle || creator?.name}</p>
-                  <span className="text-xs ml-auto" style={{ color: "var(--ln-iron)" }}>90% to artist</span>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {["1", "2", "5", "10", "25"].map(amt => (
-                    <button key={amt} onClick={() => { setTipAmount(amt); tipMutation.mutate({ songId: song.id, amountCents: Math.round(parseFloat(amt) * 100), origin: window.location.origin }); }} disabled={tipMutation.isPending}
-                      className="px-4 py-2 rounded-lg text-sm font-bold transition-all hover:scale-105 active:scale-95 disabled:opacity-60"
-                      style={{ background: "var(--ln-gold)", color: "var(--ln-parchment)" }}>${amt}</button>
-                  ))}
-                  <button onClick={() => setTipOpen(true)} className="px-4 py-2 rounded-lg text-sm font-medium transition-all hover:scale-105 active:scale-95" style={{ background: "var(--ln-coal)", color: "var(--ln-parchment)", border: "1px solid #C3AB7D" }}>Custom</button>
-                </div>
-              </div>
-            )}
-
-            {/* ── Sovereign Stamp ── */}
-            {(song as any).sovereignStampId && (
-              <div className="rounded-2xl p-4" style={{ background: "rgba(196,154,40,0.04)", border: "1px solid rgba(196,154,40,0.3)" }}>
-                <div className="flex items-start gap-3">
-                  <span style={{ fontSize: "18px", lineHeight: 1 }}>🔏</span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold mb-1" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-gold)" }}>Sovereign Stamp Applied</p>
-                    <p className="text-xs font-mono break-all" style={{ color: "#E2E8F0" }}>{(song as any).sovereignStampId}</p>
-                    <p className="text-[11px] mt-1" style={{ color: "var(--ln-smoke)" }}>Near-ultrasonic tone embedded — 17 U.S.C. § 102(a)</p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* ── Harmonic Signature ── */}
-            {(song as any).harmonicSignature && (
-              <div className="flex flex-wrap gap-2">
-                <a href={`/api/harmonic/${song.id}/audio`} download className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full hover:opacity-80 transition-opacity" style={{ background: "rgba(196,154,40,0.12)", border: "1px solid rgba(196,154,40,0.3)", color: "var(--ln-gold)" }}>
-                  <Download className="w-3 h-3" />Harmonic Tone (.wav)
-                </a>
-                <a href={`/api/harmonic/${song.id}/image`} download className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full hover:opacity-80 transition-opacity" style={{ background: "rgba(196,154,40,0.12)", border: "1px solid rgba(196,154,40,0.3)", color: "var(--ln-gold)" }}>
-                  <Download className="w-3 h-3" />Waveform Image (.png)
-                </a>
-              </div>
-            )}
-
           </div>
         </div>
 

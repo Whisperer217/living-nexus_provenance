@@ -5459,3 +5459,8 @@
 - [x] Fix GlobalPlayer touchAction:none covering entire container — change to pan-y, restrict none to drag handle only
 - [x] Remove duplicate body.overflow scroll lock in MobileNavDrawer (conflicts with overlayController)
 - [x] Remove backdropFilter blur(24px) from MobileNavDrawer panel (GPU-expensive on Tensor G1)
+
+## SongDetailPage Layout Fix + Edit Work Removal
+- [x] Remove "Edit Work" button from SongDetailPage (causes page lockup; editing available in Archive)
+- [x] Restore Reactions/Activity/Related panels to right column (beside artwork), not below the action buttons row
+- [x] Keep Witnessed Work + Download/Versions/Share/Cosmos/ID Card action buttons in correct position below left column
