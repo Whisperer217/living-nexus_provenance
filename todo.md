@@ -5512,3 +5512,10 @@
 - [x] Delete MobilePlayerLayer.tsx — confirmed dead code (not mounted anywhere)
 - [x] Update viewportLayers.ts — remove stale BOTTOM_NAV_BAR/MOBILE_NAV entries, correct CINEMATIC_PORTAL to 99995, add navigation doctrine comment
 - [x] 0 TypeScript errors, 297/297 tests passing
+
+## Bio Layout Fix — Mobile + Desktop (Jun 22 2026)
+- [x] Root cause: bio <p> in flex-col context had no w-full — flex children size to content width by default, causing single-word-per-line wrapping on mobile
+- [x] Fix: added w-full to mobile bio <p> (line 1448) and desktop bio <p> (line 1091)
+- [x] Desktop: removed line-clamp-3 — bio now shows full text (not truncated after 3 lines)
+- [x] Systemic: same root cause affects any creator profile (Slimdoggy, Doc, HulkingManiacNerdWarmonger)
+- [x] 0 TypeScript errors, 297/297 tests passing

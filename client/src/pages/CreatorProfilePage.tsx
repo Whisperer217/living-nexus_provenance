@@ -1085,10 +1085,10 @@ export default function CreatorProfilePage() {
                   </button>
                 )}
 
-                {/* Bio — two lines max, muted */}
+                {/* Bio — full text, muted, always full-width */}
                 {creator.bio && (
                   <p
-                    className="text-sm mt-2 line-clamp-3 leading-relaxed"
+                    className="text-sm mt-2 leading-relaxed w-full"
                     style={{ color: "var(--ln-smoke)", border: "none", outline: "none" }}
                   >
                     {creator.bio}
@@ -1443,9 +1443,9 @@ export default function CreatorProfilePage() {
                   </span>
                 )}
               </div>
-              {/* Bio */}
+              {/* Bio — full-width paragraph, no flex shrink */}
               {creator.bio && (
-                <p className="text-sm leading-relaxed" style={{ color: "var(--ln-smoke)" }}>
+                <p className="text-sm leading-relaxed w-full" style={{ color: "var(--ln-smoke)" }}>
                   {creator.bio}
                 </p>
               )}
