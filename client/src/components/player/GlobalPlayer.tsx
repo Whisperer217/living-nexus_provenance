@@ -323,7 +323,11 @@ function GlobalPlayerInner() {
     isMobileDevice,
   );
   const waveCanvasRef = useRef<HTMLCanvasElement | null>(null);
-  useWaveformVisualizer(audioRef, waveCanvasRef, glowEnabled, state.isPlaying, isMobileDevice);
+  const cinematicCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  // Waveform is always enabled in expanded/cinematic mode — not gated by glowEnabled
+  const waveformActive = zone === "EXPANDED" || cinematic;
+  useWaveformVisualizer(audioRef, waveCanvasRef, waveformActive, state.isPlaying, isMobileDevice);
+  useWaveformVisualizer(audioRef, cinematicCanvasRef, cinematic, state.isPlaying, isMobileDevice);
 
   /* ── Track data ── */
   const tracks = allTracks();
@@ -1189,18 +1193,16 @@ function GlobalPlayerInner() {
               </button>
             )}
 
-            {/* Waveform canvas */}
-            {glowEnabled && (
-              <div className="flex justify-center">
-                <canvas
-                  ref={waveCanvasRef}
-                  width={300}
-                  height={48}
-                  className="rounded-lg"
-                  style={{ opacity: 0.7 }}
-                />
-              </div>
-            )}
+            {/* Waveform canvas — always visible in expanded mode, per Global Player spec */}
+            <div className="px-2">
+              <canvas
+                ref={waveCanvasRef}
+                width={320}
+                height={64}
+                className="w-full rounded-xl"
+                style={{ opacity: state.isPlaying ? 0.92 : 0.45, transition: "opacity 0.4s ease" }}
+              />
+            </div>
 
             {/* Speed + playback rate */}
             <div className="flex items-center justify-center gap-3">
@@ -1475,140 +1477,151 @@ function GlobalPlayerInner() {
     document.body
   ) : null;
 
-  /* ── Cinematic overlay portal ── */
+  /* ── Cinematic overlay portal — Waveform as Primary Visual Authority ── */
   const cinematicPortal = cinematic && visTrack ? createPortal(
     <div
-      className="fixed inset-0"
+      className="fixed inset-0 flex flex-col"
       style={{
         zIndex: 99995,
-        background: "#000",
-        cursor: "pointer",
-        // Entrance animation: fade + scale-up from slightly below
+        background: "linear-gradient(180deg, #0a0008 0%, #0d0014 40%, #060008 100%)",
         animation: "ln-cinematic-enter 0.45s cubic-bezier(0.32,0.72,0,1) both",
+        paddingTop: "env(safe-area-inset-top, 0px)",
+        paddingBottom: "env(safe-area-inset-bottom, 0px)",
       }}
-      onClick={showCinematicOverlay}
     >
-      {/* Depth layer 1: far background — heavy blur, low brightness */}
+      {/* Ambient art blur — background depth only, very dim */}
       {visTrack.artUrl && (
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage: `url(${visTrack.artUrl})`,
-            backgroundSize: "cover",
-            backgroundPosition: `${visTrack.coverPositionX ?? 50}% ${visTrack.coverPositionY ?? 50}%`,
-            filter: "blur(60px) brightness(0.25) saturate(1.6)",
-            transform: "scale(1.15)",
-            // Parallax: background shifts slightly opposite to swipe
-            transition: swipeDelta === 0 ? "transform 0.6s ease" : "none",
-            ...(swipeDelta !== 0 ? { transform: `scale(1.15) translateX(${-swipeDelta * 0.04}px)` } : {}),
-          }}
-        />
+        <div className="absolute inset-0 pointer-events-none" style={{
+          backgroundImage: `url(${visTrack.artUrl})`,
+          backgroundSize: "cover",
+          backgroundPosition: `${visTrack.coverPositionX ?? 50}% ${visTrack.coverPositionY ?? 50}%`,
+          filter: "blur(80px) brightness(0.08) saturate(1.2)",
+          transform: "scale(1.2)",
+        }} />
       )}
-      {/* Depth layer 2: mid vignette — radial dark gradient for depth */}
-      <div
-        className="absolute inset-0"
-        style={{
-          background: "radial-gradient(ellipse 80% 80% at 50% 50%, transparent 30%, rgba(0,0,0,0.55) 100%)",
-          pointerEvents: "none",
-        }}
-      />
-      {/* Depth layer 3: gold ambient glow behind artwork */}
-      <div
-        className="absolute inset-0 flex items-center justify-center"
-        style={{ paddingBottom: "120px", pointerEvents: "none" }}
-      >
-        <div
+
+      {/* ── Top bar ── */}
+      <div className="relative flex items-center justify-between px-5 pt-4 pb-2 flex-shrink-0">
+        <button
+          onClick={() => setCinematic(false)}
+          className="flex items-center gap-1.5 px-3 py-2 rounded-xl"
+          style={{ background: "rgba(0,0,0,0.5)", backdropFilter: "blur(8px)", color: "rgba(255,255,255,0.75)", border: "1px solid rgba(255,255,255,0.08)" }}
+        >
+          <ChevronDown size={16} />
+          <span className="text-[11px] font-medium tracking-wide">Exit</span>
+        </button>
+        <span className="text-[9px] font-mono tracking-[0.3em] uppercase" style={{ color: "rgba(212,175,55,0.45)" }}>Cinematic</span>
+        {visTrack.witnessId ? (
+          <button onClick={() => { setCinematic(false); goToVerify(); }}
+            className="flex items-center gap-1 px-2 py-1 rounded-full text-[9px] font-bold"
+            style={{ background: "rgba(0,0,0,0.6)", border: "1px solid rgba(74,222,128,0.5)", color: "#4ade80", backdropFilter: "blur(4px)" }}
+          >
+            <Shield size={8} /> WID
+          </button>
+        ) : <div className="w-14" />}
+      </div>
+
+      {/* ── Layer 1: Playback Context ── */}
+      <div className="relative flex items-center gap-4 px-5 py-3 flex-shrink-0">
+        {visTrack.artUrl
+          ? <img src={visTrack.artUrl} alt={visTrack.title} className="rounded-xl object-cover flex-shrink-0"
+              style={{ width: 64, height: 64, objectPosition: `${visTrack.coverPositionX ?? 50}% ${visTrack.coverPositionY ?? 50}%`, boxShadow: "0 4px 20px rgba(0,0,0,0.7), 0 0 0 1px rgba(212,175,55,0.2)" }} />
+          : <div className="rounded-xl flex items-center justify-center flex-shrink-0 text-3xl"
+              style={{ width: 64, height: 64, background: visTrack.bg || "#1a0020" }}>{visTrack.emoji || "🎵"}</div>
+        }
+        <div className="flex-1 min-w-0">
+          <p className="text-[17px] font-bold leading-tight truncate" style={{ color: "#F5EDD8", fontFamily: "'Cinzel', serif" }}>{visTrack.title}</p>
+          <p className="text-[13px] mt-0.5 truncate" style={{ color: "rgba(212,175,55,0.8)" }}>{visTrack.artist}</p>
+          <p className="text-[10px] mt-0.5 tracking-widest uppercase" style={{ color: "rgba(212,175,55,0.4)", fontFamily: "'Cinzel', serif" }}>Witnessed on Living Nexus</p>
+        </div>
+      </div>
+
+      {/* ── Progress bar ── */}
+      <div className="relative flex items-center gap-3 px-5 pb-2 flex-shrink-0">
+        <span className="text-[10px] tabular-nums w-8 text-right" style={{ color: "rgba(212,175,55,0.55)" }}>{fmtTime(state.currentTime)}</span>
+        <div className="flex-1 cursor-pointer" style={{ background: "rgba(212,175,55,0.12)", height: "4px", borderRadius: "2px" }} data-seek onClick={handleSeek}>
+          <div style={{ width: `${progress}%`, background: "linear-gradient(90deg, rgba(212,175,55,0.7) 0%, #D4AF37 100%)", height: "100%", borderRadius: "2px", position: "relative" }}>
+            <div style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%) translateX(50%)", width: "14px", height: "14px", borderRadius: "50%", background: "#F5E6B3", boxShadow: "0 0 10px rgba(245,230,179,0.9), 0 0 20px rgba(212,175,55,0.5)" }} />
+          </div>
+        </div>
+        <span className="text-[10px] tabular-nums w-8" style={{ color: "rgba(212,175,55,0.55)" }}>{fmtTime(state.duration, isReady)}</span>
+      </div>
+
+      {/* ── Layer 2: Primary Controls ── */}
+      <div className="relative flex items-center justify-between px-8 py-3 flex-shrink-0">
+        <button onClick={() => toggleShuffle()} style={{ padding: "10px", color: state.isShuffle ? GOLD : "rgba(212,175,55,0.35)", minWidth: 44, minHeight: 44, display: "flex", alignItems: "center", justifyContent: "center" }}><Shuffle size={20} /></button>
+        <button onClick={() => prevTrack()} style={{ padding: "10px", color: "rgba(245,237,216,0.8)", minWidth: 44, minHeight: 44, display: "flex", alignItems: "center", justifyContent: "center" }}><SkipBack size={26} fill="currentColor" /></button>
+        <button
+          onClick={() => togglePlay()}
+          className="flex items-center justify-center rounded-full transition-transform active:scale-90"
+          style={{ width: 72, height: 72, background: `radial-gradient(circle at 35% 35%, ${GOLD_HL}, ${GOLD} 60%, rgba(180,140,20,0.9) 100%)`, color: "#000", boxShadow: `0 0 24px ${GOLD_GLOW}, 0 0 48px rgba(212,175,55,0.2), inset 0 1px 0 rgba(255,255,255,0.3)`, flexShrink: 0 }}
+        >
+          {state.isPlaying ? <Pause size={28} fill="currentColor" /> : <Play size={28} fill="currentColor" style={{ marginLeft: 3 }} />}
+        </button>
+        <button onClick={() => nextTrack()} style={{ padding: "10px", color: "rgba(245,237,216,0.8)", minWidth: 44, minHeight: 44, display: "flex", alignItems: "center", justifyContent: "center" }}><SkipForward size={26} fill="currentColor" /></button>
+        <button onClick={() => toggleRepeat()} style={{ padding: "10px", color: state.isRepeat ? GOLD : "rgba(212,175,55,0.35)", minWidth: 44, minHeight: 44, display: "flex", alignItems: "center", justifyContent: "center" }}><Repeat size={20} /></button>
+      </div>
+
+      {/* ── Layer 3: Secondary Actions ── */}
+      <div className="relative flex items-center justify-between px-4 py-2 flex-shrink-0" style={{ borderTop: "1px solid rgba(212,175,55,0.08)", borderBottom: "1px solid rgba(212,175,55,0.08)" }}>
+        {[
+          { icon: <Heart size={18} fill={isLiked ? "#ef4444" : "none"} />, label: "Like", color: isLiked ? "#ef4444" : "rgba(212,175,55,0.5)", action: () => { if (currentSongId) toggleLikeMutation.mutate({ songId: currentSongId }); } },
+          { icon: <MessageCircle size={18} />, label: "Comment", color: "rgba(212,175,55,0.5)", action: () => { setCinematic(false); setCommentsOpen(true); } },
+          { icon: <Share2 size={18} />, label: "Share", color: "rgba(212,175,55,0.5)", action: () => { if (visTrack?.id) { navigator.clipboard?.writeText(`${window.location.origin}/song/${visTrack.id}`).then(() => toast.success("Link copied")); } } },
+          { icon: <DollarSign size={18} />, label: "Tip", color: tipsEnabled ? "rgba(212,175,55,0.5)" : "rgba(212,175,55,0.2)", action: () => { if (tipsEnabled && currentSongId) { setCinematic(false); setTipOpen(true); } } },
+          { icon: <Volume2 size={18} />, label: "Volume", color: state.isMuted ? "rgba(212,175,55,0.25)" : "rgba(212,175,55,0.5)", action: () => toggleMute() },
+        ].map(({ icon, label, color, action }) => (
+          <button key={label} onClick={action}
+            className="flex flex-col items-center gap-1"
+            style={{ color, minWidth: 44, minHeight: 44, justifyContent: "center", padding: "6px 4px" }}
+          >
+            {icon}
+            <span className="text-[9px] tracking-wide uppercase" style={{ color: "rgba(212,175,55,0.4)" }}>{label}</span>
+          </button>
+        ))}
+      </div>
+
+      {/* ── Waveform Stage — Primary Visual Authority ── */}
+      <div className="relative flex-1 flex flex-col items-center justify-center px-4 py-2 min-h-0">
+        {/* Gold ambient glow behind waveform */}
+        <div className="absolute inset-0 pointer-events-none" style={{
+          background: "radial-gradient(ellipse 80% 60% at 50% 50%, rgba(212,175,55,0.04) 0%, transparent 70%)",
+        }} />
+        <canvas
+          ref={cinematicCanvasRef}
+          className="w-full rounded-2xl"
           style={{
-            width: "min(420px, 88vw)",
-            height: "min(420px, 88vw)",
-            borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(212,175,55,0.12) 0%, transparent 70%)",
-            filter: "blur(24px)",
-            transform: swipeDelta !== 0 ? `translateX(${Math.sign(swipeDelta) * Math.min(Math.abs(swipeDelta) * 0.15, 20)}px)` : undefined,
-            transition: swipeDelta === 0 ? "transform 0.5s ease" : "none",
+            height: "100%",
+            maxHeight: 160,
+            opacity: state.isPlaying ? 1 : 0.5,
+            transition: "opacity 0.4s ease",
+            border: "1px solid rgba(212,175,55,0.08)",
+            background: "rgba(0,0,0,0.3)",
           }}
         />
-      </div>
-      {/* Center artwork */}
-      <div className="absolute inset-0 flex items-center justify-center" style={{ paddingBottom: "120px" }}>
-        <div
-          className="relative rounded-3xl overflow-hidden select-none"
-          style={{
-            width: "min(380px, 80vw)",
-            height: "min(380px, 80vw)",
-            boxShadow: `0 32px 100px rgba(0,0,0,0.9), 0 0 0 1px rgba(212,175,55,0.35), 0 0 80px rgba(212,175,55,0.2)`,
-            transform: swipeDelta !== 0
-              ? `translateX(${Math.sign(swipeDelta) * Math.min(Math.abs(swipeDelta) * 0.3, 30)}px) rotate(${Math.sign(swipeDelta) * Math.min(Math.abs(swipeDelta) * 0.02, 3)}deg) scale(${swipeDelta !== 0 ? 0.97 : 1})`
-              : undefined,
-            transition: swipeDelta === 0 ? "transform 0.4s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.3s ease" : "none",
-          }}
-          onPointerDown={onArtPointerDown}
-          onPointerMove={onArtPointerMove}
-          onPointerUp={onArtPointerUp}
-          onPointerCancel={onArtPointerUp}
-        >
-          {visTrack.artUrl
-            ? <img src={visTrack.artUrl} alt={visTrack.title} className="w-full h-full object-cover" style={{ objectPosition: `${visTrack.coverPositionX ?? 50}% ${visTrack.coverPositionY ?? 50}%` }} />
-            : <div className="w-full h-full flex items-center justify-center text-8xl" style={{ background: visTrack.bg || "#000000" }}>{visTrack.emoji || "🎵"}</div>
-          }
-          {swipeDir && (
-            <div className="absolute inset-0 flex items-center justify-center" style={{ background: "rgba(0,0,0,0.15)", backdropFilter: "blur(2px)" }}>
-              <span className="text-5xl" style={{ color: "#D4AF37", filter: "drop-shadow(0 0 20px #D4AF37) drop-shadow(0 0 40px rgba(212,175,55,0.5))" }}>{swipeDir === "left" ? "▶" : "◄"}</span>
-            </div>
-          )}
-        </div>
-      </div>
-      {/* Overlay controls — auto-hide after 3s */}
-      <div
-        className="absolute inset-0 flex flex-col justify-between"
-        style={{ transition: "opacity 0.5s cubic-bezier(0.4,0,0.2,1)", opacity: cinematicOverlay ? 1 : 0, pointerEvents: cinematicOverlay ? "auto" : "none" }}
-      >
-        {/* Top bar */}
-        <div className="flex items-center justify-between px-6 pt-6" style={{ paddingTop: "max(24px, env(safe-area-inset-top, 24px))" }}>
-          <button
-            onClick={e => { e.stopPropagation(); setCinematic(false); }}
-            className="flex items-center gap-2 px-3 py-2 rounded-xl transition-all hover:bg-white/10"
-            style={{ background: "rgba(0,0,0,0.4)", backdropFilter: "blur(8px)", color: "rgba(255,255,255,0.8)" }}
+        {/* Harmonic active chip */}
+        {songDetail?.harmonicSignature && (
+          <div className="absolute top-3 right-6 flex items-center gap-1 px-2 py-0.5 rounded-full"
+            style={{ background: "rgba(212,175,55,0.1)", border: "1px solid rgba(212,175,55,0.3)", backdropFilter: "blur(4px)" }}
           >
-            <ChevronDown size={18} />
-            <span className="text-[11px] font-medium">Exit Cinematic</span>
-          </button>
-          <div className="text-[9px] font-mono tracking-[0.25em] uppercase" style={{ color: "rgba(255,255,255,0.35)" }}>Cinematic</div>
-          {visTrack.witnessId ? (
-            <button onClick={e => { e.stopPropagation(); setCinematic(false); goToVerify(); }} className="flex items-center gap-1 px-2 py-1 rounded-full text-[9px] font-bold" style={{ background: "rgba(0,0,0,0.6)", border: "1px solid rgba(74,222,128,0.5)", color: "#4ade80", backdropFilter: "blur(4px)" }}>
-              <Shield size={8} /> WID
-            </button>
-          ) : <div className="w-12" />}
-        </div>
-        {/* Bottom controls */}
-        <div className="px-6 pb-8" style={{ paddingBottom: "max(32px, env(safe-area-inset-bottom, 32px))" }}>
-          <div className="text-center mb-4">
-            <p className="text-[18px] font-semibold" style={{ color: "#F5EDD8", fontFamily: "'Cinzel', serif", textShadow: "0 2px 16px rgba(0,0,0,0.8)" }}>{visTrack.title}</p>
-            <p className="text-[13px] mt-1" style={{ color: "rgba(212,175,55,0.8)", textShadow: "0 1px 8px rgba(0,0,0,0.8)" }}>{visTrack.artist}</p>
+            <div className="w-1.5 h-1.5 rounded-full" style={{ background: GOLD, boxShadow: `0 0 6px ${GOLD}`, animation: state.isPlaying ? "pulse 1.5s ease-in-out infinite" : "none" }} />
+            <span className="text-[9px] font-mono tracking-widest uppercase" style={{ color: GOLD }}>Harmonic Active</span>
           </div>
-          {/* Progress */}
-          <div className="flex items-center gap-3 mb-4">
-            <span className="text-[10px] tabular-nums" style={{ color: "rgba(255,255,255,0.5)" }}>{fmtTime(state.currentTime)}</span>
-            <div className="flex-1 cursor-pointer" style={{ background: "rgba(255,255,255,0.15)", height: "3px", borderRadius: "2px" }} data-seek onClick={handleSeek}>
-              <div style={{ width: `${progress}%`, background: "#D4AF37", height: "100%", borderRadius: "2px", position: "relative" }}>
-                <div style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%) translateX(50%)", width: "12px", height: "12px", borderRadius: "50%", background: "#F5E6B3", boxShadow: "0 0 12px rgba(245,230,179,0.8)" }} />
-              </div>
-            </div>
-            <span className="text-[10px] tabular-nums" style={{ color: "rgba(255,255,255,0.5)" }}>{fmtTime(state.duration, isReady)}</span>
-          </div>
-          {/* Controls */}
-          <div className="flex items-center justify-center gap-6">
-            <button onClick={e => { e.stopPropagation(); prevTrack(); }} style={{ color: "rgba(255,255,255,0.7)" }}><SkipBack size={24} fill="currentColor" /></button>
-            <button
-              onClick={e => { e.stopPropagation(); togglePlay(); }}
-              className="flex items-center justify-center rounded-full transition-transform hover:scale-105"
-              style={{ width: "64px", height: "64px", background: "#D4AF37", color: "#000", boxShadow: "0 0 20px rgba(212,175,55,0.6), 0 0 40px rgba(212,175,55,0.25)" }}
-            >
-              {state.isPlaying ? <Pause size={26} fill="currentColor" /> : <Play size={26} fill="currentColor" style={{ marginLeft: "3px" }} />}
-            </button>
-            <button onClick={e => { e.stopPropagation(); nextTrack(); }} style={{ color: "rgba(255,255,255,0.7)" }}><SkipForward size={24} fill="currentColor" /></button>
-          </div>
-        </div>
+        )}
+      </div>
+
+      {/* ── Speed control ── */}
+      <div className="relative flex items-center justify-center gap-3 px-5 py-3 flex-shrink-0">
+        {[0.5, 0.75, 1, 1.25, 1.5, 2].map(rate => (
+          <button key={rate} onClick={() => setPlaybackRate(rate)}
+            className="px-2.5 py-1 rounded-lg text-[11px] font-mono transition-all"
+            style={{
+              background: playbackRate === rate ? "rgba(212,175,55,0.18)" : "transparent",
+              color: playbackRate === rate ? GOLD : "rgba(212,175,55,0.35)",
+              border: playbackRate === rate ? `1px solid rgba(212,175,55,0.4)` : "1px solid transparent",
+            }}
+          >{rate === 1 ? "1×" : `${rate}×`}</button>
+        ))}
       </div>
     </div>,
     document.body

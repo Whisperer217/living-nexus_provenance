@@ -5491,3 +5491,11 @@
 - [x] Update MainLayout content padding for unified sidebar width
 - [x] Run pnpm test — 297/297 tests passing
 - [ ] Manual mobile test: play song → open sidebar → navigate → confirm no freeze
+
+## Global Player Reconstruction — One Authority (Jun 22 2026)
+- [ ] Audit PlayerContext, MobilePlayerLayer, GlobalPlayer bar — document current state shape
+- [ ] Build GlobalPlayerView Mini mode — compact bar, desktop + mobile, same component
+- [ ] Build GlobalPlayerView Expanded mode — Layer 1 (context), Layer 2 (controls), Layer 3 (secondary), waveform stage, speed/glow, Up Next queue
+- [ ] Wire GlobalPlayerView into MainLayout — replace MobilePlayerLayer and desktop player bar
+- [ ] Remove MobilePlayerLayer.tsx — no longer needed
+- [ ] Run pnpm test — confirm all tests pass
