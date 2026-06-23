@@ -5531,3 +5531,7 @@
 ## Download Bleed Fix
 - [x] Add a.download="" to all 6 download triggers (SongDetailPage, CreatorProfilePage, ManifestationShelf, GlobalPlayer, PlayerBar x2)
 - [x] Root cause: missing download attribute caused browser to navigate to /api/download/:id as a page instead of downloading
+
+## Glow Bug Fixes (2026-06-23)
+- [x] Fix glow static gold — beat-reactive pulsing broken on mobile (direct DOM path bypasses activeShadow React state)
+- [x] Fix glow-off persistence — toggling glow off leaves border glow still visible (GOLD_SHADOW_MOBILE is always applied as baseShadow regardless of glowEnabled)

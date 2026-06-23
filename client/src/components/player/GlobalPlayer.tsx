@@ -560,10 +560,29 @@ function GlobalPlayerInner() {
   [tracks]);
 
   /* ── Gold glow shadow — desktop directional, mobile tight (decisions #1 + #9) ── */
-  const baseShadow = isDesktop ? GOLD_SHADOW_DESKTOP : GOLD_SHADOW_MOBILE;
-  const activeShadow = glowEnabled && state.isPlaying && glowShadow
-    ? `${baseShadow}, ${glowShadow}`
-    : baseShadow;
+  // BUG FIX (2026-06-23): Two issues repaired:
+  // 1. STATIC GLOW: GOLD_SHADOW_MOBILE was always applied as baseShadow, making the border
+  //    appear with a static ambient glow even when glow was OFF. The structural shadow
+  //    (elevation only, no color glow) is now used when glowEnabled is false.
+  // 2. GLOW-OFF PERSISTENCE: On mobile, the hook mutates DOM directly (bypasses React state).
+  //    When toggling off, the hook's useEffect clears the DOM boxShadow — but the React
+  //    activeShadow was still including GOLD_SHADOW_MOBILE as baseShadow, so the border
+  //    retained a static glow. Fixed by separating structural shadow from ambient glow.
+  const STRUCTURAL_SHADOW_MOBILE = `0 -2px 8px rgba(0,0,0,0.55), 0 0 0 1px rgba(212,175,55,0.10)`;
+  const STRUCTURAL_SHADOW_DESKTOP = `0 -4px 16px rgba(0,0,0,0.7), 0 12px 32px rgba(0,0,0,0.9)`;
+  // baseShadow = structural only (no color glow) — always applied
+  const baseShadow = isDesktop ? STRUCTURAL_SHADOW_DESKTOP : STRUCTURAL_SHADOW_MOBILE;
+  // ambientGlow = the colored glow layer — only applied when glowEnabled is true
+  const ambientGlow = isDesktop ? GOLD_SHADOW_DESKTOP : GOLD_SHADOW_MOBILE;
+  // Desktop: glowShadow from React state (beat-reactive via setBands in useFrequencyGlow)
+  // Mobile: glowShadow is always "none" (hook mutates DOM directly, not via React state)
+  //   → on mobile, activeShadow adds ambientGlow as the base glow layer when enabled;
+  //      the beat-reactive pulse is applied on top by direct DOM mutation in the RAF loop.
+  const activeShadow = glowEnabled && state.isPlaying
+    ? (glowShadow && glowShadow !== "none"
+        ? `${ambientGlow}, ${glowShadow}`  // desktop: ambient + beat-reactive overlay
+        : ambientGlow)                      // mobile: ambient base (beat-reactive via DOM)
+    : baseShadow;                           // glow OFF: structural shadow only, no color
 
   /* ── Render nothing if no track ever loaded ── */
   if (!visTrack && tracks.length === 0) return null;
