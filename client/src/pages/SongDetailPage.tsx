@@ -226,6 +226,7 @@ export default function SongDetailPage() {
   function triggerTaggedDownload(id: number) {
     const a = document.createElement("a");
     a.href = `/api/download/${id}`;
+    a.download = ""; // CRITICAL: tells browser to download, not navigate to the URL
     a.style.display = "none";
     document.body.appendChild(a);
     a.click();

@@ -208,6 +208,7 @@ function TrackListRow({
     onSuccess: (_data: { url: string }, vars: { songId: number }) => {
       const a = document.createElement("a");
       a.href = `/api/download/${vars.songId}`;
+      a.download = ""; // CRITICAL: tells browser to download, not navigate to the URL
       a.style.display = "none";
       document.body.appendChild(a);
       a.click();

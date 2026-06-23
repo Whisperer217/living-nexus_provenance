@@ -61,6 +61,7 @@ function SongContextMenu({ song, isOwner, onClose, onDelete, position }: Context
   function triggerTaggedDownload(id: number) {
     const a = document.createElement("a");
     a.href = `/api/download/${id}`;
+    a.download = ""; // CRITICAL: tells browser to download, not navigate to the URL
     a.style.display = "none";
     document.body.appendChild(a);
     a.click();
@@ -648,6 +649,34 @@ export default function CreatorProfilePage() {
   );
   const galleryImages = galleryData?.items ?? [];
 
+  // ─── AI-generated Nexus witness tagline ───────────────────────────────────
+  const [nexusTagline, setNexusTagline] = useState<string | null>(
+    (data?.creator as any)?.generatedTagline ?? null
+  );
+  const [taglineLoading, setTaglineLoading] = useState(false);
+  const generateTaglineMutation = trpc.profile.generateTagline.useMutation({
+    onSuccess: (result: { tagline: string; cached: boolean }) => {
+      setNexusTagline(result.tagline);
+      setTaglineLoading(false);
+    },
+    onError: () => setTaglineLoading(false),
+  });
+
+  // Auto-generate tagline on first load if not cached
+  useEffect(() => {
+    if (!data?.creator) return;
+    const cached = (data.creator as any).generatedTagline;
+    if (cached) {
+      setNexusTagline(cached);
+      return;
+    }
+    // Only auto-generate if creator has at least 1 song
+    if ((data.songs?.length ?? 0) === 0) return;
+    setTaglineLoading(true);
+    generateTaglineMutation.mutate({ creatorId: data.creator.id, forceRegenerate: false });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data?.creator?.id]);
+
   const handlePlay = (song: any) => {
     // Books and comics are not audio — navigate to their reader page
     if (song.contentType === "manuscript" || song.contentType === "comic") {
@@ -1085,10 +1114,20 @@ export default function CreatorProfilePage() {
                   </button>
                 )}
 
+                {/* Nexus Witness Tagline — AI-generated one-liner above the bio */}
+                {(nexusTagline || taglineLoading) && (
+                  <p
+                    className="text-xs mt-2 italic w-full"
+                    style={{ color: "var(--ln-gold)", opacity: taglineLoading ? 0.4 : 0.75, letterSpacing: "0.01em" }}
+                  >
+                    {taglineLoading ? "Witnessing identity…" : nexusTagline}
+                  </p>
+                )}
+
                 {/* Bio — full text, muted, always full-width */}
                 {creator.bio && (
                   <p
-                    className="text-sm mt-2 leading-relaxed w-full"
+                    className="text-sm mt-1 leading-relaxed w-full"
                     style={{ color: "var(--ln-smoke)", border: "none", outline: "none" }}
                   >
                     {creator.bio}
@@ -1443,6 +1482,16 @@ export default function CreatorProfilePage() {
                   </span>
                 )}
               </div>
+              {/* Nexus Witness Tagline — mobile */}
+              {(nexusTagline || taglineLoading) && (
+                <p
+                  className="text-xs italic w-full"
+                  style={{ color: "var(--ln-gold)", opacity: taglineLoading ? 0.4 : 0.75, letterSpacing: "0.01em" }}
+                >
+                  {taglineLoading ? "Witnessing identity…" : nexusTagline}
+                </p>
+              )}
+
               {/* Bio — full-width paragraph, no flex shrink */}
               {creator.bio && (
                 <p className="text-sm leading-relaxed w-full" style={{ color: "var(--ln-smoke)" }}>

@@ -886,6 +886,91 @@ export const appRouter = router({
       const publicSongs = songs.filter((s: any) => s.isPublic);
       return { creator, songs: publicSongs };
     }),
+
+    /**
+     * Generate (or return cached) AI-powered one-liner tagline for a creator.
+     * The tagline is the Nexus's witness statement about the creator — derived
+     * from their portfolio signals (genre, WID count, play count, harmonic data,
+     * bio keywords). Cached in generatedTagline column; regenerates on demand.
+     */
+    generateTagline: publicProcedure
+      .input(z.object({
+        creatorId: z.number().int().positive(),
+        forceRegenerate: z.boolean().default(false),
+      }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Database unavailable' });
+        const { users: usersTable } = await import('../drizzle/schema');
+        const { eq: eqFn } = await import('drizzle-orm');
+
+        const creator = await getUserById(input.creatorId);
+        if (!creator) throw new TRPCError({ code: 'NOT_FOUND', message: 'Creator not found' });
+
+        // Return cached tagline unless forceRegenerate
+        if (!input.forceRegenerate && creator.generatedTagline) {
+          return { tagline: creator.generatedTagline, cached: true };
+        }
+
+        // Gather portfolio signals
+        const songs = await getSongsByUser(creator.id);
+        const publicSongs = songs.filter((s: any) => s.status !== 'Deleted');
+        const songCount = publicSongs.length;
+        const totalPlays = await getCreatorTotalPlays(creator.id);
+
+        // Build a compact context string for the LLM
+        const genreMap: Record<string, number> = {};
+        for (const s of publicSongs) {
+          if ((s as any).genre) {
+            const g = String((s as any).genre);
+            genreMap[g] = (genreMap[g] ?? 0) + 1;
+          }
+        }
+        const topGenres = Object.entries(genreMap)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 3)
+          .map(([g]) => g)
+          .join(', ');
+
+        const contextLines = [
+          creator.name ? `Artist: ${creator.name}` : '',
+          creator.artistHandle ? `Handle: @${creator.artistHandle}` : '',
+          creator.primaryGenre ? `Primary Genre: ${creator.primaryGenre}` : '',
+          topGenres ? `Top Genres Across Works: ${topGenres}` : '',
+          creator.bio ? `Bio: ${creator.bio.slice(0, 300)}` : '',
+          creator.energyProfile ? `Energy Profile: ${creator.energyProfile}` : '',
+          creator.toneFrequencyNote ? `Tone/Frequency: ${creator.toneFrequencyNote}` : '',
+          creator.dominantKey ? `Dominant Key: ${creator.dominantKey}` : '',
+          creator.creativeMission ? `Creative Mission: ${creator.creativeMission.slice(0, 200)}` : '',
+          `Registered Works: ${songCount}`,
+          `Total Plays: ${totalPlays}`,
+        ].filter(Boolean).join('\n');
+
+        const response = await invokeLLM({
+          messages: [
+            {
+              role: 'system',
+              content: `You are the Living Nexus — an audio provenance platform that witnesses and anchors creator identity. Your task is to write a single, powerful one-liner that serves as the Nexus's witness statement about a creator. This is NOT a marketing tagline. It is the platform speaking on behalf of what it has observed in the creator's portfolio. Rules: (1) One sentence only — no more than 25 words. (2) Ground it in real portfolio signals (genre, work count, plays, energy, key, frequency). (3) Write in third person, present tense. (4) Do not use generic phrases like "talented artist" or "unique sound". (5) Make it feel earned — like a provenance seal.`,
+            },
+            {
+              role: 'user',
+              content: `Based on the following creator portfolio data, write the Nexus witness statement one-liner:\n\n${contextLines}\n\nRespond with ONLY the one-liner sentence. No quotes, no labels, no explanation.`,
+            },
+          ],
+        });
+
+        const raw = response.choices?.[0]?.message?.content;
+        if (!raw) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'No response from AI' });
+        const tagline = typeof raw === 'string' ? raw.trim().replace(/^"|"$/g, '') : '';
+        if (!tagline) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Empty tagline from AI' });
+
+        // Cache in DB
+        await db.update(usersTable)
+          .set({ generatedTagline: tagline, generatedTaglineAt: new Date() })
+          .where(eqFn(usersTable.id, creator.id));
+
+        return { tagline, cached: false };
+      }),
     myStats: protectedProcedure.query(async ({ ctx }) => {
       const [stats, songs, user] = await Promise.all([
         getCreatorForOg(ctx.user.id),

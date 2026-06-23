@@ -5519,3 +5519,15 @@
 - [x] Desktop: removed line-clamp-3 — bio now shows full text (not truncated after 3 lines)
 - [x] Systemic: same root cause affects any creator profile (Slimdoggy, Doc, HulkingManiacNerdWarmonger)
 - [x] 0 TypeScript errors, 297/297 tests passing
+
+## Download Bleed Fix
+- [ ] Fix download bleed: certain tracks navigate to /api/download/:id in a new page showing "Service Unavailable" instead of triggering a file download — affects "Ave, Ave!!! Christus Rex!!!" (Slimdoggy) and "Pride's March to Destruction" + "Curse of the Red Shirt" in Gathering Storm album (Nero's Shadow)
+- [ ] Investigate root cause: download link opens new tab/window instead of using fetch+blob download flow
+- [ ] Ensure fix is systemic — not per-track patching
+
+## Batch Upload Albums Display Fix
+- [ ] Fix Collections & Playlists tab: Batch Upload Albums section queries trpc.userCollections.list (wrong table) instead of trpc.songs.getMyCollections (correct WID-ALB collections table) — Slimdoggy's 8 batch albums not showing
+
+## Download Bleed Fix
+- [x] Add a.download="" to all 6 download triggers (SongDetailPage, CreatorProfilePage, ManifestationShelf, GlobalPlayer, PlayerBar x2)
+- [x] Root cause: missing download attribute caused browser to navigate to /api/download/:id as a page instead of downloading

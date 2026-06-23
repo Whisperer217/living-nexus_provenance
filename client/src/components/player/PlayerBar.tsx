@@ -848,6 +848,7 @@ export default function PlayerBar() {
               const triggerDownload = () => {
                 const a = document.createElement("a");
                 a.href = `/api/download/${currentSongId}`;
+                a.download = ""; // CRITICAL: tells browser to download, not navigate
                 a.style.display = "none";
                 document.body.appendChild(a);
                 a.click();
@@ -1087,6 +1088,7 @@ export default function PlayerBar() {
               setShowContextMenu(false);
               const a = document.createElement("a");
               a.href = `/api/download/${currentSongId}`;
+              a.download = ""; // CRITICAL: tells browser to download, not navigate
               a.style.display = "none";
               document.body.appendChild(a);
               a.click();
