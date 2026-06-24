@@ -40,7 +40,7 @@ oembedRouter.get("/api/oembed", async (req, res) => {
   // If wid= is provided directly, look up the song by WID
   if (wid) {
     try {
-      const { getSongByWitnessId } = await import("./db");
+      const { getSongByWitnessId } = await import("../utils/db");
       const songResult = await getSongByWitnessId(wid);
 
       if (!songResult) {

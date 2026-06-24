@@ -257,7 +257,7 @@ export async function handleStripeWebhook(req: any, res: any) {
             // Discord webhook — non-blocking
             void (async () => {
               try {
-                const { fireUserWebhook } = await import("./discord");
+                const { fireUserWebhook } = await import("../services/discord");
                 const creator = await getUserById(song.userId);
                 await fireUserWebhook(song.userId, "tip_received", {
                   creatorName: creator?.displayName || creator?.username || "Unknown",
@@ -429,7 +429,7 @@ export async function handleStripeWebhook(req: any, res: any) {
           const songId = parseInt(meta.songId);
           const buyerUserId = parseInt(meta.userId);
           const db = await getDb();
-          const { bookPurchases } = await import("../drizzle/schema");
+          const { bookPurchases } = await import("../../drizzle/schema");
           // Upsert — idempotent on duplicate webhook delivery
           await db.insert(bookPurchases).values({
             songId,
@@ -709,7 +709,7 @@ export const appRouter = router({
     }),
     /** Generate Ed25519 keypair on first use. Returns public key + private key ONCE. */
     generateKeypair: protectedProcedure.mutation(async ({ ctx }) => {
-      const { generateKeypair: genKp } = await import("./provenance");
+      const { generateKeypair: genKp } = await import("../services/provenance");
       const user = await getUserById(ctx.user.id);
       if (!user) throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
       if (user.publicKey) return { publicKeyHex: user.publicKey, alreadyExists: true };
@@ -901,7 +901,7 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         const db = await getDb();
         if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Database unavailable' });
-        const { users: usersTable } = await import('../drizzle/schema');
+        const { users: usersTable } = await import('../../drizzle/schema');
         const { eq: eqFn } = await import('drizzle-orm');
 
         const creator = await getUserById(input.creatorId);
@@ -991,8 +991,8 @@ export const appRouter = router({
     myAnalytics: protectedProcedure.query(async ({ ctx }) => getCreatorAnalytics(ctx.user.id)),
     /** Get the platform owner's lights mode — public so all visitors can read it on load */
     getLightsMode: publicProcedure.query(async () => {
-      const { getDb } = await import("./db");
-      const { users: usersTable } = await import("../drizzle/schema");
+      const { getDb } = await import("../utils/db");
+      const { users: usersTable } = await import("../../drizzle/schema");
       const db = await getDb();
       if (!db) return { lightsMode: 'dim' as const };
       const rows = await db.select({ lightsMode: usersTable.lightsMode })
@@ -1005,8 +1005,8 @@ export const appRouter = router({
     setLightsMode: protectedProcedure
       .input(z.object({ mode: z.enum(['dim', 'on']) }))
       .mutation(async ({ ctx, input }) => {
-        const { getDb } = await import("./db");
-        const { users: usersTable } = await import("../drizzle/schema");
+        const { getDb } = await import("../utils/db");
+        const { users: usersTable } = await import("../../drizzle/schema");
         const { eq: eqOp } = await import("drizzle-orm");
         const db = await getDb();
         if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR' });
@@ -1022,7 +1022,7 @@ export const appRouter = router({
       .input(z.object({ fileHash: z.string().length(64) }))
       .query(async ({ ctx, input }) => {
         const db = await getDb();
-        const { songs } = await import("../drizzle/schema");
+        const { songs } = await import("../../drizzle/schema");
         const { eq } = await import("drizzle-orm");
         const existing = await db.select({
           id: songs.id,
@@ -1168,8 +1168,8 @@ export const appRouter = router({
     }),
     // Public counters for homepage trust layer
     getWitnessedCount: publicProcedure.query(async () => {
-      const { getDb } = await import("./db");
-      const { songs: songsTable } = await import("../drizzle/schema");
+      const { getDb } = await import("../utils/db");
+      const { songs: songsTable } = await import("../../drizzle/schema");
       const { count, isNotNull, eq: eqOp, and: andOp } = await import("drizzle-orm");
       const db = await getDb();
       // Only count Published, public witnessed songs — respects archive/unpublish toggle
@@ -1179,8 +1179,8 @@ export const appRouter = router({
       return { count: row?.total ?? 0 };
     }),
     getCountsByContentType: publicProcedure.query(async () => {
-      const { getDb } = await import("./db");
-      const { songs: songsTable } = await import("../drizzle/schema");
+      const { getDb } = await import("../utils/db");
+      const { songs: songsTable } = await import("../../drizzle/schema");
       const { count, eq: eqOp, and: andOp } = await import("drizzle-orm");
       const db = await getDb();
       const countFor = async (ct: string) => {
@@ -1201,8 +1201,8 @@ export const appRouter = router({
       return { audio, lyrics, manuscript, comic };
     }),
     countByCreator: publicProcedure.input(z.object({ creatorId: z.number().int() })).query(async ({ input }) => {
-      const { getDb } = await import("./db");
-      const { songs: songsTable } = await import("../drizzle/schema");
+      const { getDb } = await import("../utils/db");
+      const { songs: songsTable } = await import("../../drizzle/schema");
       const { count, eq: eqOp, and: andOp } = await import("drizzle-orm");
       const db = await getDb();
       const [row] = await db.select({ total: count() }).from(songsTable).where(
@@ -1211,8 +1211,8 @@ export const appRouter = router({
       return { count: row?.total ?? 0 };
     }),
     getWitnessedVoices: publicProcedure.query(async () => {
-      const { getDb } = await import("./db");
-      const { songs: songsTable, users: usersTable } = await import("../drizzle/schema");
+      const { getDb } = await import("../utils/db");
+      const { songs: songsTable, users: usersTable } = await import("../../drizzle/schema");
       const { isNotNull, desc: descOp, eq: eqOp, and: andOp } = await import("drizzle-orm");
       const db = await getDb();
       // Only return Published, public, audio-type witnessed songs — respects creator archive/unpublish toggle
@@ -1249,7 +1249,7 @@ export const appRouter = router({
       .query(async ({ ctx, input }) => {
         const db = await getDb();
         if (!db) return null;
-        const { songs: songsTable } = await import("../drizzle/schema");
+        const { songs: songsTable } = await import("../../drizzle/schema");
         const { eq: eqOp, and: andOp } = await import("drizzle-orm");
         const result = await db.select().from(songsTable)
           .where(andOp(eqOp(songsTable.id, input.id), eqOp(songsTable.userId, ctx.user.id)))
@@ -1353,7 +1353,7 @@ export const appRouter = router({
       // Discord webhooks — fire non-blocking
       void (async () => {
         try {
-          const { fireUserWebhook } = await import("./discord");
+          const { fireUserWebhook } = await import("../services/discord");
           const creator = await getUserById(ctx.user.id);
           const webhookPayload = {
             title: input.title,
@@ -1614,7 +1614,7 @@ export const appRouter = router({
       .mutation(async ({ ctx, input }) => {
         const db = await getDb();
         if (!db) throw new Error("Database unavailable");
-        const { songs: songsTable } = await import("../drizzle/schema.js");
+        const { songs: songsTable } = await import("../../drizzle/schema");
         const { and: _and, eq: _eq, lt: _lt } = await import("drizzle-orm");
         const cutoff = input.olderThanDays != null
           ? new Date(Date.now() - input.olderThanDays * 86400000)
@@ -1933,8 +1933,8 @@ export const appRouter = router({
         const central = await getSongWithCreator(input.songId);
         if (!central) throw new TRPCError({ code: "NOT_FOUND", message: "Song not found" });
         // Inner ring: same creator, different song, published
-        const { songs: songsTable, users } = await import("../drizzle/schema");
-        const { getDb } = await import("./db");
+        const { songs: songsTable, users } = await import("../../drizzle/schema");
+        const { getDb } = await import("../utils/db");
         const { eq, and, ne, desc } = await import("drizzle-orm");
         const db = await getDb();
         const innerRaw = db ? await db.select({
@@ -1981,7 +1981,7 @@ export const appRouter = router({
           try {
             const db = await getDb();
             if (!db) return;
-            const { likes } = await import("../drizzle/schema");
+            const { likes } = await import("../../drizzle/schema");
             const { gte, count: drizzleCount, eq } = await import("drizzle-orm");
             const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
             const [{ cnt }] = await db
@@ -1992,7 +1992,7 @@ export const appRouter = router({
             if (cnt === 10 || cnt === 50 || cnt === 100 || cnt === 500) {
               const song = await getSongById(input.songId);
               if (song?.userId) {
-                const { fireUserWebhook } = await import("./discord");
+                const { fireUserWebhook } = await import("../services/discord");
                 const creator = await getUserById(song.userId);
                 await fireUserWebhook(song.userId, "like_surge", {
                   title: song.title,
@@ -2021,8 +2021,8 @@ export const appRouter = router({
     getListenerCount: publicProcedure
       .input(z.object({ songId: z.number() }))
       .query(async ({ input }) => {
-        const { playEvents } = await import("../drizzle/schema");
-        const { getDb } = await import("./db");
+        const { playEvents } = await import("../../drizzle/schema");
+        const { getDb } = await import("../utils/db");
         const db = await getDb();
         const { gte, eq, and, count: drizzleCount } = await import("drizzle-orm");
         const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
@@ -2686,7 +2686,7 @@ ${workType === "manuscript" || workType === "comic" ? "Category" : "Genre"}: ${i
       .mutation(async ({ ctx, input }) => {
         const db = await getDb();
         if (!db) throw new Error("DB unavailable");
-        const { songs: songsTable, users: usersTable } = await import("../drizzle/schema.js");
+        const { songs: songsTable, users: usersTable } = await import("../../drizzle/schema");
         const { count, ne, eq: eqOp } = await import("drizzle-orm");
         const [row] = await db.select({ actual: count() }).from(songsTable)
           .where(eqOp(songsTable.userId, input.userId));
@@ -2854,9 +2854,9 @@ ${workType === "manuscript" || workType === "comic" ? "Category" : "Genre"}: ${i
      */
     embedVideoStatus: adminProcedure
       .query(async ({ ctx }) => {
-        const db = await (await import("./db")).getDb();
+        const db = await (await import("../utils/db")).getDb();
         const { sql: sqlFn, eq: eqFn, and: andFn } = await import("drizzle-orm");
-        const { songs: songsTable } = await import("../drizzle/schema");
+        const { songs: songsTable } = await import("../../drizzle/schema");
         const pending = await getSongsWithoutEmbedVideo();
         let total = 0;
         if (db) {
@@ -2916,19 +2916,19 @@ ${workType === "manuscript" || workType === "comic" ? "Category" : "Genre"}: ${i
     // ── Visual Pipeline Admin ────────────────────────────────────────────────
     /** Get live visual pipeline stats for the admin dashboard */
     visualPipelineStats: adminProcedure.query(async ({ ctx }) => {
-      const { getVisualPipelineStats } = await import("./visualQueue");
+      const { getVisualPipelineStats } = await import("../workers/visualQueue");
       return getVisualPipelineStats();
     }),
     /** Get recent visual queue jobs for the admin pipeline view */
     visualQueueJobs: adminProcedure
       .input(z.object({ limit: z.number().int().min(1).max(200).default(50) }))
       .query(async ({ ctx, input }) => {
-        const { getRecentQueueJobs } = await import("./visualQueue");
+        const { getRecentQueueJobs } = await import("../workers/visualQueue");
         return getRecentQueueJobs(input.limit);
       }),
     /** Requeue all failed visual jobs */
     requeueFailedVisuals: adminProcedure.mutation(async ({ ctx }) => {
-      const { requeueFailedJobs } = await import("./visualQueue");
+      const { requeueFailedJobs } = await import("../workers/visualQueue");
       const count = await requeueFailedJobs();
       return { requeued: count };
     }),
@@ -2936,11 +2936,11 @@ ${workType === "manuscript" || workType === "comic" ? "Category" : "Genre"}: ${i
     enqueueVisualForSong: adminProcedure
       .input(z.object({ songId: z.number().int() }))
       .mutation(async ({ ctx, input }) => {
-        const { enqueueVisualJob } = await import("./visualQueue");
+        const { enqueueVisualJob } = await import("../workers/visualQueue");
         // Reset any existing failed job first
-        const db = await import("./db").then(m => m.getDb());
+        const db = await import("../utils/db").then(m => m.getDb());
         if (db) {
-          const { visualQueue } = await import("../drizzle/schema");
+          const { visualQueue } = await import("../../drizzle/schema");
           const { eq, inArray } = await import("drizzle-orm");
           await db.update(visualQueue)
             .set({ status: "pending", attempts: 0, errorMessage: null, startedAt: null, completedAt: null })
@@ -3049,8 +3049,8 @@ ${workType === "manuscript" || workType === "comic" ? "Category" : "Genre"}: ${i
       .input(z.object({ userId: z.number().int(), role: z.enum(["admin", "user"]) }))
       .mutation(async ({ ctx, input }) => {
         if (input.userId === ctx.user.id) throw new TRPCError({ code: "BAD_REQUEST", message: "Cannot change your own role" });
-        const db = await (await import("./db")).getDb();
-        const { users: usersTable } = await import("../drizzle/schema");
+        const db = await (await import("../utils/db")).getDb();
+        const { users: usersTable } = await import("../../drizzle/schema");
         const { eq: eqFn } = await import("drizzle-orm");
         await db.update(usersTable).set({ role: input.role }).where(eqFn(usersTable.id, input.userId));
         await logAdminAction({ adminId: ctx.user.id, adminName: ctx.user.name, action: "set_user_role", targetType: "user", targetId: String(input.userId), details: { role: input.role } });
@@ -3409,7 +3409,7 @@ ${workType === "manuscript" || workType === "comic" ? "Category" : "Genre"}: ${i
             refType: "user",
           });
           // SSE broadcast
-          const { broadcastEvent } = await import("./sse");
+          const { broadcastEvent } = await import("../services/sse");
           broadcastEvent("witness", { actorName: actor?.artistHandle || actor?.name || "Someone", targetUserId: input.creatorId });
           return { witnessing: true };
         }
@@ -3686,8 +3686,8 @@ ${workType === "manuscript" || workType === "comic" ? "Category" : "Genre"}: ${i
       .mutation(async ({ ctx, input }) => {
         const isMember = await isPlaylistMember(input.playlistId, ctx.user.id);
         if (!isMember) throw new TRPCError({ code: "FORBIDDEN" });
-        const { getDb } = await import("./db");
-        const { playlistTracks: pt } = await import("../drizzle/schema");
+        const { getDb } = await import("../utils/db");
+        const { playlistTracks: pt } = await import("../../drizzle/schema");
         const { eq: eqOp } = await import("drizzle-orm");
         const db = await getDb();
         // Update position for each songId in the new order
@@ -3710,8 +3710,8 @@ ${workType === "manuscript" || workType === "comic" ? "Category" : "Genre"}: ${i
       .mutation(async ({ ctx, input }) => {
         const isMember = await isPlaylistMember(input.playlistId, ctx.user.id);
         if (!isMember) throw new TRPCError({ code: "FORBIDDEN" });
-        const { getDb } = await import("./db");
-        const { playlistVersions, playlistTracks: pt, songs: songsTable } = await import("../drizzle/schema");
+        const { getDb } = await import("../utils/db");
+        const { playlistVersions, playlistTracks: pt, songs: songsTable } = await import("../../drizzle/schema");
         const { eq: eqOp, asc, max } = await import("drizzle-orm");
         const db = await getDb();
         // Get current ordered tracks
@@ -3745,8 +3745,8 @@ ${workType === "manuscript" || workType === "comic" ? "Category" : "Genre"}: ${i
       .query(async ({ ctx, input }) => {
         const isMember = await isPlaylistMember(input.playlistId, ctx.user.id);
         if (!isMember) throw new TRPCError({ code: "FORBIDDEN" });
-        const { getDb } = await import("./db");
-        const { playlistVersions, users: usersTable } = await import("../drizzle/schema");
+        const { getDb } = await import("../utils/db");
+        const { playlistVersions, users: usersTable } = await import("../../drizzle/schema");
         const { eq: eqOp, desc: descOp } = await import("drizzle-orm");
         const db = await getDb();
         const rows = await db
@@ -3771,8 +3771,8 @@ ${workType === "manuscript" || workType === "comic" ? "Category" : "Genre"}: ${i
     songInPlaylists: protectedProcedure
       .input(z.object({ songId: z.number().int().positive() }))
       .query(async ({ ctx, input }) => {
-        const { getDb: getDb2 } = await import("./db");
-        const { playlistTracks: pt2, playlists: pl2 } = await import("../drizzle/schema");
+        const { getDb: getDb2 } = await import("../utils/db");
+        const { playlistTracks: pt2, playlists: pl2 } = await import("../../drizzle/schema");
         const { eq: eqOp2, and: andOp2, inArray } = await import("drizzle-orm");
         const db2 = await getDb2();
         // Get all playlist IDs the user owns
@@ -3937,11 +3937,11 @@ ${workType === "manuscript" || workType === "comic" ? "Category" : "Genre"}: ${i
     getFoundingCreators: publicProcedure.query(async () => {
       const founders = await listFounders();
       // Attach WID count for each founder
-      const { getDb } = await import("./db");
+      const { getDb } = await import("../utils/db");
       const db = await getDb();
       if (!db) return founders.map((f: typeof founders[0]) => ({ ...f, widCount: 0 }));
       const { sql: sqlFn, eq: eqFn, and: andFn } = await import("drizzle-orm");
-      const { songs: songsTable } = await import("../drizzle/schema");
+      const { songs: songsTable } = await import("../../drizzle/schema");
       const counts = await Promise.all(
         founders.map(async (f: typeof founders[0]) => {
           const rows = await db
@@ -4008,7 +4008,7 @@ ${workType === "manuscript" || workType === "comic" ? "Category" : "Genre"}: ${i
       .query(async ({ ctx, input }) => {
         if (!ctx.user) return { purchased: false };
         const db = await getDb();
-        const { bookPurchases } = await import("../drizzle/schema");
+        const { bookPurchases } = await import("../../drizzle/schema");
         const { eq, and } = await import("drizzle-orm");
         const row = await db.select({ id: bookPurchases.id })
           .from(bookPurchases)
@@ -4066,9 +4066,9 @@ ${workType === "manuscript" || workType === "comic" ? "Category" : "Genre"}: ${i
         sourceUrl: z.string().url(),
       }))
       .mutation(async ({ ctx, input }) => {
-        const { getDb } = await import("./db");
+        const { getDb } = await import("../utils/db");
         const db = await getDb();
-        const { externalPlaylists } = await import("../drizzle/schema");
+        const { externalPlaylists } = await import("../../drizzle/schema");
 
         // Detect source type from URL
         const sourceType = input.sourceUrl.includes("youtube.com") || input.sourceUrl.includes("youtu.be")
@@ -4134,9 +4134,9 @@ ${workType === "manuscript" || workType === "comic" ? "Category" : "Genre"}: ${i
 
     // List all external playlists for the current user
     list: protectedProcedure.query(async ({ ctx }) => {
-      const { getDb } = await import("./db");
+      const { getDb } = await import("../utils/db");
       const db = await getDb();
-      const { externalPlaylists } = await import("../drizzle/schema");
+      const { externalPlaylists } = await import("../../drizzle/schema");
       const { eq, desc } = await import("drizzle-orm");
 
       return db
@@ -4150,9 +4150,9 @@ ${workType === "manuscript" || workType === "comic" ? "Category" : "Genre"}: ${i
     delete: protectedProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ ctx, input }) => {
-        const { getDb } = await import("./db");
+        const { getDb } = await import("../utils/db");
         const db = await getDb();
-        const { externalPlaylists } = await import("../drizzle/schema");
+        const { externalPlaylists } = await import("../../drizzle/schema");
         const { and, eq } = await import("drizzle-orm");
 
         await db
@@ -4323,7 +4323,7 @@ ${workType === "manuscript" || workType === "comic" ? "Category" : "Genre"}: ${i
       .query(async ({ input }) => {
         const db = await getDb();
         if (!db) return null;
-        const { users: usersTable } = await import("../drizzle/schema");
+        const { users: usersTable } = await import("../../drizzle/schema");
         const { eq: eqFn } = await import("drizzle-orm");
         const [creator] = await db
           .select({
@@ -4367,7 +4367,7 @@ ${workType === "manuscript" || workType === "comic" ? "Category" : "Genre"}: ${i
       .mutation(async ({ ctx, input }) => {
         const db = await getDb();
         if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database unavailable" });
-        const { users: usersTable } = await import("../drizzle/schema");
+        const { users: usersTable } = await import("../../drizzle/schema");
         const { eq: eqFn } = await import("drizzle-orm");
 
         // If EID already exists and not forcing regeneration, return existing
@@ -4829,7 +4829,7 @@ Respond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNo
         targetPlatform: z.enum(["Suno", "Udio", "General"]).default("General"),
       }))
       .mutation(async ({ ctx, input }) => {
-        const { users } = await import("../drizzle/schema");
+        const { users } = await import("../../drizzle/schema");
         const { eq } = await import("drizzle-orm");
         const db = await getDb();
         if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB unavailable" });
@@ -5133,7 +5133,7 @@ Respond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNo
   discord: router({
     /** Get all webhook configs for the current user */
     getWebhooks: protectedProcedure.query(async ({ ctx }) => {
-      const { getWebhooksForUser } = await import("./discord");
+      const { getWebhooksForUser } = await import("../services/discord");
       return getWebhooksForUser(ctx.user.id);
     }),
 
@@ -5145,7 +5145,7 @@ Respond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNo
         enabled: z.boolean(),
       }))
       .mutation(async ({ ctx, input }) => {
-        const { upsertWebhook } = await import("./discord");
+        const { upsertWebhook } = await import("../services/discord");
         await upsertWebhook(ctx.user.id, input.event, input.webhookUrl, input.enabled);
         return { ok: true };
       }),
@@ -5159,7 +5159,7 @@ Respond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNo
       .mutation(async ({ ctx, input }) => {
         const db = await getDb();
         if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
-        const { discordWebhooks } = await import("../drizzle/schema");
+        const { discordWebhooks } = await import("../../drizzle/schema");
         const { eq, and } = await import("drizzle-orm");
         await db
           .update(discordWebhooks)
@@ -5176,7 +5176,7 @@ Respond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNo
       .mutation(async ({ ctx, input }) => {
         const db = await getDb();
         if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
-        const { discordWebhooks } = await import("../drizzle/schema");
+        const { discordWebhooks } = await import("../../drizzle/schema");
         const { eq, and } = await import("drizzle-orm");
         await db
           .delete(discordWebhooks)
@@ -5191,7 +5191,7 @@ Respond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNo
         webhookUrl: z.string().url().max(512),
       }))
       .mutation(async ({ input }) => {
-        const { testWebhookUrl } = await import("./discord");
+        const { testWebhookUrl } = await import("../services/discord");
         const result = await testWebhookUrl(input.event, input.webhookUrl);
         return result;
       }),
@@ -5899,7 +5899,7 @@ Respond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNo
     /** Admin: manually trigger a self-improvement run */
     triggerRun: adminProcedure
       .mutation(async ({ ctx }) => {
-        const { runSelfImprovementCycle } = await import('./selfImprovementWorker');
+        const { runSelfImprovementCycle } = await import('../workers/selfImprovementWorker');
         // Fire and forget — return immediately, run in background
         runSelfImprovementCycle('manual', ctx.user.id).catch(err =>
           console.error('[SelfImprove] Manual run error:', err)
@@ -5911,7 +5911,7 @@ Respond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNo
     getRuns: adminProcedure
       .input(z.object({ limit: z.number().int().min(1).max(50).optional() }))
       .query(async ({ input }) => {
-        const { getSelfImprovementRuns } = await import('./selfImprovementWorker');
+        const { getSelfImprovementRuns } = await import('../workers/selfImprovementWorker');
         return getSelfImprovementRuns(input.limit ?? 20);
       }),
 
@@ -5919,7 +5919,7 @@ Respond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNo
     getRunById: adminProcedure
       .input(z.object({ id: z.number().int() }))
       .query(async ({ input }) => {
-        const { getSelfImprovementRunById } = await import('./selfImprovementWorker');
+        const { getSelfImprovementRunById } = await import('../workers/selfImprovementWorker');
         return getSelfImprovementRunById(input.id);
       }),
 
@@ -5927,7 +5927,7 @@ Respond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNo
     getFindingsByRun: adminProcedure
       .input(z.object({ runId: z.number().int() }))
       .query(async ({ input }) => {
-        const { getFindingsByRun } = await import('./selfImprovementWorker');
+        const { getFindingsByRun } = await import('../workers/selfImprovementWorker');
         return getFindingsByRun(input.runId);
       }),
 
@@ -5935,7 +5935,7 @@ Respond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNo
     revertFinding: adminProcedure
       .input(z.object({ findingId: z.number().int() }))
       .mutation(async ({ input }) => {
-        const { revertFinding } = await import('./selfImprovementWorker');
+        const { revertFinding } = await import('../workers/selfImprovementWorker');
         return revertFinding(input.findingId);
       }),
   }),
@@ -5945,7 +5945,7 @@ Respond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNo
     /** Admin: manually trigger a payment integrity check */
     triggerRun: adminProcedure
       .mutation(async () => {
-        const { runPaymentIntegrityCheck } = await import('./paymentIntegrityWorker');
+        const { runPaymentIntegrityCheck } = await import('../workers/paymentIntegrityWorker');
         return runPaymentIntegrityCheck();
       }),
     /** Admin: get recent reconciliation log entries */
@@ -5954,7 +5954,7 @@ Respond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNo
       .query(async ({ input }) => {
         const db = await getDb();
         if (!db) return [];
-        const { paymentReconciliationLog } = await import('../drizzle/schema');
+        const { paymentReconciliationLog } = await import('../../drizzle/schema');
         const { desc } = await import('drizzle-orm');
         return db
           .select()
@@ -5967,7 +5967,7 @@ Respond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNo
       .query(async () => {
         const db = await getDb();
         if (!db) return { total: 0, reconciled: 0, failed: 0, ok: 0, skipped: 0 };
-        const { paymentReconciliationLog } = await import('../drizzle/schema');
+        const { paymentReconciliationLog } = await import('../../drizzle/schema');
         const { sql: drizzleSql } = await import('drizzle-orm');
         const rows = await db
           .select({
@@ -6004,7 +6004,7 @@ Respond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNo
         stats: { provenanceDepth: 0, corpusSize: 0, voiceDepth: 0, lyricDensity: 0, structuralLogic: 0, emotionalRange: 0 },
       };
       if (!db) return emptyProfile;
-      const { keeperSkins, songs, witnesses } = await import('../drizzle/schema');
+      const { keeperSkins, songs, witnesses } = await import('../../drizzle/schema');
       const { eq, count } = await import('drizzle-orm');
       const skins = await db.select().from(keeperSkins).where(eq(keeperSkins.userId, ctx.user.id));
       type Skin = typeof skins[number];
@@ -6042,7 +6042,7 @@ Respond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNo
       .mutation(async ({ ctx, input }) => {
         const db = await getDb();
         if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR' });
-        const { keeperSkins } = await import('../drizzle/schema');
+        const { keeperSkins } = await import('../../drizzle/schema');
         const { eq, and } = await import('drizzle-orm');
         const existing = await db.select().from(keeperSkins)
           .where(and(eq(keeperSkins.userId, ctx.user.id), eq(keeperSkins.skinId, input.skinId)))
@@ -6067,7 +6067,7 @@ Respond ONLY with valid JSON: { prompt, styleTags, composerNote, toneFrequencyNo
       .mutation(async ({ ctx, input }) => {
         const db = await getDb();
         if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR' });
-        const { keeperSkins } = await import('../drizzle/schema');
+        const { keeperSkins } = await import('../../drizzle/schema');
         const { eq, and } = await import('drizzle-orm');
         await db.update(keeperSkins).set({ isActive: false }).where(eq(keeperSkins.userId, ctx.user.id));
         // If it's the default free skin, no row needed — just clear active
@@ -6220,7 +6220,7 @@ Never collapse multiple sections into a single block. Always label clearly.
       .mutation(async ({ ctx, input }) => {
         const db = await getDb();
         if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR' });
-        const { keeperNotes } = await import('../drizzle/schema');
+        const { keeperNotes } = await import('../../drizzle/schema');
         // Auto-generate title from first line if not provided
         const title = input.title?.trim() ||
           input.content.split('\n')[0].slice(0, 80).trim() ||
@@ -6246,7 +6246,7 @@ Never collapse multiple sections into a single block. Always label clearly.
       .query(async ({ ctx, input }) => {
         const db = await getDb();
         if (!db) return [];
-        const { keeperNotes } = await import('../drizzle/schema');
+        const { keeperNotes } = await import('../../drizzle/schema');
         const { eq, and, desc } = await import('drizzle-orm');
         const conditions: any[] = [eq(keeperNotes.userId, ctx.user.id)];
         if (input?.personaId) conditions.push(eq(keeperNotes.personaId, input.personaId));
@@ -6265,7 +6265,7 @@ Never collapse multiple sections into a single block. Always label clearly.
       .mutation(async ({ ctx, input }) => {
         const db = await getDb();
         if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR' });
-        const { keeperNotes } = await import('../drizzle/schema');
+        const { keeperNotes } = await import('../../drizzle/schema');
         const { eq, and } = await import('drizzle-orm');
         await db.delete(keeperNotes)
           .where(and(eq(keeperNotes.id, input.id), eq(keeperNotes.userId, ctx.user.id)));
@@ -6285,7 +6285,7 @@ Never collapse multiple sections into a single block. Always label clearly.
         const { url } = await storagePut(key, buf, input.mimeType);
         const db = await getDb();
         if (db) {
-          const { keeperSkins } = await import('../drizzle/schema');
+          const { keeperSkins } = await import('../../drizzle/schema');
           const { eq, and } = await import('drizzle-orm');
           const existing = await db.select().from(keeperSkins)
             .where(and(eq(keeperSkins.userId, ctx.user.id), eq(keeperSkins.skinId, "custom")))
@@ -6317,7 +6317,7 @@ Never collapse multiple sections into a single block. Always label clearly.
         language: z.string().optional(),
       }))
       .mutation(async ({ ctx, input }) => {
-        const { transcribeAudio } = await import('./_core/voiceTranscription');
+        const { transcribeAudio } = await import('../_core/voiceTranscription');
         const ext = input.mimeType.split('/')[1].replace('mpeg', 'mp3');
         const key = `keeper-voice/${ctx.user.id}/${Date.now()}.${ext}`;
         const buf = Buffer.from(input.audioBase64, 'base64');
@@ -6338,7 +6338,7 @@ Never collapse multiple sections into a single block. Always label clearly.
         styleTags: z.array(z.string()).optional(),
       }))
       .mutation(async ({ ctx, input }) => {
-        const { generateImage } = await import('./_core/imageGeneration');
+        const { generateImage } = await import('../_core/imageGeneration');
         const fullPrompt = input.styleTags?.length
           ? `${input.prompt}. Style: ${input.styleTags.join(', ')}`
           : input.prompt;
@@ -6400,7 +6400,7 @@ Never collapse multiple sections into a single block. Always label clearly.
       const db = await getDb();
       if (!db) return null;
       try {
-        const { keeperCharacterSheets } = await import('../drizzle/schema');
+        const { keeperCharacterSheets } = await import('../../drizzle/schema');
         const { eq, desc } = await import('drizzle-orm');
         const rows = await db
           .select()
@@ -6425,7 +6425,7 @@ Never collapse multiple sections into a single block. Always label clearly.
       .mutation(async ({ ctx, input }) => {
         const db = await getDb();
         if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'DB unavailable' });
-        const { keeperCharacterSheets } = await import('../drizzle/schema');
+        const { keeperCharacterSheets } = await import('../../drizzle/schema');
         const { eq } = await import('drizzle-orm');
         const existing = await db
           .select({ id: keeperCharacterSheets.id })
@@ -6465,7 +6465,7 @@ Never collapse multiple sections into a single block. Always label clearly.
       .query(async ({ input }) => {
         const db = await getDb();
         if (!db) return [];
-        const { marketplaceItems, users } = await import('../drizzle/schema');
+        const { marketplaceItems, users } = await import('../../drizzle/schema');
         const { eq, and, desc, isNull, gt } = await import('drizzle-orm');
         const conditions: any[] = [eq(marketplaceItems.active, true)];
         if (input.type) conditions.push(eq(marketplaceItems.type, input.type));
@@ -6510,7 +6510,7 @@ Never collapse multiple sections into a single block. Always label clearly.
       .query(async ({ input }) => {
         const db = await getDb();
         if (!db) return null;
-        const { marketplaceItems, users } = await import('../drizzle/schema');
+        const { marketplaceItems, users } = await import('../../drizzle/schema');
         const { eq } = await import('drizzle-orm');
         const rows = await db
           .select({
@@ -6550,7 +6550,7 @@ Never collapse multiple sections into a single block. Always label clearly.
         if (!stripe) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Payments not configured' });
         const db = await getDb();
         if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'DB unavailable' });
-        const { marketplaceItems } = await import('../drizzle/schema');
+        const { marketplaceItems } = await import('../../drizzle/schema');
         const { eq } = await import('drizzle-orm');
         const rows = await db.select().from(marketplaceItems)
           .where(eq(marketplaceItems.id, input.itemId)).limit(1);
@@ -6587,7 +6587,7 @@ Never collapse multiple sections into a single block. Always label clearly.
           },
         });
         // Record pending purchase
-        const { marketplacePurchases } = await import('../drizzle/schema');
+        const { marketplacePurchases } = await import('../../drizzle/schema');
         await db.insert(marketplacePurchases).values({
           itemId: item.id,
           buyerUserId: ctx.user.id,
@@ -6604,7 +6604,7 @@ Never collapse multiple sections into a single block. Always label clearly.
     myPurchases: protectedProcedure.query(async ({ ctx }) => {
       const db = await getDb();
       if (!db) return [];
-      const { marketplacePurchases, marketplaceItems, users } = await import('../drizzle/schema');
+      const { marketplacePurchases, marketplaceItems, users } = await import('../../drizzle/schema');
       const { eq, desc } = await import('drizzle-orm');
       const rows = await db
         .select({
@@ -6635,7 +6635,7 @@ Never collapse multiple sections into a single block. Always label clearly.
     creatorSales: protectedProcedure.query(async ({ ctx }) => {
       const db = await getDb();
       if (!db) return { items: [], totalEarningsCents: 0 };
-      const { marketplacePurchases, marketplaceItems } = await import('../drizzle/schema');
+      const { marketplacePurchases, marketplaceItems } = await import('../../drizzle/schema');
       const { eq, and, desc, sum } = await import('drizzle-orm');
       const items = await db
         .select({
@@ -6684,7 +6684,7 @@ Never collapse multiple sections into a single block. Always label clearly.
       .mutation(async ({ ctx, input }) => {
         const db = await getDb();
         if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'DB unavailable' });
-        const { marketplaceItems } = await import('../drizzle/schema');
+        const { marketplaceItems } = await import('../../drizzle/schema');
         const result = await db.insert(marketplaceItems).values({
           type: input.type,
           title: input.title,
@@ -6709,7 +6709,7 @@ Never collapse multiple sections into a single block. Always label clearly.
       .mutation(async ({ ctx, input }) => {
         const db = await getDb();
         if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'DB unavailable' });
-        const { marketplaceItems } = await import('../drizzle/schema');
+        const { marketplaceItems } = await import('../../drizzle/schema');
         const { eq, and } = await import('drizzle-orm');
         await db.update(marketplaceItems)
           .set({ active: input.active })
@@ -6722,7 +6722,7 @@ Never collapse multiple sections into a single block. Always label clearly.
     seedDefaults: protectedProcedure.mutation(async ({ ctx }) => {
       const db = await getDb();
       if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'DB unavailable' });
-      const { marketplaceItems } = await import('../drizzle/schema');
+      const { marketplaceItems } = await import('../../drizzle/schema');
       const { eq, count } = await import('drizzle-orm');
       // Idempotency guard — only seed if creator has no items yet
       const existing = await db
@@ -6826,13 +6826,13 @@ Never collapse multiple sections into a single block. Always label clearly.
         const db = await getDb();
         if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'DB unavailable' });
         // Founder gate
-        const { users } = await import('../drizzle/schema');
+        const { users } = await import('../../drizzle/schema');
         const { eq } = await import('drizzle-orm');
         const [me] = await db.select({ role: users.role }).from(users).where(eq(users.id, ctx.user.id)).limit(1);
         if (!me || me.role !== 'founder') {
           throw new TRPCError({ code: 'FORBIDDEN', message: 'Only founders may submit avatars to the marketplace.' });
         }
-        const { marketplaceItems } = await import('../drizzle/schema');
+        const { marketplaceItems } = await import('../../drizzle/schema');
         const result = await db.insert(marketplaceItems).values({
           type: 'skin',
           title: input.title,
@@ -6859,7 +6859,7 @@ Never collapse multiple sections into a single block. Always label clearly.
       .mutation(async ({ ctx, input }) => {
         const db = await getDb();
         if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'DB unavailable' });
-        const { marketplaceItems, users } = await import('../drizzle/schema');
+        const { marketplaceItems, users } = await import('../../drizzle/schema');
         const { eq } = await import('drizzle-orm');
         const [item] = await db.select({ artworkUrl: marketplaceItems.artworkUrl, type: marketplaceItems.type, active: marketplaceItems.active })
           .from(marketplaceItems).where(eq(marketplaceItems.id, input.itemId)).limit(1);
@@ -6877,7 +6877,7 @@ Never collapse multiple sections into a single block. Always label clearly.
       .mutation(async ({ ctx }) => {
         const db = await getDb();
         if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'DB unavailable' });
-        const { users } = await import('../drizzle/schema');
+        const { users } = await import('../../drizzle/schema');
         const { eq } = await import('drizzle-orm');
         await db.update(users)
           .set({ equippedAvatarItemId: null })
@@ -6895,7 +6895,7 @@ Never collapse multiple sections into a single block. Always label clearly.
       .mutation(async ({ ctx, input }) => {
         const db = await getDb();
         if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'DB unavailable' });
-        const { marketplaceItems, users } = await import('../drizzle/schema');
+        const { marketplaceItems, users } = await import('../../drizzle/schema');
         const { eq } = await import('drizzle-orm');
         const [item] = await db.select({
           id: marketplaceItems.id,
@@ -7022,7 +7022,7 @@ Never collapse multiple sections into a single block. Always label clearly.
         sessionLabel: z.string().max(128).optional(),
       }))
       .mutation(async ({ ctx, input }) => {
-        const { invokeLLM } = await import("./_core/llm");
+        const { invokeLLM } = await import("../_core/llm");
         const systemPrompt = `You are the Personal Provenance Guide (PPG) for ${ctx.user.name ?? "a creator"} on Living Nexus. 
 You help creators develop their writing, lyrics, manuscripts, and creative works. 
 You understand provenance — every word belongs to its creator. 
@@ -7050,7 +7050,7 @@ Be concise, generative, and creatively useful. Respond in plain text suitable fo
     message: protectedProcedure
       .input(z.object({ content: z.string().min(1), context: z.string().optional() }))
       .mutation(async ({ ctx, input }) => {
-        const { invokeLLM } = await import("./_core/llm");
+        const { invokeLLM } = await import("../_core/llm");
         const agent = await getOrCreateAgent(ctx.user.id);
         const sysPrompt = `You are a Personal Nexus Agent — a creative intelligence bonded to this creator. You help them develop their voice, analyze their work, and evolve their style. Be concise and generative.`;
         const messages: Array<{ role: "system" | "user" | "assistant"; content: string }> = [
@@ -7531,7 +7531,7 @@ If a field cannot be determined from the document, use an empty string. For symb
         }
         const db = await getDb();
         if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
-        const { users } = await import("../drizzle/schema");
+        const { users } = await import("../../drizzle/schema");
         const { eq } = await import("drizzle-orm");
         const [creator] = await db.select({
           stripeAccountId: users.stripeAccountId,
@@ -7592,7 +7592,7 @@ If a field cannot be determined from the document, use an empty string. For symb
            if (identityContext) enrichedPrompt = `${identityContext}. ${input.prompt}`;
          }
 
-         const { generateImage } = await import('./_core/imageGeneration');
+         const { generateImage } = await import('../_core/imageGeneration');
          // Merge referenceImageUrls array + legacy single URL into originalImages
          const allRefUrls: string[] = [
            ...(input.referenceImageUrls ?? []),
@@ -7654,7 +7654,7 @@ If a field cannot be determined from the document, use an empty string. For symb
            if (identityContext) enrichedPrompt = `${identityContext}. ${input.prompt}`;
          }
 
-         const { generateImage } = await import('./_core/imageGeneration');
+         const { generateImage } = await import('../_core/imageGeneration');
          const result = await generateImage({
            prompt: enrichedPrompt,
            originalImages: [{ url: input.sourceImageUrl, mimeType: 'image/jpeg' }],
@@ -7715,7 +7715,7 @@ If a field cannot be determined from the document, use an empty string. For symb
         title: z.string().max(255).optional(),
       }))
       .mutation(async ({ ctx, input }) => {
-        const { quiverImages } = await import('../drizzle/schema');
+        const { quiverImages } = await import('../../drizzle/schema');
         const db = await getDb();
         const [row] = await db.insert(quiverImages).values({
           userId: ctx.user.id,
@@ -7743,7 +7743,7 @@ If a field cannot be determined from the document, use an empty string. For symb
         limit: z.number().int().min(1).max(50).default(20),
       }))
       .query(async ({ ctx, input }) => {
-        const { quiverImages } = await import('../drizzle/schema');
+        const { quiverImages } = await import('../../drizzle/schema');
         const { eq: eqOp, and: andOp, or: orOp, desc: descOp, like: likeOp } = await import('drizzle-orm');
         const db = await getDb();
         const { search, guideId, page, limit } = input;
@@ -7773,7 +7773,7 @@ If a field cannot be determined from the document, use an empty string. For symb
     delete: protectedProcedure
       .input(z.object({ id: z.number().int().positive() }))
       .mutation(async ({ ctx, input }) => {
-        const { quiverImages } = await import('../drizzle/schema');
+        const { quiverImages } = await import('../../drizzle/schema');
         const { eq: eqOp, and: andOp } = await import('drizzle-orm');
         const db = await getDb();
         const [img] = await db.select().from(quiverImages).where(
@@ -7790,7 +7790,7 @@ If a field cannot be determined from the document, use an empty string. For symb
     updateTitle: protectedProcedure
       .input(z.object({ id: z.number().int().positive(), title: z.string().max(255) }))
       .mutation(async ({ ctx, input }) => {
-        const { quiverImages } = await import('../drizzle/schema');
+        const { quiverImages } = await import('../../drizzle/schema');
         const { eq: eqOp, and: andOp } = await import('drizzle-orm');
         const db = await getDb();
         await db.update(quiverImages)
@@ -7811,7 +7811,7 @@ If a field cannot be determined from the document, use an empty string. For symb
         title: z.string().min(1).max(255).optional(),
       }))
       .mutation(async ({ ctx, input }) => {
-        const { quiverImages } = await import('../drizzle/schema');
+        const { quiverImages } = await import('../../drizzle/schema');
         const { eq: eqOp, and: andOp } = await import('drizzle-orm');
         const db = await getDb();
         const [img] = await db.select().from(quiverImages).where(

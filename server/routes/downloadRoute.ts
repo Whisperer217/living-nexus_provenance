@@ -510,9 +510,9 @@ downloadRouter.get("/api/quiver/:id/download", async (req: Request, res: Respons
   // 2. Load quiver image from DB (ownership check)
   let quiverRow: { url: string; prompt: string; widId: string | null; createdAt: Date } | null = null;
   try {
-    const { quiverImages } = await import('../drizzle/schema');
+    const { quiverImages } = await import('../../drizzle/schema');
     const { eq: eqOp, and: andOp } = await import('drizzle-orm');
-    const { getDb } = await import('./db');
+    const { getDb } = await import('../utils/db');
     const db = await getDb();
     const rows = await db.select({
       url: quiverImages.url,

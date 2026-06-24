@@ -1621,7 +1621,7 @@ function MediaGenerationTab() {
                     No queue jobs found.
                   </td>
                 </tr>
-              ) : jobs.map((job, i) => (
+              ) : jobs.map((job: (typeof jobs)[number], i: number) => (
                 <tr
                   key={job.id}
                   style={{
@@ -1651,10 +1651,10 @@ function MediaGenerationTab() {
             </tbody>
           </table>
         </div>
-        {jobs.some(j => j.errorMessage) && (
+        {jobs.some((j: (typeof jobs)[number]) => j.errorMessage) && (
           <div className="px-4 py-3 space-y-1" style={{ background: CARD, borderTop: `1px solid ${BORDER}` }}>
             <p className="text-xs font-semibold mb-1" style={{ color: RED }}>Error Details</p>
-            {jobs.filter(j => j.errorMessage).map(j => (
+            {jobs.filter((j: (typeof jobs)[number]) => j.errorMessage).map((j: (typeof jobs)[number]) => (
               <p key={j.id} className="text-xs font-mono" style={{ color: RED }}>
                 Job {j.id} (song {j.songId}): {j.errorMessage}
               </p>

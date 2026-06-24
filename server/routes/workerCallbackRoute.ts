@@ -185,10 +185,10 @@ workerCallbackRouter.get(
   requireWorkerAuth,
   async (req: Request, res: Response) => {
     try {
-      const { claimPendingJobs } = await import("./workerQueue");
+      const { claimPendingJobs } = await import("../workers/workerQueue");
       const typesParam = (req.query.types as string) || "comic-processing,guide-extraction,notification-digest";
       const limit = Math.min(parseInt((req.query.limit as string) || "10", 10), 50);
-      const types = typesParam.split(",").map(t => t.trim()) as import("./workerQueue").JobType[];
+      const types = typesParam.split(",").map(t => t.trim()) as import("../workers/workerQueue").JobType[];
       const jobs = await claimPendingJobs(types, limit);
       res.json({ jobs });
     } catch (err) {
@@ -210,7 +210,7 @@ workerCallbackRouter.post(
         res.status(400).json({ error: "Invalid job ID" });
         return;
       }
-      const { completeJob, failJob } = await import("./workerQueue");
+      const { completeJob, failJob } = await import("../workers/workerQueue");
       const { success, result, error } = req.body as {
         success: boolean;
         result?: Record<string, unknown>;
@@ -233,7 +233,7 @@ workerCallbackRouter.post(
 // GET /api/worker/stats  (no auth — public stats for ops dashboard)
 workerCallbackRouter.get("/api/worker/stats", async (_req: Request, res: Response) => {
   try {
-    const { getJobStats, getRecentJobs } = await import("./workerQueue");
+    const { getJobStats, getRecentJobs } = await import("../workers/workerQueue");
     const [stats, recent] = await Promise.all([getJobStats(), getRecentJobs(20)]);
     res.json({ stats, recent });
   } catch (err) {

@@ -453,7 +453,7 @@ publicApiRouter.get("/api/v1/works/:wid", async (req: Request, res: Response) =>
       res.status(400).json({ error: "Invalid WID format. Expected WID-XXX-XXXXXXXX-XXXXXXXX" }); return;
     }
 
-    const database = await (await import("./db")).getDb();
+    const database = await (await import("../utils/db")).getDb();
     if (!database) { res.status(503).json({ error: "Database unavailable" }); return; }
 
     const { songs, users } = await import("../../drizzle/schema");
@@ -518,7 +518,7 @@ publicApiRouter.get("/api/v1/creator/:handle/works", async (req: Request, res: R
     const offset = parseInt(req.query.offset as string || "0", 10);
     const contentTypeFilter = req.query.contentType as string | undefined;
 
-    const database = await (await import("./db")).getDb();
+    const database = await (await import("../utils/db")).getDb();
     if (!database) { res.status(503).json({ error: "Database unavailable" }); return; }
 
     const { songs, users } = await import("../../drizzle/schema");

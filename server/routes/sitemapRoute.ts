@@ -74,7 +74,7 @@ sitemapRouter.get("/sitemap.xml", async (_req: Request, res: Response) => {
     try {
       const db = await getDb();
       if (db) {
-        const { users } = await import("./db").then(m => ({ users: (m as any).users }));
+        const { users } = await import("../utils/db").then(m => ({ users: (m as any).users }));
         // Use a raw query to get distinct creator IDs from published songs
         const { sql } = await import("drizzle-orm");
         const creatorRows = await db.execute(
