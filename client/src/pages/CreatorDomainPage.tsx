@@ -269,7 +269,7 @@ export default function CreatorDomainPage() {
         </div>
       ) : (
         /* ── Management Mode: sidebar + content ── */
-        <div className="flex flex-col md:flex-row min-h-[calc(100vh-57px)]">
+        <div className="flex flex-col md:flex-row" style={{ minHeight: 'calc(100vh - 57px)' }}>
 
           {/* ── Sidebar ── */}
           <aside
@@ -312,7 +312,7 @@ export default function CreatorDomainPage() {
           </aside>
 
           {/* ── Mobile section picker ── */}
-          <div className="md:hidden w-full px-4 pt-3 pb-1">
+          <div className="md:hidden w-full px-4 pt-3 pb-2" style={{ borderBottom: '1px solid rgba(196,154,40,0.08)' }}>
             <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
               {NAV_ITEMS.map((item) => {
                 const Icon = item.icon;
@@ -335,7 +335,7 @@ export default function CreatorDomainPage() {
           </div>
 
           {/* ── Content Panel ── */}
-          <main className="flex-1 min-w-0 px-4 md:px-8 py-6">
+          <main className="flex-1 min-w-0 px-4 md:px-8 py-6" style={{ minHeight: 'calc(100vh - 120px)' }}>
 
             {/* ── Overview ── */}
             {activeSection === "overview" && (
