@@ -1,5 +1,5 @@
 import { alias } from "drizzle-orm/mysql-core";
-import { and, asc, count, desc, eq, gte, inArray, isNotNull, like, ne, or, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq, gt, gte, inArray, isNotNull, isNull, like, ne, or, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import mysql from "mysql2/promise";
 import {
@@ -62,6 +62,7 @@ import {
   type QuiverImage,
   apiKeys,
   type ApiKey,
+  trackDownloadGrants,
 } from "../../drizzle/schema";
 import { ENV } from "../_core/env";
 import type { SearchResults } from "../../shared/searchTypes";
@@ -5819,4 +5820,233 @@ export async function getPublishedCountByUser(userId: number): Promise<number> {
     .from(songs)
     .where(and(eq(songs.userId, userId), eq(songs.status, "Published")));
   return Number(result[0]?.count ?? 0);
+}
+
+// ─── Track Download Grants ────────────────────────────────────────────────────
+
+
+/**
+ * Grant a specific user download access to a specific track.
+ * Creator must own the song (caller must verify ownership before calling).
+ * Returns the new grant record.
+ */
+export async function grantTrackDownload(data: {
+  songId: number;
+  grantedByUserId: number;
+  grantedToUserId: number;
+  note?: string;
+  expiresAt?: Date;
+}): Promise<{ id: number }> {
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+  const result = await db.insert(trackDownloadGrants).values({
+    songId: data.songId,
+    grantedByUserId: data.grantedByUserId,
+    grantedToUserId: data.grantedToUserId,
+    note: data.note ?? null,
+    expiresAt: data.expiresAt ?? null,
+  });
+  return { id: Number(result[0].insertId) };
+}
+
+/**
+ * Check whether a user has an active (non-revoked, non-expired) download grant
+ * for a specific song. Also returns true if the user IS the song owner.
+ */
+export async function hasTrackDownloadGrant(
+  userId: number,
+  songId: number
+): Promise<boolean> {
+  const db = await getDb();
+  if (!db) return false;
+  // Check ownership first (owner always has access)
+  const song = await db.select({ userId: songs.userId }).from(songs).where(eq(songs.id, songId)).limit(1);
+  if (song[0]?.userId === userId) return true;
+  // Check for active grant
+  const now = new Date();
+  const grants = await db
+    .select({ id: trackDownloadGrants.id })
+    .from(trackDownloadGrants)
+    .where(
+      and(
+        eq(trackDownloadGrants.songId, songId),
+        eq(trackDownloadGrants.grantedToUserId, userId),
+        isNull(trackDownloadGrants.revokedAt),
+        or(
+          isNull(trackDownloadGrants.expiresAt),
+          gt(trackDownloadGrants.expiresAt, now)
+        )
+      )
+    )
+    .limit(1);
+  return grants.length > 0;
+}
+
+/**
+ * Check download grant status for multiple songs at once.
+ * Returns a map of songId → { granted: boolean; grantId?: number; expiresAt?: Date }.
+ * Songs owned by the user are always marked granted.
+ */
+export async function getBulkDownloadGrantStatus(
+  userId: number,
+  songIds: number[]
+): Promise<Map<number, { granted: boolean; grantId?: number; expiresAt?: Date | null }>> {
+  const db = await getDb();
+  const result = new Map<number, { granted: boolean; grantId?: number; expiresAt?: Date | null }>();
+  if (!db || songIds.length === 0) {
+    songIds.forEach(id => result.set(id, { granted: false }));
+    return result;
+  }
+  // Fetch song ownership
+  const ownedSongs = await db
+    .select({ id: songs.id })
+    .from(songs)
+    .where(and(inArray(songs.id, songIds), eq(songs.userId, userId)));
+  const ownedIds = new Set(ownedSongs.map((s: { id: number }) => s.id));
+  // Fetch active grants
+  const now = new Date();
+  const grants = await db
+    .select({
+      id: trackDownloadGrants.id,
+      songId: trackDownloadGrants.songId,
+      expiresAt: trackDownloadGrants.expiresAt,
+    })
+    .from(trackDownloadGrants)
+    .where(
+      and(
+        inArray(trackDownloadGrants.songId, songIds),
+        eq(trackDownloadGrants.grantedToUserId, userId),
+        isNull(trackDownloadGrants.revokedAt),
+        or(
+          isNull(trackDownloadGrants.expiresAt),
+          gt(trackDownloadGrants.expiresAt, now)
+        )
+      )
+    );
+  const grantMap = new Map<number, { id: number; songId: number; expiresAt: Date | null }>(grants.map((g: { id: number; songId: number; expiresAt: Date | null }) => [g.songId, g]));
+  for (const id of songIds) {
+    if (ownedIds.has(id)) {
+      result.set(id, { granted: true });
+    } else {
+      const grant = grantMap.get(id);
+      result.set(id, grant
+        ? { granted: true, grantId: grant.id, expiresAt: grant.expiresAt }
+        : { granted: false }
+      );
+    }
+  }
+  return result;
+}
+
+/**
+ * Revoke a download grant (soft delete). Only the granting creator can revoke.
+ */
+export async function revokeTrackDownloadGrant(
+  grantId: number,
+  grantedByUserId: number
+): Promise<boolean> {
+  const db = await getDb();
+  if (!db) return false;
+  const result = await db
+    .update(trackDownloadGrants)
+    .set({ revokedAt: new Date() })
+    .where(
+      and(
+        eq(trackDownloadGrants.id, grantId),
+        eq(trackDownloadGrants.grantedByUserId, grantedByUserId),
+        isNull(trackDownloadGrants.revokedAt)
+      )
+    );
+  return (result[0].affectedRows ?? 0) > 0;
+}
+
+/**
+ * List all active download grants issued by a creator (for their dashboard).
+ */
+export async function getGrantsIssuedByCreator(
+  grantedByUserId: number,
+  limit = 100
+): Promise<Array<{
+  id: number;
+  songId: number;
+  songTitle: string;
+  grantedToUserId: number;
+  grantedToName: string | null;
+  note: string | null;
+  expiresAt: Date | null;
+  createdAt: Date;
+}>> {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db
+    .select({
+      id: trackDownloadGrants.id,
+      songId: trackDownloadGrants.songId,
+      songTitle: songs.title,
+      grantedToUserId: trackDownloadGrants.grantedToUserId,
+      grantedToName: users.name,
+      note: trackDownloadGrants.note,
+      expiresAt: trackDownloadGrants.expiresAt,
+      createdAt: trackDownloadGrants.createdAt,
+    })
+    .from(trackDownloadGrants)
+    .innerJoin(songs, eq(trackDownloadGrants.songId, songs.id))
+    .innerJoin(users, eq(trackDownloadGrants.grantedToUserId, users.id))
+    .where(
+      and(
+        eq(trackDownloadGrants.grantedByUserId, grantedByUserId),
+        isNull(trackDownloadGrants.revokedAt)
+      )
+    )
+    .orderBy(desc(trackDownloadGrants.createdAt))
+    .limit(limit);
+  return rows;
+}
+
+/**
+ * List all active download grants received by a user (for their downloads page).
+ */
+export async function getGrantsReceivedByUser(
+  grantedToUserId: number,
+  limit = 100
+): Promise<Array<{
+  id: number;
+  songId: number;
+  songTitle: string;
+  grantedByUserId: number;
+  grantedByName: string | null;
+  note: string | null;
+  expiresAt: Date | null;
+  createdAt: Date;
+}>> {
+  const db = await getDb();
+  if (!db) return [];
+  const now = new Date();
+  const rows = await db
+    .select({
+      id: trackDownloadGrants.id,
+      songId: trackDownloadGrants.songId,
+      songTitle: songs.title,
+      grantedByUserId: trackDownloadGrants.grantedByUserId,
+      grantedByName: users.name,
+      note: trackDownloadGrants.note,
+      expiresAt: trackDownloadGrants.expiresAt,
+      createdAt: trackDownloadGrants.createdAt,
+    })
+    .from(trackDownloadGrants)
+    .innerJoin(songs, eq(trackDownloadGrants.songId, songs.id))
+    .innerJoin(users, eq(trackDownloadGrants.grantedByUserId, users.id))
+    .where(
+      and(
+        eq(trackDownloadGrants.grantedToUserId, grantedToUserId),
+        isNull(trackDownloadGrants.revokedAt),
+        or(
+          isNull(trackDownloadGrants.expiresAt),
+          gt(trackDownloadGrants.expiresAt, now)
+        )
+      )
+    )
+    .orderBy(desc(trackDownloadGrants.createdAt))
+    .limit(limit);
+  return rows;
 }

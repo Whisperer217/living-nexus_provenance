@@ -24,6 +24,7 @@ import { workRouter } from "../routes/workRoute";
 import { workerCallbackRouter } from "../routes/workerCallbackRoute";
 import { mcpRouter } from "../mcp/index";
 import { sitemapRouter } from "../routes/sitemapRoute";
+import { bulkDownloadRouter } from "../routes/bulkDownloadRoute";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { startVisualWorker, backfillVisualQueue } from "../workers/visualQueue";
@@ -119,6 +120,15 @@ async function startServer() {
   app.use("/api/trpc/songs.play", publicWriteLimit);
   app.use("/api/trpc/songs.download", publicWriteLimit);
   app.use("/api/trpc/songs.recordPlay", publicWriteLimit);
+  // Bulk download — stricter: 5 ZIP requests per IP per 10 minutes
+  const bulkDownloadLimit = rateLimit({
+    windowMs: 10 * 60 * 1000,
+    max: 5,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: "Too many bulk download requests. Please wait before trying again." },
+  });
+  app.use("/api/bulk-download", bulkDownloadLimit);
   // OAuth callback under /api/oauth/callback
   registerStorageProxy(app);
   registerOAuthRoutes(app);
@@ -130,6 +140,8 @@ async function startServer() {
   app.use(stampRouter);
   // WID-tagged audio download endpoint
   app.use(downloadRouter);
+  // Licensed bulk download — GET /api/bulk-download/:token (streams ZIP, token valid 15 min)
+  app.use(bulkDownloadRouter);
   // Physical distribution export (admin-only)
   app.use(physicalExportRouter);
   // Harmonic Signature — GET /api/harmonic/:songId/audio and /api/harmonic/:songId/image

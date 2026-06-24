@@ -21,6 +21,7 @@ import {
   FolderOpen, Settings, LogOut, LogIn,
   Shield, BookMarked,
   LayoutGrid, LayoutDashboard, X, ExternalLink,
+  Download,
 } from "lucide-react";
 
 // ── Types ─────────────────────────────────────────────────────────
@@ -164,6 +165,7 @@ const PANELS: Record<NavMode, ModePanel> = {
         links: [
           { icon: <BookMarked size={14} />, label: "Witness Registry", path: "/witness-registry", description: "Public ledger of all registered works", gold: true },
           { icon: <Archive size={14} />, label: "My Works", path: "/archive", description: "Your personally registered works", authOnly: true },
+          { icon: <Download size={14} />, label: "Licensed Downloads", path: "/licensed-downloads", description: "Bulk download tracks you're licensed for", authOnly: true },
           { icon: <LayoutDashboard size={14} />, label: "Dashboard", path: "/dashboard", description: "Creator analytics & slots", authOnly: true },
         ],
       },

@@ -12,6 +12,8 @@ import { storagePut } from "../utils/storage";
 import { micronize } from "../services/imageProcessing";
 import { invokeLLM } from "../_core/llm";
 import {
+  grantTrackDownload, getBulkDownloadGrantStatus, revokeTrackDownloadGrant,
+  getGrantsIssuedByCreator, getGrantsReceivedByUser, getSongsByIds,
   addComment, createSong, deleteSong, getAllCreators,
   getCommentsBySong, getPublicSongs, getSongById,
   getSongsByUser, getSongWithCreator, getTipsBySong, reorderSongs, getNextDisplayOrder,
@@ -221,6 +223,123 @@ export const songDownloadRouter = router({
         if (song.userId !== ctx.user.id) throw new TRPCError({ code: "FORBIDDEN", message: "Not your song" });
         await updateSongDownloadPermission(input.songId, ctx.user.id, input.permission, input.tipThresholdCents);
         return { success: true, permission: input.permission };
+      }),
+
+    /**
+     * Grant a specific user download access to one of your tracks.
+     * Only the track owner can issue grants.
+     */
+    grantDownload: protectedProcedure
+      .input(z.object({
+        songId: z.number().int().positive(),
+        grantToUserId: z.number().int().positive(),
+        note: z.string().max(512).optional(),
+        expiresAt: z.date().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const song = await getSongById(input.songId);
+        if (!song) throw new TRPCError({ code: "NOT_FOUND", message: "Song not found" });
+        if (song.userId !== ctx.user.id)
+          throw new TRPCError({ code: "FORBIDDEN", message: "You can only grant downloads for your own tracks" });
+        if (input.grantToUserId === ctx.user.id)
+          throw new TRPCError({ code: "BAD_REQUEST", message: "You already own this track" });
+        const grant = await grantTrackDownload({
+          songId: input.songId,
+          grantedByUserId: ctx.user.id,
+          grantedToUserId: input.grantToUserId,
+          note: input.note,
+          expiresAt: input.expiresAt,
+        });
+        return { success: true, grantId: grant.id };
+      }),
+
+    /**
+     * Revoke a previously issued download grant.
+     * Only the original granting creator can revoke.
+     */
+    revokeDownload: protectedProcedure
+      .input(z.object({ grantId: z.number().int().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        const revoked = await revokeTrackDownloadGrant(input.grantId, ctx.user.id);
+        if (!revoked)
+          throw new TRPCError({ code: "NOT_FOUND", message: "Grant not found or already revoked" });
+        return { success: true };
+      }),
+
+    /** List all active download grants issued by the current creator. */
+    listIssuedGrants: protectedProcedure
+      .query(async ({ ctx }) => getGrantsIssuedByCreator(ctx.user.id)),
+
+    /** List all active download grants received by the current user. */
+    listReceivedGrants: protectedProcedure
+      .query(async ({ ctx }) => getGrantsReceivedByUser(ctx.user.id)),
+
+    /**
+     * Check bulk download grant status for a set of song IDs.
+     * Returns which songs the current user is authorized to download.
+     */
+    checkBulkGrants: protectedProcedure
+      .input(z.object({ songIds: z.array(z.number().int().positive()).min(1).max(20) }))
+      .query(async ({ ctx, input }) => {
+        const statusMap = await getBulkDownloadGrantStatus(ctx.user.id, input.songIds);
+        const result: Record<number, { granted: boolean; grantId?: number; expiresAt?: Date | null }> = {};
+        for (const [songId, status] of Array.from(statusMap)) result[songId] = status;
+        return result;
+      }),
+
+    /**
+     * Bulk download — verifies every track is licensed, then issues a signed
+     * 15-minute token the frontend uses to hit GET /api/bulk-download/:token.
+     * That endpoint streams the ZIP with all tracks + manifest.json.
+     */
+    bulkDownload: protectedProcedure
+      .input(z.object({
+        songIds: z.array(z.number().int().positive()).min(1).max(20),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const { songIds } = input;
+        const userId = ctx.user.id;
+
+        // 1. Verify licenses for ALL requested tracks
+        const grantStatus = await getBulkDownloadGrantStatus(userId, songIds);
+        const unauthorized: number[] = [];
+        for (const [songId, status] of Array.from(grantStatus)) {
+          if (!status.granted) unauthorized.push(songId);
+        }
+        if (unauthorized.length > 0) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: `You do not have download authorization for song ID(s): ${unauthorized.join(", ")}. Each track requires an explicit grant from the creator.`,
+          });
+        }
+
+        // 2. Fetch song metadata to confirm all songs exist
+        const rows = await getSongsByIds(songIds);
+        if (rows.length !== songIds.length) {
+          const foundIds = new Set(rows.map((r: { song: { id: number } }) => r.song.id));
+          const missing = songIds.filter((id: number) => !foundIds.has(id));
+          throw new TRPCError({ code: "NOT_FOUND", message: `Song(s) not found: ${missing.join(", ")}` });
+        }
+
+        // 3. Issue a short-lived signed download token (15 min)
+        const { SignJWT } = await import("jose");
+        const secret = new TextEncoder().encode(process.env.JWT_SECRET ?? "fallback");
+        const token = await new SignJWT({ userId, songIds })
+          .setProtectedHeader({ alg: "HS256" })
+          .setExpirationTime("15m")
+          .setIssuedAt()
+          .sign(secret);
+
+        return {
+          downloadUrl: `/api/bulk-download/${encodeURIComponent(token)}`,
+          trackCount: rows.length,
+          tracks: rows.map((r: { song: { id: number; title: string; witnessId: string | null }; creator: { artistHandle: string | null; name: string | null } | null }) => ({
+            id: r.song.id,
+            title: r.song.title,
+            witnessId: r.song.witnessId,
+            creator: r.creator?.artistHandle ?? r.creator?.name ?? "Unknown",
+          })),
+        };
       }),
   });
 

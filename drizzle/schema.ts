@@ -2007,3 +2007,30 @@ export const apiKeys = mysqlTable("apiKeys", {
 });
 export type ApiKey = typeof apiKeys.$inferSelect;
 export type InsertApiKey = typeof apiKeys.$inferInsert;
+
+// ─── Track Download Grants ────────────────────────────────────────────────────
+// A creator explicitly authorises a specific user to download a specific track.
+// This is the source-of-truth for the licensed bulk download system.
+// A grant is immutable once created; revocation sets revokedAt (soft delete).
+export const trackDownloadGrants = mysqlTable("trackDownloadGrants", {
+  id: int("id").autoincrement().primaryKey(),
+  // The song being licensed
+  songId: int("songId").notNull(),
+  // The creator who owns the song and is granting the license
+  grantedByUserId: int("grantedByUserId").notNull(),
+  // The user who is being granted download access
+  grantedToUserId: int("grantedToUserId").notNull(),
+  // Optional: note from creator (e.g. "For your remix project")
+  note: varchar("note", { length: 512 }),
+  // Optional expiry — null means the grant never expires
+  expiresAt: timestamp("expiresAt"),
+  // Soft revocation — null means the grant is still active
+  revokedAt: timestamp("revokedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (t) => ({
+  songGranteeIdx: index("tdg_song_grantee_idx").on(t.songId, t.grantedToUserId),
+  granteeIdx: index("tdg_grantee_idx").on(t.grantedToUserId),
+  granterIdx: index("tdg_granter_idx").on(t.grantedByUserId),
+}));
+export type TrackDownloadGrant = typeof trackDownloadGrants.$inferSelect;
+export type InsertTrackDownloadGrant = typeof trackDownloadGrants.$inferInsert;

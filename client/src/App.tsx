@@ -98,6 +98,7 @@ const ConstellationPage = lazy(() => import("./pages/ConstellationPage"));
 const OnboardingManifest = lazy(() => import("./pages/OnboardingManifest"));
 const DeveloperDashboardPage = lazy(() => import("./pages/DeveloperDashboardPage"));
 const DevelopersPage = lazy(() => import("./pages/DevelopersPage"));
+const LicensedDownloadsPage = lazy(() => import("./pages/LicensedDownloadsPage"));
 
 // Minimal fallback shown while a page chunk loads (typically <200ms on CDN)
 function PageLoader() {
@@ -190,6 +191,7 @@ function Router() {
                 <Route path="/batch-upload" component={BatchUploadPage} />
                 <Route path="/liked" component={LikedPage} />
                 <Route path="/archive" component={ArchivePage} />
+                <Route path="/licensed-downloads" component={LicensedDownloadsPage} />
                 {/* Archive sub-routes — handled in stability redirects section below */}
                 <Route path="/song/:id" component={SongDetailPage} />
                 <Route path="/book/:id" component={BookDetailPage} />
