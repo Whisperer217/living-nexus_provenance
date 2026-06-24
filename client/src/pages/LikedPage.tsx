@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { Link } from "wouter";
 import { Heart, Music, Play, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,22 +12,25 @@ export default function LikedPage() {
   const { user, loading } = useAuth();
   const { playQueueAt, openNowPlayingPanel } = usePlayer();
 
-  // Redirect to login if not authenticated
-  useEffect(() => {
-    if (!loading && !user) {
-      window.location.href = getLoginUrl();
-    }
-  }, [loading, user]);
-
   const { data: likedTracks, isLoading } = trpc.songs.getLiked.useQuery(undefined, {
     enabled: !!user,
   });
 
-  if (loading || !user) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="w-8 h-8 rounded-full border-2 animate-spin"
           style={{ borderColor: "var(--ln-gold)", borderTopColor: "transparent" }} />
+      </div>
+    );
+  }
+  if (!user) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 px-4">
+        <Heart className="w-10 h-10 opacity-30" style={{ color: "var(--ln-gold)" }} />
+        <p className="text-base font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>Liked Tracks</p>
+        <p className="text-sm" style={{ color: "var(--ln-smoke)" }}>Sign in to see the tracks you've saved</p>
+        <a href={getLoginUrl("/liked")} className="px-5 py-2.5 rounded-xl text-sm font-semibold transition-all hover:brightness-110" style={{ background: "var(--ln-gold)", color: "var(--ln-coal)" }}>Sign In</a>
       </div>
     );
   }

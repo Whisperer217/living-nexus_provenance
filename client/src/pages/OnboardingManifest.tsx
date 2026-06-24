@@ -649,12 +649,7 @@ export default function OnboardingManifest() {
     }
   }, [progress]);
 
-  // Redirect to login if not authenticated
-  useEffect(() => {
-    if (!authLoading && !user) {
-      window.location.href = getLoginUrl("/onboarding");
-    }
-  }, [authLoading, user]);
+  // No hard redirect — guests see a soft sign-in gate below
 
   const markComplete = (stepId: StepId) => {
     setCompletedSteps(prev => prev.includes(stepId) ? prev : [...prev, stepId]);
@@ -706,6 +701,16 @@ export default function OnboardingManifest() {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--ln-void)" }}>
         <Loader2 className="w-8 h-8 animate-spin" style={{ color: "var(--ln-gold)" }} />
+      </div>
+    );
+  }
+  if (!user) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 px-4" style={{ background: "var(--ln-void)" }}>
+        <div className="w-12 h-12 rounded-full border-2 mb-2" style={{ borderColor: "var(--ln-gold)", boxShadow: "0 0 24px rgba(196,154,40,0.2)" }} />
+        <p className="text-lg font-heading" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>Onboarding</p>
+        <p className="text-sm text-center max-w-xs" style={{ color: "var(--ln-smoke)" }}>Sign in to set up your creator profile and begin your provenance journey.</p>
+        <a href={getLoginUrl("/onboarding")} className="px-6 py-2.5 rounded-xl text-sm font-semibold transition-all hover:brightness-110" style={{ background: "var(--ln-gold)", color: "var(--ln-coal)" }}>Sign In</a>
       </div>
     );
   }

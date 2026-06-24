@@ -89,21 +89,22 @@ downloadRouter.get("/api/download/:songId", async (req: Request, res: Response) 
     return;
   }
 
+  // All download types require authentication — guests must sign in first
+  let authedUserId: number | undefined;
+  try {
+    const authedUser = await sdk.authenticateRequest(req);
+    authedUserId = authedUser?.id;
+  } catch {
+    // ignore auth errors
+  }
+  if (!authedUserId) {
+    res.status(401).json({ error: "Sign in to download this track." });
+    return;
+  }
+
   if (perm === "tipped") {
-    // Parse session cookie to get userId (same pattern as tRPC context)
-    let userId: number | undefined;
-    try {
-      const user = await sdk.authenticateRequest(req);
-      userId = user?.id;
-    } catch {
-      // ignore
-    }
-    if (!userId) {
-      res.status(401).json({ error: "Sign in to download this track." });
-      return;
-    }
     const thresholdCents = song.downloadTipThresholdCents ?? 179;
-    const userTipTotal = await getUserTipTotalForSong(userId, songId);
+    const userTipTotal = await getUserTipTotalForSong(authedUserId, songId);
     if (userTipTotal < thresholdCents) {
       res.status(403).json({ error: `Tip $${(thresholdCents / 100).toFixed(2)} to unlock this download.` });
       return;

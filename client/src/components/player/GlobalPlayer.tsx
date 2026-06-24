@@ -1355,6 +1355,7 @@ function GlobalPlayerInner() {
           <button
             onClick={() => {
               setShowContextMenu(false);
+              if (!user) { toast.info("Sign in to download this track"); return; }
               const a = document.createElement("a");
               a.href = `/api/download/${currentSongId}`;
               a.download = ""; // CRITICAL: tells browser to download, not navigate

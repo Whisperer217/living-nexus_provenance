@@ -8,7 +8,6 @@ import { usePlayer } from "@/contexts/PlayerContext";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
-import { useEffect } from "react";
 import { Link } from "wouter";
 import { Music, Play, Trash2, BookmarkX, ListMusic } from "lucide-react";
 import { toast } from "sonner";
@@ -17,12 +16,6 @@ export default function PlaylistPage() {
   const { isAuthenticated, loading } = useAuth();
   const { playQueueAt, openNowPlayingPanel, currentTrackId, state: playerState } = usePlayer();
   const utils = trpc.useUtils();
-
-  useEffect(() => {
-    if (!loading && !isAuthenticated) {
-      window.location.href = getLoginUrl("/playlist");
-    }
-  }, [loading, isAuthenticated]);
 
   const { data: items = [], isLoading } = trpc.playlist.get.useQuery(undefined, {
     enabled: isAuthenticated,
@@ -70,10 +63,20 @@ export default function PlaylistPage() {
     openNowPlayingPanel();
   };
 
-  if (loading || !isAuthenticated) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="w-8 h-8 rounded-full border-2 border-[#C49A28]/30 border-t-[#C49A28] animate-spin" />
+      </div>
+    );
+  }
+  if (!isAuthenticated) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 gap-4 px-4">
+        <ListMusic className="w-10 h-10 opacity-30" style={{ color: "var(--ln-gold)" }} />
+        <p className="text-base font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>My Playlist</p>
+        <p className="text-sm" style={{ color: "var(--ln-smoke)" }}>Sign in to view your saved tracks</p>
+        <a href={getLoginUrl("/playlist")} className="px-5 py-2.5 rounded-xl text-sm font-semibold transition-all hover:brightness-110" style={{ background: "var(--ln-gold)", color: "var(--ln-coal)" }}>Sign In</a>
       </div>
     );
   }

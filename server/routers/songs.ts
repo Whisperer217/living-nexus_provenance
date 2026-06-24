@@ -927,14 +927,15 @@ export const songsRouter = router({
       const perm = (song as any).downloadPermission as string | undefined;
       // Enforce permission gate
       if (!perm || perm === "none") throw new TRPCError({ code: "FORBIDDEN", message: "Downloads are not enabled for this track." });
+      // All download types require authentication — guests must sign in first
+      if (!ctx.user) throw new TRPCError({ code: "UNAUTHORIZED", message: "Sign in to download this track." });
       if (perm === "tipped") {
         // Must have tipped at least the threshold amount
-        if (!ctx.user) throw new TRPCError({ code: "UNAUTHORIZED", message: "Sign in to download this track." });
         const thresholdCents = (song as any).downloadTipThresholdCents ?? 179;
         const userTipTotal = await getUserTipTotalForSong(ctx.user.id, input.songId);
         if (userTipTotal < thresholdCents) throw new TRPCError({ code: "FORBIDDEN", message: `Tip $${(thresholdCents / 100).toFixed(2)} to unlock this download.` });
       }
-      await recordDownload({ songId: input.songId, userId: ctx.user?.id });
+      await recordDownload({ songId: input.songId, userId: ctx.user.id });
       return { url: song.fileUrl };
     }),
     updateLyrics: protectedProcedure.input(z.object({ songId: z.number(), lyricsText: z.string().max(10000) })).mutation(async ({ ctx, input }) => {

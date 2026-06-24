@@ -8,7 +8,7 @@
  *
  * - Calls songs.getLikeStatus on mount (only when authenticated AND skipQuery is false)
  * - Calls songs.toggleLike on user action with optimistic update
- * - Unauthenticated users are redirected to sign-in on toggle
+ * - Unauthenticated users see a toast prompt to sign in on toggle
  *
  * The `skipQuery` option is critical for pages that render many TrackCards (e.g. HomePage
  * with 24 Discover + 24 Trending). Without it, each card fires an individual getLikeStatus
@@ -19,7 +19,6 @@
 import { useState, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { getLoginUrl } from "@/const";
 import { toast } from "sonner";
 
 interface UseLikeOptions {
@@ -79,7 +78,7 @@ export function useLike(
   const toggle = (e?: React.MouseEvent) => {
     e?.stopPropagation();
     if (!user) {
-      window.location.href = getLoginUrl();
+      toast.info("Sign in to like this track");
       return;
     }
     if (isNaN(id)) return;

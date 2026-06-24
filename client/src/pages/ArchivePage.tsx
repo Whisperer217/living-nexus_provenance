@@ -344,12 +344,7 @@ export default function ArchivePage() {
     toast.success(`Now playing: ${clickedTrack.title}`);
   };
 
-  // Auth guard
-  useEffect(() => {
-    if (!loading && !isAuthenticated) {
-      window.location.href = getLoginUrl();
-    }
-  }, [loading, isAuthenticated]);
+  // No hard redirect — guests see a soft sign-in gate below
 
   const { data: songs, isLoading: songsLoading } = trpc.songs.mySongs.useQuery(undefined, {
     enabled: isAuthenticated,
@@ -500,11 +495,21 @@ export default function ArchivePage() {
     dragOverId.current = null;
   };
 
-  if (loading || !isAuthenticated) {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--ln-coal)" }}>
         <div className="w-8 h-8 rounded-full border-2 animate-spin"
           style={{ borderColor: "var(--ln-gold)", borderTopColor: "transparent" }} />
+      </div>
+    );
+  }
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 px-4" style={{ background: "var(--ln-coal)" }}>
+        <div className="w-12 h-12 rounded-full border-2 mb-2" style={{ borderColor: "var(--ln-gold)", boxShadow: "0 0 24px rgba(196,154,40,0.2)" }} />
+        <p className="text-lg font-heading" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>Your Archive</p>
+        <p className="text-sm text-center max-w-xs" style={{ color: "var(--ln-smoke)" }}>Sign in to manage your registered works, download permissions, and provenance records.</p>
+        <a href={getLoginUrl("/archive")} className="px-6 py-2.5 rounded-xl text-sm font-semibold transition-all hover:brightness-110" style={{ background: "var(--ln-gold)", color: "var(--ln-coal)" }}>Sign In</a>
       </div>
     );
   }

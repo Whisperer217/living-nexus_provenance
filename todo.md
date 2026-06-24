@@ -5557,3 +5557,28 @@
 - [x] Deleted routers.ts.patch
 - [x] Updated all import paths across server/, mcp/, and test files
 - [x] 297/297 tests pass, 0 TypeScript errors after refactor
+
+## Auth Policy Enforcement (Browse-Free / Download-Gated)
+- [ ] Audit all pages and components for forced login redirects or login-wall guards on browse/listen actions
+- [ ] Remove any page-level useEffect/navigate-to-login guards that fire on load for unauthenticated users
+- [ ] Remove any login prompts on play/listen/view actions
+- [ ] Ensure download buttons show a login prompt (not a hard redirect) when user is not authenticated
+- [ ] Ensure download buttons show a "no license" message when user is authenticated but has no grant
+- [ ] Verify GlobalPlayer and PlayerBar play actions work without login
+- [ ] Verify SongDetailPage loads and plays without login
+- [ ] Verify CreatorProfilePage loads without login
+- [ ] Verify Explore/Home pages load without login
+- [ ] Confirm mutation-cache redirect still fires for expired-session mutations (non-download protected actions)
+
+## Auth Policy Enforcement (Browse-Free, Download-Gated)
+- [x] Remove hard page-load redirect from ArchivePage (soft sign-in gate instead)
+- [x] Remove hard page-load redirect from LikedPage (soft sign-in gate instead)
+- [x] Remove hard page-load redirect from PlaylistPage (soft sign-in gate instead)
+- [x] Remove hard page-load redirect from OnboardingManifest (soft sign-in gate instead)
+- [x] Change useLike hook to show toast instead of hard-redirect when user is not logged in
+- [x] Add login prompt toast to SongDetailPage download buttons when user is not logged in
+- [x] Add login prompt toast to PlayerBar download button (toolbar) when user is not logged in
+- [x] Add login prompt toast to PlayerBar context menu download button when user is not logged in
+- [x] Add login prompt toast to GlobalPlayer context menu download button when user is not logged in
+- [x] Require auth for free tracks in songs.download tRPC procedure (server-side)
+- [x] Require auth for free tracks in /api/download/:songId route (server-side)

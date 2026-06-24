@@ -17,6 +17,7 @@ import {
   MoreHorizontal, ExternalLink, ListPlus, List, Waves,
 } from "lucide-react";
 import { AddToMyListModal } from "@/components/AddToMyListModal";
+import { toast } from "sonner";
 import { useLocation } from "wouter";
 import { useState, useCallback, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
@@ -846,6 +847,7 @@ export default function PlayerBar() {
               const dlPerm = (songDetail?.song as any)?.downloadPermission as string | undefined;
               if (!dlPerm || dlPerm === "none") return null;
               const triggerDownload = () => {
+                if (!user) { toast.info("Sign in to download this track"); return; }
                 const a = document.createElement("a");
                 a.href = `/api/download/${currentSongId}`;
                 a.download = ""; // CRITICAL: tells browser to download, not navigate
@@ -1086,6 +1088,7 @@ export default function PlayerBar() {
           <button
             onClick={() => {
               setShowContextMenu(false);
+              if (!user) { toast.info("Sign in to download this track"); return; }
               const a = document.createElement("a");
               a.href = `/api/download/${currentSongId}`;
               a.download = ""; // CRITICAL: tells browser to download, not navigate

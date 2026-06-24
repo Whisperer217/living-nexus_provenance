@@ -783,12 +783,18 @@ export default function SongDetailPage() {
                 const tipCents = (song as any).downloadTipThresholdCents as number | undefined;
                 if (!dlPerm || dlPerm === "none") return null;
                 if (dlPerm === "free") return (
-                  <Button size="sm" variant="outline" onClick={() => downloadMutation.mutate({ songId: song.id })} disabled={downloadMutation.isPending} style={{ borderColor: "#C3AB7D", color: "var(--ln-smoke)" }}>
+                  <Button size="sm" variant="outline" onClick={() => {
+                    if (!user) { toast.info("Sign in to download this track"); return; }
+                    downloadMutation.mutate({ songId: song.id });
+                  }} disabled={downloadMutation.isPending} style={{ borderColor: "#C3AB7D", color: "var(--ln-smoke)" }}>
                     <Download className="w-3.5 h-3.5 mr-1" />{downloadMutation.isPending ? "…" : "Download"}
                   </Button>
                 );
                 if (dlPerm === "tipped") return (
-                  <Button size="sm" variant="outline" onClick={() => tipDownloadMutation.mutate({ songId: song.id, origin: window.location.origin })} disabled={tipDownloadMutation.isPending} title={`Tip $${((tipCents ?? 179) / 100).toFixed(2)} to unlock download`} style={{ borderColor: "rgba(196,154,40,0.3)", color: "var(--ln-gold)" }}>
+                  <Button size="sm" variant="outline" onClick={() => {
+                    if (!user) { toast.info("Sign in to download this track"); return; }
+                    tipDownloadMutation.mutate({ songId: song.id, origin: window.location.origin });
+                  }} disabled={tipDownloadMutation.isPending} title={`Tip $${((tipCents ?? 179) / 100).toFixed(2)} to unlock download`} style={{ borderColor: "rgba(196,154,40,0.3)", color: "var(--ln-gold)" }}>
                     <Download className="w-3.5 h-3.5 mr-1" />{tipDownloadMutation.isPending ? "Processing…" : `Download ($${((tipCents ?? 179) / 100).toFixed(2)} tip)`}
                   </Button>
                 );
