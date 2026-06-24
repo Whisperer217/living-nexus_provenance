@@ -10,7 +10,7 @@ import { usePlayer } from "@/contexts/PlayerContext";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { Link, useLocation, useSearch } from "wouter";
-import { Search, Music, Play, Shuffle, Infinity, TrendingUp, Heart, DollarSign, Shield, SkipForward, ListPlus, ExternalLink, Crown, Rocket, Users, Bell, Sparkles, BookOpen, LayoutGrid, List } from "lucide-react";
+import { Search, Music, Play, Shuffle, Infinity, TrendingUp, Heart, DollarSign, Shield, SkipForward, ListPlus, ExternalLink, Crown, Rocket, Users, Bell, Sparkles, BookOpen, LayoutGrid, List, Flame } from "lucide-react";
 import { AiDisclosurePill } from "@/components/AiDisclosurePill";
 import { MediaAsset } from "@/components/MediaAsset";
 import { AddToMyListModal } from "@/components/AddToMyListModal";
@@ -111,42 +111,56 @@ function ExploreCard({
   const [, navigate] = useLocation();
   const [showAddToList, setShowAddToList] = useState(false);
   const [addToListRect, setAddToListRect] = useState<DOMRect | null>(null);
+  const [hovered, setHovered] = useState(false);
   // Skip individual queries when bulk prefetch data is available
   const hasPrefetch = prefetchedLiked !== undefined;
   const { liked, toggle: toggleLike } = useLike(song.id, { skipQuery: hasPrefetch, initialLiked: prefetchedLiked });
   const likeCount = prefetchedLikeCount ?? 0;
-  const artistName = creator?.artistHandle || creator?.name || "Unknown";
+  const artistName = creator?.artistHandle ? `@${creator.artistHandle}` : (creator?.name || "Unknown");
   // Non-audio types navigate to song detail page instead of playing audio
   const isNonAudio = song.contentType === "manuscript" || song.contentType === "comic";
   const isComic = song.contentType === "comic";
   const isHot = (song.playCount ?? 0) >= 50;
   const ctColors = getContentTypeColors(song.contentType ?? "audio");
+  const hasAudio = !!song.fileUrl && !isNonAudio;
+  const hasWid = !!song.witnessId;
+
   const handleCardClick = () => {
     if (isComic && onOpenReader) { onOpenReader(song); return; }
     if (isNonAudio) { navigate(`/book/${song.id}`); } else { onPlay(item); }
   };
 
+  const plays = song.playCount && song.playCount > 0
+    ? song.playCount >= 1000 ? `${(song.playCount / 1000).toFixed(1)}k` : String(song.playCount)
+    : null;
+
   return (
     <>
     <div
-      className={`group relative rounded-xl overflow-hidden cursor-pointer transition-all duration-200
-        museum-card parchment-grain
-        ${isActive && !isNonAudio
-          ? "border-[#E8A830]/40 shadow-[0_0_0_1px_rgba(232,197,71,0.2),0_8px_32px_rgba(0,0,0,0.5),0_0_24px_rgba(196,154,40,0.08)]"
-          : isHot
-            ? "gold-banner"
-            : ""
-        }`}
-      style={isActive ? undefined : { borderColor: ctColors.dim, boxShadow: `0 2px 8px rgba(0,0,0,0.35), 0 0 0 1px ${ctColors.dim}` }}
+      className="group relative cursor-pointer"
+      style={{ aspectRatio: "2/3" }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       onClick={handleCardClick}
-      onContextMenu={e => { e.preventDefault(); }}
+      onContextMenu={e => e.preventDefault()}
     >
-      {/* ── Zone 1: Cover Art ── */}
+      {/* Card frame — rounded, subtle gold border */}
       <div
-        className="prov-card-img-wrap cursor-pointer"
-        style={{ maxHeight: "200px" }}
-        onClick={e => { e.stopPropagation(); handleCardClick(); }}
+        className="absolute inset-0 rounded-2xl overflow-hidden"
+        style={{
+          border: isActive
+            ? "1px solid rgba(196,154,40,0.55)"
+            : `1px solid ${ctColors.dim}`,
+          boxShadow: isActive
+            ? "0 0 0 1px rgba(196,154,40,0.20), 0 8px 32px rgba(0,0,0,0.65), 0 0 28px rgba(196,154,40,0.12)"
+            : hovered
+              ? "0 12px 40px rgba(0,0,0,0.70), 0 0 0 1px rgba(196,154,40,0.22)"
+              : "0 4px 16px rgba(0,0,0,0.55)",
+          transform: hovered ? "translateY(-4px) scale(1.015)" : "translateY(0) scale(1)",
+          transition: "transform 0.28s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.28s ease, border-color 0.28s ease",
+        }}
       >
+        {/* LAYER 1: Artwork — full-bleed */}
         <MediaAsset
           src={song.coverArtUrl}
           alt={song.title}
@@ -154,193 +168,238 @@ function ExploreCard({
           aspectRatio={(song.artAspectRatio as "1:1" | "4:5" | "16:9" | null) ?? "4:5"}
           focalX={song.coverPositionX ?? 50}
           focalY={song.coverPositionY ?? 50}
-          className="transition-transform duration-300 group-hover:scale-105"
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{
+            filter: hovered ? "brightness(0.82)" : "brightness(0.88)",
+            transition: "filter 0.28s ease",
+          }}
         />
-        {/* Overlay gradient — always present per card standard */}
-        <div className="prov-card-gradient" />
-        {/* Play / wave / read button */}
-        <div className={`absolute bottom-2 right-2 w-9 h-9 rounded-full flex items-center justify-center
-          transition-all duration-200 z-10
-          ${isNonAudio
-            ? "opacity-0 group-hover:opacity-100 bg-[#4ADE80]"
-            : isActive ? "opacity-100 bg-[#1C1A14]" : "opacity-0 group-hover:opacity-100 bg-[#A78BFA]"}`}
-        >
-          {isComic
-            ? <BookOpen size={14} className="text-white" />
-            : isNonAudio
-              ? <ExternalLink size={14} className="text-white" />
-              : isActive && isPlaying
-                ? <div className="live-wave scale-75"><span /><span /><span /><span /><span /></div>
-                : <Play size={14} fill="currentColor" className="text-black ml-0.5" />
-          }
-        </div>
-        {/* 🔥 Hot badge — top-left ribbon for 50+ plays */}
-        {isHot && (
-          <div className="absolute top-0 left-0 z-20 flex items-center gap-0.5 px-2 py-0.5"
+
+        {/* LAYER 2: Gradient scrim — cinematic bottom fade */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: "linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.55) 30%, rgba(0,0,0,0.18) 55%, transparent 75%)",
+          }}
+        />
+
+        {/* LAYER 3: WID badge — top-right, elegant pill */}
+        {hasWid && (
+          <Link
+            href={`/verify/${song.witnessId}`}
+            onClick={(e: React.MouseEvent) => e.stopPropagation()}
+            className="absolute top-2.5 right-2.5 z-20 flex items-center gap-1 px-2 py-0.5 rounded-full"
             style={{
-              background: "linear-gradient(90deg, rgba(122,90,30,0.92), rgba(196,154,40,0.75))",
-              borderBottomRightRadius: "8px",
-              borderTopLeftRadius: "inherit",
+              background: "rgba(196,154,40,0.14)",
+              border: "1px solid rgba(196,154,40,0.42)",
+              backdropFilter: "blur(6px)",
+              boxShadow: "0 0 8px rgba(196,154,40,0.18)",
             }}
           >
-            <Crown size={9} style={{ color: "var(--ln-coal)" }} />
-            <span className="text-[11px] font-heading font-bold tracking-widest" style={{ color: "var(--ln-coal)" }}>
+            <Shield size={8} style={{ color: "#C49A28" }} />
+            <span className="font-heading text-[8px] tracking-[0.18em] uppercase" style={{ color: "#C9A84C" }}>
+              WID
+            </span>
+          </Link>
+        )}
+
+        {/* Hot badge — top-left */}
+        {isHot && (
+          <div
+            className="absolute top-2.5 left-2.5 z-20 flex items-center gap-0.5 px-2 py-0.5 rounded-full"
+            style={{
+              background: "linear-gradient(90deg, rgba(122,90,30,0.92), rgba(196,154,40,0.75))",
+              backdropFilter: "blur(4px)",
+            }}
+          >
+            <Crown size={8} style={{ color: "var(--ln-coal)" }} />
+            <span className="text-[8px] font-heading font-bold tracking-widest" style={{ color: "var(--ln-coal)" }}>
               {(song.playCount ?? 0) >= 1000
-                ? `${Math.floor((song.playCount ?? 0) / 1000)}K PLAYS`
-                : `${song.playCount} PLAYS`}
+                ? `${Math.floor((song.playCount ?? 0) / 1000)}K`
+                : `${song.playCount}`}
             </span>
           </div>
         )}
 
-        {/* WID badge — clickable → /verify/:witnessId */}
-        {song.witnessId && (
-          <Link
-            href={`/verify/${song.witnessId}`}
-            onClick={(e: React.MouseEvent) => e.stopPropagation()}
-            className="absolute bottom-2 left-2 flex items-center gap-0.5 type-overline px-1.5 py-0.5 rounded z-10 font-heading tracking-wider wid-glow wid-origin-glow transition-opacity opacity-90 hover:opacity-100"
-            style={{ background: "rgba(0,0,0,0.72)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.5)" }}
-            title={`Verified Witness ID: ${song.witnessId}`}
+        {/* Now playing badge */}
+        {isActive && (
+          <div
+            className="absolute top-2.5 left-2.5 z-20 text-[8px] px-2 py-0.5 rounded-full font-bold tracking-wider"
+            style={{
+              background: "rgba(196,154,40,0.18)",
+              border: "1px solid rgba(196,154,40,0.45)",
+              color: "#C9A84C",
+              fontFamily: "'Cinzel', serif",
+              backdropFilter: "blur(4px)",
+            }}
           >
-            <Shield size={8} /><span>WID</span>
-          </Link>
+            ▶ NOW PLAYING
+          </div>
         )}
-        {/* AI disclosure badge — top-right */}
-        {creator?.aiDisclosure && (
+
+        {/* AI disclosure — top-right when no WID */}
+        {!hasWid && creator?.aiDisclosure && (
           <div className="absolute top-2 right-2 z-10">
             <AiDisclosurePill value={creator.aiDisclosure as any} size="compact" />
           </div>
         )}
-      </div>
 
-      {/* ── Info panel ── */}
-      <div className="p-3 pb-4">
-        {/* Song title → song/book detail page */}
-        <Link
-          href={isNonAudio ? `/book/${song.id}` : `/song/${song.id}`}
-          onClick={(e: React.MouseEvent) => e.stopPropagation()}
-          className="block type-ui font-heading text-white/90 truncate mb-1 tracking-wide hover:text-[#C49A28] transition-colors cursor-pointer"
-          title={`Open ${song.title}`}
+        {/* LAYER 4: Play/action button — centered, hidden at rest */}
+        <div
+          className="absolute inset-0 flex items-center justify-center pointer-events-none z-10"
+          style={{
+            opacity: hovered || isActive ? 1 : 0,
+            transition: "opacity 0.22s ease",
+          }}
         >
-          {song.title}
-        </Link>
+          {isComic ? (
+            <div
+              className="pointer-events-auto flex items-center justify-center rounded-full"
+              style={{
+                width: "52px", height: "52px",
+                background: "rgba(74,222,128,0.18)",
+                border: "1.5px solid rgba(74,222,128,0.60)",
+                backdropFilter: "blur(4px)",
+                boxShadow: "0 0 20px rgba(74,222,128,0.25)",
+              }}
+            >
+              <BookOpen size={18} className="text-green-400" />
+            </div>
+          ) : isNonAudio ? (
+            <div
+              className="pointer-events-auto flex items-center justify-center rounded-full"
+              style={{
+                width: "52px", height: "52px",
+                background: "rgba(167,139,250,0.18)",
+                border: "1.5px solid rgba(167,139,250,0.60)",
+                backdropFilter: "blur(4px)",
+                boxShadow: "0 0 20px rgba(167,139,250,0.25)",
+              }}
+            >
+              <ExternalLink size={18} className="text-purple-400" />
+            </div>
+          ) : hasAudio ? (
+            <div
+              className="pointer-events-auto flex items-center justify-center rounded-full"
+              style={{
+                width: "52px", height: "52px",
+                background: isActive ? "rgba(196,154,40,0.20)" : "rgba(0,0,0,0.42)",
+                border: isActive ? "1.5px solid rgba(196,154,40,0.90)" : "1.5px solid rgba(196,154,40,0.70)",
+                boxShadow: isActive
+                  ? "0 0 0 8px rgba(196,154,40,0.10), 0 0 32px rgba(196,154,40,0.45)"
+                  : "0 0 0 6px rgba(196,154,40,0.08), 0 0 20px rgba(196,154,40,0.30)",
+                backdropFilter: "blur(4px)",
+                animation: isActive && isPlaying ? "pulse-gold 1.8s ease-in-out infinite" : "none",
+              }}
+            >
+              {isActive && isPlaying
+                ? <div className="live-wave scale-75"><span /><span /><span /><span /><span /></div>
+                : <Play size={18} fill="currentColor" className="ml-0.5" style={{ color: "#C9A84C" }} />
+              }
+            </div>
+          ) : null}
+        </div>
 
-        {/* Artist row — avatar initial + name → creator profile */}
-        <div className="flex items-center gap-2 type-caption text-white/75 mb-2.5">
-          <div className="w-4 h-4 rounded-full flex items-center justify-center text-[11px] font-bold
-            bg-gradient-to-br from-[#7C3AED] to-[#A78BFA] text-white flex-shrink-0">
-            {artistName.charAt(0).toUpperCase()}
+        {/* LAYERS 5+6+7: Bottom content stack */}
+        <div className="absolute inset-x-0 bottom-0 p-3 z-10">
+          {/* Content type chip — minimal */}
+          <div className="mb-1">
+            <span
+              className="text-[8px] font-heading tracking-[0.16em] uppercase px-1.5 py-0.5 rounded-full"
+              style={{ background: ctColors.chipBg, color: ctColors.text, border: `1px solid ${ctColors.chipBorder}` }}
+            >
+              {ctColors.label}
+            </span>
           </div>
-          {creator?.id ? (
-            <Link
-              href={`/creator/${creator.id}`}
-              onClick={(e: React.MouseEvent) => e.stopPropagation()}
-              className="truncate hover:text-[#C49A28] transition-colors cursor-pointer"
-              title={`View ${artistName}'s profile`}
+
+          {/* Work title — dominant */}
+          <p
+            className="font-heading leading-tight line-clamp-2 mb-1"
+            style={{
+              fontSize: "0.875rem",
+              color: "rgba(245,242,235,0.97)",
+              letterSpacing: "0.02em",
+              textShadow: "0 1px 12px rgba(0,0,0,0.99), 0 2px 20px rgba(0,0,0,0.85)",
+            }}
+          >
+            {song.title}
+          </p>
+
+          {/* Creator + resonance row */}
+          <div className="flex items-center justify-between gap-1">
+            <span
+              className="truncate"
+              style={{
+                fontSize: "10px",
+                color: "rgba(196,154,40,0.55)",
+                fontFamily: "'Cinzel', serif",
+                letterSpacing: "0.03em",
+                textShadow: "0 1px 6px rgba(0,0,0,0.95)",
+              }}
             >
               {artistName}
-            </Link>
-          ) : (
-            <span className="truncate">{artistName}</span>
-          )}
-        </div>
-
-        {/* Genre pills — own row, never competes with actions */}
-        {/* Content-type chip */}
-        <div className="flex flex-wrap gap-1 mb-2 items-center">
-          <span
-            className="type-overline px-1.5 py-0.5 rounded-full font-heading tracking-widest leading-none uppercase"
-            style={{ background: ctColors.chipBg, color: ctColors.text, border: `1px solid ${ctColors.chipBorder}` }}
-          >
-            {ctColors.icon} {ctColors.label}
-          </span>
-        </div>
-        {song.genre && (
-          <div className="flex flex-wrap gap-1.5 mb-3">
-            {(song.genre as string).split(/[,/|]+/).map((t: string) => t.trim()).filter(Boolean).slice(0, 3).map((tag: string) => (
-              <span
-                key={tag}
-                className="text-[11px] px-1.5 py-0.5 rounded-full font-body leading-tight"
-                style={{ background: ctColors.chipBg, color: ctColors.text, border: `1px solid ${ctColors.chipBorder}` }}
-              >
-                {tag}
-              </span>
-            ))}
-            {(song.genre as string).split(/[,/|]+/).filter((t: string) => t.trim()).length > 3 && (
-              <span
-                className="text-[11px] px-1.5 py-0.5 rounded-full font-body leading-tight"
-                style={{ background: "var(--ln-coal)", color: "var(--ln-iron)", border: "1px solid rgba(196,154,40,0.10)" }}
-              >
-                +{(song.genre as string).split(/[,/|]+/).filter((t: string) => t.trim()).length - 3}
-              </span>
+            </span>
+            {plays && (
+              <div className="flex items-center gap-0.5 flex-shrink-0">
+                <Flame size={9} style={{ color: "rgba(196,154,40,0.50)" }} />
+                <span style={{ fontSize: "10px", color: "rgba(196,154,40,0.50)", fontVariantNumeric: "tabular-nums" }}>{plays}</span>
+              </div>
             )}
           </div>
-        )}
-        {/* Actions row — always on its own line, never contested */}
-        <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-            {/* Heart / like */}
-            <button
-              onClick={e => { e.stopPropagation(); toggleLike(e); }}
-              className={`flex items-center gap-0.5 p-1 transition-colors ${liked ? "text-pink-400" : "text-white/70 hover:text-pink-400"}`}
-              title={liked ? "Unlike" : "Like"}
-            >
-              <Heart size={12} fill={liked ? "currentColor" : "none"} />
-              {likeCount > 0 && (
-                <span className="text-[11px] leading-none font-medium tabular-nums">
-                  {likeCount >= 1000 ? `${(likeCount / 1000).toFixed(1)}k` : likeCount}
-                </span>
-              )}
-            </button>
-            {/* Gift */}
-            <button
-              onClick={e => { e.stopPropagation(); onTip(item, (e.currentTarget as HTMLButtonElement).getBoundingClientRect()); }}
-               className="p-1 text-white/70 hover:text-[#C49A28] transition-colors"
-               title="Send a gift"
-            >
-              <DollarSign size={12} />
-            </button>
-            {/* Play next */}
-            <button
-              onClick={e => {
-                e.stopPropagation();
-                playNext({
-                  id: String(song.id),
-                  title: song.title,
-                  artist: artistName,
-                  genre: song.genre || "",
-                  audioUrl: song.fileUrl || undefined,
-                  artUrl: song.coverArtUrl || undefined,
-                  witnessId: song.witnessId || undefined,
-                  creatorId: creator?.id ?? undefined,
-                  coverPositionX: song.coverPositionX ?? 50,
-                  coverPositionY: song.coverPositionY ?? 50,
-                  visualReady: song.visualReady ?? false,
-                  autoVideoUrl: song.autoVideoUrl ?? undefined,
-                  creatorRole: song.creator?.role ?? undefined,
-                });
-                toast.success(`"${song.title}" plays next`);
-              }}
-              className="p-1 text-white/70 hover:text-[#C49A28] transition-colors"
-              title="Play next"
-            >
-              <SkipForward size={12} />
-            </button>
-            {/* Add to list */}
-            <button
-              onClick={e => { e.stopPropagation(); setAddToListRect((e.currentTarget as HTMLButtonElement).getBoundingClientRect()); setShowAddToList(true); }}
-              className="p-1 text-white/70 hover:text-[#C49A28] transition-colors"
-              title="Add to my list"
-            >
-              <ListPlus size={12} />
-            </button>
-            {/* Open song page */}
-            <button
-              onClick={e => { e.stopPropagation(); navigate(`/song/${song.id}`); }}
-              className="p-1 text-white/70 hover:text-[#A78BFA] transition-colors"
-              title="Open song page"
-            >
-              <ExternalLink size={12} />
-            </button>
-          </div>
+        </div>
+
+        {/* Action strip — appears on hover, bottom overlay */}
+        <div
+          className="absolute inset-x-0 bottom-0 z-20 flex items-center justify-end gap-1 px-2 pb-1"
+          style={{
+            opacity: hovered ? 1 : 0,
+            transition: "opacity 0.2s ease",
+            background: "linear-gradient(to top, rgba(0,0,0,0.70) 0%, transparent 100%)",
+            paddingTop: "24px",
+          }}
+        >
+          <button
+            onClick={e => { e.stopPropagation(); toggleLike(e); }}
+            className={`flex items-center gap-0.5 p-1 rounded transition-colors ${liked ? "text-pink-400" : "text-white/60 hover:text-pink-400"}`}
+            title={liked ? "Unlike" : "Like"}
+          >
+            <Heart size={11} fill={liked ? "currentColor" : "none"} />
+            {likeCount > 0 && <span className="text-[10px] tabular-nums">{likeCount >= 1000 ? `${(likeCount/1000).toFixed(1)}k` : likeCount}</span>}
+          </button>
+          <button
+            onClick={e => { e.stopPropagation(); onTip(item, (e.currentTarget as HTMLButtonElement).getBoundingClientRect()); }}
+            className="p-1 text-white/60 hover:text-[#C49A28] transition-colors rounded"
+            title="Send a gift"
+          >
+            <DollarSign size={11} />
+          </button>
+          <button
+            onClick={e => {
+              e.stopPropagation();
+              playNext({
+                id: String(song.id), title: song.title, artist: artistName,
+                genre: song.genre || "", audioUrl: song.fileUrl || undefined,
+                artUrl: song.coverArtUrl || undefined, witnessId: song.witnessId || undefined,
+                creatorId: creator?.id ?? undefined,
+                coverPositionX: song.coverPositionX ?? 50, coverPositionY: song.coverPositionY ?? 50,
+                visualReady: song.visualReady ?? false, autoVideoUrl: song.autoVideoUrl ?? undefined,
+                creatorRole: song.creator?.role ?? undefined,
+              });
+              toast.success(`"${song.title}" plays next`);
+            }}
+            className="p-1 text-white/60 hover:text-[#C49A28] transition-colors rounded"
+            title="Play next"
+          >
+            <SkipForward size={11} />
+          </button>
+          <button
+            onClick={e => { e.stopPropagation(); setAddToListRect((e.currentTarget as HTMLButtonElement).getBoundingClientRect()); setShowAddToList(true); }}
+            className="p-1 text-white/60 hover:text-[#C49A28] transition-colors rounded"
+            title="Add to my list"
+          >
+            <ListPlus size={11} />
+          </button>
+        </div>
       </div>
     </div>
     <AddToMyListModal
@@ -1069,7 +1128,9 @@ export default function ExplorePage() {
               const creatorQueue = items
                 .filter((s: any) => !!s.song.fileUrl)
                 .map(itemToTrack);
-              const handleCreatorPlay = (track: any) => {
+              const handleCreatorPlay = (item: any) => {
+                // ExploreCard passes { song, creator } — convert to track for queue
+                const track = itemToTrack(item);
                 const startIdx = creatorQueue.findIndex((t: any) => t.id === track.id);
                 if (creatorQueue.length > 0) {
                   playQueueAt(creatorQueue, startIdx >= 0 ? startIdx : 0, "EXPLORE");
@@ -1122,14 +1183,16 @@ export default function ExplorePage() {
                   <div className="museum-pan-row -mx-6 px-6">
                     {items.map((item: any, idx: number) => {
                       const likeEntry = (likeMap as any)[item.song.id];
-                      const track = itemToTrack(item);
+                      const isItemActive = currentTrackId === String(item.song.id);
+                      const isItemPlaying = isItemActive && playerState.isPlaying;
                       return (
                         <div key={item.song.id} className="flex-shrink-0" style={{ width: "var(--card-pan-w)" }}>
-                          <TrackCard
-                            track={track}
-                            index={idx}
+                          <ExploreCard
+                            item={item}
+                            isActive={isItemActive}
+                            isPlaying={isItemPlaying}
                             onPlay={handleCreatorPlay}
-                            onTip={(_track, rect) => {
+                            onTip={(_item: any, rect: DOMRect) => {
                               setTipItem(item);
                               setTipRect(rect);
                             }}
@@ -1149,7 +1212,7 @@ export default function ExplorePage() {
         {/* Flat grid — randomize / trending / new modes: all tracks across all creators (classic view only) */}
         {!isCreatorsMode && !isLoading && songs.length > 0 && viewMode === "classic" && mode !== "infinite" && (
           <div
-            className="grid gap-4"
+            className="grid gap-3"
             style={{
               gridTemplateColumns: "repeat(auto-fill, minmax(min(var(--card-pan-w), 100%), 1fr))",
               opacity: isShuffling ? 0.5 : 1,
@@ -1158,14 +1221,16 @@ export default function ExplorePage() {
           >
             {songs.map((item: any, idx: number) => {
               const likeEntry = (likeMap as any)[item.song.id];
-              const track = itemToTrack(item);
+              const isItemActive = currentTrackId === String(item.song.id);
+              const isItemPlaying = isItemActive && playerState.isPlaying;
               return (
-                <TrackCard
+                <ExploreCard
                   key={item.song.id}
-                  track={track}
-                  index={idx}
+                  item={item}
+                  isActive={isItemActive}
+                  isPlaying={isItemPlaying}
                   onPlay={handlePlay}
-                  onTip={(_track, rect) => {
+                  onTip={(_item: any, rect: DOMRect) => {
                     setTipItem(item);
                     setTipRect(rect);
                   }}

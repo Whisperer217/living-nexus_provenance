@@ -1,24 +1,24 @@
 /*
 ╔══════════════════════════════════════════════════════════════════╗
-║  LIVING NEXUS — DUAL SURFACE CARD (CANONICAL SPEC v1.0)         ║
+║  LIVING NEXUS — WITNESS CARD (CANONICAL SPEC v2.0)              ║
 ║  ──────────────────────────────────────────────────────────────  ║
-║  Principle:                                                      ║
-║    Artwork attracts → Testimony anchors → Action converts        ║
-║    → Attribution persists                                        ║
+║  Design Language: Vibe-coded cathedral. Premium gallery.         ║
+║  The creation is the statement. The creator is the signature.    ║
 ║                                                                  ║
-║  Layer 1: Artwork — full-bleed, no blur, brightness(0.88)        ║
-║  Layer 2: Gradient — bottom-only, exact spec values              ║
-║  Layer 3: Testimony — 2-line overlay, #F5F5F5 @ 0.92            ║
-║  Layer 4: Play — centered 56px gold ring, glow, pulse            ║
-║  Layer 5: Attribution — creator + WID, bottom-left               ║
-║  Layer 6: Resonance — plays/hearts/funding, bottom-right         ║
+║  Layer 1: Artwork — full-bleed portrait, 2:3 aspect ratio        ║
+║  Layer 2: Gradient — bottom 50%, deep cinematic fade             ║
+║  Layer 3: WID badge — top-right, gold pill, elegant              ║
+║  Layer 4: Play — hidden at rest, centered glow ring on hover     ║
+║  Layer 5: Title — bottom, dominant, work-first                   ║
+║  Layer 6: Creator — whispered below title, 55% opacity           ║
+║  Layer 7: Resonance — plays/tips, bottom-right, minimal          ║
 ╚══════════════════════════════════════════════════════════════════╝
 */
 
 import { useState, useRef, useEffect } from "react";
 import { Link } from "wouter";
-import { Play, Pause, Shield, MoreVertical, FolderPlus, ExternalLink, Copy, SkipForward, Flame, Heart, Zap } from "lucide-react";
-import { AddToCollectionButton, AddToCollectionModal } from "@/components/AddToCollectionModal";
+import { Play, Pause, Shield, MoreVertical, FolderPlus, ExternalLink, Copy, SkipForward, Flame, Heart } from "lucide-react";
+import { AddToCollectionModal } from "@/components/AddToCollectionModal";
 import { createPortal } from "react-dom";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { toast } from "sonner";
@@ -71,33 +71,15 @@ function toTrack(s: SongData): Track {
   };
 }
 
-/** Extract best testimony — max 2 lines, ~120 chars */
-function getTestimony(song: SongData): string | null {
-  const raw = song.description || song.lyricsText || null;
-  if (!raw) return null;
-  const lines = raw.split(/\n+/).map(l => l.trim()).filter(l => l.length > 0);
-  if (lines.length === 0) return null;
-  let result = "";
-  for (const line of lines.slice(0, 2)) {
-    if ((result + line).length > 120) break;
-    result += (result ? " " : "") + line;
-  }
-  return result || lines[0].slice(0, 120) || null;
-}
-
 function formatResonance(song: SongData) {
   const plays = song.playCount && song.playCount > 0
     ? song.playCount >= 1000 ? `${(song.playCount / 1000).toFixed(1)}k` : String(song.playCount)
     : null;
-  const cents = song.totalFundingCents ?? 0;
-  const funding = cents >= 100
-    ? cents >= 100000 ? `$${(cents / 100000).toFixed(1)}k` : `$${(cents / 100).toFixed(0)}`
-    : null;
   const tips = song.tipCount && song.tipCount > 0 ? String(song.tipCount) : null;
-  return { plays, funding, tips };
+  return { plays, tips };
 }
 
-// ── Collection menu item (proper row, not oval button) ──────────────────────
+// ── Collection menu item ──────────────────────────────────────────
 function CollectionMenuItem({ songId, songTitle, onMenuClose }: {
   songId: number;
   songTitle: string;
@@ -125,7 +107,7 @@ function CollectionMenuItem({ songId, songTitle, onMenuClose }: {
   );
 }
 
-// ── Context menu ──────────────────────────────────────────────────────────────
+// ── Context menu ──────────────────────────────────────────────────
 function TrackContextMenu({ song, position, onClose }: {
   song: SongData;
   position: { x: number; y: number };
@@ -205,20 +187,27 @@ function TrackContextMenu({ song, position, onClose }: {
   );
 }
 
-// ── DUAL SURFACE CARD ─────────────────────────────────────────────────────────
+// ── WITNESS CARD ──────────────────────────────────────────────────
 export function StoreTrackCard({ song, size = "md", allSongs, songIndex, isNew }: StoreTrackCardProps) {
   const { state, playQueueAt, addAndPlay } = usePlayer();
   const currentTrack = state.tracks[state.currentIdx];
   const isPlaying = currentTrack?.id === String(song.id) && state.isPlaying;
   const isActive = currentTrack?.id === String(song.id);
   const [menuPos, setMenuPos] = useState<{ x: number; y: number } | null>(null);
+  const [hovered, setHovered] = useState(false);
 
-  // Mobile-first sizing: cards are wider on small screens for comfortable touch targets.
-  // sm: 180px mobile / 208px desktop | md: 200px mobile / 240px desktop | lg: 240px mobile / 288px desktop
-  const cardWidth = size === "sm" ? "w-[180px] sm:w-52" : size === "lg" ? "w-[240px] sm:w-72" : "w-[200px] sm:w-60";
-  const testimony = getTestimony(song);
-  const { plays, funding, tips } = formatResonance(song);
+  // Portrait card widths — 2:3 aspect ratio (golden ratio territory)
+  // sm: 140px mobile / 160px desktop
+  // md: 160px mobile / 190px desktop  
+  // lg: 180px mobile / 220px desktop
+  const cardWidth =
+    size === "sm" ? "w-[140px] sm:w-[160px]" :
+    size === "lg" ? "w-[180px] sm:w-[220px]" :
+                   "w-[160px] sm:w-[190px]";
+
+  const { plays, tips } = formatResonance(song);
   const hasAudio = !!song.fileUrl;
+  const hasWid = !!(song.wid || song.widShort);
 
   const handlePlay = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -237,217 +226,249 @@ export function StoreTrackCard({ song, size = "md", allSongs, songIndex, isNew }
     setMenuPos({ x: e.clientX, y: e.clientY });
   };
 
+  const creatorLabel = song.artistHandle ? `@${song.artistHandle}` : (song.artistName || "Unknown");
+
   return (
     <>
       <Link href={`/song/${song.id}`}>
         <div
-          className={`relative ${cardWidth} flex-shrink-0 rounded-2xl overflow-hidden cursor-pointer group snap-start`}
-          style={{
-            minHeight: "240px",
-            transition: "transform 0.3s ease, box-shadow 0.3s ease",
-          }}
-          onMouseEnter={e => {
-            (e.currentTarget as HTMLDivElement).style.transform = "scale(1.02)";
-            (e.currentTarget as HTMLDivElement).style.boxShadow = "0 0 40px rgba(196,154,40,0.15), 0 16px 48px rgba(0,0,0,0.6)";
-          }}
-          onMouseLeave={e => {
-            (e.currentTarget as HTMLDivElement).style.transform = "scale(1)";
-            (e.currentTarget as HTMLDivElement).style.boxShadow = "none";
-          }}
+          className={`relative ${cardWidth} flex-shrink-0 snap-start cursor-pointer group`}
+          style={{ aspectRatio: "2/3" }}
+          onMouseEnter={() => setHovered(true)}
+          onMouseLeave={() => setHovered(false)}
         >
-          {/* ── LAYER 1: Artwork — full-bleed, vibrant, no blur ── */}
-          <div className="absolute inset-0">
+          {/* ── Card frame — rounded, subtle gold border ── */}
+          <div
+            className="absolute inset-0 rounded-2xl overflow-hidden"
+            style={{
+              border: isActive
+                ? "1px solid rgba(196,154,40,0.55)"
+                : "1px solid rgba(196,154,40,0.18)",
+              boxShadow: isActive
+                ? "0 0 0 1px rgba(196,154,40,0.20), 0 8px 32px rgba(0,0,0,0.65), 0 0 28px rgba(196,154,40,0.12)"
+                : hovered
+                  ? "0 12px 40px rgba(0,0,0,0.70), 0 0 0 1px rgba(196,154,40,0.22), 0 0 20px rgba(196,154,40,0.08)"
+                  : "0 4px 16px rgba(0,0,0,0.55)",
+              transform: hovered ? "translateY(-4px) scale(1.015)" : "translateY(0) scale(1)",
+              transition: "transform 0.28s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.28s ease, border-color 0.28s ease",
+            }}
+          >
+            {/* ── LAYER 1: Artwork — full-bleed, portrait ── */}
             {song.coverArtUrl ? (
               <img
                 src={song.coverArtUrl}
                 alt=""
                 aria-hidden="true"
-                className="w-full h-full object-cover"
-                style={{ filter: "brightness(0.88)" }}
+                className="absolute inset-0 w-full h-full object-cover"
+                style={{
+                  filter: hovered ? "brightness(0.82)" : "brightness(0.88)",
+                  transition: "filter 0.28s ease",
+                }}
               />
             ) : (
               <div
-                className="w-full h-full"
-                style={{ background: "linear-gradient(135deg, #111111 0%, #0A0A0A 50%, #000000 100%)" }}
+                className="absolute inset-0"
+                style={{
+                  background: "linear-gradient(160deg, #1a1228 0%, #0e0c1c 40%, #0d0814 100%)",
+                }}
               />
             )}
-          </div>
 
-          {/* ── LAYER 2: Gradient — bottom-only, exact spec ── */}
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              background: "linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.35) 40%, rgba(0,0,0,0.0) 80%)",
-            }}
-          />
-
-          {/* ── NEW badge — top-left corner, only when isNew=true ── */}
-          {isNew && !isActive && (
+            {/* ── LAYER 2: Gradient scrim — cinematic bottom fade ── */}
             <div
-              className="absolute top-2.5 left-2.5 z-20 text-[9px] px-1.5 py-0.5 rounded font-bold uppercase"
+              className="absolute inset-0 pointer-events-none"
               style={{
-                background: "rgba(74,222,128,0.18)",
-                border: "1px solid rgba(74,222,128,0.55)",
-                color: "#4ade80",
-                fontFamily: "'Space Mono', monospace",
-                letterSpacing: "0.12em",
-                backdropFilter: "blur(4px)",
+                background: "linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.55) 30%, rgba(0,0,0,0.18) 55%, transparent 75%)",
               }}
-            >
-              NEW
-            </div>
-          )}
-          {/* ── LAYER 4: Play button — centered 56px gold ring ── */}
-          {hasAudio && (
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <button
-                onClick={handlePlay}
-                className="pointer-events-auto flex items-center justify-center rounded-full transition-all duration-200"
+            />
+
+            {/* ── LAYER 3: WID badge — top-right, elegant pill ── */}
+            {hasWid && (
+              <div
+                className="absolute top-2.5 right-2.5 z-20 flex items-center gap-1 px-2 py-0.5 rounded-full"
                 style={{
-                  width: "56px",
-                  height: "56px",
-                  background: isPlaying ? "rgba(196,154,40,0.22)" : "rgba(0,0,0,0.35)",
-                  border: isPlaying ? "2px solid rgba(196,154,40,0.9)" : "2px solid rgba(196,154,40,0.65)",
-                  boxShadow: isPlaying
-                    ? "0 0 0 6px rgba(196,154,40,0.15), 0 0 24px rgba(196,154,40,0.4)"
-                    : "0 0 16px rgba(196,154,40,0.2)",
-                  animation: isPlaying ? "pulse-gold 1.8s ease-in-out infinite" : "none",
-                }}
-                onMouseEnter={e => {
-                  if (!isPlaying) {
-                    (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 0 0 4px rgba(196,154,40,0.2), 0 0 28px rgba(196,154,40,0.5)";
-                    (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(196,154,40,0.95)";
-                    (e.currentTarget as HTMLButtonElement).style.background = "rgba(196,154,40,0.18)";
-                  }
-                }}
-                onMouseLeave={e => {
-                  if (!isPlaying) {
-                    (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 0 16px rgba(196,154,40,0.2)";
-                    (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(196,154,40,0.65)";
-                    (e.currentTarget as HTMLButtonElement).style.background = "rgba(0,0,0,0.35)";
-                  }
-                }}
-                aria-label={isPlaying ? "Pause" : "Play"}
-              >
-                {isPlaying ? (
-                  <Pause className="w-5 h-5 fill-current" style={{ color: "#C9A84C" }} />
-                ) : (
-                  <Play className="w-5 h-5 fill-current ml-0.5" style={{ color: "#C9A84C" }} />
-                )}
-              </button>
-            </div>
-          )}
-
-          {/* ── LAYERS 3 + 5 + 6: Bottom content stack ── */}
-          <div className="absolute inset-x-0 bottom-0 p-3 flex flex-col gap-1">
-
-            {/* LAYER 3.5: Work title — creation first, dominant */}
-            <p
-              className="font-heading leading-tight line-clamp-2"
-              style={{
-                fontSize: "clamp(0.75rem, 2.5vw, 0.875rem)",
-                color: "rgba(245,242,235,0.97)",
-                letterSpacing: "0.03em",
-                textShadow: "0 1px 8px rgba(0,0,0,0.98), 0 2px 16px rgba(0,0,0,0.80)",
-              }}
-            >
-              {song.title}
-            </p>
-
-            {/* LAYER 3: Testimony — 1-line hint, desktop only */}
-            {testimony && (
-              <p
-                className="text-xs leading-snug line-clamp-1 hidden sm:block"
-                style={{
-                  color: "rgba(180,168,145,0.65)",
-                  fontFamily: "'Georgia', 'Times New Roman', serif",
-                  letterSpacing: "0.01em",
-                  lineHeight: "1.4",
-                  textShadow: "0 1px 6px rgba(0,0,0,0.95)",
+                  background: "rgba(196,154,40,0.14)",
+                  border: "1px solid rgba(196,154,40,0.42)",
+                  backdropFilter: "blur(6px)",
+                  boxShadow: "0 0 8px rgba(196,154,40,0.18)",
                 }}
               >
-                {testimony}
-              </p>
+                <Shield className="w-2.5 h-2.5" style={{ color: "#C49A28" }} />
+                <span
+                  className="font-heading text-[8px] tracking-[0.18em] uppercase"
+                  style={{ color: "#C9A84C" }}
+                >
+                  WID
+                </span>
+              </div>
             )}
 
-            {/* LAYER 5 + 6: Attribution (left) + Resonance (right) */}
-            <div className="flex items-center justify-between gap-2">
-
-              {/* Layer 5: Attribution — creator + WID */}
-              <div className="flex items-center gap-1.5 min-w-0">
-                {song.profilePhotoUrl ? (
-                  <img
-                    src={song.profilePhotoUrl}
-                    alt={song.artistName || ""}
-                    className="w-5 h-5 rounded-full object-cover flex-shrink-0"
-                    style={{ border: "1px solid rgba(196,154,40,0.3)" }}
-                  />
-                ) : (
-                  <div
-                    className="w-5 h-5 rounded-full flex-shrink-0"
-                    style={{ background: "rgba(196,154,40,0.12)", border: "1px solid rgba(196,154,40,0.2)" }}
-                  />
-                )}
-                <span
-                  className="type-caption truncate"
-                  style={{ color: "rgba(160,140,100,0.60)", fontFamily: "'Cinzel', serif", letterSpacing: "0.02em", fontSize: "10px" }}
-                >
-                  {song.artistHandle ? `@${song.artistHandle}` : (song.artistName || "Unknown")}
-                </span>
-                {(song.wid || song.widShort) && (
-                  <div className="flex items-center gap-0.5 flex-shrink-0">
-                    <Shield className="w-2.5 h-2.5" style={{ color: "rgba(196,154,40,0.6)" }} />
-                    <span className="type-overline" style={{ color: "rgba(196,154,40,0.5)" }}>WID</span>
-                  </div>
-                )}
+            {/* ── NEW badge — top-left, only when isNew=true ── */}
+            {isNew && !isActive && (
+              <div
+                className="absolute top-2.5 left-2.5 z-20 text-[8px] px-1.5 py-0.5 rounded-full font-bold uppercase"
+                style={{
+                  background: "rgba(74,222,128,0.14)",
+                  border: "1px solid rgba(74,222,128,0.45)",
+                  color: "#4ade80",
+                  fontFamily: "'Space Mono', monospace",
+                  letterSpacing: "0.14em",
+                  backdropFilter: "blur(4px)",
+                }}
+              >
+                NEW
               </div>
+            )}
 
-              {/* Layer 6: Resonance — plays / hearts / funding */}
-              <div className="flex items-center gap-2 flex-shrink-0">
-                {plays && (
-                  <div className="flex items-center gap-0.5">
-                    <Flame className="w-2.5 h-2.5" style={{ color: "rgba(196,154,40,0.55)" }} />
-                    <span className="text-[11px] tabular-nums" style={{ color: "rgba(196,154,40,0.55)" }}>{plays}</span>
-                  </div>
-                )}
-                {tips && (
-                  <div className="flex items-center gap-0.5">
-                    <Heart className="w-2.5 h-2.5" style={{ color: "rgba(220,80,80,0.65)" }} />
-                    <span className="text-[11px] tabular-nums" style={{ color: "rgba(220,80,80,0.65)" }}>{tips}</span>
-                  </div>
-                )}
-                {funding && (
-                  <div className="flex items-center gap-0.5">
-                    <span className="text-[11px] tabular-nums font-medium" style={{ color: "rgba(196,154,40,0.8)" }}>+{funding}</span>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Contributed badge — shown when user has supported */}
+            {/* ── NOW PLAYING badge — top-left when active ── */}
             {isActive && (
               <div
-                className="absolute top-3 right-3 text-[11px] px-2 py-0.5 rounded-full font-bold tracking-wider"
+                className="absolute top-2.5 left-2.5 z-20 text-[8px] px-2 py-0.5 rounded-full font-bold tracking-wider"
                 style={{
                   background: "rgba(196,154,40,0.18)",
-                  border: "1px solid rgba(196,154,40,0.4)",
+                  border: "1px solid rgba(196,154,40,0.45)",
                   color: "#C9A84C",
                   fontFamily: "'Cinzel', serif",
+                  backdropFilter: "blur(4px)",
                 }}
               >
-                NOW PLAYING
+                ▶ NOW PLAYING
               </div>
             )}
-          </div>
 
-          {/* 3-dot menu — top-right, hover-visible */}
-          <button
-            onClick={handleMenuOpen}
-            className="absolute top-3 right-3 w-6 h-6 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-black/70 z-20"
-            title="More options"
-          >
-            <MoreVertical className="w-3 h-3 text-white/70" />
-          </button>
+            {/* ── LAYER 4: Play button — centered, hidden at rest, glowing on hover ── */}
+            {hasAudio && (
+              <div
+                className="absolute inset-0 flex items-center justify-center pointer-events-none z-10"
+                style={{
+                  opacity: hovered || isPlaying ? 1 : 0,
+                  transition: "opacity 0.22s ease",
+                }}
+              >
+                <button
+                  onClick={handlePlay}
+                  className="pointer-events-auto flex items-center justify-center rounded-full"
+                  style={{
+                    width: "52px",
+                    height: "52px",
+                    background: isPlaying ? "rgba(196,154,40,0.20)" : "rgba(0,0,0,0.42)",
+                    border: isPlaying ? "1.5px solid rgba(196,154,40,0.90)" : "1.5px solid rgba(196,154,40,0.70)",
+                    boxShadow: isPlaying
+                      ? "0 0 0 8px rgba(196,154,40,0.10), 0 0 32px rgba(196,154,40,0.45)"
+                      : "0 0 0 6px rgba(196,154,40,0.08), 0 0 20px rgba(196,154,40,0.30)",
+                    backdropFilter: "blur(4px)",
+                    animation: isPlaying ? "pulse-gold 1.8s ease-in-out infinite" : "none",
+                    transition: "box-shadow 0.2s ease, background 0.2s ease",
+                  }}
+                  aria-label={isPlaying ? "Pause" : "Play"}
+                >
+                  {isPlaying ? (
+                    <Pause className="w-5 h-5 fill-current" style={{ color: "#C9A84C" }} />
+                  ) : (
+                    <Play className="w-5 h-5 fill-current ml-0.5" style={{ color: "#C9A84C" }} />
+                  )}
+                </button>
+              </div>
+            )}
+
+            {/* ── LAYERS 5 + 6 + 7: Bottom content stack ── */}
+            <div className="absolute inset-x-0 bottom-0 p-3 z-10">
+              {/* Work title — dominant, creation first */}
+              <p
+                className="font-heading leading-tight line-clamp-2 mb-1"
+                style={{
+                  fontSize: size === "sm" ? "0.78rem" : "0.875rem",
+                  color: "rgba(245,242,235,0.97)",
+                  letterSpacing: "0.02em",
+                  textShadow: "0 1px 12px rgba(0,0,0,0.99), 0 2px 20px rgba(0,0,0,0.85)",
+                }}
+              >
+                {song.title}
+              </p>
+
+              {/* Creator + resonance row */}
+              <div className="flex items-center justify-between gap-1">
+                {/* Creator — whispered, secondary */}
+                <div className="flex items-center gap-1 min-w-0">
+                  {song.profilePhotoUrl ? (
+                    <img
+                      src={song.profilePhotoUrl}
+                      alt=""
+                      className="w-4 h-4 rounded-full object-cover flex-shrink-0"
+                      style={{ border: "1px solid rgba(196,154,40,0.22)" }}
+                    />
+                  ) : (
+                    <div
+                      className="w-4 h-4 rounded-full flex-shrink-0"
+                      style={{ background: "rgba(196,154,40,0.10)", border: "1px solid rgba(196,154,40,0.18)" }}
+                    />
+                  )}
+                  <span
+                    className="truncate"
+                    style={{
+                      fontSize: "10px",
+                      color: "rgba(196,154,40,0.55)",
+                      fontFamily: "'Cinzel', serif",
+                      letterSpacing: "0.03em",
+                      textShadow: "0 1px 6px rgba(0,0,0,0.95)",
+                    }}
+                  >
+                    {creatorLabel}
+                  </span>
+                </div>
+
+                {/* Resonance — plays / tips, minimal */}
+                <div className="flex items-center gap-1.5 flex-shrink-0">
+                  {plays && (
+                    <div className="flex items-center gap-0.5">
+                      <Flame className="w-2.5 h-2.5" style={{ color: "rgba(196,154,40,0.50)" }} />
+                      <span style={{ fontSize: "10px", color: "rgba(196,154,40,0.50)", fontVariantNumeric: "tabular-nums" }}>{plays}</span>
+                    </div>
+                  )}
+                  {tips && (
+                    <div className="flex items-center gap-0.5">
+                      <Heart className="w-2.5 h-2.5" style={{ color: "rgba(220,80,80,0.55)" }} />
+                      <span style={{ fontSize: "10px", color: "rgba(220,80,80,0.55)", fontVariantNumeric: "tabular-nums" }}>{tips}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* ── 3-dot menu — top-right area, appears on hover, below WID badge ── */}
+            {!hasWid && (
+              <button
+                onClick={handleMenuOpen}
+                className="absolute top-2.5 right-2.5 w-6 h-6 rounded-full flex items-center justify-center z-20"
+                style={{
+                  background: "rgba(0,0,0,0.50)",
+                  backdropFilter: "blur(4px)",
+                  opacity: hovered ? 1 : 0,
+                  transition: "opacity 0.2s ease",
+                  border: "1px solid rgba(255,255,255,0.10)",
+                }}
+                title="More options"
+              >
+                <MoreVertical className="w-3 h-3 text-white/70" />
+              </button>
+            )}
+            {hasWid && (
+              <button
+                onClick={handleMenuOpen}
+                className="absolute top-9 right-2.5 w-6 h-6 rounded-full flex items-center justify-center z-20"
+                style={{
+                  background: "rgba(0,0,0,0.50)",
+                  backdropFilter: "blur(4px)",
+                  opacity: hovered ? 1 : 0,
+                  transition: "opacity 0.2s ease",
+                  border: "1px solid rgba(255,255,255,0.10)",
+                }}
+                title="More options"
+              >
+                <MoreVertical className="w-3 h-3 text-white/70" />
+              </button>
+            )}
+          </div>
         </div>
       </Link>
 

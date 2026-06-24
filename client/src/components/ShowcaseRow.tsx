@@ -6,11 +6,12 @@ import { ConstellationReveal } from "@/components/ConstellationReveal";
 interface ShowcaseRowProps {
   title: string;
   seeAllHref?: string;
+  seeAllLabel?: string;
   children: React.ReactNode;
   className?: string;
 }
 
-export function ShowcaseRow({ title, seeAllHref, children, className = "" }: ShowcaseRowProps) {
+export function ShowcaseRow({ title, seeAllHref, seeAllLabel = "See All", children, className = "" }: ShowcaseRowProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
@@ -40,71 +41,121 @@ export function ShowcaseRow({ title, seeAllHref, children, className = "" }: Sho
   };
 
   return (
-    <ConstellationReveal className={`mb-10 overflow-hidden ${className}`} dotCount={5}>
+    <ConstellationReveal className={`mb-12 overflow-hidden ${className}`} dotCount={5}>
       <section>
-        {/* Section header — revealed as part of constellation formation */}
-        <div className="flex items-center justify-between mb-4 px-1">
-          <div className="flex items-center gap-2">
-            <h2
-              className="font-heading tracking-wide"
+        {/* ── Section header ── */}
+        <div className="flex items-center justify-between mb-5 px-1">
+          {/* Left: vertical gold accent + title */}
+          <div className="flex items-center gap-3 min-w-0">
+            <div
+              className="flex-shrink-0 w-[3px] rounded-full"
               style={{
-                fontSize: "clamp(0.95rem, 2.2vw, 1.1rem)",
-                color: "#E8DFC8",
-                letterSpacing: "0.06em",
+                height: "1.1rem",
+                background: "linear-gradient(to bottom, rgba(196,154,40,0.90), rgba(196,154,40,0.15))",
+              }}
+            />
+            <h2
+              className="font-heading uppercase truncate"
+              style={{
+                fontSize: "clamp(0.72rem, 1.8vw, 0.82rem)",
+                color: "rgba(220,208,180,0.88)",
+                letterSpacing: "0.16em",
               }}
             >
               {title}
             </h2>
+          </div>
+
+          {/* Right: See All pill + desktop arrows */}
+          <div className="flex items-center gap-2 flex-shrink-0">
             {seeAllHref && (
               <Link href={seeAllHref}>
+                {/* Desktop: pill with label */}
                 <span
-                  className="flex items-center gap-0.5 text-sm transition-colors cursor-pointer"
-                  style={{ color: "rgba(196,154,40,0.35)" }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = "rgba(196,154,40,0.75)")}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(196,154,40,0.35)")}
+                  className="hidden sm:flex items-center gap-1 font-heading uppercase cursor-pointer transition-all"
+                  style={{
+                    fontSize: "0.65rem",
+                    letterSpacing: "0.14em",
+                    color: "rgba(196,154,40,0.55)",
+                    border: "1px solid rgba(196,154,40,0.18)",
+                    background: "rgba(196,154,40,0.04)",
+                    padding: "0.25rem 0.75rem",
+                    borderRadius: "999px",
+                  }}
+                  onMouseEnter={e => {
+                    const el = e.currentTarget as HTMLElement;
+                    el.style.color = "rgba(196,154,40,0.90)";
+                    el.style.borderColor = "rgba(196,154,40,0.38)";
+                    el.style.background = "rgba(196,154,40,0.08)";
+                  }}
+                  onMouseLeave={e => {
+                    const el = e.currentTarget as HTMLElement;
+                    el.style.color = "rgba(196,154,40,0.55)";
+                    el.style.borderColor = "rgba(196,154,40,0.18)";
+                    el.style.background = "rgba(196,154,40,0.04)";
+                  }}
+                >
+                  {seeAllLabel}
+                  <ChevronRight className="w-3 h-3" />
+                </span>
+                {/* Mobile: icon only */}
+                <span
+                  className="sm:hidden flex items-center justify-center w-7 h-7 rounded-full"
+                  style={{
+                    color: "rgba(196,154,40,0.55)",
+                    border: "1px solid rgba(196,154,40,0.18)",
+                    background: "rgba(196,154,40,0.04)",
+                  }}
                 >
                   <ChevronRight className="w-4 h-4" />
                 </span>
               </Link>
             )}
-          </div>
-          <div className="hidden sm:flex items-center gap-1">
-            <button
-              onClick={() => scroll("left")}
-              disabled={!canScrollLeft}
-              className="w-7 h-7 rounded-full flex items-center justify-center transition-all disabled:opacity-20 disabled:cursor-not-allowed"
-              style={{
-                background: "rgba(196,154,40,0.06)",
-                border: "1px solid rgba(196,154,40,0.15)",
-                color: "rgba(196,154,40,0.6)",
-              }}
-              onMouseEnter={(e) => !e.currentTarget.disabled && (e.currentTarget.style.background = "rgba(196,154,40,0.12)")}
-              onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(196,154,40,0.06)")}
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => scroll("right")}
-              disabled={!canScrollRight}
-              className="w-7 h-7 rounded-full flex items-center justify-center transition-all disabled:opacity-20 disabled:cursor-not-allowed"
-              style={{
-                background: "rgba(196,154,40,0.06)",
-                border: "1px solid rgba(196,154,40,0.15)",
-                color: "rgba(196,154,40,0.6)",
-              }}
-              onMouseEnter={(e) => !e.currentTarget.disabled && (e.currentTarget.style.background = "rgba(196,154,40,0.12)")}
-              onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(196,154,40,0.06)")}
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
+
+            {/* Desktop scroll arrows */}
+            <div className="hidden sm:flex items-center gap-1">
+              <button
+                onClick={() => scroll("left")}
+                disabled={!canScrollLeft}
+                className="w-7 h-7 rounded-full flex items-center justify-center transition-all disabled:opacity-20 disabled:cursor-not-allowed"
+                style={{
+                  background: "rgba(196,154,40,0.06)",
+                  border: "1px solid rgba(196,154,40,0.15)",
+                  color: "rgba(196,154,40,0.6)",
+                }}
+                onMouseEnter={e => { if (!e.currentTarget.disabled) e.currentTarget.style.background = "rgba(196,154,40,0.14)"; }}
+                onMouseLeave={e => { e.currentTarget.style.background = "rgba(196,154,40,0.06)"; }}
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => scroll("right")}
+                disabled={!canScrollRight}
+                className="w-7 h-7 rounded-full flex items-center justify-center transition-all disabled:opacity-20 disabled:cursor-not-allowed"
+                style={{
+                  background: "rgba(196,154,40,0.06)",
+                  border: "1px solid rgba(196,154,40,0.15)",
+                  color: "rgba(196,154,40,0.6)",
+                }}
+                onMouseEnter={e => { if (!e.currentTarget.disabled) e.currentTarget.style.background = "rgba(196,154,40,0.14)"; }}
+                onMouseLeave={e => { e.currentTarget.style.background = "rgba(196,154,40,0.06)"; }}
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Scrollable row */}
+        {/* ── Scrollable row ── */}
         <div
           ref={scrollRef}
           className="flex gap-3 overflow-x-auto pb-3 snap-x snap-mandatory"
-          style={{ scrollbarWidth: "none", msOverflowStyle: "none", scrollPaddingLeft: "1rem", paddingRight: "2rem" }}
+          style={{
+            scrollbarWidth: "none",
+            msOverflowStyle: "none",
+            scrollPaddingLeft: "0.75rem",
+            paddingRight: "2.5rem", // peek effect — next card visible at edge
+          }}
         >
           {children}
         </div>

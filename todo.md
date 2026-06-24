@@ -5623,3 +5623,13 @@
 - [x] Verify verify/:witnessId returns complete WitnessRecord with all provenance fields
 - [x] Write Vitest contract tests (server/coreDataTypes.test.ts — 8 tests)
 - [x] TypeScript: 0 errors | Vitest: 317/317 passing
+
+## Phase N+4: Card Consistency & Mobile Polish
+- [x] Audit StoreTrackCard, TrackCard, and all pages that render cards
+- [x] Rebuild StoreTrackCard (Witness Card): dominant artwork, glowing play button, elegant WID badge, portrait aspect ratio
+- [x] Rebuild ExploreCard (Witness Card): same design language, full action set (like/tip/add-to-list)
+- [x] Replace all TrackCard usages in ExplorePage classic view with ExploreCard
+- [x] Remove dead HorizontalTrackGrid + TrendingHorizontalGrid from HomePage (unused)
+- [x] Remove unused TrackCard + BookCard imports from HomePage
+- [x] Polish ShowcaseRow: section header typography, mobile snap scroll, hide arrows on mobile
+- [x] TypeScript: 0 errors | Vitest: 317/317 passing
