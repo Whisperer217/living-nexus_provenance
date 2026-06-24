@@ -1,16 +1,16 @@
 /*
 ╔══════════════════════════════════════════════════════════════════╗
-║  LIVING NEXUS — WITNESS CARD (CANONICAL SPEC v2.0)              ║
+║  LIVING NEXUS — WITNESS CARD (CANONICAL SPEC v2.1)              ║
 ║  ──────────────────────────────────────────────────────────────  ║
 ║  Design Language: Vibe-coded cathedral. Premium gallery.         ║
 ║  The creation is the statement. The creator is the signature.    ║
 ║                                                                  ║
 ║  Layer 1: Artwork — full-bleed portrait, 2:3 aspect ratio        ║
-║  Layer 2: Gradient — bottom 50%, deep cinematic fade             ║
-║  Layer 3: WID badge — top-right, gold pill, elegant              ║
+║  Layer 2: Gradient — bottom 55%, deeper cinematic fade           ║
+║  Layer 3: WID badge — top-right, architectural seal, permanent   ║
 ║  Layer 4: Play — hidden at rest, centered glow ring on hover     ║
 ║  Layer 5: Title — bottom, dominant, work-first                   ║
-║  Layer 6: Creator — whispered below title, 55% opacity           ║
+║  Layer 6: Creator — whispered below title, warm parchment        ║
 ║  Layer 7: Resonance — plays/tips, bottom-right, minimal          ║
 ╚══════════════════════════════════════════════════════════════════╝
 */
@@ -242,15 +242,15 @@ export function StoreTrackCard({ song, size = "md", allSongs, songIndex, isNew }
             className="absolute inset-0 rounded-2xl overflow-hidden"
             style={{
               border: isActive
-                ? "1px solid rgba(196,154,40,0.55)"
-                : "1px solid rgba(196,154,40,0.18)",
+                ? "1px solid rgba(196,154,40,0.65)"
+                : "1px solid rgba(196,154,40,0.22)",
               boxShadow: isActive
-                ? "0 0 0 1px rgba(196,154,40,0.22), 0 8px 32px rgba(0,0,0,0.65), 0 0 28px rgba(196,154,40,0.14), inset 0 0 32px rgba(196,154,40,0.05)"
+                ? "0 0 0 1px rgba(196,154,40,0.28), 0 8px 40px rgba(0,0,0,0.70), 0 0 32px rgba(196,154,40,0.18), inset 0 0 40px rgba(196,154,40,0.06)"
                 : hovered
-                  ? "0 12px 48px rgba(0,0,0,0.75), 0 0 0 1px rgba(196,154,40,0.22), 0 0 24px rgba(196,154,40,0.10), inset 0 0 24px rgba(196,154,40,0.04)"
+                  ? "0 16px 56px rgba(0,0,0,0.80), 0 0 0 1px rgba(196,154,40,0.28), 0 0 28px rgba(196,154,40,0.12), inset 0 0 32px rgba(196,154,40,0.06)"
                   : "0 4px 20px rgba(0,0,0,0.55)",
-              transform: hovered ? "translateY(-4px) scale(1.015)" : "translateY(0) scale(1)",
-              transition: "transform 0.28s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.28s ease, border-color 0.28s ease",
+              transform: hovered ? "translateY(-5px) scale(1.018)" : "translateY(0) scale(1)",
+              transition: "transform 0.30s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.30s ease, border-color 0.30s ease",
             }}
           >
             {/* ── LAYER 1: Artwork — full-bleed, portrait ── */}
@@ -261,8 +261,8 @@ export function StoreTrackCard({ song, size = "md", allSongs, songIndex, isNew }
                 aria-hidden="true"
                 className="absolute inset-0 w-full h-full object-cover"
                 style={{
-                  filter: hovered ? "brightness(0.82)" : "brightness(0.88)",
-                  transition: "filter 0.28s ease",
+                  filter: hovered ? "brightness(0.78) saturate(1.08)" : "brightness(0.86) saturate(1.04)",
+                  transition: "filter 0.30s ease",
                 }}
               />
             ) : (
@@ -278,7 +278,7 @@ export function StoreTrackCard({ song, size = "md", allSongs, songIndex, isNew }
             <div
               className="absolute inset-0 pointer-events-none"
               style={{
-                background: "linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.70) 25%, rgba(0,0,0,0.28) 50%, rgba(0,0,0,0.06) 68%, transparent 80%)",
+                background: "linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.75) 22%, rgba(0,0,0,0.32) 48%, rgba(0,0,0,0.08) 66%, transparent 80%)",
               }}
             />
 
@@ -291,16 +291,16 @@ export function StoreTrackCard({ song, size = "md", allSongs, songIndex, isNew }
                 <div
                   className="absolute top-2.5 right-2.5 z-20 flex items-center gap-1 px-2 py-0.5 rounded-full"
                   style={{
-                    background: "rgba(196,154,40,0.12)",
-                    border: "1px solid rgba(196,154,40,0.50)",
-                    backdropFilter: "blur(10px)",
-                    boxShadow: "0 0 8px rgba(196,154,40,0.14), 0 0 0 1px rgba(196,154,40,0.06), inset 0 1px 0 rgba(196,154,40,0.18)",
+                    background: "rgba(196,154,40,0.15)",
+                    border: "1px solid rgba(196,154,40,0.60)",
+                    backdropFilter: "blur(12px)",
+                    boxShadow: "0 0 12px rgba(196,154,40,0.22), 0 0 0 1px rgba(196,154,40,0.08), inset 0 1px 0 rgba(255,220,100,0.24)",
                   }}
                 >
-                  <Shield className="w-2.5 h-2.5" style={{ color: "#D4A843" }} />
+                  <Shield className="w-2.5 h-2.5" style={{ color: "#D4A843", filter: "drop-shadow(0 0 3px rgba(196,154,40,0.60))" }} />
                   <span
-                    className="font-heading text-[8px] tracking-[0.20em] uppercase"
-                    style={{ color: "#D4A843", textShadow: "0 0 8px rgba(196,154,40,0.40)" }}
+                    className="font-heading text-[8px] tracking-[0.22em] uppercase"
+                    style={{ color: "#D4A843", textShadow: "0 0 10px rgba(196,154,40,0.55)" }}
                   >
                     WID
                   </span>
@@ -330,11 +330,12 @@ export function StoreTrackCard({ song, size = "md", allSongs, songIndex, isNew }
               <div
                 className="absolute top-2.5 left-2.5 z-20 text-[8px] px-2 py-0.5 rounded-full font-bold tracking-wider"
                 style={{
-                  background: "rgba(196,154,40,0.18)",
-                  border: "1px solid rgba(196,154,40,0.45)",
+                  background: "rgba(196,154,40,0.20)",
+                  border: "1px solid rgba(196,154,40,0.55)",
                   color: "#C9A84C",
                   fontFamily: "'Cinzel', serif",
                   backdropFilter: "blur(4px)",
+                  boxShadow: "0 0 8px rgba(196,154,40,0.20)",
                 }}
               >
                 ▶ NOW PLAYING
@@ -354,14 +355,14 @@ export function StoreTrackCard({ song, size = "md", allSongs, songIndex, isNew }
                   onClick={handlePlay}
                   className="pointer-events-auto flex items-center justify-center rounded-full"
                   style={{
-                    width: "52px",
-                    height: "52px",
-                    background: isPlaying ? "rgba(196,154,40,0.20)" : "rgba(0,0,0,0.42)",
-                    border: isPlaying ? "1.5px solid rgba(196,154,40,0.90)" : "1.5px solid rgba(196,154,40,0.70)",
+                    width: "54px",
+                    height: "54px",
+                    background: isPlaying ? "rgba(196,154,40,0.22)" : "rgba(0,0,0,0.45)",
+                    border: isPlaying ? "1.5px solid rgba(196,154,40,0.95)" : "1.5px solid rgba(196,154,40,0.75)",
                     boxShadow: isPlaying
-                      ? "0 0 0 6px rgba(196,154,40,0.07), 0 0 24px rgba(196,154,40,0.32)"
-                      : "0 0 0 5px rgba(196,154,40,0.05), 0 0 16px rgba(196,154,40,0.22)",
-                    backdropFilter: "blur(4px)",
+                      ? "0 0 0 7px rgba(196,154,40,0.08), 0 0 28px rgba(196,154,40,0.38), inset 0 1px 0 rgba(255,220,100,0.18)"
+                      : "0 0 0 6px rgba(196,154,40,0.06), 0 0 20px rgba(196,154,40,0.26), inset 0 1px 0 rgba(255,220,100,0.12)",
+                    backdropFilter: "blur(6px)",
                     animation: isPlaying ? "pulse-gold 1.8s ease-in-out infinite" : "none",
                     transition: "box-shadow 0.2s ease, background 0.2s ease",
                   }}
@@ -383,9 +384,9 @@ export function StoreTrackCard({ song, size = "md", allSongs, songIndex, isNew }
                 className="font-heading leading-tight line-clamp-2 mb-1"
                 style={{
                   fontSize: size === "sm" ? "0.80rem" : "0.90rem",
-                  color: "rgba(248,244,236,1)",
+                  color: "rgba(252,248,240,1)",
                   letterSpacing: "0.025em",
-                  textShadow: "0 1px 8px rgba(0,0,0,1), 0 2px 24px rgba(0,0,0,0.90), 0 0 40px rgba(0,0,0,0.60)",
+                  textShadow: "0 1px 8px rgba(0,0,0,1), 0 2px 24px rgba(0,0,0,0.92), 0 0 40px rgba(0,0,0,0.65), 0 0 60px rgba(196,154,40,0.08)",
                 }}
               >
                 {song.title}
@@ -400,21 +401,21 @@ export function StoreTrackCard({ song, size = "md", allSongs, songIndex, isNew }
                       src={song.profilePhotoUrl}
                       alt=""
                       className="w-4 h-4 rounded-full object-cover flex-shrink-0"
-                      style={{ border: "1px solid rgba(196,154,40,0.22)" }}
+                      style={{ border: "1px solid rgba(196,154,40,0.28)" }}
                     />
                   ) : (
                     <div
                       className="w-4 h-4 rounded-full flex-shrink-0"
-                      style={{ background: "rgba(196,154,40,0.10)", border: "1px solid rgba(196,154,40,0.18)" }}
+                      style={{ background: "rgba(196,154,40,0.10)", border: "1px solid rgba(196,154,40,0.22)" }}
                     />
                   )}
                   <span
                     className="truncate"
                     style={{
                       fontSize: "10px",
-                  color: "rgba(220,200,140,0.62)",
+                  color: "rgba(220,200,140,0.58)",
                   fontFamily: "'Cinzel', serif",
-                  letterSpacing: "0.03em",
+                  letterSpacing: "0.04em",
                   textShadow: "0 1px 8px rgba(0,0,0,0.98)",
                     }}
                   >

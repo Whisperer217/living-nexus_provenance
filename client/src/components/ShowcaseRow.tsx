@@ -41,10 +41,10 @@ export function ShowcaseRow({ title, seeAllHref, seeAllLabel = "See All", childr
   };
 
   return (
-    <ConstellationReveal className={`mb-14 overflow-hidden ${className}`} dotCount={5}>
+    <ConstellationReveal className={`mb-16 overflow-hidden ${className}`} dotCount={5}>
       <section>
         {/* ── Section header ── */}
-        <div className="flex items-center justify-between mb-6 px-1">
+        <div className="flex items-center justify-between mb-7 px-1">
           {/* Left: vertical gold accent + title */}
           <div className="flex items-center gap-3 min-w-0">
             <div

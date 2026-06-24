@@ -473,7 +473,7 @@ function ShowcaseSection() {
   if (!hasNew && !hasTrend && !hasCreators && !hasVoices) return null;
 
   return (
-    <div className="px-4 pt-6 pb-2">
+    <div className="px-4 pt-10 pb-6">
       {hasNew && (
         <ShowcaseRow title="New Arrivals" seeAllHref="/explore?sort=new">
           {newSongs.map((song: ReturnType<typeof mapToSongData>, idx: number) => (
@@ -569,7 +569,7 @@ function CinematicHero({ isAuthenticated, getLoginUrl: getLogin }: { isAuthentic
           alt=""
           aria-hidden="true"
           className="w-full h-full object-cover"
-          style={{ filter: "brightness(0.72) saturate(1.15)" }}
+          style={{ filter: "brightness(0.65) saturate(1.18)" }}
         />
       </div>
 
@@ -577,20 +577,20 @@ function CinematicHero({ isAuthenticated, getLoginUrl: getLogin }: { isAuthentic
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
-          background: "linear-gradient(to right, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.58) 38%, rgba(0,0,0,0.14) 65%, transparent 100%)",
+          background: "linear-gradient(to right, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.62) 38%, rgba(0,0,0,0.18) 65%, transparent 100%)",
         }}
       />
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
-          background: "linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.40) 28%, transparent 58%)",
+          background: "linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.48) 28%, transparent 58%)",
         }}
       />
       {/* Subtle sacred geometry border frame */}
       <div
         className="absolute inset-0 pointer-events-none z-10"
         style={{
-          boxShadow: "inset 0 0 0 1px rgba(196,154,40,0.08), inset 0 0 60px rgba(196,154,40,0.04)",
+          boxShadow: "inset 0 0 0 1px rgba(196,154,40,0.10), inset 0 0 80px rgba(196,154,40,0.06)",
         }}
       />
 
@@ -598,7 +598,7 @@ function CinematicHero({ isAuthenticated, getLoginUrl: getLogin }: { isAuthentic
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
-          background: "radial-gradient(ellipse 110% 110% at 50% 50%, transparent 42%, rgba(0,0,0,0.28) 78%, rgba(0,0,0,0.55) 100%)",
+          background: "radial-gradient(ellipse 110% 110% at 50% 50%, transparent 38%, rgba(0,0,0,0.32) 75%, rgba(0,0,0,0.62) 100%)",
         }}
       />
 
@@ -631,14 +631,14 @@ function CinematicHero({ isAuthenticated, getLoginUrl: getLogin }: { isAuthentic
                 <div
                   className="flex items-center gap-1.5 px-2.5 py-1 rounded-full"
                   style={{
-                    background: "rgba(196,154,40,0.10)",
-                    border: "1px solid rgba(196,154,40,0.45)",
-                    backdropFilter: "blur(10px)",
-                    boxShadow: "0 0 10px rgba(196,154,40,0.16), inset 0 1px 0 rgba(196,154,40,0.20)",
+                  background: "rgba(196,154,40,0.14)",
+                  border: "1px solid rgba(196,154,40,0.55)",
+                  backdropFilter: "blur(12px)",
+                  boxShadow: "0 0 14px rgba(196,154,40,0.22), 0 0 0 1px rgba(196,154,40,0.08), inset 0 1px 0 rgba(255,220,100,0.24)",
                   }}
                 >
-                  <Shield className="w-3 h-3" style={{ color: "#D4A843", filter: "drop-shadow(0 0 4px rgba(196,154,40,0.50))" }} />
-                  <span className="text-[9px] font-heading tracking-[0.18em] uppercase" style={{ color: "#D4A843", textShadow: "0 0 8px rgba(196,154,40,0.50)" }}>
+                  <Shield className="w-3 h-3" style={{ color: "#D4A843", filter: "drop-shadow(0 0 5px rgba(196,154,40,0.65))" }} />
+                  <span className="text-[9px] font-heading tracking-[0.20em] uppercase" style={{ color: "#D4A843", textShadow: "0 0 10px rgba(196,154,40,0.60)" }}>
                     WID Witnessed
                   </span>
                 </div>
@@ -675,7 +675,7 @@ function CinematicHero({ isAuthenticated, getLoginUrl: getLogin }: { isAuthentic
               )}
               <span
                 className="font-heading text-[11px] tracking-[0.08em]"
-                style={{ color: "rgba(196,154,40,0.65)" }}
+                style={{ color: "rgba(196,154,40,0.70)" }}
               >
                 {hero.artistHandle ? `@${hero.artistHandle}` : (hero.artistName || "Unknown Creator")}
               </span>
@@ -687,7 +687,7 @@ function CinematicHero({ isAuthenticated, getLoginUrl: getLogin }: { isAuthentic
                 <button
                   onClick={handlePlay}
                   className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-heading font-bold text-[12px] tracking-wide transition-all active:scale-95 hover:brightness-110"
-                  style={{ background: "#C49A28", color: "#0A0806", boxShadow: "0 2px 16px rgba(196,154,40,0.30)" }}
+                  style={{ background: "#C49A28", color: "#0A0806", boxShadow: "0 2px 20px rgba(196,154,40,0.38), inset 0 1px 0 rgba(255,240,160,0.20)" }}
                 >
                   <Play className="w-3.5 h-3.5 fill-current" />
                   Play Now
@@ -697,10 +697,10 @@ function CinematicHero({ isAuthenticated, getLoginUrl: getLogin }: { isAuthentic
                 <button
                   className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-heading font-bold text-[12px] tracking-wide transition-all active:scale-95 hover:brightness-110"
                   style={{
-                    background: "rgba(196,154,40,0.08)",
-                    border: "1px solid rgba(196,154,40,0.35)",
+                    background: "rgba(196,154,40,0.10)",
+                    border: "1px solid rgba(196,154,40,0.45)",
                     color: "#D4A843",
-                    boxShadow: "0 0 12px rgba(196,154,40,0.10), inset 0 1px 0 rgba(196,154,40,0.15)",
+                    boxShadow: "0 0 16px rgba(196,154,40,0.14), inset 0 1px 0 rgba(255,220,100,0.18)",
                   }}
                 >
                   <Shield className="w-3.5 h-3.5" />
@@ -889,7 +889,7 @@ function WIDExplainer() {
 
   return (
     <section
-      className="px-4 md:px-8 py-12"
+      className="px-4 md:px-8 py-16"
       style={{ borderTop: "1px solid rgba(196,154,40,0.08)" }}
     >
       <div className="max-w-4xl mx-auto">

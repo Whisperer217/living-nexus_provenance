@@ -5642,3 +5642,21 @@
 - [ ] Add subtle laminin/cross motif as section divider in index.css
 - [ ] Center-card elevation effect in ShowcaseRow (scale transform on focused card)
 - [ ] TypeScript: 0 errors | Vitest: all passing
+
+## Phase N+6: Final Polish Pass — Sacred Cathedral Standard Elevation
+- [x] StoreTrackCard v2.1: WID seal upgraded (bg 0.15, border 0.60, inset highlight rgba(255,220,100,0.24), glow 0.22)
+- [x] StoreTrackCard v2.1: Deeper cinematic scrim (0.95 → 0.75 → 0.32 → 0.08 → transparent)
+- [x] StoreTrackCard v2.1: Title warm luminous white rgba(252,248,240,1) + fourth shadow layer (gold warmth 0.08)
+- [x] StoreTrackCard v2.1: Play button 54px with inset highlight on both states
+- [x] StoreTrackCard v2.1: Card inactive border 0.22, hover lift -5px scale(1.018), breathing inner glow inset 0.06
+- [x] ExploreCard: Identical token elevation applied (scrim, WID seal, title, play button, hover glow)
+- [x] CinematicHero: Artwork brightness 0.65 saturate 1.18 (deeper, more cinematic)
+- [x] CinematicHero: Left scrim 0.92, bottom scrim 0.95, corner vignette deepened
+- [x] CinematicHero: Sacred geometry border frame inset glow 0.10/0.06 (up from 0.08/0.04)
+- [x] CinematicHero: WID eyebrow badge elevated (border 0.55, glow 0.22, inset highlight 0.24)
+- [x] CinematicHero: "Witness This Work" button border 0.45, glow 0.14, inset highlight 0.18
+- [x] CinematicHero: "Play Now" button inset highlight rgba(255,240,160,0.20)
+- [x] ShowcaseSection: Padding increased pt-10 pb-6 (from pt-6 pb-2)
+- [x] ShowcaseRow: Bottom margin mb-16 (from mb-14), section header mb-7 (from mb-6)
+- [x] WIDExplainer: Vertical padding py-16 (from py-12)
+- [x] TypeScript: 0 errors | Tests: 317/317 passing | Clean production build
