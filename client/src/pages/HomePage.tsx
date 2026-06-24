@@ -10,28 +10,23 @@
      7. Trending Now — side-pane horizontal scroll (2 rows × 12)
 ═══════════════════════════════════════════════════════════════════ */
 
-import { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react"; // useRef/useCallback used in AnimatedCounter and WIDTrustLayer
 import { Helmet } from "react-helmet-async";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { useAuth } from "@/_core/hooks/useAuth";
-import TrackCard from "@/components/TrackCard";
-import BookCard from "@/components/BookCard";
+import TrackCard from "@/components/TrackCard"; // used in HorizontalTrackGrid / TrendingHorizontalGrid
+import BookCard from "@/components/BookCard"; // used in HorizontalTrackGrid
 import TipModal from "@/components/TipModal";
 // Card width is now responsive via CSS variable --card-pan-w (see index.css)
-import { Sparkles, ShieldCheck, Upload, Compass, Star, Lock, Fingerprint, Shield, Users, Play, Pause, Heart, DollarSign, Cpu, CheckCircle2, ChevronLeft, ChevronRight, Send } from "lucide-react";
+import { Sparkles, ShieldCheck, Upload, Compass, Star, Lock, Fingerprint, Shield, Users, Play, Pause, Heart, DollarSign, Cpu, CheckCircle2, ChevronLeft, ChevronRight, Send, Flame } from "lucide-react";
 import { Link } from "wouter";
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
-import { WIDPanel } from "@/components/WIDPanel";
-import FeaturedProjectsCarousel from "@/components/FeaturedProjectsCarousel";
-import { WorkCarousel } from "@/components/WorkCarousel";
-import { CosmicMediumIcon } from "@/components/CosmicMediumIcon";
+import { CosmicMediumIcon } from "@/components/CosmicMediumIcon"; // used in WIDTrustLayer
 import { ShowcaseRow } from "@/components/ShowcaseRow";
 import { StoreTrackCard } from "@/components/StoreTrackCard";
 import { StoreCreatorCard } from "@/components/StoreCreatorCard";
-import { CinematicComicReader } from "@/components/reader/CinematicComicReader";
-import { DiscoverySection } from "@/components/DiscoverySection";
-import { ObservatoryCanvas } from "@/components/ObservatoryCanvas";
+
 import { ConstellationReveal } from "@/components/ConstellationReveal";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { PullToRefreshIndicator } from "@/components/PullToRefreshIndicator";
@@ -703,170 +698,228 @@ function ShowcaseSection() {
   );
 }
 
-/* ─── Hero Carousel ─────────────────────────────────────────────────────── */
-const HERO_SLIDES = [
-  {
-    id: 1,
-    img: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663123503966/CikRjojXDGlVnusc.png",
-    tag: "Creator Owned. Provenance Powered.",
-    headline: "Built to preserve.",
-    accent: "Built to last.",
-    body: "A creator-owned manifestation archive and provenance platform designed to preserve, package, and distribute creative works across digital and physical formats.",
-    cta1: { label: "Register Your Work", href: "/upload", icon: "upload" as const },
-    cta2: { label: "Explore Works", href: "/explore", icon: "compass" as const },
-  },
-  {
-    id: 2,
-    img: "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/living-nexus-discover-4BDchKkmG3vEtUQgZzwK6E.webp",
-    tag: "Discover New Voices",
-    headline: "Explore a growing archive of",
-    accent: "witnessed music.",
-    body: "Browse tracks, lyrics, manuscripts, and comics — all registered with cryptographic timestamps. Every play supports an independent creator.",
-    cta1: { label: "Explore Now", href: "/explore", icon: "compass" as const },
-    cta2: { label: "Browse Creators", href: "/explore?view=creators", icon: "users" as const },
-  },
-  {
-    id: 3,
-    img: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663123503966/znZFuENyiCRsHFOi.png",
-    tag: "Founder's Era — Limited",
-    headline: "Be among the first",
-    accent: "Founding Creators.",
-    body: "Founder's Era creators establish the first anchors of a cryptographically-verified creative record. A timestamped declaration that cannot be altered, disputed, or erased.",
-    cta1: { label: "Claim Your WID", href: "/upload", icon: "upload" as const },
-    cta2: { label: "Learn More", href: "/founder-era", icon: "star" as const },
-  },
-  {
-    id: 4,
-    img: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663123503966/CikRjojXDGlVnusc.png",
-    imgMirror: true, /* scaleX(-1) applied to background image for visual variety */
-    tag: "We Are Distributing",
-    headline: "Beyond the cloud —",
-    accent: "into physical reality.",
-    body: "USB archives. CDs. Vinyl. Books. Comics. Real artifacts for real creators. The sovereign distribution pipeline is being built.",
-    cta1: { label: "Distribution Hub", href: "/distribute", icon: "compass" as const },
-    cta2: { label: "Register Interest", href: "/distribute#form", icon: "star" as const },
-  },
-];
+/* ─── Cinematic Hero — live trending work, golden-ratio height ─────────────── */
+const FALLBACK_HERO_IMG = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663123503966/CikRjojXDGlVnusc.png";
 
-function HeroCarousel({ isAuthenticated, getLoginUrl: getLogin }: { isAuthenticated: boolean; getLoginUrl: (path?: string) => string }) {
-  const [active, setActive] = useState(0);
-  const [paused, setPaused] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+function CinematicHero({ isAuthenticated, getLoginUrl: getLogin }: { isAuthenticated: boolean; getLoginUrl: (path?: string) => string }) {
+  const heroInput = useMemo(() => ({ limit: 1 }), []);
+  const { data: trendingRaw } = trpc.songs.trending.useQuery(heroInput, {
+    staleTime: 120_000,
+    refetchOnWindowFocus: false,
+  });
+  const { addAndPlay } = usePlayer();
 
-  const advance = useCallback((dir: 1 | -1) => {
-    setActive(prev => (prev + dir + HERO_SLIDES.length) % HERO_SLIDES.length);
-  }, []);
+  const hero = useMemo(() => {
+    const row = (trendingRaw ?? [])[0];
+    if (!row) return null;
+    const song = (row as any).song ?? row;
+    const creator = (row as any).creator ?? null;
+    return {
+      id: song.id as number,
+      title: song.title as string ?? "Untitled Work",
+      coverArtUrl: (song.coverArtUrl as string | null) ?? null,
+      fileUrl: (song.fileUrl as string | null) ?? null,
+      genre: (song.genre as string | null) ?? null,
+      witnessId: (song.witnessId as string | null) ?? null,
+      contentType: (song.contentType as string) ?? "audio",
+      artistHandle: creator?.artistHandle ?? null,
+      artistName: creator?.name ?? null,
+      profilePhotoUrl: creator?.profilePhotoUrl ?? null,
+      userId: song.userId as number | null ?? null,
+    };
+  }, [trendingRaw]);
 
-  useEffect(() => {
-    if (paused) return;
-    timerRef.current = setInterval(() => advance(1), 5000);
-    return () => { if (timerRef.current) clearInterval(timerRef.current); };
-  }, [paused, advance]);
+  const imgSrc = hero?.coverArtUrl ?? FALLBACK_HERO_IMG;
+  const hasAudio = !!hero?.fileUrl;
 
-  const slide = HERO_SLIDES[active];
+  const handlePlay = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!hero || !hasAudio) return;
+    addAndPlay({
+      id: String(hero.id),
+      title: hero.title,
+      artist: hero.artistHandle || hero.artistName || "Unknown",
+      genre: hero.genre || "",
+      audioUrl: hero.fileUrl || undefined,
+      artUrl: hero.coverArtUrl || undefined,
+      witnessId: hero.witnessId || undefined,
+      creatorHandle: hero.artistHandle || undefined,
+      creatorId: hero.userId || undefined,
+      contentType: (hero.contentType as any) || "audio",
+    });
+  };
 
   return (
     <div
-      className="relative overflow-hidden"
-      style={{ height: "var(--hero-h, clamp(420px, 61.8vh, 680px))" }}
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
+      className="hero-phi relative overflow-hidden"
+      style={{ background: "#000" }}
     >
-      {/* Background images — cross-fade */}
-      {HERO_SLIDES.map((s, i) => (
+      {/* Full-bleed artwork */}
+      <div className="absolute inset-0">
+        <img
+          src={imgSrc}
+          alt=""
+          aria-hidden="true"
+          className="w-full h-full object-cover"
+          style={{ filter: "brightness(0.72) saturate(1.15)" }}
+        />
+      </div>
+
+      {/* Layered scrims — left-heavy for text readability, bottom for attribution */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: "linear-gradient(to right, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.50) 38%, rgba(0,0,0,0.10) 65%, transparent 100%)",
+        }}
+      />
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: "linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.30) 30%, transparent 62%)",
+        }}
+      />
+
+      {/* Corner vignette */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: "radial-gradient(ellipse 110% 110% at 50% 50%, transparent 42%, rgba(0,0,0,0.28) 78%, rgba(0,0,0,0.55) 100%)",
+        }}
+      />
+
+      {/* Content — anchored to lower 38.2% (golden ratio) */}
+      <div className="hero-phi-content relative z-20">
+        {/* Work title — dominant */}
+        {hero ? (
+          <>
+            {/* Eyebrow — content type + genre */}
+            <div className="flex items-center gap-2 mb-2">
+              <span
+                className="text-[9px] font-heading tracking-[0.22em] uppercase px-2 py-0.5 rounded"
+                style={{
+                  background: "rgba(196,154,40,0.12)",
+                  border: "1px solid rgba(196,154,40,0.28)",
+                  color: "#C49A28",
+                }}
+              >
+                {hero.contentType === "audio" ? "Music" :
+                 hero.contentType === "lyrics" ? "Lyrics" :
+                 hero.contentType === "manuscript" ? "Manuscript" :
+                 hero.contentType === "comic" ? "Comic" : hero.contentType}
+              </span>
+              {hero.genre && (
+                <span className="text-[9px] font-heading tracking-[0.15em] uppercase" style={{ color: "rgba(196,154,40,0.55)" }}>
+                  {hero.genre}
+                </span>
+              )}
+              {hero.witnessId && (
+                <div className="flex items-center gap-1">
+                  <Shield className="w-2.5 h-2.5" style={{ color: "rgba(196,154,40,0.65)" }} />
+                  <span className="text-[9px] font-heading tracking-[0.12em] uppercase" style={{ color: "rgba(196,154,40,0.55)" }}>
+                    Witnessed
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Work title — the creation, dominant */}
+            <h1
+              className="font-display leading-tight mb-2"
+              style={{
+                fontSize: "clamp(1.6rem, 5vw, 3rem)",
+                color: "#F0EAD8",
+                textShadow: "0 2px 32px rgba(0,0,0,0.70)",
+                maxWidth: "22ch",
+              }}
+            >
+              {hero.title}
+            </h1>
+
+            {/* Creator — secondary, whispered */}
+            <div className="flex items-center gap-2 mb-5">
+              {hero.profilePhotoUrl ? (
+                <img
+                  src={hero.profilePhotoUrl}
+                  alt=""
+                  className="w-5 h-5 rounded-full object-cover flex-shrink-0"
+                  style={{ border: "1px solid rgba(196,154,40,0.25)" }}
+                />
+              ) : (
+                <div
+                  className="w-5 h-5 rounded-full flex-shrink-0"
+                  style={{ background: "rgba(196,154,40,0.10)", border: "1px solid rgba(196,154,40,0.18)" }}
+                />
+              )}
+              <span
+                className="font-heading text-[11px] tracking-[0.08em]"
+                style={{ color: "rgba(196,154,40,0.65)" }}
+              >
+                {hero.artistHandle ? `@${hero.artistHandle}` : (hero.artistName || "Unknown Creator")}
+              </span>
+            </div>
+
+            {/* CTAs */}
+            <div className="flex flex-wrap gap-3">
+              {hasAudio && (
+                <button
+                  onClick={handlePlay}
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-heading font-bold text-[12px] tracking-wide transition-all active:scale-95 hover:brightness-110"
+                  style={{ background: "#C49A28", color: "#0A0806", boxShadow: "0 2px 16px rgba(196,154,40,0.30)" }}
+                >
+                  <Play className="w-3.5 h-3.5 fill-current" />
+                  Play Now
+                </button>
+              )}
+              <Link href={`/song/${hero.id}`}>
+                <button
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-heading font-bold text-[12px] tracking-wide transition-all active:scale-95 hover:brightness-110"
+                  style={{ background: "rgba(196,154,40,0.06)", border: "1px solid rgba(196,154,40,0.22)", color: "#C9C0A8" }}
+                >
+                  <Compass className="w-3.5 h-3.5" />
+                  View Work
+                </button>
+              </Link>
+              <Link href={isAuthenticated ? "/upload" : getLogin("/upload")}>
+                <button
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-heading font-bold text-[12px] tracking-wide transition-all active:scale-95 hover:brightness-110"
+                  style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.10)", color: "rgba(220,210,190,0.70)" }}
+                >
+                  <Upload className="w-3.5 h-3.5" />
+                  Register Yours
+                </button>
+              </Link>
+            </div>
+          </>
+        ) : (
+          /* Skeleton while loading */
+          <>
+            <div className="h-3 w-24 rounded mb-3 animate-pulse" style={{ background: "rgba(196,154,40,0.12)" }} />
+            <div className="h-10 w-64 rounded mb-2 animate-pulse" style={{ background: "rgba(255,255,255,0.06)" }} />
+            <div className="h-4 w-40 rounded mb-5 animate-pulse" style={{ background: "rgba(255,255,255,0.04)" }} />
+            <div className="flex gap-3">
+              <div className="h-10 w-28 rounded-xl animate-pulse" style={{ background: "rgba(196,154,40,0.10)" }} />
+              <div className="h-10 w-28 rounded-xl animate-pulse" style={{ background: "rgba(255,255,255,0.04)" }} />
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* "Trending #1" badge — top right */}
+      {hero && (
         <div
-          key={s.id}
-          className="absolute inset-0 transition-opacity duration-700"
-          style={{ opacity: i === active ? 1 : 0, zIndex: 0 }}
+          className="absolute top-4 right-4 z-30 flex items-center gap-1.5 px-3 py-1.5 rounded-full"
+          style={{
+            background: "rgba(0,0,0,0.55)",
+            border: "1px solid rgba(196,154,40,0.25)",
+            backdropFilter: "blur(8px)",
+          }}
         >
-          <img
-            src={s.img}
-            alt=""
-            className="w-full h-full object-cover object-center"
-            style={{
-              filter: "saturate(1.2) contrast(1.08)",
-              transform: (s as any).imgMirror ? "scaleX(-1)" : undefined,
-            }}
-          />
-        </div>
-      ))}
-
-      {/* Scrims */}
-      <div className="absolute inset-0 z-10" style={{ background: "linear-gradient(to right, rgba(20,10,30,0.85) 0%, rgba(30,16,40,0.55) 40%, rgba(40,20,50,0.08) 68%, transparent 100%)" }} />
-      <div className="absolute inset-0 z-10" style={{ background: "linear-gradient(to top, rgba(20,10,30,0.80) 0%, rgba(30,16,40,0.18) 38%, transparent 100%)" }} />
-      <div className="absolute inset-0 z-10" style={{ background: "radial-gradient(ellipse 100% 100% at 50% 50%, transparent 40%, rgba(0,0,0,0.30) 80%, rgba(0,0,0,0.60) 100%)" }} />
-
-      {/* Content */}
-      <div className="relative z-20 flex flex-col justify-end px-6 pb-12 pt-16 max-w-3xl">
-        <div className="flex items-center gap-2 mb-4">
-          <Sparkles size={13} className="text-[#C49A28]" />
-          <span className="text-[10px] font-heading tracking-[0.22em] uppercase text-[#8B6914]">
-            {slide.tag}
+          <Flame className="w-3 h-3" style={{ color: "#C49A28" }} />
+          <span className="text-[10px] font-heading tracking-[0.12em] uppercase" style={{ color: "rgba(196,154,40,0.85)" }}>
+            Trending #1
           </span>
         </div>
-        <h1
-          className="font-display leading-tight mb-3 transition-all duration-500"
-          style={{ fontSize: "clamp(1.9rem, 5vw, 3rem)", color: "#E8DFC8", textShadow: "0 2px 24px rgba(0,0,0,0.60)" }}
-        >
-          {slide.headline}<br />
-          <span style={{ color: "#C49A28" }}>{slide.accent}</span>
-        </h1>
-        <p className="font-body text-[14px] leading-relaxed mb-6 max-w-md" style={{ color: "#A09880" }}>
-          {slide.body}
-        </p>
-        <div className="flex flex-wrap gap-3">
-          <Link href={isAuthenticated ? slide.cta1.href : getLogin(slide.cta1.href)}>
-            <button
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-heading font-bold text-[12px] tracking-wide transition-all active:scale-95 hover:brightness-110"
-              style={{ background: "#C49A28", color: "#0A0806", boxShadow: "0 2px 16px rgba(196,154,40,0.25)" }}
-            >
-              {slide.cta1.icon === "upload" ? <Upload size={13} /> : slide.cta1.icon === "compass" ? <Compass size={13} /> : <Star size={13} />}
-              {slide.cta1.label}
-            </button>
-          </Link>
-          <Link href={slide.cta2.href}>
-            <button
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-heading font-bold text-[12px] tracking-wide transition-all active:scale-95 hover:brightness-110"
-              style={{ background: "rgba(196,154,40,0.06)", border: "1px solid rgba(196,154,40,0.18)", color: "#C9C0A8" }}
-            >
-              {slide.cta2.icon === "compass" ? <Compass size={13} /> : slide.cta2.icon === "users" ? <Users size={13} /> : <Star size={13} />}
-              {slide.cta2.label}
-            </button>
-          </Link>
-        </div>
-      </div>
-
-      {/* Prev / Next arrows */}
-      <button
-        onClick={() => advance(-1)}
-        className="absolute left-3 top-1/2 -translate-y-1/2 z-30 w-8 h-8 rounded-full flex items-center justify-center transition-all hover:bg-white/20"
-        style={{ background: "rgba(0,0,0,0.35)" }}
-      >
-        <ChevronLeft className="w-4 h-4 text-white" />
-      </button>
-      <button
-        onClick={() => advance(1)}
-        className="absolute right-3 top-1/2 -translate-y-1/2 z-30 w-8 h-8 rounded-full flex items-center justify-center transition-all hover:bg-white/20"
-        style={{ background: "rgba(0,0,0,0.35)" }}
-      >
-        <ChevronRight className="w-4 h-4 text-white" />
-      </button>
-
-      {/* Dot pagination */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2">
-        {HERO_SLIDES.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => setActive(i)}
-            className="rounded-full transition-all duration-300"
-            style={{
-              width: i === active ? "20px" : "6px",
-              height: "6px",
-              background: i === active ? "#C49A28" : "rgba(255,255,255,0.35)",
-            }}
-          />
-        ))}
-      </div>
+      )}
     </div>
   );
 }
@@ -922,82 +975,9 @@ export default function HomePage() {
     document.title = "Living Nexus — Audio Provenance Platform for Creators";
   }, []);
 
-  const [activeGenre, setActiveGenre] = useState("All");
   const [tipTarget, setTipTarget] = useState<any | null>(null);
   const [tipRect, setTipRect] = useState<DOMRect | null>(null);
-  const [readerSong, setReaderSong] = useState<any | null>(null);
-
-  const discoverInput = useMemo(() => ({
-    genre: activeGenre === "All" ? undefined : activeGenre,
-    limit: 24,
-  }), [activeGenre]);
-
-  const { data: discoverData, isLoading: discoverLoading } = trpc.songs.discover.useQuery(
-    discoverInput,
-    { staleTime: 30_000 }
-  );
-
-  const trendingInput = useMemo(() => ({ limit: 24 }), []);
-  const { data: trendingRaw } = trpc.songs.trending.useQuery(
-    trendingInput,
-    { staleTime: 60_000, refetchOnWindowFocus: false }
-  );
-
-  const mapSong = (s: any) => {
-    const song = s.song ?? s;
-    const creator = s.creator ?? null;
-    return {
-      id: String(song.id),
-      title: song.title ?? "Untitled Work",
-      artist: creator?.artistHandle || creator?.name || "Unknown Creator",
-      artUrl: song.coverArtUrl ?? undefined,
-      audioUrl: song.fileUrl ?? "",
-      genre: song.genre ?? undefined,
-      plays: song.playCount ?? 0,
-      witnessId: song.witnessId ?? undefined,
-      coverPositionX: song.coverPositionX ?? 50,
-      coverPositionY: song.coverPositionY ?? 50,
-        visualReady: song.visualReady ?? false,
-        autoVideoUrl: song.autoVideoUrl ?? undefined,
-        creatorRole: song.creator?.role ?? undefined,
-      artAspectRatio: song.artAspectRatio ?? "1:1",
-      userId: song.userId,
-      artistHandle: creator?.artistHandle ?? undefined,
-      profilePhotoUrl: creator?.profilePhotoUrl ?? undefined,
-      creatorId: creator?.id ?? undefined,
-      contentType: song.contentType ?? "audio",
-      songId: song.id,
-    };
-  };
-
-  const tracks = useMemo(() => (discoverData ?? []).map(mapSong), [discoverData]);
-  const trendingTracks = useMemo(() => (trendingRaw ?? []).map(mapSong), [trendingRaw]);
-
-  // Collect all unique song IDs from both lists for a SINGLE bulk like-status fetch.
-  // This replaces up to 48 individual getLikeStatus + getLikeCount queries that were
-  // causing HTTP 414 URI Too Long errors when batched into one GET request.
-  const allSongIds = useMemo(() => {
-    const ids = new Set<number>();
-    const toId = (t: any) => {
-      const n = typeof t.id === "string" ? parseInt(t.id, 10) : t.id;
-      if (!isNaN(n) && n > 0) ids.add(n);
-    };
-    tracks.forEach(toId);
-    trendingTracks.forEach(toId);
-    return Array.from(ids);
-  }, [tracks, trendingTracks]);
-
-  const { data: bulkLikes } = trpc.songs.getBulkLikeStatuses.useQuery(
-    { songIds: allSongIds },
-    { enabled: allSongIds.length > 0, staleTime: 30_000 }
-  );
-  const { data: publicProjects = [] } = trpc.projects.listPublic.useQuery(
-    { limit: 12 },
-    { staleTime: 60_000 }
-  );
-
   const tipTrack = tipTarget ?? null;
-  const handleTip = (track: any, rect: DOMRect) => { setTipTarget(track); setTipRect(rect); };
 
   // Pull-to-refresh — invalidates all home feed queries
   const utils = trpc.useUtils();
@@ -1021,589 +1001,158 @@ export default function HomePage() {
         <meta name="description" content="Register your music, lyrics, manuscripts, and comics with cryptographic Witness IDs. Living Nexus anchors creative provenance so every work is witnessed, attributed, and protected." />
         <meta name="keywords" content="music provenance, witness ID, audio registration, creator platform, cryptographic provenance, music attribution, digital rights, creative ownership, WID, Living Nexus" />
       </Helmet>
+
       <PullToRefreshIndicator
         pullProgress={pullProgress}
         isRefreshing={isRefreshing}
         indicatorY={indicatorY}
       />
+
       <div className="cosmic-bg min-h-screen" style={{ position: "relative" }}>
-      {/* Observatory starfield — persistent, slow-moving 3-depth-layer parallax */}
-      <ObservatoryCanvas
-        className="fixed inset-0 w-full h-full"
-        style={{ zIndex: 0, pointerEvents: "none" } as React.CSSProperties}
-      />
 
-      {/* ══════════════════════════════════════════════════════════════
-          §1 — CINEMATIC HERO (φ-height: 61.8vh)
-          Golden Ratio hero: content anchored to lower 38.2%
-      ══════════════════════════════════════════════════════════════ */}
-      <HeroCarousel isAuthenticated={isAuthenticated} getLoginUrl={getLoginUrl} />
+        {/* ══════════════════════════════════════════════════════════════
+            §1 — CINEMATIC HERO (φ-height: 61.8vh)
+            Live trending work — creation dominant, creator secondary
+        ══════════════════════════════════════════════════════════════ */}
+        <CinematicHero isAuthenticated={isAuthenticated} getLoginUrl={getLoginUrl} />
 
-      {/* SEO: visible H2 for crawlers */}
-      <h2 className="sr-only">Discover and Register Creative Works on Living Nexus</h2>
+        {/* SEO: visible H2 for crawlers */}
+        <h2 className="sr-only">Discover and Register Creative Works on Living Nexus</h2>
 
-      {/* ══════════════════════════════════════════════════════════════
-          §2 — CREATOR DISCOVERY SHOWCASE (Steam-like rows)
-          New Arrivals · Trending · Featured Creators · Recently Witnessed
-      ══════════════════════════════════════════════════════════════ */}
-      <ConstellationReveal delay={60} dotCount={4} skipDots={false}>
-        <ShowcaseSection />
-      </ConstellationReveal>
-
-      {/* ── Sacred Geometry Divider ── */}
-      <div className="sg-divider-wide px-6">
-        <div className="sg-divider-wide-center"><div className="sg-divider-wide-center-dot" /></div>
-      </div>
-
-      {/* ══════════════════════════════════════════════════════════════
-          §3 — MANIFESTATION DISCOVERY ARCHITECTURE
-          Featured Realms · New Arrivals grid · Trending grid · Hidden Realms
-      ══════════════════════════════════════════════════════════════ */}
-      <ConstellationReveal delay={100} dotCount={6} skipDots={false}>
-        <DiscoverySection />
-      </ConstellationReveal>
-
-      {/* ── Sacred Geometry Divider ── */}
-      <div className="sg-divider-wide px-6">
-        <div className="sg-divider-wide-center"><div className="sg-divider-wide-center-dot" /></div>
-      </div>
-
-      {/* ══════════════════════════════════════════════════════════════
-          §4 — CREATOR SPOTLIGHTS
-          Featured Creators · New Voices
-      ══════════════════════════════════════════════════════════════ */}
-      <ConstellationReveal delay={0} dotCount={5}>
-        <FeaturedCreatorsCarousel />
-      </ConstellationReveal>
-
-      {/* ── Sacred Geometry Divider ── */}
-      <div className="sg-divider-wide px-6">
-        <div className="sg-divider-wide-center"><div className="sg-divider-wide-center-dot" /></div>
-      </div>
-
-      <ConstellationReveal delay={0} dotCount={5}>
-        <NewVoicesCarousel />
-      </ConstellationReveal>
-
-      {/* ── Sacred Geometry Divider ── */}
-      <div className="sg-divider-wide px-6">
-        <div className="sg-divider-wide-center"><div className="sg-divider-wide-center-dot" /></div>
-      </div>
-
-      {/* ══════════════════════════════════════════════════════════════
-          §5 — FEATURED PROJECTS
-      ══════════════════════════════════════════════════════════════ */}
-      {(isAuthenticated || (publicProjects as any[]).length > 0) && (
-        <div className="px-6 pt-5 pb-2">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="museum-section-header">Featured Projects</h2>
-            <Link href="/projects">
-              <span className="text-[11px] font-body cursor-pointer transition-colors hover:text-[#C49A28]" style={{ color: "#6B6555" }}>See all</span>
-            </Link>
-          </div>
-          <FeaturedProjectsCarousel
-            projects={(publicProjects as any[])}
-            isAuthenticated={isAuthenticated}
-          />
-          <div className="sg-divider mt-4"><div className="sg-divider-pip" /></div>
-        </div>
-      )}
-
-      {/* ── Sacred Geometry Divider ── */}
-      <div className="sg-divider-wide px-6">
-        <div className="sg-divider-wide-center"><div className="sg-divider-wide-center-dot" /></div>
-      </div>
-
-      {/* ══════════════════════════════════════════════════════════════
-          §6 — GENRE FILTERS + DISCOVER TRACKS + TRENDING + MEDIUM CAROUSELS
-      ══════════════════════════════════════════════════════════════ */}
-      <div className="px-6 py-5 overflow-hidden">
-        {/* Genre icon cards */}
-        <div className="mb-7">
-          <h2 className="museum-section-title mb-3">Browse Genres</h2>
-          <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
-            {GENRE_CARDS.map(g => (
-              <button
-                key={g.label}
-                onClick={() => setActiveGenre(g.label)}
-                className={`flex flex-col items-center gap-1.5 p-2 rounded-xl transition-all border group
-                  ${activeGenre === g.label
-                    ? "border-[#C49A28]/40 bg-[#1C1A14]/[0.07]"
-                    : "border-[rgba(196,154,40,0.10)] bg-[#1C1A14] hover:border-[rgba(196,154,40,0.22)] hover:bg-[#252218]"
-                  }`}
-              >
-                {g.icon ? (
-                  <div className="w-10 h-10 flex items-center justify-center">
-                    <img
-                      src={g.icon}
-                      alt={g.label}
-                      className={`w-full h-full object-contain transition-all duration-200
-                        ${activeGenre === g.label ? "scale-110 drop-shadow-lg" : "opacity-80 group-hover:opacity-100 group-hover:scale-105"}`}
-                    />
-                  </div>
-                ) : (
-                  <div className="w-10 h-10 flex items-center justify-center rounded-lg"
-                    style={{ background: "linear-gradient(135deg, #C49A28, #7C3AED)" }}>
-                    <span className="text-[11px] font-heading font-bold text-black">ALL</span>
-                  </div>
-                )}
-                <span
-                  className="text-[10px] font-body truncate w-full text-center transition-colors"
-                  style={{ color: activeGenre === g.label ? g.color : "rgba(255,255,255,0.75)" }}
-                >
-                  {g.label}
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Discover Tracks header */}
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="museum-section-header">
-            {activeGenre === "All" ? "Discover Tracks" : activeGenre}
-          </h2>
-          <Link href="/explore">
-            <span className="text-[12px] text-[#A78BFA] cursor-pointer hover:text-[#C49A28] transition-colors font-body">
-              See all
-            </span>
-          </Link>
-        </div>
-
-        {/* Discover — horizontal 2-row scroll */}
-        <div className="mb-8">
-          <HorizontalTrackGrid
-            tracks={tracks}
-            loading={discoverLoading}
-            onTip={handleTip}
-            emptyMessage="Be the first to upload a witnessed creation."
-            likeMap={bulkLikes}
-          />
-        </div>
+        {/* ══════════════════════════════════════════════════════════════
+            §2 — DISCOVERY SHOWCASE (Steam-style rows)
+            New Arrivals · Trending · Featured Creators · Recently Witnessed
+        ══════════════════════════════════════════════════════════════ */}
+        <ConstellationReveal delay={60} dotCount={4} skipDots={false}>
+          <ShowcaseSection />
+        </ConstellationReveal>
 
         {/* ── Sacred Geometry Divider ── */}
-        <div className="sg-divider"><div className="sg-divider-pip" /></div>
+        <div className="sg-divider-wide px-6">
+          <div className="sg-divider-wide-center"><div className="sg-divider-wide-center-dot" /></div>
+        </div>
 
-        {/* ── Trending section ── */}
-        {trendingTracks.length > 0 && (
-          <>
-            <div className="gold-divider mb-6" />
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="museum-section-header">Trending Now</h2>
-              <span className="text-[10px] font-body uppercase tracking-widest" style={{ color: "#6B6555" }}>By plays + likes + recency</span>
-            </div>
-            <div className="mb-8">
-              <TrendingHorizontalGrid
-                tracks={trendingTracks}
-                onTip={handleTip}
-                likeMap={bulkLikes}
-              />
-            </div>
-          </>
+        {/* ══════════════════════════════════════════════════════════════
+            §3 — WHAT IS LIVING NEXUS (compact, secondary, not preachy)
+        ══════════════════════════════════════════════════════════════ */}
+        <ConstellationReveal delay={120} dotCount={3} skipDots>
+          <WIDExplainer />
+        </ConstellationReveal>
+
+        {/* ── Contributors Strip ── */}
+        <ContributorsStrip />
+
+        {/* Tip modal */}
+        {tipTarget !== null && (
+          <TipModal track={tipTrack} onClose={() => { setTipTarget(null); setTipRect(null); }} originRect={tipRect} />
         )}
+      </div>
+    </>
+  );
+}
 
-        {/* ── Medium Sections ── */}
-        <div className="gold-divider mb-6" />
-        <div className="space-y-8 mb-8">
-          <WorkCarousel type="audio" title="Witnessed Music" limit={12} viewAllHref="/explore?medium=audio" />
-          <WorkCarousel type="lyrics" title="Witnessed Lyrics" limit={12} viewAllHref="/explore?medium=lyrics" />
-          <WorkCarousel type="manuscript" title="Witnessed Manuscripts" limit={12} viewAllHref="/explore?medium=manuscript" onOpenReader={setReaderSong} />
-          <WorkCarousel type="comic" title="Witnessed Comics" limit={12} viewAllHref="/explore?medium=comic" onOpenReader={setReaderSong} />
+/* ─── WID Explainer — compact, secondary, not preachy ──────────────────────── */
+function WIDExplainer() {
+  const { data: countData } = trpc.songs.getWitnessedCount.useQuery(undefined, {
+    staleTime: 120_000,
+    refetchOnWindowFocus: false,
+  });
+  const total = countData?.count ?? 0;
+
+  return (
+    <section
+      className="px-4 md:px-8 py-12"
+      style={{ borderTop: "1px solid rgba(196,154,40,0.08)" }}
+    >
+      <div className="max-w-4xl mx-auto">
+        {/* Section label */}
+        <div className="flex items-center gap-3 mb-8">
+          <div className="gold-divider flex-1" />
+          <span className="text-[9px] font-heading tracking-[0.22em] uppercase flex-shrink-0" style={{ color: "rgba(196,154,40,0.45)" }}>
+            What is Living Nexus
+          </span>
+          <div className="gold-divider flex-1" />
         </div>
 
-        {/* ── Prompt Studio: Workflow Attribution ── */}
-        <div className="gold-divider mb-8" />
-        <div
-          className="mb-10 rounded-2xl p-6 relative overflow-hidden"
-          style={{
-            background: "linear-gradient(135deg, rgba(14,12,28,0.97) 0%, rgba(20,16,42,0.99) 100%)",
-            border: "1px solid rgba(245,196,81,0.18)",
-            boxShadow: "0 0 40px rgba(245,196,81,0.05), inset 0 1px 0 rgba(245,196,81,0.08)",
-          }}
-        >
-          <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 55% 60% at 8% 50%, rgba(124,58,237,0.08) 0%, transparent 70%)" }} />
-          <div className="relative flex flex-col sm:flex-row gap-5 items-start">
-            <Link href="/creator/780095">
-              <img
-                src="https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/avatars/780095-1774641904221.jpg"
-                alt="MoshAIMusic"
-                className="w-14 h-14 rounded-full flex-shrink-0 object-cover cursor-pointer hover:brightness-110 transition-all"
-                style={{ border: "2px solid rgba(245,196,81,0.4)", boxShadow: "0 0 20px rgba(245,196,81,0.15)" }}
-              />
-            </Link>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-2 flex-wrap">
-                <p className="text-xs font-mono tracking-widest uppercase" style={{ color: "rgba(245,196,81,0.55)" }}>Prompt Studio &mdash; workflow architecture</p>
-              </div>
-              <div className="flex items-center gap-2 mb-3 flex-wrap">
-                <Link href="/creator/780095">
-                  <span className="text-sm font-bold tracking-wide cursor-pointer hover:brightness-110 transition-all" style={{ fontFamily: "'Cinzel', serif", color: "#F5C451" }}>MoshAIMusic</span>
-                </Link>
-                <span className="text-[9px] px-2 py-0.5 rounded-full font-mono tracking-widest" style={{ background: "rgba(245,196,81,0.1)", color: "rgba(245,196,81,0.65)", border: "1px solid rgba(245,196,81,0.2)" }}>WORKFLOW ARCHITECT</span>
-              </div>
-              <p className="text-sm leading-relaxed mb-3" style={{ color: "rgba(229,231,235,0.82)" }}>The lyric sheet &rarr; instrumentation cue &rarr; timing map pipeline that powers this generator was conceived from Brandon&rsquo;s description of his own creative process.</p>
-              <div className="flex items-center gap-1.5 mt-3">
-                <Shield className="w-3 h-3" style={{ color: "rgba(245,196,81,0.45)" }} />
-                <span className="text-[10px] font-mono" style={{ color: "rgba(245,196,81,0.45)" }}>Workflow attribution recorded on Living Nexus</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* ── Prompt Studio CTA ── */}
-        <div className="gold-divider mb-8" />
-        <div
-          className="mb-10 rounded-2xl p-6 relative overflow-hidden"
-          style={{
-            background: "linear-gradient(135deg, rgba(124,58,237,0.12) 0%, rgba(14,12,28,0.97) 60%, rgba(20,16,42,0.99) 100%)",
-            border: "1px solid rgba(124,58,237,0.25)",
-            boxShadow: "0 0 40px rgba(124,58,237,0.06), inset 0 1px 0 rgba(124,58,237,0.1)",
-          }}
-        >
-          <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 40% 70% at 95% 50%, rgba(245,196,81,0.05) 0%, transparent 70%)" }} />
-          <div className="relative flex flex-col sm:flex-row gap-6 items-start sm:items-center">
-            <div className="w-14 h-14 rounded-2xl flex-shrink-0 flex items-center justify-center" style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.4), rgba(245,196,81,0.2))", border: "1px solid rgba(124,58,237,0.4)" }}>
-              <Sparkles className="w-7 h-7" style={{ color: "#A78BFA" }} />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-[10px] font-mono tracking-widest uppercase mb-1" style={{ color: "rgba(167,139,250,0.6)" }}>Creator Tool</p>
-              <h3 className="font-heading text-[18px] font-bold text-white mb-1">Prompt Studio</h3>
-              <p className="text-sm leading-relaxed" style={{ color: "rgba(229,231,235,0.75)" }}>Turn your lyrics into a production-ready music prompt. The generator builds a lyric sheet &rarr; instrumentation cue &rarr; timing map pipeline — then pre-fills your registration form so you can witness the work immediately.</p>
-            </div>
-            <Link href={(user as any)?.id ? `/creator/${(user as any).id}?openPromptStudio=1` : getLoginUrl()}>
-              <button
-                className="flex-shrink-0 flex items-center gap-2 px-5 py-3 rounded-xl font-heading font-bold text-[13px] tracking-wide transition-all active:scale-95 hover:brightness-110"
-                style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.5), rgba(167,139,250,0.3))", border: "1px solid rgba(124,58,237,0.5)", color: "#E9D5FF", boxShadow: "0 0 20px rgba(124,58,237,0.2)" }}
+        {/* 3-column explainer */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+          {([
+            {
+              icon: <Fingerprint className="w-5 h-5" style={{ color: "#C49A28" }} />,
+              title: "Witness ID",
+              body: "Every registered work receives a cryptographic timestamp — a permanent, tamper-evident record of origin issued the moment you upload.",
+            },
+            {
+              icon: <ShieldCheck className="w-5 h-5" style={{ color: "#C49A28" }} />,
+              title: "Creator Owned",
+              body: "Your work stays yours. Living Nexus records provenance without claiming rights. The registry is a witness, not a gatekeeper.",
+            },
+            {
+              icon: <Compass className="w-5 h-5" style={{ color: "#C49A28" }} />,
+              title: "Open Discovery",
+              body: "Browse music, lyrics, manuscripts, and comics from independent creators. Every play is a direct acknowledgment of the work.",
+            },
+          ] as const).map(({ icon, title, body }) => (
+            <div key={title} className="flex flex-col gap-3">
+              <div
+                className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                style={{ background: "rgba(196,154,40,0.06)", border: "1px solid rgba(196,154,40,0.16)" }}
               >
-                <Sparkles size={14} />
-                Open Prompt Studio
-              </button>
-            </Link>
-          </div>
-          <p className="text-[10px] font-mono mt-4" style={{ color: "rgba(167,139,250,0.4)" }}>Prompt Studio is available on any creator profile page. Visit your profile or any creator&rsquo;s page to access it.</p>
-        </div>
-
-      </div>
-
-      {/* ══════════════════════════════════════════════════════════════
-          §7 — SUBTLE DOCTRINE SECTION (lower prominence)
-          Elegant WID explanation — not the loudest thing on the page
-      ══════════════════════════════════════════════════════════════ */}
-      <section className="px-6 py-10">
-        <div
-          className="rounded-2xl p-6 relative overflow-hidden"
-          style={{
-            background: "linear-gradient(135deg, rgba(12,10,20,0.98) 0%, rgba(0,0,0,1) 100%)",
-            border: "1px solid rgba(196,154,40,0.14)",
-          }}
-        >
-          {/* Ambient glow */}
-          <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 60% 40% at 50% 0%, rgba(196,154,40,0.04) 0%, transparent 70%)" }} />
-          {/* Section label */}
-          <div className="flex items-center gap-2.5 mb-5 relative">
-            <ShieldCheck className="w-4 h-4 flex-shrink-0" style={{ color: "#C49A28" }} />
-            <span className="font-heading text-[10px] tracking-[0.22em] uppercase" style={{ color: "#8B6914" }}>The Witness ID</span>
-          </div>
-          {/* Core statement */}
-          <blockquote
-            className="font-body text-[15px] leading-relaxed mb-5 pl-4 relative"
-            style={{ color: "#E8DFC8", borderLeft: "2px solid rgba(196,154,40,0.35)" }}
-          >
-            A Witness ID is a cryptographic timestamp that proves you created this work, at this moment, with this content — supporting, but not replacing, official copyright registration.
-          </blockquote>
-          {/* Three-column breakdown */}
-          <div className="museum-grid mb-5 relative">
-            {([
-              { icon: "✓", color: "#4ade80", bg: "rgba(74,222,128,0.06)", border: "rgba(74,222,128,0.18)", title: "What a WID Proves", points: ["You created this work", "The exact timestamp of creation", "The content has not been altered since registration", "Your AI disclosure intent at time of upload"] },
-              { icon: "◎", color: "#F5C451", bg: "rgba(245,196,81,0.06)", border: "rgba(245,196,81,0.18)", title: "What a WID Supports", points: ["Copyright registration applications", "Dispute resolution and prior art claims", "Licensing negotiations and provenance audits", "AI training consent documentation"] },
-              { icon: "✗", color: "rgba(255,255,255,0.35)", bg: "rgba(255,255,255,0.03)", border: "rgba(255,255,255,0.08)", title: "What a WID Does Not Replace", points: ["Official copyright registration (U.S. Copyright Office)", "Trademark or patent filings", "Legal representation or counsel", "Enforcement action against infringement"] },
-            ] as const).map(({ icon, color, bg, border, title, points }) => (
-              <div key={title} className="rounded-xl p-4" style={{ background: bg, border: `1px solid ${border}` }}>
-                <div className="flex items-center gap-2 mb-2.5">
-                  <span className="font-mono text-[15px]" style={{ color }}>{icon}</span>
-                  <h4 className="font-heading font-bold text-[11px] tracking-wide" style={{ color: "rgba(255,255,255,0.9)" }}>{title}</h4>
-                </div>
-                <ul className="space-y-1">
-                  {points.map(p => (
-                    <li key={p} className="flex items-start gap-1.5 text-[11px] font-body leading-snug" style={{ color: "rgba(229,231,235,0.7)" }}>
-                      <span className="mt-0.5 flex-shrink-0" style={{ color }}>·</span>
-                      {p}
-                    </li>
-                  ))}
-                </ul>
+                {icon}
               </div>
-            ))}
-          </div>
-          {/* WID counter inline */}
-          <WIDTrustLayer />
-          {/* Disclaimer */}
-          <p className="text-[11px] font-body leading-relaxed relative mt-4" style={{ color: "#6B6555" }}>
-            Living Nexus is operated by BDDT Publishing, a DBA of Command Domains LLC. Witness IDs are cryptographic provenance records issued by this platform and do not constitute legal copyright registration. For official copyright protection, visit{" "}
-            <a href="https://www.copyright.gov/registration/" target="_blank" rel="noopener noreferrer" className="underline hover:text-[#C49A28] transition-colors" style={{ color: "#C49A28" }}>copyright.gov/registration</a>.
-          </p>
-        </div>
-      </section>
-
-      {/* ══════════════════════════════════════════════════════════════
-          §8 — FOUNDER'S ERA BLOCK (lower prominence)
-      ══════════════════════════════════════════════════════════════ */}
-      <div className="px-6 py-5 overflow-hidden">
-        <div
-          className="rounded-2xl p-5 relative overflow-hidden"
-          style={{
-            background: "linear-gradient(135deg, #1C1A14 0%, #000000 100%)",
-            border: "1px solid rgba(196,154,40,0.18)",
-          }}
-        >
-          <div className="absolute top-0 right-0 w-48 h-48 rounded-full opacity-5"
-            style={{ background: "radial-gradient(circle, rgba(196,154,40,0.4) 0%, transparent 70%)", transform: "translate(30%, -30%)" }} />
-
-          <div className="relative z-10">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-6 h-6 rounded-lg flex items-center justify-center"
-                style={{ background: "rgba(196,154,40,0.08)", border: "1px solid rgba(196,154,40,0.22)" }}>
-                <Star size={12} style={{ color: "#C49A28" }} />
-              </div>
-              <span className="text-[10px] font-heading tracking-[0.2em] uppercase" style={{ color: "#8B6914" }}>
-                Founder's Era
-              </span>
+              <h3 className="font-heading text-[13px] tracking-wide" style={{ color: "#E8DFC8" }}>
+                {title}
+              </h3>
+              <p className="font-body text-[12px] leading-relaxed" style={{ color: "#7A7060" }}>
+                {body}
+              </p>
             </div>
-
-            <h2 className="font-display text-[18px] leading-tight mb-3" style={{ color: "#E8DFC8" }}>
-              The First Witnesses
-            </h2>
-
-              <p className="text-[13px] font-body leading-relaxed mb-4" style={{ color: "#A09880" }}>
-                Founder's Era creators are the architects of this platform's provenance foundation —
-                establishing the first anchors of a cryptographically-verified creative record that cannot
-                be altered, disputed, or erased.
-              </p>
-
-              <p className="text-[13px] font-body leading-relaxed mb-4" style={{ color: "#A09880" }}>
-                In an era where automated systems train on uncredited work and platforms routinely strip creator
-                metadata, a Founder's Era WID is a timestamped declaration of origin. It says:{" "}
-                <em style={{ color: "#C49A28" }}>
-                  "I was here. This is mine. The record proves it."
-                </em>
-              </p>
-
-              <div className="museum-grid mt-2">
-                {([
-                  {
-                    Icon: ShieldCheck,
-                    title: "Immutable Proof",
-                    desc: "Your WID is written to a permanent ledger. No platform, no algorithm, no third party can overwrite it.",
-                  },
-                  {
-                    Icon: Lock,
-                    title: "Ownership on Record",
-                    desc: "Founding creators receive the earliest registry timestamps — the strongest possible claim to authorship.",
-                  },
-                  {
-                    Icon: Star,
-                    title: "Founding Status",
-                    desc: "Founder's Era creators are permanently distinguished in the registry as the builders of this platform's provenance foundation.",
-                  },
-                ] as const).map(p => (
-                  <div
-                    key={p.title}
-                    className="rounded-xl p-3"
-                    style={{
-                      background: "rgba(17,16,9,0.7)",
-                      border: "1px solid rgba(196,154,40,0.12)",
-                    }}
-                  >
-                    <div className="flex items-center gap-1.5 mb-1.5" style={{ color: "#C49A28" }}>
-                      <p.Icon size={14} />
-                      <span className="text-[11px] font-heading tracking-wide">{p.title}</span>
-                    </div>
-                    <p className="text-[11px] font-body leading-relaxed" style={{ color: "#6B6555" }}>
-                      {p.desc}
-                    </p>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-5 flex flex-wrap gap-2">
-                <Link href={isAuthenticated ? "/upload" : getLoginUrl("/upload")}>
-                  <button
-                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-heading font-bold text-[12px] tracking-wide transition-all active:scale-95 hover:brightness-110"
-                    style={{
-                      background: "rgba(196,154,40,0.08)",
-                      border: "1px solid rgba(196,154,40,0.28)",
-                      color: "#C49A28",
-                    }}
-                  >
-                    <Upload size={13} />
-                    Claim Your Founder's Era WID
-                  </button>
-                </Link>
-                <Link href="/founders">
-                  <button
-                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-heading font-bold text-[12px] tracking-wide transition-all active:scale-95 hover:brightness-110"
-                    style={{
-                      background: "rgba(17,16,9,0.7)",
-                      border: "1px solid rgba(196,154,40,0.12)",
-                      color: "#6B6555",
-                    }}
-                  >
-                    <Users size={13} />
-                    View Founding Creators
-                  </button>
-                </Link>
-                <Link href="/founder-era">
-                  <button
-                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-heading font-bold text-[12px] tracking-wide transition-all active:scale-95 hover:brightness-110"
-                    style={{
-                      background: "rgba(17,16,9,0.7)",
-                      border: "1px solid rgba(196,154,40,0.16)",
-                      color: "rgba(196,154,40,0.70)",
-                    }}
-                  >
-                    <Heart size={13} />
-                    Support the Era
-                  </button>
-                </Link>
-              </div>
-          </div>
+          ))}
         </div>
-      </div>
 
-
-
-      {/* ══════════════════════════════════════════════════════════════
-          §9 — WHY WORK WITH US + FINAL CTA
-      ══════════════════════════════════════════════════════════════ */}
-      <div className="px-6 pb-2">
-        <div className="gold-divider mb-8" />
-        <div className="mb-12">
-          <div className="text-center mb-8">
-            <p className="text-[10px] font-mono tracking-widest uppercase mb-2" style={{ color: "rgba(245,196,81,0.55)" }}>The Registry Difference</p>
-            <h2 className="font-heading text-[24px] sm:text-[28px] font-bold text-white mb-3">Why Work With Living Nexus?</h2>
-            <p className="text-sm max-w-xl mx-auto" style={{ color: "rgba(229,231,235,0.65)" }}>
-              Every platform stores your music. Only Living Nexus witnesses it — issuing a cryptographic timestamp that functions as a deed of creative origin.
-            </p>
+        {/* Compact counter + CTA row */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-6" style={{ borderTop: "1px solid rgba(196,154,40,0.08)" }}>
+          <div className="flex items-center gap-3">
+            <Shield className="w-4 h-4 flex-shrink-0" style={{ color: "rgba(196,154,40,0.50)" }} />
+            <span className="font-body text-[12px]" style={{ color: "#5A5040" }}>
+              {total > 0 ? (
+                <><span className="font-heading text-[14px]" style={{ color: "#C49A28" }}>{total.toLocaleString()}</span> works witnessed and counting</>
+              ) : (
+                "Works witnessed and counting"
+              )}
+            </span>
           </div>
-          <div className="overflow-x-auto rounded-2xl" style={{ border: "1px solid rgba(245,196,81,0.12)" }}>
-            <table className="w-full text-sm">
-              <thead>
-                <tr style={{ background: "rgba(14,12,28,0.98)", borderBottom: "1px solid rgba(245,196,81,0.15)" }}>
-                  <th className="text-left px-5 py-4 font-mono text-[11px] tracking-widest uppercase" style={{ color: "rgba(255,255,255,0.4)", minWidth: 180 }}>Feature</th>
-                  <th className="px-5 py-4 font-mono text-[11px] tracking-widest uppercase text-center" style={{ color: "rgba(255,255,255,0.35)" }}>Spotify / Apple</th>
-                  <th className="px-5 py-4 font-mono text-[11px] tracking-widest uppercase text-center" style={{ color: "rgba(255,255,255,0.35)" }}>SoundCloud / Bandcamp</th>
-                  <th className="px-5 py-4 font-mono text-[11px] tracking-widest uppercase text-center" style={{ color: "#F5C451", background: "rgba(245,196,81,0.06)" }}>Living Nexus</th>
-                </tr>
-              </thead>
-              <tbody>
-                {([
-                  ["Cryptographic WID provenance", "✗", "✗", "✓"],
-                  ["Creator owns the timestamp", "✗", "Partial", "✓"],
-                  ["Multi-medium registry (music, lyrics, manuscript, comic)", "✗", "✗", "✓"],
-                  ["Prompt Studio (lyric → production prompt)", "✗", "✗", "✓"],
-                  ["Direct tipping / creator commerce", "✗", "Partial", "✓"],
-                  ["OG-optimized share pipeline (Discord / X)", "✓", "Partial", "✓"],
-                  ["Platform takes revenue cut", "Yes (30%+)", "Yes (15%+)", "10% tip fee only"],
-                  ["Independent creator focus", "✗", "✓", "✓"],
-                ] as [string, string, string, string][]).map(([feature, col1, col2, col3], i) => (
-                  <tr key={feature} style={{ background: i % 2 === 0 ? "rgba(14,12,28,0.92)" : "rgba(20,16,42,0.85)", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
-                    <td className="px-5 py-3.5 font-body" style={{ color: "rgba(229,231,235,0.82)" }}>{feature}</td>
-                    <td className="px-5 py-3.5 text-center font-mono text-[13px]" style={{ color: col1 === "✓" ? "#4ade80" : col1 === "✗" ? "rgba(255,255,255,0.25)" : "rgba(245,196,81,0.7)" }}>{col1}</td>
-                    <td className="px-5 py-3.5 text-center font-mono text-[13px]" style={{ color: col2 === "✓" ? "#4ade80" : col2 === "✗" ? "rgba(255,255,255,0.25)" : "rgba(245,196,81,0.7)" }}>{col2}</td>
-                    <td className="px-5 py-3.5 text-center font-mono text-[13px]" style={{ color: col3 === "✓" ? "#4ade80" : col3 === "✗" ? "rgba(255,255,255,0.25)" : "rgba(245,196,81,0.7)", background: "rgba(245,196,81,0.04)" }}>{col3}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <div className="museum-grid mt-6">
-            {[
-              { icon: Fingerprint, color: "#F5C451", bg: "rgba(245,196,81,0.08)", border: "rgba(245,196,81,0.2)", title: "Your Work, Witnessed", body: "Every registration receives a Witness ID — a cryptographic timestamp that proves you created it first. Not a certificate. A deed." },
-              { icon: ShieldCheck, color: "#4ade80", bg: "rgba(74,222,128,0.06)", border: "rgba(74,222,128,0.18)", title: "Creator-First Commerce", body: "Direct tipping and Living Archive subscriptions. The platform takes 10% on tips only. Everything else is yours." },
-              { icon: Sparkles, color: "#A78BFA", bg: "rgba(167,139,250,0.06)", border: "rgba(167,139,250,0.18)", title: "Creator Tools That Serve You", body: "Prompt Studio turns your lyrics into a production-ready music prompt. The WID goes on the output — you stay the origin." },
-            ].map(({ icon: Icon, color, bg, border, title, body }) => (
-              <div key={title} className="rounded-xl p-5" style={{ background: bg, border: `1px solid ${border}` }}>
-                <Icon className="w-6 h-6 mb-3" style={{ color }} />
-                <h4 className="font-heading font-bold text-white text-[14px] mb-2">{title}</h4>
-                <p className="text-[13px] leading-relaxed" style={{ color: "rgba(229,231,235,0.7)" }}>{body}</p>
-              </div>
-            ))}
-          </div>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center mt-8">
-            <Link href="/upload">
-              <button className="flex items-center gap-2 px-6 py-3 rounded-xl font-heading font-bold text-[13px] tracking-wide transition-all active:scale-95 hover:brightness-110" style={{ background: "linear-gradient(135deg, #F5C451, #C49A28)", color: "#0a0812", boxShadow: "0 0 24px rgba(245,196,81,0.25)" }}>
-                <Upload size={14} />
-                Share Your Work
+          <div className="flex items-center gap-3">
+            <Link href="/verify">
+              <button
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-heading tracking-wide transition-all hover:brightness-110"
+                style={{ background: "rgba(196,154,40,0.06)", border: "1px solid rgba(196,154,40,0.18)", color: "#C49A28" }}
+              >
+                <Fingerprint className="w-3 h-3" />
+                Verify a WID
               </button>
             </Link>
             <Link href="/explore">
-              <button className="flex items-center gap-2 px-6 py-3 rounded-xl font-heading font-bold text-[13px] tracking-wide transition-all active:scale-95 hover:brightness-110" style={{ background: "rgba(14,12,28,0.8)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(229,231,235,0.8)" }}>
-                <Compass size={14} />
+              <button
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-heading tracking-wide transition-all hover:brightness-110"
+                style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(200,190,170,0.60)" }}
+              >
+                <Compass className="w-3 h-3" />
                 Explore Works
               </button>
             </Link>
           </div>
         </div>
+
+        {/* Disclaimer — minimal */}
+        <p className="text-[10px] font-body leading-relaxed mt-6" style={{ color: "#3A3428" }}>
+          Living Nexus is operated by BDDT Publishing, a DBA of Command Domains LLC. Witness IDs are cryptographic provenance records and do not constitute legal copyright registration.{" "}
+          <a href="https://www.copyright.gov/registration/" target="_blank" rel="noopener noreferrer" className="underline transition-colors" style={{ color: "rgba(196,154,40,0.35)" }}>
+            copyright.gov/registration
+          </a>
+        </p>
       </div>
-
-      {/* ── Sacred Geometry Divider ── */}
-      <div className="sg-divider-wide px-6">
-        <div className="sg-divider-wide-center"><div className="sg-divider-wide-center-dot" /></div>
-      </div>
-
-      {/* ── Contributors Strip ──────────────────────────────────────────── */}
-      {/* ── Distribution Teaser ── */}
-      <section className="px-4 md:px-8 py-12 md:py-16">
-        <div className="max-w-4xl mx-auto rounded-2xl p-8 md:p-10 text-center" style={{
-          background: "rgba(20,14,30,0.5)",
-          border: "1px solid rgba(196,154,40,0.10)",
-        }}>
-          <span className="font-heading text-[10px] tracking-[0.25em] uppercase" style={{ color: "#8B6914" }}>
-            We Are Distributing
-          </span>
-          <h2 className="font-display text-lg md:text-xl mt-3 mb-3" style={{ color: "#E8DFC8" }}>
-            Beyond the Cloud — Into Physical Reality.
-          </h2>
-          <p className="font-body text-[13px] leading-relaxed max-w-xl mx-auto mb-6" style={{ color: "#A09880" }}>
-            USB archives. CDs. Vinyl. Books. Comics. The sovereign distribution pipeline is being built for Living Nexus creators.
-          </p>
-          <Link href="/distribute">
-            <button
-              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg font-heading font-bold text-[11px] tracking-wider uppercase transition-all hover:brightness-110"
-              style={{ background: "rgba(196,154,40,0.15)", border: "1px solid rgba(196,154,40,0.3)", color: "#C49A28" }}
-            >
-              <Send size={13} />
-              Explore Distribution
-            </button>
-          </Link>
-        </div>
-      </section>
-
-      <ContributorsStrip />
-
-      {/* Tip modal */}
-      {tipTarget !== null && (
-        <TipModal track={tipTrack} onClose={() => { setTipTarget(null); setTipRect(null); }} originRect={tipRect} />
-      )}
-
-      {/* Inline Comic/Manuscript Reader — launched from carousel cards */}
-      {readerSong && (() => {
-        let pages: { imageUrl: string; caption?: string; pageNumber: number }[] = [];
-        try {
-          const raw = readerSong.pagesJson;
-          if (raw) pages = typeof raw === "string" ? JSON.parse(raw) : raw;
-        } catch { /* ignore */ }
-        return (
-          <div className="fixed inset-0 z-[9999]">
-            <CinematicComicReader
-              pages={pages}
-              title={readerSong.title}
-              onClose={() => setReaderSong(null)}
-            />
-          </div>
-        );
-      })()}
-    </div>
-    </>
+    </section>
   );
 }
 

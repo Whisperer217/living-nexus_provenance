@@ -213,7 +213,9 @@ export function StoreTrackCard({ song, size = "md", allSongs, songIndex, isNew }
   const isActive = currentTrack?.id === String(song.id);
   const [menuPos, setMenuPos] = useState<{ x: number; y: number } | null>(null);
 
-  const cardWidth = size === "sm" ? "w-52" : size === "lg" ? "w-72" : "w-60";
+  // Mobile-first sizing: cards are wider on small screens for comfortable touch targets.
+  // sm: 180px mobile / 208px desktop | md: 200px mobile / 240px desktop | lg: 240px mobile / 288px desktop
+  const cardWidth = size === "sm" ? "w-[180px] sm:w-52" : size === "lg" ? "w-[240px] sm:w-72" : "w-[200px] sm:w-60";
   const testimony = getTestimony(song);
   const { plays, funding, tips } = formatResonance(song);
   const hasAudio = !!song.fileUrl;
@@ -239,7 +241,7 @@ export function StoreTrackCard({ song, size = "md", allSongs, songIndex, isNew }
     <>
       <Link href={`/song/${song.id}`}>
         <div
-          className={`relative ${cardWidth} flex-shrink-0 rounded-2xl overflow-hidden cursor-pointer group`}
+          className={`relative ${cardWidth} flex-shrink-0 rounded-2xl overflow-hidden cursor-pointer group snap-start`}
           style={{
             minHeight: "240px",
             transition: "transform 0.3s ease, box-shadow 0.3s ease",
@@ -337,21 +339,34 @@ export function StoreTrackCard({ song, size = "md", allSongs, songIndex, isNew }
           )}
 
           {/* ── LAYERS 3 + 5 + 6: Bottom content stack ── */}
-          <div className="absolute inset-x-0 bottom-0 p-3 flex flex-col gap-1.5">
+          <div className="absolute inset-x-0 bottom-0 p-3 flex flex-col gap-1">
 
-            {/* LAYER 3: Testimony — 2-line max */}
+            {/* LAYER 3.5: Work title — creation first, dominant */}
+            <p
+              className="font-heading leading-tight line-clamp-2"
+              style={{
+                fontSize: "clamp(0.75rem, 2.5vw, 0.875rem)",
+                color: "rgba(245,242,235,0.97)",
+                letterSpacing: "0.03em",
+                textShadow: "0 1px 8px rgba(0,0,0,0.98), 0 2px 16px rgba(0,0,0,0.80)",
+              }}
+            >
+              {song.title}
+            </p>
+
+            {/* LAYER 3: Testimony — 1-line hint, desktop only */}
             {testimony && (
               <p
-                className="text-xs leading-snug line-clamp-2"
+                className="text-xs leading-snug line-clamp-1 hidden sm:block"
                 style={{
-                  color: "rgba(245,245,245,0.92)",
+                  color: "rgba(180,168,145,0.65)",
                   fontFamily: "'Georgia', 'Times New Roman', serif",
                   letterSpacing: "0.01em",
-                  lineHeight: "1.5",
+                  lineHeight: "1.4",
                   textShadow: "0 1px 6px rgba(0,0,0,0.95)",
                 }}
               >
-                &ldquo;{testimony}&rdquo;
+                {testimony}
               </p>
             )}
 
@@ -375,7 +390,7 @@ export function StoreTrackCard({ song, size = "md", allSongs, songIndex, isNew }
                 )}
                 <span
                   className="type-caption truncate"
-                  style={{ color: "rgba(200,169,106,0.85)", fontFamily: "'Cinzel', serif", letterSpacing: "0.02em" }}
+                  style={{ color: "rgba(160,140,100,0.60)", fontFamily: "'Cinzel', serif", letterSpacing: "0.02em", fontSize: "10px" }}
                 >
                   {song.artistHandle ? `@${song.artistHandle}` : (song.artistName || "Unknown")}
                 </span>

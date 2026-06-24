@@ -68,7 +68,7 @@ export function ShowcaseRow({ title, seeAllHref, children, className = "" }: Sho
               </Link>
             )}
           </div>
-          <div className="flex items-center gap-1">
+          <div className="hidden sm:flex items-center gap-1">
             <button
               onClick={() => scroll("left")}
               disabled={!canScrollLeft}
@@ -103,8 +103,8 @@ export function ShowcaseRow({ title, seeAllHref, children, className = "" }: Sho
         {/* Scrollable row */}
         <div
           ref={scrollRef}
-          className="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory"
-          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+          className="flex gap-3 overflow-x-auto pb-3 snap-x snap-mandatory"
+          style={{ scrollbarWidth: "none", msOverflowStyle: "none", scrollPaddingLeft: "1rem", paddingRight: "2rem" }}
         >
           {children}
         </div>

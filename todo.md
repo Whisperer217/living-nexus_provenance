@@ -5601,3 +5601,14 @@
 - [x] Updated useAuth.ts: calls markHadSession() when auth.me resolves with a real user
 - [x] Updated PlayerContext.tsx: added enabled: hadSession() guard to playback.getSettings query
 - [x] 309/309 tests passing, 0 TypeScript errors, clean production build
+
+## Phase N+2: Homepage Redesign — Creator-First Discovery Platform
+- [x] Rebuild HomePage with cinematic hero (live trending work, 61.8vh golden ratio)
+- [x] New Arrivals horizontal scroll row (StoreTrackCard md, real data from songs.newThisWeek)
+- [x] Trending This Week horizontal scroll row (real data from songs.trending)
+- [x] Featured Creators horizontal strip (real data from profile.featuredCreators)
+- [x] Compact "What is Living Nexus" WID explainer section (secondary, 3-column)
+- [x] Remove heavy/noisy sections: WID counter block, Cosmic Medium grid, Witnessed Voices, Genre filter grid, HorizontalTrackGrid 2-row, FeaturedProjectsCarousel, ObservatoryCanvas
+- [x] Work cards emphasize creation first (large art), creator name secondary
+- [x] Dark premium aesthetic, golden ratio spacing, mobile-first
+- [x] TypeScript: 0 errors | Vitest: 309/309 passing

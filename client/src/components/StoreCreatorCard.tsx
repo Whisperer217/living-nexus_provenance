@@ -37,7 +37,7 @@ export function StoreCreatorCard({ creator }: StoreCreatorCardProps) {
   return (
     <Link href={`/creator/${creator.id}`}>
       <div
-        className="relative flex-shrink-0 rounded-xl overflow-hidden cursor-pointer"
+        className="relative flex-shrink-0 rounded-xl overflow-hidden cursor-pointer snap-start"
         style={{
           width: "176px",
           background: "linear-gradient(160deg, #0e0c1c 0%, #13101e 100%)",

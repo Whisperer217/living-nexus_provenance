@@ -1063,13 +1063,7 @@ body.overlay-active-full:has([data-slot="dialog-content"]) {
     left: 0;
     right: 0;
     padding: var(--phi-4) var(--phi-3) var(--phi-4);
-    background: linear-gradient(
-      to top,
-      rgba(0,0,0,0.92) 0%,
-      rgba(0,0,0,0.65) 30%,
-      rgba(0,0,0,0.20) 62%,
-      transparent 100%
-    );
+    /* background handled by component-level scrims */
   }
   /* φ-proportioned section padding */
   .phi-section { padding-top: var(--phi-4); padding-bottom: var(--phi-4); }
