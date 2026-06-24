@@ -5633,3 +5633,12 @@
 - [x] Remove unused TrackCard + BookCard imports from HomePage
 - [x] Polish ShowcaseRow: section header typography, mobile snap scroll, hide arrows on mobile
 - [x] TypeScript: 0 errors | Vitest: 317/317 passing
+
+## Phase N+5: Sacred Vision — Homepage & Witness Card Elevation
+- [ ] Elevate StoreTrackCard: deeper scrim, luminous title, parchment creator whisper, gold WID seal with inner glow, play button with sacred pulse
+- [ ] Elevate ExploreCard to match StoreTrackCard exactly (same reliquary standard)
+- [ ] Rebuild CinematicHero as Living Witness hero: WID seal integrated, "Witness This Work" CTA, dominant title, whispered creator
+- [ ] ShowcaseRow: golden-ratio section spacing, subtle divider between sections, breathing room
+- [ ] Add subtle laminin/cross motif as section divider in index.css
+- [ ] Center-card elevation effect in ShowcaseRow (scale transform on focused card)
+- [ ] TypeScript: 0 errors | Vitest: all passing

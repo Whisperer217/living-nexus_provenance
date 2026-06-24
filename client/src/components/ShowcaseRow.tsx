@@ -41,10 +41,10 @@ export function ShowcaseRow({ title, seeAllHref, seeAllLabel = "See All", childr
   };
 
   return (
-    <ConstellationReveal className={`mb-12 overflow-hidden ${className}`} dotCount={5}>
+    <ConstellationReveal className={`mb-14 overflow-hidden ${className}`} dotCount={5}>
       <section>
         {/* ── Section header ── */}
-        <div className="flex items-center justify-between mb-5 px-1">
+        <div className="flex items-center justify-between mb-6 px-1">
           {/* Left: vertical gold accent + title */}
           <div className="flex items-center gap-3 min-w-0">
             <div
@@ -57,9 +57,10 @@ export function ShowcaseRow({ title, seeAllHref, seeAllLabel = "See All", childr
             <h2
               className="font-heading uppercase truncate"
               style={{
-                fontSize: "clamp(0.72rem, 1.8vw, 0.82rem)",
-                color: "rgba(220,208,180,0.88)",
-                letterSpacing: "0.16em",
+                fontSize: "clamp(0.76rem, 2vw, 0.88rem)",
+                color: "rgba(228,216,188,0.92)",
+                letterSpacing: "0.20em",
+                textShadow: "0 0 20px rgba(196,154,40,0.08)",
               }}
             >
               {title}
@@ -149,7 +150,7 @@ export function ShowcaseRow({ title, seeAllHref, seeAllLabel = "See All", childr
         {/* ── Scrollable row ── */}
         <div
           ref={scrollRef}
-          className="flex gap-3 overflow-x-auto pb-3 snap-x snap-mandatory"
+          className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory"
           style={{
             scrollbarWidth: "none",
             msOverflowStyle: "none",

@@ -245,10 +245,10 @@ export function StoreTrackCard({ song, size = "md", allSongs, songIndex, isNew }
                 ? "1px solid rgba(196,154,40,0.55)"
                 : "1px solid rgba(196,154,40,0.18)",
               boxShadow: isActive
-                ? "0 0 0 1px rgba(196,154,40,0.20), 0 8px 32px rgba(0,0,0,0.65), 0 0 28px rgba(196,154,40,0.12)"
+                ? "0 0 0 1px rgba(196,154,40,0.22), 0 8px 32px rgba(0,0,0,0.65), 0 0 28px rgba(196,154,40,0.14), inset 0 0 32px rgba(196,154,40,0.05)"
                 : hovered
-                  ? "0 12px 40px rgba(0,0,0,0.70), 0 0 0 1px rgba(196,154,40,0.22), 0 0 20px rgba(196,154,40,0.08)"
-                  : "0 4px 16px rgba(0,0,0,0.55)",
+                  ? "0 12px 48px rgba(0,0,0,0.75), 0 0 0 1px rgba(196,154,40,0.22), 0 0 24px rgba(196,154,40,0.10), inset 0 0 24px rgba(196,154,40,0.04)"
+                  : "0 4px 20px rgba(0,0,0,0.55)",
               transform: hovered ? "translateY(-4px) scale(1.015)" : "translateY(0) scale(1)",
               transition: "transform 0.28s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.28s ease, border-color 0.28s ease",
             }}
@@ -278,29 +278,34 @@ export function StoreTrackCard({ song, size = "md", allSongs, songIndex, isNew }
             <div
               className="absolute inset-0 pointer-events-none"
               style={{
-                background: "linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.60) 28%, rgba(0,0,0,0.20) 52%, transparent 72%)",
+                background: "linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.70) 25%, rgba(0,0,0,0.28) 50%, rgba(0,0,0,0.06) 68%, transparent 80%)",
               }}
             />
 
-            {/* ── LAYER 3: WID badge — top-right, elegant pill ── */}
+            {/* ── LAYER 3: WID seal — top-right, architectural badge ── */}
             {hasWid && (
-              <div
-                className="absolute top-2.5 right-2.5 z-20 flex items-center gap-1 px-2 py-0.5 rounded-full"
-                style={{
-                  background: "rgba(196,154,40,0.14)",
-                  border: "1px solid rgba(196,154,40,0.42)",
-                  backdropFilter: "blur(8px)",
-                  boxShadow: "0 0 6px rgba(196,154,40,0.10), inset 0 0 0 0.5px rgba(196,154,40,0.08)",
-                }}
+              <Link
+                href={`/verify/${song.wid || song.widShort}`}
+                onClick={(e: React.MouseEvent) => e.stopPropagation()}
               >
-                <Shield className="w-2.5 h-2.5" style={{ color: "#C49A28" }} />
-                <span
-                  className="font-heading text-[8px] tracking-[0.18em] uppercase"
-                  style={{ color: "#C9A84C" }}
+                <div
+                  className="absolute top-2.5 right-2.5 z-20 flex items-center gap-1 px-2 py-0.5 rounded-full"
+                  style={{
+                    background: "rgba(196,154,40,0.12)",
+                    border: "1px solid rgba(196,154,40,0.50)",
+                    backdropFilter: "blur(10px)",
+                    boxShadow: "0 0 8px rgba(196,154,40,0.14), 0 0 0 1px rgba(196,154,40,0.06), inset 0 1px 0 rgba(196,154,40,0.18)",
+                  }}
                 >
-                  WID
-                </span>
-              </div>
+                  <Shield className="w-2.5 h-2.5" style={{ color: "#D4A843" }} />
+                  <span
+                    className="font-heading text-[8px] tracking-[0.20em] uppercase"
+                    style={{ color: "#D4A843", textShadow: "0 0 8px rgba(196,154,40,0.40)" }}
+                  >
+                    WID
+                  </span>
+                </div>
+              </Link>
             )}
 
             {/* ── NEW badge — top-left, only when isNew=true ── */}
@@ -377,10 +382,10 @@ export function StoreTrackCard({ song, size = "md", allSongs, songIndex, isNew }
               <p
                 className="font-heading leading-tight line-clamp-2 mb-1"
                 style={{
-                  fontSize: size === "sm" ? "0.78rem" : "0.875rem",
-                  color: "rgba(245,242,235,0.97)",
-                  letterSpacing: "0.02em",
-                  textShadow: "0 1px 12px rgba(0,0,0,0.99), 0 2px 20px rgba(0,0,0,0.85)",
+                  fontSize: size === "sm" ? "0.80rem" : "0.90rem",
+                  color: "rgba(248,244,236,1)",
+                  letterSpacing: "0.025em",
+                  textShadow: "0 1px 8px rgba(0,0,0,1), 0 2px 24px rgba(0,0,0,0.90), 0 0 40px rgba(0,0,0,0.60)",
                 }}
               >
                 {song.title}

@@ -577,13 +577,20 @@ function CinematicHero({ isAuthenticated, getLoginUrl: getLogin }: { isAuthentic
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
-          background: "linear-gradient(to right, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.50) 38%, rgba(0,0,0,0.10) 65%, transparent 100%)",
+          background: "linear-gradient(to right, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.58) 38%, rgba(0,0,0,0.14) 65%, transparent 100%)",
         }}
       />
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
-          background: "linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.30) 30%, transparent 62%)",
+          background: "linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.40) 28%, transparent 58%)",
+        }}
+      />
+      {/* Subtle sacred geometry border frame */}
+      <div
+        className="absolute inset-0 pointer-events-none z-10"
+        style={{
+          boxShadow: "inset 0 0 0 1px rgba(196,154,40,0.08), inset 0 0 60px rgba(196,154,40,0.04)",
         }}
       />
 
@@ -621,10 +628,18 @@ function CinematicHero({ isAuthenticated, getLoginUrl: getLogin }: { isAuthentic
                 </span>
               )}
               {hero.witnessId && (
-                <div className="flex items-center gap-1">
-                  <Shield className="w-2.5 h-2.5" style={{ color: "rgba(196,154,40,0.65)" }} />
-                  <span className="text-[9px] font-heading tracking-[0.12em] uppercase" style={{ color: "rgba(196,154,40,0.55)" }}>
-                    Witnessed
+                <div
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-full"
+                  style={{
+                    background: "rgba(196,154,40,0.10)",
+                    border: "1px solid rgba(196,154,40,0.45)",
+                    backdropFilter: "blur(10px)",
+                    boxShadow: "0 0 10px rgba(196,154,40,0.16), inset 0 1px 0 rgba(196,154,40,0.20)",
+                  }}
+                >
+                  <Shield className="w-3 h-3" style={{ color: "#D4A843", filter: "drop-shadow(0 0 4px rgba(196,154,40,0.50))" }} />
+                  <span className="text-[9px] font-heading tracking-[0.18em] uppercase" style={{ color: "#D4A843", textShadow: "0 0 8px rgba(196,154,40,0.50)" }}>
+                    WID Witnessed
                   </span>
                 </div>
               )}
@@ -681,10 +696,15 @@ function CinematicHero({ isAuthenticated, getLoginUrl: getLogin }: { isAuthentic
               <Link href={`/song/${hero.id}`}>
                 <button
                   className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-heading font-bold text-[12px] tracking-wide transition-all active:scale-95 hover:brightness-110"
-                  style={{ background: "rgba(196,154,40,0.06)", border: "1px solid rgba(196,154,40,0.22)", color: "#C9C0A8" }}
+                  style={{
+                    background: "rgba(196,154,40,0.08)",
+                    border: "1px solid rgba(196,154,40,0.35)",
+                    color: "#D4A843",
+                    boxShadow: "0 0 12px rgba(196,154,40,0.10), inset 0 1px 0 rgba(196,154,40,0.15)",
+                  }}
                 >
-                  <Compass className="w-3.5 h-3.5" />
-                  View Work
+                  <Shield className="w-3.5 h-3.5" />
+                  Witness This Work
                 </button>
               </Link>
               <Link href={isAuthenticated ? "/upload" : getLogin("/upload")}>
