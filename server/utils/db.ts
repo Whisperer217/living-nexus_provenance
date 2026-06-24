@@ -976,7 +976,7 @@ export async function getRelatedSongs(songId: number, genre?: string | null, lim
 export async function getLikedSongs(userId: number) {
   const db = await getDb();
   if (!db) return [];
-  const { likes } = await import("../drizzle/schema");
+  const { likes } = await import("../../drizzle/schema");
   return db
     .select({
       song: songs,
@@ -999,7 +999,7 @@ export async function getLikedSongs(userId: number) {
 export async function toggleLike(userId: number, songId: number): Promise<{ liked: boolean }> {
   const db = await getDb();
   if (!db) throw new Error("Database unavailable");
-  const { likes } = await import("../drizzle/schema");
+  const { likes } = await import("../../drizzle/schema");
   const existing = await db
     .select({ id: likes.id })
     .from(likes)
@@ -1017,7 +1017,7 @@ export async function toggleLike(userId: number, songId: number): Promise<{ like
 export async function getLikeStatus(userId: number, songId: number): Promise<boolean> {
   const db = await getDb();
   if (!db) return false;
-  const { likes } = await import("../drizzle/schema");
+  const { likes } = await import("../../drizzle/schema");
   const result = await db
     .select({ id: likes.id })
     .from(likes)
@@ -1029,7 +1029,7 @@ export async function getLikeStatus(userId: number, songId: number): Promise<boo
 export async function getLikeCount(songId: number): Promise<number> {
   const db = await getDb();
   if (!db) return 0;
-  const { likes } = await import("../drizzle/schema");
+  const { likes } = await import("../../drizzle/schema");
   const result = await db
     .select({ count: sql<number>`count(*)` })
     .from(likes)
@@ -1048,7 +1048,7 @@ export async function getBulkLikeStatuses(
   if (songIds.length === 0) return {};
   const db = await getDb();
   if (!db) return {};
-  const { likes } = await import("../drizzle/schema");
+  const { likes } = await import("../../drizzle/schema");
 
   // One query for all counts
   const countRows = await db
@@ -1109,7 +1109,7 @@ export async function getRecentTips(limit = 20) {
 export async function getPlaylist(userId: number) {
   const db = await getDb();
   if (!db) return [];
-  const { playlistItems } = await import("../drizzle/schema");
+  const { playlistItems } = await import("../../drizzle/schema");
   return db
     .select({
       id: playlistItems.id,
@@ -1146,7 +1146,7 @@ export async function getPlaylist(userId: number) {
 export async function addToPlaylist(userId: number, songId: number): Promise<{ added: boolean }> {
   const db = await getDb();
   if (!db) throw new Error("Database unavailable");
-  const { playlistItems } = await import("../drizzle/schema");
+  const { playlistItems } = await import("../../drizzle/schema");
   // Idempotent: if already in playlist, return added: false
   const existing = await db
     .select({ id: playlistItems.id })
@@ -1167,14 +1167,14 @@ export async function addToPlaylist(userId: number, songId: number): Promise<{ a
 export async function removeFromPlaylist(userId: number, songId: number): Promise<void> {
   const db = await getDb();
   if (!db) throw new Error("Database unavailable");
-  const { playlistItems } = await import("../drizzle/schema");
+  const { playlistItems } = await import("../../drizzle/schema");
   await db.delete(playlistItems).where(and(eq(playlistItems.userId, userId), eq(playlistItems.songId, songId)));
 }
 
 export async function isInPlaylist(userId: number, songId: number): Promise<boolean> {
   const db = await getDb();
   if (!db) return false;
-  const { playlistItems } = await import("../drizzle/schema");
+  const { playlistItems } = await import("../../drizzle/schema");
   const result = await db
     .select({ id: playlistItems.id })
     .from(playlistItems)
@@ -1464,7 +1464,7 @@ export async function createFieldNote(data: {
 }) {
   const db = await getDb();
   if (!db) throw new Error("Database unavailable");
-  const { fieldNotes } = await import("../drizzle/schema");
+  const { fieldNotes } = await import("../../drizzle/schema");
   const [result] = await (db as any).insert(fieldNotes).values({
     ...data,
     createdAt: new Date(),
@@ -1476,7 +1476,7 @@ export async function createFieldNote(data: {
 export async function getFieldNotesByUser(userId: number) {
   const db = await getDb();
   if (!db) return [];
-  const { fieldNotes } = await import("../drizzle/schema");
+  const { fieldNotes } = await import("../../drizzle/schema");
   const { isNull } = await import("drizzle-orm");
   return (db as any)
     .select()
@@ -1488,7 +1488,7 @@ export async function getFieldNotesByUser(userId: number) {
 export async function getPublicFieldNotes(limit = 50) {
   const db = await getDb();
   if (!db) return [];
-  const { fieldNotes } = await import("../drizzle/schema");
+  const { fieldNotes } = await import("../../drizzle/schema");
   const { isNull } = await import("drizzle-orm");
   return (db as any)
     .select()
@@ -1508,7 +1508,7 @@ export async function updateFieldNote(id: number, userId: number, data: {
 }) {
   const db = await getDb();
   if (!db) throw new Error("Database unavailable");
-  const { fieldNotes } = await import("../drizzle/schema");
+  const { fieldNotes } = await import("../../drizzle/schema");
   await (db as any)
     .update(fieldNotes)
     .set({ ...data, updatedAt: new Date() })
@@ -1518,7 +1518,7 @@ export async function updateFieldNote(id: number, userId: number, data: {
 export async function deleteFieldNote(id: number, userId: number) {
   const db = await getDb();
   if (!db) throw new Error("Database unavailable");
-  const { fieldNotes } = await import("../drizzle/schema");
+  const { fieldNotes } = await import("../../drizzle/schema");
   await (db as any)
     .update(fieldNotes)
     .set({ deletedAt: new Date() })
@@ -1530,7 +1530,7 @@ export async function deleteFieldNote(id: number, userId: number) {
 export async function witnessCreator(witnesserId: number, witnessedId: number) {
   const db = await getDb();
   if (!db) throw new Error("Database unavailable");
-  const { witnesses } = await import("../drizzle/schema");
+  const { witnesses } = await import("../../drizzle/schema");
   try {
     await (db as any).insert(witnesses).values({ witnesserId, witnessedId });
   } catch (_e) { /* duplicate — already witnessing */ }
@@ -1539,7 +1539,7 @@ export async function witnessCreator(witnesserId: number, witnessedId: number) {
 export async function unwatchCreator(witnesserId: number, witnessedId: number) {
   const db = await getDb();
   if (!db) throw new Error("Database unavailable");
-  const { witnesses } = await import("../drizzle/schema");
+  const { witnesses } = await import("../../drizzle/schema");
   await (db as any)
     .delete(witnesses)
     .where(and(eq(witnesses.witnesserId, witnesserId), eq(witnesses.witnessedId, witnessedId)));
@@ -1548,7 +1548,7 @@ export async function unwatchCreator(witnesserId: number, witnessedId: number) {
 export async function isWitnessing(witnesserId: number, witnessedId: number): Promise<boolean> {
   const db = await getDb();
   if (!db) return false;
-  const { witnesses } = await import("../drizzle/schema");
+  const { witnesses } = await import("../../drizzle/schema");
   const rows = await (db as any)
     .select({ id: witnesses.id })
     .from(witnesses)
@@ -1560,7 +1560,7 @@ export async function isWitnessing(witnesserId: number, witnessedId: number): Pr
 export async function getWitnessCount(witnessedId: number): Promise<number> {
   const db = await getDb();
   if (!db) return 0;
-  const { witnesses } = await import("../drizzle/schema");
+  const { witnesses } = await import("../../drizzle/schema");
   const rows = await (db as any)
     .select({ id: witnesses.id })
     .from(witnesses)
@@ -1571,7 +1571,7 @@ export async function getWitnessCount(witnessedId: number): Promise<number> {
 export async function getWitnessedByCount(witnesserId: number): Promise<number> {
   const db = await getDb();
   if (!db) return 0;
-  const { witnesses } = await import("../drizzle/schema");
+  const { witnesses } = await import("../../drizzle/schema");
   const rows = await (db as any)
     .select({ id: witnesses.id })
     .from(witnesses)
@@ -1582,7 +1582,7 @@ export async function getWitnessedByCount(witnesserId: number): Promise<number> 
 export async function getWitnessNetwork(userId: number) {
   const db = await getDb();
   if (!db) return { witnessing: [], witnessedBy: [] };
-  const { witnesses } = await import("../drizzle/schema");
+  const { witnesses } = await import("../../drizzle/schema");
   const witnessing = await (db as any)
     .select({
       id: users.id,
@@ -1618,7 +1618,7 @@ export async function createReference(
 ) {
   const db = await getDb();
   if (!db) throw new Error("Database unavailable");
-  const { creativeReferences } = await import("../drizzle/schema");
+  const { creativeReferences } = await import("../../drizzle/schema");
   const [result] = await (db as any).insert(creativeReferences).values({
     fromUserId,
     toUserId: opts.toUserId ?? null,
@@ -1631,7 +1631,7 @@ export async function createReference(
 export async function getReferencesForSong(songId: number) {
   const db = await getDb();
   if (!db) return [];
-  const { creativeReferences } = await import("../drizzle/schema");
+  const { creativeReferences } = await import("../../drizzle/schema");
   return (db as any)
     .select({
       id: creativeReferences.id,
@@ -1653,7 +1653,7 @@ export async function getReferencesForSong(songId: number) {
 export async function getReferencesForUser(userId: number) {
   const db = await getDb();
   if (!db) return [];
-  const { creativeReferences } = await import("../drizzle/schema");
+  const { creativeReferences } = await import("../../drizzle/schema");
   return (db as any)
     .select({
       id: creativeReferences.id,
@@ -1681,7 +1681,7 @@ export async function createPlaylist(data: {
 }) {
   const db = await getDb();
   if (!db) return null;
-  const { playlists } = await import("../drizzle/schema");
+  const { playlists } = await import("../../drizzle/schema");
   const [result] = await (db as any).insert(playlists).values({
     ownerId: data.ownerId,
     name: data.name,
@@ -1695,7 +1695,7 @@ export async function createPlaylist(data: {
 export async function getPlaylistsByUser(userId: number) {
   const db = await getDb();
   if (!db) return [];
-  const { playlists, playlistCollaborators } = await import("../drizzle/schema");
+  const { playlists, playlistCollaborators } = await import("../../drizzle/schema");
   // Own playlists
   const owned = await (db as any)
     .select().from(playlists)
@@ -1717,7 +1717,7 @@ export async function getPlaylistsByUser(userId: number) {
 export async function getPlaylistById(playlistId: number) {
   const db = await getDb();
   if (!db) return null;
-  const { playlists } = await import("../drizzle/schema");
+  const { playlists } = await import("../../drizzle/schema");
   const rows = await (db as any).select().from(playlists).where(eq(playlists.id, playlistId)).limit(1);
   return rows[0] ?? null;
 }
@@ -1728,14 +1728,14 @@ export async function updatePlaylist(playlistId: number, data: {
 }) {
   const db = await getDb();
   if (!db) return;
-  const { playlists } = await import("../drizzle/schema");
+  const { playlists } = await import("../../drizzle/schema");
   await (db as any).update(playlists).set(data).where(eq(playlists.id, playlistId));
 }
 
 export async function deletePlaylist(playlistId: number) {
   const db = await getDb();
   if (!db) return;
-  const { playlists, playlistTracks, playlistCollaborators } = await import("../drizzle/schema");
+  const { playlists, playlistTracks, playlistCollaborators } = await import("../../drizzle/schema");
   await (db as any).delete(playlistTracks).where(eq(playlistTracks.playlistId, playlistId));
   await (db as any).delete(playlistCollaborators).where(eq(playlistCollaborators.playlistId, playlistId));
   await (db as any).delete(playlists).where(eq(playlists.id, playlistId));
@@ -1744,7 +1744,7 @@ export async function deletePlaylist(playlistId: number) {
 export async function getPlaylistTracks(playlistId: number) {
   const db = await getDb();
   if (!db) return [];
-  const { playlistTracks } = await import("../drizzle/schema");
+  const { playlistTracks } = await import("../../drizzle/schema");
   const rows = await (db as any)
     .select({
       id: playlistTracks.id,
@@ -1779,7 +1779,7 @@ export async function getPlaylistTracks(playlistId: number) {
 export async function addTrackToPlaylist(playlistId: number, songId: number, addedByUserId: number) {
   const db = await getDb();
   if (!db) return;
-  const { playlistTracks } = await import("../drizzle/schema");
+  const { playlistTracks } = await import("../../drizzle/schema");
   // Get next position
   const existing = await (db as any).select({ pos: playlistTracks.position })
     .from(playlistTracks).where(eq(playlistTracks.playlistId, playlistId))
@@ -1791,14 +1791,14 @@ export async function addTrackToPlaylist(playlistId: number, songId: number, add
 export async function removeTrackFromPlaylist(playlistTrackId: number) {
   const db = await getDb();
   if (!db) return;
-  const { playlistTracks } = await import("../drizzle/schema");
+  const { playlistTracks } = await import("../../drizzle/schema");
   await (db as any).delete(playlistTracks).where(eq(playlistTracks.id, playlistTrackId));
 }
 
 export async function getPlaylistCollaborators(playlistId: number) {
   const db = await getDb();
   if (!db) return [];
-  const { playlistCollaborators } = await import("../drizzle/schema");
+  const { playlistCollaborators } = await import("../../drizzle/schema");
   return (db as any)
     .select({
       id: playlistCollaborators.id,
@@ -1820,7 +1820,7 @@ export async function getPlaylistCollaborators(playlistId: number) {
 export async function inviteCollaborator(playlistId: number, userId: number, invitedByUserId: number) {
   const db = await getDb();
   if (!db) return;
-  const { playlistCollaborators } = await import("../drizzle/schema");
+  const { playlistCollaborators } = await import("../../drizzle/schema");
   // Check not already invited
   const existing = await (db as any).select().from(playlistCollaborators)
     .where(and(eq(playlistCollaborators.playlistId, playlistId), eq(playlistCollaborators.userId, userId))).limit(1);
@@ -1831,7 +1831,7 @@ export async function inviteCollaborator(playlistId: number, userId: number, inv
 export async function acceptPlaylistInvite(playlistId: number, userId: number) {
   const db = await getDb();
   if (!db) return;
-  const { playlistCollaborators } = await import("../drizzle/schema");
+  const { playlistCollaborators } = await import("../../drizzle/schema");
   await (db as any).update(playlistCollaborators)
     .set({ acceptedAt: new Date() })
     .where(and(eq(playlistCollaborators.playlistId, playlistId), eq(playlistCollaborators.userId, userId)));
@@ -1840,7 +1840,7 @@ export async function acceptPlaylistInvite(playlistId: number, userId: number) {
 export async function removeCollaborator(playlistId: number, userId: number) {
   const db = await getDb();
   if (!db) return;
-  const { playlistCollaborators } = await import("../drizzle/schema");
+  const { playlistCollaborators } = await import("../../drizzle/schema");
   await (db as any).delete(playlistCollaborators)
     .where(and(eq(playlistCollaborators.playlistId, playlistId), eq(playlistCollaborators.userId, userId)));
 }
@@ -1848,7 +1848,7 @@ export async function removeCollaborator(playlistId: number, userId: number) {
 export async function isPlaylistMember(playlistId: number, userId: number): Promise<boolean> {
   const db = await getDb();
   if (!db) return false;
-  const { playlists, playlistCollaborators } = await import("../drizzle/schema");
+  const { playlists, playlistCollaborators } = await import("../../drizzle/schema");
   const owned = await (db as any).select({ id: playlists.id }).from(playlists)
     .where(and(eq(playlists.id, playlistId), eq(playlists.ownerId, userId))).limit(1);
   if (owned.length > 0) return true;
@@ -1870,7 +1870,7 @@ export async function createNotification(data: {
 }) {
   const db = await getDb();
   if (!db) return;
-  const { notifications } = await import("../drizzle/schema");
+  const { notifications } = await import("../../drizzle/schema");
   await (db as any).insert(notifications).values({
     userId: data.userId,
     type: data.type as any,
@@ -1888,7 +1888,7 @@ export async function getNotifications(userId: number, limit = 50) {
   const db = await getDb();
   if (!db) return [];
   // Use Drizzle ORM now that the DB schema has been migrated to include all columns
-  const { notifications } = await import("../drizzle/schema");
+  const { notifications } = await import("../../drizzle/schema");
   const rows = await (db as any)
     .select()
     .from(notifications)
@@ -1907,7 +1907,7 @@ export async function getNotifications(userId: number, limit = 50) {
 export async function markNotificationRead(notificationId: number, userId: number) {
   const db = await getDb();
   if (!db) return;
-  const { notifications } = await import("../drizzle/schema");
+  const { notifications } = await import("../../drizzle/schema");
   await (db as any).update(notifications)
     .set({ isRead: true })
     .where(and(eq(notifications.id, notificationId), eq(notifications.userId, userId)));
@@ -1916,7 +1916,7 @@ export async function markNotificationRead(notificationId: number, userId: numbe
 export async function markAllNotificationsRead(userId: number) {
   const db = await getDb();
   if (!db) return;
-  const { notifications } = await import("../drizzle/schema");
+  const { notifications } = await import("../../drizzle/schema");
   await (db as any).update(notifications)
     .set({ isRead: true })
     .where(and(eq(notifications.userId, userId), eq(notifications.isRead, false)));
@@ -1925,7 +1925,7 @@ export async function markAllNotificationsRead(userId: number) {
 export async function archiveNotification(notificationId: number, userId: number) {
   const db = await getDb();
   if (!db) return;
-  const { notifications } = await import("../drizzle/schema");
+  const { notifications } = await import("../../drizzle/schema");
   await (db as any).update(notifications)
     .set({ archivedAt: new Date() })
     .where(and(eq(notifications.id, notificationId), eq(notifications.userId, userId)));
@@ -1934,7 +1934,7 @@ export async function archiveNotification(notificationId: number, userId: number
 export async function getUnreadNotificationCount(userId: number): Promise<number> {
   const db = await getDb();
   if (!db) return 0;
-  const { notifications } = await import("../drizzle/schema");
+  const { notifications } = await import("../../drizzle/schema");
   const rows = await (db as any)
     .select({ count: sql<number>`count(*)` })
     .from(notifications)
@@ -1949,7 +1949,7 @@ export async function getUnreadNotificationCount(userId: number): Promise<number
 export async function getNotificationById(notificationId: number, userId: number) {
   const db = await getDb();
   if (!db) return null;
-  const { notifications } = await import("../drizzle/schema");
+  const { notifications } = await import("../../drizzle/schema");
   const rows = await (db as any)
     .select().from(notifications)
     .where(and(eq(notifications.id, notificationId), eq(notifications.userId, userId)))
@@ -2497,7 +2497,7 @@ export async function getDashboardDeltas(creatorId: number): Promise<{
     db.select({ count: sql<number>`count(*)` }).from(events).where(buildCond("TIP")),
     db.select({ count: sql<number>`count(*)` }).from(events).where(buildCond("COMMENT")),
   ]);
-  const { witnesses } = await import("../drizzle/schema");
+  const { witnesses } = await import("../../drizzle/schema");
   const witnessConds: any[] = [eq(witnesses.witnessedId, creatorId)];
   if (lastVisit) witnessConds.push(gt2(witnesses.createdAt, lastVisit));
   const witnessRow = await db.select({ count: sql<number>`count(*)` })
@@ -2516,7 +2516,7 @@ export async function getDashboardDeltas(creatorId: number): Promise<{
 export async function getSongReactions(songId: number, userId?: number) {
   const db = await getDb();
   if (!db) return { counts: {} as Record<string, number>, mine: [] as string[] };
-  const { songReactions } = await import("../drizzle/schema");
+  const { songReactions } = await import("../../drizzle/schema");
 
   // All reactions for this song
   const rows = await db
@@ -2546,7 +2546,7 @@ export async function toggleSongReaction(
 ): Promise<"added" | "removed"> {
   const db = await getDb();
   if (!db) throw new Error("Database unavailable");
-  const { songReactions } = await import("../drizzle/schema");
+  const { songReactions } = await import("../../drizzle/schema");
 
   // Check if reaction already exists
   const existing = await db
@@ -2677,7 +2677,7 @@ export async function logAdminAction(data: {
   try {
     const db = await getDb();
     if (!db) return;
-    const { adminLogs } = await import("../drizzle/schema");
+    const { adminLogs } = await import("../../drizzle/schema");
     await db.insert(adminLogs).values({
       adminId: data.adminId,
       adminName: data.adminName ?? null,
@@ -2695,7 +2695,7 @@ export async function logAdminAction(data: {
 export async function getAdminLogs(limit = 200) {
   const db = await getDb();
   if (!db) return [];
-  const { adminLogs } = await import("../drizzle/schema");
+  const { adminLogs } = await import("../../drizzle/schema");
   return db.select().from(adminLogs).orderBy(desc(adminLogs.createdAt)).limit(limit);
 }
 
@@ -2769,7 +2769,7 @@ export async function adminSearchWorks(opts: {
 export async function getAllSystemConfig() {
   const db = await getDb();
   if (!db) return [];
-  const { systemConfig } = await import("../drizzle/schema");
+  const { systemConfig } = await import("../../drizzle/schema");
   return db.select().from(systemConfig);
 }
 
@@ -2777,7 +2777,7 @@ export async function getAllSystemConfig() {
 export async function getSystemConfigValue(key: string): Promise<string | null> {
   const db = await getDb();
   if (!db) return null;
-  const { systemConfig } = await import("../drizzle/schema");
+  const { systemConfig } = await import("../../drizzle/schema");
   const rows = await db.select({ value: systemConfig.value }).from(systemConfig).where(eq(systemConfig.key, key)).limit(1);
   return rows[0]?.value ?? null;
 }
@@ -2786,7 +2786,7 @@ export async function getSystemConfigValue(key: string): Promise<string | null> 
 export async function setSystemConfigValue(key: string, value: string, description?: string, updatedByUserId?: number): Promise<void> {
   const db = await getDb();
   if (!db) return;
-  const { systemConfig } = await import("../drizzle/schema");
+  const { systemConfig } = await import("../../drizzle/schema");
   await db.insert(systemConfig).values({ key, value, description: description ?? null, updatedByUserId: updatedByUserId ?? null })
     .onDuplicateKeyUpdate({ set: { value, updatedByUserId: updatedByUserId ?? null } });
 }
@@ -3114,7 +3114,7 @@ export async function savePromptDraft(data: {
   shareUrl?: string;
 }): Promise<{ id: number }> {
   const db = await getDb();
-  const { promptDrafts } = await import("../drizzle/schema");
+  const { promptDrafts } = await import("../../drizzle/schema");
   const [result] = await db.insert(promptDrafts).values(data);
   return { id: (result as any).insertId };
 }
@@ -3122,7 +3122,7 @@ export async function savePromptDraft(data: {
 /** Get all prompt drafts for a user, newest first. */
 export async function getPromptDraftsByUser(userId: number) {
   const db = await getDb();
-  const { promptDrafts } = await import("../drizzle/schema");
+  const { promptDrafts } = await import("../../drizzle/schema");
   return db.select().from(promptDrafts)
     .where(eq(promptDrafts.userId, userId))
     .orderBy(desc(promptDrafts.createdAt));
@@ -3131,7 +3131,7 @@ export async function getPromptDraftsByUser(userId: number) {
 /** Get a single prompt draft by ID. */
 export async function getPromptDraftById(id: number) {
   const db = await getDb();
-  const { promptDrafts } = await import("../drizzle/schema");
+  const { promptDrafts } = await import("../../drizzle/schema");
   const [row] = await db.select().from(promptDrafts).where(eq(promptDrafts.id, id));
   return row ?? null;
 }
@@ -3139,7 +3139,7 @@ export async function getPromptDraftById(id: number) {
 /** Get a prompt draft by share token (public). */
 export async function getPromptDraftByShareToken(shareToken: string) {
   const db = await getDb();
-  const { promptDrafts } = await import("../drizzle/schema");
+  const { promptDrafts } = await import("../../drizzle/schema");
   const [row] = await db.select().from(promptDrafts).where(eq(promptDrafts.shareToken, shareToken));
   return row ?? null;
 }
@@ -3147,14 +3147,14 @@ export async function getPromptDraftByShareToken(shareToken: string) {
 /** Update share token and URL on a draft, and mark it as shared. */
 export async function updatePromptDraftShare(id: number, shareToken: string, shareUrl: string): Promise<void> {
   const db = await getDb();
-  const { promptDrafts } = await import("../drizzle/schema");
+  const { promptDrafts } = await import("../../drizzle/schema");
   await db.update(promptDrafts).set({ shareToken, shareUrl, isShared: true }).where(eq(promptDrafts.id, id));
 }
 
 /** Revoke a share link — clears token, URL, and isShared flag. */
 export async function revokePromptDraftShare(id: number, userId: number): Promise<void> {
   const db = await getDb();
-  const { promptDrafts } = await import("../drizzle/schema");
+  const { promptDrafts } = await import("../../drizzle/schema");
   await db.update(promptDrafts)
     .set({ shareToken: null, shareUrl: null, isShared: false })
     .where(and(eq(promptDrafts.id, id), eq(promptDrafts.userId, userId)));
@@ -3163,7 +3163,7 @@ export async function revokePromptDraftShare(id: number, userId: number): Promis
 /** Delete a prompt draft (owner only — caller must verify ownership). */
 export async function deletePromptDraft(id: number, userId: number): Promise<void> {
   const db = await getDb();
-  const { promptDrafts } = await import("../drizzle/schema");
+  const { promptDrafts } = await import("../../drizzle/schema");
   await db.delete(promptDrafts).where(and(eq(promptDrafts.id, id), eq(promptDrafts.userId, userId)));
 }
 
@@ -4026,7 +4026,7 @@ export async function insertProvenanceEvent(data: {
 }) {
   const db = await getDb();
   if (!db) throw new Error("DB unavailable");
-  const { provenanceEvents } = await import("../drizzle/schema");
+  const { provenanceEvents } = await import("../../drizzle/schema");
   await db.insert(provenanceEvents).values({
     eventId: data.eventId,
     creatorId: data.creatorId,
@@ -4044,7 +4044,7 @@ export async function insertProvenanceEvent(data: {
 export async function getProvenanceEventsByCreator(creatorId: number, limit = 100) {
   const db = await getDb();
   if (!db) return [];
-  const { provenanceEvents } = await import("../drizzle/schema");
+  const { provenanceEvents } = await import("../../drizzle/schema");
   return db
     .select()
     .from(provenanceEvents)
@@ -4056,7 +4056,7 @@ export async function getProvenanceEventsByCreator(creatorId: number, limit = 10
 export async function getLatestProvenanceCheckpoint(creatorId: number) {
   const db = await getDb();
   if (!db) return null;
-  const { provenanceEvents } = await import("../drizzle/schema");
+  const { provenanceEvents } = await import("../../drizzle/schema");
   const rows = await db
     .select()
     .from(provenanceEvents)
@@ -4167,7 +4167,7 @@ export async function createUserCollection(userId: number, name: string, descrip
 export async function renameUserCollection(userId: number, collectionId: number, name: string, description?: string) {
   const db = await getDb();
   if (!db) throw new Error("Database unavailable");
-  const { userCollections } = await import("../drizzle/schema");
+  const { userCollections } = await import("../../drizzle/schema");
   await db.update(userCollections)
     .set({ name, description })
     .where(and(eq(userCollections.id, collectionId), eq(userCollections.userId, userId)));
@@ -4186,7 +4186,7 @@ export async function deleteUserCollection(userId: number, collectionId: number)
 export async function getUserCollectionTracks(collectionId: number) {
   const db = await getDb();
   if (!db) return [];
-  const { userCollectionTracks } = await import("../drizzle/schema");
+  const { userCollectionTracks } = await import("../../drizzle/schema");
   return db
     .select({
       entry: userCollectionTracks,
@@ -4208,7 +4208,7 @@ export async function getUserCollectionTracks(collectionId: number) {
 export async function addTrackToUserCollection(collectionId: number, songId: number) {
   const db = await getDb();
   if (!db) throw new Error("Database unavailable");
-  const { userCollectionTracks } = await import("../drizzle/schema");
+  const { userCollectionTracks } = await import("../../drizzle/schema");
   // Check if already in collection
   const existing = await db
     .select({ id: userCollectionTracks.id })

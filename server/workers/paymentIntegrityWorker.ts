@@ -45,7 +45,7 @@ async function logReconciliation(data: {
   try {
     const db = await getDb();
     if (!db) return;
-    const { paymentReconciliationLog } = await import("../drizzle/schema");
+    const { paymentReconciliationLog } = await import("../../drizzle/schema");
     // Upsert — if we've already logged this session (from a previous run), update it
     await db
       .insert(paymentReconciliationLog)
@@ -75,7 +75,7 @@ async function isSessionAlreadyLogged(sessionId: string): Promise<boolean> {
   try {
     const db = await getDb();
     if (!db) return false;
-    const { paymentReconciliationLog } = await import("../drizzle/schema");
+    const { paymentReconciliationLog } = await import("../../drizzle/schema");
     const rows = await db
       .select({ id: paymentReconciliationLog.id, status: paymentReconciliationLog.status })
       .from(paymentReconciliationLog)
@@ -97,7 +97,7 @@ async function isDonationCredited(sessionId: string): Promise<boolean> {
   try {
     const db = await getDb();
     if (!db) return false;
-    const { projectDonations } = await import("../drizzle/schema");
+    const { projectDonations } = await import("../../drizzle/schema");
     const rows = await db
       .select({ id: projectDonations.id })
       .from(projectDonations)
@@ -113,7 +113,7 @@ async function isTipCredited(paymentIntentId: string): Promise<boolean> {
   try {
     const db = await getDb();
     if (!db) return false;
-    const { tips } = await import("../drizzle/schema");
+    const { tips } = await import("../../drizzle/schema");
     const rows = await db
       .select({ id: tips.id })
       .from(tips)
@@ -129,7 +129,7 @@ async function isLicenseCredited(paymentIntentId: string): Promise<boolean> {
   try {
     const db = await getDb();
     if (!db) return false;
-    const { licenses } = await import("../drizzle/schema");
+    const { licenses } = await import("../../drizzle/schema");
     const rows = await db
       .select({ id: licenses.id })
       .from(licenses)
@@ -145,7 +145,7 @@ async function isSlotPurchaseCredited(paymentIntentId: string): Promise<boolean>
   try {
     const db = await getDb();
     if (!db) return false;
-    const { slotPurchases } = await import("../drizzle/schema");
+    const { slotPurchases } = await import("../../drizzle/schema");
     const rows = await db
       .select({ id: slotPurchases.id })
       .from(slotPurchases)

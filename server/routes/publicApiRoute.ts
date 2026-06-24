@@ -190,7 +190,7 @@ publicApiRouter.get("/api/v1/verify/:witnessId", async (req: Request, res: Respo
     const database = await getDb();
     if (!database) { res.status(503).json({ error: "Database unavailable" }); return; }
 
-    const { songs, users } = await import("../drizzle/schema");
+    const { songs, users } = await import("../../drizzle/schema");
     const { eq } = await import("drizzle-orm");
 
     const result = await database.select({
@@ -456,7 +456,7 @@ publicApiRouter.get("/api/v1/works/:wid", async (req: Request, res: Response) =>
     const database = await (await import("./db")).getDb();
     if (!database) { res.status(503).json({ error: "Database unavailable" }); return; }
 
-    const { songs, users } = await import("../drizzle/schema");
+    const { songs, users } = await import("../../drizzle/schema");
     const { eq } = await import("drizzle-orm");
 
     const result = await database
@@ -521,7 +521,7 @@ publicApiRouter.get("/api/v1/creator/:handle/works", async (req: Request, res: R
     const database = await (await import("./db")).getDb();
     if (!database) { res.status(503).json({ error: "Database unavailable" }); return; }
 
-    const { songs, users } = await import("../drizzle/schema");
+    const { songs, users } = await import("../../drizzle/schema");
     const { eq, and, isNotNull } = await import("drizzle-orm");
 
     // Find creator by handle
@@ -634,7 +634,7 @@ publicApiRouter.get("/api/v1/wid/:wid", async (req: Request, res: Response) => {
     const database = await getDb();
     if (!database) { res.status(503).json({ error: "Database unavailable" }); return; }
 
-    const { songs, users } = await import("../drizzle/schema");
+    const { songs, users } = await import("../../drizzle/schema");
     const { eq, or } = await import("drizzle-orm");
 
     // Accept both witnessId (WID-MUS-...) and numeric song id
@@ -723,7 +723,7 @@ publicApiRouter.get("/api/v1/search", async (req: Request, res: Response) => {
     const database = await getDb();
     if (!database) { res.status(503).json({ error: "Database unavailable" }); return; }
 
-    const { songs, users } = await import("../drizzle/schema");
+    const { songs, users } = await import("../../drizzle/schema");
     const { eq, like, or, and } = await import("drizzle-orm");
 
     const searchPattern = `%${q}%`;
