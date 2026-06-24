@@ -438,27 +438,28 @@ export default function DiscoverPage() {
                     <div className={`absolute inset-0 transition-opacity duration-200 bg-black/50 ${
                       isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"
                     }`} />
-                    {/* Play button / animated waveform */}
+                    {/* Play button — Witness Card treatment */}
                     <div className="absolute inset-0 flex items-center justify-center">
-                      {isActive && playerState.isPlaying ? (
-                        <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ background: "var(--ln-gold)" }}>
-                          <div className="flex items-end gap-[2px] h-5">
-                            {[1,2,3,4].map(i => (
-                              <div key={i} className="w-[3px] rounded-full" style={{
-                                background: "var(--ln-coal)",
-                                height: "40%",
-                                animation: `waveBar 0.7s ease-in-out ${i * 0.12}s infinite alternate`
-                              }} />
-                            ))}
-                          </div>
-                        </div>
-                      ) : (
-                        <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-opacity ${
+                      <div
+                        className={`w-11 h-11 rounded-full flex items-center justify-center transition-all ${
                           isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-                        }`} style={{ background: "var(--ln-gold)" }}>
-                          <Play className="w-5 h-5 fill-current" style={{ color: "var(--ln-coal)" }} />
-                        </div>
-                      )}
+                        }`}
+                        style={{
+                          background: isActive ? "rgba(196,154,40,0.18)" : "rgba(0,0,0,0.40)",
+                          border: isActive ? "1.5px solid rgba(196,154,40,0.85)" : "1.5px solid rgba(196,154,40,0.60)",
+                          backdropFilter: "blur(4px)",
+                          boxShadow: isActive
+                            ? "0 0 0 5px rgba(196,154,40,0.07), 0 0 20px rgba(196,154,40,0.28)"
+                            : "0 0 0 4px rgba(196,154,40,0.04), 0 0 14px rgba(196,154,40,0.18)",
+                          animation: isActive && playerState.isPlaying ? "pulse-gold 1.8s ease-in-out infinite" : "none",
+                        }}
+                      >
+                        {isActive && playerState.isPlaying ? (
+                          <div className="live-wave scale-[0.65]"><span /><span /><span /><span /><span /></div>
+                        ) : (
+                          <Play className="w-4 h-4 fill-current ml-0.5" style={{ color: "#C9A84C" }} />
+                        )}
+                      </div>
                     </div>
                     {item.song.witnessId && (
                       <Link

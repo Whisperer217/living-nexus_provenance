@@ -179,7 +179,7 @@ function ExploreCard({
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: "linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.55) 30%, rgba(0,0,0,0.18) 55%, transparent 75%)",
+            background: "linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.60) 28%, rgba(0,0,0,0.20) 52%, transparent 72%)",
           }}
         />
 
@@ -192,8 +192,8 @@ function ExploreCard({
             style={{
               background: "rgba(196,154,40,0.14)",
               border: "1px solid rgba(196,154,40,0.42)",
-              backdropFilter: "blur(6px)",
-              boxShadow: "0 0 8px rgba(196,154,40,0.18)",
+              backdropFilter: "blur(8px)",
+              boxShadow: "0 0 6px rgba(196,154,40,0.10), inset 0 0 0 0.5px rgba(196,154,40,0.08)",
             }}
           >
             <Shield size={8} style={{ color: "#C49A28" }} />
@@ -286,8 +286,8 @@ function ExploreCard({
                 background: isActive ? "rgba(196,154,40,0.20)" : "rgba(0,0,0,0.42)",
                 border: isActive ? "1.5px solid rgba(196,154,40,0.90)" : "1.5px solid rgba(196,154,40,0.70)",
                 boxShadow: isActive
-                  ? "0 0 0 8px rgba(196,154,40,0.10), 0 0 32px rgba(196,154,40,0.45)"
-                  : "0 0 0 6px rgba(196,154,40,0.08), 0 0 20px rgba(196,154,40,0.30)",
+                  ? "0 0 0 6px rgba(196,154,40,0.07), 0 0 24px rgba(196,154,40,0.32)"
+                  : "0 0 0 5px rgba(196,154,40,0.05), 0 0 16px rgba(196,154,40,0.22)",
                 backdropFilter: "blur(4px)",
                 animation: isActive && isPlaying ? "pulse-gold 1.8s ease-in-out infinite" : "none",
               }}
@@ -331,18 +331,18 @@ function ExploreCard({
               className="truncate"
               style={{
                 fontSize: "10px",
-                color: "rgba(196,154,40,0.55)",
+                color: "rgba(220,200,140,0.62)",
                 fontFamily: "'Cinzel', serif",
                 letterSpacing: "0.03em",
-                textShadow: "0 1px 6px rgba(0,0,0,0.95)",
+                textShadow: "0 1px 8px rgba(0,0,0,0.98)",
               }}
             >
               {artistName}
             </span>
             {plays && (
               <div className="flex items-center gap-0.5 flex-shrink-0">
-                <Flame size={9} style={{ color: "rgba(196,154,40,0.50)" }} />
-                <span style={{ fontSize: "10px", color: "rgba(196,154,40,0.50)", fontVariantNumeric: "tabular-nums" }}>{plays}</span>
+                <Flame size={9} style={{ color: "rgba(220,180,80,0.45)" }} />
+                <span style={{ fontSize: "10px", color: "rgba(220,180,80,0.45)", fontVariantNumeric: "tabular-nums" }}>{plays}</span>
               </div>
             )}
           </div>

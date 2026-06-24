@@ -155,6 +155,8 @@ export function ShowcaseRow({ title, seeAllHref, seeAllLabel = "See All", childr
             msOverflowStyle: "none",
             scrollPaddingLeft: "0.75rem",
             paddingRight: "2.5rem", // peek effect — next card visible at edge
+            WebkitOverflowScrolling: "touch",
+            willChange: "scroll-position",
           }}
         >
           {children}

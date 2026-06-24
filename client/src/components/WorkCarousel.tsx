@@ -150,7 +150,7 @@ export function WorkCarousel({ type, title, limit = 12, viewAllHref, onOpenReade
         <div
           ref={scrollRef}
           className="flex gap-3 overflow-x-auto pb-2 scroll-smooth snap-x snap-mandatory"
-          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+          style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch", willChange: "scroll-position" }}
         >
           {(works as any[]).map((item: any) => {
             const isActive = type === "audio" && currentTrackId === String(item.song.id);
@@ -194,18 +194,28 @@ export function WorkCarousel({ type, title, limit = 12, viewAllHref, onOpenReade
                       </div>
                     )}
                     <div className="prov-card-gradient" />
-                    {/* Play/Pause indicator */}
-                    <div className="absolute inset-0 flex items-center justify-center">
+                    {/* Play/Pause indicator — Witness Card treatment */}
+                    <div className="absolute inset-0 flex items-center justify-center"
+                      style={{ opacity: isActive ? 1 : undefined }}
+                    >
                       <div
-                        className={`w-10 h-10 rounded-full flex items-center justify-center transition-opacity ${
+                        className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
                           isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"
                         }`}
-                        style={{ background: widColor }}
+                        style={{
+                          background: isActive ? "rgba(196,154,40,0.18)" : "rgba(0,0,0,0.40)",
+                          border: isActive ? "1.5px solid rgba(196,154,40,0.85)" : "1.5px solid rgba(196,154,40,0.60)",
+                          backdropFilter: "blur(4px)",
+                          boxShadow: isActive
+                            ? "0 0 0 5px rgba(196,154,40,0.07), 0 0 20px rgba(196,154,40,0.28)"
+                            : "0 0 0 4px rgba(196,154,40,0.04), 0 0 14px rgba(196,154,40,0.18)",
+                          animation: isPlaying ? "pulse-gold 1.8s ease-in-out infinite" : "none",
+                        }}
                       >
                         {isPlaying ? (
-                          <Pause className="w-4 h-4" style={{ color: "#0a0815" }} />
+                          <div className="live-wave scale-[0.65]"><span /><span /><span /><span /><span /></div>
                         ) : (
-                          <Play className="w-4 h-4 fill-current" style={{ color: "#0a0815" }} />
+                          <Play className="w-3.5 h-3.5 fill-current ml-0.5" style={{ color: "#C9A84C" }} />
                         )}
                       </div>
                     </div>
