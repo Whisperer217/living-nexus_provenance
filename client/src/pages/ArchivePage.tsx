@@ -438,6 +438,17 @@ export default function ArchivePage() {
     },
   });
 
+  // Pull-to-refresh — MUST be declared here (before any early returns) to satisfy Rules of Hooks
+  const { pullProgress, isRefreshing, indicatorY } = usePullToRefresh({
+    onRefresh: async () => {
+      await Promise.all([
+        utils.songs.mySongs.invalidate(),
+        utils.userCollections.list.invalidate(),
+        utils.witnessSubscription.getMyArchive.invalidate(),
+      ]);
+    },
+  });
+
   const handleToggle = (e: React.MouseEvent, song: any) => {
     e.preventDefault();
     e.stopPropagation();
@@ -559,17 +570,6 @@ export default function ArchivePage() {
     }
     return list;
   })();
-
-  // Pull-to-refresh — invalidates all archive queries
-  const { pullProgress, isRefreshing, indicatorY } = usePullToRefresh({
-    onRefresh: async () => {
-      await Promise.all([
-        utils.songs.mySongs.invalidate(),
-        utils.userCollections.list.invalidate(),
-        utils.witnessSubscription.getMyArchive.invalidate(),
-      ]);
-    },
-  });
 
   return (
     <>

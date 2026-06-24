@@ -585,6 +585,14 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
 
     const onError = () => {
       setState(s => {
+        // Only auto-advance on error if the player was actively playing.
+        // If paused (e.g. restored from sessionStorage on page reload), do NOT
+        // advance — this prevents the "track changes on reload" bug on mobile
+        // Chrome where audio.load() triggers an async error event after the
+        // listener attaches (e.g. CORS preflight, auth re-check, or stale URL).
+        if (!s.isPlaying) {
+          return { ...s, isReady: false, duration: 0 };
+        }
         const tracks = s.tracks.filter(t => !!t.audioUrl);
         const next = s.currentIdx + 1;
         if (next >= tracks.length) {
