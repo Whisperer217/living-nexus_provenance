@@ -5582,3 +5582,13 @@
 - [x] Add login prompt toast to GlobalPlayer context menu download button when user is not logged in
 - [x] Require auth for free tracks in songs.download tRPC procedure (server-side)
 - [x] Require auth for free tracks in /api/download/:songId route (server-side)
+
+## Homepage Redesign — Sacred Geometry + Creator-First Discovery (Phase 90)
+- [x] Add Golden Ratio CSS variables (--phi, --phi-inv, --hero-h) to index.css
+- [x] Update HeroCarousel height to use φ-height (61.8vh via var(--hero-h))
+- [x] Restructure main render to: Hero → ShowcaseSection → DiscoverySection → Creator Spotlights → Featured Projects → Genre/Discover/Trending → Medium Carousels → Prompt Studio → Subtle Doctrine (§7) → Founder's Era (§8) → Why Work With Us + CTA (§9) → Distribution Teaser → ContributorsStrip
+- [x] Remove duplicate WIDTrustLayer, WID Clarity, Featured Creators, New Voices, Featured Projects, Genre/Discover/Trending, Medium Carousels, Prompt Studio, Why Work With Us blocks from old positions
+- [x] Add §9 Why Work With Us + Final CTA ("Share Your Work" / "Explore Works") after Founder's Era
+- [x] Update CTA labels to "Share Your Work" and "Explore Works" (natural, not forced)
+- [x] Verify 0 TypeScript errors and 309/309 tests pass
+- [x] Clean build confirmed (HomePage-DEJ4xalW.js)

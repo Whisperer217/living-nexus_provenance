@@ -768,7 +768,7 @@ function HeroCarousel({ isAuthenticated, getLoginUrl: getLogin }: { isAuthentica
   return (
     <div
       className="relative overflow-hidden"
-      style={{ height: "clamp(380px, 52vw, 520px)" }}
+      style={{ height: "var(--hero-h, clamp(420px, 61.8vh, 680px))" }}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
@@ -1034,7 +1034,8 @@ export default function HomePage() {
       />
 
       {/* ══════════════════════════════════════════════════════════════
-          HERO CAROUSEL
+          §1 — CINEMATIC HERO (φ-height: 61.8vh)
+          Golden Ratio hero: content anchored to lower 38.2%
       ══════════════════════════════════════════════════════════════ */}
       <HeroCarousel isAuthenticated={isAuthenticated} getLoginUrl={getLoginUrl} />
 
@@ -1042,14 +1043,309 @@ export default function HomePage() {
       <h2 className="sr-only">Discover and Register Creative Works on Living Nexus</h2>
 
       {/* ══════════════════════════════════════════════════════════════
-          MANIFESTATION DISCOVERY ARCHITECTURE
+          §2 — CREATOR DISCOVERY SHOWCASE (Steam-like rows)
+          New Arrivals · Trending · Featured Creators · Recently Witnessed
+      ══════════════════════════════════════════════════════════════ */}
+      <ConstellationReveal delay={60} dotCount={4} skipDots={false}>
+        <ShowcaseSection />
+      </ConstellationReveal>
+
+      {/* ── Sacred Geometry Divider ── */}
+      <div className="sg-divider-wide px-6">
+        <div className="sg-divider-wide-center"><div className="sg-divider-wide-center-dot" /></div>
+      </div>
+
+      {/* ══════════════════════════════════════════════════════════════
+          §3 — MANIFESTATION DISCOVERY ARCHITECTURE
+          Featured Realms · New Arrivals grid · Trending grid · Hidden Realms
       ══════════════════════════════════════════════════════════════ */}
       <ConstellationReveal delay={100} dotCount={6} skipDots={false}>
         <DiscoverySection />
       </ConstellationReveal>
 
+      {/* ── Sacred Geometry Divider ── */}
+      <div className="sg-divider-wide px-6">
+        <div className="sg-divider-wide-center"><div className="sg-divider-wide-center-dot" /></div>
+      </div>
+
       {/* ══════════════════════════════════════════════════════════════
-          FOUNDER'S ERA BLOCK
+          §4 — CREATOR SPOTLIGHTS
+          Featured Creators · New Voices
+      ══════════════════════════════════════════════════════════════ */}
+      <ConstellationReveal delay={0} dotCount={5}>
+        <FeaturedCreatorsCarousel />
+      </ConstellationReveal>
+
+      {/* ── Sacred Geometry Divider ── */}
+      <div className="sg-divider-wide px-6">
+        <div className="sg-divider-wide-center"><div className="sg-divider-wide-center-dot" /></div>
+      </div>
+
+      <ConstellationReveal delay={0} dotCount={5}>
+        <NewVoicesCarousel />
+      </ConstellationReveal>
+
+      {/* ── Sacred Geometry Divider ── */}
+      <div className="sg-divider-wide px-6">
+        <div className="sg-divider-wide-center"><div className="sg-divider-wide-center-dot" /></div>
+      </div>
+
+      {/* ══════════════════════════════════════════════════════════════
+          §5 — FEATURED PROJECTS
+      ══════════════════════════════════════════════════════════════ */}
+      {(isAuthenticated || (publicProjects as any[]).length > 0) && (
+        <div className="px-6 pt-5 pb-2">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="museum-section-header">Featured Projects</h2>
+            <Link href="/projects">
+              <span className="text-[11px] font-body cursor-pointer transition-colors hover:text-[#C49A28]" style={{ color: "#6B6555" }}>See all</span>
+            </Link>
+          </div>
+          <FeaturedProjectsCarousel
+            projects={(publicProjects as any[])}
+            isAuthenticated={isAuthenticated}
+          />
+          <div className="sg-divider mt-4"><div className="sg-divider-pip" /></div>
+        </div>
+      )}
+
+      {/* ── Sacred Geometry Divider ── */}
+      <div className="sg-divider-wide px-6">
+        <div className="sg-divider-wide-center"><div className="sg-divider-wide-center-dot" /></div>
+      </div>
+
+      {/* ══════════════════════════════════════════════════════════════
+          §6 — GENRE FILTERS + DISCOVER TRACKS + TRENDING + MEDIUM CAROUSELS
+      ══════════════════════════════════════════════════════════════ */}
+      <div className="px-6 py-5 overflow-hidden">
+        {/* Genre icon cards */}
+        <div className="mb-7">
+          <h2 className="museum-section-title mb-3">Browse Genres</h2>
+          <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
+            {GENRE_CARDS.map(g => (
+              <button
+                key={g.label}
+                onClick={() => setActiveGenre(g.label)}
+                className={`flex flex-col items-center gap-1.5 p-2 rounded-xl transition-all border group
+                  ${activeGenre === g.label
+                    ? "border-[#C49A28]/40 bg-[#1C1A14]/[0.07]"
+                    : "border-[rgba(196,154,40,0.10)] bg-[#1C1A14] hover:border-[rgba(196,154,40,0.22)] hover:bg-[#252218]"
+                  }`}
+              >
+                {g.icon ? (
+                  <div className="w-10 h-10 flex items-center justify-center">
+                    <img
+                      src={g.icon}
+                      alt={g.label}
+                      className={`w-full h-full object-contain transition-all duration-200
+                        ${activeGenre === g.label ? "scale-110 drop-shadow-lg" : "opacity-80 group-hover:opacity-100 group-hover:scale-105"}`}
+                    />
+                  </div>
+                ) : (
+                  <div className="w-10 h-10 flex items-center justify-center rounded-lg"
+                    style={{ background: "linear-gradient(135deg, #C49A28, #7C3AED)" }}>
+                    <span className="text-[11px] font-heading font-bold text-black">ALL</span>
+                  </div>
+                )}
+                <span
+                  className="text-[10px] font-body truncate w-full text-center transition-colors"
+                  style={{ color: activeGenre === g.label ? g.color : "rgba(255,255,255,0.75)" }}
+                >
+                  {g.label}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Discover Tracks header */}
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="museum-section-header">
+            {activeGenre === "All" ? "Discover Tracks" : activeGenre}
+          </h2>
+          <Link href="/explore">
+            <span className="text-[12px] text-[#A78BFA] cursor-pointer hover:text-[#C49A28] transition-colors font-body">
+              See all
+            </span>
+          </Link>
+        </div>
+
+        {/* Discover — horizontal 2-row scroll */}
+        <div className="mb-8">
+          <HorizontalTrackGrid
+            tracks={tracks}
+            loading={discoverLoading}
+            onTip={handleTip}
+            emptyMessage="Be the first to upload a witnessed creation."
+            likeMap={bulkLikes}
+          />
+        </div>
+
+        {/* ── Sacred Geometry Divider ── */}
+        <div className="sg-divider"><div className="sg-divider-pip" /></div>
+
+        {/* ── Trending section ── */}
+        {trendingTracks.length > 0 && (
+          <>
+            <div className="gold-divider mb-6" />
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="museum-section-header">Trending Now</h2>
+              <span className="text-[10px] font-body uppercase tracking-widest" style={{ color: "#6B6555" }}>By plays + likes + recency</span>
+            </div>
+            <div className="mb-8">
+              <TrendingHorizontalGrid
+                tracks={trendingTracks}
+                onTip={handleTip}
+                likeMap={bulkLikes}
+              />
+            </div>
+          </>
+        )}
+
+        {/* ── Medium Sections ── */}
+        <div className="gold-divider mb-6" />
+        <div className="space-y-8 mb-8">
+          <WorkCarousel type="audio" title="Witnessed Music" limit={12} viewAllHref="/explore?medium=audio" />
+          <WorkCarousel type="lyrics" title="Witnessed Lyrics" limit={12} viewAllHref="/explore?medium=lyrics" />
+          <WorkCarousel type="manuscript" title="Witnessed Manuscripts" limit={12} viewAllHref="/explore?medium=manuscript" onOpenReader={setReaderSong} />
+          <WorkCarousel type="comic" title="Witnessed Comics" limit={12} viewAllHref="/explore?medium=comic" onOpenReader={setReaderSong} />
+        </div>
+
+        {/* ── Prompt Studio: Workflow Attribution ── */}
+        <div className="gold-divider mb-8" />
+        <div
+          className="mb-10 rounded-2xl p-6 relative overflow-hidden"
+          style={{
+            background: "linear-gradient(135deg, rgba(14,12,28,0.97) 0%, rgba(20,16,42,0.99) 100%)",
+            border: "1px solid rgba(245,196,81,0.18)",
+            boxShadow: "0 0 40px rgba(245,196,81,0.05), inset 0 1px 0 rgba(245,196,81,0.08)",
+          }}
+        >
+          <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 55% 60% at 8% 50%, rgba(124,58,237,0.08) 0%, transparent 70%)" }} />
+          <div className="relative flex flex-col sm:flex-row gap-5 items-start">
+            <Link href="/creator/780095">
+              <img
+                src="https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/avatars/780095-1774641904221.jpg"
+                alt="MoshAIMusic"
+                className="w-14 h-14 rounded-full flex-shrink-0 object-cover cursor-pointer hover:brightness-110 transition-all"
+                style={{ border: "2px solid rgba(245,196,81,0.4)", boxShadow: "0 0 20px rgba(245,196,81,0.15)" }}
+              />
+            </Link>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-2 flex-wrap">
+                <p className="text-xs font-mono tracking-widest uppercase" style={{ color: "rgba(245,196,81,0.55)" }}>Prompt Studio &mdash; workflow architecture</p>
+              </div>
+              <div className="flex items-center gap-2 mb-3 flex-wrap">
+                <Link href="/creator/780095">
+                  <span className="text-sm font-bold tracking-wide cursor-pointer hover:brightness-110 transition-all" style={{ fontFamily: "'Cinzel', serif", color: "#F5C451" }}>MoshAIMusic</span>
+                </Link>
+                <span className="text-[9px] px-2 py-0.5 rounded-full font-mono tracking-widest" style={{ background: "rgba(245,196,81,0.1)", color: "rgba(245,196,81,0.65)", border: "1px solid rgba(245,196,81,0.2)" }}>WORKFLOW ARCHITECT</span>
+              </div>
+              <p className="text-sm leading-relaxed mb-3" style={{ color: "rgba(229,231,235,0.82)" }}>The lyric sheet &rarr; instrumentation cue &rarr; timing map pipeline that powers this generator was conceived from Brandon&rsquo;s description of his own creative process.</p>
+              <div className="flex items-center gap-1.5 mt-3">
+                <Shield className="w-3 h-3" style={{ color: "rgba(245,196,81,0.45)" }} />
+                <span className="text-[10px] font-mono" style={{ color: "rgba(245,196,81,0.45)" }}>Workflow attribution recorded on Living Nexus</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Prompt Studio CTA ── */}
+        <div className="gold-divider mb-8" />
+        <div
+          className="mb-10 rounded-2xl p-6 relative overflow-hidden"
+          style={{
+            background: "linear-gradient(135deg, rgba(124,58,237,0.12) 0%, rgba(14,12,28,0.97) 60%, rgba(20,16,42,0.99) 100%)",
+            border: "1px solid rgba(124,58,237,0.25)",
+            boxShadow: "0 0 40px rgba(124,58,237,0.06), inset 0 1px 0 rgba(124,58,237,0.1)",
+          }}
+        >
+          <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 40% 70% at 95% 50%, rgba(245,196,81,0.05) 0%, transparent 70%)" }} />
+          <div className="relative flex flex-col sm:flex-row gap-6 items-start sm:items-center">
+            <div className="w-14 h-14 rounded-2xl flex-shrink-0 flex items-center justify-center" style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.4), rgba(245,196,81,0.2))", border: "1px solid rgba(124,58,237,0.4)" }}>
+              <Sparkles className="w-7 h-7" style={{ color: "#A78BFA" }} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] font-mono tracking-widest uppercase mb-1" style={{ color: "rgba(167,139,250,0.6)" }}>Creator Tool</p>
+              <h3 className="font-heading text-[18px] font-bold text-white mb-1">Prompt Studio</h3>
+              <p className="text-sm leading-relaxed" style={{ color: "rgba(229,231,235,0.75)" }}>Turn your lyrics into a production-ready music prompt. The generator builds a lyric sheet &rarr; instrumentation cue &rarr; timing map pipeline — then pre-fills your registration form so you can witness the work immediately.</p>
+            </div>
+            <Link href={(user as any)?.id ? `/creator/${(user as any).id}?openPromptStudio=1` : getLoginUrl()}>
+              <button
+                className="flex-shrink-0 flex items-center gap-2 px-5 py-3 rounded-xl font-heading font-bold text-[13px] tracking-wide transition-all active:scale-95 hover:brightness-110"
+                style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.5), rgba(167,139,250,0.3))", border: "1px solid rgba(124,58,237,0.5)", color: "#E9D5FF", boxShadow: "0 0 20px rgba(124,58,237,0.2)" }}
+              >
+                <Sparkles size={14} />
+                Open Prompt Studio
+              </button>
+            </Link>
+          </div>
+          <p className="text-[10px] font-mono mt-4" style={{ color: "rgba(167,139,250,0.4)" }}>Prompt Studio is available on any creator profile page. Visit your profile or any creator&rsquo;s page to access it.</p>
+        </div>
+
+      </div>
+
+      {/* ══════════════════════════════════════════════════════════════
+          §7 — SUBTLE DOCTRINE SECTION (lower prominence)
+          Elegant WID explanation — not the loudest thing on the page
+      ══════════════════════════════════════════════════════════════ */}
+      <section className="px-6 py-10">
+        <div
+          className="rounded-2xl p-6 relative overflow-hidden"
+          style={{
+            background: "linear-gradient(135deg, rgba(12,10,20,0.98) 0%, rgba(0,0,0,1) 100%)",
+            border: "1px solid rgba(196,154,40,0.14)",
+          }}
+        >
+          {/* Ambient glow */}
+          <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 60% 40% at 50% 0%, rgba(196,154,40,0.04) 0%, transparent 70%)" }} />
+          {/* Section label */}
+          <div className="flex items-center gap-2.5 mb-5 relative">
+            <ShieldCheck className="w-4 h-4 flex-shrink-0" style={{ color: "#C49A28" }} />
+            <span className="font-heading text-[10px] tracking-[0.22em] uppercase" style={{ color: "#8B6914" }}>The Witness ID</span>
+          </div>
+          {/* Core statement */}
+          <blockquote
+            className="font-body text-[15px] leading-relaxed mb-5 pl-4 relative"
+            style={{ color: "#E8DFC8", borderLeft: "2px solid rgba(196,154,40,0.35)" }}
+          >
+            A Witness ID is a cryptographic timestamp that proves you created this work, at this moment, with this content — supporting, but not replacing, official copyright registration.
+          </blockquote>
+          {/* Three-column breakdown */}
+          <div className="museum-grid mb-5 relative">
+            {([
+              { icon: "✓", color: "#4ade80", bg: "rgba(74,222,128,0.06)", border: "rgba(74,222,128,0.18)", title: "What a WID Proves", points: ["You created this work", "The exact timestamp of creation", "The content has not been altered since registration", "Your AI disclosure intent at time of upload"] },
+              { icon: "◎", color: "#F5C451", bg: "rgba(245,196,81,0.06)", border: "rgba(245,196,81,0.18)", title: "What a WID Supports", points: ["Copyright registration applications", "Dispute resolution and prior art claims", "Licensing negotiations and provenance audits", "AI training consent documentation"] },
+              { icon: "✗", color: "rgba(255,255,255,0.35)", bg: "rgba(255,255,255,0.03)", border: "rgba(255,255,255,0.08)", title: "What a WID Does Not Replace", points: ["Official copyright registration (U.S. Copyright Office)", "Trademark or patent filings", "Legal representation or counsel", "Enforcement action against infringement"] },
+            ] as const).map(({ icon, color, bg, border, title, points }) => (
+              <div key={title} className="rounded-xl p-4" style={{ background: bg, border: `1px solid ${border}` }}>
+                <div className="flex items-center gap-2 mb-2.5">
+                  <span className="font-mono text-[15px]" style={{ color }}>{icon}</span>
+                  <h4 className="font-heading font-bold text-[11px] tracking-wide" style={{ color: "rgba(255,255,255,0.9)" }}>{title}</h4>
+                </div>
+                <ul className="space-y-1">
+                  {points.map(p => (
+                    <li key={p} className="flex items-start gap-1.5 text-[11px] font-body leading-snug" style={{ color: "rgba(229,231,235,0.7)" }}>
+                      <span className="mt-0.5 flex-shrink-0" style={{ color }}>·</span>
+                      {p}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+          {/* WID counter inline */}
+          <WIDTrustLayer />
+          {/* Disclaimer */}
+          <p className="text-[11px] font-body leading-relaxed relative mt-4" style={{ color: "#6B6555" }}>
+            Living Nexus is operated by BDDT Publishing, a DBA of Command Domains LLC. Witness IDs are cryptographic provenance records issued by this platform and do not constitute legal copyright registration. For official copyright protection, visit{" "}
+            <a href="https://www.copyright.gov/registration/" target="_blank" rel="noopener noreferrer" className="underline hover:text-[#C49A28] transition-colors" style={{ color: "#C49A28" }}>copyright.gov/registration</a>.
+          </p>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════════════════════════
+          §8 — FOUNDER'S ERA BLOCK (lower prominence)
       ══════════════════════════════════════════════════════════════ */}
       <div className="px-6 py-5 overflow-hidden">
         <div
@@ -1173,429 +1469,12 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* ══════════════════════════════════════════════════════════════
-          TRUST LAYER — WID counter + Witnessed Voices (8 panels)
-      ══════════════════════════════════════════════════════════════ */}
-      <WIDTrustLayer />
+
 
       {/* ══════════════════════════════════════════════════════════════
-          WID CLARITY — what it proves vs. what it does not replace
+          §9 — WHY WORK WITH US + FINAL CTA
       ══════════════════════════════════════════════════════════════ */}
       <div className="px-6 pb-2">
-        <div
-          className="rounded-2xl p-5 relative overflow-hidden sg-hero-frame"
-          style={{
-            background: "linear-gradient(135deg, #1C1A14 0%, #000000 100%)",
-            border: "1px solid rgba(196,154,40,0.18)",
-            boxShadow: "0 0 40px rgba(196,154,40,0.04)",
-          }}
-        >
-          {/* Ambient glow */}
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              background: "radial-gradient(ellipse 60% 40% at 50% 0%, rgba(196,154,40,0.05) 0%, transparent 70%)",
-            }}
-          />
-          {/* Header */}
-          <div className="flex items-center gap-2.5 mb-4 relative">
-            <ShieldCheck className="w-5 h-5 flex-shrink-0" style={{ color: "#C49A28" }} />
-            <span
-              className="font-heading text-[11px] tracking-[0.2em] uppercase"
-              style={{ color: "#8B6914" }}
-            >
-              What a Witness ID Is — and Is Not
-            </span>
-          </div>
-          {/* Core statement */}
-          <blockquote
-            className="font-body text-[14px] leading-relaxed mb-4 pl-4 relative"
-            style={{
-              color: "#E8DFC8",
-              borderLeft: "3px solid rgba(196,154,40,0.40)",
-            }}
-          >
-            Witness IDs help creators preserve verifiable proof of authorship, creation date, and work integrity — supporting, but not replacing, official copyright registration.
-          </blockquote>
-          {/* Three-column breakdown */}
-          <div className="museum-grid mb-4 relative">
-            {([
-              {
-                icon: "✓",
-                color: "#4ade80",
-                bg: "rgba(74,222,128,0.06)",
-                border: "rgba(74,222,128,0.18)",
-                title: "What a WID Proves",
-                points: [
-                  "You created this work",
-                  "The exact timestamp of creation",
-                  "The content has not been altered since registration",
-                  "Your AI disclosure intent at time of upload",
-                ],
-              },
-              {
-                icon: "◎",
-                color: "#F5C451",
-                bg: "rgba(245,196,81,0.06)",
-                border: "rgba(245,196,81,0.18)",
-                title: "What a WID Supports",
-                points: [
-                  "Copyright registration applications",
-                  "Dispute resolution and prior art claims",
-                  "Licensing negotiations and provenance audits",
-                  "AI training consent documentation",
-                ],
-              },
-              {
-                icon: "✗",
-                color: "rgba(255,255,255,0.35)",
-                bg: "rgba(255,255,255,0.03)",
-                border: "rgba(255,255,255,0.08)",
-                title: "What a WID Does Not Replace",
-                points: [
-                  "Official copyright registration (U.S. Copyright Office)",
-                  "Trademark or patent filings",
-                  "Legal representation or counsel",
-                  "Enforcement action against infringement",
-                ],
-              },
-            ] as const).map(({ icon, color, bg, border, title, points }) => (
-              <div
-                key={title}
-                className="rounded-xl p-4"
-                style={{ background: bg, border: `1px solid ${border}` }}
-              >
-                <div className="flex items-center gap-2 mb-2.5">
-                  <span className="font-mono text-[15px]" style={{ color }}>{icon}</span>
-                  <h4 className="font-heading font-bold text-[11px] tracking-wide" style={{ color: "rgba(255,255,255,0.9)" }}>{title}</h4>
-                </div>
-                <ul className="space-y-1">
-                  {points.map(p => (
-                    <li key={p} className="flex items-start gap-1.5 text-[11px] font-body leading-snug" style={{ color: "rgba(229,231,235,0.7)" }}>
-                      <span className="mt-0.5 flex-shrink-0" style={{ color }}>·</span>
-                      {p}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-          {/* Disclaimer footer */}
-          <p
-            className="text-[11px] font-body leading-relaxed relative"
-            style={{ color: "#6B6555" }}
-          >
-            Living Nexus is operated by BDDT Publishing, a DBA of Command Domains LLC. Witness IDs are cryptographic provenance records issued by this platform and do not constitute legal copyright registration. For official copyright protection, visit{" "}
-            <a
-              href="https://www.copyright.gov/registration/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline hover:text-[#C49A28] transition-colors"
-              style={{ color: "#C49A28" }}
-            >
-              copyright.gov/registration
-            </a>
-            .
-          </p>
-        </div>
-      </div>
-
-
-      {/* ══════════════════════════════════════════════════════════════
-          FEATURED CREATORS — horizontal panning carousel
-      ══════════════════════════════════════════════════════════════ */}
-      <ConstellationReveal delay={0} dotCount={5}>
-        <FeaturedCreatorsCarousel />
-      </ConstellationReveal>
-
-      {/* ── Sacred Geometry Divider ── */}
-      <div className="sg-divider-wide px-6">
-        <div className="sg-divider-wide-center">
-          <div className="sg-divider-wide-center-dot" />
-        </div>
-      </div>
-
-      {/* ══════════════════════════════════════════════════════════════
-          NEW VOICES — recently joined creators
-      ══════════════════════════════════════════════════════════════ */}
-      <ConstellationReveal delay={0} dotCount={5}>
-        <NewVoicesCarousel />
-      </ConstellationReveal>
-
-      {/* ── Sacred Geometry Divider ── */}
-      <div className="sg-divider-wide px-6">
-        <div className="sg-divider-wide-center">
-          <div className="sg-divider-wide-center-dot" />
-        </div>
-      </div>
-
-      {/* ══════════════════════════════════════════════════════════════
-          FEATURED PROJECTS — wireframe redesign (Phase 81)
-          Cards: banner + artist avatar/name + AI/$/♥/WID badges
-      ══════════════════════════════════════════════════════════════ */}
-      {(isAuthenticated || (publicProjects as any[]).length > 0) && (
-        <div className="px-6 pt-5 pb-2">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="museum-section-header">Featured Projects</h2>
-            <Link href="/projects">
-              <span className="text-[11px] font-body cursor-pointer transition-colors hover:text-[#C49A28]" style={{ color: "#6B6555" }}>See all</span>
-            </Link>
-          </div>
-
-          {/* Swipeable 2×2 paged carousel */}
-          <FeaturedProjectsCarousel
-            projects={(publicProjects as any[])}
-            isAuthenticated={isAuthenticated}
-          />
-          {/* sg-divider inside featured projects */}
-          <div className="sg-divider mt-4"><div className="sg-divider-pip" /></div>
-        </div>
-      )}
-      {/* ══════════════════════════════════════════════════════════════
-          GENRE FILTERS + DISCOVER TRACKS (side-pane horizontal scroll)
-      ══════════════════════════════════════════════════════════════ */}
-      {/* ── Sacred Geometry Divider ── */}
-      <div className="sg-divider-wide px-6">
-        <div className="sg-divider-wide-center">
-          <div className="sg-divider-wide-center-dot" />
-        </div>
-      </div>
-
-      <div className="px-6 py-5 overflow-hidden">
-        {/* Genre icon cards */}
-        <div className="mb-7">
-          <h2 className="museum-section-title mb-3">Browse Genres</h2>
-          <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
-            {GENRE_CARDS.map(g => (
-              <button
-                key={g.label}
-                onClick={() => setActiveGenre(g.label)}
-                className={`flex flex-col items-center gap-1.5 p-2 rounded-xl transition-all border group
-                  ${activeGenre === g.label
-                    ? "border-[#C49A28]/40 bg-[#1C1A14]/[0.07]"
-                    : "border-[rgba(196,154,40,0.10)] bg-[#1C1A14] hover:border-[rgba(196,154,40,0.22)] hover:bg-[#252218]"
-                  }`}
-              >
-                {g.icon ? (
-                  <div className="w-10 h-10 flex items-center justify-center">
-                    <img
-                      src={g.icon}
-                      alt={g.label}
-                      className={`w-full h-full object-contain transition-all duration-200
-                        ${activeGenre === g.label ? "scale-110 drop-shadow-lg" : "opacity-80 group-hover:opacity-100 group-hover:scale-105"}`}
-                    />
-                  </div>
-                ) : (
-                  <div className="w-10 h-10 flex items-center justify-center rounded-lg"
-                    style={{ background: "linear-gradient(135deg, #C49A28, #7C3AED)" }}>
-                    <span className="text-[11px] font-heading font-bold text-black">ALL</span>
-                  </div>
-                )}
-                <span
-                  className="text-[10px] font-body truncate w-full text-center transition-colors"
-                  style={{ color: activeGenre === g.label ? g.color : "rgba(255,255,255,0.75)" }}
-                >
-                  {g.label}
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Discover Tracks header */}
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="museum-section-header">
-            {activeGenre === "All" ? "Discover Tracks" : activeGenre}
-          </h2>
-          <Link href="/explore">
-            <span className="text-[12px] text-[#A78BFA] cursor-pointer hover:text-[#C49A28] transition-colors font-body">
-              See all
-            </span>
-          </Link>
-        </div>
-
-        {/* Discover — horizontal 2-row scroll */}
-        <div className="mb-8">
-          <HorizontalTrackGrid
-            tracks={tracks}
-            loading={discoverLoading}
-            onTip={handleTip}
-            emptyMessage="Be the first to upload a witnessed creation."
-            likeMap={bulkLikes}
-          />
-        </div>
-
-        {/* ── Sacred Geometry Divider ── */}
-        <div className="sg-divider"><div className="sg-divider-pip" /></div>
-
-        {/* ── Trending section ── */}
-        {trendingTracks.length > 0 && (
-          <>
-            <div className="gold-divider mb-6" />
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="museum-section-header">Trending Now</h2>
-              <span className="text-[10px] font-body uppercase tracking-widest" style={{ color: "#6B6555" }}>By plays + likes + recency</span>
-            </div>
-
-            {/* Trending — horizontal 2-row scroll */}
-            <div className="mb-8">
-              <TrendingHorizontalGrid
-                tracks={trendingTracks}
-                onTip={handleTip}
-                likeMap={bulkLikes}
-              />
-            </div>
-          </>
-        )}
-
-        {/* ── Medium Sections ────────────────────────────────────────────────────────── */}
-        <div className="gold-divider mb-6" />
-        <div className="space-y-8 mb-8">
-          <WorkCarousel
-            type="audio"
-            title="Witnessed Music"
-            limit={12}
-            viewAllHref="/explore?medium=audio"
-          />
-          <WorkCarousel
-            type="lyrics"
-            title="Witnessed Lyrics"
-            limit={12}
-            viewAllHref="/explore?medium=lyrics"
-          />
-          <WorkCarousel
-            type="manuscript"
-            title="Witnessed Manuscripts"
-            limit={12}
-            viewAllHref="/explore?medium=manuscript"
-            onOpenReader={setReaderSong}
-          />
-          <WorkCarousel
-            type="comic"
-            title="Witnessed Comics"
-            limit={12}
-            viewAllHref="/explore?medium=comic"
-            onOpenReader={setReaderSong}
-          />
-        </div>
-
-        {/* ── Prompt Studio: Workflow Attribution ───────────────────────────── */}
-        <div className="gold-divider mb-8" />
-        <div
-          className="mb-10 rounded-2xl p-6 relative overflow-hidden"
-          style={{
-            background: "linear-gradient(135deg, rgba(14,12,28,0.97) 0%, rgba(20,16,42,0.99) 100%)",
-            border: "1px solid rgba(245,196,81,0.18)",
-            boxShadow: "0 0 40px rgba(245,196,81,0.05), inset 0 1px 0 rgba(245,196,81,0.08)",
-          }}
-        >
-          {/* Ambient radial glow */}
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{ background: "radial-gradient(ellipse 55% 60% at 8% 50%, rgba(124,58,237,0.08) 0%, transparent 70%)" }}
-          />
-          <div className="relative flex flex-col sm:flex-row gap-5 items-start">
-            {/* Avatar */}
-            <Link href="/creator/780095">
-              <img
-                src="https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/avatars/780095-1774641904221.jpg"
-                alt="MoshAIMusic"
-                className="w-14 h-14 rounded-full flex-shrink-0 object-cover cursor-pointer hover:brightness-110 transition-all"
-                style={{
-                  border: "2px solid rgba(245,196,81,0.4)",
-                  boxShadow: "0 0 20px rgba(245,196,81,0.15)",
-                }}
-              />
-            </Link>
-            {/* Content */}
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-2 flex-wrap">
-                <p
-                  className="text-xs font-mono tracking-widest uppercase"
-                  style={{ color: "rgba(245,196,81,0.55)" }}
-                >
-                  Prompt Studio &mdash; workflow architecture
-                </p>
-              </div>
-              <div className="flex items-center gap-2 mb-3 flex-wrap">
-                <Link href="/creator/780095">
-                  <span
-                    className="text-sm font-bold tracking-wide cursor-pointer hover:brightness-110 transition-all"
-                    style={{ fontFamily: "'Cinzel', serif", color: "#F5C451" }}
-                  >
-                    MoshAIMusic
-                  </span>
-                </Link>
-                <span
-                  className="text-[9px] px-2 py-0.5 rounded-full font-mono tracking-widest"
-                  style={{ background: "rgba(245,196,81,0.1)", color: "rgba(245,196,81,0.65)", border: "1px solid rgba(245,196,81,0.2)" }}
-                >
-                  WORKFLOW ARCHITECT
-                </span>
-              </div>
-              <p
-                className="text-sm leading-relaxed mb-3"
-                style={{ color: "rgba(229,231,235,0.82)" }}
-              >
-                The lyric sheet &rarr; instrumentation cue &rarr; timing map pipeline that powers this generator was conceived from Brandon&rsquo;s description of his own creative process.
-              </p>
-              <div className="flex items-center gap-1.5 mt-3">
-                <Shield className="w-3 h-3" style={{ color: "rgba(245,196,81,0.45)" }} />
-                <span className="text-[10px] font-mono" style={{ color: "rgba(245,196,81,0.45)" }}>Workflow attribution recorded on Living Nexus</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* ── Prompt Studio CTA ───────────────────────────────────────────────── */}
-        <div className="gold-divider mb-8" />
-        <div
-          className="mb-10 rounded-2xl p-6 relative overflow-hidden"
-          style={{
-            background: "linear-gradient(135deg, rgba(124,58,237,0.12) 0%, rgba(14,12,28,0.97) 60%, rgba(20,16,42,0.99) 100%)",
-            border: "1px solid rgba(124,58,237,0.25)",
-            boxShadow: "0 0 40px rgba(124,58,237,0.06), inset 0 1px 0 rgba(124,58,237,0.1)",
-          }}
-        >
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{ background: "radial-gradient(ellipse 40% 70% at 95% 50%, rgba(245,196,81,0.05) 0%, transparent 70%)" }}
-          />
-          <div className="relative flex flex-col sm:flex-row gap-6 items-start sm:items-center">
-            <div
-              className="w-14 h-14 rounded-2xl flex-shrink-0 flex items-center justify-center"
-              style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.4), rgba(245,196,81,0.2))", border: "1px solid rgba(124,58,237,0.4)" }}
-            >
-              <Sparkles className="w-7 h-7" style={{ color: "#A78BFA" }} />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-[10px] font-mono tracking-widest uppercase mb-1" style={{ color: "rgba(167,139,250,0.6)" }}>Creator Tool</p>
-              <h3 className="font-heading text-[18px] font-bold text-white mb-1">Prompt Studio</h3>
-              <p className="text-sm leading-relaxed" style={{ color: "rgba(229,231,235,0.75)" }}>
-                Turn your lyrics into a production-ready music prompt. The generator builds a lyric sheet &rarr; instrumentation cue &rarr; timing map pipeline — then pre-fills your registration form so you can witness the work immediately.
-              </p>
-            </div>
-            <Link href={(user as any)?.id ? `/creator/${(user as any).id}?openPromptStudio=1` : getLoginUrl()}>
-              <button
-                className="flex-shrink-0 flex items-center gap-2 px-5 py-3 rounded-xl font-heading font-bold text-[13px] tracking-wide transition-all active:scale-95 hover:brightness-110"
-                style={{
-                  background: "linear-gradient(135deg, rgba(124,58,237,0.5), rgba(167,139,250,0.3))",
-                  border: "1px solid rgba(124,58,237,0.5)",
-                  color: "#E9D5FF",
-                  boxShadow: "0 0 20px rgba(124,58,237,0.2)",
-                }}
-              >
-                <Sparkles size={14} />
-                Open Prompt Studio
-              </button>
-            </Link>
-          </div>
-          <p className="text-[10px] font-mono mt-4" style={{ color: "rgba(167,139,250,0.4)" }}>
-            Prompt Studio is available on any creator profile page. Visit your profile or any creator&rsquo;s page to access it.
-          </p>
-        </div>
-
-        {/* ── Why Work With Us / Competitor Comparison ────────────────────────── */}
         <div className="gold-divider mb-8" />
         <div className="mb-12">
           <div className="text-center mb-8">
@@ -1605,8 +1484,6 @@ export default function HomePage() {
               Every platform stores your music. Only Living Nexus witnesses it — issuing a cryptographic timestamp that functions as a deed of creative origin.
             </p>
           </div>
-
-          {/* Comparison table */}
           <div className="overflow-x-auto rounded-2xl" style={{ border: "1px solid rgba(245,196,81,0.12)" }}>
             <table className="w-full text-sm">
               <thead>
@@ -1628,13 +1505,7 @@ export default function HomePage() {
                   ["Platform takes revenue cut", "Yes (30%+)", "Yes (15%+)", "10% tip fee only"],
                   ["Independent creator focus", "✗", "✓", "✓"],
                 ] as [string, string, string, string][]).map(([feature, col1, col2, col3], i) => (
-                  <tr
-                    key={feature}
-                    style={{
-                      background: i % 2 === 0 ? "rgba(14,12,28,0.92)" : "rgba(20,16,42,0.85)",
-                      borderBottom: "1px solid rgba(255,255,255,0.04)",
-                    }}
-                  >
+                  <tr key={feature} style={{ background: i % 2 === 0 ? "rgba(14,12,28,0.92)" : "rgba(20,16,42,0.85)", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
                     <td className="px-5 py-3.5 font-body" style={{ color: "rgba(229,231,235,0.82)" }}>{feature}</td>
                     <td className="px-5 py-3.5 text-center font-mono text-[13px]" style={{ color: col1 === "✓" ? "#4ade80" : col1 === "✗" ? "rgba(255,255,255,0.25)" : "rgba(245,196,81,0.7)" }}>{col1}</td>
                     <td className="px-5 py-3.5 text-center font-mono text-[13px]" style={{ color: col2 === "✓" ? "#4ade80" : col2 === "✗" ? "rgba(255,255,255,0.25)" : "rgba(245,196,81,0.7)" }}>{col2}</td>
@@ -1644,56 +1515,39 @@ export default function HomePage() {
               </tbody>
             </table>
           </div>
-
-          {/* Three value pillars */}
           <div className="museum-grid mt-6">
             {[
               { icon: Fingerprint, color: "#F5C451", bg: "rgba(245,196,81,0.08)", border: "rgba(245,196,81,0.2)", title: "Your Work, Witnessed", body: "Every registration receives a Witness ID — a cryptographic timestamp that proves you created it first. Not a certificate. A deed." },
               { icon: ShieldCheck, color: "#4ade80", bg: "rgba(74,222,128,0.06)", border: "rgba(74,222,128,0.18)", title: "Creator-First Commerce", body: "Direct tipping and Living Archive subscriptions. The platform takes 10% on tips only. Everything else is yours." },
               { icon: Sparkles, color: "#A78BFA", bg: "rgba(167,139,250,0.06)", border: "rgba(167,139,250,0.18)", title: "Creator Tools That Serve You", body: "Prompt Studio turns your lyrics into a production-ready music prompt. The WID goes on the output — you stay the origin." },
             ].map(({ icon: Icon, color, bg, border, title, body }) => (
-              <div
-                key={title}
-                className="rounded-xl p-5"
-                style={{ background: bg, border: `1px solid ${border}` }}
-              >
+              <div key={title} className="rounded-xl p-5" style={{ background: bg, border: `1px solid ${border}` }}>
                 <Icon className="w-6 h-6 mb-3" style={{ color }} />
                 <h4 className="font-heading font-bold text-white text-[14px] mb-2">{title}</h4>
                 <p className="text-[13px] leading-relaxed" style={{ color: "rgba(229,231,235,0.7)" }}>{body}</p>
               </div>
             ))}
           </div>
-
-          {/* CTA row */}
           <div className="flex flex-col sm:flex-row gap-3 justify-center mt-8">
             <Link href="/upload">
-              <button
-                className="flex items-center gap-2 px-6 py-3 rounded-xl font-heading font-bold text-[13px] tracking-wide transition-all active:scale-95 hover:brightness-110"
-                style={{
-                  background: "linear-gradient(135deg, #F5C451, #C49A28)",
-                  color: "#0a0812",
-                  boxShadow: "0 0 24px rgba(245,196,81,0.25)",
-                }}
-              >
+              <button className="flex items-center gap-2 px-6 py-3 rounded-xl font-heading font-bold text-[13px] tracking-wide transition-all active:scale-95 hover:brightness-110" style={{ background: "linear-gradient(135deg, #F5C451, #C49A28)", color: "#0a0812", boxShadow: "0 0 24px rgba(245,196,81,0.25)" }}>
                 <Upload size={14} />
-                Register Your First Work
+                Share Your Work
               </button>
             </Link>
-            <Link href="/learn">
-              <button
-                className="flex items-center gap-2 px-6 py-3 rounded-xl font-heading font-bold text-[13px] tracking-wide transition-all active:scale-95 hover:brightness-110"
-                style={{
-                  background: "rgba(14,12,28,0.8)",
-                  border: "1px solid rgba(255,255,255,0.1)",
-                  color: "rgba(229,231,235,0.8)",
-                }}
-              >
-                <ShieldCheck size={14} />
-                How WIDs Work
+            <Link href="/explore">
+              <button className="flex items-center gap-2 px-6 py-3 rounded-xl font-heading font-bold text-[13px] tracking-wide transition-all active:scale-95 hover:brightness-110" style={{ background: "rgba(14,12,28,0.8)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(229,231,235,0.8)" }}>
+                <Compass size={14} />
+                Explore Works
               </button>
             </Link>
           </div>
         </div>
+      </div>
+
+      {/* ── Sacred Geometry Divider ── */}
+      <div className="sg-divider-wide px-6">
+        <div className="sg-divider-wide-center"><div className="sg-divider-wide-center-dot" /></div>
       </div>
 
       {/* ── Contributors Strip ──────────────────────────────────────────── */}

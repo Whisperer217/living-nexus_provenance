@@ -1035,6 +1035,46 @@ body.overlay-active-full:has([data-slot="dialog-content"]) {
     }
   }
 
+  /* ── GOLDEN RATIO / PHI SPACING TOKENS ──────────────────────────────────
+     φ = 1.618  |  spacing = 10px × φ^n  |  hero-h = 61.8vh
+  ────────────────────────────────────────────────────────────────── */
+  :root {
+    --phi:       1.618;
+    --phi-inv:   0.618;
+    --phi-1:     10px;
+    --phi-2:     16px;
+    --phi-3:     26px;
+    --phi-4:     42px;
+    --phi-5:     69px;
+    --phi-6:     111px;
+    /* Hero height: 61.8% of viewport height */
+    --hero-h:    clamp(420px, 61.8vh, 680px);
+  }
+  /* Cinematic hero container */
+  .hero-phi {
+    height: var(--hero-h);
+    position: relative;
+    overflow: hidden;
+  }
+  /* Content anchored to the lower 38.2% of the hero */
+  .hero-phi-content {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: var(--phi-4) var(--phi-3) var(--phi-4);
+    background: linear-gradient(
+      to top,
+      rgba(0,0,0,0.92) 0%,
+      rgba(0,0,0,0.65) 30%,
+      rgba(0,0,0,0.20) 62%,
+      transparent 100%
+    );
+  }
+  /* φ-proportioned section padding */
+  .phi-section { padding-top: var(--phi-4); padding-bottom: var(--phi-4); }
+  .phi-section-lg { padding-top: var(--phi-5); padding-bottom: var(--phi-5); }
+
   /* ── SACRED GEOMETRY DIVIDERS — section separators with gold vein lines ──
      Three variants:
      .sg-divider        — simple centered gold line with diamond pip
