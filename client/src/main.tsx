@@ -11,6 +11,7 @@ import { KeeperAttrsProvider } from "./contexts/KeeperAttrsContext";
 import { WSPProvider } from "./contexts/WSPContext";
 import { RightRailProvider } from "./contexts/RightRailContext";
 import { getLoginUrl } from "./const";
+import { hadSession } from "./lib/sessionFlags";
 import "./index.css";
 
 const queryClient = new QueryClient({
@@ -32,10 +33,29 @@ const queryClient = new QueryClient({
   },
 });
 
-// Queries that are expected to return 401 for unauthenticated (guest) users.
-// auth.me is called on every page load to check session state; a 401 here simply
-// means "no active session" — it must NOT trigger a hard redirect to the login page,
-// otherwise first-time visitors are forced to sign up before seeing any content.
+// ─── Session-Aware Auth Redirect ──────────────────────────────────────────────
+// Living Nexus is a browse-first platform: guests must be able to explore all
+// content without being redirected to OAuth login.
+//
+// Strategy: only redirect to login when the user HAD an active session that
+// expired (i.e., they were previously authenticated in this browser tab).
+// Never redirect a fresh guest visitor who has never logged in.
+//
+// Implementation:
+//   • When auth.me resolves with a real user, useAuth calls markHadSession()
+//     which writes 'ln-had-session=1' to sessionStorage. This flag persists
+//     for the browser tab's lifetime.
+//   • The redirect handler checks this flag before redirecting. If the flag is
+//     absent, the 401 is treated as "expected guest 401" and ignored.
+//   • auth.me 401s are always suppressed (they mean "no session", not expiry).
+//
+// This correctly handles:
+//   ✓ Fresh guest visit → no redirect (flag absent)
+//   ✓ Logged-in user whose session expires mid-use → redirect (flag present)
+//   ✓ playback.getSettings, keeper.getProfile, etc. firing for guests → no redirect
+//   ✓ Mutation 401s for guests (e.g. keeper.chat) → no redirect
+
+/** True for queries that are expected to 401 for guests (auth.me = "no session"). */
 const isGuestSafeQueryKey = (queryKey: readonly unknown[]): boolean => {
   const keyStr = JSON.stringify(queryKey);
   // tRPC batches queries as [["auth","me"], {...}] — match the procedure path
@@ -49,8 +69,11 @@ const redirectToLoginIfUnauthorized = (
   if (!(error instanceof TRPCClientError)) return;
   if (typeof window === "undefined") return;
   if (error.message !== UNAUTHED_ERR_MSG) return;
-  // Never redirect for guest-safe queries — these 401s are expected for logged-out users
+  // auth.me 401 always means "no session" — never redirect
   if (queryKey && isGuestSafeQueryKey(queryKey)) return;
+  // Only redirect if this tab previously had an authenticated session.
+  // A fresh guest visitor has never set the flag, so we skip the redirect.
+  if (!hadSession()) return;
   window.location.href = getLoginUrl();
 };
 
@@ -58,11 +81,11 @@ queryClient.getQueryCache().subscribe(event => {
   if (event.type === "updated" && event.action.type === "error") {
     const error = event.query.state.error;
     redirectToLoginIfUnauthorized(error, event.query.queryKey);
-    // Suppress expected 401 noise from auth.me on guest page loads
+    // Suppress expected 401 noise (auth.me for guests, or any query for non-session tabs)
     const isExpectedGuestError =
       error instanceof TRPCClientError &&
       error.message === UNAUTHED_ERR_MSG &&
-      isGuestSafeQueryKey(event.query.queryKey);
+      (isGuestSafeQueryKey(event.query.queryKey) || !hadSession());
     if (!isExpectedGuestError) console.error("[API Query Error]", error);
   }
 });
@@ -71,7 +94,12 @@ queryClient.getMutationCache().subscribe(event => {
   if (event.type === "updated" && event.action.type === "error") {
     const error = event.mutation.state.error;
     redirectToLoginIfUnauthorized(error);
-    console.error("[API Mutation Error]", error);
+    // Suppress expected mutation 401 noise for guests
+    const isExpectedGuestError =
+      error instanceof TRPCClientError &&
+      error.message === UNAUTHED_ERR_MSG &&
+      !hadSession();
+    if (!isExpectedGuestError) console.error("[API Mutation Error]", error);
   }
 });
 

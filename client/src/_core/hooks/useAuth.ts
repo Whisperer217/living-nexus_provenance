@@ -1,5 +1,6 @@
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
+import { markHadSession } from "@/lib/sessionFlags";
 import { TRPCClientError } from "@trpc/client";
 import { useCallback, useEffect, useMemo } from "react";
 
@@ -46,6 +47,9 @@ export function useAuth(options?: UseAuthOptions) {
       "manus-runtime-user-info",
       JSON.stringify(meQuery.data)
     );
+    // Mark that this tab had an authenticated session so the global redirect
+    // handler knows to redirect on future 401s (session expiry), not just ignore them.
+    if (meQuery.data) markHadSession();
     return {
       user: meQuery.data ?? null,
       loading: meQuery.isLoading || logoutMutation.isPending,

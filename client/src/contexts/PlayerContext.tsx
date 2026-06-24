@@ -16,6 +16,7 @@ import React, { createContext, useContext, useRef, useState, useCallback, useEff
 import { safeAudioUrl } from "@shared/const";
 import { getCache, setCache, CACHE_KEYS, TTL } from "@/lib/lnxCache";
 import { trpc } from "@/lib/trpc";
+import { hadSession } from "@/lib/sessionFlags";
 
 /** Generate a stable UUID v4 */
 function generateId(): string {
@@ -292,7 +293,10 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const allTracks = useCallback(() => state.tracks.filter(t => !!t.audioUrl), [state.tracks]);
 
   // ── Playback Settings (crossfade / gapless / fade) ──────────────────────────
+  // Only fetch for authenticated users — playback.getSettings is a protectedProcedure
+  // that returns 401 for guests, which would trigger a false redirect without this guard.
   const { data: playbackSettingsData } = trpc.playback.getSettings.useQuery(undefined, {
+    enabled: hadSession(),
     staleTime: 60_000,
     retry: false,
   });

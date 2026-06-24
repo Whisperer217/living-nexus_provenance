@@ -5592,3 +5592,12 @@
 - [x] Update CTA labels to "Share Your Work" and "Explore Works" (natural, not forced)
 - [x] Verify 0 TypeScript errors and 309/309 tests pass
 - [x] Clean build confirmed (HomePage-DEJ4xalW.js)
+
+## Phase N+1: Fix Forced OAuth Redirect for Guest Users on Mobile Chrome
+- [x] Root cause 1: playback.getSettings (protectedProcedure) in PlayerContext had no enabled guard — fired for all visitors including guests, returning 401 that triggered redirect
+- [x] Root cause 2: mutation cache subscriber in main.tsx had no guest-safe exemption — any mutation 401 triggered redirect
+- [x] Created client/src/lib/sessionFlags.ts with markHadSession() / hadSession() utilities
+- [x] Updated main.tsx: redirect handler now checks hadSession() before redirecting — fresh guests are never redirected
+- [x] Updated useAuth.ts: calls markHadSession() when auth.me resolves with a real user
+- [x] Updated PlayerContext.tsx: added enabled: hadSession() guard to playback.getSettings query
+- [x] 309/309 tests passing, 0 TypeScript errors, clean production build
