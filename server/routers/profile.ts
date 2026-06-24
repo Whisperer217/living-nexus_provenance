@@ -331,6 +331,12 @@ export const profileRouter = router({
       return { url, focalX, focalY };
     }),
     allCreators: publicProcedure.query(async () => getAllCreators()),
+    /**
+     * @version 1.0.0
+     * Returns up to 12 creators in canonical CreatorProfile[] shape (see shared/coreDataTypes.ts).
+     * Sort order: pinned creators first, then by publishedCount descending.
+     * Used by the Featured Creators row on the homepage and the Explore page.
+     */
     featuredCreators: publicProcedure.query(async () => {
       // Return up to 12 creators: pinned creators first, then sorted by most published tracks
       const all = await getAllCreators();

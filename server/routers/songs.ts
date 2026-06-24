@@ -211,8 +211,23 @@ export const songsRouter = router({
           existingCreatedAt: match.createdAt,
         };
       }),
+    /**
+     * @version 1.0.0
+     * Returns paginated public works in canonical FeedRow[] shape { song: SongRecord, creator: CreatorSummary }.
+     * All clients (web, mobile) MUST use coreDataTypes.ts FeedRow for type safety.
+     */
     discover: publicProcedure.input(z.object({ genre: z.string().optional(), search: z.string().optional(), limit: z.number().max(500).optional(), offset: z.number().optional(), randomize: z.boolean().optional(), seed: z.number().optional(), contentType: z.enum(["audio", "lyrics", "manuscript", "comic", "written", "game"]).optional() }).optional()).query(async ({ input }) => getPublicSongs(input ?? {})),
+    /**
+     * @version 1.0.0
+     * Returns trending works scored by weekly plays + likes in canonical FeedRow[] shape.
+     * Score: weeklyPlays * 3 + weeklyLikes * 5 + allTimePlays * 0.01 (recency-weighted).
+     */
     trending: publicProcedure.input(z.object({ genre: z.string().optional(), limit: z.number().max(500).optional(), contentType: z.enum(["audio", "lyrics", "manuscript", "comic", "written", "game"]).optional() }).optional()).query(async ({ input }) => getTrendingWorks(input ?? {})),
+    /**
+     * @version 1.0.0
+     * Returns works published within the last 90 days, newest first, in canonical FeedRow[] shape.
+     * Falls back to all-time newest if no works exist within the window.
+     */
     newThisWeek: publicProcedure.input(z.object({ genre: z.string().optional(), contentType: z.enum(["audio", "lyrics", "manuscript", "comic", "written", "game"]).optional(), limit: z.number().max(100).optional() }).optional()).query(async ({ input }) => getNewThisWeek(input ?? {})),
     updateCredits: protectedProcedure.input(z.object({ songId: z.number().int(), creditsJson: z.string().max(4096) })).mutation(async ({ ctx, input }) => {
       const song = await getSongById(input.songId);
@@ -225,10 +240,21 @@ export const songsRouter = router({
       const total = await getCreatorTotalPlays(input.creatorId);
       return { total };
     }),
+    /**
+     * @version 1.0.0
+     * Returns a single work with creator in canonical { song: SongRecord, creator: CreatorSummary } shape.
+     * Used for work detail pages and OG meta tag generation.
+     */
     getById: publicProcedure.input(z.object({ id: z.number().int().positive() })).query(async ({ input }) => {
       const result = await getSongWithCreator(input.id);
       return result ?? null;
     }),
+    /**
+     * @version 1.0.0
+     * Returns the canonical WitnessRecord for any WID (WID-MUS-*, WID-LYR-*, WID-TST-*, PROJ-*).
+     * This is the authoritative provenance lookup endpoint — see shared/coreDataTypes.ts WitnessRecord.
+     * All clients MUST use this endpoint for WID verification; do not reconstruct provenance client-side.
+     */
     verifyWid: publicProcedure.input(z.object({ witnessId: z.string().min(1) })).query(async ({ input }) => {
       // Handle WID-TST (testimony) lookups
       if (input.witnessId.startsWith("WID-TST-")) {
@@ -378,6 +404,12 @@ export const songsRouter = router({
       );
       return { count: row?.total ?? 0 };
     }),
+    /**
+     * @version 1.0.0
+     * Returns recently witnessed audio works in canonical FeedRow shape { song, creator }.
+     * All clients (web, mobile) MUST use this shape — see shared/coreDataTypes.ts FeedRow.
+     * Previously returned a flat shape; normalized in v1.0.0 for cross-client consistency.
+     */
     getWitnessedVoices: publicProcedure.query(async () => {
       const { getDb } = await import("../utils/db");
       const { songs: songsTable, users: usersTable } = await import("../../drizzle/schema");
@@ -386,17 +418,19 @@ export const songsRouter = router({
       // Only return Published, public, audio-type witnessed songs — respects creator archive/unpublish toggle
       const rows = await db
         .select({
-          songId: songsTable.id,
-          title: songsTable.title,
-          witnessId: songsTable.witnessId,
-          coverArtUrl: songsTable.coverArtUrl,
-          fileUrl: songsTable.fileUrl,
-          genre: songsTable.genre,
-          createdAt: songsTable.createdAt,
-          userId: usersTable.id,
-          userName: usersTable.name,
-          artistHandle: usersTable.artistHandle,
-          profilePhotoUrl: usersTable.profilePhotoUrl,
+          // Canonical FeedRow.song fields (coreDataTypes.ts SongRecord)
+          song: songsTable,
+          // Canonical FeedRow.creator fields (coreDataTypes.ts CreatorSummary)
+          creator: {
+            id: usersTable.id,
+            name: usersTable.name,
+            artistHandle: usersTable.artistHandle,
+            profilePhotoUrl: usersTable.profilePhotoUrl,
+            aiDisclosure: usersTable.aiDisclosure,
+            primaryGenre: usersTable.primaryGenre,
+            stripeAccountStatus: usersTable.stripeAccountStatus,
+            role: usersTable.role,
+          },
         })
         .from(songsTable)
         .innerJoin(usersTable, eqOp(songsTable.userId, usersTable.id))

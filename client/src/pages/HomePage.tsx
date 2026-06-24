@@ -638,24 +638,8 @@ function ShowcaseSection() {
 
   const newSongs = useMemo(() => (newRaw ?? []).map(mapToSongData), [newRaw]);
   const trendSongs = useMemo(() => (trendRaw ?? []).map(mapToSongData), [trendRaw]);
-  // getWitnessedVoices returns a slightly different shape — adapt it
-  const voiceSongs = useMemo(() => (voicesRaw ?? []).map((v: any) => ({
-    id: typeof v.songId === "string" ? parseInt(v.songId, 10) : (v.songId as number),
-    title: v.title ?? "Untitled",
-    coverArtUrl: v.coverArtUrl ?? null,
-    artistName: v.artistHandle || v.userName || "Unknown",
-    genre: v.genre ?? null,
-    wid: v.witnessId ?? null,
-    widShort: null,
-    playCount: null,
-    fileUrl: v.fileUrl ?? null,
-    duration: null,
-    userId: null,
-    artistHandle: v.artistHandle ?? null,
-    profilePhotoUrl: v.profilePhotoUrl ?? null,
-    aiDisclosure: null,
-    contentType: "audio" as const,
-  })), [voicesRaw]);
+  // getWitnessedVoices now returns canonical FeedRow { song, creator } — same shape as newRaw/trendRaw
+  const voiceSongs = useMemo(() => (voicesRaw ?? []).map(mapToSongData), [voicesRaw]);
 
   const hasNew = newSongs.length > 0;
   const hasTrend = trendSongs.length > 0;

@@ -5612,3 +5612,14 @@
 - [x] Work cards emphasize creation first (large art), creator name secondary
 - [x] Dark premium aesthetic, golden ratio spacing, mobile-first
 - [x] TypeScript: 0 errors | Vitest: 309/309 passing
+
+## Phase N+3: Singular Source of Truth — Cross-Platform API Contract
+- [x] Audit songs, WID, provenance, license, and download routers for completeness and field consistency
+- [x] Create shared/coreDataTypes.ts — canonical TypeScript types for SongRecord, WitnessRecord, ProvenanceEvent, LicenseRecord, DownloadGrant, CreatorProfile
+- [x] Ensure all critical fields (widHash, createdAt UTC, ownerId, licenseCount, manifestData) are returned consistently across all procedures
+- [x] Add @version JSDoc comments to all key procedures in songs, profile, and license routers
+- [x] Normalize getWitnessedVoices to return canonical FeedRow { song, creator } shape (was flat)
+- [x] Add role field to getSongWithCreator creator subset (match CreatorSummary)
+- [x] Verify verify/:witnessId returns complete WitnessRecord with all provenance fields
+- [x] Write Vitest contract tests (server/coreDataTypes.test.ts — 8 tests)
+- [x] TypeScript: 0 errors | Vitest: 317/317 passing

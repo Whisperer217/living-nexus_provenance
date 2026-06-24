@@ -385,6 +385,8 @@ export async function getSongWithCreator(id: number) {
       id: users.id, name: users.name, artistHandle: users.artistHandle,
       profilePhotoUrl: users.profilePhotoUrl, stripeAccountStatus: users.stripeAccountStatus,
       stripeAccountId: users.stripeAccountId, aiDisclosure: users.aiDisclosure, primaryGenre: users.primaryGenre,
+      // canonical CreatorSummary field — must match FeedRow.creator shape (coreDataTypes.ts)
+      role: users.role,
     },
   }).from(songs).leftJoin(users, eq(songs.userId, users.id))
     // Allow published OR public songs — OG tags should work for any accessible song
