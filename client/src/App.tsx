@@ -16,6 +16,7 @@ import AmbientWidget from "./components/AmbientWidget";
 import KeeperAvatarWidget from "./components/KeeperAvatarWidget";
 import { useQrScanLogger } from "./hooks/useQrScanLogger";
 import { overlayCloseAll } from "@/lib/overlayController";
+import { PWAInstallBanner } from "./components/PWAInstallBanner";
 
 /** Logs QR scan events when ?qr= param is present in the URL. */
 function QrScanLogger() {
@@ -305,6 +306,7 @@ export default function App() {
             <QrScanLogger />
             <AmbientWidget />
             <KeeperAvatarWidget />
+            <PWAInstallBanner />
             <Router />
             </AmbientPlayerProvider>
           </PlayerProvider>

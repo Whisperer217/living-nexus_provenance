@@ -5535,3 +5535,14 @@
 ## Glow Bug Fixes (2026-06-23)
 - [x] Fix glow static gold — beat-reactive pulsing broken on mobile (direct DOM path bypasses activeShadow React state)
 - [x] Fix glow-off persistence — toggling glow off leaves border glow still visible (GOLD_SHADOW_MOBILE is always applied as baseShadow regardless of glowEnabled)
+
+## Pending Doc Review — 2026-06-23 (Slimdoggy Session)
+
+- [ ] [DOC REVIEW] Hide domain history panel on public creator profile — visible to visitors but serves no purpose; already accessible to creator in Edit My Domain page
+- [ ] [DOC REVIEW] Feedback section for creators — options: listener testimonials on profile, witness statements tied to WID provenance, private creator feedback channel, or community creator endorsements. Witness statement concept most aligned with platform identity.
+
+## PWA Install Prompt Fixes
+- [x] Add <link rel="manifest"> to index.html — Chrome cannot discover manifest without this
+- [x] Register service worker (sw.js) in main.tsx — required prerequisite for install prompt
+- [x] Build PWAInstallBanner component with beforeinstallprompt handler — in-app install banner
+- [x] Wire PWAInstallBanner into App.tsx — appears above GlobalPlayer mini bar

@@ -85,6 +85,38 @@ window.addEventListener("unhandledrejection", (e) => {
   console.error("[global-unhandled-promise]", e.reason);
 });
 
+// ─── Service Worker Registration ─────────────────────────────────────────────
+// Registers sw.js for PWA offline support and install prompt eligibility.
+// Only runs in production (or when explicitly enabled) to avoid caching
+// during development. The SW is registered after the page loads to avoid
+// competing with critical resource fetches.
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker
+      .register("/sw.js", { scope: "/" })
+      .then((reg) => {
+        console.log("[SW] Registered, scope:", reg.scope);
+        // Listen for a new SW waiting — prompt user to reload for update
+        reg.addEventListener("updatefound", () => {
+          const newWorker = reg.installing;
+          if (!newWorker) return;
+          newWorker.addEventListener("statechange", () => {
+            if (
+              newWorker.state === "installed" &&
+              navigator.serviceWorker.controller
+            ) {
+              // New content available — the PWAInstallBanner will handle reload UX
+              window.dispatchEvent(new CustomEvent("sw-update-available"));
+            }
+          });
+        });
+      })
+      .catch((err) => {
+        console.warn("[SW] Registration failed:", err);
+      });
+  });
+}
+
 // Phase 207: Remove server-injected witness/static body blocks before React mounts.
 // These blocks are visible to crawlers and no-JS users (provenance proof layer).
 // React replaces them with the full SPA experience.
