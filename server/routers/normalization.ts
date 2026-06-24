@@ -14,7 +14,7 @@
 import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
 import { TRPCError } from "@trpc/server";
-import { getDb } from "../db";
+import { getDb } from "../utils/db";
 import { songs, users, collections } from "../../drizzle/schema";
 import { isNull, isNotNull, eq, and, or, sql } from "drizzle-orm";
 

@@ -5551,3 +5551,9 @@
 - [x] Funding progress bar shows $0 despite real Stripe donations received (Slimdoggy donated $50-55 to LN fund; $30 to Super O: Save the Mainframe) — root cause: Stripe in test mode can't see live payments; added admin.manualCreditDonation procedure + Manual Credit panel in Admin → Projects tab
 - [x] Trace Stripe webhook → DB write → UI query: root cause confirmed (test key can't see live sessions)
 - [x] Fix root cause so progress bar reflects actual total donated: manual credit tool added; permanent fix requires switching to live Stripe keys
+
+## Server Folder Refactor
+- [x] Moved 62 server root files into clean subfolders: routes/ (12 files), workers/ (5 files), services/ (12 files), utils/ (2 files), tests/ (29 files), routers/ (index.ts + normalization.ts + qr.ts)
+- [x] Deleted routers.ts.patch
+- [x] Updated all import paths across server/, mcp/, and test files
+- [x] 297/297 tests pass, 0 TypeScript errors after refactor

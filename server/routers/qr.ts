@@ -13,7 +13,7 @@ import {
   getQrSharesByEntity,
   logQrScan,
   getQrScanStats,
-} from "../db";
+} from "../utils/db";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 

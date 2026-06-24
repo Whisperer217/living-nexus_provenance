@@ -15,7 +15,7 @@
 
 import { z } from "zod";
 import { and, count, eq, isNotNull, sql } from "drizzle-orm";
-import { getDb } from "../db";
+import { getDb } from "../utils/db";
 import { songs, users } from "../../drizzle/schema";
 import { generateRef } from "../_core/errorHandler";
 

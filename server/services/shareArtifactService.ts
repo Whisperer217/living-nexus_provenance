@@ -7,7 +7,7 @@
  */
 
 import { eq } from "drizzle-orm";
-import { getDb } from "../db";
+import { getDb } from "../utils/db";
 import { shareArtifacts, songs } from "../../drizzle/schema";
 
 const SITE_URL = "https://www.livingnexus.org";
