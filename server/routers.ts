@@ -3198,6 +3198,63 @@ ${workType === "manuscript" || workType === "comic" ? "Category" : "Genre"}: ${i
 
         return { ok: true, synced, skipped, totalCentsAdded };
       }),
+    /**
+     * Manually credit a donation to a project — for cases where Stripe keys
+     * are in test mode but real live payments were made, or when the webhook
+     * and confirmDonation both failed to fire.
+     */
+    manualCreditDonation: adminProcedure
+      .input(z.object({
+        projectId: z.number().int(),
+        amountCents: z.number().int().min(1),
+        donorName: z.string().max(256).optional(),
+        donorEmail: z.string().email().max(256).optional(),
+        message: z.string().max(500).optional(),
+        stripeSessionId: z.string().max(256).optional(),
+        anonymous: z.boolean().optional(),
+        note: z.string().max(512).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB unavailable" });
+        const project = await getProjectById(input.projectId);
+        if (!project) throw new TRPCError({ code: "NOT_FOUND", message: "Project not found" });
+        // Check for duplicate stripeSessionId
+        if (input.stripeSessionId) {
+          const existing = await db.execute(
+            `SELECT id FROM projectDonations WHERE stripeSessionId = ? LIMIT 1`,
+            [input.stripeSessionId]
+          ) as any;
+          const rows = existing?.[0] as any[];
+          if (rows && rows.length > 0) {
+            return { ok: false, reason: "already_recorded" };
+          }
+        }
+        await recordProjectDonation({
+          projectId: input.projectId,
+          donorUserId: undefined,
+          donorName: input.anonymous ? "Anonymous" : (input.donorName || undefined),
+          donorEmail: input.donorEmail || undefined,
+          amountCents: input.amountCents,
+          message: input.message || undefined,
+          anonymous: input.anonymous ?? false,
+          stripeSessionId: input.stripeSessionId || undefined,
+        });
+        await logAdminAction({
+          adminId: ctx.user.id,
+          adminName: ctx.user.name,
+          action: "manual_credit_donation",
+          targetType: "project",
+          targetId: String(input.projectId),
+          details: {
+            amountCents: input.amountCents,
+            donorName: input.donorName,
+            stripeSessionId: input.stripeSessionId,
+            note: input.note,
+          },
+        });
+        return { ok: true, amountCents: input.amountCents };
+      }),
   }),
   // ── Field Notes ────────────────────────────────────────────────────────────
   fieldNotes: router({

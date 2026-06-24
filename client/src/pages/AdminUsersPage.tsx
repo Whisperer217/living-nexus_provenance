@@ -2060,11 +2060,53 @@ function DataRightsTab() {
   );
 }
 
+// ── Manual Credit Button ─────────────────────────────────────────────────────
+function ManualCreditButton({
+  projectId, amountCents, donorName, stripeSessionId, note,
+  onResult,
+}: {
+  projectId: number;
+  amountCents: number;
+  donorName: string;
+  stripeSessionId: string;
+  note: string;
+  onResult: (r: { ok: boolean; amountCents?: number; reason?: string }) => void;
+}) {
+  const credit = trpc.admin.manualCreditDonation.useMutation({
+    onSuccess: (r) => onResult(r),
+    onError: (e) => onResult({ ok: false, reason: e.message }),
+  });
+  const disabled = !projectId || !amountCents || credit.isPending;
+  return (
+    <Button
+      disabled={disabled}
+      onClick={() => credit.mutate({
+        projectId,
+        amountCents,
+        donorName: donorName || undefined,
+        stripeSessionId: stripeSessionId || undefined,
+        note: note || undefined,
+      })}
+      style={{ background: "#7c3aed", color: "#fff" }}
+    >
+      {credit.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+      Credit Donation
+    </Button>
+  );
+}
+
 // ── Projects / Donations Tab ──────────────────────────────────────────────────
 function ProjectDonationsTab() {
   const utils = trpc.useUtils();
   const [projectIdInput, setProjectIdInput] = useState("");
   const [syncResult, setSyncResult] = useState<{ synced: number; skipped: number; totalCentsAdded: number } | null>(null);
+  // Manual credit form
+  const [mcProjectId, setMcProjectId] = useState("");
+  const [mcAmount, setMcAmount] = useState("");
+  const [mcDonorName, setMcDonorName] = useState("");
+  const [mcSessionId, setMcSessionId] = useState("");
+  const [mcNote, setMcNote] = useState("");
+  const [mcResult, setMcResult] = useState<{ ok: boolean; amountCents?: number; reason?: string } | null>(null);
 
   // List all active projects so admin can pick one
   const { data: projects, isLoading: projectsLoading } = trpc.projects.list.useQuery(undefined, { retry: false });
@@ -2191,6 +2233,58 @@ function ProjectDonationsTab() {
                 </div>
               ))}
             </div>
+          </div>
+        )}
+      </div>
+
+      {/* Manual Credit Donation — for live payments when Stripe key is in test mode */}
+      <div className="rounded-xl p-5 border" style={{ background: CARD, borderColor: "#7c3aed44" }}>
+        <h3 className="text-sm font-semibold uppercase tracking-wider mb-1" style={{ color: "#a78bfa" }}>Manual Credit Donation</h3>
+        <p className="text-xs mb-4" style={{ color: SUBTEXT }}>
+          Use this when a real live payment was made but the Stripe key is in test mode (so sync cannot see it),
+          or when both the webhook and the return-URL confirm both failed. Idempotent if you supply the Stripe session ID.
+        </p>
+        <div className="grid grid-cols-2 gap-3 mb-3">
+          <div>
+            <label className="block text-xs mb-1" style={{ color: MUTED }}>Project ID *</label>
+            <Input type="number" min={1} value={mcProjectId} onChange={e => { setMcProjectId(e.target.value); setMcResult(null); }} placeholder="e.g. 30001" style={{ background: BG, border: `1px solid ${BORDER}`, color: TEXT }} />
+          </div>
+          <div>
+            <label className="block text-xs mb-1" style={{ color: MUTED }}>Amount (USD) *</label>
+            <Input type="number" min={1} step="0.01" value={mcAmount} onChange={e => { setMcAmount(e.target.value); setMcResult(null); }} placeholder="e.g. 25.00" style={{ background: BG, border: `1px solid ${BORDER}`, color: TEXT }} />
+          </div>
+          <div>
+            <label className="block text-xs mb-1" style={{ color: MUTED }}>Donor Name</label>
+            <Input value={mcDonorName} onChange={e => setMcDonorName(e.target.value)} placeholder="e.g. Slimdoggy" style={{ background: BG, border: `1px solid ${BORDER}`, color: TEXT }} />
+          </div>
+          <div>
+            <label className="block text-xs mb-1" style={{ color: MUTED }}>Stripe Session ID (deduplication)</label>
+            <Input value={mcSessionId} onChange={e => setMcSessionId(e.target.value)} placeholder="cs_live_..." style={{ background: BG, border: `1px solid ${BORDER}`, color: TEXT }} />
+          </div>
+          <div className="col-span-2">
+            <label className="block text-xs mb-1" style={{ color: MUTED }}>Internal Note</label>
+            <Input value={mcNote} onChange={e => setMcNote(e.target.value)} placeholder="e.g. Live payment made 2026-06-23, test key couldn't see it" style={{ background: BG, border: `1px solid ${BORDER}`, color: TEXT }} />
+          </div>
+        </div>
+        <ManualCreditButton
+          projectId={parseInt(mcProjectId) || 0}
+          amountCents={Math.round(parseFloat(mcAmount) * 100) || 0}
+          donorName={mcDonorName}
+          stripeSessionId={mcSessionId}
+          note={mcNote}
+          onResult={(r) => {
+            setMcResult(r);
+            if (r.ok) {
+              utils.projects.list.invalidate();
+              toast.success(`Credited $${((r.amountCents ?? 0) / 100).toFixed(2)} to project ${mcProjectId}`);
+            } else {
+              toast.error(r.reason === "already_recorded" ? "Already recorded — skipped" : "Credit failed");
+            }
+          }}
+        />
+        {mcResult && (
+          <div className="mt-3 text-xs rounded-lg px-3 py-2" style={{ background: mcResult.ok ? "#052e16" : "#1a0a0a", color: mcResult.ok ? "#4ade80" : "#f87171" }}>
+            {mcResult.ok ? `✓ Credited $${((mcResult.amountCents ?? 0) / 100).toFixed(2)}` : `✗ ${mcResult.reason ?? "error"}`}
           </div>
         )}
       </div>

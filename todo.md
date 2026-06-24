@@ -5546,3 +5546,8 @@
 - [x] Register service worker (sw.js) in main.tsx — required prerequisite for install prompt
 - [x] Build PWAInstallBanner component with beforeinstallprompt handler — in-app install banner
 - [x] Wire PWAInstallBanner into App.tsx — appears above GlobalPlayer mini bar
+
+## Donation Tracker Bug (reported 2026-06-23)
+- [x] Funding progress bar shows $0 despite real Stripe donations received (Slimdoggy donated $50-55 to LN fund; $30 to Super O: Save the Mainframe) — root cause: Stripe in test mode can't see live payments; added admin.manualCreditDonation procedure + Manual Credit panel in Admin → Projects tab
+- [x] Trace Stripe webhook → DB write → UI query: root cause confirmed (test key can't see live sessions)
+- [x] Fix root cause so progress bar reflects actual total donated: manual credit tool added; permanent fix requires switching to live Stripe keys
