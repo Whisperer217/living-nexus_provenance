@@ -269,7 +269,7 @@ export default function CreatorDomainPage() {
         </div>
       ) : (
         /* ── Management Mode: sidebar + content ── */
-        <div className="flex min-h-[calc(100vh-57px)]">
+        <div className="flex flex-col md:flex-row min-h-[calc(100vh-57px)]">
 
           {/* ── Sidebar ── */}
           <aside
@@ -335,7 +335,7 @@ export default function CreatorDomainPage() {
           </div>
 
           {/* ── Content Panel ── */}
-          <main className="flex-1 min-w-0 px-4 md:px-8 py-6 overflow-y-auto">
+          <main className="flex-1 min-w-0 px-4 md:px-8 py-6">
 
             {/* ── Overview ── */}
             {activeSection === "overview" && (
