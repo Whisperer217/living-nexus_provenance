@@ -61,6 +61,27 @@ class ErrorBoundary extends Component<Props, State> {
     console.error("[ErrorBoundary component stack]", info.componentStack);
     this.setState({ componentStack: info.componentStack });
     this.props.onError?.(error, info);
+    // Chunk-load failures happen when a stale service worker serves an old JS
+    // bundle hash after a new deploy. Detect this pattern and auto-reload once
+    // so the user never sees the crash screen — the fresh deploy will resolve it.
+    const isChunkError =
+      error.message?.includes("Failed to fetch dynamically imported module") ||
+      error.message?.includes("Importing a module script failed") ||
+      error.name === "ChunkLoadError";
+    if (isChunkError) {
+      const reloadKey = "_ln_chunk_reload";
+      const alreadyReloaded = sessionStorage.getItem(reloadKey);
+      if (!alreadyReloaded) {
+        sessionStorage.setItem(reloadKey, "1");
+        console.warn("[ErrorBoundary] Chunk load failure detected — reloading for fresh deploy");
+        window.location.reload();
+        return;
+      } else {
+        // Already reloaded once — clear the flag so future deploys work, then
+        // show the normal error UI so the user can report a persistent issue.
+        sessionStorage.removeItem(reloadKey);
+      }
+    }
   }
 
   /** Auto-reset when the route key changes — clears the error so the new page renders normally */

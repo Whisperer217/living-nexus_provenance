@@ -130,6 +130,13 @@ if ("serviceWorker" in navigator) {
       .catch((err) => {
         console.warn("[SW] Registration failed:", err);
       });
+    // When the SW controller changes (new SW took over after skipWaiting),
+    // reload the page immediately so stale chunk hashes are never used.
+    // This is the primary defense against "Failed to fetch dynamically imported module".
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      console.log("[SW] Controller changed — reloading for fresh chunks");
+      window.location.reload();
+    });
   });
 }
 
