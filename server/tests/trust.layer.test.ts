@@ -201,9 +201,9 @@ describe("WIDPanel — Witness Flow integration", () => {
 describe("songs.upload procedure — metadata fields", () => {
   it("routers.ts upload input includes durationSeconds, sampleRate, bitDepth", async () => {
     const fs = await import("fs");
-    // After router split, songs procedures live in songsRouter.ts
+    // After router split, songs procedures live in songs.ts
     const content = fs.readFileSync(
-      new URL("../routers/songsRouter.ts", import.meta.url).pathname,
+      new URL("../routers/songs.ts", import.meta.url).pathname,
       "utf-8"
     );
     expect(content).toContain("durationSeconds: z.number().optional()");
