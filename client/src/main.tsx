@@ -32,22 +32,38 @@ const queryClient = new QueryClient({
   },
 });
 
-const redirectToLoginIfUnauthorized = (error: unknown) => {
+// Queries that are expected to return 401 for unauthenticated (guest) users.
+// auth.me is called on every page load to check session state; a 401 here simply
+// means "no active session" — it must NOT trigger a hard redirect to the login page,
+// otherwise first-time visitors are forced to sign up before seeing any content.
+const isGuestSafeQueryKey = (queryKey: readonly unknown[]): boolean => {
+  const keyStr = JSON.stringify(queryKey);
+  // tRPC batches queries as [["auth","me"], {...}] — match the procedure path
+  return keyStr.includes('"auth"') && keyStr.includes('"me"');
+};
+
+const redirectToLoginIfUnauthorized = (
+  error: unknown,
+  queryKey?: readonly unknown[]
+) => {
   if (!(error instanceof TRPCClientError)) return;
   if (typeof window === "undefined") return;
-
-  const isUnauthorized = error.message === UNAUTHED_ERR_MSG;
-
-  if (!isUnauthorized) return;
-
+  if (error.message !== UNAUTHED_ERR_MSG) return;
+  // Never redirect for guest-safe queries — these 401s are expected for logged-out users
+  if (queryKey && isGuestSafeQueryKey(queryKey)) return;
   window.location.href = getLoginUrl();
 };
 
 queryClient.getQueryCache().subscribe(event => {
   if (event.type === "updated" && event.action.type === "error") {
     const error = event.query.state.error;
-    redirectToLoginIfUnauthorized(error);
-    console.error("[API Query Error]", error);
+    redirectToLoginIfUnauthorized(error, event.query.queryKey);
+    // Suppress expected 401 noise from auth.me on guest page loads
+    const isExpectedGuestError =
+      error instanceof TRPCClientError &&
+      error.message === UNAUTHED_ERR_MSG &&
+      isGuestSafeQueryKey(event.query.queryKey);
+    if (!isExpectedGuestError) console.error("[API Query Error]", error);
   }
 });
 
