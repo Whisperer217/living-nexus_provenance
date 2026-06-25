@@ -454,10 +454,10 @@ function NewVoicesCarousel() {
 /** Horizontal 2-row track grid — accepts pre-fetched like data to avoid per-card queries */
 function ShowcaseSection() {
   const newInput = useMemo(() => ({ limit: 16 }), []);
-  const { data: newRaw } = trpc.songs.newThisWeek.useQuery(newInput, { staleTime: 60_000, refetchOnWindowFocus: false });
+  const { data: newRaw, isLoading: newLoading } = trpc.songs.newThisWeek.useQuery(newInput, { staleTime: 60_000, refetchOnWindowFocus: false });
   const trendInput = useMemo(() => ({ limit: 16 }), []);
-  const { data: trendRaw } = trpc.songs.trending.useQuery(trendInput, { staleTime: 60_000, refetchOnWindowFocus: false });
-  const { data: creators } = trpc.profile.featuredCreators.useQuery(undefined, { staleTime: 120_000, refetchOnWindowFocus: false });
+  const { data: trendRaw, isLoading: trendLoading } = trpc.songs.trending.useQuery(trendInput, { staleTime: 60_000, refetchOnWindowFocus: false });
+  const { data: creators, isLoading: creatorsLoading } = trpc.profile.featuredCreators.useQuery(undefined, { staleTime: 120_000, refetchOnWindowFocus: false });
   const { data: voicesRaw } = trpc.songs.getWitnessedVoices.useQuery(undefined, { staleTime: 60_000, refetchOnWindowFocus: false });
 
   const newSongs = useMemo(() => (newRaw ?? []).map(mapToSongData), [newRaw]);
@@ -470,7 +470,31 @@ function ShowcaseSection() {
   const hasCreators = (creators ?? []).length > 0;
   const hasVoices = voiceSongs.length > 0;
 
-  if (!hasNew && !hasTrend && !hasCreators && !hasVoices) return null;
+  // While queries are still in-flight, show skeleton rows so the section is
+  // always present in the DOM — never silently invisible.
+  const isAnyLoading = newLoading || trendLoading || creatorsLoading;
+  if (!hasNew && !hasTrend && !hasCreators && !hasVoices && !isAnyLoading) return null;
+
+  // Loading skeleton — two rows of 6 placeholder cards each
+  if (isAnyLoading && !hasNew && !hasTrend && !hasCreators && !hasVoices) {
+    return (
+      <div className="px-4 pt-10 pb-6">
+        {["New Arrivals", "Trending This Week"].map((title) => (
+          <div key={title} className="mb-10">
+            <div className="flex items-center justify-between mb-4 px-1">
+              <div className="h-5 w-36 bg-white/10 rounded animate-pulse" />
+              <div className="h-4 w-16 bg-white/10 rounded animate-pulse" />
+            </div>
+            <div className="flex gap-3 overflow-hidden">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="flex-none w-40 aspect-[2/3] bg-white/5 rounded-lg animate-pulse" style={{ animationDelay: `${i * 80}ms` }} />
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="px-4 pt-10 pb-6">

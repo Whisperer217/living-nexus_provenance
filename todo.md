@@ -5804,3 +5804,10 @@
 - [x] Check frontend: verify HomePage and ExplorePage are not stuck in loading/empty state
 - [x] Fix root cause and verify songs appear on Homepage and Explore on both desktop and mobile
 - [x] 0 TypeScript errors, all tests passing
+
+## Bug: Discovery Pages Still Empty (Round 2 — Deep Investigation)
+- [x] Trace live API responses from songs.newThisWeek, songs.trending, songs.discoverInfinite
+- [x] Verify DB query filters (status, visibility, owner-only logic)
+- [x] Trace frontend rendering pipeline — check if data reaches StoreTrackCard/ExploreCard
+- [x] Fix root cause and verify songs appear on Homepage and Explore
+- [x] 0 TypeScript errors, all tests passing
