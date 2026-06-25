@@ -219,6 +219,35 @@ export const songsRouter = router({
     discover: publicProcedure.input(z.object({ genre: z.string().optional(), search: z.string().optional(), limit: z.number().max(500).optional(), offset: z.number().optional(), randomize: z.boolean().optional(), seed: z.number().optional(), contentType: z.enum(["audio", "lyrics", "manuscript", "comic", "written", "game"]).optional() }).optional()).query(async ({ input }) => getPublicSongs(input ?? {})),
     /**
      * @version 1.0.0
+     * Cursor-based infinite-scroll variant of discover.
+     * cursor = offset (number of rows already seen). Returns { items, nextCursor }.
+     * nextCursor is null when the feed is exhausted.
+     */
+    discoverInfinite: publicProcedure
+      .input(z.object({
+        cursor: z.number().int().min(0).optional(),
+        limit: z.number().int().min(1).max(60).optional(),
+        genre: z.string().optional(),
+        search: z.string().optional(),
+        contentType: z.enum(["audio", "lyrics", "manuscript", "comic", "written", "game"]).optional(),
+      }).optional())
+      .query(async ({ input }) => {
+        const limit = input?.limit ?? 24;
+        const offset = input?.cursor ?? 0;
+        const rows = await getPublicSongs({
+          genre: input?.genre,
+          search: input?.search,
+          contentType: input?.contentType,
+          limit: limit + 1, // fetch one extra to detect hasMore
+          offset,
+        });
+        const hasMore = rows.length > limit;
+        const items = hasMore ? rows.slice(0, limit) : rows;
+        const nextCursor = hasMore ? offset + limit : null;
+        return { items, nextCursor };
+      }),
+    /**
+     * @version 1.0.0
      * Returns trending works scored by weekly plays + likes in canonical FeedRow[] shape.
      * Score: weeklyPlays * 3 + weeklyLikes * 5 + allTimePlays * 0.01 (recency-weighted).
      */

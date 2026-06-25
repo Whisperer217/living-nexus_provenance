@@ -467,14 +467,8 @@ export default function ExplorePage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search]);
 
-  // Infinite scroll state — accumulate pages client-side
-  const [offset, setOffset] = useState(0);
-  const [allSongs, setAllSongs] = useState<any[]>([]);
-  const [hasMore, setHasMore] = useState(true);
-  const [isFetchingMore, setIsFetchingMore] = useState(false);
+  // ── Infinite scroll state — useInfiniteQuery (cursor-based) ─────────────
   const loaderRef = useRef<HTMLDivElement>(null);
-  // Track which offset we've already fetched to avoid double-fetching
-  const fetchedOffsetRef = useRef<number>(-1);
 
   // Randomize state
   const [seed, setSeed] = useState(() => Math.floor(Math.random() * 1_000_000));
@@ -517,70 +511,50 @@ export default function ExplorePage() {
     { enabled: mode === "trending", refetchOnWindowFocus: false, staleTime: 60_000 }
   );
 
-  // ── Infinite scroll — fetch one page at a time ────────────────────
-  const { data: pageData, isLoading: pageLoading, isFetching: pageFetching } = trpc.songs.discover.useQuery(
+  // ── Infinite scroll — useInfiniteQuery (cursor-based) ───────────────────
+  const {
+    data: infiniteData,
+    isLoading: pageLoading,
+    isFetchingNextPage,
+    fetchNextPage,
+    hasNextPage,
+  } = trpc.songs.discoverInfinite.useInfiniteQuery(
     {
+      limit: PAGE_SIZE,
       genre: activeGenre === "All" ? undefined : activeGenre,
       search: query || undefined,
-      limit: PAGE_SIZE,
-      offset,
       contentType: serverContentType,
     },
     {
+      getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
       enabled: mode === "infinite",
       refetchOnWindowFocus: false,
       staleTime: 60_000,
+      initialCursor: 0,
     }
   );
 
-  // Append new page to accumulated list — only when offset changes
-  useEffect(() => {
-    if (mode !== "infinite" || !pageData || pageFetching) return;
-    if (fetchedOffsetRef.current === offset) return; // already processed this offset
-    fetchedOffsetRef.current = offset;
+  // Flatten pages into a single array — memoised to avoid re-renders
+  const allSongs = useMemo(
+    () => (infiniteData?.pages ?? []).flatMap((p) => p.items),
+    [infiniteData]
+  );
+  const hasMore = !!hasNextPage;
+  const isFetchingMore = isFetchingNextPage;
 
-    const newBatch = pageData as any[];
-    if (newBatch.length === 0) {
-      setHasMore(false);
-    } else {
-      setAllSongs(prev => {
-        // Deduplicate by song id
-        const existingIds = new Set(prev.map((s: any) => s.song.id));
-        const fresh = newBatch.filter((s: any) => !existingIds.has(s.song.id));
-        return [...prev, ...fresh];
-      });
-      if (newBatch.length < PAGE_SIZE) setHasMore(false);
-    }
-    setIsFetchingMore(false);
-  }, [pageData, pageFetching, mode, offset]);
-
-  // Reset on filter/mode/contentType change
-  useEffect(() => {
-    setOffset(0);
-    setAllSongs([]);
-    setHasMore(true);
-    setIsFetchingMore(false);
-    fetchedOffsetRef.current = -1;
-  }, [activeGenre, query, mode, contentType]);
-
-  // IntersectionObserver — only fires when not already loading
-  const handleObserver = useCallback((entries: IntersectionObserverEntry[]) => {
-    const target = entries[0];
-    if (
-      target.isIntersecting &&
-      hasMore &&
-      !pageLoading &&
-      !pageFetching &&
-      !isFetchingMore &&
-      mode === "infinite"
-    ) {
-      setIsFetchingMore(true);
-      setOffset(prev => prev + PAGE_SIZE);
-    }
-  }, [hasMore, pageLoading, pageFetching, isFetchingMore, mode]);
+  // IntersectionObserver — triggers fetchNextPage when sentinel enters viewport
+  const handleObserver = useCallback(
+    (entries: IntersectionObserverEntry[]) => {
+      const target = entries[0];
+      if (target.isIntersecting && hasMore && !isFetchingMore && mode === "infinite") {
+        fetchNextPage();
+      }
+    },
+    [hasMore, isFetchingMore, mode, fetchNextPage]
+  );
 
   useEffect(() => {
-    const observer = new IntersectionObserver(handleObserver, { rootMargin: "300px" });
+    const observer = new IntersectionObserver(handleObserver, { rootMargin: "400px" });
     const el = loaderRef.current;
     if (el) observer.observe(el);
     return () => { if (el) observer.unobserve(el); };
@@ -802,6 +776,7 @@ export default function ExplorePage() {
       await Promise.all([
         utils.songs.trending.invalidate(),
         utils.songs.discover.invalidate(),
+        utils.songs.discoverInfinite.invalidate(),
         utils.songs.newThisWeek.invalidate(),
         utils.profile.allCreators.invalidate(),
       ]);
@@ -1243,17 +1218,54 @@ export default function ExplorePage() {
         )}
         {/* Infinite scroll sentinel — only rendered in infinite mode */}
         {!isCreatorsMode && mode === "infinite" && !isLoading && (
-          <div ref={loaderRef} className="py-8 flex justify-center">
-            {(isFetchingMore || pageFetching) && hasMore && (
-              <div className="flex items-center gap-2 text-[12px]" style={{ color: "rgba(255,255,255,0.40)" }}>
-                <div className="w-4 h-4 rounded-full border-2 border-white/20 border-t-[#C49A28] animate-spin" />
-                Loading more…
+          <div ref={loaderRef} className="py-12 flex flex-col items-center gap-3">
+            {isFetchingMore && (
+              <div className="flex flex-col items-center gap-3">
+                {/* Cinematic loading ring */}
+                <div className="relative w-10 h-10">
+                  <div
+                    className="absolute inset-0 rounded-full animate-spin"
+                    style={{
+                      border: "2px solid rgba(196,154,40,0.12)",
+                      borderTopColor: "rgba(196,154,40,0.80)",
+                      animationDuration: "0.9s",
+                    }}
+                  />
+                  <div
+                    className="absolute inset-[5px] rounded-full animate-spin"
+                    style={{
+                      border: "1px solid rgba(196,154,40,0.06)",
+                      borderTopColor: "rgba(196,154,40,0.35)",
+                      animationDuration: "1.4s",
+                      animationDirection: "reverse",
+                    }}
+                  />
+                </div>
+                <span
+                  className="text-[11px] font-mono tracking-[0.18em] uppercase"
+                  style={{ color: "rgba(196,154,40,0.55)" }}
+                >
+                  Summoning more works…
+                </span>
               </div>
             )}
             {!hasMore && songs.length > 0 && (
-              <p className="text-[11px] font-body text-center" style={{ color: "rgba(255,255,255,0.25)" }}>
-                ✦ You've reached the end of the cosmos ✦
-              </p>
+              <div className="flex flex-col items-center gap-2 py-4">
+                <div
+                  className="w-16 h-px"
+                  style={{ background: "linear-gradient(to right, transparent, rgba(196,154,40,0.35), transparent)" }}
+                />
+                <p
+                  className="text-[10px] font-mono tracking-[0.22em] uppercase text-center"
+                  style={{ color: "rgba(196,154,40,0.40)" }}
+                >
+                  ❖ All works witnessed ❖
+                </p>
+                <div
+                  className="w-16 h-px"
+                  style={{ background: "linear-gradient(to right, transparent, rgba(196,154,40,0.35), transparent)" }}
+                />
+              </div>
             )}
           </div>
         )}

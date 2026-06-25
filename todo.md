@@ -5660,3 +5660,12 @@
 - [x] ShowcaseRow: Bottom margin mb-16 (from mb-14), section header mb-7 (from mb-6)
 - [x] WIDExplainer: Vertical padding py-16 (from py-12)
 - [x] TypeScript: 0 errors | Tests: 317/317 passing | Clean production build
+
+## Phase N+7: Infinite Scroll on Explore Page
+- [x] Add songs.discoverInfinite tRPC procedure (cursor-based, returns { items, nextCursor })
+- [x] Replace manual offset/allSongs state machine in ExplorePage with useInfiniteQuery
+- [x] Wire IntersectionObserver sentinel to fetchNextPage
+- [x] Add cinematic loading indicator and end-of-feed marker
+- [x] Invalidate discoverInfinite in pull-to-refresh handler
+- [x] Write Vitest test for discoverInfinite procedure
+- [x] TypeScript check + clean build + checkpoint
