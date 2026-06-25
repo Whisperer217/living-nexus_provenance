@@ -535,10 +535,18 @@ export default function ExplorePage() {
   );
 
   // Flatten pages into a single array — memoised to avoid re-renders
-  const allSongs = useMemo(
-    () => (infiniteData?.pages ?? []).flatMap((p) => p.items),
-    [infiniteData]
-  );
+  const allSongs = useMemo(() => {
+    const flat = (infiniteData?.pages ?? []).flatMap((p) => p.items);
+    // Deduplicate by song ID — offset drift (e.g. new uploads between pages) can
+    // cause the same song to appear in two pages, producing duplicate React keys.
+    const seen = new Set<number>();
+    return flat.filter((item) => {
+      const id = item.song.id;
+      if (seen.has(id)) return false;
+      seen.add(id);
+      return true;
+    });
+  }, [infiniteData]);
   const hasMore = !!hasNextPage;
   const isFetchingMore = isFetchingNextPage;
 
@@ -1070,17 +1078,21 @@ export default function ExplorePage() {
                 rows.push(
                   <ShowcaseRow key="__all" title={mode === "trending" ? "Trending" : mode === "new" ? "New This Week" : "All Tracks"} seeAllHref="/explore" className="px-6">
                     {topSlice.map((song: ReturnType<typeof exploreMapToSongData>, idx: number) => (
-                      <StoreTrackCard key={song.id} song={song} size="md" allSongs={topSlice} songIndex={idx} isNew={mode === "new"} />
+                      // Namespace key with row context to prevent collision with genre rows
+                      <StoreTrackCard key={`__all-${song.id}`} song={song} size="md" allSongs={topSlice} songIndex={idx} isNew={mode === "new"} />
                     ))}
                   </ShowcaseRow>
                 );
               }
               genreMap.forEach((genreSongs, genre) => {
                 if (genreSongs.length < 3) return; // skip tiny rows
+                // Sanitize genre for use in key (remove spaces/special chars)
+                const genreKey = genre.replace(/[^a-zA-Z0-9]/g, "_");
                 rows.push(
                   <ShowcaseRow key={genre} title={genre} seeAllHref={`/explore?genre=${encodeURIComponent(genre)}`} className="px-6">
                     {genreSongs.map((song: ReturnType<typeof exploreMapToSongData>, idx: number) => (
-                      <StoreTrackCard key={song.id} song={song} size="md" allSongs={genreSongs} songIndex={idx} isNew={mode === "new"} />
+                      // Namespace key with genre to prevent collision with __all row
+                      <StoreTrackCard key={`${genreKey}-${song.id}`} song={song} size="md" allSongs={genreSongs} songIndex={idx} isNew={mode === "new"} />
                     ))}
                   </ShowcaseRow>
                 );
