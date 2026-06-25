@@ -406,7 +406,10 @@ export default function SongDetailPage() {
   const embedVideoUrl = (song as any).embedVideoUrl as string | undefined;
 
   return (
-    <div className="min-h-screen pb-8" style={{ background: "var(--ln-coal)" }}>
+    <div
+      className={`min-h-screen pb-8 transition-all duration-700 cathedral-enter ${isThisTrackActive ? "harmonic-resonance" : ""}`}
+      style={{ background: "var(--ln-coal)" }}
+    >
       {/* ══ STICKY MOBILE MANIFESTATION HEADER (slides in after hero scrolls past) ══ */}
       <div
         className="md:hidden"
@@ -478,11 +481,27 @@ export default function SongDetailPage() {
         {audioFileUrl && <meta name="twitter:player:stream" content={audioFileUrl} />}
         {audioFileUrl && <meta name="twitter:player:stream:content_type" content="audio/mpeg" />}
       </Helmet>
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-4" ref={heroRef}>
+      {/* Ambient cathedral scrim — radial glow behind the hero */}
+      <div
+        className="pointer-events-none absolute inset-0 z-0"
+        style={{
+          background: song?.coverArtUrl
+            ? "radial-gradient(ellipse 80% 50% at 50% 0%, rgba(196,154,40,0.07) 0%, transparent 70%)"
+            : "radial-gradient(ellipse 60% 40% at 50% 0%, rgba(196,154,40,0.05) 0%, transparent 60%)",
+          maxHeight: "600px",
+        }}
+      />
+      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 pt-4" ref={heroRef}>
         <Link href={creator ? `/creator/${creator.id}` : "/"}>
-          <button type="button" className="flex items-center gap-2 text-sm hover:opacity-80 transition-opacity mb-6" style={{ color: "#E2E8F0" }}>
-            <ChevronLeft className="w-4 h-4" />
-            {creator?.artistHandle || creator?.name || "Back"}
+          <button
+            type="button"
+            className="flex items-center gap-2 text-sm hover:opacity-80 transition-all mb-6 group"
+            style={{ color: "rgba(196,154,40,0.65)" }}
+          >
+            <ChevronLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+            <span style={{ fontFamily: "'Cinzel', serif", letterSpacing: "0.04em", fontSize: "12px" }}>
+              {creator?.artistHandle || creator?.name || "Back"}
+            </span>
           </button>
         </Link>
 
@@ -513,14 +532,14 @@ export default function SongDetailPage() {
           </div>
         )}
         {/* ══════════════════════════════════════════════════════════════
-             TWO-COLUMN PRODUCT SHOWCASE
-             Left: large cover art + primary CTA
-             Right: title + provenance + artifacts + actions
+             CATHEDRAL HERO — Sacred two-column sanctuary
+             Left: Cover Art Sanctuary (full-bleed, breathing, sg-hero-frame)
+             Right: Testimony Chamber (dominant title, WID seal, sacred tools)
         ══════════════════════════════════════════════════════════════ */}
-        <div className="grid grid-cols-1 lg:grid-cols-[420px_1fr] gap-8 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-[440px_1fr] gap-10 mb-10">
 
-          {/* ── LEFT: Cover Art + Primary CTA ── */}
-          <div className="flex flex-col gap-4">
+          {/* ── LEFT: Cover Art Sanctuary ── */}
+          <div className="flex flex-col gap-5 cathedral-enter-art">
             {/* Cover art — large, square, sticky on desktop */}
             <div>
               {/* Video player */}
@@ -548,15 +567,54 @@ export default function SongDetailPage() {
                   {showVideo ? <><ImageIcon size={12} /> Cover Art</> : <><Video size={12} /> Music Video</>}
                 </button>
               )}
-              {/* Cover art — full width square */}
+              {/* Cover art — full-bleed cathedral sanctuary */}
               <div
-                className="relative w-full rounded-2xl overflow-hidden group cursor-pointer"
-                style={{ aspectRatio: "1/1", background: "linear-gradient(135deg, #111111, #000000)" }}
+                className={`relative w-full overflow-hidden group cursor-pointer sg-hero-frame transition-all duration-700 ${isThisTrackActive ? "witness-card breathing" : ""}`}
+                style={{
+                  aspectRatio: "1/1",
+                  background: "linear-gradient(135deg, #0d0b08, #000000)",
+                  borderRadius: "1.25rem",
+                  border: isThisTrackActive
+                    ? "1px solid rgba(196,154,40,0.55)"
+                    : "1px solid rgba(196,154,40,0.18)",
+                  boxShadow: isThisTrackActive
+                    ? "0 0 60px 8px rgba(196,154,40,0.18), 0 0 120px 20px rgba(196,154,40,0.08)"
+                    : "0 8px 48px rgba(0,0,0,0.6), 0 0 0 1px rgba(196,154,40,0.06)",
+                }}
                 onClick={song.fileUrl ? handlePlay : ((song as any).contentType === "comic" || (song as any).contentType === "manuscript") ? handleReadNow : undefined}
               >
                 {song.coverArtUrl
                   ? <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover" style={{ objectPosition: `${song.coverPositionX ?? 50}% ${song.coverPositionY ?? 50}%` }} />
-                  : <div className="w-full h-full flex items-center justify-center"><Music className="w-24 h-24 opacity-10" style={{ color: "var(--ln-gold)" }} /></div>}
+                  : (
+                    <div className="w-full h-full flex flex-col items-center justify-center gap-5" style={{ background: "radial-gradient(ellipse at 50% 60%, rgba(196,154,40,0.07) 0%, transparent 70%)" }}>
+                      {/* Sacred geometry ornament */}
+                      <div className="relative flex items-center justify-center" style={{ width: 96, height: 96 }}>
+                        <div className="absolute inset-0 rounded-full" style={{ border: "1px solid rgba(196,154,40,0.15)", animation: "widPulse 4s ease-in-out infinite" }} />
+                        <div className="absolute inset-3 rounded-full" style={{ border: "1px solid rgba(196,154,40,0.1)" }} />
+                        <Music className="w-10 h-10" style={{ color: "rgba(196,154,40,0.35)" }} />
+                      </div>
+                      <div className="text-center px-6">
+                        <p className="text-sm font-semibold mb-1" style={{ fontFamily: "'Cinzel', serif", color: "rgba(196,154,40,0.55)" }}>No Cover Art</p>
+                        <p className="text-xs" style={{ color: "rgba(255,255,255,0.2)" }}>This work awaits its visual testimony</p>
+                      </div>
+                      {isOwner && (
+                        <button
+                          type="button"
+                          onClick={e => { e.stopPropagation(); setEditingOpen(true); }}
+                          className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all hover:scale-105 active:scale-95 btn-gold-glow"
+                          style={{
+                            background: "rgba(196,154,40,0.12)",
+                            border: "1px solid rgba(196,154,40,0.45)",
+                            color: "var(--ln-gold)",
+                            fontFamily: "'Cinzel', serif",
+                            letterSpacing: "0.05em",
+                          }}
+                        >
+                          <ImageIcon size={14} /> Bestow Cover Art
+                        </button>
+                      )}
+                    </div>
+                  )}
                 {/* Waveform canvas overlay */}
                 <canvas ref={waveCanvasRef} width={800} height={60} className="absolute bottom-0 left-0 right-0 w-full" style={{ height: "60px", opacity: isPlaying ? 1 : 0.35, transition: "opacity 0.4s" }} />
                 {/* Play/pause overlay */}
@@ -623,30 +681,63 @@ export default function SongDetailPage() {
                   </div>
                 );
               })()}
-              {/* Stats row */}
-              <div className="flex items-center justify-center gap-5 text-xs pt-1" style={{ color: "rgba(255,255,255,0.4)" }}>
-                <span className="flex items-center gap-1"><Headphones className="w-3 h-3" />{song.playCount || 0}</span>
-                <span className="flex items-center gap-1"><MessageSquare className="w-3 h-3" />{comments?.length || 0}</span>
-                {likeCount > 0 && <span className="flex items-center gap-1"><Heart className="w-3 h-3" />{likeCount}</span>}
+              {/* Stats row — sacred metrics */}
+              <div className="flex items-center justify-center gap-6 pt-2" style={{ borderTop: "1px solid rgba(196,154,40,0.08)" }}>
+                <div className="flex flex-col items-center gap-0.5">
+                  <span className="text-base font-bold" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>{song.playCount || 0}</span>
+                  <span className="text-[10px] tracking-widest uppercase" style={{ color: "rgba(196,154,40,0.45)" }}>Plays</span>
+                </div>
+                <div className="w-px h-6" style={{ background: "rgba(196,154,40,0.12)" }} />
+                <div className="flex flex-col items-center gap-0.5">
+                  <span className="text-base font-bold" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>{comments?.length || 0}</span>
+                  <span className="text-[10px] tracking-widest uppercase" style={{ color: "rgba(196,154,40,0.45)" }}>Voices</span>
+                </div>
+                {likeCount > 0 && (
+                  <>
+                    <div className="w-px h-6" style={{ background: "rgba(196,154,40,0.12)" }} />
+                    <div className="flex flex-col items-center gap-0.5">
+                      <span className="text-base font-bold" style={{ color: "var(--ln-ember)", fontFamily: "'Cinzel', serif" }}>{likeCount}</span>
+                      <span className="text-[10px] tracking-widest uppercase" style={{ color: "rgba(196,154,40,0.45)" }}>Loved</span>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>
-          {/* ── RIGHT: Title + Provenance + Artifacts + Actions ── */}
-          <div className="flex flex-col gap-5">
+          {/* ── RIGHT: Testimony Chamber ── */}
+          <div className="flex flex-col gap-6">
 
-            {/* Title + Creator */}
-            <div>
-              <h1 className="text-3xl sm:text-4xl font-bold leading-tight mb-3" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>
+            {/* ══ TITLE SANCTUARY ══ */}
+            <div className="space-y-4 cathedral-enter-title">
+              {/* Luminous title */}
+              <h1
+                className="leading-tight"
+                style={{
+                  fontFamily: "'Cinzel', serif",
+                  color: "var(--ln-parchment)",
+                  fontSize: "clamp(1.75rem, 4vw, 2.75rem)",
+                  fontWeight: 700,
+                  letterSpacing: "0.02em",
+                  textShadow: isThisTrackActive
+                    ? "0 0 40px rgba(196,154,40,0.35), 0 2px 8px rgba(0,0,0,0.8)"
+                    : "0 2px 8px rgba(0,0,0,0.6)",
+                  transition: "text-shadow 0.7s ease",
+                }}
+              >
                 {song.title}
               </h1>
+
+              {/* Creator whisper */}
               {creator && (
-                <div className="mb-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-px h-5" style={{ background: "rgba(196,154,40,0.3)" }} />
                   <CreatorHandle userId={creator.id} handle={creator.artistHandle} displayName={creator.name} role={(creator as any).role} size="md" />
                 </div>
               )}
+
               {/* Content type + genre + BPM chips */}
               {(() => { const _ctc = getContentTypeColors((song as any).contentType ?? "audio"); return (
-                <div className="flex flex-wrap gap-1.5 mb-3">
+                <div className="flex flex-wrap gap-1.5">
                   <Badge style={{ background: _ctc.chipBg, color: _ctc.text, border: `1px solid ${_ctc.chipBorder}`, fontSize: "11px" }}>{_ctc.icon} {_ctc.label}</Badge>
                   {song.genre && song.genre.split(",").map((g: string) => g.trim()).filter(Boolean).map((g: string, i: number) => (
                     <Badge key={i} style={{ background: _ctc.chipBg, color: _ctc.text, border: `1px solid ${_ctc.chipBorder}`, fontSize: "11px" }}>{g}</Badge>
@@ -655,20 +746,46 @@ export default function SongDetailPage() {
                   {song.keySignature && <Badge style={{ background: "var(--ln-coal)", color: "var(--ln-smoke)", border: "1px solid #C49A28", fontSize: "11px" }}>{song.keySignature}</Badge>}
                 </div>
               ); })()}
+
               {/* Caption / description */}
               {(song as any).caption && (
-                <p className="text-sm leading-relaxed" style={{ color: "var(--ln-smoke)", fontFamily: "'Lato', sans-serif", borderLeft: "2px solid rgba(196,154,40,0.35)", paddingLeft: "12px" }}>
+                <p
+                  className="text-sm leading-relaxed"
+                  style={{
+                    color: "var(--ln-smoke)",
+                    fontFamily: "'Cormorant Garamond', serif",
+                    fontStyle: "italic",
+                    fontSize: "1rem",
+                    borderLeft: "2px solid rgba(196,154,40,0.35)",
+                    paddingLeft: "14px",
+                  }}
+                >
                   {(song as any).caption}
                 </p>
               )}
+
+              {/* Sacred geometry divider */}
+              <div className="sg-divider"><div className="sg-divider-pip" /></div>
             </div>
 
-            {/* ══ WITNESSED WORK — Inline, front and center ══ */}
-            <div className="rounded-2xl overflow-hidden" style={{ background: "rgba(196,154,40,0.03)", border: "1px solid rgba(196,154,40,0.25)" }}>
+            {/* ══ WITNESSED WORK — Sacred Provenance Seal ══ */}
+            <div
+              className={`rounded-2xl overflow-hidden transition-all duration-700 cathedral-enter-wid ${song.witnessId ? "wid-origin-glow" : ""}`}
+              style={{
+                background: "rgba(196,154,40,0.03)",
+                border: song.witnessId ? "1px solid rgba(196,154,40,0.4)" : "1px solid rgba(196,154,40,0.15)",
+              }}
+            >
               {/* Header */}
-              <div className="flex items-center gap-2.5 px-5 py-3.5" style={{ borderBottom: "1px solid rgba(196,154,40,0.12)" }}>
-                <ShieldCheck className="w-4 h-4 flex-shrink-0" style={{ color: "rgba(196,154,40,0.8)" }} />
-                <span className="text-sm font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>Witnessed Work</span>
+              <div
+                className="flex items-center gap-2.5 px-5 py-4"
+                style={{
+                  borderBottom: "1px solid rgba(196,154,40,0.12)",
+                  background: "linear-gradient(90deg, rgba(196,154,40,0.06) 0%, transparent 100%)",
+                }}
+              >
+                <ShieldCheck className="w-5 h-5 flex-shrink-0" style={{ color: "rgba(196,154,40,0.9)" }} />
+                <span className="text-base font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)", letterSpacing: "0.04em" }}>Witnessed Work</span>
                 {evidenceItems.length > 0 && (
                   <span className="text-xs px-1.5 py-0.5 rounded ml-1" style={{ background: "rgba(196,154,40,0.1)", color: "rgba(196,154,40,0.7)", border: "1px solid rgba(196,154,40,0.2)" }}>
                     {evidenceItems.length} artifact{evidenceItems.length !== 1 ? "s" : ""}
@@ -772,8 +889,8 @@ export default function SongDetailPage() {
               </div>
             </div>
 
-            {/* ── Action Buttons ── */}
-            <div className="flex flex-wrap gap-2">
+            {/* ── Sacred Tools ── */}
+            <div className="flex flex-wrap gap-2.5 cathedral-enter-tools">
               {!isOwner && (
                 <Button size="sm" variant="outline" onClick={e => toggleLike(e)}
                   style={isLiked ? { borderColor: "rgba(239,68,68,0.6)", color: "var(--ln-ember)" } : { borderColor: "#C3AB7D", color: "var(--ln-smoke)" }}>
@@ -807,23 +924,41 @@ export default function SongDetailPage() {
                 );
                 return null;
               })()}
-              <Button size="sm" variant="outline" onClick={() => setVersionHistoryOpen(true)} style={{ borderColor: "rgba(196,154,40,0.25)", color: "var(--ln-gold)" }}>
-                <History className="w-3.5 h-3.5 mr-1" />Versions
+              <Button
+                size="sm" variant="outline"
+                onClick={() => setVersionHistoryOpen(true)}
+                className="gap-1.5 transition-all hover:scale-105 active:scale-95"
+                style={{ borderColor: "rgba(196,154,40,0.35)", color: "var(--ln-gold)", background: "rgba(196,154,40,0.04)" }}
+              >
+                <History className="w-3.5 h-3.5" />Versions
               </Button>
-              <Button size="sm" variant="outline" onClick={() => setShareOpen(true)} style={{ borderColor: "#C3AB7D", color: "var(--ln-smoke)" }}>
-                <Share2 className="w-3.5 h-3.5 mr-1" />Share
+              <Button
+                size="sm" variant="outline"
+                onClick={() => setShareOpen(true)}
+                className="gap-1.5 transition-all hover:scale-105 active:scale-95"
+                style={{ borderColor: "rgba(196,154,40,0.2)", color: "var(--ln-smoke)", background: "rgba(255,255,255,0.02)" }}
+              >
+                <Share2 className="w-3.5 h-3.5" />Share
               </Button>
               {song && (
                 <Link href={`/constellation/${song.id}`}>
-                  <Button size="sm" variant="outline" style={{ borderColor: "rgba(138,43,226,0.4)", color: "rgba(192,132,252,0.85)" }}>
-                    <Network className="w-3.5 h-3.5 mr-1" />Cosmos
+                  <Button
+                    size="sm" variant="outline"
+                    className="gap-1.5 transition-all hover:scale-105 active:scale-95"
+                    style={{ borderColor: "rgba(138,43,226,0.45)", color: "rgba(192,132,252,0.9)", background: "rgba(138,43,226,0.04)" }}
+                  >
+                    <Network className="w-3.5 h-3.5" />Cosmos
                   </Button>
                 </Link>
               )}
               {song && (
                 <QRShareModal entity={{ type: "song", id: song.id, slug: String(song.id), name: song.title, subtitle: song.artistHandle || song.creatorName || undefined, description: song.description ?? undefined, thumbnailUrl: song.coverArtUrl ?? undefined }}
                   trigger={
-                    <Button size="sm" variant="outline" style={{ borderColor: "rgba(196,154,40,0.25)", color: "rgba(232,223,200,0.6)" }} className="gap-1.5">
+                    <Button
+                      size="sm" variant="outline"
+                      className="gap-1.5 transition-all hover:scale-105 active:scale-95"
+                      style={{ borderColor: "rgba(196,154,40,0.25)", color: "rgba(232,223,200,0.65)", background: "rgba(196,154,40,0.03)" }}
+                    >
                       <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h2v2h-2zm4 0h3v3h-3zm0 4v3h-3v-3"/></svg>
                       ID Card
                     </Button>
@@ -837,13 +972,14 @@ export default function SongDetailPage() {
                 <Button
                   size="sm"
                   onClick={() => setEditingOpen(true)}
-                  className="gap-1.5"
+                  className="gap-1.5 btn-gold-glow transition-all hover:scale-105 active:scale-95"
                   style={{
-                    background: "rgba(196,154,40,0.10)",
-                    border: "1px solid rgba(196,154,40,0.40)",
+                    background: "rgba(196,154,40,0.12)",
+                    border: "1px solid rgba(196,154,40,0.5)",
                     color: "var(--ln-gold)",
                     fontFamily: "'Cinzel', serif",
-                    letterSpacing: "0.04em",
+                    letterSpacing: "0.05em",
+                    fontWeight: 600,
                   }}
                 >
                   <Pencil size={13} />

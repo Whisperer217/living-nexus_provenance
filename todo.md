@@ -5764,3 +5764,18 @@
 - [x] CreatorProfilePage: editingChapelSong state added, ManifestationShelf + StandaloneShelf wired with onEditTrack, EditChapel mounted at bottom
 - [x] SongDetailPage: EditTrackPanel import/mount replaced with EditChapel (same editingOpen state, stable callbacks preserved)
 - [x] 0 TypeScript errors, 324/324 tests passing
+
+## Phase N+14: SongDetailPage Cathedral Elevation
+- [x] Ambient cathedral scrim — radial gold glow behind hero section
+- [x] Back button elevated to Cinzel font with gold tint and hover slide
+- [x] Cover art sanctuary: sg-hero-frame corner brackets, witness-breathe glow when playing
+- [x] Missing cover art: sacred placeholder with Music relic icon + inviting "Add Art" button
+- [x] Stats row: plays, likes, witnesses in gold-tinted chips
+- [x] Primary CTA play button: large, gold-bordered, luminous
+- [x] Title sanctuary: dominant Cinzel h1 with gold text-shadow, creator whisper, sg-divider
+- [x] WID seal: wid-origin-glow pulse animation, architectural border
+- [x] Sacred Tools row: btn-gold-glow on all action buttons with generous spacing
+- [x] Page wrapper: cathedral-enter fade-in on load, harmonic-resonance edge glow when playing
+- [x] Staggered entrance animations: art (0.05s), title (0.12s), WID (0.22s), tools (0.32s)
+- [x] New CSS tokens added: cathedralFadeIn, cathedralScaleIn, cathedral-enter-*, harmonicEdge, harmonic-resonance
+- [x] 0 TypeScript errors, 324/324 tests passing
