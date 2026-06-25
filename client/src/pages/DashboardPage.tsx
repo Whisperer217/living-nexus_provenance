@@ -3,7 +3,7 @@ import { getWIDSnapshots, clearWIDSnapshots, type WIDSnapshot } from "@/lib/lnxC
 import { DashboardErrorCard } from "@/components/DashboardErrorCard";
 import { WIDPanel } from "@/components/WIDPanel";
 import { ImagePositioner } from "@/components/ImagePositioner";
-import { EditTrackPanel } from "@/components/EditTrackPanel";
+import { EditChapel } from "@/components/EditChapel";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { Link } from "wouter";
@@ -1194,7 +1194,7 @@ export default function DashboardPage() {
       </div>
       {/* ── Edit Track Panel ───────────────────────────────────────── */}
       {editingSong && (
-        <EditTrackPanel
+        <EditChapel
           song={editingSong}
           onClose={() => setEditingSong(null)}
           onSaved={() => {
