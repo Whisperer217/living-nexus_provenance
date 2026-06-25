@@ -232,7 +232,7 @@ export function StoreTrackCard({ song, size = "md", allSongs, songIndex, isNew }
     <>
       <Link href={`/song/${song.id}`}>
         <div
-          className={`relative ${cardWidth} flex-shrink-0 snap-start cursor-pointer group`}
+          className={`relative ${cardWidth} flex-shrink-0 snap-start cursor-pointer group witness-card${hovered ? ' breathing' : ''}`}
           style={{ aspectRatio: "2/3" }}
           onMouseEnter={() => setHovered(true)}
           onMouseLeave={() => setHovered(false)}

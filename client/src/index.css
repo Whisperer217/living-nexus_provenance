@@ -1598,6 +1598,33 @@ input[type="range"].volume-slider-theater::-moz-range-thumb {
   50%       { opacity: 1;   transform: scale(1.2); }
 }
 
+/* ── Witness Card Breathing Animation ──────────────────────────────────────
+   Organic, living pulse — like the card holds the creator's testimony.
+   Applied on hover (and .breathing class for programmatic control).
+   Uses the exact spec values provided: scale 1.00→1.02, glow 0→30px 12px.
+   Duration 4s for a slow, reverent breath cycle.
+────────────────────────────────────────────────────────────────────────── */
+@keyframes witness-breathe {
+  0%, 100% {
+    transform: scale(1.00);
+    box-shadow: 0 0 0 0 rgba(196, 154, 40, 0.15);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 0 30px 12px rgba(196, 154, 40, 0.35);
+  }
+}
+
+.witness-card {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 0 0 rgba(196, 154, 40, 0.15);
+}
+
+.witness-card.breathing {
+  animation: witness-breathe 4s ease-in-out infinite;
+  box-shadow: 0 0 25px 8px rgba(196, 154, 40, 0.25);
+}
+
 /* ═══════════════════════════════════════════════════════════════════
    PROVENANCE CARD STYLE STANDARD — see CARD_STANDARDS.md
    Canonical CSS for all provenance cards. Do not override without

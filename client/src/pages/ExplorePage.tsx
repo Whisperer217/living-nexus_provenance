@@ -137,7 +137,7 @@ function ExploreCard({
   return (
     <>
     <div
-      className="group relative cursor-pointer"
+      className={`group relative cursor-pointer witness-card${hovered ? ' breathing' : ''}`}
       style={{ aspectRatio: "2/3" }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
