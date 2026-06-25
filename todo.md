@@ -5818,3 +5818,9 @@
 - [x] Fix ManifestationReveal: positive rootMargin "0px 0px 300px 0px", 400ms hard fallback
 - [x] 0 TypeScript errors, 324/324 tests passing
 - [x] Fix ConstellationReveal and ManifestationReveal hiding content on mobile (opacity always 1, only animate transform)
+
+## Phase N+Y: Loosen Discovery Filters
+- [x] Extend New Arrivals window from 90 days to 180 days with always-show fallback
+- [x] Add graceful trending fallback: if weekly score is all zero, sort by all-time playCount (allTimePlays weight raised from 0.01 to 0.1)
+- [x] Ensure discoverInfinite Explore page shows full published catalog with no extra filters (confirmed: only isPublic+Published filters)
+- [x] Add "New Arrivals" label clarification: show "Recently Added" when using fallback window

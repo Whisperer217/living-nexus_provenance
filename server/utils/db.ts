@@ -2642,12 +2642,14 @@ export async function getTrendingWorks(opts?: { genre?: string; limit?: number; 
     const weeklyPlays = Number(r.weeklyPlays) || 0;
     const weeklyLikes = Number(r.weeklyLikes) || 0;
     const allTimePlays = r.song.playCount ?? 0;
-    // Primary drivers: this week's engagement. Secondary: all-time plays as a very small tiebreaker.
-    // Weight is intentionally tiny (0.01) so historical play counts cannot override recent weekly
-    // activity — a song with 2 weekly plays (score: 6.0) must outrank a song with 118 all-time
-    // plays and 0 weekly plays (score: 1.18). Previously 0.1 caused stale high-play-count songs
-    // to dominate the trending list even with zero recent engagement.
-    const score = weeklyPlays * 3 + weeklyLikes * 5 + allTimePlays * 0.01;
+    // Scoring: weekly engagement is the primary signal, but all-time plays provide a meaningful
+    // baseline so the trending list never looks empty on a quiet week.
+    // - weeklyPlays * 3: a song played 5 times this week scores 15
+    // - weeklyLikes * 5: likes are higher-intent signals
+    // - allTimePlays * 0.1: a song with 100 all-time plays adds 10 to its score as a quality signal
+    // This means a song with 0 weekly activity but 100 all-time plays (score: 10) ranks below
+    // a song with 1 weekly play (score: 3+0.1), but still appears rather than sinking to the bottom.
+    const score = weeklyPlays * 3 + weeklyLikes * 5 + allTimePlays * 0.1;
     return { ...r, score };
   });
   scored.sort((a: ScoredRow, b: ScoredRow) => b.score - a.score);
@@ -3763,9 +3765,10 @@ export async function getNewThisWeek(opts?: { genre?: string; contentType?: "aud
   const db = await getDb();
   if (!db) return [];
   const limit = opts?.limit ?? 24;
-  // Use a 90-day window; fall back to most-recent works if nothing falls in the window
-  // (platform is still growing — a strict 7-day window returns nothing when no one uploaded this week)
-  const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
+  // Use a 180-day window; fall back to most-recent works if nothing falls in the window.
+  // The platform is still growing — a strict window returns nothing when uploads are sparse.
+  // 180 days ensures the catalog always feels populated while still surfacing recent work first.
+  const windowStart = new Date(Date.now() - 180 * 24 * 60 * 60 * 1000);
   const creatorFields = {
     id: users.id, name: users.name, artistHandle: users.artistHandle,
     profilePhotoUrl: users.profilePhotoUrl, aiDisclosure: users.aiDisclosure,
@@ -3782,10 +3785,10 @@ export async function getNewThisWeek(opts?: { genre?: string; contentType?: "aud
   } else if (opts?.contentType) {
     baseConditions.push(eq(songs.contentType, opts.contentType) as ReturnType<typeof eq>);
   }
-  // First attempt: 90-day window, newest first
+  // First attempt: 180-day window, newest first
   const windowConditions = [
     ...baseConditions,
-    sql`${songs.createdAt} >= ${ninetyDaysAgo}` as unknown as ReturnType<typeof eq>,
+    sql`${songs.createdAt} >= ${windowStart}` as unknown as ReturnType<typeof eq>,
   ];
   const windowResults = await db.select({ song: songs, creator: creatorFields })
     .from(songs)
