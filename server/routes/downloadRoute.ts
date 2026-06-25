@@ -61,7 +61,25 @@ async function fetchBytes(url: string, retries = FETCH_RETRIES): Promise<Buffer 
 }
 
 function sanitizeFilename(name: string): string {
-  return name.replace(/[/\\?%*:|"<>]/g, "-").trim();
+  // Strip filesystem-unsafe chars AND any non-ASCII characters (0x00-0x1F, 0x7F+)
+  // Non-ASCII in a plain filename= header value causes ERR_INVALID_CHAR in Node.js.
+  return name
+    .replace(/[/\\?%*:|"<>]/g, "-") // filesystem-unsafe
+    .replace(/[^\x20-\x7E]/g, "")   // strip non-ASCII / control chars
+    .replace(/\s+/g, " ")            // collapse whitespace
+    .trim()
+    || "track";                       // fallback if everything was stripped
+}
+
+/**
+ * Build a Content-Disposition header value that is safe for Node.js setHeader.
+ * Uses RFC 6266 filename* for full Unicode support while providing an ASCII
+ * filename= fallback for older clients.
+ */
+function safeContentDisposition(filename: string): string {
+  const asciiName = sanitizeFilename(filename); // already ASCII-safe after the fix above
+  const encodedName = encodeURIComponent(filename.replace(/[/\\?%*:|"<>]/g, "-").trim());
+  return `attachment; filename="${asciiName}"; filename*=UTF-8''${encodedName}`;
 }
 
 // ── Download Endpoint ─────────────────────────────────────────────────────────
@@ -122,7 +140,7 @@ downloadRouter.get("/api/download/:songId", async (req: Request, res: Response) 
     console.warn(`[download] Falling back to CDN redirect for song ${songId} (file too large or fetch failed after retry)`);
     const safeTitle = sanitizeFilename(song.title);
     const fallbackFilename = `${safeTitle}.mp3`;
-    res.setHeader("Content-Disposition", `attachment; filename="${fallbackFilename}"`);
+    res.setHeader("Content-Disposition", safeContentDisposition(fallbackFilename));
     res.redirect(302, song.fileUrl);
     return;
   }
@@ -224,14 +242,14 @@ downloadRouter.get("/api/download/:songId", async (req: Request, res: Response) 
     const zipBuffer = await zip.generateAsync({ type: "nodebuffer", compression: "DEFLATE" });
     const zipFilename = `${safeTitle} - ${safeArtist} [${widShort}].zip`;
     res.setHeader("Content-Type", "application/zip");
-    res.setHeader("Content-Disposition", `attachment; filename="${zipFilename}"`);
+    res.setHeader("Content-Disposition", safeContentDisposition(zipFilename));
     res.setHeader("Content-Length", zipBuffer.length.toString());
     res.setHeader("Cache-Control", "no-store");
     res.end(zipBuffer);
   } else {
     // No lyrics — stream tagged MP3 directly
     res.setHeader("Content-Type", "audio/mpeg");
-    res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+    res.setHeader("Content-Disposition", safeContentDisposition(filename));
     res.setHeader("Content-Length", taggedBuffer.length.toString());
     res.setHeader("Cache-Control", "no-store");
     res.end(taggedBuffer);
@@ -414,7 +432,7 @@ downloadRouter.get("/api/download/batch/:batchIndex", async (req: Request, res: 
   const zipFilename = `LivingNexus_${safeCreator}_${batchLabel}.zip`;
 
   res.setHeader("Content-Type", "application/zip");
-  res.setHeader("Content-Disposition", `attachment; filename="${zipFilename}"`);
+  res.setHeader("Content-Disposition", safeContentDisposition(zipFilename));
   res.setHeader("Content-Length", zipBuffer.length.toString());
   res.setHeader("Cache-Control", "no-store");
   res.end(zipBuffer);
@@ -579,7 +597,7 @@ downloadRouter.get("/api/quiver/:id/download", async (req: Request, res: Respons
 
   // 6. Stream the provenance-tagged PNG
   res.setHeader("Content-Type", "image/png");
-  res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+  res.setHeader("Content-Disposition", safeContentDisposition(filename));
   res.setHeader("Content-Length", outputBuffer.length.toString());
   res.setHeader("Cache-Control", "no-store");
   res.setHeader("X-LN-WID", widId);

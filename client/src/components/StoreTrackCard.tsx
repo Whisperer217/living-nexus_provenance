@@ -16,7 +16,7 @@
 */
 
 import { useState, useRef, useEffect } from "react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Play, Pause, Shield, MoreVertical, FolderPlus, ExternalLink, Copy, SkipForward, Flame, Heart } from "lucide-react";
 import { AddToCollectionModal } from "@/components/AddToCollectionModal";
 import { createPortal } from "react-dom";
@@ -227,6 +227,7 @@ export function StoreTrackCard({ song, size = "md", allSongs, songIndex, isNew }
   };
 
   const creatorLabel = song.artistHandle ? `@${song.artistHandle}` : (song.artistName || "Unknown");
+  const [, navigate] = useLocation();
 
   return (
     <>
@@ -283,29 +284,34 @@ export function StoreTrackCard({ song, size = "md", allSongs, songIndex, isNew }
             />
 
             {/* ── LAYER 3: WID seal — top-right, architectural badge ── */}
+            {/* NOTE: Cannot use <Link> here — it would be nested inside the outer <Link> wrapper.
+                 Use a <button> instead and navigate programmatically. */}
             {hasWid && (
-              <Link
-                href={`/verify/${song.wid || song.widShort}`}
-                onClick={(e: React.MouseEvent) => e.stopPropagation()}
+              <button
+                type="button"
+                aria-label="Verify WID"
+                className="absolute top-2.5 right-2.5 z-20 flex items-center gap-1 px-2 py-0.5 rounded-full"
+                style={{
+                  background: "rgba(196,154,40,0.15)",
+                  border: "1px solid rgba(196,154,40,0.60)",
+                  backdropFilter: "blur(12px)",
+                  boxShadow: "0 0 12px rgba(196,154,40,0.22), 0 0 0 1px rgba(196,154,40,0.08), inset 0 1px 0 rgba(255,220,100,0.24)",
+                  cursor: "pointer",
+                }}
+                onClick={(e: React.MouseEvent) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  navigate(`/verify/${song.wid || song.widShort}`);
+                }}
               >
-                <div
-                  className="absolute top-2.5 right-2.5 z-20 flex items-center gap-1 px-2 py-0.5 rounded-full"
-                  style={{
-                    background: "rgba(196,154,40,0.15)",
-                    border: "1px solid rgba(196,154,40,0.60)",
-                    backdropFilter: "blur(12px)",
-                    boxShadow: "0 0 12px rgba(196,154,40,0.22), 0 0 0 1px rgba(196,154,40,0.08), inset 0 1px 0 rgba(255,220,100,0.24)",
-                  }}
+                <Shield className="w-2.5 h-2.5" style={{ color: "#D4A843", filter: "drop-shadow(0 0 3px rgba(196,154,40,0.60))" }} />
+                <span
+                  className="font-heading text-[8px] tracking-[0.22em] uppercase"
+                  style={{ color: "#D4A843", textShadow: "0 0 10px rgba(196,154,40,0.55)" }}
                 >
-                  <Shield className="w-2.5 h-2.5" style={{ color: "#D4A843", filter: "drop-shadow(0 0 3px rgba(196,154,40,0.60))" }} />
-                  <span
-                    className="font-heading text-[8px] tracking-[0.22em] uppercase"
-                    style={{ color: "#D4A843", textShadow: "0 0 10px rgba(196,154,40,0.55)" }}
-                  >
-                    WID
-                  </span>
-                </div>
-              </Link>
+                  WID
+                </span>
+              </button>
             )}
 
             {/* ── NEW badge — top-left, only when isNew=true ── */}
