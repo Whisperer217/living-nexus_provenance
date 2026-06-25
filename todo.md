@@ -5669,3 +5669,11 @@
 - [x] Invalidate discoverInfinite in pull-to-refresh handler
 - [x] Write Vitest test for discoverInfinite procedure
 - [x] TypeScript check + clean build + checkpoint
+
+## Phase N+8: Harmonic Glow — ECDSA Visual Signature on Global Player
+- [x] Audit global player component and WID/ECDSA data on current song
+- [x] Build useHarmonicSignature hook — FNV-1a deterministic HSL/color from WID+ecdsaSignature bytes
+- [x] Add harmonic-breathe CSS keyframe and .harmonic-glow-layer class to index.css
+- [x] Wire glow layer to expanded player — visible only when expanded, zero cost when collapsed
+- [x] Harmonic border: expanded player border reflects song's ECDSA signature color
+- [x] TypeScript: 0 errors | Tests: 324/324 passing | Clean production build

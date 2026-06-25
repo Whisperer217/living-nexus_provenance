@@ -10,6 +10,7 @@ import { usePlayer } from "@/contexts/PlayerContext";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useFrequencyGlow } from "@/hooks/useFrequencyGlow";
+import { useHarmonicSignature } from "@/hooks/useHarmonicSignature";
 import { useWaveformVisualizer } from "@/hooks/useWaveformVisualizer";
 import {
   Play, Pause, SkipBack, SkipForward,
@@ -400,6 +401,14 @@ function GlobalPlayerInner() {
   const creatorStripeAccountId = songDetail?.creator?.stripeAccountId ?? null;
   const tipsEnabled = !!creatorStripeAccountId;
 
+  /* ── Harmonic Signature — ECDSA Visual Identity ── */
+  // Derives a unique color temperature from the song's Witness ID + ECDSA signature.
+  // Falls back to platform gold when no WID is available (unsigned or pre-WID tracks).
+  const harmonicSig = useHarmonicSignature(
+    visTrack?.witnessId ?? songDetail?.song?.witnessId,
+    songDetail?.song?.ecdsaSignature,
+  );
+
   /* ── Like state ── */
   const { data: likeStatusData, refetch: refetchLikeStatus } = trpc.songs.getLikeStatus.useQuery(
     { songId: currentSongId! },
@@ -653,11 +662,13 @@ function GlobalPlayerInner() {
         background: glassBg,
         backdropFilter: glassBlur,
         WebkitBackdropFilter: glassBlur,
-        border: GOLD_BORDER,
+        // Harmonic border: when expanded, the border color reflects the song's ECDSA signature.
+        // When collapsed (mini bar), use the standard platform gold border.
+        border: isExpanded ? harmonicSig.expandedBorder : GOLD_BORDER,
         borderRadius: isExpanded ? "20px 20px 0 0" : isDesktop ? "20px" : "12px 12px 0 0",
         boxShadow: activeShadow,
         // Spring-physics transition: overshoot + settle for zone changes; none during active drag
-        transition: dragHeight !== null ? "none" : "height 0.4s cubic-bezier(0.34,1.56,0.64,1), border-radius 0.35s ease, transform 0.35s ease, opacity 0.4s ease",
+        transition: dragHeight !== null ? "none" : "height 0.4s cubic-bezier(0.34,1.56,0.64,1), border-radius 0.35s ease, transform 0.35s ease, opacity 0.4s ease, border-color 1.8s ease",
         /* Suspension: fade + dock when tip modal is open (Option A) */
         opacity: tipModalOpen ? 0.15 : 1,
         pointerEvents: tipModalOpen ? "none" : undefined,
@@ -679,6 +690,23 @@ function GlobalPlayerInner() {
       onPointerUp={onPointerUp}
       onPointerCancel={onPointerUp}
     >
+      {/* ── HARMONIC GLOW LAYER — ECDSA Visual Signature ──
+           Unique color derived from the song's Witness ID + ECDSA signature.
+           Only visible when expanded. Zero cost when collapsed (opacity:0 + display:none).
+           Lives behind all content (z-index:0) and never intercepts pointer events.
+      */}
+      {isExpanded && (
+        <div
+          className="harmonic-glow-layer"
+          aria-hidden="true"
+          style={{
+            boxShadow: harmonicSig.expandedGlowShadow,
+            // Transition the glow smoothly when the song changes
+            transition: "box-shadow 1.8s ease",
+          }}
+        />
+      )}
+
       {/* ── DRAG HANDLE (mobile) / CLICK TOGGLE HEADER (desktop) ── */}
       <div
         className="flex items-center justify-center flex-shrink-0 cursor-grab active:cursor-grabbing"

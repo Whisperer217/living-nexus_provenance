@@ -1625,6 +1625,41 @@ input[type="range"].volume-slider-theater::-moz-range-thumb {
   box-shadow: 0 0 25px 8px rgba(196, 154, 40, 0.25);
 }
 
+/* ── Harmonic Glow — ECDSA Visual Signature Animation ──────────────────────
+   The expanded global player breathes with the unique color derived from the
+   song's Witness ID cryptographic signature. Each song has its own soul-color.
+   The animation uses CSS custom properties set by the React component so the
+   exact hue/intensity is unique per track without any JavaScript RAF loop.
+   Duration: 6s — slower than the card breathe (4s) for a more meditative feel.
+────────────────────────────────────────────────────────────────────────── */
+@keyframes harmonic-breathe {
+  0%, 100% {
+    opacity: 0.55;
+    transform: scale(1.000);
+  }
+  50% {
+    opacity: 1.0;
+    transform: scale(1.004);
+  }
+}
+
+/* The harmonic glow layer sits as an absolute inset overlay inside the
+   expanded player container. It is pointer-events:none so it never
+   intercepts clicks. The border-radius matches the player's expanded radius. */
+.harmonic-glow-layer {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  /* The box-shadow is set via inline style (CSS custom properties) from React
+     so each song's unique color is applied without class proliferation. */
+  animation: harmonic-breathe 6s ease-in-out infinite;
+  /* will-change: opacity keeps the animation on the compositor thread */
+  will-change: opacity;
+  /* Isolate this layer from the parent stacking context */
+  z-index: 0;
+}
+
 /* ═══════════════════════════════════════════════════════════════════
    PROVENANCE CARD STYLE STANDARD — see CARD_STANDARDS.md
    Canonical CSS for all provenance cards. Do not override without
