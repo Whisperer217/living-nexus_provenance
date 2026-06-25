@@ -7,7 +7,7 @@
    Divine Noir aesthetic — Orbitron/Cinzel, gold/cyan palette
 ═══════════════════════════════════════════════════════════════════ */
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Helmet } from "react-helmet-async";
 import { useParams, Link } from "wouter";
 import { trpc } from "@/lib/trpc";
@@ -130,6 +130,13 @@ export default function SongDetailPage() {
   const [shareOpen, setShareOpen] = useState(false);
   const [versionHistoryOpen, setVersionHistoryOpen] = useState(false);
   const [editingOpen, setEditingOpen] = useState(false);
+  // Stable callbacks for EditTrackPanel — inline arrow functions would cause
+  // the Escape-key useEffect to re-register on every parent re-render.
+  const handleEditClose = useCallback(() => setEditingOpen(false), []);
+  const handleEditSaved = useCallback(() => {
+    setEditingOpen(false);
+    utils.songs.getById.invalidate({ id: songId });
+  }, [utils.songs.getById, songId]);
   // Derive play state from global player — this page is a remote control only
   const isThisTrackActive = currentTrackId === String(songId);
   const isPlaying = isThisTrackActive && playerState.isPlaying;
@@ -1507,11 +1514,8 @@ export default function SongDetailPage() {
             contentType: (song as any).contentType ?? "audio",
             creditsJson: (song as any).creditsJson ?? undefined,
           }}
-          onClose={() => setEditingOpen(false)}
-          onSaved={() => {
-            setEditingOpen(false);
-            utils.songs.getById.invalidate({ id: songId });
-          }}
+          onClose={handleEditClose}
+          onSaved={handleEditSaved}
         />
       )}
 

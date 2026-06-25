@@ -323,9 +323,14 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
     return () => window.removeEventListener("keydown", handler);
   }, [onClose]);
 
-  // Prevent body scroll — routed through global overlay controller
+  // Prevent body scroll — use "light" mode (overflow:hidden only, no position:fixed).
+  // The app layout root is already h-dvh overflow-hidden, so the body is NOT the
+  // scroll container. Using the default "full" mode (position:fixed) changes the
+  // containing block for every fixed child (PlayerBar, GlobalPlayer, mobile header)
+  // and triggers a massive layout-recalculation cascade that freezes the browser.
+  // "light" mode is sufficient — the backdrop already blocks background interaction.
   useEffect(() => {
-    overlayOpen("edit-track");
+    overlayOpen("edit-track", "light");
     return () => overlayClose("edit-track");
   }, []);
 

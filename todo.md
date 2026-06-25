@@ -5718,3 +5718,19 @@
 - [ ] Wire harmonic signature into waveform visualizer — hue shift, glow intensity, pulse color
 - [ ] Apply subtle harmonic resonance to top navigation bar — soft bottom-edge glow when playing
 - [ ] TypeScript check + clean build + checkpoint
+
+## Phase N+12: Fix Page Freeze on Edit Work / Add Art
+- [ ] Diagnose root cause of freeze when editingOpen state is set to true
+- [ ] Fix EditTrackPanel so it opens cleanly without freezing
+- [ ] Add error boundary / loading state around EditTrackPanel
+- [ ] Verify fix on desktop and mobile
+- [ ] 0 TypeScript errors, 324/324 tests passing
+
+## Phase N+12: Fix Page Freeze on Edit Work / Add Art
+- [x] Root cause: overlayOpen("edit-track") used default "full" mode which sets body { position: fixed }
+- [x] body is already h-dvh overflow-hidden (MainLayout) so it is NOT the scroll container
+- [x] Setting position:fixed on body changed the containing block for ALL fixed children (PlayerBar, GlobalPlayer, mobile header), triggering a massive synchronous layout-recalculation cascade that froze the browser
+- [x] Fix: changed overlayOpen("edit-track", "full") to overlayOpen("edit-track", "light") — overflow:hidden only, no position:fixed
+- [x] Added stable useCallback handlers (handleEditClose, handleEditSaved) in SongDetailPage to prevent Escape-key useEffect from re-registering on every parent re-render
+- [x] Both "Edit Work" and "Add Art" buttons use the same EditTrackPanel — both are now fixed
+- [x] 0 TypeScript errors, 324/324 tests passing
