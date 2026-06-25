@@ -5779,3 +5779,21 @@
 - [x] Staggered entrance animations: art (0.05s), title (0.12s), WID (0.22s), tools (0.32s)
 - [x] New CSS tokens added: cathedralFadeIn, cathedralScaleIn, cathedral-enter-*, harmonicEdge, harmonic-resonance
 - [x] 0 TypeScript errors, 324/324 tests passing
+
+## Phase N+15: Batch Upload Bug Fixes (Slimdoggy Report)
+- [ ] Fix track duplication: 11 files dropped → 22 cards (drop handler firing twice)
+- [ ] Add client-side ID3 metadata auto-import on file drop (title, cover art, lyrics)
+
+## Phase N+15: Batch Upload Bug Fixes (Slimdoggy report — PC app)
+- [x] Bug 1 — Track duplication (11 files → 22 cards)
+  - [x] Root cause: inner drop zones did not call e.stopPropagation(), so drop event bubbled to outer handleGlobalDrop and added files twice
+  - [x] Fixed: added e.stopPropagation() to TrackDetailPanel audio drop zone, TrackDetailPanel cover art drop zone, and TrackCardUI audio drop zone
+- [x] Bug 2 — ID3 metadata (artwork + lyrics) not auto-imported on batch drop
+  - [x] useAudioMetadata hook with music-metadata parseBlob already existed but was only called in per-card handleAudioFile (single-file path)
+  - [x] handleAddMultiple (multi-file drop from Add Track slot) and handleGlobalDrop (page-level drop) never called extractMetadata
+  - [x] Fixed: added extractBatchMetadata (useAudioMetadata) to main BatchUploadPage component
+  - [x] Both handleAddMultiple and handleGlobalDrop now call extractBatchMetadata per card after creation
+  - [x] Metadata applied: title, genre, lyricsText, releaseDate (year), coverFile + coverPreview (embedded art)
+  - [x] Also fixed lyricsText field name (was incorrectly 'lyrics') in TrackDetailPanel and TrackCardUI handleAudioFile patches
+  - [x] Also added releaseDate (year) to per-card handleAudioFile patches
+- [x] 0 TypeScript errors, 324/324 tests passing

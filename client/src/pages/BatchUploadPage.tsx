@@ -214,6 +214,8 @@ function TrackDetailPanel({
       const patch: Partial<TrackCard> = {};
       if (meta.title) patch.title = meta.title;
       if (meta.genre && !card.genre) patch.genre = meta.genre;
+      if (meta.lyrics && !card.lyricsText) patch.lyricsText = meta.lyrics;
+      if (meta.year && !card.releaseDate) patch.releaseDate = meta.year;
       if (meta.coverArtBlob && !card.coverFile) {
         const ext = meta.coverArtBlob.type.includes("png") ? "png" : "jpg";
         patch.coverFile = new File([meta.coverArtBlob], `cover.${ext}`, { type: meta.coverArtBlob.type });
@@ -287,6 +289,7 @@ function TrackDetailPanel({
               onDragLeave={() => onChange(card.id, { audioDragging: false })}
               onDrop={e => {
                 e.preventDefault();
+                e.stopPropagation(); // prevent bubble to global drop handler
                 onChange(card.id, { audioDragging: false });
                 const file = Array.from(e.dataTransfer.files).find(
                   f => f.type.startsWith("audio/") || /\.(mp3|wav|ogg|flac|aac|m4a|webm)$/i.test(f.name)
@@ -382,6 +385,7 @@ function TrackDetailPanel({
               onDragLeave={() => onChange(card.id, { coverDragging: false })}
               onDrop={e => {
                 e.preventDefault();
+                e.stopPropagation(); // prevent bubble to global drop handler
                 onChange(card.id, { coverDragging: false });
                 const file = Array.from(e.dataTransfer.files).find(f => f.type.startsWith("image/"));
                 if (!file) { toast.error("Drop an image file here"); return; }
@@ -648,6 +652,8 @@ function TrackCardUI({
       const patch: Partial<TrackCard> = {};
       if (meta.title) patch.title = meta.title;
       if (meta.genre && !card.genre) patch.genre = meta.genre;
+      if (meta.lyrics && !card.lyricsText) patch.lyricsText = meta.lyrics;
+      if (meta.year && !card.releaseDate) patch.releaseDate = meta.year;
       if (meta.coverArtBlob && !card.coverFile) {
         const ext = meta.coverArtBlob.type.includes("png") ? "png" : "jpg";
         patch.coverFile = new File([meta.coverArtBlob], `cover.${ext}`, { type: meta.coverArtBlob.type });
@@ -746,6 +752,7 @@ function TrackCardUI({
           onDragLeave={() => onChange(card.id, { audioDragging: false })}
           onDrop={e => {
             e.preventDefault();
+            e.stopPropagation(); // prevent bubble to global drop handler (avoids duplication)
             onChange(card.id, { audioDragging: false });
             const files = Array.from(e.dataTransfer.files);
             const audioFiles = files.filter(f => f.type.startsWith("audio/") || /\.(mp3|wav|ogg|flac|aac|m4a|webm)$/i.test(f.name));
@@ -854,6 +861,7 @@ export default function BatchUploadPage() {
   const [isDraggingGlobal, setIsDraggingGlobal] = useState(false);
   const globalDropRef = useRef<HTMLDivElement>(null);
   const albumCoverRef = useRef<HTMLInputElement>(null);
+  const { extractMetadata: extractBatchMetadata } = useAudioMetadata();
 
   const [collectionResult, setCollectionResult] = useState<{
     collectionId: number;
@@ -937,8 +945,26 @@ export default function BatchUploadPage() {
       return [...filled, ...newCards];
     });
     newCards.forEach(c => generateWID(c.id, c.audioFile!));
+    // Auto-populate metadata from embedded ID3 tags
+    newCards.forEach(c => {
+      extractBatchMetadata(c.audioFile!).then(meta => {
+        const patch: Partial<TrackCard> = {};
+        if (meta.title) patch.title = meta.title;
+        if (meta.genre) patch.genre = meta.genre;
+        if (meta.lyrics) patch.lyricsText = meta.lyrics;
+        if (meta.year) patch.releaseDate = meta.year;
+        if (meta.coverArtBlob) {
+          const ext = meta.coverArtBlob.type.includes("png") ? "png" : "jpg";
+          patch.coverFile = new File([meta.coverArtBlob], `cover.${ext}`, { type: meta.coverArtBlob.type });
+          const reader = new FileReader();
+          reader.onload = ev => setCards(p => p.map(x => x.id === c.id ? { ...x, coverPreview: ev.target?.result as string } : x));
+          reader.readAsDataURL(meta.coverArtBlob);
+        }
+        if (Object.keys(patch).length > 0) setCards(p => p.map(x => x.id === c.id ? { ...x, ...patch } : x));
+      });
+    });
     toast.success(`Added ${audioFiles.length} track${audioFiles.length > 1 ? "s" : ""}`);
-  }, [generateWID]);
+  }, [generateWID, extractBatchMetadata]);
 
   const handleGlobalDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -957,8 +983,26 @@ export default function BatchUploadPage() {
       return [...filled, ...newCards];
     });
     newCards.forEach(c => generateWID(c.id, c.audioFile!));
+    // Auto-populate metadata from embedded ID3 tags
+    newCards.forEach(c => {
+      extractBatchMetadata(c.audioFile!).then(meta => {
+        const patch: Partial<TrackCard> = {};
+        if (meta.title) patch.title = meta.title;
+        if (meta.genre) patch.genre = meta.genre;
+        if (meta.lyrics) patch.lyricsText = meta.lyrics;
+        if (meta.year) patch.releaseDate = meta.year;
+        if (meta.coverArtBlob) {
+          const ext = meta.coverArtBlob.type.includes("png") ? "png" : "jpg";
+          patch.coverFile = new File([meta.coverArtBlob], `cover.${ext}`, { type: meta.coverArtBlob.type });
+          const reader = new FileReader();
+          reader.onload = ev => setCards(p => p.map(x => x.id === c.id ? { ...x, coverPreview: ev.target?.result as string } : x));
+          reader.readAsDataURL(meta.coverArtBlob);
+        }
+        if (Object.keys(patch).length > 0) setCards(p => p.map(x => x.id === c.id ? { ...x, ...patch } : x));
+      });
+    });
     toast.success(`Added ${audioFiles.length} track${audioFiles.length > 1 ? "s" : ""}`);
-  }, [generateWID]);
+  }, [generateWID, extractBatchMetadata]);
 
   const applyBatchFill = () => {
     setCards(prev => prev.map(c => ({
