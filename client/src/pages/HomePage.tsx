@@ -853,9 +853,7 @@ export default function HomePage() {
             §2 — DISCOVERY SHOWCASE (Steam-style rows)
             New Arrivals · Trending · Featured Creators · Recently Witnessed
         ══════════════════════════════════════════════════════════════ */}
-        <ConstellationReveal delay={60} dotCount={4} skipDots={false}>
-          <ShowcaseSection />
-        </ConstellationReveal>
+        <ShowcaseSection />
 
         {/* ── Sacred Geometry Divider ── */}
         <div className="sg-divider-wide px-6">

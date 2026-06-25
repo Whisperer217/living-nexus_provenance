@@ -5797,3 +5797,10 @@
   - [x] Also fixed lyricsText field name (was incorrectly 'lyrics') in TrackDetailPanel and TrackCardUI handleAudioFile patches
   - [x] Also added releaseDate (year) to per-card handleAudioFile patches
 - [x] 0 TypeScript errors, 324/324 tests passing
+
+## Bug: Discovery Pages Empty — No Songs Populating
+- [x] Check DB: verify published songs exist with correct status='Published' and coverArtUrl
+- [x] Check songs.newThisWeek, songs.trending, songs.discoverInfinite tRPC procedures for incorrect filters
+- [x] Check frontend: verify HomePage and ExplorePage are not stuck in loading/empty state
+- [x] Fix root cause and verify songs appear on Homepage and Explore on both desktop and mobile
+- [x] 0 TypeScript errors, all tests passing

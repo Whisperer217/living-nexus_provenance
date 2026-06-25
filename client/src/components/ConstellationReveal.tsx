@@ -41,28 +41,39 @@ export function ConstellationReveal({
     const el = wrapperRef.current;
     if (!el) return;
 
+    const triggerReveal = () => {
+      if (hasTriggeredRef.current) return;
+      hasTriggeredRef.current = true;
+      observer.disconnect();
+
+      if (skipDots) {
+        setTimeout(() => setPhase("content"), delay);
+        return;
+      }
+
+      // Phase sequence: hidden → dots → lines → content
+      setTimeout(() => setPhase("dots"), delay);
+      setTimeout(() => setPhase("lines"), delay + 400);
+      setTimeout(() => setPhase("content"), delay + 900);
+    };
+
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && !hasTriggeredRef.current) {
-          hasTriggeredRef.current = true;
-          observer.disconnect();
-
-          if (skipDots) {
-            setTimeout(() => setPhase("content"), delay);
-            return;
-          }
-
-          // Phase sequence: hidden → dots → lines → content
-          setTimeout(() => setPhase("dots"), delay);
-          setTimeout(() => setPhase("lines"), delay + 400);
-          setTimeout(() => setPhase("content"), delay + 900);
-        }
+        if (entries[0].isIntersecting) triggerReveal();
       },
-      { threshold: 0.08, rootMargin: "0px 0px -40px 0px" }
+      { threshold: 0.02, rootMargin: "0px 0px 0px 0px" }
     );
 
     observer.observe(el);
-    return () => observer.disconnect();
+
+    // Safety fallback: if the observer never fires (e.g. element is below fold on mobile
+    // and user never scrolls), force the reveal after 2.5s so content is never permanently hidden.
+    const fallbackTimer = setTimeout(() => triggerReveal(), 2500);
+
+    return () => {
+      observer.disconnect();
+      clearTimeout(fallbackTimer);
+    };
   }, [delay, skipDots]);
 
   const isVisible = phase === "content";
