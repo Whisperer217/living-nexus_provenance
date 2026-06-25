@@ -2749,3 +2749,201 @@ h1, h2, h3, h4, h5, h6,
 .harmonic-resonance {
   animation: harmonicEdge 5s ease-in-out infinite;
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   PHASE N+5 SACRED VISION — Unified Cathedral Design Language
+   Every song surface breathes with the same soul. The creation is
+   the testimony. The art is the altar. The gold is the light.
+═══════════════════════════════════════════════════════════════════ */
+
+/* ── Sacred Pulse — deeper, slower breath for active/playing cards ── */
+@keyframes sacred-pulse {
+  0%, 100% {
+    box-shadow:
+      0 0 0 0 rgba(196,154,40,0.00),
+      0 0 20px 0 rgba(196,154,40,0.10),
+      0 8px 40px rgba(0,0,0,0.60);
+  }
+  50% {
+    box-shadow:
+      0 0 0 3px rgba(196,154,40,0.12),
+      0 0 40px 8px rgba(196,154,40,0.28),
+      0 8px 60px rgba(0,0,0,0.70);
+  }
+}
+
+/* ── Sacred Lift — card hover elevation with golden corona ── */
+@keyframes sacred-lift {
+  from { transform: translateY(0) scale(1); }
+  to   { transform: translateY(-6px) scale(1.022); }
+}
+
+/* ── Sanctuary Glow — the art frame pulses when the track is playing ── */
+@keyframes sanctuary-glow {
+  0%, 100% {
+    border-color: rgba(196,154,40,0.30);
+    box-shadow:
+      0 0 0 1px rgba(196,154,40,0.12),
+      0 0 40px 4px rgba(196,154,40,0.12),
+      0 16px 64px rgba(0,0,0,0.65);
+  }
+  50% {
+    border-color: rgba(196,154,40,0.70);
+    box-shadow:
+      0 0 0 2px rgba(196,154,40,0.22),
+      0 0 60px 12px rgba(196,154,40,0.28),
+      0 16px 80px rgba(0,0,0,0.75);
+  }
+}
+
+/* ── Missing Art Sanctuary — the void breathes, inviting testimony ── */
+@keyframes void-breathe {
+  0%, 100% {
+    background: radial-gradient(ellipse 80% 70% at 50% 55%, rgba(196,154,40,0.04) 0%, transparent 70%);
+  }
+  50% {
+    background: radial-gradient(ellipse 80% 70% at 50% 55%, rgba(196,154,40,0.09) 0%, transparent 70%);
+  }
+}
+
+/* ── Relic Ring — concentric sacred geometry rings for missing art ── */
+@keyframes relic-ring-outer {
+  0%, 100% { opacity: 0.18; transform: scale(1.00); }
+  50%       { opacity: 0.35; transform: scale(1.04); }
+}
+@keyframes relic-ring-inner {
+  0%, 100% { opacity: 0.10; transform: scale(1.00); }
+  50%       { opacity: 0.22; transform: scale(1.02); }
+}
+@keyframes relic-icon {
+  0%, 100% { opacity: 0.28; transform: scale(1.00); }
+  50%       { opacity: 0.50; transform: scale(1.06); }
+}
+
+/* ── Gold Shimmer — text shimmer for sacred labels ── */
+@keyframes gold-shimmer {
+  0%, 100% { background-position: 0% 50%; }
+  50%       { background-position: 100% 50%; }
+}
+
+/* ── Witness Card — Sacred Vision upgrade ── */
+/* When a card is active (currently playing), it breathes with the sanctuary glow */
+.witness-card.sacred-active {
+  animation: sanctuary-glow 3.5s ease-in-out infinite;
+}
+
+/* ── Missing Art Void — elegant placeholder container ── */
+.missing-art-void {
+  animation: void-breathe 5s ease-in-out infinite;
+}
+
+/* ── Relic Ring components ── */
+.relic-ring-outer {
+  animation: relic-ring-outer 4s ease-in-out infinite;
+}
+.relic-ring-inner {
+  animation: relic-ring-inner 4s ease-in-out infinite 0.5s;
+}
+.relic-icon {
+  animation: relic-icon 4s ease-in-out infinite 1s;
+}
+
+/* ── Sacred Section Header — ShowcaseRow elevation ── */
+.sacred-section-header {
+  position: relative;
+}
+.sacred-section-header::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 1.1rem;
+  background: linear-gradient(to bottom, rgba(196,154,40,0.95), rgba(196,154,40,0.12));
+  border-radius: 2px;
+}
+
+/* ── Hero Scrim — deeper cinematic layering for CinematicHero ── */
+.hero-cinematic-scrim {
+  background:
+    linear-gradient(to right, rgba(0,0,0,0.94) 0%, rgba(0,0,0,0.68) 42%, rgba(0,0,0,0.20) 68%, transparent 100%),
+    linear-gradient(to top, rgba(0,0,0,0.96) 0%, rgba(0,0,0,0.55) 30%, transparent 60%);
+}
+
+/* ── Gold Corner Brackets — four-corner architectural frame ── */
+.sg-corner-frame {
+  position: relative;
+}
+.sg-corner-frame::before,
+.sg-corner-frame::after {
+  content: '';
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  pointer-events: none;
+  z-index: 3;
+  opacity: 0.60;
+  transition: opacity 0.3s ease;
+}
+.sg-corner-frame::before {
+  top: 10px;
+  left: 10px;
+  border-top: 1.5px solid #C49A28;
+  border-left: 1.5px solid #C49A28;
+}
+.sg-corner-frame::after {
+  bottom: 10px;
+  right: 10px;
+  border-bottom: 1.5px solid #C49A28;
+  border-right: 1.5px solid #C49A28;
+}
+.sg-corner-frame:hover::before,
+.sg-corner-frame:hover::after {
+  opacity: 0.90;
+}
+
+/* ── All-four-corners frame (requires pseudo-element siblings via JS) ── */
+/* Use .sg-corner-frame for the standard two-corner treatment */
+/* For all-four, add .sg-corner-frame-full which uses box-shadow trick */
+.sg-corner-frame-full {
+  position: relative;
+}
+.sg-corner-frame-full::before,
+.sg-corner-frame-full::after {
+  content: '';
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  pointer-events: none;
+  z-index: 3;
+  opacity: 0.55;
+  transition: opacity 0.3s ease;
+}
+.sg-corner-frame-full::before {
+  top: 10px;
+  left: 10px;
+  border-top: 1.5px solid #C49A28;
+  border-left: 1.5px solid #C49A28;
+}
+.sg-corner-frame-full::after {
+  top: 10px;
+  right: 10px;
+  border-top: 1.5px solid #C49A28;
+  border-right: 1.5px solid #C49A28;
+}
+.sg-corner-frame-full:hover::before,
+.sg-corner-frame-full:hover::after {
+  opacity: 0.85;
+}
+
+/* ── Harmonic Card Border — active track card glows with soul color ── */
+/* Set --harmonic-hue and --harmonic-sat on the element via inline style */
+.harmonic-card-active {
+  border-color: oklch(from hsl(var(--harmonic-hue, 45), var(--harmonic-sat, 60%), 55%) l c h / 0.65) !important;
+  box-shadow:
+    0 0 0 1px oklch(from hsl(var(--harmonic-hue, 45), var(--harmonic-sat, 60%), 55%) l c h / 0.25),
+    0 0 32px oklch(from hsl(var(--harmonic-hue, 45), var(--harmonic-sat, 60%), 55%) l c h / 0.20),
+    0 8px 48px rgba(0,0,0,0.70);
+  animation: sanctuary-glow 3.5s ease-in-out infinite;
+}

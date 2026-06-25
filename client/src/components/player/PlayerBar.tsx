@@ -11,6 +11,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { useFrequencyGlow } from "@/hooks/useFrequencyGlow";
 import { useWaveformVisualizer } from "@/hooks/useWaveformVisualizer";
 import { useHarmonic } from "@/contexts/HarmonicContext";
+import { triggerTaggedDownload } from "@/lib/downloadTrack";
 import {
   Play, Pause, SkipBack, SkipForward,
   Shuffle, Repeat, Volume2, VolumeX, Heart, DollarSign, Maximize2, Minimize2,
@@ -850,13 +851,10 @@ export default function PlayerBar() {
               if (!dlPerm || dlPerm === "none") return null;
               const triggerDownload = () => {
                 if (!user) { toast.info("Sign in to download this track"); return; }
-                const a = document.createElement("a");
-                a.href = `/api/download/${currentSongId}`;
-                a.download = ""; // CRITICAL: tells browser to download, not navigate
-                a.style.display = "none";
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
+                if (!currentSongId) return;
+                triggerTaggedDownload(currentSongId).catch((e: unknown) => {
+                  toast.error(e instanceof Error ? e.message : "Download failed");
+                });
               };
               return (
                 <button
@@ -1091,13 +1089,10 @@ export default function PlayerBar() {
             onClick={() => {
               setShowContextMenu(false);
               if (!user) { toast.info("Sign in to download this track"); return; }
-              const a = document.createElement("a");
-              a.href = `/api/download/${currentSongId}`;
-              a.download = ""; // CRITICAL: tells browser to download, not navigate
-              a.style.display = "none";
-              document.body.appendChild(a);
-              a.click();
-              document.body.removeChild(a);
+              if (!currentSongId) return;
+              triggerTaggedDownload(currentSongId).catch((e: unknown) => {
+                toast.error(e instanceof Error ? e.message : "Download failed");
+              });
             }}
             className="flex items-center gap-2.5 w-full px-4 py-2.5 text-[12px] font-body transition-colors hover:bg-white/5 text-left"
             style={{ color: "var(--ln-parchment)" }}

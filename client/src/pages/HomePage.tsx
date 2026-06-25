@@ -569,38 +569,40 @@ function CinematicHero({ isAuthenticated, getLoginUrl: getLogin }: { isAuthentic
           alt=""
           aria-hidden="true"
           className="w-full h-full object-cover"
-          style={{ filter: "brightness(0.65) saturate(1.18)" }}
+          style={{ filter: "brightness(0.58) saturate(1.22)", transform: "scale(1.04)", transformOrigin: "center center" }}
         />
       </div>
 
-      {/* Layered scrims — left-heavy for text readability, bottom for attribution */}
+      {/* Layered scrims — deeper cinematic left-heavy + bottom */}
       <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background: "linear-gradient(to right, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.62) 38%, rgba(0,0,0,0.18) 65%, transparent 100%)",
-        }}
+        className="absolute inset-0 pointer-events-none hero-cinematic-scrim"
       />
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background: "linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.48) 28%, transparent 58%)",
-        }}
-      />
-      {/* Subtle sacred geometry border frame */}
+
+      {/* Sacred geometry border frame — stronger gold corona */}
       <div
         className="absolute inset-0 pointer-events-none z-10"
         style={{
-          boxShadow: "inset 0 0 0 1px rgba(196,154,40,0.10), inset 0 0 80px rgba(196,154,40,0.06)",
+          boxShadow: "inset 0 0 0 1px rgba(196,154,40,0.14), inset 0 0 120px rgba(196,154,40,0.08), inset 0 0 240px rgba(196,154,40,0.03)",
         }}
       />
 
-      {/* Corner vignette */}
+      {/* Corner vignette — deeper */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
-          background: "radial-gradient(ellipse 110% 110% at 50% 50%, transparent 38%, rgba(0,0,0,0.32) 75%, rgba(0,0,0,0.62) 100%)",
+          background: "radial-gradient(ellipse 110% 110% at 50% 50%, transparent 28%, rgba(0,0,0,0.40) 68%, rgba(0,0,0,0.75) 100%)",
         }}
       />
+
+      {/* Sacred corner brackets — all four corners */}
+      {/* Top-left */}
+      <div className="absolute top-5 left-5 z-20 pointer-events-none" style={{ width: 28, height: 28, borderTop: "1.5px solid rgba(196,154,40,0.55)", borderLeft: "1.5px solid rgba(196,154,40,0.55)" }} />
+      {/* Top-right */}
+      <div className="absolute top-5 right-5 z-20 pointer-events-none" style={{ width: 28, height: 28, borderTop: "1.5px solid rgba(196,154,40,0.55)", borderRight: "1.5px solid rgba(196,154,40,0.55)" }} />
+      {/* Bottom-left */}
+      <div className="absolute bottom-5 left-5 z-20 pointer-events-none" style={{ width: 28, height: 28, borderBottom: "1.5px solid rgba(196,154,40,0.55)", borderLeft: "1.5px solid rgba(196,154,40,0.55)" }} />
+      {/* Bottom-right */}
+      <div className="absolute bottom-5 right-5 z-20 pointer-events-none" style={{ width: 28, height: 28, borderBottom: "1.5px solid rgba(196,154,40,0.55)", borderRight: "1.5px solid rgba(196,154,40,0.55)" }} />
 
       {/* Content — anchored to lower 38.2% (golden ratio) */}
       <div className="hero-phi-content relative z-20">

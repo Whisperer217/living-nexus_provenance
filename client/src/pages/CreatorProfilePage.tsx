@@ -6,6 +6,7 @@
 ═══════════════════════════════════════════════════════════════════ */
 
 import { useState, useRef, useEffect } from "react";
+import { triggerTaggedDownload } from "@/lib/downloadTrack";
 import { Helmet } from "react-helmet-async";
 import { useParams, Link, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
@@ -61,17 +62,16 @@ function SongContextMenu({ song, isOwner, onClose, onDelete, onEdit, position }:
     toast.success("Link copied!");
     onClose();
   };
-  function triggerTaggedDownload(id: number) {
-    const a = document.createElement("a");
-    a.href = `/api/download/${id}`;
-    a.download = ""; // CRITICAL: tells browser to download, not navigate to the URL
-    a.style.display = "none";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  }
+  // Uses fetch+blob to handle cross-origin S3 redirects (anchor a.download fails on cross-origin)
   const downloadMutation = trpc.songs.download.useMutation({
-    onSuccess: (_data: { url: string }, vars: { songId: number }) => { triggerTaggedDownload(vars.songId); onClose(); },
+    onSuccess: async (_data: { url: string }, vars: { songId: number }) => {
+      onClose();
+      try {
+        await triggerTaggedDownload(vars.songId);
+      } catch (e: unknown) {
+        toast.error(e instanceof Error ? e.message : "Download failed");
+      }
+    },
     onError: (e) => { toast.error(e.message); onClose(); },
   });
 

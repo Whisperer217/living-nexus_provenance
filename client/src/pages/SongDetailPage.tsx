@@ -8,6 +8,7 @@
 ═══════════════════════════════════════════════════════════════════ */
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { triggerTaggedDownload } from "@/lib/downloadTrack";
 import { Helmet } from "react-helmet-async";
 import { useParams, Link } from "wouter";
 import { trpc } from "@/lib/trpc";
@@ -232,19 +233,15 @@ export default function SongDetailPage() {
     onSuccess: () => { setReplyText(""); setReplyingTo(null); refetchComments(); toast.success("Reply posted!"); },
     onError: (e: { message: string }) => toast.error(e.message),
   });
-  // WID-tagged download: permission check via tRPC, then trigger /api/download/:songId
-  function triggerTaggedDownload(id: number) {
-    const a = document.createElement("a");
-    a.href = `/api/download/${id}`;
-    a.download = ""; // CRITICAL: tells browser to download, not navigate to the URL
-    a.style.display = "none";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  }
+  // WID-tagged download: permission check via tRPC, then fetch+blob download
+  // Uses fetch+blob to handle cross-origin S3 redirects (anchor a.download fails on cross-origin)
   const downloadMutation = trpc.songs.download.useMutation({
-    onSuccess: (_d: { url: string }, vars: { songId: number }) => {
-      triggerTaggedDownload(vars.songId);
+    onSuccess: async (_d: { url: string }, vars: { songId: number }) => {
+      try {
+        await triggerTaggedDownload(vars.songId);
+      } catch (e: unknown) {
+        toast.error(e instanceof Error ? e.message : "Download failed");
+      }
     },
     onError: (e: { message: string }) => toast.error(e.message),
   });
@@ -589,16 +586,49 @@ export default function SongDetailPage() {
                 {song.coverArtUrl
                   ? <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover" style={{ objectPosition: `${song.coverPositionX ?? 50}% ${song.coverPositionY ?? 50}%` }} />
                   : (
-                    <div className="w-full h-full flex flex-col items-center justify-center gap-5" style={{ background: "radial-gradient(ellipse at 50% 60%, rgba(196,154,40,0.07) 0%, transparent 70%)" }}>
-                      {/* Sacred geometry ornament */}
-                      <div className="relative flex items-center justify-center" style={{ width: 96, height: 96 }}>
-                        <div className="absolute inset-0 rounded-full" style={{ border: "1px solid rgba(196,154,40,0.15)", animation: "widPulse 4s ease-in-out infinite" }} />
-                        <div className="absolute inset-3 rounded-full" style={{ border: "1px solid rgba(196,154,40,0.1)" }} />
-                        <Music className="w-10 h-10" style={{ color: "rgba(196,154,40,0.35)" }} />
+                    /* Missing Art Sanctuary — sacred void, three relic rings, animated breathe */
+                    <div
+                      className="w-full h-full flex flex-col items-center justify-center gap-6 missing-art-void"
+                      style={{
+                        background: "linear-gradient(160deg, #130f1e 0%, #0a0812 45%, #060409 100%)",
+                      }}
+                    >
+                      {/* Sacred geometry ornament — three concentric relic rings */}
+                      <div className="relative flex items-center justify-center" style={{ width: 120, height: 120 }}>
+                        {/* Outer ring — slow breathe */}
+                        <div
+                          className="absolute inset-0 rounded-full relic-ring-outer"
+                          style={{ border: "1px solid rgba(196,154,40,0.20)", boxShadow: "0 0 20px rgba(196,154,40,0.06)" }}
+                        />
+                        {/* Middle ring */}
+                        <div
+                          className="absolute inset-[14px] rounded-full relic-ring-inner"
+                          style={{ border: "1px solid rgba(196,154,40,0.14)" }}
+                        />
+                        {/* Inner ring — tightest */}
+                        <div
+                          className="absolute inset-[28px] rounded-full"
+                          style={{ border: "1px solid rgba(196,154,40,0.08)" }}
+                        />
+                        {/* Center icon */}
+                        <Music
+                          className="relic-icon"
+                          style={{ width: 30, height: 30, color: "rgba(196,154,40,0.40)", filter: "drop-shadow(0 0 8px rgba(196,154,40,0.22))" }}
+                        />
                       </div>
-                      <div className="text-center px-6">
-                        <p className="text-sm font-semibold mb-1" style={{ fontFamily: "'Cinzel', serif", color: "rgba(196,154,40,0.55)" }}>No Cover Art</p>
-                        <p className="text-xs" style={{ color: "rgba(255,255,255,0.2)" }}>This work awaits its visual testimony</p>
+                      <div className="text-center px-8">
+                        <p
+                          className="font-heading tracking-[0.18em] uppercase mb-2"
+                          style={{ fontSize: "0.78rem", color: "rgba(196,154,40,0.52)", textShadow: "0 0 20px rgba(196,154,40,0.18)" }}
+                        >
+                          Awaiting Visual Testimony
+                        </p>
+                        <p
+                          className="text-xs"
+                          style={{ color: "rgba(255,255,255,0.18)", lineHeight: 1.6 }}
+                        >
+                          This work has not yet received its cover art
+                        </p>
                       </div>
                       {isOwner && (
                         <button
@@ -606,11 +636,12 @@ export default function SongDetailPage() {
                           onClick={e => { e.stopPropagation(); setEditingOpen(true); }}
                           className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all hover:scale-105 active:scale-95 btn-gold-glow"
                           style={{
-                            background: "rgba(196,154,40,0.12)",
-                            border: "1px solid rgba(196,154,40,0.45)",
+                            background: "rgba(196,154,40,0.10)",
+                            border: "1px solid rgba(196,154,40,0.42)",
                             color: "var(--ln-gold)",
                             fontFamily: "'Cinzel', serif",
-                            letterSpacing: "0.05em",
+                            letterSpacing: "0.06em",
+                            boxShadow: "0 0 16px rgba(196,154,40,0.12)",
                           }}
                         >
                           <ImageIcon size={14} /> Bestow Cover Art

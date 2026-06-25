@@ -9,6 +9,7 @@
 import { usePlayer } from "@/contexts/PlayerContext";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { triggerTaggedDownload } from "@/lib/downloadTrack";
 import { useFrequencyGlow } from "@/hooks/useFrequencyGlow";
 import { useHarmonic } from "@/contexts/HarmonicContext";
 import { useWaveformVisualizer } from "@/hooks/useWaveformVisualizer";
@@ -1393,13 +1394,10 @@ function GlobalPlayerInner() {
             onClick={() => {
               setShowContextMenu(false);
               if (!user) { toast.info("Sign in to download this track"); return; }
-              const a = document.createElement("a");
-              a.href = `/api/download/${currentSongId}`;
-              a.download = ""; // CRITICAL: tells browser to download, not navigate
-              a.style.display = "none";
-              document.body.appendChild(a);
-              a.click();
-              document.body.removeChild(a);
+              if (!currentSongId) return;
+              triggerTaggedDownload(currentSongId).catch((e: unknown) => {
+                toast.error(e instanceof Error ? e.message : "Download failed");
+              });
             }}
             className="flex items-center gap-2.5 w-full px-4 py-2.5 text-[12px] transition-colors hover:bg-white/5 text-left"
             style={{ color: "var(--ln-parchment)" }}

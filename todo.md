@@ -5669,13 +5669,13 @@
 - [x] TypeScript: 0 errors | Vitest: 317/317 passing
 
 ## Phase N+5: Sacred Vision — Homepage & Witness Card Elevation
-- [ ] Elevate StoreTrackCard: deeper scrim, luminous title, parchment creator whisper, gold WID seal with inner glow, play button with sacred pulse
-- [ ] Elevate ExploreCard to match StoreTrackCard exactly (same reliquary standard)
-- [ ] Rebuild CinematicHero as Living Witness hero: WID seal integrated, "Witness This Work" CTA, dominant title, whispered creator
-- [ ] ShowcaseRow: golden-ratio section spacing, subtle divider between sections, breathing room
-- [ ] Add subtle laminin/cross motif as section divider in index.css
-- [ ] Center-card elevation effect in ShowcaseRow (scale transform on focused card)
-- [ ] TypeScript: 0 errors | Vitest: all passing
+- [x] Elevate StoreTrackCard: deeper scrim, luminous title, parchment creator whisper, gold WID seal with inner glow, play button with sacred pulse
+- [x] Elevate ExploreCard to match StoreTrackCard exactly (same reliquary standard)
+- [x] Rebuild CinematicHero as Living Witness hero: WID seal integrated, "Witness This Work" CTA, dominant title, whispered creator
+- [x] ShowcaseRow: golden-ratio section spacing, subtle divider between sections, breathing room
+- [x] Add subtle laminin/cross motif as section divider in index.css
+- [x] Center-card elevation effect in ShowcaseRow (scale transform on focused card)
+- [x] TypeScript: 0 errors | Vitest: all passing
 
 ## Phase N+6: Final Polish Pass — Sacred Cathedral Standard Elevation
 - [x] StoreTrackCard v2.1: WID seal upgraded (bg 0.15, border 0.60, inset highlight rgba(255,220,100,0.24), glow 0.22)
@@ -5713,18 +5713,18 @@
 - [x] TypeScript: 0 errors | Tests: 324/324 passing | Clean production build
 
 ## Phase N+9: Sacred Harmonic System — Platform-Wide Living Testimony
-- [ ] Audit waveform visualizer hook, nav bar component, and existing harmonic system
-- [ ] Expose harmonicSig from PlayerContext (or a dedicated HarmonicContext) for global consumption
-- [ ] Wire harmonic signature into waveform visualizer — hue shift, glow intensity, pulse color
-- [ ] Apply subtle harmonic resonance to top navigation bar — soft bottom-edge glow when playing
-- [ ] TypeScript check + clean build + checkpoint
+- [x] Audit waveform visualizer hook, nav bar component, and existing harmonic system
+- [x] Expose harmonicSig from PlayerContext (or a dedicated HarmonicContext) for global consumption
+- [x] Wire harmonic signature into waveform visualizer — hue shift, glow intensity, pulse color
+- [x] Apply subtle harmonic resonance to top navigation bar — soft bottom-edge glow when playing
+- [x] TypeScript check + clean build + checkpoint
 
 ## Phase N+12: Fix Page Freeze on Edit Work / Add Art
-- [ ] Diagnose root cause of freeze when editingOpen state is set to true
-- [ ] Fix EditTrackPanel so it opens cleanly without freezing
-- [ ] Add error boundary / loading state around EditTrackPanel
-- [ ] Verify fix on desktop and mobile
-- [ ] 0 TypeScript errors, 324/324 tests passing
+- [x] Diagnose root cause of freeze when editingOpen state is set to true
+- [x] Fix EditTrackPanel so it opens cleanly without freezing
+- [x] Add error boundary / loading state around EditTrackPanel
+- [x] Verify fix on desktop and mobile
+- [x] 0 TypeScript errors, 324/324 tests passing
 
 ## Phase N+12: Fix Page Freeze on Edit Work / Add Art
 - [x] Root cause: overlayOpen("edit-track") used default "full" mode which sets body { position: fixed }
@@ -5736,13 +5736,13 @@
 - [x] 0 TypeScript errors, 324/324 tests passing
 
 ## Phase N+13: Edit Chapel — Sacred Unified Track Edit Experience
-- [ ] Audit current EditTrackPanel, Archive edit button, Creator Domain edit button, SongDetailPage edit button
-- [ ] Build new EditChapel component: sacred right-side drawer, mobile full-screen, all required sections
-- [ ] EditChapel sections: cover art preview + replace, title, genre, creation date, status, Origin Story, lyrics editor, creation disclosure, delete with confirmation
-- [ ] Wire EditChapel into Archive page (/archive)
-- [ ] Wire EditChapel into Creator Domain / Profile page
-- [ ] Wire EditChapel into SongDetailPage (/song/:id) — replace current EditTrackPanel usage
-- [ ] 0 TypeScript errors, all tests passing
+- [x] Audit current EditTrackPanel, Archive edit button, Creator Domain edit button, SongDetailPage edit button
+- [x] Build new EditChapel component: sacred right-side drawer, mobile full-screen, all required sections
+- [x] EditChapel sections: cover art preview + replace, title, genre, creation date, status, Origin Story, lyrics editor, creation disclosure, delete with confirmation
+- [x] Wire EditChapel into Archive page (/archive)
+- [x] Wire EditChapel into Creator Domain / Profile page
+- [x] Wire EditChapel into SongDetailPage (/song/:id) — replace current EditTrackPanel usage
+- [x] 0 TypeScript errors, all tests passing
 
 ## Phase N+13: Edit Chapel — Sacred Unified Edit Experience
 - [x] New EditChapel component built (client/src/components/EditChapel.tsx)

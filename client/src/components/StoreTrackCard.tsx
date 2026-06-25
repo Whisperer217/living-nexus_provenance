@@ -1,6 +1,6 @@
 /*
 ╔══════════════════════════════════════════════════════════════════╗
-║  LIVING NEXUS — WITNESS CARD (CANONICAL SPEC v2.1)              ║
+║  LIVING NEXUS — WITNESS CARD (SACRED VISION v3.0 — Phase N+5)  ║
 ║  ──────────────────────────────────────────────────────────────  ║
 ║  Design Language: Vibe-coded cathedral. Premium gallery.         ║
 ║  The creation is the statement. The creator is the signature.    ║
@@ -12,12 +12,19 @@
 ║  Layer 5: Title — bottom, dominant, work-first                   ║
 ║  Layer 6: Creator — whispered below title, warm parchment        ║
 ║  Layer 7: Resonance — plays/tips, bottom-right, minimal          ║
+║                                                                  ║
+║  Sacred Vision Elevation:                                        ║
+║  • sanctuary-glow animation when playing (replaces witness-breathe)
+║  • Missing art: relic rings + void-breathe + inviting label      ║
+║  • sg-corner-frame on all cards (architectural gold brackets)    ║
+║  • Deeper cinematic scrim (95→0 bottom fade)                     ║
+║  • Gold shimmer on title when active                             ║
 ╚══════════════════════════════════════════════════════════════════╝
 */
 
 import { useState, useRef, useEffect } from "react";
 import { Link, useLocation } from "wouter";
-import { Play, Pause, Shield, MoreVertical, FolderPlus, ExternalLink, Copy, SkipForward, Flame, Heart } from "lucide-react";
+import { Play, Pause, Shield, MoreVertical, FolderPlus, ExternalLink, Copy, SkipForward, Flame, Heart, Music } from "lucide-react";
 import { AddToCollectionModal } from "@/components/AddToCollectionModal";
 import { createPortal } from "react-dom";
 import { usePlayer } from "@/contexts/PlayerContext";
@@ -187,7 +194,7 @@ function TrackContextMenu({ song, position, onClose }: {
   );
 }
 
-// ── WITNESS CARD ──────────────────────────────────────────────────
+// ── WITNESS CARD — Sacred Vision v3.0 ────────────────────────────
 export function StoreTrackCard({ song, size = "md", allSongs, songIndex, isNew }: StoreTrackCardProps) {
   const { state, playQueueAt, addAndPlay } = usePlayer();
   const currentTrack = state.tracks[state.currentIdx];
@@ -197,9 +204,6 @@ export function StoreTrackCard({ song, size = "md", allSongs, songIndex, isNew }
   const [hovered, setHovered] = useState(false);
 
   // Portrait card widths — 2:3 aspect ratio (golden ratio territory)
-  // sm: 140px mobile / 160px desktop
-  // md: 160px mobile / 190px desktop  
-  // lg: 180px mobile / 220px desktop
   const cardWidth =
     size === "sm" ? "w-[140px] sm:w-[160px]" :
     size === "lg" ? "w-[180px] sm:w-[220px]" :
@@ -208,6 +212,7 @@ export function StoreTrackCard({ song, size = "md", allSongs, songIndex, isNew }
   const { plays, tips } = formatResonance(song);
   const hasAudio = !!song.fileUrl;
   const hasWid = !!(song.wid || song.widShort);
+  const hasArt = !!song.coverArtUrl;
 
   const handlePlay = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -229,63 +234,90 @@ export function StoreTrackCard({ song, size = "md", allSongs, songIndex, isNew }
   const creatorLabel = song.artistHandle ? `@${song.artistHandle}` : (song.artistName || "Unknown");
   const [, navigate] = useLocation();
 
+  // Sacred Vision: card frame style — active tracks breathe with sanctuary glow
+  const cardFrameStyle: React.CSSProperties = {
+    border: isActive
+      ? "1px solid rgba(196,154,40,0.68)"
+      : hovered
+        ? "1px solid rgba(196,154,40,0.38)"
+        : "1px solid rgba(196,154,40,0.18)",
+    boxShadow: isActive
+      ? "0 0 0 2px rgba(196,154,40,0.18), 0 8px 48px rgba(0,0,0,0.75), 0 0 40px rgba(196,154,40,0.22)"
+      : hovered
+        ? "0 16px 64px rgba(0,0,0,0.82), 0 0 0 1px rgba(196,154,40,0.28), 0 0 32px rgba(196,154,40,0.14)"
+        : "0 4px 24px rgba(0,0,0,0.58), 0 0 0 0 transparent",
+    transform: hovered && !isActive ? "translateY(-6px) scale(1.022)" : isActive ? "translateY(-2px) scale(1.008)" : "translateY(0) scale(1)",
+    transition: "transform 0.32s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.32s ease, border-color 0.32s ease",
+    // sanctuary-glow animation applied via className below
+  };
+
   return (
     <>
       <Link href={`/song/${song.id}`}>
         <div
-          className={`relative ${cardWidth} flex-shrink-0 snap-start cursor-pointer group witness-card${hovered ? ' breathing' : ''}`}
+          className={`relative ${cardWidth} flex-shrink-0 snap-start cursor-pointer group`}
           style={{ aspectRatio: "2/3" }}
           onMouseEnter={() => setHovered(true)}
           onMouseLeave={() => setHovered(false)}
         >
-          {/* ── Card frame — rounded, subtle gold border ── */}
+          {/* ── Card frame — sg-corner-frame + sanctuary glow when active ── */}
           <div
-            className="absolute inset-0 rounded-2xl overflow-hidden"
-            style={{
-              border: isActive
-                ? "1px solid rgba(196,154,40,0.65)"
-                : "1px solid rgba(196,154,40,0.22)",
-              boxShadow: isActive
-                ? "0 0 0 1px rgba(196,154,40,0.28), 0 8px 40px rgba(0,0,0,0.70), 0 0 32px rgba(196,154,40,0.18), inset 0 0 40px rgba(196,154,40,0.06)"
-                : hovered
-                  ? "0 16px 56px rgba(0,0,0,0.80), 0 0 0 1px rgba(196,154,40,0.28), 0 0 28px rgba(196,154,40,0.12), inset 0 0 32px rgba(196,154,40,0.06)"
-                  : "0 4px 20px rgba(0,0,0,0.55)",
-              transform: hovered ? "translateY(-5px) scale(1.018)" : "translateY(0) scale(1)",
-              transition: "transform 0.30s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.30s ease, border-color 0.30s ease",
-            }}
+            className={`absolute inset-0 rounded-2xl overflow-hidden sg-corner-frame${isActive ? " witness-card sacred-active" : ""}`}
+            style={cardFrameStyle}
           >
             {/* ── LAYER 1: Artwork — full-bleed, portrait ── */}
-            {song.coverArtUrl ? (
+            {hasArt ? (
               <img
-                src={song.coverArtUrl}
+                src={song.coverArtUrl!}
                 alt=""
                 aria-hidden="true"
                 className="absolute inset-0 w-full h-full object-cover"
                 style={{
-                  filter: hovered ? "brightness(0.78) saturate(1.08)" : "brightness(0.86) saturate(1.04)",
-                  transition: "filter 0.30s ease",
+                  filter: hovered ? "brightness(0.75) saturate(1.10)" : "brightness(0.84) saturate(1.05)",
+                  transition: "filter 0.32s ease",
                 }}
               />
             ) : (
+              /* ── Missing Art Sanctuary — relic rings, void breathe ── */
               <div
-                className="absolute inset-0"
+                className="absolute inset-0 missing-art-void flex flex-col items-center justify-center gap-3"
                 style={{
-                  background: "linear-gradient(160deg, #1a1228 0%, #0e0c1c 40%, #0d0814 100%)",
+                  background: "linear-gradient(160deg, #120e1c 0%, #0a0812 40%, #08060f 100%)",
                 }}
-              />
+              >
+                {/* Relic geometry rings */}
+                <div className="relative flex items-center justify-center" style={{ width: 72, height: 72 }}>
+                  <div
+                    className="absolute inset-0 rounded-full relic-ring-outer"
+                    style={{ border: "1px solid rgba(196,154,40,0.22)" }}
+                  />
+                  <div
+                    className="absolute inset-[10px] rounded-full relic-ring-inner"
+                    style={{ border: "1px solid rgba(196,154,40,0.14)" }}
+                  />
+                  <Music
+                    className="relic-icon"
+                    style={{ width: 22, height: 22, color: "rgba(196,154,40,0.38)" }}
+                  />
+                </div>
+                <span
+                  className="text-[9px] font-heading tracking-[0.18em] uppercase"
+                  style={{ color: "rgba(196,154,40,0.30)" }}
+                >
+                  No Art Yet
+                </span>
+              </div>
             )}
 
-            {/* ── LAYER 2: Gradient scrim — cinematic bottom fade ── */}
+            {/* ── LAYER 2: Gradient scrim — deeper cinematic bottom fade ── */}
             <div
               className="absolute inset-0 pointer-events-none"
               style={{
-                background: "linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.75) 22%, rgba(0,0,0,0.32) 48%, rgba(0,0,0,0.08) 66%, transparent 80%)",
+                background: "linear-gradient(to top, rgba(0,0,0,0.97) 0%, rgba(0,0,0,0.80) 20%, rgba(0,0,0,0.38) 46%, rgba(0,0,0,0.10) 64%, transparent 80%)",
               }}
             />
 
             {/* ── LAYER 3: WID seal — top-right, architectural badge ── */}
-            {/* NOTE: Cannot use <Link> here — it would be nested inside the outer <Link> wrapper.
-                 Use a <button> instead and navigate programmatically. */}
             {hasWid && (
               <button
                 type="button"
@@ -293,9 +325,9 @@ export function StoreTrackCard({ song, size = "md", allSongs, songIndex, isNew }
                 className="absolute top-2.5 right-2.5 z-20 flex items-center gap-1 px-2 py-0.5 rounded-full"
                 style={{
                   background: "rgba(196,154,40,0.15)",
-                  border: "1px solid rgba(196,154,40,0.60)",
+                  border: "1px solid rgba(196,154,40,0.62)",
                   backdropFilter: "blur(12px)",
-                  boxShadow: "0 0 12px rgba(196,154,40,0.22), 0 0 0 1px rgba(196,154,40,0.08), inset 0 1px 0 rgba(255,220,100,0.24)",
+                  boxShadow: "0 0 14px rgba(196,154,40,0.24), 0 0 0 1px rgba(196,154,40,0.08), inset 0 1px 0 rgba(255,220,100,0.26)",
                   cursor: "pointer",
                 }}
                 onClick={(e: React.MouseEvent) => {
@@ -304,10 +336,10 @@ export function StoreTrackCard({ song, size = "md", allSongs, songIndex, isNew }
                   navigate(`/verify/${song.wid || song.widShort}`);
                 }}
               >
-                <Shield className="w-2.5 h-2.5" style={{ color: "#D4A843", filter: "drop-shadow(0 0 3px rgba(196,154,40,0.60))" }} />
+                <Shield className="w-2.5 h-2.5" style={{ color: "#D4A843", filter: "drop-shadow(0 0 4px rgba(196,154,40,0.65))" }} />
                 <span
                   className="font-heading text-[8px] tracking-[0.22em] uppercase"
-                  style={{ color: "#D4A843", textShadow: "0 0 10px rgba(196,154,40,0.55)" }}
+                  style={{ color: "#D4A843", textShadow: "0 0 10px rgba(196,154,40,0.60)" }}
                 >
                   WID
                 </span>
@@ -334,17 +366,18 @@ export function StoreTrackCard({ song, size = "md", allSongs, songIndex, isNew }
             {/* ── NOW PLAYING badge — top-left when active ── */}
             {isActive && (
               <div
-                className="absolute top-2.5 left-2.5 z-20 text-[8px] px-2 py-0.5 rounded-full font-bold tracking-wider"
+                className="absolute top-2.5 left-2.5 z-20 flex items-center gap-1 text-[8px] px-2 py-0.5 rounded-full font-bold tracking-wider"
                 style={{
-                  background: "rgba(196,154,40,0.20)",
-                  border: "1px solid rgba(196,154,40,0.55)",
+                  background: "rgba(196,154,40,0.22)",
+                  border: "1px solid rgba(196,154,40,0.58)",
                   color: "#C9A84C",
                   fontFamily: "'Cinzel', serif",
-                  backdropFilter: "blur(4px)",
-                  boxShadow: "0 0 8px rgba(196,154,40,0.20)",
+                  backdropFilter: "blur(6px)",
+                  boxShadow: "0 0 10px rgba(196,154,40,0.22)",
                 }}
               >
-                ▶ NOW PLAYING
+                <div className="live-wave scale-75"><span /><span /><span /></div>
+                LIVE
               </div>
             )}
 
@@ -354,23 +387,27 @@ export function StoreTrackCard({ song, size = "md", allSongs, songIndex, isNew }
                 className="absolute inset-0 flex items-center justify-center pointer-events-none z-10"
                 style={{
                   opacity: hovered || isPlaying ? 1 : 0,
-                  transition: "opacity 0.22s ease",
+                  transition: "opacity 0.24s ease",
                 }}
               >
                 <button
                   onClick={handlePlay}
                   className="pointer-events-auto flex items-center justify-center rounded-full"
                   style={{
-                    width: "54px",
-                    height: "54px",
-                    background: isPlaying ? "rgba(196,154,40,0.22)" : "rgba(0,0,0,0.45)",
-                    border: isPlaying ? "1.5px solid rgba(196,154,40,0.95)" : "1.5px solid rgba(196,154,40,0.75)",
+                    width: "56px",
+                    height: "56px",
+                    background: isPlaying
+                      ? "rgba(196,154,40,0.26)"
+                      : "rgba(0,0,0,0.50)",
+                    border: isPlaying
+                      ? "1.5px solid rgba(196,154,40,0.98)"
+                      : "1.5px solid rgba(196,154,40,0.80)",
                     boxShadow: isPlaying
-                      ? "0 0 0 7px rgba(196,154,40,0.08), 0 0 28px rgba(196,154,40,0.38), inset 0 1px 0 rgba(255,220,100,0.18)"
-                      : "0 0 0 6px rgba(196,154,40,0.06), 0 0 20px rgba(196,154,40,0.26), inset 0 1px 0 rgba(255,220,100,0.12)",
-                    backdropFilter: "blur(6px)",
+                      ? "0 0 0 8px rgba(196,154,40,0.10), 0 0 32px rgba(196,154,40,0.42), inset 0 1px 0 rgba(255,220,100,0.22)"
+                      : "0 0 0 7px rgba(196,154,40,0.07), 0 0 22px rgba(196,154,40,0.28), inset 0 1px 0 rgba(255,220,100,0.14)",
+                    backdropFilter: "blur(8px)",
                     animation: isPlaying ? "pulse-gold 1.8s ease-in-out infinite" : "none",
-                    transition: "box-shadow 0.2s ease, background 0.2s ease",
+                    transition: "box-shadow 0.22s ease, background 0.22s ease",
                   }}
                   aria-label={isPlaying ? "Pause" : "Play"}
                 >
@@ -387,12 +424,15 @@ export function StoreTrackCard({ song, size = "md", allSongs, songIndex, isNew }
             <div className="absolute inset-x-0 bottom-0 p-3 z-10">
               {/* Work title — dominant, creation first */}
               <p
-                className="font-heading leading-tight line-clamp-2 mb-1"
+                className="font-heading leading-tight line-clamp-2 mb-1.5"
                 style={{
-                  fontSize: size === "sm" ? "0.80rem" : "0.90rem",
-                  color: "rgba(252,248,240,1)",
+                  fontSize: size === "sm" ? "0.80rem" : "0.92rem",
+                  color: isActive ? "rgba(255,230,140,0.98)" : "rgba(252,248,240,1)",
                   letterSpacing: "0.025em",
-                  textShadow: "0 1px 8px rgba(0,0,0,1), 0 2px 24px rgba(0,0,0,0.92), 0 0 40px rgba(0,0,0,0.65), 0 0 60px rgba(196,154,40,0.08)",
+                  textShadow: isActive
+                    ? "0 1px 8px rgba(0,0,0,1), 0 0 20px rgba(196,154,40,0.35)"
+                    : "0 1px 8px rgba(0,0,0,1), 0 2px 24px rgba(0,0,0,0.92)",
+                  transition: "color 0.4s ease, text-shadow 0.4s ease",
                 }}
               >
                 {song.title}
@@ -407,7 +447,7 @@ export function StoreTrackCard({ song, size = "md", allSongs, songIndex, isNew }
                       src={song.profilePhotoUrl}
                       alt=""
                       className="w-4 h-4 rounded-full object-cover flex-shrink-0"
-                      style={{ border: "1px solid rgba(196,154,40,0.28)" }}
+                      style={{ border: "1px solid rgba(196,154,40,0.30)" }}
                     />
                   ) : (
                     <div
@@ -419,10 +459,10 @@ export function StoreTrackCard({ song, size = "md", allSongs, songIndex, isNew }
                     className="truncate"
                     style={{
                       fontSize: "10px",
-                  color: "rgba(220,200,140,0.58)",
-                  fontFamily: "'Cinzel', serif",
-                  letterSpacing: "0.04em",
-                  textShadow: "0 1px 8px rgba(0,0,0,0.98)",
+                      color: "rgba(220,200,140,0.60)",
+                      fontFamily: "'Cinzel', serif",
+                      letterSpacing: "0.04em",
+                      textShadow: "0 1px 8px rgba(0,0,0,0.98)",
                     }}
                   >
                     {creatorLabel}
@@ -433,53 +473,37 @@ export function StoreTrackCard({ song, size = "md", allSongs, songIndex, isNew }
                 <div className="flex items-center gap-1.5 flex-shrink-0">
                   {plays && (
                     <div className="flex items-center gap-0.5">
-                      <Flame className="w-2.5 h-2.5" style={{ color: "rgba(220,180,80,0.45)" }} />
-                      <span style={{ fontSize: "10px", color: "rgba(220,180,80,0.45)", fontVariantNumeric: "tabular-nums" }}>{plays}</span>
+                      <Flame className="w-2.5 h-2.5" style={{ color: "rgba(220,180,80,0.50)" }} />
+                      <span style={{ fontSize: "10px", color: "rgba(220,180,80,0.50)", fontVariantNumeric: "tabular-nums" }}>{plays}</span>
                     </div>
                   )}
                   {tips && (
                     <div className="flex items-center gap-0.5">
-                      <Heart className="w-2.5 h-2.5" style={{ color: "rgba(220,80,80,0.55)" }} />
-                      <span style={{ fontSize: "10px", color: "rgba(220,80,80,0.55)", fontVariantNumeric: "tabular-nums" }}>{tips}</span>
+                      <Heart className="w-2.5 h-2.5" style={{ color: "rgba(220,80,80,0.60)" }} />
+                      <span style={{ fontSize: "10px", color: "rgba(220,80,80,0.60)", fontVariantNumeric: "tabular-nums" }}>{tips}</span>
                     </div>
                   )}
                 </div>
               </div>
             </div>
 
-            {/* ── 3-dot menu — top-right area, appears on hover, below WID badge ── */}
-            {!hasWid && (
-              <button
-                onClick={handleMenuOpen}
-                className="absolute top-2.5 right-2.5 w-6 h-6 rounded-full flex items-center justify-center z-20"
-                style={{
-                  background: "rgba(0,0,0,0.50)",
-                  backdropFilter: "blur(4px)",
-                  opacity: hovered ? 1 : 0,
-                  transition: "opacity 0.2s ease",
-                  border: "1px solid rgba(255,255,255,0.10)",
-                }}
-                title="More options"
-              >
-                <MoreVertical className="w-3 h-3 text-white/70" />
-              </button>
-            )}
-            {hasWid && (
-              <button
-                onClick={handleMenuOpen}
-                className="absolute top-9 right-2.5 w-6 h-6 rounded-full flex items-center justify-center z-20"
-                style={{
-                  background: "rgba(0,0,0,0.50)",
-                  backdropFilter: "blur(4px)",
-                  opacity: hovered ? 1 : 0,
-                  transition: "opacity 0.2s ease",
-                  border: "1px solid rgba(255,255,255,0.10)",
-                }}
-                title="More options"
-              >
-                <MoreVertical className="w-3 h-3 text-white/70" />
-              </button>
-            )}
+            {/* ── 3-dot menu — below WID badge, appears on hover ── */}
+            <button
+              onClick={handleMenuOpen}
+              className="absolute z-20 w-6 h-6 rounded-full flex items-center justify-center"
+              style={{
+                top: hasWid ? "2.4rem" : "0.625rem",
+                right: "0.625rem",
+                background: "rgba(0,0,0,0.55)",
+                backdropFilter: "blur(4px)",
+                opacity: hovered ? 1 : 0,
+                transition: "opacity 0.2s ease",
+                border: "1px solid rgba(255,255,255,0.10)",
+              }}
+              title="More options"
+            >
+              <MoreVertical className="w-3 h-3 text-white/70" />
+            </button>
           </div>
         </div>
       </Link>

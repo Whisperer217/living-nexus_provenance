@@ -10,7 +10,7 @@ import { usePlayer } from "@/contexts/PlayerContext";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { Link, useLocation, useSearch } from "wouter";
-import { Search, Music, Play, Shuffle, Infinity, TrendingUp, Heart, DollarSign, Shield, SkipForward, ListPlus, ExternalLink, Crown, Rocket, Users, Bell, Sparkles, BookOpen, LayoutGrid, List, Flame } from "lucide-react";
+import { Search, Music, Play, Shuffle, Infinity, TrendingUp, Heart, DollarSign, Shield, SkipForward, ListPlus, ExternalLink, Crown, Rocket, Users, Bell, Sparkles, BookOpen, LayoutGrid, List, Flame, Pause } from "lucide-react";
 import { AiDisclosurePill } from "@/components/AiDisclosurePill";
 import { MediaAsset } from "@/components/MediaAsset";
 import { AddToMyListModal } from "@/components/AddToMyListModal";
@@ -137,49 +137,68 @@ function ExploreCard({
   return (
     <>
     <div
-      className={`group relative cursor-pointer witness-card${hovered ? ' breathing' : ''}`}
+      className={`group relative cursor-pointer witness-card${isActive ? ' sacred-active' : ''}`}
       style={{ aspectRatio: "2/3" }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       onClick={handleCardClick}
       onContextMenu={e => e.preventDefault()}
     >
-      {/* Card frame — rounded, subtle gold border */}
+      {/* Card frame — sg-corner-frame + sanctuary glow when active */}
       <div
-        className="absolute inset-0 rounded-2xl overflow-hidden"
+        className={`absolute inset-0 rounded-2xl overflow-hidden sg-corner-frame`}
         style={{
           border: isActive
-            ? "1px solid rgba(196,154,40,0.65)"
-            : `1px solid ${ctColors.dim}`,
-          boxShadow: isActive
-            ? "0 0 0 1px rgba(196,154,40,0.28), 0 8px 40px rgba(0,0,0,0.70), 0 0 32px rgba(196,154,40,0.18), inset 0 0 40px rgba(196,154,40,0.06)"
+            ? "1px solid rgba(196,154,40,0.68)"
             : hovered
-              ? "0 16px 56px rgba(0,0,0,0.80), 0 0 0 1px rgba(196,154,40,0.28), 0 0 28px rgba(196,154,40,0.12), inset 0 0 32px rgba(196,154,40,0.06)"
-              : "0 4px 20px rgba(0,0,0,0.55)",
-          transform: hovered ? "translateY(-5px) scale(1.018)" : "translateY(0) scale(1)",
-          transition: "transform 0.30s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.30s ease, border-color 0.30s ease",
+              ? "1px solid rgba(196,154,40,0.38)"
+              : `1px solid ${ctColors.dim}`,
+          boxShadow: isActive
+            ? "0 0 0 2px rgba(196,154,40,0.18), 0 8px 48px rgba(0,0,0,0.75), 0 0 40px rgba(196,154,40,0.22)"
+            : hovered
+              ? "0 16px 64px rgba(0,0,0,0.82), 0 0 0 1px rgba(196,154,40,0.28), 0 0 32px rgba(196,154,40,0.14)"
+              : "0 4px 24px rgba(0,0,0,0.58)",
+          transform: hovered && !isActive ? "translateY(-6px) scale(1.022)" : isActive ? "translateY(-2px) scale(1.008)" : "translateY(0) scale(1)",
+          transition: "transform 0.32s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.32s ease, border-color 0.32s ease",
         }}
       >
-        {/* LAYER 1: Artwork — full-bleed */}
-        <MediaAsset
-          src={song.coverArtUrl}
-          alt={song.title}
-          mode="card"
-          aspectRatio={(song.artAspectRatio as "1:1" | "4:5" | "16:9" | null) ?? "4:5"}
-          focalX={song.coverPositionX ?? 50}
-          focalY={song.coverPositionY ?? 50}
-          className="absolute inset-0 w-full h-full object-cover"
-          style={{
-            filter: hovered ? "brightness(0.78) saturate(1.08)" : "brightness(0.86) saturate(1.04)",
-            transition: "filter 0.30s ease",
-          }}
-        />
+        {/* LAYER 1: Artwork — full-bleed, or missing-art sanctuary */}
+        {song.coverArtUrl ? (
+          <MediaAsset
+            src={song.coverArtUrl}
+            alt={song.title}
+            mode="card"
+            aspectRatio={(song.artAspectRatio as "1:1" | "4:5" | "16:9" | null) ?? "4:5"}
+            focalX={song.coverPositionX ?? 50}
+            focalY={song.coverPositionY ?? 50}
+            className="absolute inset-0 w-full h-full object-cover"
+            style={{
+              filter: hovered ? "brightness(0.75) saturate(1.10)" : "brightness(0.84) saturate(1.05)",
+              transition: "filter 0.32s ease",
+            }}
+          />
+        ) : (
+          /* Missing Art Sanctuary — relic rings, void breathe */
+          <div
+            className="absolute inset-0 missing-art-void flex flex-col items-center justify-center gap-3"
+            style={{
+              background: "linear-gradient(160deg, #120e1c 0%, #0a0812 40%, #08060f 100%)",
+            }}
+          >
+            <div className="relative flex items-center justify-center" style={{ width: 72, height: 72 }}>
+              <div className="absolute inset-0 rounded-full relic-ring-outer" style={{ border: "1px solid rgba(196,154,40,0.22)" }} />
+              <div className="absolute inset-[10px] rounded-full relic-ring-inner" style={{ border: "1px solid rgba(196,154,40,0.14)" }} />
+              <Music className="relic-icon" style={{ width: 22, height: 22, color: "rgba(196,154,40,0.38)" }} />
+            </div>
+            <span className="text-[9px] font-heading tracking-[0.18em] uppercase" style={{ color: "rgba(196,154,40,0.30)" }}>No Art Yet</span>
+          </div>
+        )}
 
-        {/* LAYER 2: Gradient scrim — cinematic bottom fade */}
+        {/* LAYER 2: Gradient scrim — deeper cinematic bottom fade */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: "linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.75) 22%, rgba(0,0,0,0.32) 48%, rgba(0,0,0,0.08) 66%, transparent 80%)",
+            background: "linear-gradient(to top, rgba(0,0,0,0.97) 0%, rgba(0,0,0,0.80) 20%, rgba(0,0,0,0.38) 46%, rgba(0,0,0,0.10) 64%, transparent 80%)",
           }}
         />
 
@@ -221,19 +240,21 @@ function ExploreCard({
           </div>
         )}
 
-        {/* Now playing badge */}
+        {/* Now playing badge — sacred live wave */}
         {isActive && (
           <div
-            className="absolute top-2.5 left-2.5 z-20 text-[8px] px-2 py-0.5 rounded-full font-bold tracking-wider"
+            className="absolute top-2.5 left-2.5 z-20 flex items-center gap-1 text-[8px] px-2 py-0.5 rounded-full font-bold tracking-wider"
             style={{
-              background: "rgba(196,154,40,0.18)",
-              border: "1px solid rgba(196,154,40,0.45)",
+              background: "rgba(196,154,40,0.22)",
+              border: "1px solid rgba(196,154,40,0.58)",
               color: "#C9A84C",
               fontFamily: "'Cinzel', serif",
-              backdropFilter: "blur(4px)",
+              backdropFilter: "blur(6px)",
+              boxShadow: "0 0 10px rgba(196,154,40,0.22)",
             }}
           >
-            ▶ NOW PLAYING
+            <div className="live-wave scale-75"><span /><span /><span /></div>
+            LIVE
           </div>
         )}
 

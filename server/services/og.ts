@@ -338,7 +338,7 @@ async function getHtmlTemplate(isDev: boolean): Promise<string> {
   if (isDev) {
     const clientTemplate = path.resolve(
       import.meta.dirname,
-      "..",
+      "../..",
       "client",
       "index.html"
     );
