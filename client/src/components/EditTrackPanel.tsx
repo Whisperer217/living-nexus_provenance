@@ -400,9 +400,11 @@ export function EditTrackPanel({ song, onClose, onSaved }: EditTrackPanelProps) 
       // Base64 encoding inflates file size by ~33%, so any image > ~750 KB would fail
       // if sent through the tRPC uploadCoverArt mutation.
       const formData = new FormData();
-      formData.append("file", file, file.name);
+      // IMPORTANT: type and filename MUST come before the file binary
+      // so busboy reads them before the file stream event fires.
       formData.append("type", "cover");
       formData.append("filename", file.name);
+      formData.append("file", file, file.name);
       const res = await fetch("/api/upload-file", {
         method: "POST",
         credentials: "include",

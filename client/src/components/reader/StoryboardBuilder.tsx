@@ -40,9 +40,11 @@ interface Props {
 // ─── S3 upload helper (mirrors uploadPipeline.ts pattern) ────────────────────
 async function uploadPageImage(file: File): Promise<string> {
   const formData = new FormData();
+  // IMPORTANT: type and filename MUST come before the file binary
+  formData.append("type", "cover");
+  formData.append("filename", file.name);
   formData.append("file", file);
-  formData.append("type", "image");
-  const res = await fetch("/api/upload-file", { method: "POST", body: formData });
+  const res = await fetch("/api/upload-file", { method: "POST", credentials: "include", body: formData });
   if (!res.ok) throw new Error(`Upload failed: ${res.statusText}`);
   const json = await res.json() as { url: string };
   return json.url;

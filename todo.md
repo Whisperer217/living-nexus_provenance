@@ -87,6 +87,24 @@
 - [x] Edit Work button added to SongDetailPage owner action bar (gold, Cinzel, Pencil icon)
 - [x] 0 TypeScript errors, 324/324 tests passing
 
+## Phase N+11: Cover Art Upload Fix + Audio Metadata Stripping
+- [x] Root cause identified: FormData appended file before type — busboy saw file stream before type field, so cover art was always stored as audio/
+- [x] Fixed FormData field order in UploadPage (type+filename before file)
+- [x] Fixed FormData field order in BatchUploadPage
+- [x] Fixed FormData field order in EditTrackPanel
+- [x] Fixed FormData field order in ComicEnvironment
+- [x] Fixed FormData field order in LyricsEnvironment
+- [x] Fixed FormData field order in ManuscriptEnvironment
+- [x] Fixed FormData field order in MusicEnvironment
+- [x] Fixed FormData field order in VideoEnvironment
+- [x] Fixed FormData field order in StoryboardBuilder (also added credentials:include)
+- [x] Created server/services/audioMetadataStrip.ts — ffmpeg strips all ID3/EXIF tags from audio before S3 upload (fail-open: returns original on error)
+- [x] Wired stripAudioMetadata into /api/upload-file for all audio MIME types
+- [x] Switched audio upload path from streaming Forge relay to buffer+strip+storagePut
+- [x] Missing Cover Art banner on SongDetailPage confirmed working (owner-only, with Add Art button)
+- [x] MediaAsset component confirmed handles null/missing src with Music icon fallback
+- [x] 0 TypeScript errors, 324/324 tests passing
+
 ## Phase 9: Audio Player Fix
 - [ ] Audit PlayerContext addAndPlay, player bar metadata display, DiscoverPage/ExplorePage click handlers
 - [ ] Fix addAndPlay so clicking a track card loads it into the bottom player bar and starts playing

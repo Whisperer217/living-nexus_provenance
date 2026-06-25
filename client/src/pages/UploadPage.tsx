@@ -633,9 +633,11 @@ export default function UploadPage() {
     onProgress?: (pct: number) => void
   ): Promise<{ url: string; key: string }> => {
     const formData = new FormData();
-    formData.append("file", file);
+    // IMPORTANT: type and filename MUST be appended before the file binary
+    // so busboy receives them before the file stream event fires.
     formData.append("type", type);
     formData.append("filename", file.name);
+    formData.append("file", file);
 
     if (onProgress) {
       // Use XHR for progress tracking

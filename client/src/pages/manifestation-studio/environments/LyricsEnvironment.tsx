@@ -118,9 +118,10 @@ export function LyricsEnvironment({ onBack }: LyricsEnvironmentProps) {
   // Helper: upload file to S3 via multipart POST
   const uploadFileToS3 = async (file: File, type: "audio" | "cover" | "video"): Promise<{ url: string; key: string }> => {
     const formData = new FormData();
-    formData.append("file", file);
+    // IMPORTANT: type and filename MUST come before the file binary
     formData.append("type", type);
     formData.append("filename", file.name);
+    formData.append("file", file);
     const res = await fetch("/api/upload-file", { method: "POST", credentials: "include", body: formData });
     if (!res.ok) { const err = await res.json().catch(() => ({ error: res.statusText })); throw new Error(err.error || `Upload failed (${res.status})`); }
     return res.json();

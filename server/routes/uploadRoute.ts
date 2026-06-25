@@ -26,6 +26,7 @@ import { sdk } from "../_core/sdk";
 import { generateRef, safeErrorResponse } from "../_core/errorHandler";
 import { micronize, type ImagePreset } from "../services/imageProcessing";
 import { storagePut } from "../utils/storage";
+import { stripAudioMetadata } from "../services/audioMetadataStrip";
 
 const router = Router();
 
@@ -115,51 +116,29 @@ router.post("/api/upload-file", async (req: Request, res: Response) => {
         fileStream.on("error", reject);
       });
     } else {
-      // STREAMING PATH: pipe directly to Forge (audio/video — no processing)
+      // AUDIO/VIDEO PATH: buffer the stream, strip metadata for audio, then upload to S3
+      const isAudio = fileType === "audio" || mimeType.startsWith("audio/");
       const key = `${prefix}/${user!.id}/${Date.now()}-${safeFileName}`;
-      const form = new FormData();
-      form.append("file", fileStream, {
-        filename: safeFileName,
-        contentType: mimeType,
-        knownLength: undefined, // unknown — streaming
-      });
 
-      const forgeUrl = `${ENV.forgeApiUrl.replace(/\/+$/, "")}/v1/storage/upload?path=${encodeURIComponent(key)}`;
-
+      const chunks: Buffer[] = [];
+      fileStream.on("data", (chunk: Buffer) => chunks.push(chunk));
       uploadPromise = new Promise<{ url: string; key: string }>((resolve, reject) => {
-        form.submit(
-          {
-            protocol: forgeUrl.startsWith("https") ? "https:" : "http:",
-            host: new URL(forgeUrl).hostname,
-            port: new URL(forgeUrl).port || undefined,
-            path: new URL(forgeUrl).pathname + new URL(forgeUrl).search,
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${ENV.forgeApiKey}`,
-            },
-          },
-          (err, forgeRes) => {
-            if (err) { reject(err); return; }
-            let body = "";
-            forgeRes.on("data", (chunk: Buffer) => { body += chunk.toString(); });
-            forgeRes.on("end", () => {
-              if (forgeRes.statusCode && forgeRes.statusCode >= 400) {
-                const ref = generateRef("UPL");
-                console.error(`[upload-file] Forge API error [${ref}] status=${forgeRes.statusCode} body=${body}`);
-                reject(Object.assign(new Error("Forge API rejected the upload"), { ref }));
-                return;
-              }
-              try {
-                const parsed = JSON.parse(body);
-                resolve({ url: parsed.url, key });
-              } catch (parseErr) {
-                const ref = generateRef("UPL");
-                console.error(`[upload-file] Forge response parse error [${ref}]`, parseErr, "body:", body);
-                reject(Object.assign(new Error("Invalid storage response"), { ref }));
-              }
-            });
+        fileStream.on("end", async () => {
+          try {
+            let buffer = Buffer.concat(chunks);
+
+            // Strip all ID3/EXIF metadata from audio files before storage
+            if (isAudio) {
+              buffer = Buffer.from(await stripAudioMetadata(buffer, mimeType));
+            }
+
+            const { url } = await storagePut(key, buffer, mimeType);
+            resolve({ url, key });
+          } catch (err) {
+            reject(err);
           }
-        );
+        });
+        fileStream.on("error", reject);
       });
     }
   });
