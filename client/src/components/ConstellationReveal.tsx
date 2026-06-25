@@ -44,7 +44,8 @@ export function ConstellationReveal({
     const triggerReveal = () => {
       if (hasTriggeredRef.current) return;
       hasTriggeredRef.current = true;
-      observer.disconnect();
+      observer1.disconnect();
+      observer2.disconnect();
 
       if (skipDots) {
         setTimeout(() => setPhase("content"), delay);
@@ -57,21 +58,42 @@ export function ConstellationReveal({
       setTimeout(() => setPhase("content"), delay + 900);
     };
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) triggerReveal();
-      },
-      { threshold: 0.02, rootMargin: "0px 0px 0px 0px" }
+    // Find the nearest scrollable ancestor (the app's main scroll container).
+    // We need this so the IntersectionObserver fires correctly when the page
+    // scrolls inside a nested div rather than the window.
+    const getScrollRoot = (node: HTMLElement): HTMLElement | null => {
+      let parent = node.parentElement;
+      while (parent && parent !== document.body) {
+        const style = window.getComputedStyle(parent);
+        const overflow = style.overflow + style.overflowY;
+        if (/auto|scroll/.test(overflow)) return parent;
+        parent = parent.parentElement;
+      }
+      return null;
+    };
+    const scrollRoot = getScrollRoot(el);
+
+    // Observer 1: relative to the nearest scroll container (catches nested scroll)
+    const observer1 = new IntersectionObserver(
+      (entries) => { if (entries[0].isIntersecting) triggerReveal(); },
+      { root: scrollRoot, threshold: 0, rootMargin: "0px 0px 200px 0px" }
+    );
+    // Observer 2: relative to the viewport with a large bottom margin (fallback)
+    const observer2 = new IntersectionObserver(
+      (entries) => { if (entries[0].isIntersecting) triggerReveal(); },
+      { threshold: 0, rootMargin: "0px 0px 400px 0px" }
     );
 
-    observer.observe(el);
+    observer1.observe(el);
+    observer2.observe(el);
 
-    // Safety fallback: if the observer never fires (e.g. element is below fold on mobile
-    // and user never scrolls), force the reveal after 2.5s so content is never permanently hidden.
-    const fallbackTimer = setTimeout(() => triggerReveal(), 2500);
+    // Hard fallback: 300ms ensures content is never permanently hidden
+    // even if both observers fail (e.g. display:none parent, SSR, etc.).
+    const fallbackTimer = setTimeout(() => triggerReveal(), 300);
 
     return () => {
-      observer.disconnect();
+      observer1.disconnect();
+      observer2.disconnect();
       clearTimeout(fallbackTimer);
     };
   }, [delay, skipDots]);
@@ -172,20 +194,27 @@ export function ManifestationReveal({
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+    const reveal = () => {
+      if (triggered.current) return;
+      triggered.current = true;
+      const stagger = Math.min(index * 60, 600);
+      setTimeout(() => setVisible(true), stagger);
+    };
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && !triggered.current) {
-          triggered.current = true;
+        if (entries[0].isIntersecting) {
           observer.disconnect();
-          // Stagger: 60ms per index, capped at 600ms so long rows don't feel broken
-          const stagger = Math.min(index * 60, 600);
-          setTimeout(() => setVisible(true), stagger);
+          reveal();
         }
       },
-      { threshold: 0.05, rootMargin: "0px 0px -20px 0px" }
+      // Positive rootMargin ensures cards inside nested scroll containers
+      // are revealed before the user reaches them.
+      { threshold: 0, rootMargin: "0px 0px 300px 0px" }
     );
     observer.observe(el);
-    return () => observer.disconnect();
+    // Fallback: 400ms so cards are never permanently invisible
+    const t = setTimeout(reveal, 400);
+    return () => { observer.disconnect(); clearTimeout(t); };
   }, [index]);
 
   return (

@@ -5811,3 +5811,9 @@
 - [x] Trace frontend rendering pipeline — check if data reaches StoreTrackCard/ExploreCard
 - [x] Fix root cause and verify songs appear on Homepage and Explore
 - [x] 0 TypeScript errors, all tests passing
+
+## Phase N+X: Mobile Discovery Sections Blank Fix
+- [x] Root cause: ConstellationReveal/ManifestationReveal used IntersectionObserver with root:null (viewport), but app scrolls inside a nested div (MainLayout player-scroll-area), so off-screen sections never triggered reveal
+- [x] Fix ConstellationReveal: dual observers (scroll root + viewport), rootMargin "0px 0px 400px 0px", 300ms hard fallback
+- [x] Fix ManifestationReveal: positive rootMargin "0px 0px 300px 0px", 400ms hard fallback
+- [x] 0 TypeScript errors, 324/324 tests passing
