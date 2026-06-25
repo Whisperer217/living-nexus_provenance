@@ -99,6 +99,7 @@ interface TrackCard {
   aiToolOtherName: string;
   lyricsText: string;
   lyricsExpanded: boolean;
+  haaiOriginStory: string;
 }
 
 /** Strip leading track-number prefix from a filename-derived title.
@@ -124,6 +125,7 @@ function makeEmptyCard(overrides?: Partial<TrackCard>): TrackCard {
     aiToolOtherName: "",
     lyricsText: "",
     lyricsExpanded: false,
+    haaiOriginStory: "",
     audioFile: null,
     audioStatus: "empty",
     coverFile: null,
@@ -179,9 +181,438 @@ async function uploadFileToS3(
   return res.json() as Promise<{ url: string; key: string }>;
 }
 
-// ── TrackCard component ───────────────────────────────────────────────────────
+// ── TrackDetailPanel — slide-out drawer for per-track metadata ────────────────
+function TrackDetailPanel({
+  card, onClose, onChange,
+}: {
+  card: TrackCard;
+  onClose: () => void;
+  onChange: (id: string, patch: Partial<TrackCard>) => void;
+}) {
+  const audioInputRef = useRef<HTMLInputElement>(null);
+  const coverInputRef = useRef<HTMLInputElement>(null);
+  const { extractMetadata } = useAudioMetadata();
+
+  const MAX_BATCH_AUDIO_MB = 200;
+  const handleAudioFile = (file: File) => {
+    if (file.size > MAX_BATCH_AUDIO_MB * 1024 * 1024) {
+      toast.error(`File too large: ${(file.size / 1024 / 1024).toFixed(0)} MB. Batch upload limit is ${MAX_BATCH_AUDIO_MB} MB per track.`);
+      return;
+    }
+    const fallbackTitle = stripTrackPrefix(file.name.replace(/\.[^.]+$/, ""));
+    const nameLower = file.name.toLowerCase();
+    const detectedType: TrackCard["fileType"] =
+      nameLower.includes("vocal") ? "vocal_stem" :
+      nameLower.includes("instrument") ? "instrumental_stem" :
+      nameLower.includes("bass") ? "bass_stem" :
+      nameLower.includes("drum") || nameLower.includes("perc") ? "drum_stem" :
+      "full_mix";
+    onChange(card.id, { audioFile: file, title: card.title || fallbackTitle, audioStatus: "hashing", fileType: detectedType });
+    extractMetadata(file).then(meta => {
+      const patch: Partial<TrackCard> = {};
+      if (meta.title) patch.title = meta.title;
+      if (meta.genre && !card.genre) patch.genre = meta.genre;
+      if (meta.coverArtBlob && !card.coverFile) {
+        const ext = meta.coverArtBlob.type.includes("png") ? "png" : "jpg";
+        patch.coverFile = new File([meta.coverArtBlob], `cover.${ext}`, { type: meta.coverArtBlob.type });
+        const reader = new FileReader();
+        reader.onload = ev => onChange(card.id, { coverPreview: ev.target?.result as string });
+        reader.readAsDataURL(meta.coverArtBlob);
+      }
+      if (Object.keys(patch).length > 0) onChange(card.id, patch);
+    });
+  };
+
+  const handleCoverFile = (file: File) => {
+    const reader = new FileReader();
+    reader.onload = ev => onChange(card.id, { coverFile: file, coverPreview: ev.target?.result as string });
+    reader.readAsDataURL(file);
+  };
+
+  return (
+    <>
+      {/* Backdrop */}
+      <div
+        className="fixed inset-0 z-40"
+        style={{ background: "rgba(0,0,0,0.55)", backdropFilter: "blur(3px)" }}
+        onClick={onClose}
+      />
+      {/* Panel */}
+      <div
+        className="fixed right-0 top-0 bottom-0 z-50 flex flex-col overflow-hidden"
+        style={{
+          width: "min(480px, 100vw)",
+          background: "#0D0D0D",
+          borderLeft: "1px solid rgba(196,154,40,0.35)",
+          boxShadow: "-8px 0 40px rgba(0,0,0,0.6)",
+        }}
+      >
+        {/* Panel header */}
+        <div
+          className="flex items-center gap-3 px-5 py-4 flex-shrink-0"
+          style={{ borderBottom: "1px solid rgba(196,154,40,0.18)", background: "rgba(44,52,56,0.5)" }}
+        >
+          <div
+            className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
+            style={{ background: "rgba(196,154,40,0.10)", border: "1px solid rgba(196,154,40,0.30)" }}
+          >
+            <Fingerprint size={14} style={{ color: "var(--ln-gold)" }} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold truncate" style={{ color: "#FFFFFF", fontFamily: "'Cinzel', serif" }}>
+              {card.title || "Untitled Track"}
+            </p>
+            {card.wid && (
+              <p className="text-[10px] font-mono truncate" style={{ color: "rgba(196,154,40,0.7)" }}>{card.wid}</p>
+            )}
+          </div>
+          <button
+            onClick={onClose}
+            className="p-2 rounded-lg transition-colors hover:bg-white/[0.08]"
+            style={{ color: "var(--ln-smoke)" }}
+          >
+            <X size={16} />
+          </button>
+        </div>
+
+        {/* Scrollable body */}
+        <div className="flex-1 overflow-y-auto px-5 py-5 space-y-5">
+          {/* Audio file */}
+          <div>
+            <label className="text-[10px] font-heading tracking-widest uppercase mb-2 block" style={{ color: "rgba(232,223,200,0.6)" }}>Audio File</label>
+            <div
+              onDragOver={e => { e.preventDefault(); onChange(card.id, { audioDragging: true }); }}
+              onDragLeave={() => onChange(card.id, { audioDragging: false })}
+              onDrop={e => {
+                e.preventDefault();
+                onChange(card.id, { audioDragging: false });
+                const file = Array.from(e.dataTransfer.files).find(
+                  f => f.type.startsWith("audio/") || /\.(mp3|wav|ogg|flac|aac|m4a|webm)$/i.test(f.name)
+                );
+                if (!file) { toast.error("Drop an audio file here"); return; }
+                handleAudioFile(file);
+              }}
+              onClick={() => !card.audioFile && audioInputRef.current?.click()}
+              className="relative rounded-xl flex items-center gap-3 px-4 py-3 cursor-pointer transition-all"
+              style={{
+                background: card.audioDragging ? "rgba(196,154,40,0.05)" : "rgba(22,22,22,0.8)",
+                border: `1.5px dashed ${card.audioDragging ? "rgba(232,223,200,0.6)" : card.audioFile ? "rgba(74,222,128,0.5)" : "#C3AB7D"}`,
+              }}
+            >
+              <input
+                ref={audioInputRef}
+                type="file"
+                accept="audio/*,.mp3,.wav,.flac,.ogg,.aac,.m4a,.webm"
+                className="hidden"
+                onChange={e => {
+                  const file = e.target.files?.[0];
+                  if (file) handleAudioFile(file);
+                  e.target.value = "";
+                }}
+              />
+              {card.audioStatus === "hashing"
+                ? <Loader2 size={16} className="animate-spin flex-shrink-0" style={{ color: "var(--ln-gold)" }} />
+                : card.audioFile
+                  ? <Music size={16} className="flex-shrink-0" style={{ color: "var(--ln-seal-bright)" }} />
+                  : <Upload size={16} className="flex-shrink-0" style={{ color: "var(--ln-parchment)" }} />}
+              <div className="flex-1 min-w-0">
+                {card.audioFile
+                  ? <p className="text-sm truncate" style={{ color: "#FFFFFF" }}>{card.audioFile.name}</p>
+                  : <p className="text-sm" style={{ color: "var(--ln-parchment)" }}>Drop audio or click to browse</p>}
+                {card.audioFile && (
+                  <p className="text-[10px] mt-0.5" style={{ color: "var(--ln-parchment)" }}>
+                    {(card.audioFile.size / 1024 / 1024).toFixed(1)} MB
+                  </p>
+                )}
+              </div>
+              {card.audioFile && card.audioStatus !== "done" && (
+                <button
+                  onClick={e => {
+                    e.stopPropagation();
+                    onChange(card.id, { audioFile: null, audioStatus: "empty", wid: undefined, fileHash: undefined });
+                  }}
+                  className="p-1 rounded-md hover:bg-white/[0.08]"
+                  style={{ color: "var(--ln-parchment)" }}
+                >
+                  <X size={13} />
+                </button>
+              )}
+            </div>
+            {/* Upload progress */}
+            {card.audioStatus === "uploading" && (
+              <div className="mt-2 space-y-1">
+                <div className="flex justify-between text-[10px]" style={{ color: "rgba(184,168,138,0.8)" }}>
+                  <span>Uploading…</span>
+                  <span style={{ color: "var(--ln-gold)" }}>{card.uploadProgress ?? 0}%</span>
+                </div>
+                <div className="w-full rounded-full h-1.5" style={{ background: "rgba(196,154,40,0.12)" }}>
+                  <div
+                    className="h-1.5 rounded-full transition-all duration-200"
+                    style={{ width: `${card.uploadProgress ?? 0}%`, background: "linear-gradient(90deg, #C49A28, #D4AF37)" }}
+                  />
+                </div>
+              </div>
+            )}
+            {/* WID */}
+            {card.wid && (
+              <div
+                className="mt-2 flex items-center gap-2 px-3 py-2 rounded-lg"
+                style={{ background: "rgba(196,154,40,0.04)", border: "1px solid rgba(196,154,40,0.15)" }}
+              >
+                <Fingerprint size={12} style={{ color: "var(--ln-gold)" }} />
+                <span className="text-[11px] font-mono flex-1 truncate" style={{ color: "var(--ln-gold)" }}>{card.wid}</span>
+                <button
+                  onClick={() => { navigator.clipboard.writeText(card.wid!); toast.success("WID copied"); }}
+                  className="p-1 rounded hover:bg-white/[0.08]"
+                  style={{ color: "var(--ln-smoke)" }}
+                >
+                  <Copy size={11} />
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Cover art */}
+          <div>
+            <label className="text-[10px] font-heading tracking-widest uppercase mb-2 block" style={{ color: "rgba(232,223,200,0.6)" }}>Cover Art</label>
+            <div
+              onDragOver={e => { e.preventDefault(); onChange(card.id, { coverDragging: true }); }}
+              onDragLeave={() => onChange(card.id, { coverDragging: false })}
+              onDrop={e => {
+                e.preventDefault();
+                onChange(card.id, { coverDragging: false });
+                const file = Array.from(e.dataTransfer.files).find(f => f.type.startsWith("image/"));
+                if (!file) { toast.error("Drop an image file here"); return; }
+                handleCoverFile(file);
+              }}
+              onClick={() => coverInputRef.current?.click()}
+              className="relative rounded-xl overflow-hidden cursor-pointer transition-all"
+              style={{
+                height: 160,
+                background: card.coverPreview ? "transparent" : "rgba(22,22,22,0.8)",
+                border: `1.5px dashed ${card.coverDragging ? "rgba(232,223,200,0.6)" : card.coverPreview ? "rgba(74,222,128,0.4)" : "#C3AB7D"}`,
+              }}
+            >
+              <input ref={coverInputRef} type="file" accept="image/*" className="hidden"
+                onChange={e => { const file = e.target.files?.[0]; if (file) handleCoverFile(file); e.target.value = ""; }}
+              />
+              {card.coverPreview ? (
+                <>
+                  <img src={card.coverPreview} alt="Cover" className="w-full h-full object-cover absolute inset-0" />
+                  <div className="absolute inset-0 bg-black/0 hover:bg-black/40 transition-colors flex items-center justify-center opacity-0 hover:opacity-100">
+                    <ImageIcon size={20} className="text-white" />
+                  </div>
+                  <button
+                    onClick={e => { e.stopPropagation(); onChange(card.id, { coverFile: null, coverPreview: null, coverUrl: undefined }); }}
+                    className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center"
+                    style={{ background: "rgba(0,0,0,0.7)" }}
+                  >
+                    <X size={11} className="text-white" />
+                  </button>
+                </>
+              ) : (
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+                  <ImageIcon size={24} style={{ color: "var(--ln-smoke)" }} />
+                  <p className="text-xs" style={{ color: "var(--ln-parchment)" }}>
+                    {card.coverDragging ? "Drop image" : "Drop or click to add cover art"}
+                  </p>
+                </div>
+              )}
+            </div>
+            {!card.coverPreview && (
+              <p className="text-[9px] mt-1" style={{ color: "var(--ln-smoke)" }}>Falls back to album art if not set</p>
+            )}
+          </div>
+
+          {/* Title */}
+          <div>
+            <label className="text-[10px] font-heading tracking-widest uppercase mb-1 block" style={{ color: "rgba(232,223,200,0.6)" }}>Title</label>
+            <Input
+              placeholder="Track title"
+              value={card.title}
+              onChange={e => onChange(card.id, { title: e.target.value })}
+              className="h-9 text-sm"
+              style={{ background: "rgba(22,22,22,0.8)", border: "1px solid rgba(196,154,40,0.4)", color: "#FFFFFF" }}
+            />
+          </div>
+
+          {/* File Type + Genre */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-[10px] font-heading tracking-widest uppercase mb-1 block" style={{ color: "rgba(232,223,200,0.6)" }}>File Type</label>
+              <Select value={card.fileType} onValueChange={v => onChange(card.id, { fileType: v as TrackCard["fileType"] })}>
+                <SelectTrigger className="h-9 text-xs" style={{ background: "rgba(22,22,22,0.8)", border: "1px solid rgba(196,154,40,0.4)", color: "#FFFFFF" }}>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent style={{ background: "#0A0A0A", border: "1px solid rgba(196,154,40,0.5)" }}>
+                  <SelectItem value="full_mix" style={{ color: "var(--ln-parchment)", fontSize: "12px" }}>Full Mix</SelectItem>
+                  <SelectItem value="vocal_stem" style={{ color: "var(--ln-parchment)", fontSize: "12px" }}>Vocal Stem</SelectItem>
+                  <SelectItem value="instrumental_stem" style={{ color: "var(--ln-parchment)", fontSize: "12px" }}>Instrumental Stem</SelectItem>
+                  <SelectItem value="bass_stem" style={{ color: "var(--ln-parchment)", fontSize: "12px" }}>Bass Stem</SelectItem>
+                  <SelectItem value="drum_stem" style={{ color: "var(--ln-parchment)", fontSize: "12px" }}>Drum Stem</SelectItem>
+                  <SelectItem value="other_stem" style={{ color: "var(--ln-parchment)", fontSize: "12px" }}>Other Stem</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="text-[10px] font-heading tracking-widest uppercase mb-1 block" style={{ color: "rgba(232,223,200,0.6)" }}>Genre</label>
+              <Select value={card.genre} onValueChange={v => onChange(card.id, { genre: v })}>
+                <SelectTrigger className="h-9 text-xs" style={{ background: "rgba(22,22,22,0.8)", border: "1px solid rgba(196,154,40,0.4)", color: card.genre ? "#FFFFFF" : "var(--ln-iron)" }}>
+                  <SelectValue placeholder="Select" />
+                </SelectTrigger>
+                <SelectContent position="popper" side="bottom" sideOffset={4} style={{ background: "#0A0A0A", border: "1px solid rgba(196,154,40,0.5)", maxHeight: 220, overflowY: "auto" }}>
+                  {GENRES.map(g => <SelectItem key={g} value={g} style={{ color: "#E8DFC8", fontSize: "12px" }}>{g}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* AI Consent + Release Date */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-[10px] font-heading tracking-widest uppercase mb-1 block" style={{ color: "rgba(232,223,200,0.6)" }}>Training Consent</label>
+              <Select value={card.aiConsent} onValueChange={v => onChange(card.id, { aiConsent: v as TrackCard["aiConsent"] })}>
+                <SelectTrigger className="h-9 text-xs" style={{ background: "rgba(22,22,22,0.8)", border: "1px solid rgba(196,154,40,0.4)", color: "#FFFFFF" }}>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent style={{ background: "#0A0A0A", border: "1px solid rgba(196,154,40,0.5)" }}>
+                  {AI_OPTIONS.map(o => <SelectItem key={o.value} value={o.value} style={{ color: "var(--ln-parchment)", fontSize: "12px" }}>{o.label}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="text-[10px] font-heading tracking-widest uppercase mb-1 block" style={{ color: "rgba(232,223,200,0.6)" }}>Creation Date</label>
+              <Input
+                type="date"
+                value={card.releaseDate}
+                onChange={e => onChange(card.id, { releaseDate: e.target.value })}
+                className="h-9 text-sm"
+                style={{ background: "rgba(22,22,22,0.8)", border: "1px solid rgba(196,154,40,0.4)", color: card.releaseDate ? "#FFFFFF" : "var(--ln-iron)", colorScheme: "dark" }}
+              />
+            </div>
+          </div>
+
+          {/* AI Disclosure */}
+          <div>
+            <label className="text-[10px] font-heading tracking-widest uppercase mb-2 block" style={{ color: "rgba(232,223,200,0.6)" }}>Creation Disclosure</label>
+            <div className="grid grid-cols-2 gap-1.5">
+              {([
+                { value: "original", label: "Original" },
+                { value: "human_authored_ai_instrument", label: "HAAI" },
+                { value: "ai_assisted", label: "Assisted" },
+                { value: "ai_generated", label: "AI-Generated" },
+              ] as const).map(opt => (
+                <label key={opt.value} className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name={`aiDisclosure-${card.id}`}
+                    value={opt.value}
+                    checked={card.aiDisclosure === opt.value}
+                    onChange={() => onChange(card.id, { aiDisclosure: opt.value })}
+                    className="accent-yellow-500"
+                  />
+                  <span className="text-xs" style={{ color: "var(--ln-parchment)" }}>{opt.label}</span>
+                </label>
+              ))}
+            </div>
+            {(card.aiDisclosure === "ai_assisted" || card.aiDisclosure === "human_authored_ai_instrument" || card.aiDisclosure === "ai_generated") && (
+              <div className="mt-3">
+                <label className="text-[10px] font-heading tracking-widest uppercase mb-2 block" style={{ color: "rgba(232,223,200,0.6)" }}>Tools Used</label>
+                <div className="flex flex-wrap gap-3">
+                  {([
+                    { key: "aiToolSuno" as const, label: "Suno 5+" },
+                    { key: "aiToolUdio" as const, label: "Udio" },
+                    { key: "aiToolSonato" as const, label: "Sonato" },
+                    { key: "aiToolOther" as const, label: "Other" },
+                  ]).map(tool => (
+                    <label key={tool.key} className="flex items-center gap-1.5 cursor-pointer">
+                      <input type="checkbox" checked={card[tool.key]} onChange={e => onChange(card.id, { [tool.key]: e.target.checked })} className="accent-yellow-500" />
+                      <span className="text-xs" style={{ color: "var(--ln-parchment)" }}>{tool.label}</span>
+                    </label>
+                  ))}
+                </div>
+                {card.aiToolOther && (
+                  <Input
+                    placeholder="Name the tool"
+                    value={card.aiToolOtherName}
+                    onChange={e => onChange(card.id, { aiToolOtherName: e.target.value })}
+                    className="h-8 text-xs mt-2"
+                    style={{ background: "rgba(22,22,22,0.8)", border: "1px solid rgba(196,154,40,0.4)", color: "#FFFFFF" }}
+                  />
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Origin Story */}
+          <div>
+            <label className="text-[10px] font-heading tracking-widest uppercase mb-2 block" style={{ color: "rgba(232,223,200,0.6)" }}>Origin Story</label>
+            <textarea
+              value={card.haaiOriginStory}
+              onChange={e => onChange(card.id, { haaiOriginStory: e.target.value })}
+              placeholder="Where did this come from? What was the spark, the moment, the train of thought that brought this work into being?"
+              rows={4}
+              className="w-full text-xs rounded-lg px-3 py-2 resize-y leading-relaxed"
+              style={{
+                background: "rgba(22,22,22,0.8)",
+                border: "1px solid rgba(196,154,40,0.4)",
+                color: "#FFFFFF",
+                outline: "none",
+                minHeight: 88,
+                fontFamily: "Inter, sans-serif",
+              }}
+            />
+          </div>
+
+          {/* Lyrics */}
+          <div>
+            <button
+              type="button"
+              onClick={() => onChange(card.id, { lyricsExpanded: !card.lyricsExpanded })}
+              className="flex items-center gap-2 text-[10px] font-heading tracking-widest uppercase transition-colors hover:opacity-80 mb-2"
+              style={{ color: card.lyricsText.trim() ? "var(--ln-gold)" : "rgba(232,223,200,0.6)" }}
+            >
+              {card.lyricsExpanded ? <ChevronUp size={11} /> : <ChevronDown size={11} />}
+              Lyrics
+              {card.lyricsText.trim() && (
+                <span className="text-[9px] font-mono ml-1" style={{ color: "rgba(196,154,40,0.7)" }}>
+                  {card.lyricsText.trim().split(/\s+/).length}w
+                </span>
+              )}
+            </button>
+            {card.lyricsExpanded && (
+              <div className="space-y-1.5">
+                <textarea
+                  value={card.lyricsText}
+                  onChange={e => onChange(card.id, { lyricsText: e.target.value })}
+                  placeholder="Paste lyrics here — a WID-LYR will be generated automatically on upload..."
+                  rows={6}
+                  className="w-full text-xs rounded-lg px-3 py-2 resize-y font-mono leading-relaxed"
+                  style={{
+                    background: "rgba(22,22,22,0.8)",
+                    border: "1px solid rgba(196,154,40,0.4)",
+                    color: "#FFFFFF",
+                    outline: "none",
+                    minHeight: 96,
+                  }}
+                />
+                {card.lyricsText.trim() && (
+                  <p className="text-[9px]" style={{ color: "rgba(196,154,40,0.6)" }}>
+                    WID-LYR will be generated server-side and tied to this track's WID on upload.
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+// ── TrackGridSlot — compact visual card in the grid ───────────────────────────
 function TrackCardUI({
-  card, index, total, onChange, onRemove, onGenerateWid, onAddMultiple,
+  card, index, total, onChange, onRemove, onGenerateWid, onAddMultiple, onOpenDetail,
 }: {
   card: TrackCard;
   index: number;
@@ -190,9 +621,9 @@ function TrackCardUI({
   onRemove: (id: string) => void;
   onGenerateWid: (id: string, file: File) => void;
   onAddMultiple: (files: File[]) => void;
+  onOpenDetail: (id: string) => void;
 }) {
   const audioInputRef = useRef<HTMLInputElement>(null);
-  const coverInputRef = useRef<HTMLInputElement>(null);
   const { extractMetadata } = useAudioMetadata();
 
   const MAX_BATCH_AUDIO_MB = 200;
@@ -202,7 +633,6 @@ function TrackCardUI({
       return;
     }
     const fallbackTitle = stripTrackPrefix(file.name.replace(/\.[^.]+$/, ""));
-    // Auto-detect stem type from filename
     const nameLower = file.name.toLowerCase();
     const detectedType: TrackCard["fileType"] =
       nameLower.includes("vocal") ? "vocal_stem" :
@@ -212,7 +642,6 @@ function TrackCardUI({
       "full_mix";
     onChange(card.id, { audioFile: file, title: card.title || fallbackTitle, audioStatus: "hashing", fileType: detectedType });
     onGenerateWid(card.id, file);
-    // Auto-populate card fields from embedded ID3 metadata
     extractMetadata(file).then(meta => {
       const patch: Partial<TrackCard> = {};
       if (meta.title) patch.title = meta.title;
@@ -220,7 +649,6 @@ function TrackCardUI({
       if (meta.coverArtBlob && !card.coverFile) {
         const ext = meta.coverArtBlob.type.includes("png") ? "png" : "jpg";
         patch.coverFile = new File([meta.coverArtBlob], `cover.${ext}`, { type: meta.coverArtBlob.type });
-        patch.coverPreview = undefined; // will be set below via FileReader
         const reader = new FileReader();
         reader.onload = ev => onChange(card.id, { coverPreview: ev.target?.result as string });
         reader.readAsDataURL(meta.coverArtBlob);
@@ -229,32 +657,8 @@ function TrackCardUI({
     });
   };
 
-  const handleAudioDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    onChange(card.id, { audioDragging: false });
-    const file = Array.from(e.dataTransfer.files).find(
-      f => f.type.startsWith("audio/") || /\.(mp3|wav|ogg|flac|aac|m4a|webm)$/i.test(f.name)
-    );
-    if (!file) { toast.error("Drop an audio file here"); return; }
-    handleAudioFile(file);
-  };
-
-  const handleCoverFile = (file: File) => {
-    const reader = new FileReader();
-    reader.onload = ev => onChange(card.id, { coverFile: file, coverPreview: ev.target?.result as string });
-    reader.readAsDataURL(file);
-  };
-
-  const handleCoverDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    onChange(card.id, { coverDragging: false });
-    const file = Array.from(e.dataTransfer.files).find(f => f.type.startsWith("image/"));
-    if (!file) { toast.error("Drop an image file here"); return; }
-    handleCoverFile(file);
-  };
-
   const statusColor = {
-    empty: "var(--ln-coal)",
+    empty: "rgba(184,168,138,0.4)",
     hashing: "var(--ln-gold)",
     ready: "var(--ln-seal-bright)",
     uploading: "var(--ln-gold)",
@@ -262,417 +666,154 @@ function TrackCardUI({
     error: "var(--ln-ember)",
   }[card.audioStatus];
 
-  const statusLabel = {
-    empty: "Drop audio",
-    hashing: "Generating WID...",
-    ready: "Ready",
-    uploading: "Uploading...",
-    done: "Uploaded",
-    error: card.errorMsg ?? "Error",
+  const borderColor = {
+    empty: "rgba(196,154,40,0.18)",
+    hashing: "rgba(196,154,40,0.5)",
+    ready: "rgba(196,154,40,0.45)",
+    uploading: "rgba(196,154,40,0.5)",
+    done: "rgba(74,222,128,0.45)",
+    error: "rgba(220,60,60,0.5)",
   }[card.audioStatus];
 
   return (
     <div
-      className="rounded-2xl overflow-hidden transition-all"
+      className="relative rounded-2xl overflow-hidden transition-all group"
       style={{
-        background: "var(--ln-coal)",
-        border: `1px solid ${card.audioStatus === "done" ? "rgba(74,222,128,0.5)" : "var(--ln-gold)"}`,
+        background: "#0D0D0D",
+        border: `1px solid ${borderColor}`,
+        aspectRatio: "3/4",
       }}
     >
-      {/* Card header */}
-      <div
-        className="flex items-center gap-3 px-4 py-3 cursor-pointer select-none"
-        style={{ background: "rgba(44,52,56,0.6)" }}
-        onClick={() => onChange(card.id, { expanded: !card.expanded })}
-      >
+      {/* Cover art background */}
+      {card.coverPreview ? (
+        <img
+          src={card.coverPreview}
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ opacity: 0.55, filter: "brightness(0.7) saturate(1.1)" }}
+        />
+      ) : (
         <div
-          className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
-          style={{ background: "rgba(196,154,40,0.08)", color: "var(--ln-gold)", fontFamily: "'Cinzel', serif" }}
-        >
-          {index + 1}
-        </div>
-        <div className="flex-1 min-w-0">
-          <p
-            className="text-sm font-semibold truncate"
-            style={{ color: card.title ? "#FFFFFF" : "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}
-          >
-            {card.title || "Untitled Track"}
-          </p>
-          {card.wid && (
-            <p className="text-[10px] font-mono truncate mt-0.5" style={{ color: "rgba(232,223,200,0.6)" }}>
-              {card.wid}
-            </p>
-          )}
-        </div>
-        <div className="flex items-center gap-2 flex-shrink-0">
-          {(card.audioStatus === "hashing" || card.audioStatus === "uploading") && (
-            <Loader2 size={14} className="animate-spin" style={{ color: statusColor }} />
-          )}
-          {card.audioStatus === "done" && <CheckCircle size={14} style={{ color: statusColor }} />}
-          {card.audioStatus === "error" && <AlertCircle size={14} style={{ color: statusColor }} />}
-          {card.audioStatus === "ready" && <Fingerprint size={14} style={{ color: statusColor }} />}
-          <span className="text-[10px] font-mono" style={{ color: statusColor }}>{statusLabel}</span>
-        </div>
-        <div className="flex items-center gap-1 ml-2">
-          {card.expanded
-            ? <ChevronUp size={14} style={{ color: "var(--ln-parchment)" }} />
-            : <ChevronDown size={14} style={{ color: "var(--ln-parchment)" }} />}
-          {total > 1 && (
-            <button
-              onClick={e => { e.stopPropagation(); onRemove(card.id); }}
-              className="p-1 rounded-md hover:bg-white/[0.08] transition-colors ml-1"
-              style={{ color: "var(--ln-parchment)" }}
-              title="Remove track"
-            >
-              <X size={13} />
-            </button>
-          )}
-        </div>
+          className="absolute inset-0"
+          style={{
+            background: "linear-gradient(135deg, rgba(44,52,56,0.9) 0%, rgba(10,10,10,1) 100%)",
+          }}
+        />
+      )}
+
+      {/* Gradient scrim */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background: "linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.55) 50%, rgba(0,0,0,0.15) 100%)",
+        }}
+      />
+
+      {/* Track number badge */}
+      <div
+        className="absolute top-3 left-3 w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold"
+        style={{ background: "rgba(196,154,40,0.12)", border: "1px solid rgba(196,154,40,0.35)", color: "var(--ln-gold)", fontFamily: "'Cinzel', serif" }}
+      >
+        {index + 1}
       </div>
 
-      {/* Card body */}
-      {card.expanded && (
-        <div className="p-4 space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-[1fr_140px] gap-4">
-            {/* Left: audio + metadata */}
-            <div className="space-y-3">
-              {/* Audio drop zone */}
-              <div
-                onDragOver={e => { e.preventDefault(); onChange(card.id, { audioDragging: true }); }}
-                onDragLeave={() => onChange(card.id, { audioDragging: false })}
-                onDrop={handleAudioDrop}
-                onClick={() => !card.audioFile && audioInputRef.current?.click()}
-                className="relative rounded-xl flex items-center gap-3 px-4 py-3 cursor-pointer transition-all"
-                style={{
-                  background: card.audioDragging ? "rgba(196,154,40,0.05)" : "var(--ln-coal)",
-                  border: `1.5px dashed ${card.audioDragging
-                    ? "rgba(232,223,200,0.6)"
-                    : card.audioFile ? "rgba(74,222,128,0.5)" : "#C3AB7D"}`,
-                }}
-              >
-                <input
-                  ref={audioInputRef}
-                  type="file"
-                  accept="audio/*,.mp3,.wav,.flac,.ogg,.aac,.m4a,.webm"
-                  multiple
-                  className="hidden"
-                  onChange={e => {
-                    const files = Array.from(e.target.files || []);
-                    if (files.length === 1) {
-                      handleAudioFile(files[0]);
-                    } else if (files.length > 1) {
-                      onAddMultiple(files);
-                    }
-                    e.target.value = "";
-                  }}
-                />
-                {card.audioStatus === "hashing"
-                  ? <Loader2 size={18} className="animate-spin flex-shrink-0" style={{ color: "var(--ln-gold)" }} />
-                  : card.audioFile
-                    ? <Music size={18} className="flex-shrink-0" style={{ color: "var(--ln-seal-bright)" }} />
-                    : <Upload size={18} className="flex-shrink-0" style={{ color: "var(--ln-parchment)" }} />}
-                <div className="flex-1 min-w-0">
-                  {card.audioFile
-                    ? <p className="text-sm truncate" style={{ color: "#FFFFFF" }}>{card.audioFile.name}</p>
-                    : <p className="text-sm" style={{ color: "var(--ln-parchment)" }}>Drop audio or click to browse</p>}
-                  {card.audioFile && (
-                    <p className="text-[10px] mt-0.5" style={{ color: "var(--ln-parchment)" }}>
-                      {(card.audioFile.size / 1024 / 1024).toFixed(1)} MB
-                    </p>
-                  )}
-                </div>
-                {card.audioFile && card.audioStatus !== "done" && (
-                  <button
-                    onClick={e => {
-                      e.stopPropagation();
-                      onChange(card.id, { audioFile: null, audioStatus: "empty", wid: undefined, fileHash: undefined });
-                    }}
-                    className="p-1 rounded-md hover:bg-white/[0.08]"
-                    style={{ color: "var(--ln-parchment)" }}
-                  >
-                    <X size={13} />
-                  </button>
-                )}
-              </div>
+      {/* Status indicator top-right */}
+      <div className="absolute top-3 right-3 flex items-center gap-1.5">
+        {card.audioStatus === "hashing" && <Loader2 size={12} className="animate-spin" style={{ color: statusColor }} />}
+        {card.audioStatus === "done" && <CheckCircle size={13} style={{ color: statusColor }} />}
+        {card.audioStatus === "error" && <AlertCircle size={13} style={{ color: statusColor }} />}
+        {card.audioStatus === "ready" && <Fingerprint size={12} style={{ color: statusColor }} />}
+      </div>
 
-              {/* Upload progress bar — shown during audio upload */}
-              {card.audioStatus === "uploading" && (
-                <div className="space-y-1">
-                  <div className="flex justify-between text-[10px]" style={{ color: "rgba(184,168,138,0.8)" }}>
-                    <span>Uploading{card.audioFile && card.audioFile.size > 50 * 1024 * 1024 ? ` (${(card.audioFile.size / 1024 / 1024).toFixed(0)} MB — please wait)` : ""}…</span>
-                    <span style={{ color: "var(--ln-gold)" }}>{card.uploadProgress ?? 0}%</span>
-                  </div>
-                  <div className="w-full rounded-full h-1.5" style={{ background: "rgba(196,154,40,0.12)" }}>
-                    <div
-                      className="h-1.5 rounded-full transition-all duration-200"
-                      style={{ width: `${card.uploadProgress ?? 0}%`, background: "linear-gradient(90deg, #C49A28, #D4AF37)" }}
-                    />
-                  </div>
-                </div>
-              )}
+      {/* Remove button (only when multiple cards) */}
+      {total > 1 && (
+        <button
+          onClick={e => { e.stopPropagation(); onRemove(card.id); }}
+          className="absolute top-3 right-3 w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+          style={{ background: "rgba(0,0,0,0.7)", color: "var(--ln-parchment)" }}
+          title="Remove track"
+        >
+          <X size={11} />
+        </button>
+      )}
 
-              {/* WID display */}
-              {card.wid && (
+      {/* Drop zone — shown when no audio */}
+      {!card.audioFile ? (
+        <div
+          onDragOver={e => { e.preventDefault(); onChange(card.id, { audioDragging: true }); }}
+          onDragLeave={() => onChange(card.id, { audioDragging: false })}
+          onDrop={e => {
+            e.preventDefault();
+            onChange(card.id, { audioDragging: false });
+            const files = Array.from(e.dataTransfer.files);
+            const audioFiles = files.filter(f => f.type.startsWith("audio/") || /\.(mp3|wav|ogg|flac|aac|m4a|webm)$/i.test(f.name));
+            if (!audioFiles.length) { toast.error("Drop an audio file here"); return; }
+            if (audioFiles.length === 1) handleAudioFile(audioFiles[0]);
+            else onAddMultiple(audioFiles);
+          }}
+          onClick={() => audioInputRef.current?.click()}
+          className="absolute inset-0 flex flex-col items-center justify-center gap-3 cursor-pointer transition-all"
+          style={{
+            background: card.audioDragging ? "rgba(196,154,40,0.08)" : "transparent",
+          }}
+        >
+          <input
+            ref={audioInputRef}
+            type="file"
+            accept="audio/*,.mp3,.wav,.flac,.ogg,.aac,.m4a,.webm"
+            multiple
+            className="hidden"
+            onChange={e => {
+              const files = Array.from(e.target.files || []);
+              if (files.length === 1) handleAudioFile(files[0]);
+              else if (files.length > 1) onAddMultiple(files);
+              e.target.value = "";
+            }}
+          />
+          <div
+            className="w-12 h-12 rounded-full flex items-center justify-center transition-transform group-hover:scale-110"
+            style={{ background: "rgba(196,154,40,0.10)", border: "1px solid rgba(196,154,40,0.30)" }}
+          >
+            <Upload size={20} style={{ color: "var(--ln-gold)" }} />
+          </div>
+          <p className="text-xs text-center px-4" style={{ color: "var(--ln-parchment)" }}>
+            {card.audioDragging ? "Release to add" : "Drop audio\nor click"}
+          </p>
+        </div>
+      ) : (
+        /* Bottom info bar — shown when audio loaded */
+        <div className="absolute bottom-0 left-0 right-0 px-3 pb-3 pt-8">
+          {/* Upload progress bar */}
+          {card.audioStatus === "uploading" && (
+            <div className="mb-2">
+              <div className="w-full rounded-full h-1" style={{ background: "rgba(196,154,40,0.12)" }}>
                 <div
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg"
-                  style={{ background: "rgba(196,154,40,0.04)", border: "1px solid rgba(196,154,40,0.15)" }}
-                >
-                  <Fingerprint size={13} style={{ color: "var(--ln-gold)" }} />
-                  <span className="text-[11px] font-mono flex-1 truncate" style={{ color: "var(--ln-gold)" }}>
-                    {card.wid}
-                  </span>
-                  <button
-                    onClick={() => { navigator.clipboard.writeText(card.wid!); toast.success("WID copied"); }}
-                    className="p-1 rounded hover:bg-white/[0.08]"
-                    style={{ color: "var(--ln-smoke)" }}
-                  >
-                    <Copy size={11} />
-                  </button>
-                </div>
-              )}
-
-              {/* Title */}
-              <Input
-                placeholder="Track title"
-                value={card.title}
-                onChange={e => onChange(card.id, { title: e.target.value })}
-                className="h-9 text-sm"
-                style={{ background: "var(--ln-coal)", border: "1px solid #C49A28", color: "#FFFFFF" }}
-              />
-
-              {/* File Type */}
-              <div>
-                <label className="text-[10px] font-heading tracking-widest uppercase mb-1 block" style={{ color: "rgba(232,223,200,0.6)" }}>File Type</label>
-                <Select value={card.fileType} onValueChange={v => onChange(card.id, { fileType: v as TrackCard["fileType"] })}>
-                  <SelectTrigger className="h-9 text-xs" style={{ background: "var(--ln-coal)", border: "1px solid #C49A28", color: "#FFFFFF" }}>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent style={{ background: "#0A0A0A", border: "1px solid rgba(196,154,40,0.5)", color: "var(--ln-parchment)" }}>
-                    <SelectItem value="full_mix" style={{ color: "var(--ln-parchment)", fontSize: "12px" }}>Full Mix</SelectItem>
-                    <SelectItem value="vocal_stem" style={{ color: "var(--ln-parchment)", fontSize: "12px" }}>Vocal Stem</SelectItem>
-                    <SelectItem value="instrumental_stem" style={{ color: "var(--ln-parchment)", fontSize: "12px" }}>Instrumental Stem</SelectItem>
-                    <SelectItem value="bass_stem" style={{ color: "var(--ln-parchment)", fontSize: "12px" }}>Bass Stem</SelectItem>
-                    <SelectItem value="drum_stem" style={{ color: "var(--ln-parchment)", fontSize: "12px" }}>Drum Stem</SelectItem>
-                    <SelectItem value="other_stem" style={{ color: "var(--ln-parchment)", fontSize: "12px" }}>Other Stem</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Genre + AI consent */}
-              <div className="grid grid-cols-2 gap-2">
-                <Select value={card.genre} onValueChange={v => onChange(card.id, { genre: v })}>
-                  <SelectTrigger
-                    className="h-9 text-xs"
-                    style={{
-                      background: "var(--ln-coal)",
-                      border: "1px solid #C49A28",
-                      color: card.genre ? "#FFFFFF" : "var(--ln-iron)",
-                    }}
-                  >
-                    <SelectValue placeholder="Genre" />
-                  </SelectTrigger>
-                  <SelectContent position="popper" side="bottom" sideOffset={4} style={{ background: "#0A0A0A", border: "1px solid rgba(196,154,40,0.5)", color: "#E8DFC8", maxHeight: 220, overflowY: "auto" }}>
-                    {GENRES.map(g => (
-                      <SelectItem key={g} value={g} style={{ color: "#E8DFC8", fontSize: "12px" }}>{g}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Select
-                  value={card.aiConsent}
-                  onValueChange={v => onChange(card.id, { aiConsent: v as TrackCard["aiConsent"] })}
-                >
-                  <SelectTrigger
-                    className="h-9 text-xs"
-                    style={{ background: "var(--ln-coal)", border: "1px solid #C49A28", color: "#FFFFFF" }}
-                  >
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent style={{ background: "#0A0A0A", border: "1px solid rgba(196,154,40,0.5)", color: "var(--ln-parchment)" }}>
-                    {AI_OPTIONS.map(o => (
-                      <SelectItem key={o.value} value={o.value} style={{ color: "var(--ln-parchment)", fontSize: "12px" }}>
-                        {o.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-
-              {/* Release Date */}
-              <div>
-                <label className="text-[10px] font-heading tracking-widest uppercase mb-1 block" style={{ color: "#E8DFC8" }}>Original Creation Date</label>
-                <Input
-                  type="date"
-                  value={card.releaseDate}
-                  onChange={e => onChange(card.id, { releaseDate: e.target.value })}
-                  className="h-9 text-sm"
-                  style={{ background: "var(--ln-coal)", border: "1px solid #C49A28", color: card.releaseDate ? "#FFFFFF" : "var(--ln-iron)", colorScheme: "dark" }}
+                  className="h-1 rounded-full transition-all duration-200"
+                  style={{ width: `${card.uploadProgress ?? 0}%`, background: "linear-gradient(90deg, #C49A28, #D4AF37)" }}
                 />
               </div>
-
-              {/* AI Disclosure */}
-              <div>
-                <label className="text-[10px] font-heading tracking-widest uppercase mb-2 block" style={{ color: "var(--ln-parchment)" }}>Creation Disclosure</label>
-                <div className="flex flex-col gap-1.5">
-                  {([
-                    { value: "original", label: "Original" },
-                    { value: "human_authored_ai_instrument", label: "HAAI" },
-                    { value: "ai_assisted", label: "Assisted Manifestation" },
-                    { value: "ai_generated", label: "AI-Assisted Manifestation" },
-                  ] as const).map(opt => (
-                    <label key={opt.value} className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="radio"
-                        name={`aiDisclosure-${card.id}`}
-                        value={opt.value}
-                        checked={card.aiDisclosure === opt.value}
-                        onChange={() => onChange(card.id, { aiDisclosure: opt.value })}
-                        className="accent-yellow-500"
-                      />
-                      <span className="text-xs" style={{ color: "var(--ln-parchment)" }}>{opt.label}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              {/* AI Tool Toggles */}
-              {(card.aiDisclosure === "ai_assisted" || card.aiDisclosure === "human_authored_ai_instrument" || card.aiDisclosure === "ai_generated") && (
-                <div>
-                  <label className="text-[10px] font-heading tracking-widest uppercase mb-2 block" style={{ color: "var(--ln-parchment)" }}>Tools Used</label>
-                  <div className="flex flex-col gap-1.5">
-                    {([
-                      { key: "aiToolSuno" as const, label: "Suno 5+" },
-                      { key: "aiToolUdio" as const, label: "Udio" },
-                      { key: "aiToolSonato" as const, label: "Sonato" },
-                      { key: "aiToolOther" as const, label: "Other" },
-                    ]).map(tool => (
-                      <label key={tool.key} className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={card[tool.key]}
-                          onChange={e => onChange(card.id, { [tool.key]: e.target.checked })}
-                          className="accent-yellow-500"
-                        />
-                        <span className="text-xs" style={{ color: "var(--ln-parchment)" }}>{tool.label}</span>
-                      </label>
-                    ))}
-                    {card.aiToolOther && (
-                      <Input
-                        placeholder="Name the tool"
-                        value={card.aiToolOtherName}
-                        onChange={e => onChange(card.id, { aiToolOtherName: e.target.value })}
-                        className="h-8 text-xs mt-1"
-                        style={{ background: "var(--ln-coal)", border: "1px solid #C49A28", color: "#FFFFFF" }}
-                      />
-                    )}
-                  </div>
-                </div>
-              )}
             </div>
-
-              {/* Lyrics section */}
-              <div>
-                <button
-                  type="button"
-                  onClick={() => onChange(card.id, { lyricsExpanded: !card.lyricsExpanded })}
-                  className="flex items-center gap-2 text-[10px] font-heading tracking-widest uppercase transition-colors hover:opacity-80"
-                  style={{ color: card.lyricsText.trim() ? "var(--ln-gold)" : "var(--ln-parchment)" }}
-                >
-                  {card.lyricsExpanded ? <ChevronUp size={11} /> : <ChevronDown size={11} />}
-                  Lyrics
-                  {card.lyricsText.trim() && (
-                    <span className="text-[9px] font-mono ml-1" style={{ color: "rgba(196,154,40,0.7)" }}>
-                      {card.lyricsText.trim().split(/\s+/).length}w
-                    </span>
-                  )}
-                </button>
-                {card.lyricsExpanded && (
-                  <div className="mt-2 space-y-1.5">
-                    <textarea
-                      value={card.lyricsText}
-                      onChange={e => onChange(card.id, { lyricsText: e.target.value })}
-                      placeholder="Paste lyrics here — a WID-LYR will be generated automatically on upload..."
-                      rows={6}
-                      className="w-full text-xs rounded-lg px-3 py-2 resize-y font-mono leading-relaxed"
-                      style={{
-                        background: "var(--ln-coal)",
-                        border: "1px solid rgba(196,154,40,0.4)",
-                        color: "#FFFFFF",
-                        outline: "none",
-                        minHeight: 96,
-                      }}
-                    />
-                    {card.lyricsText.trim() && (
-                      <p className="text-[9px]" style={{ color: "rgba(196,154,40,0.6)" }}>
-                        WID-LYR will be generated server-side and tied to this track's WID on upload.
-                      </p>
-                    )}
-                  </div>
-                )}
-              </div>
-          </div>
-
-            {/* Right: per-track cover art */}
-            <div className="flex flex-col gap-2">
-              <p className="text-[10px] font-heading tracking-widest uppercase" style={{ color: "var(--ln-parchment)" }}>
-                Cover Art
-              </p>
-              <div
-                onDragOver={e => { e.preventDefault(); onChange(card.id, { coverDragging: true }); }}
-                onDragLeave={() => onChange(card.id, { coverDragging: false })}
-                onDrop={handleCoverDrop}
-                onClick={() => coverInputRef.current?.click()}
-                className="relative rounded-xl overflow-hidden cursor-pointer transition-all flex-1"
-                style={{
-                  minHeight: 120,
-                  background: card.coverPreview ? "transparent" : "var(--ln-coal)",
-                  border: `1.5px dashed ${card.coverDragging
-                    ? "rgba(232,223,200,0.6)"
-                    : card.coverPreview ? "rgba(74,222,128,0.4)" : "#C3AB7D"}`,
-                }}
-              >
-                <input
-                  ref={coverInputRef}
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={e => {
-                    const file = e.target.files?.[0];
-                    if (file) handleCoverFile(file);
-                    e.target.value = "";
-                  }}
-                />
-                {card.coverPreview ? (
-                  <>
-                    <img src={card.coverPreview} alt="Cover" className="w-full h-full object-cover absolute inset-0" />
-                    <div className="absolute inset-0 bg-black/0 hover:bg-black/40 transition-colors flex items-center justify-center opacity-0 hover:opacity-100">
-                      <ImageIcon size={20} className="text-white" />
-                    </div>
-                    <button
-                      onClick={e => {
-                        e.stopPropagation();
-                        onChange(card.id, { coverFile: null, coverPreview: null, coverUrl: undefined });
-                      }}
-                      className="absolute top-1 right-1 w-5 h-5 rounded-full flex items-center justify-center"
-                      style={{ background: "rgba(44,52,56,0.8)" }}
-                    >
-                      <X size={10} className="text-white" />
-                    </button>
-                  </>
-                ) : (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-1">
-                    <ImageIcon size={20} style={{ color: "var(--ln-smoke)" }} />
-                    <p className="text-[9px] text-center px-2" style={{ color: "var(--ln-parchment)" }}>
-                      {card.coverDragging ? "Drop image" : "Drop or click"}
-                    </p>
-                  </div>
-                )}
-              </div>
-              {!card.coverPreview && (
-                <p className="text-[9px] text-center" style={{ color: "var(--ln-smoke)" }}>
-                  Falls back to album art
-                </p>
-              )}
-            </div>
-          </div>
+          )}
+          <p
+            className="text-sm font-semibold truncate mb-0.5"
+            style={{ color: card.title ? "rgba(252,248,240,1)" : "rgba(232,223,200,0.6)", fontFamily: "'Cinzel', serif" }}
+          >
+            {card.title || "Untitled"}
+          </p>
+          {card.wid && (
+            <p className="text-[10px] font-mono truncate" style={{ color: "rgba(196,154,40,0.7)" }}>{card.wid}</p>
+          )}
+          {!card.wid && card.audioFile && (
+            <p className="text-[10px] truncate" style={{ color: "rgba(184,168,138,0.5)" }}>{card.audioFile.name}</p>
+          )}
+          {/* Edit details button */}
+          <button
+            onClick={() => onOpenDetail(card.id)}
+            className="mt-2 w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-[10px] font-heading tracking-widest uppercase transition-all hover:bg-white/[0.08]"
+            style={{ border: "1px solid rgba(196,154,40,0.22)", color: "var(--ln-parchment)" }}
+          >
+            Edit Details
+          </button>
         </div>
       )}
     </div>
@@ -703,8 +844,10 @@ export default function BatchUploadPage() {
   const [batchAiToolSonato, setBatchAiToolSonato] = useState(false);
   const [batchAiToolOther, setBatchAiToolOther] = useState(false);
   const [batchAiToolOtherName, setBatchAiToolOtherName] = useState("");
+  const [batchOriginStory, setBatchOriginStory] = useState("");
 
   const [cards, setCards] = useState<TrackCard[]>([makeEmptyCard()]);
+  const [detailCardId, setDetailCardId] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isDraggingGlobal, setIsDraggingGlobal] = useState(false);
   const globalDropRef = useRef<HTMLDivElement>(null);
@@ -827,6 +970,7 @@ export default function BatchUploadPage() {
       aiToolSonato: batchAiToolSonato,
       aiToolOther: batchAiToolOther,
       aiToolOtherName: batchAiToolOtherName,
+      haaiOriginStory: batchOriginStory || c.haaiOriginStory,
     })));
     toast.success("Batch fill applied to all tracks");
     setBatchFillOpen(false);
@@ -871,6 +1015,7 @@ export default function BatchUploadPage() {
         aiToolOther?: boolean; aiToolOtherName?: string;
         fileType?: string;
         lyricsText?: string;
+        haaiOriginStory?: string;
       }[] = [];
 
       for (const card of readyCards) {
@@ -907,6 +1052,7 @@ export default function BatchUploadPage() {
           aiToolOtherName: card.aiToolOtherName || undefined,
           fileType: card.fileType,
           lyricsText: card.lyricsText.trim() || undefined,
+          haaiOriginStory: card.haaiOriginStory?.trim() || undefined,
         });
       }
 
@@ -1305,6 +1451,25 @@ export default function BatchUploadPage() {
                 </div>
               )}
             </div>
+            {/* Origin Story batch */}
+            <div className="border-t pt-3" style={{ borderColor: "rgba(196,154,40,0.2)" }}>
+              <p className="text-[10px] mb-2 font-heading tracking-widest uppercase" style={{ color: "var(--ln-parchment)" }}>Origin Story (Shared Across Tracks)</p>
+              <textarea
+                value={batchOriginStory}
+                onChange={e => setBatchOriginStory(e.target.value)}
+                placeholder="Where did this collection come from? What was the spark, the moment, the train of thought that brought these works into being?"
+                rows={4}
+                className="w-full text-xs rounded-lg px-3 py-2 resize-y leading-relaxed"
+                style={{
+                  background: "var(--ln-coal)",
+                  border: "1px solid rgba(196,154,40,0.4)",
+                  color: "#FFFFFF",
+                  outline: "none",
+                  minHeight: 80,
+                  fontFamily: "Inter, sans-serif",
+                }}
+              />
+            </div>
             <Button
               onClick={applyBatchFill}
               size="sm"
@@ -1341,29 +1506,56 @@ export default function BatchUploadPage() {
           )}
         </div>
 
-        {cards.map((card, i) => (
-          <TrackCardUI
-            key={card.id}
-            card={card}
-            index={i}
-            total={cards.length}
-            onChange={updateCard}
-            onRemove={removeCard}
-            onGenerateWid={generateWID}
-            onAddMultiple={handleAddMultiple}
-          />
-        ))}
+        {/* Visual grid: 3-col desktop / 2-col tablet / 1-col mobile */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {cards.map((card, i) => (
+            <TrackCardUI
+              key={card.id}
+              card={card}
+              index={i}
+              total={cards.length}
+              onChange={updateCard}
+              onRemove={removeCard}
+              onGenerateWid={generateWID}
+              onAddMultiple={handleAddMultiple}
+              onOpenDetail={id => setDetailCardId(id)}
+            />
+          ))}
 
-        {/* Add track button */}
-        <button
-          onClick={addCard}
-          className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl transition-all hover:bg-white/[0.04]"
-          style={{ border: "1.5px dashed rgba(196,154,40,0.18)", color: "var(--ln-parchment)" }}
-        >
-          <Plus size={16} />
-          <span className="text-sm">Add Track</span>
-        </button>
+          {/* Add track slot */}
+          <button
+            onClick={addCard}
+            className="rounded-2xl flex flex-col items-center justify-center gap-3 transition-all hover:bg-white/[0.04]"
+            style={{
+              border: "1.5px dashed rgba(196,154,40,0.18)",
+              color: "var(--ln-parchment)",
+              aspectRatio: "3/4",
+              minHeight: 160,
+            }}
+          >
+            <div
+              className="w-10 h-10 rounded-full flex items-center justify-center"
+              style={{ background: "rgba(196,154,40,0.08)", border: "1px solid rgba(196,154,40,0.22)" }}
+            >
+              <Plus size={18} style={{ color: "var(--ln-gold)" }} />
+            </div>
+            <span className="text-xs" style={{ color: "var(--ln-parchment)" }}>Add Track</span>
+          </button>
+        </div>
       </div>
+
+      {/* Track detail slide-out panel */}
+      {detailCardId && (() => {
+        const detailCard = cards.find(c => c.id === detailCardId);
+        if (!detailCard) return null;
+        return (
+          <TrackDetailPanel
+            card={detailCard}
+            onClose={() => setDetailCardId(null)}
+            onChange={updateCard}
+          />
+        );
+      })()}
 
       {/* Sticky submit bar */}
       <div

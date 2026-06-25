@@ -27,7 +27,7 @@ import { Label } from "@/components/ui/label";
 import {
   Eye, Sliders, Mic2, Feather, Music2, Heart,
   BookOpen, Layers, AlignLeft, Zap, Lightbulb,
-  Palette, Frame, Move, Film, Camera,
+  Palette, Frame, Move, Film, Camera, Flame,
 } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -39,6 +39,7 @@ export interface HAAIDeclaration {
   haaiVocalConveyance: string;
   haaiLyricalInspiration: string;
   haaiEmotionalTone: string;
+  haaiOriginStory: string;
 }
 
 export type HAAIWorkType = "audio" | "lyrics" | "manuscript" | "comic" | "video";
@@ -369,7 +370,53 @@ export function HAAIDeclarationForm({
         </div>
       </div>
 
-      {/* Fields */}
+      {/* Origin Story — the sacred entry point of the declaration */}
+      <div className="space-y-1.5 mb-6">
+        <div className="flex items-center gap-2 mb-1">
+          <Flame className="w-4 h-4" style={{ color: "var(--ln-gold)" }} />
+          <span
+            className="text-xs font-bold uppercase tracking-widest"
+            style={{ color: "var(--ln-gold)" }}
+          >
+            Origin Story
+          </span>
+          <span
+            className="text-[10px] ml-1 px-1.5 py-0.5 rounded"
+            style={{
+              background: "rgba(196,154,40,0.12)",
+              color: "rgba(196,154,40,0.7)",
+              border: "1px solid rgba(196,154,40,0.2)",
+            }}
+          >
+            Living Testimony
+          </span>
+        </div>
+        <p className="text-[11px] leading-relaxed mb-2" style={{ color: "var(--ln-iron)" }}>
+          Where did this come from? What was the spark — the moment, the memory, the revelation that
+          birthed this work? What human experience, emotion, or train of thought made this creation
+          possible? This is your testimony. Write it freely.
+        </p>
+        <Textarea
+          id="haai-originStory"
+          value={value.haaiOriginStory ?? ""}
+          onChange={(e) => onChange({ ...value, haaiOriginStory: e.target.value })}
+          placeholder="I was sitting in the truck at 3am after a 24-hour shift when I heard the first note in my head. It came from the weight of what I'd seen that week — the kind of grief that doesn't have language yet. I needed to give it one…"
+          rows={compact ? 4 : 6}
+          className="resize-none text-sm"
+          style={{
+            background: "var(--ln-coal)",
+            border: "1px solid rgba(196,154,40,0.45)",
+            color: "var(--ln-parchment)",
+            lineHeight: "1.75",
+          }}
+        />
+        <p className="text-[11px] leading-relaxed" style={{ color: "var(--ln-iron)" }}>
+          No format required. This is your voice, not a form field. The more specific and human, the
+          stronger your provenance record.
+        </p>
+      </div>
+
+      {/* Dimension Fields */}
       <div className={compact ? "space-y-4" : "space-y-5"}>
         {fields.map(({ key, label, icon: Icon, placeholder, hint }) => (
           <div key={key} className="space-y-1.5">
@@ -427,4 +474,5 @@ export const EMPTY_HAAI: HAAIDeclaration = {
   haaiVocalConveyance: "",
   haaiLyricalInspiration: "",
   haaiEmotionalTone: "",
+  haaiOriginStory: "",
 };

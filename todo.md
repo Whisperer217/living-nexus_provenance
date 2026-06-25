@@ -71,6 +71,22 @@
 - [x] Replace AI Transform stub modal with full functional modal (prompt, style preset, quick tags, processing spinner, result audio player, download button)
 - [x] TypeScript: 0 errors | Vitest: 1/1 passing
 
+## Phase N+10: HAAI Origin Story + Batch Upload Grid + Edit Work Button
+- [x] haaiOriginStory column added to drizzle/schema.ts and migrated to DB
+- [x] haaiOriginStory added to songs.ts upload and update procedures
+- [x] haaiOriginStory added to HAAIDeclarationForm (prominent first field with deep textarea)
+- [x] haaiOriginStory added to UploadPage initialization and draft hydration
+- [x] haaiOriginStory added to BatchUploadPage TrackCard interface and makeEmptyCard
+- [x] haaiOriginStory added to trackPayloads in BatchUploadPage handleSubmit
+- [x] batchOriginStory state + textarea added to BatchFill panel
+- [x] haaiOriginStory applied in applyBatchFill
+- [x] TrackCardUI accordion replaced with compact visual grid slots (3-col desktop / 2-col tablet / 1-col mobile)
+- [x] New TrackDetailPanel slide-out drawer for per-track metadata (all fields including Origin Story)
+- [x] detailCardId state + TrackDetailPanel render wired in main BatchUploadPage component
+- [x] Add track button redesigned as grid slot with 3/4 aspect ratio
+- [x] Edit Work button added to SongDetailPage owner action bar (gold, Cinzel, Pencil icon)
+- [x] 0 TypeScript errors, 324/324 tests passing
+
 ## Phase 9: Audio Player Fix
 - [ ] Audit PlayerContext addAndPlay, player bar metadata display, DiscoverPage/ExplorePage click handlers
 - [ ] Fix addAndPlay so clicking a track card loads it into the bottom player bar and starts playing

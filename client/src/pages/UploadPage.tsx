@@ -191,6 +191,7 @@ export default function UploadPage() {
     haaiVocalConveyance: "",
     haaiLyricalInspiration: "",
     haaiEmotionalTone: "",
+    haaiOriginStory: "",
   });
   const [caption, setCaption] = useState("");
   const [captionSuggestion, setCaptionSuggestion] = useState<string | null>(null);
@@ -311,7 +312,8 @@ export default function UploadPage() {
     }
     // HAAI declaration fields
     if (draftData.haaiVisualConcept || draftData.haaiStyleLanguage || draftData.haaiInstrumentation ||
-        draftData.haaiVocalConveyance || draftData.haaiLyricalInspiration || draftData.haaiEmotionalTone) {
+        draftData.haaiVocalConveyance || draftData.haaiLyricalInspiration || draftData.haaiEmotionalTone ||
+        draftData.haaiOriginStory) {
       setHaaiDeclaration({
         haaiVisualConcept: draftData.haaiVisualConcept ?? "",
         haaiStyleLanguage: draftData.haaiStyleLanguage ?? "",
@@ -319,6 +321,7 @@ export default function UploadPage() {
         haaiVocalConveyance: draftData.haaiVocalConveyance ?? "",
         haaiLyricalInspiration: draftData.haaiLyricalInspiration ?? "",
         haaiEmotionalTone: draftData.haaiEmotionalTone ?? "",
+        haaiOriginStory: draftData.haaiOriginStory ?? "",
       });
     }
     // Credits from creditsJson

@@ -315,6 +315,7 @@ export const songs = mysqlTable("songs", {
   haaiVocalConveyance: text("haaiVocalConveyance"),    // The voice, tone, and delivery the creator was trying to convey
   haaiLyricalInspiration: text("haaiLyricalInspiration"), // Lyrical seed / inspiration snippets that anchored the work
   haaiEmotionalTone: text("haaiEmotionalTone"),        // The emotional tone and MUT-alignment the creator was pursuing
+  haaiOriginStory: text("haaiOriginStory"),             // The spark, train of thought, and human experience that birthed this work
   haaiDeclaredAt: timestamp("haaiDeclaredAt"),         // Timestamp when the HAAI declaration was completed
 
   // File Type — classifies the audio file within an album/collection

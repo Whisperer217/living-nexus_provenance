@@ -826,7 +826,23 @@ export default function SongDetailPage() {
               {!isOwner && (
                 <FlagContentButton workId={song.id} workType="audio" workTitle={song.title} size="sm" className="px-2 py-1 rounded border border-zinc-800 hover:border-red-800/60" />
               )}
-                            {/* Edit Work removed — edit via Archive */}
+              {isOwner && (
+                <Button
+                  size="sm"
+                  onClick={() => setEditingOpen(true)}
+                  className="gap-1.5"
+                  style={{
+                    background: "rgba(196,154,40,0.10)",
+                    border: "1px solid rgba(196,154,40,0.40)",
+                    color: "var(--ln-gold)",
+                    fontFamily: "'Cinzel', serif",
+                    letterSpacing: "0.04em",
+                  }}
+                >
+                  <Pencil size={13} />
+                  Edit Work
+                </Button>
+              )}
             </div>
 
             {/* ── Missing cover art alert (owner only) ── */}
