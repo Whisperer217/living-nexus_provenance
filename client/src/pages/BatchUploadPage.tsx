@@ -216,12 +216,10 @@ function TrackDetailPanel({
       if (meta.genre && !card.genre) patch.genre = meta.genre;
       if (meta.lyrics && !card.lyricsText) patch.lyricsText = meta.lyrics;
       if (meta.year && !card.releaseDate) patch.releaseDate = meta.year;
-      if (meta.coverArtBlob && !card.coverFile) {
+      if (meta.coverArtBlob && meta.coverArtDataUrl && !card.coverFile) {
         const ext = meta.coverArtBlob.type.includes("png") ? "png" : "jpg";
         patch.coverFile = new File([meta.coverArtBlob], `cover.${ext}`, { type: meta.coverArtBlob.type });
-        const reader = new FileReader();
-        reader.onload = ev => onChange(card.id, { coverPreview: ev.target?.result as string });
-        reader.readAsDataURL(meta.coverArtBlob);
+        patch.coverPreview = meta.coverArtDataUrl;
       }
       if (Object.keys(patch).length > 0) onChange(card.id, patch);
     });
@@ -654,12 +652,10 @@ function TrackCardUI({
       if (meta.genre && !card.genre) patch.genre = meta.genre;
       if (meta.lyrics && !card.lyricsText) patch.lyricsText = meta.lyrics;
       if (meta.year && !card.releaseDate) patch.releaseDate = meta.year;
-      if (meta.coverArtBlob && !card.coverFile) {
+      if (meta.coverArtBlob && meta.coverArtDataUrl && !card.coverFile) {
         const ext = meta.coverArtBlob.type.includes("png") ? "png" : "jpg";
         patch.coverFile = new File([meta.coverArtBlob], `cover.${ext}`, { type: meta.coverArtBlob.type });
-        const reader = new FileReader();
-        reader.onload = ev => onChange(card.id, { coverPreview: ev.target?.result as string });
-        reader.readAsDataURL(meta.coverArtBlob);
+        patch.coverPreview = meta.coverArtDataUrl;
       }
       if (Object.keys(patch).length > 0) onChange(card.id, patch);
     });
@@ -953,12 +949,10 @@ export default function BatchUploadPage() {
         if (meta.genre) patch.genre = meta.genre;
         if (meta.lyrics) patch.lyricsText = meta.lyrics;
         if (meta.year) patch.releaseDate = meta.year;
-        if (meta.coverArtBlob) {
+        if (meta.coverArtBlob && meta.coverArtDataUrl) {
           const ext = meta.coverArtBlob.type.includes("png") ? "png" : "jpg";
           patch.coverFile = new File([meta.coverArtBlob], `cover.${ext}`, { type: meta.coverArtBlob.type });
-          const reader = new FileReader();
-          reader.onload = ev => setCards(p => p.map(x => x.id === c.id ? { ...x, coverPreview: ev.target?.result as string } : x));
-          reader.readAsDataURL(meta.coverArtBlob);
+          patch.coverPreview = meta.coverArtDataUrl;
         }
         if (Object.keys(patch).length > 0) setCards(p => p.map(x => x.id === c.id ? { ...x, ...patch } : x));
       });
@@ -991,12 +985,10 @@ export default function BatchUploadPage() {
         if (meta.genre) patch.genre = meta.genre;
         if (meta.lyrics) patch.lyricsText = meta.lyrics;
         if (meta.year) patch.releaseDate = meta.year;
-        if (meta.coverArtBlob) {
+        if (meta.coverArtBlob && meta.coverArtDataUrl) {
           const ext = meta.coverArtBlob.type.includes("png") ? "png" : "jpg";
           patch.coverFile = new File([meta.coverArtBlob], `cover.${ext}`, { type: meta.coverArtBlob.type });
-          const reader = new FileReader();
-          reader.onload = ev => setCards(p => p.map(x => x.id === c.id ? { ...x, coverPreview: ev.target?.result as string } : x));
-          reader.readAsDataURL(meta.coverArtBlob);
+          patch.coverPreview = meta.coverArtDataUrl;
         }
         if (Object.keys(patch).length > 0) setCards(p => p.map(x => x.id === c.id ? { ...x, ...patch } : x));
       });
