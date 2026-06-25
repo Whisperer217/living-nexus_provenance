@@ -47,7 +47,11 @@ export function useAudioMetadata() {
       if (pictures && pictures.length > 0) {
         const pic = pictures[0];
         const mime = pic.format || "image/jpeg";
-        const blob = new Blob([pic.data.buffer as ArrayBuffer], { type: mime });
+        // pic.data is Uint8Array<ArrayBufferLike> — may be backed by a SharedArrayBuffer.
+        // Blob() requires ArrayBufferView<ArrayBuffer>, so we copy into a fresh Uint8Array
+        // with a plain ArrayBuffer. .slice() always returns a new Uint8Array with its own buffer.
+        const safeBytes = pic.data.slice(0);
+        const blob = new Blob([safeBytes], { type: mime });
         coverArtBlob = blob;
         coverArtDataUrl = await new Promise<string>((resolve, reject) => {
           const reader = new FileReader();

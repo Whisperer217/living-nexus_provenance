@@ -26,9 +26,10 @@ export async function parseAudioMetadata(file: File): Promise<AudioMetadata> {
     // Extract embedded cover art
     if (common.picture && common.picture.length > 0) {
       const pic = common.picture[0];
-      // pic.data may be a Node Buffer (SharedArrayBuffer) — always copy to a plain ArrayBuffer
-      const bytes = new Uint8Array(pic.data.buffer.slice(pic.data.byteOffset, pic.data.byteOffset + pic.data.byteLength));
-      const blob = new Blob([bytes.buffer as ArrayBuffer], { type: pic.format || "image/jpeg" });
+      // pic.data is Buffer<ArrayBufferLike> — may be backed by a SharedArrayBuffer.
+      // Copy into a fresh Uint8Array with a plain ArrayBuffer so Blob() accepts it.
+      const safeBytes = new Uint8Array(pic.data);
+      const blob = new Blob([safeBytes], { type: pic.format || "image/jpeg" });
       coverDataUrl = await blobToDataUrl(blob);
     }
 
