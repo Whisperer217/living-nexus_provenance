@@ -153,13 +153,15 @@ export function ConstellationReveal({
         </div>
       )}
 
-      {/* Content — slow cinematic rise */}
+      {/* Content — always visible; subtle rise when animation triggers */}
       <div
         style={{
-          opacity: isVisible ? 1 : 0,
-          transform: isVisible ? "translateY(0)" : "translateY(18px)",
+          // Content is ALWAYS visible (opacity:1) to prevent blank sections on mobile.
+          // The translateY rise is a cosmetic enhancement only — content never hides.
+          opacity: 1,
+          transform: isVisible ? "translateY(0)" : "translateY(8px)",
           transition: isVisible
-            ? "opacity 700ms cubic-bezier(0.16,1,0.3,1), transform 700ms cubic-bezier(0.16,1,0.3,1)"
+            ? "transform 700ms cubic-bezier(0.16,1,0.3,1)"
             : "none",
         }}
       >
@@ -222,11 +224,13 @@ export function ManifestationReveal({
       ref={ref}
       className={className}
       style={{
-        opacity: visible ? 1 : 0,
-        transform: visible ? "translateY(0)" : "translateY(22px)",
-        transition: visible
-          ? "opacity 600ms cubic-bezier(0.16,1,0.3,1), transform 600ms cubic-bezier(0.16,1,0.3,1)"
-          : "none",
+      // Content is ALWAYS visible (opacity:1) to prevent blank cards on mobile.
+          // The translateY rise is a cosmetic enhancement only.
+          opacity: 1,
+          transform: visible ? "translateY(0)" : "translateY(8px)",
+          transition: visible
+            ? "transform 600ms cubic-bezier(0.16,1,0.3,1)"
+            : "none",
       }}
     >
       {children}

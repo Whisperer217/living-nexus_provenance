@@ -5817,3 +5817,4 @@
 - [x] Fix ConstellationReveal: dual observers (scroll root + viewport), rootMargin "0px 0px 400px 0px", 300ms hard fallback
 - [x] Fix ManifestationReveal: positive rootMargin "0px 0px 300px 0px", 400ms hard fallback
 - [x] 0 TypeScript errors, 324/324 tests passing
+- [x] Fix ConstellationReveal and ManifestationReveal hiding content on mobile (opacity always 1, only animate transform)
