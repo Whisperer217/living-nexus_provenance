@@ -324,6 +324,10 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  /** Clamp a volume value to the valid [0, 1] range, guarding against
+   * floating-point rounding errors that produce tiny negative values. */
+  const clampVol = (v: number) => Math.max(0, Math.min(1, v));
+
   /** Fade audio element volume from `from` to `to` over `durationMs` ms */
   const fadeVolume = useCallback((
     audioEl: HTMLAudioElement,
@@ -333,15 +337,15 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     onComplete?: () => void,
   ) => {
     const startTime = performance.now();
-    audioEl.volume = from;
+    audioEl.volume = clampVol(from);
     const tick = (now: number) => {
       const elapsed = now - startTime;
       const progress = Math.min(elapsed / durationMs, 1);
-      audioEl.volume = from + (to - from) * progress;
+      audioEl.volume = clampVol(from + (to - from) * progress);
       if (progress < 1) {
         fadeRafRef.current = requestAnimationFrame(tick);
       } else {
-        audioEl.volume = to;
+        audioEl.volume = clampVol(to);
         fadeRafRef.current = null;
         onComplete?.();
       }
@@ -402,7 +406,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
-    audio.volume = state.volume;
+    audio.volume = clampVol(state.volume);
 
     const onTimeUpdate = () => {
       setState(s => ({ ...s, currentTime: audio.currentTime }));
@@ -441,7 +445,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
             const nextT = tracks[nextIdx];
             if (nextT?.audioUrl) {
               const nextAudio = new Audio(safeAudioUrl(nextT.audioUrl));
-              nextAudio.volume = 0;
+              nextAudio.volume = clampVol(0);
               nextAudioRef.current = nextAudio;
               nextAudio.play().catch(() => {});
               // Fade next in over the crossfade window
@@ -451,7 +455,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
                   audio.pause();
                   audio.src = safeAudioUrl(nextT.audioUrl);
                   audio.currentTime = nextAudio.currentTime;
-                  audio.volume = s.volume;
+                  audio.volume = clampVol(s.volume);
                   nextAudio.pause();
                   nextAudioRef.current = null;
                   setState(prev => ({
@@ -478,7 +482,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
           cancelFade();
           fadeVolume(audio, audio.volume, 0, (timeLeft - 0.05) * 1000, () => {
             crossfadeActiveRef.current = false;
-            audio.volume = s.volume; // restore for next track
+            audio.volume = clampVol(s.volume); // restore for next track
           });
         }
       }
@@ -550,7 +554,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
           audio.pause();
           audio.src = safeAudioUrl(nextTrackData.audioUrl);
           audio.currentTime = preloaded.currentTime;
-          audio.volume = s.volume;
+          audio.volume = clampVol(s.volume);
           audio.play().catch(() => {});
           nextAudioRef.current = null;
         } else {
@@ -566,7 +570,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
         audio.src = safeAudioUrl(nextTrackData.audioUrl);
         audio.load();
         if (fadeIn > 0) {
-          audio.volume = 0;
+          audio.volume = clampVol(0);
           audio.play().catch(() => {});
           // Fade in after canplay
           const doFadeIn = () => {
@@ -576,7 +580,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
           };
           audio.addEventListener("canplay", doFadeIn, { once: true });
         } else {
-          audio.volume = s.volume;
+          audio.volume = clampVol(s.volume);
           audio.play().catch(() => {});
         }
       }
@@ -650,7 +654,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       const t = tracks[idx];
       if (!t) return s;
       if (t.audioUrl) {
-        audio.volume = s.volume;
+        audio.volume = clampVol(s.volume);
         audio.src = safeAudioUrl(t.audioUrl);
         audio.load();
         // Apply fade-in if configured
@@ -659,7 +663,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
           ? t.fadeInSeconds
           : settings.globalFadeIn;
         if (fadeIn > 0) {
-          audio.volume = 0;
+          audio.volume = clampVol(0);
           audio.play().catch(() => {});
           audio.addEventListener("canplay", () => {
             fadeVolume(audio, 0, s.volume, fadeIn * 1000);
@@ -747,9 +751,9 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const setVolume = useCallback((v: number) => {
     const audio = audioRef.current;
     if (!audio) return;
-    audio.volume = v;
-    setState(s => ({ ...s, volume: v, isMuted: false }));
-    setCache(CACHE_KEYS.VOLUME, v, TTL.UI_STATE);
+    audio.volume = clampVol(v);
+    setState(s => ({ ...s, volume: clampVol(v), isMuted: false }));
+    setCache(CACHE_KEYS.VOLUME, clampVol(v), TTL.UI_STATE);
   }, []);
 
   const seek = useCallback((t: number) => {

@@ -664,7 +664,11 @@ function GlobalPlayerInner() {
         WebkitBackdropFilter: glassBlur,
         // Harmonic border: when expanded, the border color reflects the song's ECDSA signature.
         // When collapsed (mini bar), use the standard platform gold border.
-        border: isExpanded ? harmonicSig.expandedBorder : GOLD_BORDER,
+        // NOTE: Use explicit longhands (not the 'border' shorthand) to prevent React's
+        // "shorthand vs longhand conflict" warning when the style object is updated.
+        borderWidth: "1px",
+        borderStyle: "solid",
+        borderColor: isExpanded ? harmonicSig.borderColor : "rgba(212,175,55,0.45)",
         borderRadius: isExpanded ? "20px 20px 0 0" : isDesktop ? "20px" : "12px 12px 0 0",
         boxShadow: activeShadow,
         // Spring-physics transition: overshoot + settle for zone changes; none during active drag
