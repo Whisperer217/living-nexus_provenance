@@ -54,10 +54,10 @@ function formatDate(date: Date | string | null | undefined): string {
 
 /* ── CollectionsSection — batch upload albums ───────────────────── */
 function CollectionsSection() {
-  const { data: collections = [], isLoading } = trpc.userCollections.list.useQuery();
+  const { data: collections = [], isLoading } = trpc.songs.getMyCollections.useQuery();
   const utils = trpc.useUtils();
   const [expanded, setExpanded] = useState<number | null>(null);
-  const { data: tracks = [] } = trpc.userCollections.getTracks.useQuery(
+  const { data: tracks = [] } = trpc.songs.getCollectionTracks.useQuery(
     { collectionId: expanded! },
     { enabled: expanded !== null }
   );

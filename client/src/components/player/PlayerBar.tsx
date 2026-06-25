@@ -10,6 +10,7 @@ import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useFrequencyGlow } from "@/hooks/useFrequencyGlow";
 import { useWaveformVisualizer } from "@/hooks/useWaveformVisualizer";
+import { useHarmonic } from "@/contexts/HarmonicContext";
 import {
   Play, Pause, SkipBack, SkipForward,
   Shuffle, Repeat, Volume2, VolumeX, Heart, DollarSign, Maximize2, Minimize2,
@@ -66,10 +67,11 @@ export default function PlayerBar() {
     return next;
   });
   const { glowShadow } = useFrequencyGlow(audioRef, glowEnabled, state.isPlaying);
-
+  // ── Harmonic signature — wire waveform to the current song's soul ──
+  const { harmonicSig } = useHarmonic();
   // ── Waveform canvas ──
   const waveCanvasRef = useRef<HTMLCanvasElement | null>(null);
-  useWaveformVisualizer(audioRef, waveCanvasRef, glowEnabled, state.isPlaying);
+  useWaveformVisualizer(audioRef, waveCanvasRef, glowEnabled, state.isPlaying, false, harmonicSig.hue, harmonicSig.saturation);
 
   const tracks = allTracks();
   const currentTrack = state.currentIdx >= 0 ? tracks[state.currentIdx] : null;

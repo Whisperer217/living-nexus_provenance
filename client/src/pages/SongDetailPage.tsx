@@ -29,6 +29,7 @@ import {
 import { useLike } from "@/hooks/useLike";
 import { useRef as _useRef } from "react";
 import { useWaveformVisualizer } from "@/hooks/useWaveformVisualizer";
+import { useHarmonic } from "@/contexts/HarmonicContext";
 import AddToPlaylistButton from "@/components/AddToPlaylistButton";
 import AddToNamedPlaylistPopover from "@/components/AddToNamedPlaylistPopover";
 import { WIDPanel } from "@/components/WIDPanel";
@@ -142,7 +143,9 @@ export default function SongDetailPage() {
   const isPlaying = isThisTrackActive && playerState.isPlaying;
 
   // Live waveform visualizer — driven by the global audio element
-  useWaveformVisualizer(audioRef, waveCanvasRef, isThisTrackActive, isPlaying);
+  // Wire harmonic hue so the waveform reflects the song's unique soul color
+  const { harmonicSig } = useHarmonic();
+  useWaveformVisualizer(audioRef, waveCanvasRef, isThisTrackActive, isPlaying, false, harmonicSig.hue, harmonicSig.saturation);
   const { liked: isLiked, toggle: toggleLike } = useLike(songId);
   const { data: likeCountData } = trpc.songs.getLikeCount.useQuery(
     { songId },

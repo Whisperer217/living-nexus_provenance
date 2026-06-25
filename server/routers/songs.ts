@@ -1477,6 +1477,12 @@ ${workType === "manuscript" || workType === "comic" ? "Category" : "Genre"}: ${i
       .query(async ({ input }) => {
         return getCollectionsByCreator(input.creatorId);
       }),
+    // ── Get tracks for a WID-ALB collection (Archive page) ─────────────────────────────────────
+    getCollectionTracks: publicProcedure
+      .input(z.object({ collectionId: z.number().int().positive() }))
+      .query(async ({ input }) => {
+        return getSongsByCollectionId(input.collectionId);
+      }),
     // ── Update Collection Cover Position ─────────────────────────────────────────────────────
     updateCollectionCoverPosition: protectedProcedure.input(z.object({
       collectionId: z.number(),

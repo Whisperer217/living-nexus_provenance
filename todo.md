@@ -5593,16 +5593,16 @@
 - [x] 297/297 tests pass, 0 TypeScript errors after refactor
 
 ## Auth Policy Enforcement (Browse-Free / Download-Gated)
-- [ ] Audit all pages and components for forced login redirects or login-wall guards on browse/listen actions
-- [ ] Remove any page-level useEffect/navigate-to-login guards that fire on load for unauthenticated users
-- [ ] Remove any login prompts on play/listen/view actions
-- [ ] Ensure download buttons show a login prompt (not a hard redirect) when user is not authenticated
-- [ ] Ensure download buttons show a "no license" message when user is authenticated but has no grant
-- [ ] Verify GlobalPlayer and PlayerBar play actions work without login
-- [ ] Verify SongDetailPage loads and plays without login
-- [ ] Verify CreatorProfilePage loads without login
-- [ ] Verify Explore/Home pages load without login
-- [ ] Confirm mutation-cache redirect still fires for expired-session mutations (non-download protected actions)
+- [x] Audit all pages and components for forced login redirects or login-wall guards on browse/listen actions
+- [x] Remove any page-level useEffect/navigate-to-login guards that fire on load for unauthenticated users
+- [x] Remove any login prompts on play/listen/view actions
+- [x] Ensure download buttons show a login prompt (not a hard redirect) when user is not authenticated
+- [x] Ensure download buttons show a "no license" message when user is authenticated but has no grant
+- [x] Verify GlobalPlayer and PlayerBar play actions work without login
+- [x] Verify SongDetailPage loads and plays without login
+- [x] Verify CreatorProfilePage loads without login
+- [x] Verify Explore/Home pages load without login
+- [x] Confirm mutation-cache redirect still fires for expired-session mutations (non-download protected actions)
 
 ## Auth Policy Enforcement (Browse-Free, Download-Gated)
 - [x] Remove hard page-load redirect from ArchivePage (soft sign-in gate instead)
@@ -5781,8 +5781,8 @@
 - [x] 0 TypeScript errors, 324/324 tests passing
 
 ## Phase N+15: Batch Upload Bug Fixes (Slimdoggy Report)
-- [ ] Fix track duplication: 11 files dropped → 22 cards (drop handler firing twice)
-- [ ] Add client-side ID3 metadata auto-import on file drop (title, cover art, lyrics)
+- [x] Fix track duplication: 11 files dropped → 22 cards (drop handler firing twice)
+- [x] Add client-side ID3 metadata auto-import on file drop (title, cover art, lyrics)
 
 ## Phase N+15: Batch Upload Bug Fixes (Slimdoggy report — PC app)
 - [x] Bug 1 — Track duplication (11 files → 22 cards)
