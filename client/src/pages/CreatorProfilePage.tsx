@@ -21,7 +21,7 @@ import {
   Copy, Heart, Share2, MoreHorizontal, Download, Trash2,
   ChevronRight, Headphones, Twitter, Instagram, Youtube, Eye, EyeOff,
   Library, Move, Upload, Loader2, Crown, Sparkles, Wand2, ClipboardCopy, ChevronDown, BookOpen, Camera,
-  Bell, BellPlus,
+  Bell, BellPlus, Pencil,
 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { ImagePositioner } from "@/components/ImagePositioner";
@@ -39,6 +39,7 @@ import { CreatorIdentitySection } from "@/components/CreatorIdentitySection";
 import { ManifestationShelf, StandaloneShelf, type ShelfTrack } from "@/components/ManifestationShelf";
 import { LayoutGrid } from "lucide-react";
 import { CreatorIdentityStrip } from "@/components/CreatorIdentityStrip";
+import { EditChapel } from "@/components/EditChapel";
 
 // ─── Context Menu ─────────────────────────────────────────────────────────────
 interface ContextMenuProps {
@@ -46,9 +47,10 @@ interface ContextMenuProps {
   isOwner: boolean;
   onClose: () => void;
   onDelete?: (id: number) => void;
+  onEdit?: (song: any) => void;
   position: { x: number; y: number };
 }
-function SongContextMenu({ song, isOwner, onClose, onDelete, position }: ContextMenuProps) {
+function SongContextMenu({ song, isOwner, onClose, onDelete, onEdit, position }: ContextMenuProps) {
   const { playNext } = usePlayer();
   const [, navigate] = useLocation();
   const [showAddToList, setShowAddToList] = useState(false);
@@ -143,6 +145,13 @@ function SongContextMenu({ song, isOwner, onClose, onDelete, position }: Context
           <>
             <div className="my-1 border-t" style={{ borderColor: "rgba(196,154,40,0.12)" }} />
             <button
+              onClick={() => { onEdit?.(song); onClose(); }}
+              className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/[0.06] transition-colors text-left"
+              style={{ color: "var(--ln-gold)" }}
+            >
+              <Pencil className="w-4 h-4" /> Edit Work
+            </button>
+            <button
               onClick={() => { onDelete?.(song.id); onClose(); }}
               className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-red-500/10 transition-colors text-left"
               style={{ color: "var(--ln-ember)" }}
@@ -227,9 +236,9 @@ function FeaturedCard({ song, onPlay, isPlaying }: { song: any; onPlay: () => vo
 }
 
 // ─── Song Row ─────────────────────────────────────────────────────────────────
-function SongRow({ song, index, isPlaying, onPlay, isOwner, onDelete }: {
+function SongRow({ song, index, isPlaying, onPlay, isOwner, onDelete, onEdit }: {
   song: any; index: number; isPlaying: boolean; onPlay: () => void;
-  isOwner: boolean; onDelete?: (id: number) => void;
+  isOwner: boolean; onDelete?: (id: number) => void; onEdit?: (song: any) => void;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuPos, setMenuPos] = useState({ x: 0, y: 0 });
@@ -327,6 +336,7 @@ function SongRow({ song, index, isPlaying, onPlay, isOwner, onDelete }: {
             isOwner={isOwner}
             onClose={() => setMenuOpen(false)}
             onDelete={onDelete}
+            onEdit={onEdit}
             position={menuPos}
           />
         </>
@@ -473,6 +483,7 @@ export default function CreatorProfilePage() {
     onError: (e) => toast.error(e.message),
   });
   const playMutation = trpc.songs.play.useMutation();
+  const [editingChapelSong, setEditingChapelSong] = useState<any | null>(null);
 
   // ── Build stats — admin profile + honored contributors ────────────────────
   // Honored handles receive the 🐛 BUGS KILLED pill as a gift from the platform.
@@ -1925,6 +1936,7 @@ export default function CreatorProfilePage() {
                       onPlayAll={(albumTracks) => handleShelfPlayAll(albumTracks)}
                       isOwner={isOwner}
                       onDeleteTrack={(id) => deleteMutation.mutate({ songId: id })}
+                      onEditTrack={isOwner ? (track) => setEditingChapelSong(songs.find((s: any) => s.id === track.id) ?? track) : undefined}
                     />
                   );
                 })}
@@ -2001,6 +2013,8 @@ export default function CreatorProfilePage() {
                 tracks={standaloneTracks}
                 playingId={playingId}
                 onPlayTrack={(track, allTracks) => handleShelfPlay(track, allTracks)}
+                isOwner={isOwner}
+                onEditTrack={isOwner ? (track) => setEditingChapelSong(songs.find((s: any) => s.id === track.id) ?? track) : undefined}
               />
             </section>
           );
@@ -2812,6 +2826,15 @@ export default function CreatorProfilePage() {
             // Refetch declaration status after signing
             utils.declaration.creatorStatus.invalidate({ userId: creatorId });
           }}
+        />
+      )}
+
+      {/* ── Edit Chapel — sacred edit drawer for owner ── */}
+      {editingChapelSong && (
+        <EditChapel
+          song={editingChapelSong}
+          onClose={() => setEditingChapelSong(null)}
+          onSaved={() => { setEditingChapelSong(null); refetch(); }}
         />
       )}
     </div>

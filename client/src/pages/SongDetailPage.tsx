@@ -44,7 +44,7 @@ import { getContentTypeColors } from "@/lib/contentTypeColors";
 import { QRShareModal } from "@/components/QRIdentityCard";
 import { CinematicComicReader, type BookPage } from "@/components/reader/CinematicComicReader";
 import { CreatorHandle } from "@/components/CreatorHandle";
-import { EditTrackPanel } from "@/components/EditTrackPanel";
+import { EditChapel } from "@/components/EditChapel";
 import { SongDetailPageSkeleton } from "@/components/SongDetailPageSkeleton";
 
 // Slug keys stored in DB (safe ASCII, no charset issues); emoji shown in UI
@@ -1493,26 +1493,22 @@ export default function SongDetailPage() {
         </DialogContent>
       </Dialog>
 
-      {/* ── Owner: Edit Work Panel ── */}
+      {/* ── Owner: Edit Chapel ── */}
       {editingOpen && song && (
-        <EditTrackPanel
+        <EditChapel
           song={{
             id: song.id,
             title: song.title,
-            genre: song.genre ?? undefined,
-            caption: (song as any).caption ?? undefined,
-            collectionTag: (song as any).collectionTag ?? undefined,
-            coverArtUrl: song.coverArtUrl ?? undefined,
-            coverPositionX: song.coverPositionX ?? undefined,
-            coverPositionY: song.coverPositionY ?? undefined,
-            aiConsent: (song as any).aiConsent ?? undefined,
+            genre: song.genre ?? null,
+            caption: (song as any).caption ?? null,
+            coverArtUrl: song.coverArtUrl ?? null,
+            aiConsent: (song as any).aiConsent ?? null,
             status: (song as any).status ?? "Published",
-            lyricsText: song.lyricsText ?? undefined,
-            downloadPermission: (song as any).downloadPermission ?? undefined,
-            downloadTipThresholdCents: (song as any).downloadTipThresholdCents ?? undefined,
-            witnessId: song.witnessId ?? undefined,
+            lyricsText: song.lyricsText ?? null,
+            haaiOriginStory: (song as any).haaiOriginStory ?? null,
+            aiDisclosure: (song as any).aiDisclosure ?? null,
             contentType: (song as any).contentType ?? "audio",
-            creditsJson: (song as any).creditsJson ?? undefined,
+            releaseDate: (song as any).releaseDate ?? null,
           }}
           onClose={handleEditClose}
           onSaved={handleEditSaved}

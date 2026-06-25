@@ -19,7 +19,7 @@ import {
   Download, Lock, Coins, Layers, AlertTriangle, X,
   Library, ChevronRight, Layers2, Search,
 } from "lucide-react";
-import { EditTrackPanel } from "@/components/EditTrackPanel";
+import { EditChapel } from "@/components/EditChapel";
 import { getLoginUrl } from "@/const";
 import { usePlayer } from "@/contexts/PlayerContext";
 import MyListsTab from "@/components/MyListsTab";
@@ -1352,9 +1352,9 @@ export default function ArchivePage() {
       </div>
     </div>
 
-    {/* Edit Track Panel */}
+    {/* Edit Chapel */}
     {editingSong && (
-      <EditTrackPanel
+      <EditChapel
         song={editingSong}
         onClose={() => setEditingSong(null)}
         onSaved={() => {

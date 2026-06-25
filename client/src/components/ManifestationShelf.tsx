@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { Link } from "wouter";
-import { Play, Pause, ChevronLeft, ChevronRight, Shield, Music, BookOpen, FileText, Film, Package, Layers, LayoutGrid, List, ChevronDown, ChevronUp as ChevronUpIcon, Clock, Headphones, Download, Share2 } from "lucide-react";
+import { Play, Pause, ChevronLeft, ChevronRight, Shield, Music, BookOpen, FileText, Film, Package, Layers, LayoutGrid, List, ChevronDown, ChevronUp as ChevronUpIcon, Clock, Headphones, Download, Share2, Pencil } from "lucide-react";
 import { MediaAsset } from "@/components/MediaAsset";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
@@ -42,6 +42,7 @@ interface ManifestationShelfProps {
   onPlayAll?: (albumTracks: ShelfTrack[]) => void;
   isOwner?: boolean;
   onDeleteTrack?: (id: number) => void;
+  onEditTrack?: (track: ShelfTrack) => void;
 }
 
 // ─── Medium icon helper ───────────────────────────────────────────────────────
@@ -62,10 +63,12 @@ function TrackCard({
   track,
   isPlaying,
   onPlay,
+  onEdit,
 }: {
   track: ShelfTrack;
   isPlaying: boolean;
   onPlay: () => void;
+  onEdit?: () => void;
 }) {
   const duration = track.durationSeconds
     ? `${Math.floor(track.durationSeconds / 60)}:${String(Math.round(track.durationSeconds % 60)).padStart(2, "0")}`
@@ -120,6 +123,18 @@ function TrackCard({
                 : <Play className="w-4 h-4 ml-0.5" style={{ color: "var(--ln-parchment)" }} />}
             </button>
           </div>
+          {/* Owner edit button */}
+          {onEdit && (
+            <button
+              className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all z-20"
+              style={{ background: "rgba(0,0,0,0.75)", border: "1px solid rgba(196,154,40,0.4)" }}
+              onClick={(e) => { e.stopPropagation(); onEdit(); }}
+              aria-label="Edit work"
+              title="Edit Work"
+            >
+              <Pencil className="w-3 h-3" style={{ color: "var(--ln-gold)" }} />
+            </button>
+          )}
           {/* Duration badge */}
           {duration && (
             <div
@@ -198,11 +213,13 @@ function TrackListRow({
   index,
   isPlaying,
   onPlay,
+  onEdit,
 }: {
   track: ShelfTrack;
   index: number;
   isPlaying: boolean;
   onPlay: () => void;
+  onEdit?: () => void;
 }) {
   const downloadMutation = trpc.songs.download.useMutation({
     onSuccess: (_data: { url: string }, vars: { songId: number }) => {
@@ -347,6 +364,17 @@ function TrackListRow({
         </Link>
       )}
 
+      {/* Edit button — owner only */}
+      {onEdit && (
+        <button
+          onClick={(e) => { e.stopPropagation(); onEdit(); }}
+          className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+          title="Edit Work"
+          style={{ color: 'rgba(196,154,40,0.7)' }}
+        >
+          <Pencil className="w-3 h-3" />
+        </button>
+      )}
       {/* Download button */}
       <button
         onClick={handleDownload}
@@ -378,8 +406,9 @@ export function ManifestationShelf({
   playingId,
   onPlayTrack,
   onPlayAll,
-  isOwner: _isOwner,
+  isOwner,
   onDeleteTrack: _onDeleteTrack,
+  onEditTrack,
 }: ManifestationShelfProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -640,6 +669,7 @@ export function ManifestationShelf({
               index={i}
               isPlaying={playingId === track.id}
               onPlay={() => onPlayTrack(track, album.tracks)}
+              onEdit={isOwner && onEditTrack ? () => onEditTrack(track) : undefined}
             />
           ))}
 
@@ -703,6 +733,7 @@ export function ManifestationShelf({
                   track={track}
                   isPlaying={playingId === track.id}
                   onPlay={() => onPlayTrack(track, album.tracks)}
+                  onEdit={isOwner && onEditTrack ? () => onEditTrack(track) : undefined}
                 />
               ))}
             </div>
@@ -746,10 +777,14 @@ export function StandaloneShelf({
   tracks,
   playingId,
   onPlayTrack,
+  isOwner,
+  onEditTrack,
 }: {
   tracks: ShelfTrack[];
   playingId: number | null;
   onPlayTrack: (track: ShelfTrack, allTracks: ShelfTrack[]) => void;
+  isOwner?: boolean;
+  onEditTrack?: (track: ShelfTrack) => void;
 }) {
   if (!tracks.length) return null;
   return (
@@ -761,6 +796,8 @@ export function StandaloneShelf({
       }}
       playingId={playingId}
       onPlayTrack={onPlayTrack}
+      isOwner={isOwner}
+      onEditTrack={onEditTrack}
     />
   );
 }

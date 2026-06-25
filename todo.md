@@ -5734,3 +5734,33 @@
 - [x] Added stable useCallback handlers (handleEditClose, handleEditSaved) in SongDetailPage to prevent Escape-key useEffect from re-registering on every parent re-render
 - [x] Both "Edit Work" and "Add Art" buttons use the same EditTrackPanel — both are now fixed
 - [x] 0 TypeScript errors, 324/324 tests passing
+
+## Phase N+13: Edit Chapel — Sacred Unified Track Edit Experience
+- [ ] Audit current EditTrackPanel, Archive edit button, Creator Domain edit button, SongDetailPage edit button
+- [ ] Build new EditChapel component: sacred right-side drawer, mobile full-screen, all required sections
+- [ ] EditChapel sections: cover art preview + replace, title, genre, creation date, status, Origin Story, lyrics editor, creation disclosure, delete with confirmation
+- [ ] Wire EditChapel into Archive page (/archive)
+- [ ] Wire EditChapel into Creator Domain / Profile page
+- [ ] Wire EditChapel into SongDetailPage (/song/:id) — replace current EditTrackPanel usage
+- [ ] 0 TypeScript errors, all tests passing
+
+## Phase N+13: Edit Chapel — Sacred Unified Edit Experience
+- [x] New EditChapel component built (client/src/components/EditChapel.tsx)
+  - [x] Sacred right-side drawer with "light" overlay mode (no position:fixed freeze)
+  - [x] Large cover art preview with Replace Art upload (field order fixed)
+  - [x] Prominent title field (Cinzel, dominant typography)
+  - [x] Genre, Release Date, Status (Draft/Published/Unlisted), Caption
+  - [x] Origin Story textarea with deep prompting
+  - [x] Expandable Lyrics editor
+  - [x] Expandable AI Disclosure + Training Consent section
+  - [x] Delete with two-step confirmation ("This cannot be undone")
+  - [x] Sticky save bar with glow on save, loading states, error handling
+  - [x] Mobile-first, full-height on mobile, 480px drawer on desktop
+- [x] ArchivePage: EditTrackPanel replaced with EditChapel
+- [x] ManifestationShelf: onEditTrack prop threaded through to TrackCard (carousel) and TrackListRow (list)
+  - [x] Pencil icon appears on hover on carousel cards (top-right)
+  - [x] Pencil icon appears on hover on list rows (between WID and Download)
+- [x] StandaloneShelf: isOwner + onEditTrack props added and forwarded
+- [x] CreatorProfilePage: editingChapelSong state added, ManifestationShelf + StandaloneShelf wired with onEditTrack, EditChapel mounted at bottom
+- [x] SongDetailPage: EditTrackPanel import/mount replaced with EditChapel (same editingOpen state, stable callbacks preserved)
+- [x] 0 TypeScript errors, 324/324 tests passing
