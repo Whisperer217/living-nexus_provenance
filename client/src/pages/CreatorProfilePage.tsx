@@ -1127,14 +1127,27 @@ export default function CreatorProfilePage() {
                   </p>
                 )}
 
-                {/* Bio — full text, muted, always full-width */}
+                {/* Bio — full text, sacred typography, preserves creator's line breaks */}
                 {creator.bio && (
-                  <p
-                    className="text-sm mt-1 leading-relaxed w-full"
-                    style={{ color: "var(--ln-smoke)", border: "none", outline: "none" }}
-                  >
-                    {creator.bio}
-                  </p>
+                  <div className="mt-2 w-full">
+                    {creator.bio.split(/\n+/).map((paragraph: string, i: number) =>
+                      paragraph.trim() ? (
+                        <p
+                          key={i}
+                          className="text-sm leading-[1.75] w-full"
+                          style={{
+                            color: "rgba(232,220,196,0.78)",  /* warm parchment, not harsh white */
+                            fontFamily: "'Inter', sans-serif",
+                            fontWeight: 400,
+                            letterSpacing: "0.012em",
+                            marginBottom: i < creator.bio!.split(/\n+/).length - 1 ? "0.65rem" : 0,
+                          }}
+                        >
+                          {paragraph.trim()}
+                        </p>
+                      ) : null
+                    )}
+                  </div>
                 )}
 
                 {/* Social links — icon-only, minimal */}
@@ -1495,11 +1508,27 @@ export default function CreatorProfilePage() {
                 </p>
               )}
 
-              {/* Bio — full-width paragraph, no flex shrink */}
+              {/* Bio — full-width, sacred typography, preserves creator's line breaks */}
               {creator.bio && (
-                <p className="text-sm leading-relaxed w-full" style={{ color: "var(--ln-smoke)" }}>
-                  {creator.bio}
-                </p>
+                <div className="w-full">
+                  {creator.bio.split(/\n+/).map((paragraph: string, i: number) =>
+                    paragraph.trim() ? (
+                      <p
+                        key={i}
+                        className="text-sm leading-[1.75] w-full"
+                        style={{
+                          color: "rgba(232,220,196,0.78)",  /* warm parchment */
+                          fontFamily: "'Inter', sans-serif",
+                          fontWeight: 400,
+                          letterSpacing: "0.012em",
+                          marginBottom: i < creator.bio!.split(/\n+/).length - 1 ? "0.65rem" : 0,
+                        }}
+                      >
+                        {paragraph.trim()}
+                      </p>
+                    ) : null
+                  )}
+                </div>
               )}
 
               {/* Social links */}
