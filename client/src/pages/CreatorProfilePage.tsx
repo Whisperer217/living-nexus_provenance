@@ -50,6 +50,7 @@ interface ContextMenuProps {
 }
 function SongContextMenu({ song, isOwner, onClose, onDelete, position }: ContextMenuProps) {
   const { playNext } = usePlayer();
+  const [, navigate] = useLocation();
   const [showAddToList, setShowAddToList] = useState(false);
   const [addToListRect, setAddToListRect] = useState<DOMRect | null>(null);
 
@@ -97,11 +98,10 @@ function SongContextMenu({ song, isOwner, onClose, onDelete, position }: Context
         className="fixed z-50 min-w-[200px] rounded-xl overflow-hidden shadow-2xl py-1"
         style={{ top: position.y, left: position.x, background: "var(--ln-coal)", border: "1px solid #C3AB7D" }}
       >
-        <Link href={`/song/${song.id}`} onClick={onClose}>
-          <button type="button" className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/[0.06] transition-colors text-left" style={{ color: "var(--ln-parchment)" }}>
-            <ExternalLink className="w-4 h-4 opacity-60" /> Song Page
-          </button>
-        </Link>
+        {/* Use button+navigate instead of Link+button to avoid nested <a> */}
+        <button type="button" onClick={() => { navigate(`/song/${song.id}`); onClose(); }} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/[0.06] transition-colors text-left" style={{ color: "var(--ln-parchment)" }}>
+          <ExternalLink className="w-4 h-4 opacity-60" /> Song Page
+        </button>
 
         {/* ── Queue / Collection actions ── */}
         <div className="my-1 border-t" style={{ borderColor: "rgba(196,154,40,0.12)" }} />
@@ -134,11 +134,10 @@ function SongContextMenu({ song, isOwner, onClose, onDelete, position }: Context
           <Download className="w-4 h-4 opacity-60" /> Download
         </button>
         {song.witnessId && (
-          <Link href={`/verify/${song.witnessId}`} onClick={onClose}>
-            <button type="button" className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/[0.06] transition-colors text-left" style={{ color: "var(--ln-gold)" }}>
-              <Shield className="w-4 h-4" /> View Witness ID
-            </button>
-          </Link>
+          /* Use button+navigate instead of Link+button to avoid nested <a> */
+          <button type="button" onClick={() => { navigate(`/verify/${song.witnessId}`); onClose(); }} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/[0.06] transition-colors text-left" style={{ color: "var(--ln-gold)" }}>
+            <Shield className="w-4 h-4" /> View Witness ID
+          </button>
         )}
         {isOwner && (
           <>
@@ -166,6 +165,7 @@ function SongContextMenu({ song, isOwner, onClose, onDelete, position }: Context
 
 // ─── Featured Song Card ────────────────────────────────────────────────────────
 function FeaturedCard({ song, onPlay, isPlaying }: { song: any; onPlay: () => void; isPlaying: boolean }) {
+  const [, navigate] = useLocation();
   return (
     <div
       className={`group museum-card parchment-grain cursor-pointer ${
@@ -201,12 +201,15 @@ function FeaturedCard({ song, onPlay, isPlaying }: { song: any; onPlay: () => vo
             </div>
           )}
           {song.witnessId && (
-            <Link href={`/verify/${song.witnessId}`} onClick={(e: React.MouseEvent) => e.stopPropagation()}
+            // button+navigate: cannot use Link here because FeaturedCard's outer wrapper is already a <Link>
+            <button
+              type="button"
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); navigate(`/verify/${song.witnessId}`); }}
               className="absolute bottom-2 left-2 flex items-center gap-0.5 type-overline px-1.5 py-0.5 rounded z-10 font-heading tracking-wider wid-glow transition-opacity opacity-90 hover:opacity-100"
-              style={{ background: "rgba(0,0,0,0.72)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.5)" }}
+              style={{ background: "rgba(0,0,0,0.72)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.5)", cursor: "pointer" }}
             >
               <Shield size={8} /><span>WID</span>
-            </Link>
+            </button>
           )}
           {song.aiConsent === "prohibited" && (
             <div className="absolute top-2 left-2 text-[11px] font-bold px-1.5 py-0.5 rounded" style={{ background: "rgba(239,68,68,0.85)", color: "white" }}>
