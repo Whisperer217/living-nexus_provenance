@@ -10,7 +10,7 @@ import { usePlayer } from "@/contexts/PlayerContext";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useFrequencyGlow } from "@/hooks/useFrequencyGlow";
-import { useHarmonicSignature } from "@/hooks/useHarmonicSignature";
+import { useHarmonic } from "@/contexts/HarmonicContext";
 import { useWaveformVisualizer } from "@/hooks/useWaveformVisualizer";
 import {
   Play, Pause, SkipBack, SkipForward,
@@ -114,6 +114,12 @@ function GlobalPlayerInner() {
   const { user } = useAuth();
 
   const isDesktop = useIsDesktop();
+
+  /* ── Harmonic Signature — must be declared before useWaveformVisualizer calls ── */
+  // Consumed from HarmonicContext (mounted above the entire app tree).
+  // Placed here at the top of the hook sequence so harmonicSig is available
+  // when the waveform visualizer hooks are called below.
+  const { harmonicSig } = useHarmonic();
 
   /* ── Snap zone state ── */
   const [zone, setZone] = useState<SnapZone>("MINI");
@@ -327,8 +333,12 @@ function GlobalPlayerInner() {
   const cinematicCanvasRef = useRef<HTMLCanvasElement | null>(null);
   // Waveform is always enabled in expanded/cinematic mode — not gated by glowEnabled
   const waveformActive = zone === "EXPANDED" || cinematic;
-  useWaveformVisualizer(audioRef, waveCanvasRef, waveformActive, state.isPlaying, isMobileDevice);
-  useWaveformVisualizer(audioRef, cinematicCanvasRef, cinematic, state.isPlaying, isMobileDevice);
+  // Thread the harmonic signature into the waveform visualizer so the
+  // oscilloscope color reflects the song's unique Witness ID identity.
+  // harmonicSig is derived later in the component, but the hook reads from
+  // a ref internally so it always uses the latest value without re-subscribing.
+  useWaveformVisualizer(audioRef, waveCanvasRef, waveformActive, state.isPlaying, isMobileDevice, harmonicSig?.hue ?? null, harmonicSig?.saturation ?? null);
+  useWaveformVisualizer(audioRef, cinematicCanvasRef, cinematic, state.isPlaying, isMobileDevice, harmonicSig?.hue ?? null, harmonicSig?.saturation ?? null);
 
   /* ── Track data ── */
   const tracks = allTracks();
@@ -401,13 +411,8 @@ function GlobalPlayerInner() {
   const creatorStripeAccountId = songDetail?.creator?.stripeAccountId ?? null;
   const tipsEnabled = !!creatorStripeAccountId;
 
-  /* ── Harmonic Signature — ECDSA Visual Identity ── */
-  // Derives a unique color temperature from the song's Witness ID + ECDSA signature.
-  // Falls back to platform gold when no WID is available (unsigned or pre-WID tracks).
-  const harmonicSig = useHarmonicSignature(
-    visTrack?.witnessId ?? songDetail?.song?.witnessId,
-    songDetail?.song?.ecdsaSignature,
-  );
+  // harmonicSig is now declared at the top of the component (line ~117) to
+  // ensure it is available before the useWaveformVisualizer calls at line ~330.
 
   /* ── Like state ── */
   const { data: likeStatusData, refetch: refetchLikeStatus } = trpc.songs.getLikeStatus.useQuery(

@@ -115,7 +115,7 @@ export interface HarmonicSignature {
 
 /* ── Null signature (no WID available) ─────────────────────────────────── */
 // When no WID is available, return the platform's default gold identity.
-const NULL_SIGNATURE: HarmonicSignature = {
+export const NULL_SIGNATURE: HarmonicSignature = {
   hue: 43,
   saturation: 60,
   intensity: 45,

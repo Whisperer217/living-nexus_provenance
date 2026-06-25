@@ -124,9 +124,54 @@ function lerpRGB(
   ];
 }
 
-function getBandColor(bass: number, mid: number): [number, number, number] {
+/**
+ * Convert HSL to RGB (all values 0–1 range).
+ * Used to derive the harmonic base color from the song's signature hue.
+ */
+function hslToRgb(h: number, s: number, l: number): [number, number, number] {
+  const a = s * Math.min(l, 1 - l);
+  const f = (n: number) => {
+    const k = (n + h / 30) % 12;
+    return l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+  };
+  return [
+    Math.round(f(0) * 255),
+    Math.round(f(8) * 255),
+    Math.round(f(4) * 255),
+  ];
+}
+
+/**
+ * Derive the waveform's three-state color palette from the harmonic signature.
+ *
+ * When harmonicHue is provided:
+ *  - Idle/base color: derived from the harmonic hue (the song's soul)
+ *  - Bass hit: shifts toward warm gold (universal energy marker)
+ *  - Mid-heavy: shifts toward a lighter, more luminous version of the harmonic hue
+ *
+ * When harmonicHue is null (no WID): falls back to the original violet → gold → cyan palette.
+ */
+function getBandColor(
+  bass: number,
+  mid: number,
+  harmonicHue: number | null,
+  harmonicSat: number | null,
+): [number, number, number] {
   const bassT = Math.min(bass * 3.0, 1);
   const midT  = Math.min(mid  * 2.5, 1);
+
+  if (harmonicHue !== null && harmonicSat !== null) {
+    // Harmonic base: the song's unique color identity at moderate lightness
+    const [hr, hg, hb] = hslToRgb(harmonicHue, harmonicSat / 100, 0.50);
+    // Bass target: warm gold (energy marker, universal)
+    const [r1, g1, b1] = lerpRGB(hr, hg, hb, 196, 154, 40, bassT * 0.75);
+    // Mid target: lighter, more luminous version of the harmonic hue
+    const [hlr, hlg, hlb] = hslToRgb(harmonicHue, (harmonicSat * 0.8) / 100, 0.70);
+    const [r2, g2, b2] = lerpRGB(r1, g1, b1, hlr, hlg, hlb, midT * 0.5);
+    return [r2, g2, b2];
+  }
+
+  // Original palette: violet → gold → cyan
   const [r1, g1, b1] = lerpRGB(138, 43, 226, 196, 154, 40, bassT);
   const [r2, g2, b2] = lerpRGB(r1, g1, b1, 56, 189, 248, midT * 0.6);
   return [r2, g2, b2];
@@ -167,6 +212,14 @@ export function useWaveformVisualizer(
   isPlaying: boolean,
   /** Pass true on mobile to enable all mobile optimizations */
   isMobile?: boolean,
+  /**
+   * Optional harmonic hue (0–360°) derived from the song's Witness ID.
+   * When provided, the waveform's idle color shifts toward this hue.
+   * When null/undefined, falls back to the original violet palette.
+   */
+  harmonicHue?: number | null,
+  /** Harmonic saturation (0–100) paired with harmonicHue */
+  harmonicSat?: number | null,
 ): void {
   const rafRef   = useRef<number | null>(null);
   const frameRef = useRef<number>(0);
@@ -177,6 +230,11 @@ export function useWaveformVisualizer(
       rafRef.current = null;
     }
   }, []);
+
+  // Capture harmonic values in a ref so the RAF loop always sees the latest
+  // without needing to be in the useCallback dependency array.
+  const harmonicRef = useRef<{ hue: number | null; sat: number | null }>({ hue: harmonicHue ?? null, sat: harmonicSat ?? null });
+  harmonicRef.current = { hue: harmonicHue ?? null, sat: harmonicSat ?? null };
 
   const drawWave = useCallback((
     ctx:      CanvasRenderingContext2D,
@@ -190,7 +248,11 @@ export function useWaveformVisualizer(
     analyser.getByteTimeDomainData(timeData);
 
     const { bass, mid, rms } = getFreqBands(analyser);
-    const [r, g, b]          = getBandColor(bass, mid);
+    const [r, g, b]          = getBandColor(
+      bass, mid,
+      harmonicHue ?? null,
+      harmonicSat ?? null,
+    );
 
     const alpha     = Math.max(0.15, Math.min(0.85, 0.2 + rms * 2.5));
     const lineWidth = 1.5 + rms * 2.0;

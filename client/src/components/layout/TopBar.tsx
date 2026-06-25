@@ -13,6 +13,7 @@ import { usePlayer } from "@/contexts/PlayerContext";
 import { useWSP } from "@/contexts/WSPContext";
 import { WhatsNewModal } from "@/components/WhatsNewModal";
 import { useLightsMode } from "@/contexts/LightsModeContext";
+import { useHarmonic } from "@/contexts/HarmonicContext";
 import {
   Upload, Bell, LogIn, LogOut, CheckCircle2, Zap, Search, User, Settings,
   SkipBack, SkipForward, Play, Pause, Shuffle, Repeat, PictureInPicture2,
@@ -322,8 +323,27 @@ export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCoun
   const { mode: lightsMode } = useLightsMode();
   const isWarm = lightsMode === "on";
 
-  const NAV_BG = isWarm ? "rgba(55,68,85,0.72)" : "rgba(0,0,0,0.97)";
-  const NAV_BORDER = isWarm ? "rgba(100,125,150,0.22)" : "rgba(196,154,40,0.18)";
+  /* ── Harmonic resonance: the nav bar breathes with the currently playing song ── */
+  const { harmonicSig, isPlaying: harmonicPlaying } = useHarmonic();
+
+  // When music is playing, shift the nav background toward the song's harmonic
+  // color at very low opacity (0.04–0.06) so the effect is subliminal, not
+  // decorative. The bottom border also picks up a faint harmonic tint.
+  // Zero cost when idle: all values fall back to the static platform tokens.
+  const harmonicTint = harmonicPlaying
+    ? `hsla(${harmonicSig.hue}, ${harmonicSig.saturation}%, 45%, 0.05)`
+    : "transparent";
+  const harmonicBorderTint = harmonicPlaying
+    ? `hsla(${harmonicSig.hue}, ${harmonicSig.saturation}%, 55%, 0.28)`
+    : null;
+
+  const NAV_BG = isWarm
+    ? `rgba(55,68,85,0.72)`
+    : harmonicPlaying
+      ? `rgba(0,0,0,0.97)`  // keep base dark; tint is layered via pseudo-element below
+      : `rgba(0,0,0,0.97)`;
+  const NAV_BORDER = harmonicBorderTint
+    ?? (isWarm ? "rgba(100,125,150,0.22)" : "rgba(196,154,40,0.18)");
 
   return (
     <div className="hidden md:block">
@@ -334,10 +354,21 @@ export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCoun
           left: 72,
           right: 0,
           height: "56px",
+          // Base background — dark and clean
           background: NAV_BG,
+          // Harmonic tint layered on top of the base via backgroundImage gradient.
+          // At 0.05 opacity this is subliminal — the cathedral breathing, not a disco light.
+          backgroundImage: harmonicTint !== "transparent"
+            ? `linear-gradient(to right, ${harmonicTint}, ${harmonicTint})`
+            : undefined,
           borderBottom: `1px solid ${NAV_BORDER}`,
+          // Bottom edge glow: a soft inset shadow in the harmonic color when playing.
+          // This is the primary visual cue — the nav "lights up" from below.
+          boxShadow: harmonicPlaying
+            ? `inset 0 -1px 0 0 ${harmonicBorderTint}, 0 1px 12px 0 hsla(${harmonicSig.hue}, ${harmonicSig.saturation}%, 45%, 0.12)`
+            : undefined,
           backdropFilter: isWarm ? "blur(32px) saturate(0.7)" : "blur(16px)",
-          transition: "background 0.4s ease, border-color 0.4s ease",
+          transition: "background 0.4s ease, border-color 0.4s ease, box-shadow 1.2s ease, background-image 1.2s ease",
         }}
       >
         {/* LEFT: Search bar */}

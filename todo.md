@@ -5677,3 +5677,10 @@
 - [x] Wire glow layer to expanded player — visible only when expanded, zero cost when collapsed
 - [x] Harmonic border: expanded player border reflects song's ECDSA signature color
 - [x] TypeScript: 0 errors | Tests: 324/324 passing | Clean production build
+
+## Phase N+9: Sacred Harmonic System — Platform-Wide Living Testimony
+- [ ] Audit waveform visualizer hook, nav bar component, and existing harmonic system
+- [ ] Expose harmonicSig from PlayerContext (or a dedicated HarmonicContext) for global consumption
+- [ ] Wire harmonic signature into waveform visualizer — hue shift, glow intensity, pulse color
+- [ ] Apply subtle harmonic resonance to top navigation bar — soft bottom-edge glow when playing
+- [ ] TypeScript check + clean build + checkpoint

@@ -12,6 +12,7 @@ import WelcomeModal from "./components/WelcomeModal";
 import { TosAcceptanceModal } from "./components/TosAcceptanceModal";
 import { CommunityToastProvider } from "./components/CommunityToast";
 import { AmbientPlayerProvider } from "./contexts/AmbientPlayerContext";
+import { HarmonicProvider } from "./contexts/HarmonicContext";
 import AmbientWidget from "./components/AmbientWidget";
 import KeeperAvatarWidget from "./components/KeeperAvatarWidget";
 import { useQrScanLogger } from "./hooks/useQrScanLogger";
@@ -284,6 +285,7 @@ export default function App() {
       <ThemeProvider defaultTheme="dark">
         <TooltipProvider>
           <PlayerProvider>
+            <HarmonicProvider>
             <AmbientPlayerProvider>
             <QueueLoader />
             <WhatsNewModal />
@@ -311,6 +313,7 @@ export default function App() {
             <PWAInstallBanner />
             <Router />
             </AmbientPlayerProvider>
+            </HarmonicProvider>
           </PlayerProvider>
         </TooltipProvider>
       </ThemeProvider>
