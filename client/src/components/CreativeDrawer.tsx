@@ -173,6 +173,9 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
   const [videoUploading, setVideoUploading] = useState(false);
   const videoInputRef                   = useRef<HTMLInputElement>(null);
   const drawerRootRef                    = useRef<HTMLDivElement>(null);
+  /* T2 FIX: drawerRootRef.current is null on first render — use state so
+     SelectContent always gets the live DOM node as its portal container */
+  const [drawerContainerEl, setDrawerContainerEl] = useState<HTMLDivElement | null>(null);
 
   /* ── AI Caption ── */
   const [captionGenerating, setCaptionGenerating] = useState(false);
@@ -192,6 +195,10 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
   useEffect(() => {
     const t = setTimeout(() => setBackdropActive(true), 120);
     return () => clearTimeout(t);
+  }, []);
+  /* T2 FIX: Set drawerContainerEl after mount so SelectContent portal has a live node */
+  useEffect(() => {
+    if (drawerRootRef.current) setDrawerContainerEl(drawerRootRef.current);
   }, []);
 
   /* ── Mutations ── */
@@ -378,11 +385,16 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
      main-thread lock (the freeze). Instead we lock the scroll container div directly.
      This is zero-reflow: the div's overflow is toggled, body is untouched. */
   useEffect(() => {
+    /* Lock the actual scroll container (MainLayout div) */
     const scrollArea = document.querySelector<HTMLElement>(".player-scroll-area");
-    const prevOverflow = scrollArea?.style.overflowY ?? "";
+    const prevDivOverflow = scrollArea?.style.overflowY ?? "";
     if (scrollArea) scrollArea.style.overflowY = "hidden";
+    /* Mobile Safari fallback: if no scroll area found, lock body */
+    const prevBodyOverflow = document.body.style.overflow;
+    if (!scrollArea) document.body.style.overflow = "hidden";
     return () => {
-      if (scrollArea) scrollArea.style.overflowY = prevOverflow;
+      if (scrollArea) scrollArea.style.overflowY = prevDivOverflow;
+      else document.body.style.overflow = prevBodyOverflow;
     };
   }, []);
 
@@ -591,7 +603,7 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
                   <SelectTrigger style={{ background: SURFACE2, border: `1px solid ${GOLD_BORDER}`, color: "rgba(255,255,255,0.8)" }}>
                     <SelectValue placeholder="Select genre" />
                   </SelectTrigger>
-                  <SelectContent container={drawerRootRef.current} style={{ background: "#0d0b1a", border: `1px solid ${GOLD_BORDER}` }}>
+                  <SelectContent container={drawerContainerEl} style={{ background: "#0d0b1a", border: `1px solid ${GOLD_BORDER}` }}>
                     {GENRES.map((g) => (
                       <SelectItem key={g} value={g} style={{ color: "rgba(255,255,255,0.8)" }}>{g}</SelectItem>
                     ))}
@@ -604,7 +616,7 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
                   <SelectTrigger style={{ background: SURFACE2, border: `1px solid ${GOLD_BORDER}`, color: "rgba(255,255,255,0.8)" }}>
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent container={drawerRootRef.current} style={{ background: "#0d0b1a", border: `1px solid ${GOLD_BORDER}` }}>
+                  <SelectContent container={drawerContainerEl} style={{ background: "#0d0b1a", border: `1px solid ${GOLD_BORDER}` }}>
                     {STATUS_OPTIONS.map((s) => (
                       <SelectItem key={s.value} value={s.value}>
                         <span style={{ color: s.color }}>{s.label}</span>
