@@ -5938,3 +5938,10 @@
 - [x] Add externalLinksJson to ArchivePage, CreatorDomainPage, ProfilePage CreativeDrawer call sites (currently missing — links editor always starts empty)
 - [x] Adapt drawer header icon/label to contentType (comic → BookOpen, manuscript → FileText, audio → Music)
 - [x] Verify provenance stamp refresh on all 4 surfaces after save — updateMetadata.onSuccess invalidates both mySongs + getById on all surfaces
+## SongDetailPage — Sacred Architecture Elevation (Jun 26 2026)
+- [x] T1: Promote Origin Story / Testimony to full-width sacred section below hero (Cormorant Garamond, gold left-pillar, flame watermark, breathing room)
+- [x] T2: Promote HAAI disclosure from buried footnote to dedicated always-visible section with proper framing
+- [x] T3: Add sanctuary-glow to cover art when playing, harmonic-resonance to page wrapper, title glow transition
+- [x] T4: Sacred geometry spacing — phi-section-lg between sections, sg-divider-wide between major zones
+- [x] T5: Elevate "Find It Elsewhere" external links to a proper sacred section with platform badges
+- [x] T6: Restructure below-fold left column order: Testimony → HAAI → Gallery → Lyrics
