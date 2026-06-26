@@ -725,7 +725,11 @@ function TrackCardUI({
       <div className="absolute top-3 right-3 flex items-center gap-1.5">
         {card.audioStatus === "hashing" && <Loader2 size={12} className="animate-spin" style={{ color: statusColor }} />}
         {card.audioStatus === "done" && <CheckCircle size={13} style={{ color: statusColor }} />}
-        {card.audioStatus === "error" && <AlertCircle size={13} style={{ color: statusColor }} />}
+        {card.audioStatus === "error" && (
+          <span title={card.errorMsg || "Processing failed — click Retry below"}>
+            <AlertCircle size={13} style={{ color: statusColor }} />
+          </span>
+        )}
         {card.audioStatus === "ready" && <Fingerprint size={12} style={{ color: statusColor }} />}
       </div>
 
@@ -808,17 +812,38 @@ function TrackCardUI({
           {card.wid && (
             <p className="text-[10px] font-mono truncate" style={{ color: "rgba(196,154,40,0.7)" }}>{card.wid}</p>
           )}
-          {!card.wid && card.audioFile && (
+          {!card.wid && card.audioFile && card.audioStatus !== "error" && (
             <p className="text-[10px] truncate" style={{ color: "rgba(184,168,138,0.5)" }}>{card.audioFile.name}</p>
           )}
+          {card.audioStatus === "error" && (
+            <p className="text-[10px] truncate" style={{ color: "var(--ln-ember)" }}>
+              {card.errorMsg || "Processing failed"}
+            </p>
+          )}
+          {/* Retry button for error state */}
+          {card.audioStatus === "error" && card.audioFile && (
+            <button
+              onClick={e => {
+                e.stopPropagation();
+                onChange(card.id, { audioStatus: "hashing", errorMsg: undefined });
+                onGenerateWid(card.id, card.audioFile!);
+              }}
+              className="mt-2 w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-[10px] font-heading tracking-widest uppercase transition-all"
+              style={{ border: "1px solid rgba(220,60,60,0.45)", color: "var(--ln-ember)", background: "rgba(220,60,60,0.08)" }}
+            >
+              Retry
+            </button>
+          )}
           {/* Edit details button */}
-          <button
-            onClick={() => onOpenDetail(card.id)}
-            className="mt-2 w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-[10px] font-heading tracking-widest uppercase transition-all hover:bg-white/[0.08]"
-            style={{ border: "1px solid rgba(196,154,40,0.22)", color: "var(--ln-parchment)" }}
-          >
-            Edit Details
-          </button>
+          {card.audioStatus !== "error" && (
+            <button
+              onClick={() => onOpenDetail(card.id)}
+              className="mt-2 w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-[10px] font-heading tracking-widest uppercase transition-all hover:bg-white/[0.08]"
+              style={{ border: "1px solid rgba(196,154,40,0.22)", color: "var(--ln-parchment)" }}
+            >
+              Edit Details
+            </button>
+          )}
         </div>
       )}
     </div>
