@@ -5955,3 +5955,11 @@
 - [x] T6: Scroll elevation — useScrollReveal hook (IntersectionObserver), Testimony + HAAI sections rise from translateY(20px) opacity:0
 - [x] T7: Waveform strip — dedicated 80px canvas strip below cover art, gold gradient overlay, breathing opacity when playing
 - [x] 0 TypeScript errors, 340/340 tests pass
+
+## Download Settings — Creative Chapel + Song Page + Player (Jun 26 2026)
+- [ ] T1: Add downloadPermission + downloadTipThresholdCents to updateMetadata procedure input schema
+- [ ] T2: Add downloadPermission + downloadTipThresholdCents to updateSongMetadata DB helper
+- [ ] T3: Add Download Settings section to CreativeDrawer (No Download / Free / Paid with price input)
+- [ ] T4: Wire download button on SongDetailPage (free = direct, paid = checkout, none = hidden)
+- [ ] T5: Wire download button in PlayerBar (shows when track allows download)
+- [ ] T6: 0 TypeScript errors, 340/340 tests pass

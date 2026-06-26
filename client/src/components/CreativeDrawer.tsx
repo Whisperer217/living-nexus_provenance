@@ -29,7 +29,7 @@ import {
   X, Upload, Loader2, CheckCircle2, AlertCircle, Trash2,
   Music, Flame, BookOpen, Shield, ChevronDown, ChevronUp,
   ImageIcon, Eye, Video, Sparkles, Hash, FileText,
-  ExternalLink, Plus, Pencil,
+  ExternalLink, Plus, Pencil, Download,
 } from "lucide-react";
 
 /* ─── Types ─────────────────────────────────────────────────────────────── */
@@ -52,6 +52,8 @@ export interface CreativeDrawerSong {
   witnessId?: string | null;
   videoUrl?: string | null;
   videoWitnessId?: string | null;
+  downloadPermission?: string | null;
+  downloadTipThresholdCents?: number | null;
 }
 
 interface CreativeDrawerProps {
@@ -180,6 +182,17 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
   const [lyrics, setLyrics]             = useState(song.lyricsText ?? "");
   const [creationDate, setCreationDate] = useState(
     song.releaseDate ? song.releaseDate.slice(0, 10) : ""
+  );
+
+  /* ── Download Settings ── */
+  const [downloadPermission, setDownloadPermission] = useState<"none" | "free" | "tipped">(
+    (song.downloadPermission as "none" | "free" | "tipped") ?? "none"
+  );
+  const [tipThresholdCents, setTipThresholdCents] = useState<number>(
+    song.downloadTipThresholdCents ?? 179
+  );
+  const [tipThresholdInput, setTipThresholdInput] = useState<string>(
+    ((song.downloadTipThresholdCents ?? 179) / 100).toFixed(2)
   );
 
   /* ── Cover art ── */
@@ -391,6 +404,8 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
       haaiOriginStory: originStory || null,
       externalLinksJson: extLinks.length > 0 ? JSON.stringify(extLinks) : null,
       releaseDate: creationDate || undefined,
+      downloadPermission,
+      downloadTipThresholdCents: downloadPermission === "tipped" ? tipThresholdCents : undefined,
     });
   }
 
@@ -1053,6 +1068,122 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
             </div>
 
             {/* ═══ PROVENANCE STAMP ════════════════════════════════════════ */}
+            {/* ═══ DOWNLOAD SETTINGS ═══════════════════════════════════════════ */}
+            <SectionDivider label="Distribution" icon={<Download className="w-3.5 h-3.5" />} />
+
+            <div className="mb-7">
+              <p className="text-xs mb-4 leading-relaxed" style={{ color: "rgba(255,255,255,0.28)", fontStyle: "italic" }}>
+                Control how your work can be distributed. Downloads are off by default.
+              </p>
+
+              {/* Three sacred option cards */}
+              <div className="flex flex-col gap-2.5 mb-5">
+                {([
+                  {
+                    value: "none" as const,
+                    label: "No Download",
+                    desc: "Fans cannot download this work.",
+                    color: "rgba(239,68,68,0.85)",
+                    glow: "rgba(239,68,68,0.08)",
+                  },
+                  {
+                    value: "free" as const,
+                    label: "Free Download",
+                    desc: "Anyone can download at no cost.",
+                    color: "rgba(34,197,94,0.9)",
+                    glow: "rgba(34,197,94,0.08)",
+                  },
+                  {
+                    value: "tipped" as const,
+                    label: "Paid Download",
+                    desc: `Unlock after gifting $${(tipThresholdCents / 100).toFixed(2)}.`,
+                    color: GOLD,
+                    glow: GOLD_GLOW,
+                  },
+                ] as const).map(({ value, label, desc, color, glow }) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => setDownloadPermission(value)}
+                    className="w-full text-left rounded-xl px-4 py-3 transition-all"
+                    style={{
+                      background: downloadPermission === value ? glow : "rgba(255,255,255,0.025)",
+                      border: `1px solid ${downloadPermission === value ? color : "rgba(255,255,255,0.07)"}`,
+                      boxShadow: downloadPermission === value ? `0 0 18px ${glow} inset` : "none",
+                    }}
+                  >
+                    <div className="flex items-center gap-2.5 mb-0.5">
+                      {downloadPermission === value && (
+                        <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: color, boxShadow: `0 0 6px ${color}` }} />
+                      )}
+                      <p
+                        className="text-sm"
+                        style={{
+                          color: downloadPermission === value ? color : "rgba(255,255,255,0.65)",
+                          fontFamily: "'Cinzel', serif",
+                          letterSpacing: "0.06em",
+                        }}
+                      >
+                        {label}
+                      </p>
+                    </div>
+                    <p className="text-xs" style={{ color: "rgba(255,255,255,0.30)", paddingLeft: downloadPermission === value ? "1.25rem" : "0" }}>{desc}</p>
+                  </button>
+                ))}
+              </div>
+
+              {/* Paid price input — only shown when tipped is selected */}
+              {downloadPermission === "tipped" && (
+                <div
+                  className="rounded-xl p-4"
+                  style={{
+                    background: "rgba(212,175,55,0.04)",
+                    border: `1px solid ${GOLD_BORDER}`,
+                  }}
+                >
+                  <Label className="text-xs mb-2 block" style={{ color: "rgba(212,175,55,0.65)", fontFamily: "'Cinzel', serif", letterSpacing: "0.08em" }}>
+                    Minimum Gift to Unlock (USD)
+                  </Label>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm" style={{ color: GOLD, fontFamily: "'Cinzel', serif" }}>$</span>
+                    <input
+                      type="text"
+                      inputMode="decimal"
+                      placeholder="1.79"
+                      value={tipThresholdInput}
+                      onChange={(e) => {
+                        const raw = e.target.value;
+                        setTipThresholdInput(raw);
+                        const dollars = parseFloat(raw);
+                        if (!isNaN(dollars) && dollars >= 0.5) {
+                          setTipThresholdCents(Math.round(dollars * 100));
+                        }
+                      }}
+                      onBlur={() => {
+                        const dollars = parseFloat(tipThresholdInput);
+                        if (!isNaN(dollars) && dollars >= 0.5) {
+                          setTipThresholdInput((Math.round(dollars * 100) / 100).toFixed(2));
+                        } else {
+                          setTipThresholdInput((tipThresholdCents / 100).toFixed(2));
+                        }
+                      }}
+                      className="flex-1 rounded-lg px-3 py-2 text-sm"
+                      style={{
+                        background: "rgba(20,14,36,0.95)",
+                        border: `1px solid rgba(212,175,55,0.26)`,
+                        color: "rgba(255,255,255,0.85)",
+                        outline: "none",
+                        fontFamily: "'Cinzel', serif",
+                      }}
+                    />
+                  </div>
+                  <p className="text-xs mt-2" style={{ color: "rgba(212,175,55,0.35)" }}>
+                    Minimum $0.50. Fans gift this amount to unlock the download.
+                  </p>
+                </div>
+              )}
+            </div>
+
             <SectionDivider label="Provenance Stamp" icon={<Shield className="w-3.5 h-3.5" />} />
 
             <div

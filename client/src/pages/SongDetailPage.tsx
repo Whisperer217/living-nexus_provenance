@@ -343,6 +343,8 @@ export default function SongDetailPage() {
       visualReady: song.visualReady ?? false,
       autoVideoUrl: song.autoVideoUrl ?? undefined,
       creatorRole: song.creator?.role ?? undefined,
+      downloadPermission: (song as any).downloadPermission ?? null,
+      downloadTipThresholdCents: (song as any).downloadTipThresholdCents ?? null,
     };
     const relatedTracks = (relatedData ?? []).map((item: any) => ({
       id: String(item.song.id),
@@ -999,19 +1001,44 @@ export default function SongDetailPage() {
                 const tipCents = (song as any).downloadTipThresholdCents as number | undefined;
                 if (!dlPerm || dlPerm === "none") return null;
                 if (dlPerm === "free") return (
-                  <Button size="sm" variant="outline" onClick={() => {
-                    if (!user) { toast.info("Sign in to download this track"); return; }
-                    downloadMutation.mutate({ songId: song.id });
-                  }} disabled={downloadMutation.isPending} style={{ borderColor: "#C3AB7D", color: "var(--ln-smoke)" }}>
-                    <Download className="w-3.5 h-3.5 mr-1" />{downloadMutation.isPending ? "…" : "Download"}
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      if (!user) { toast.info("Sign in to download this track"); return; }
+                      downloadMutation.mutate({ songId: song.id });
+                    }}
+                    disabled={downloadMutation.isPending}
+                    className="living-btn transition-all"
+                    style={{
+                      borderColor: "rgba(34,197,94,0.45)",
+                      color: "rgba(34,197,94,0.9)",
+                      background: "rgba(34,197,94,0.06)",
+                      boxShadow: "0 0 12px rgba(34,197,94,0.08)",
+                    }}
+                  >
+                    <Download className="w-3.5 h-3.5 mr-1.5" />{downloadMutation.isPending ? "…" : "Free Download"}
                   </Button>
                 );
                 if (dlPerm === "tipped") return (
-                  <Button size="sm" variant="outline" onClick={() => {
-                    if (!user) { toast.info("Sign in to download this track"); return; }
-                    tipDownloadMutation.mutate({ songId: song.id, origin: window.location.origin });
-                  }} disabled={tipDownloadMutation.isPending} title={`Tip $${((tipCents ?? 179) / 100).toFixed(2)} to unlock download`} style={{ borderColor: "rgba(196,154,40,0.3)", color: "var(--ln-gold)" }}>
-                    <Download className="w-3.5 h-3.5 mr-1" />{tipDownloadMutation.isPending ? "Processing…" : `Download ($${((tipCents ?? 179) / 100).toFixed(2)} tip)`}
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      if (!user) { toast.info("Sign in to download this track"); return; }
+                      tipDownloadMutation.mutate({ songId: song.id, origin: window.location.origin });
+                    }}
+                    disabled={tipDownloadMutation.isPending}
+                    title={`Gift $${((tipCents ?? 179) / 100).toFixed(2)} to unlock download`}
+                    className="living-btn transition-all"
+                    style={{
+                      borderColor: "rgba(212,175,55,0.45)",
+                      color: "rgba(212,175,55,0.95)",
+                      background: "rgba(212,175,55,0.07)",
+                      boxShadow: "0 0 14px rgba(212,175,55,0.10)",
+                    }}
+                  >
+                    <Download className="w-3.5 h-3.5 mr-1.5" />{tipDownloadMutation.isPending ? "Processing…" : `Download — $${((tipCents ?? 179) / 100).toFixed(2)}`}
                   </Button>
                 );
                 return null;
@@ -2002,6 +2029,8 @@ export default function SongDetailPage() {
               videoUrl: (song as any).videoUrl ?? null,
               videoWitnessId: (song as any).videoWitnessId ?? null,
               externalLinksJson: (song as any).externalLinksJson ?? null,
+              downloadPermission: (song as any).downloadPermission ?? null,
+              downloadTipThresholdCents: (song as any).downloadTipThresholdCents ?? null,
             }}
             onClose={handleEditClose}
             onSaved={handleEditSaved}

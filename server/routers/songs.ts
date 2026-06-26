@@ -936,6 +936,9 @@ export const songsRouter = router({
       moodTags: z.array(z.string()).nullable().optional(),
       // Release / creation date (ISO date string, e.g. "2024-03-15")
       releaseDate: z.string().nullable().optional(),
+      // Download Settings
+      downloadPermission: z.enum(["none", "free", "tipped"]).optional(),
+      downloadTipThresholdCents: z.number().int().min(0).max(100000).optional(),
     })).mutation(async ({ ctx, input }) => {
       const { songId, creditsJson, ...fields } = input;
       // If saving a complete HAAI declaration, stamp the declared timestamp

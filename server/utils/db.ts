@@ -645,6 +645,9 @@ export async function updateSongMetadata(
     haaiOriginStory?: string | null;
     // Mood tags
     moodTags?: string[] | null;
+    // Download Settings
+    downloadPermission?: "none" | "free" | "tipped";
+    downloadTipThresholdCents?: number;
   }
 ) {
   const db = await getDb();
@@ -687,6 +690,8 @@ export async function updateSongMetadata(
   if (fields.releaseDate !== undefined) updateSet.releaseDate = fields.releaseDate;
   if (fields.haaiOriginStory !== undefined) updateSet.haaiOriginStory = fields.haaiOriginStory;
   if (fields.moodTags !== undefined) updateSet.moodTags = fields.moodTags;
+  if (fields.downloadPermission !== undefined) updateSet.downloadPermission = fields.downloadPermission;
+  if (fields.downloadTipThresholdCents !== undefined) updateSet.downloadTipThresholdCents = fields.downloadTipThresholdCents;
   await db.update(songs).set(updateSet).where(and(eq(songs.id, songId), eq(songs.userId, userId)));
 }
 

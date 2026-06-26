@@ -66,6 +66,8 @@ export interface Track {
   albumName?: string;
   fadeInSeconds?: number | null;
   fadeOutSeconds?: number | null;
+  downloadPermission?: "none" | "free" | "tipped" | null;
+  downloadTipThresholdCents?: number | null;
 }
 
 /** Describes WHERE the current queue was built from */

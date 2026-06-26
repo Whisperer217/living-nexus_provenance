@@ -17,7 +17,7 @@ import { useHarmonic } from "@/contexts/HarmonicContext";
 import {
   Upload, Bell, LogIn, LogOut, CheckCircle2, Zap, Search, User, Settings,
   SkipBack, SkipForward, Play, Pause, Shuffle, Repeat, PictureInPicture2,
-  ChevronDown, Music, ShieldCheck, Sparkles,
+  ChevronDown, Music, ShieldCheck, Sparkles, Download,
 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 
@@ -43,6 +43,22 @@ function InlinePlayer() {
   const [shuffle, setShuffle] = useState(false);
   const [repeat, setRepeat] = useState(false);
   const seekBarRef = useRef<HTMLDivElement>(null);
+
+  /* ── Download mutations ── */
+  const downloadMutation = trpc.songs.download.useMutation({
+    onSuccess: (data: any) => {
+      if (!data?.url) return;
+      const a = document.createElement("a");
+      a.href = data.url;
+      a.download = data.filename || "download";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    },
+  });
+  const tipDownloadMutation = trpc.tips.createTipDownloadCheckout.useMutation({
+    onSuccess: (data: any) => { if (data?.url) window.location.href = data.url; },
+  });
 
   const track = state.tracks[state.currentIdx];
   const progress = state.duration > 0 ? (state.currentTime / state.duration) * 100 : 0;
@@ -219,6 +235,38 @@ function InlinePlayer() {
         >
           <Repeat size={13} />
         </button>
+        {/* Download — only shown when track allows downloads */}
+        {track && track.downloadPermission && track.downloadPermission !== "none" && (() => {
+          const songId = parseInt(track.id, 10);
+          const tipCents = track.downloadTipThresholdCents ?? 179;
+          if (track.downloadPermission === "free") return (
+            <button
+              key="dl-free"
+              onClick={() => downloadMutation.mutate({ songId })}
+              disabled={downloadMutation.isPending}
+              className="p-1.5 rounded transition-all hover:bg-white/5"
+              style={{ color: downloadMutation.isPending ? "rgba(255,255,255,0.2)" : "rgba(255,215,0,0.75)" }}
+              aria-label="Download track"
+              title="Free Download"
+            >
+              <Download size={13} />
+            </button>
+          );
+          if (track.downloadPermission === "tipped") return (
+            <button
+              key="dl-paid"
+              onClick={() => tipDownloadMutation.mutate({ songId, origin: window.location.origin })}
+              disabled={tipDownloadMutation.isPending}
+              className="p-1.5 rounded transition-all hover:bg-white/5"
+              style={{ color: tipDownloadMutation.isPending ? "rgba(255,255,255,0.2)" : "rgba(255,215,0,0.75)" }}
+              aria-label={`Download for $${(tipCents / 100).toFixed(2)}`}
+              title={`Paid Download — $${(tipCents / 100).toFixed(2)}`}
+            >
+              <Download size={13} />
+            </button>
+          );
+          return null;
+        })()}
         {/* PiP / Expand */}
         <button
           onClick={expand}

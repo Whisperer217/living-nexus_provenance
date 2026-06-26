@@ -1375,6 +1375,8 @@ export default function ArchivePage() {
           videoUrl: editingSong.videoUrl ?? null,
           videoWitnessId: editingSong.videoWitnessId ?? null,
           externalLinksJson: editingSong.externalLinksJson ?? null,
+          downloadPermission: (editingSong as any).downloadPermission ?? null,
+          downloadTipThresholdCents: (editingSong as any).downloadTipThresholdCents ?? null,
         }}
         onClose={() => setEditingSong(null)}
         onSaved={() => {
