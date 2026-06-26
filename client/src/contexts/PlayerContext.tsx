@@ -812,10 +812,24 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
    * Rotates queueId — the existing queue is replaced with just this track.
    * Pages calling addAndPlay() should prefer playQueueAt() with a full list
    * when they have surrounding context available.
+   *
+   * TOGGLE-GUARD: If the requested track is already the active track, toggles
+   * play/pause instead of restarting.
    */
   const addAndPlay = useCallback((t: Track) => {
     const audio = audioRef.current;
     if (!audio || !t.audioUrl) return;
+
+    // ── Toggle-guard: same track already active → toggle, never restart ──
+    const currentState = stateRef.current;
+    const activeTracks = currentState.tracks.filter(tr => !!tr.audioUrl);
+    const activeTrack = activeTracks[currentState.currentIdx];
+    if (activeTrack && activeTrack.id === t.id) {
+      if (audio.paused) audio.play().catch(() => {});
+      else audio.pause();
+      return;
+    }
+
     const newQueueId = generateId();
     if (t.audioUrl) {
       audio.src = safeAudioUrl(t.audioUrl);
@@ -853,6 +867,11 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
    * Replace the entire queue with a context-tagged set and immediately play startIdx.
    * Freezes the queue as an IMMUTABLE SNAPSHOT and rotates queueId.
    * Next/prev/shuffle/repeat all operate exclusively within this snapshot.
+   *
+   * TOGGLE-GUARD: If the requested track is already the active track in the current
+   * session, this call toggles play/pause instead of restarting. This prevents the
+   * recurring "tile button restarts instead of pausing" bug regardless of which
+   * page or component calls playQueueAt.
    */
   const playQueueAt = useCallback((
     newTracks: Track[],
@@ -866,6 +885,18 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     const clampedIdx = Math.max(0, Math.min(startIdx, validTracks.length - 1));
     const t = validTracks[clampedIdx];
     if (!t?.audioUrl) return;
+
+    // ── Toggle-guard: same track already active → toggle play/pause, never restart ──
+    const currentState = stateRef.current;
+    const activeTracks = currentState.tracks.filter(tr => !!tr.audioUrl);
+    const activeTrack = activeTracks[currentState.currentIdx];
+    if (activeTrack && activeTrack.id === t.id) {
+      // Same track: toggle instead of restart
+      if (audio.paused) audio.play().catch(() => {});
+      else audio.pause();
+      return;
+    }
+
     const newQueueId = generateId();
     audio.src = safeAudioUrl(t.audioUrl);
     audio.load();

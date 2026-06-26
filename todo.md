@@ -6011,3 +6011,10 @@
 - [x] Archive: all 52 collections now show with accurate live track counts
 - [x] Profile Collections & Playlists tab: now shows ALBUMS section (WID-ALB batch-upload albums) alongside personal userCollections and legacy playlists
 - [x] 0 TypeScript errors, 340/340 tests pass
+
+## Fix: Centralized Play/Pause Toggle-Guard in PlayerContext (Permanent)
+- [x] Audit: found 27 files calling playQueueAt/addAndPlay — previous fix only patched 3 page-level handlers
+- [x] Root fix: added toggle-guard directly inside playQueueAt() and addAndPlay() in PlayerContext.tsx
+- [x] Guard logic: if activeTrack.id === requested track id → togglePlay instead of restart (works for ALL 27 call sites automatically)
+- [x] Documented with TOGGLE-GUARD comment in PlayerContext so future developers understand the invariant
+- [x] 0 TypeScript errors, 340/340 tests pass
