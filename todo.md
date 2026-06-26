@@ -5974,3 +5974,16 @@
 
 ## Bug Fix: New Arrivals "See All" Empty State
 - [x] Fix /explore?sort=new showing "Nothing new this week" — root cause: contentType useState initializer defaulted to "audio" from cache even when no medium param present, causing a double-query race; when navigating to sort=new or sort=trending URLs, contentType now initializes to undefined (all content types shown); also reduced newThisWeek staleTime from 120s to 30s to prevent stale empty-result cache from persisting
+
+## Bug Fix — Symphonic Power Metal Missing from Genre Dropdowns
+- [x] Add "Symphonic Power Metal" to GENRES list in shared/const.ts (or wherever the canonical list lives)
+- [x] Verify it appears in CreativeDrawer genre select (CreativeDrawer.tsx now imports EDIT_GENRES from shared/contentTypes)
+- [x] Verify it appears in UploadPage genre select (already used EDIT_GENRES)
+- [x] Verify it appears in batch upload apply-to-all genre select (already used EDIT_GENRES)
+- [x] Verify it appears in ExplorePage genre filter (EditChapel.tsx now imports EDIT_GENRES from shared/contentTypes)
+
+## Bug Fix — Play/Pause Tile Button Restarts Instead of Pausing (Recurring)
+- [x] Locate all SongCard / tile play button onClick handlers
+- [x] Fix: when the tile's song is the currently playing track AND isPlaying is true, clicking should call pause() not play()
+- [x] Ensure fix covers HomePage, ExplorePage, CreatorProfilePage, DiscoverPage (all handlePlay functions now check currentTrackId === song.id first)
+- [x] Add regression note to prevent future recurrence

@@ -54,7 +54,7 @@ export default function DiscoverPage() {
     const param = new URLSearchParams(window.location.search).get("type");
     setActiveContentType(param ? (TYPE_PARAM_MAP[param.toLowerCase()] ?? undefined) : undefined);
   }, [typeof window !== "undefined" ? window.location.search : ""]);
-  const { addAndPlay, playQueueAt, playNext, openNowPlayingPanel, currentTrackId, state: playerState } = usePlayer();
+  const { addAndPlay, playQueueAt, playNext, togglePlay, openNowPlayingPanel, currentTrackId, state: playerState } = usePlayer();
   const [menuSong, setMenuSong] = useState<any | null>(null);
   const [menuPos, setMenuPos] = useState({ x: 0, y: 0 });
   const [showAddToList, setShowAddToList] = useState(false);
@@ -115,6 +115,11 @@ export default function DiscoverPage() {
       return;
     }
     if (!clickedSong.song.fileUrl) { toast.error("No audio file available"); return; }
+    // If this track is already active, toggle play/pause instead of restarting
+    if (currentTrackId === String(clickedSong.song.id)) {
+      togglePlay();
+      return;
+    }
     if (songs && songs.length > 0) {
       // Build full queue from current filtered results and play from the clicked track
       const queue = songs

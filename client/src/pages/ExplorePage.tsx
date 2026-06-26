@@ -435,7 +435,7 @@ function ExploreCard({
 }
 
 export default function ExplorePage() {
-  const { addAndPlay, playQueueAt, playNext, openNowPlayingPanel, currentTrackId, state: playerState } = usePlayer();
+  const { addAndPlay, playQueueAt, playNext, togglePlay, openNowPlayingPanel, currentTrackId, state: playerState } = usePlayer();
   const search = useSearch();
   const [query, setQuery] = useState("");
   const [activeGenre, setActiveGenre] = useState("All");
@@ -760,6 +760,11 @@ export default function ExplorePage() {
     const song = item.song;
     const creator = item.creator;
     if (!song.fileUrl) { toast.error("No audio file available for this track"); return; }
+    // If this track is already active, toggle play/pause instead of restarting the queue
+    if (currentTrackId === String(song.id)) {
+      togglePlay();
+      return;
+    }
     if (songs.length > 0) {
       const queue = songs
         .filter((s: any) => !!s.song.fileUrl)

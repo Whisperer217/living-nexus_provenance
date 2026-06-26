@@ -458,7 +458,7 @@ export default function CreatorProfilePage() {
       setTimeout(() => setTipSuccess(false), 8000);
     }
   }, []);
-  const { addAndPlay, playQueueAt, openNowPlayingPanel, state: playerState, currentTrackId } = usePlayer();
+  const { addAndPlay, playQueueAt, togglePlay, openNowPlayingPanel, state: playerState, currentTrackId } = usePlayer();
   // Use currentTrackId (derived from currentIdx) — NOT tracks[0] which always points to the
   // first track in the queue regardless of which track is actively playing.
   const playingId = playerState.isPlaying && currentTrackId ? parseInt(currentTrackId) : null;
@@ -699,6 +699,11 @@ export default function CreatorProfilePage() {
       return;
     }
     if (!song.fileUrl) { toast.error("No audio file available"); return; }
+    // If this track is already active, toggle play/pause instead of restarting
+    if (currentTrackId === String(song.id)) {
+      togglePlay();
+      return;
+    }
     // Build queue from all this creator's public AUDIO songs so playback continues
     const creatorSongs = (data?.songs || []).filter((s: any) => !!s.fileUrl && s.contentType !== "manuscript" && s.contentType !== "comic");
     if (creatorSongs.length > 1) {

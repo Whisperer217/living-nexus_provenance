@@ -39,6 +39,7 @@ import {
   ImageIcon,
   Eye,
 } from "lucide-react";
+import { EDIT_GENRES as GENRES } from "@shared/contentTypes";
 
 /* ─── Types ─────────────────────────────────────────────────────────────── */
 
@@ -66,13 +67,6 @@ interface EditChapelProps {
 }
 
 /* ─── Constants ─────────────────────────────────────────────────────────── */
-
-const GENRES = [
-  "Hip-Hop", "R&B / Soul", "Gospel / Worship", "Jazz", "Blues",
-  "Rock", "Alternative", "Electronic / EDM", "Pop", "Folk / Acoustic",
-  "Classical", "Spoken Word / Poetry", "Ambient", "Cinematic / Score",
-  "World / Cultural", "Experimental", "Other",
-];
 
 const STATUS_OPTIONS = [
   { value: "Published", label: "Published", desc: "Visible to everyone",  color: "#22c55e" },
