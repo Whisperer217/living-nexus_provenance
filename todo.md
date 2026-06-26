@@ -1294,10 +1294,10 @@
 - [x] TypeScript: 0 errors | Vitest: 51/51 passing
 
 ## Bug Fix — ImagePositioner Modal Off-Screen on Mobile
-- [ ] ImagePositioner modal renders below the fold on mobile (user must scroll to find it)
-- [ ] Fix: ensure fixed overlay uses `position: fixed; top: 0; left: 0; width: 100%; height: 100%` with `overflow-y: auto` and modal card centered with `margin: auto`
-- [ ] Fix all inline modal wrappers in ProfilePage (banner + avatar positioners) with same pattern
-- [ ] Verify on narrow viewport (375px) that modal is always visible without scrolling
+- [x] ImagePositioner modal renders below the fold on mobile (user must scroll to find it)
+- [x] Fix: ensure fixed overlay uses `position: fixed; top: 0; left: 0; width: 100%; height: 100%` with `overflow-y: auto` and modal card centered with `margin: auto`
+- [x] Fix all inline modal wrappers in ProfilePage (banner + avatar positioners) with same pattern
+- [x] Verify on narrow viewport (375px) that modal is always visible without scrolling
 
 ## Refactor — Inline Slider Repositioner (Replace Drag Modal) [COMPLETE]
 - [x] Rewrite ImagePositioner as inline slider component (X/Y range inputs, live preview, presets, Save/Cancel) — no modal, no drag
@@ -1944,15 +1944,15 @@
 - [x] Server running cleanly after all changes
 
 ## Phase 66: LNA Archive Sidebar + Batch Actions
-- [ ] Rename sidebar "Archive" label to "LNA — Archive" with gold text color (#c9a84c)
-- [ ] Add song count badge to LNA Archive sidebar nav item
-- [ ] Add batch select checkboxes to each track row in ArchivePage
-- [ ] Add batch actions bar (Delete Selected / Clear) when tracks are selected
-- [ ] Replace text drag handle with GripVertical icon (lucide-react)
-- [ ] Add track number display (index + 1) to each row
-- [ ] Show WID in monospace under track title
-- [ ] Confirm /archive route is auth-guarded and sidebar links correctly
-- [ ] Remove Facebook pixel from index.html if present
+- [x] Rename sidebar "Archive" label to "LNA — Archive" with gold text color (#c9a84c)
+- [x] Add song count badge to LNA Archive sidebar nav item
+- [x] Add batch select checkboxes to each track row in ArchivePage
+- [x] Add batch actions bar (Delete Selected / Clear) when tracks are selected
+- [x] Replace text drag handle with GripVertical icon (lucide-react)
+- [x] Add track number display (index + 1) to each row
+- [x] Show WID in monospace under track title
+- [x] Confirm /archive route is auth-guarded and sidebar links correctly
+- [x] Remove Facebook pixel from index.html if present (confirmed: not present)
 
 ## Phase 66: Archive Page & Sidebar Improvements
 - [x] Add "LNA — Archive" nav item to MainLayout sidebar (gold label, Archive icon, song count badge)

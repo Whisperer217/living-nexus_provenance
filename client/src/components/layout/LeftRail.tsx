@@ -34,7 +34,7 @@ const RAIL_ITEMS: Array<{
   { id: "explore", icon: Compass, label: "Explore",  path: "/explore" },
   { id: "profile", icon: User,    label: "Profile",  path: "/profile", authRequired: true },
   { id: "upload",  icon: Upload,  label: "Register", path: "/upload",  authRequired: true },
-  { id: "archive", icon: Archive, label: "Archive",  path: "/archive", authRequired: true },
+  { id: "archive", icon: Archive, label: "LNA",  path: "/archive", authRequired: true },
 ];
 
 interface LeftRailProps {
@@ -45,6 +45,8 @@ interface LeftRailProps {
   // Mobile state — owned by MainLayout, passed down
   mobileOpen?: boolean;
   onMobileClose?: () => void;
+  // Badge counts
+  archiveSongCount?: number;
 }
 
 export default function LeftRail({
@@ -53,6 +55,7 @@ export default function LeftRail({
   onRailClick,
   mobileOpen = false,
   onMobileClose,
+  archiveSongCount = 0,
 }: LeftRailProps) {
   const [location, navigate] = useLocation();
   const { user } = useAuth();
@@ -127,7 +130,27 @@ export default function LeftRail({
             style={{ width: 3, height: 22, background: "#D4AF37" }}
           />
         )}
-        <Icon size={18} />
+        <div className="relative">
+          <Icon size={18} />
+          {id === "archive" && archiveSongCount > 0 && (
+            <span
+              className="absolute -top-1.5 -right-2 flex items-center justify-center rounded-full"
+              style={{
+                minWidth: 14,
+                height: 14,
+                fontSize: 8,
+                fontWeight: 700,
+                lineHeight: 1,
+                padding: "0 3px",
+                background: "rgba(196,154,40,0.85)",
+                color: "#0A0806",
+                fontFamily: "'DM Sans', sans-serif",
+              }}
+            >
+              {archiveSongCount > 99 ? "99+" : archiveSongCount}
+            </span>
+          )}
+        </div>
         <span style={{ fontSize: 9, fontWeight: 600, letterSpacing: "0.04em", lineHeight: 1 }}>
           {label.toUpperCase()}
         </span>

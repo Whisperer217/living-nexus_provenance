@@ -391,6 +391,18 @@ export default function ArchivePage() {
     onError: () => toast.error("Failed to clear drafts"),
   });
 
+  /* Batch delete */
+  const [batchDeleteConfirm, setBatchDeleteConfirm] = useState(false);
+  const batchDeleteMutation = trpc.songs.batchDelete.useMutation({
+    onSuccess: (data) => {
+      toast.success(`${data.deleted} track${data.deleted === 1 ? "" : "s"} removed. WID records preserved permanently.`);
+      setBatchDeleteConfirm(false);
+      setBatchMode(false);
+      utils.songs.mySongs.invalidate();
+    },
+    onError: () => toast.error("Failed to delete selected tracks"),
+  });
+
   /* Delete (soft) */
   const deleteSong = trpc.songs.delete.useMutation({
     onSuccess: () => {
@@ -974,6 +986,101 @@ export default function ArchivePage() {
                 Drag <GripVertical className="inline w-3 h-3" /> to reorder
               </p>
             )}
+          </div>
+        )}
+
+          {/* ── Batch Actions Bar ──────────────────────────────── */}
+        {activeTab === "tracks" && batchMode && selectedIds.size > 0 && (
+          <div
+            className="flex items-center gap-3 mb-3 px-4 py-3 rounded-xl"
+            style={{
+              background: "rgba(196,154,40,0.06)",
+              border: "1px solid rgba(196,154,40,0.22)",
+            }}
+          >
+            <span className="text-xs font-semibold" style={{ color: "var(--ln-gold)", fontFamily: "'Cinzel', serif", letterSpacing: "0.06em" }}>
+              {selectedIds.size} SELECTED
+            </span>
+            <div className="flex-1" />
+            <button
+              onClick={() => setBatchDeleteConfirm(true)}
+              className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg transition-all"
+              style={{
+                background: "color-mix(in srgb, var(--lnx-red) 12%, transparent)",
+                border: "1px solid color-mix(in srgb, var(--lnx-red) 40%, transparent)",
+                color: "var(--ln-ember)",
+              }}
+            >
+              <Trash2 className="w-3 h-3" />
+              Delete Selected
+            </button>
+            <button
+              onClick={clearSelection}
+              className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg transition-all"
+              style={{ color: "var(--ln-smoke)", border: "1px solid rgba(196,154,40,0.20)" }}
+            >
+              <X className="w-3 h-3" />
+              Clear
+            </button>
+          </div>
+        )}
+
+        {/* ── Batch Delete Confirm Modal ─────────────────────────── */}
+        {batchDeleteConfirm && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center px-4"
+            style={{ background: "rgba(0,0,0,0.85)" }}
+            onClick={() => setBatchDeleteConfirm(false)}
+          >
+            <div
+              className="rounded-2xl p-6 max-w-sm w-full"
+              style={{
+                background: "var(--ln-coal)",
+                border: "1px solid color-mix(in srgb, var(--lnx-red) 35%, transparent)",
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <p className="font-bold text-lg mb-1" style={{ color: "var(--ln-ember)", fontFamily: "'Cinzel', serif" }}>
+                Delete {selectedIds.size} Track{selectedIds.size === 1 ? "" : "s"}
+              </p>
+              <p className="text-sm mb-4" style={{ color: "#E2E8F0" }}>
+                This will remove {selectedIds.size} track{selectedIds.size === 1 ? "" : "s"} from public view. This action cannot be undone.
+              </p>
+              <div
+                className="rounded-xl p-3 mb-5"
+                style={{ background: "rgba(196,154,40,0.05)", border: "1px solid rgba(196,154,40,0.2)" }}
+              >
+                <div className="flex items-center gap-1.5 mb-1">
+                  <Shield className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "var(--ln-gold)" }} />
+                  <p className="text-xs font-bold" style={{ color: "var(--ln-gold)" }}>WID Records Preserved</p>
+                </div>
+                <p className="text-xs leading-relaxed" style={{ color: "#E2E8F0" }}>
+                  All Witness IDs for the selected tracks remain on record permanently. Cryptographic proof of origin is never deleted.
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => batchDeleteMutation.mutate({ songIds: Array.from(selectedIds) })}
+                  disabled={batchDeleteMutation.isPending}
+                  className="flex-1 font-bold py-2.5 rounded-xl text-sm transition-colors disabled:opacity-50"
+                  style={{
+                    background: "color-mix(in srgb, var(--lnx-red) 20%, transparent)",
+                    border: "1px solid color-mix(in srgb, var(--lnx-red) 50%, transparent)",
+                    color: "var(--ln-ember)",
+                  }}
+                >
+                  {batchDeleteMutation.isPending ? "Deleting…" : `Delete ${selectedIds.size} Track${selectedIds.size === 1 ? "" : "s"}`}
+                </button>
+                <button
+                  onClick={() => setBatchDeleteConfirm(false)}
+                  disabled={batchDeleteMutation.isPending}
+                  className="flex-1 py-2.5 rounded-xl text-sm"
+                  style={{ border: "1px solid #C3AB7D", color: "#E2E8F0" }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
           </div>
         )}
 

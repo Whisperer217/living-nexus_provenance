@@ -840,6 +840,12 @@ export const songsRouter = router({
       };
     }),
     delete: protectedProcedure.input(z.object({ songId: z.number() })).mutation(async ({ ctx, input }) => { await deleteSong(input.songId, ctx.user.id); return { success: true }; }),
+    batchDelete: protectedProcedure
+      .input(z.object({ songIds: z.array(z.number()).min(1).max(100) }))
+      .mutation(async ({ ctx, input }) => {
+        await Promise.all(input.songIds.map(id => deleteSong(id, ctx.user.id)));
+        return { deleted: input.songIds.length };
+      }),
     // Bulk-dismiss stale Draft songs — soft-deletes all Draft songs for the user
     dismissDrafts: protectedProcedure
       .input(z.object({ olderThanDays: z.number().int().min(0).max(365).optional() }))

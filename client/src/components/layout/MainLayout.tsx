@@ -133,6 +133,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         onRailClick={handleRailClick}
         mobileOpen={mobileMenuOpen}
         onMobileClose={closeMobileMenu}
+        archiveSongCount={archiveSongCount}
       />
 
       {/* ── ContextDrawer — desktop only ── */}

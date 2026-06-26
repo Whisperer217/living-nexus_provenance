@@ -581,23 +581,41 @@ export default function ProfilePage() {
         )}
         <input ref={bannerRef} type="file" accept="image/*" className="hidden" onChange={handleBanner} />
       </div>
-      {/* ── Banner inline repositioner ── */}
-      {showBannerPositioner && (pendingBannerUrl || profile?.bannerUrl) && (
-        <ImagePositioner
-          imageUrl={pendingBannerUrl || profile!.bannerUrl!}
-          initialX={aiFocalPos?.x ?? bannerPos.x}
-          initialY={aiFocalPos?.y ?? bannerPos.y}
-          initialZoom={110}
-          aiFocal={!!aiFocalPos}
-          previewHeight="16rem"
-          roundedTop={false}
-          label={pendingBannerUrl ? "Set Banner Position" : "Reposition Banner"}
-          onSave={pendingBannerUrl ? confirmBannerUpload : saveBannerPosition}
-          onCancel={() => {
-            setShowBannerPositioner(false);
-            if (pendingBannerUrl) { URL.revokeObjectURL(pendingBannerUrl); setPendingBannerUrl(null); }
-          }}
-        />
+      {/* ── Banner repositioner — portal-rendered, fixed overlay (mobile-safe) ── */}
+      {showBannerPositioner && (pendingBannerUrl || profile?.bannerUrl) && createPortal(
+        <>
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 z-[9998] bg-black/40 backdrop-blur-sm"
+            onClick={() => {
+              setShowBannerPositioner(false);
+              if (pendingBannerUrl) { URL.revokeObjectURL(pendingBannerUrl); setPendingBannerUrl(null); }
+            }}
+          />
+          {/* Floating panel */}
+          <div
+            className="fixed z-[9999] left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+            style={{ width: "min(480px, 92vw)" }}
+            onClick={e => e.stopPropagation()}
+          >
+            <ImagePositioner
+              imageUrl={pendingBannerUrl || profile!.bannerUrl!}
+              initialX={aiFocalPos?.x ?? bannerPos.x}
+              initialY={aiFocalPos?.y ?? bannerPos.y}
+              initialZoom={110}
+              aiFocal={!!aiFocalPos}
+              previewHeight="14rem"
+              roundedTop={true}
+              label={pendingBannerUrl ? "Set Banner Position" : "Reposition Banner"}
+              onSave={pendingBannerUrl ? confirmBannerUpload : saveBannerPosition}
+              onCancel={() => {
+                setShowBannerPositioner(false);
+                if (pendingBannerUrl) { URL.revokeObjectURL(pendingBannerUrl); setPendingBannerUrl(null); }
+              }}
+            />
+          </div>
+        </>,
+        document.body
       )}
 
       {/*

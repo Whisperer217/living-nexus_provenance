@@ -6,6 +6,7 @@
 ═══════════════════════════════════════════════════════════════════ */
 
 import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { triggerTaggedDownload } from "@/lib/downloadTrack";
 import { Helmet } from "react-helmet-async";
 import { useParams, Link, useLocation } from "wouter";
@@ -1038,20 +1039,33 @@ export default function CreatorProfilePage() {
         </div>
       </div>
 
-      {/* ── Banner inline repositioner ── */}
-      {showBannerPositioner && creator.bannerUrl && (
-        <ImagePositioner
-          imageUrl={creator.bannerUrl}
-          initialX={aiFocalPos?.x ?? bannerPos.x}
-          initialY={aiFocalPos?.y ?? bannerPos.y}
-          initialZoom={110}
-          aiFocal={!!aiFocalPos}
-          previewHeight="16rem"
-          roundedTop={false}
-          label="Reposition Banner"
-          onSave={(pos: { x: number; y: number; zoom: number }) => { setAiFocalPos(null); saveBannerPosition(pos); }}
-          onCancel={() => setShowBannerPositioner(false)}
-        />
+      {/* ── Banner repositioner — portal-rendered, fixed overlay (mobile-safe) ── */}
+      {showBannerPositioner && creator.bannerUrl && createPortal(
+        <>
+          <div
+            className="fixed inset-0 z-[9998] bg-black/40 backdrop-blur-sm"
+            onClick={() => setShowBannerPositioner(false)}
+          />
+          <div
+            className="fixed z-[9999] left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+            style={{ width: "min(480px, 92vw)" }}
+            onClick={e => e.stopPropagation()}
+          >
+            <ImagePositioner
+              imageUrl={creator.bannerUrl}
+              initialX={aiFocalPos?.x ?? bannerPos.x}
+              initialY={aiFocalPos?.y ?? bannerPos.y}
+              initialZoom={110}
+              aiFocal={!!aiFocalPos}
+              previewHeight="14rem"
+              roundedTop={true}
+              label="Reposition Banner"
+              onSave={(pos: { x: number; y: number; zoom: number }) => { setAiFocalPos(null); saveBannerPosition(pos); }}
+              onCancel={() => setShowBannerPositioner(false)}
+            />
+          </div>
+        </>,
+        document.body
       )}
 
       {/* ── Profile header (below banner) ── */}
