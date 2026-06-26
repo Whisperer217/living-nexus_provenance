@@ -1071,6 +1071,40 @@ export default function SongDetailPage() {
               </div>
             )}
 
+            {/* ── Find It Elsewhere — External Links ── */}
+            {(() => {
+              const raw = (song as any).externalLinksJson;
+              if (!raw) return null;
+              let links: Array<{ platform: string; url: string }> = [];
+              try { links = JSON.parse(raw); } catch { return null; }
+              if (!links.length) return null;
+              return (
+                <div className="rounded-2xl p-4" style={{ background: "rgba(196,154,40,0.03)", border: "1px solid rgba(196,154,40,0.18)" }}>
+                  <p className="text-xs font-semibold mb-3 tracking-[0.12em] uppercase flex items-center gap-2" style={{ color: "rgba(196,154,40,0.65)", fontFamily: "'Cinzel', serif" }}>
+                    <span style={{ fontSize: "14px" }}>🔗</span> Find It Elsewhere
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {links.map((link, i) => (
+                      <a
+                        key={i}
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all hover:scale-105 active:scale-95 hover:opacity-90"
+                        style={{
+                          background: "rgba(196,154,40,0.08)",
+                          border: "1px solid rgba(196,154,40,0.25)",
+                          color: "rgba(212,175,55,0.85)",
+                        }}
+                      >
+                        <ExternalLink className="w-3 h-3" />
+                        {link.platform}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
             {/* ── Harmonic Signature ── creator-only download buttons */}
             {isOwner && (song as any).harmonicSignature && (
               <div className="flex flex-wrap gap-2">

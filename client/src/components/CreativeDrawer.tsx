@@ -29,6 +29,7 @@ import {
   X, Upload, Loader2, CheckCircle2, AlertCircle, Trash2,
   Music, Flame, BookOpen, Shield, ChevronDown, ChevronUp,
   ImageIcon, Eye, Video, Sparkles, Hash, FileText,
+  ExternalLink, Plus,
 } from "lucide-react";
 
 /* ─── Types ─────────────────────────────────────────────────────────────── */
@@ -44,6 +45,7 @@ export interface CreativeDrawerSong {
   status: string;
   lyricsText?: string | null;
   haaiOriginStory?: string | null;
+  externalLinksJson?: string | null;
   aiDisclosure?: string | null;
   contentType?: string | null;
   releaseDate?: string | null;
@@ -140,6 +142,19 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
   const [aiConsent, setAiConsent]       = useState<string>(song.aiConsent ?? "prohibited");
   const [aiDisclosure, setAiDisclosure] = useState<string>(song.aiDisclosure ?? "original");
   const [originStory, setOriginStory]   = useState(song.haaiOriginStory ?? "");
+
+  // External links — stored as JSON array of {platform: string, url: string}
+  const parseLinks = (raw?: string | null): Array<{ platform: string; url: string }> => {
+    if (!raw) return [];
+    try { return JSON.parse(raw); } catch { return []; }
+  };
+  const [extLinks, setExtLinks] = useState<Array<{ platform: string; url: string }>>(
+    parseLinks(song.externalLinksJson)
+  );
+  const addExtLink = () => setExtLinks(prev => [...prev, { platform: "", url: "" }]);
+  const removeExtLink = (i: number) => setExtLinks(prev => prev.filter((_, idx) => idx !== i));
+  const updateExtLink = (i: number, key: "platform" | "url", val: string) =>
+    setExtLinks(prev => prev.map((l, idx) => idx === i ? { ...l, [key]: val } : l));
   const [lyrics, setLyrics]             = useState(song.lyricsText ?? "");
   const [creationDate, setCreationDate] = useState(
     song.releaseDate ? song.releaseDate.slice(0, 10) : ""
@@ -327,6 +342,9 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
       aiConsent: aiConsent as "prohibited" | "permitted_attribution" | "permitted",
       aiDisclosure: aiDisclosure as "original" | "ai_assisted" | "ai_generated" | "human_authored_ai_instrument",
       haaiOriginStory: originStory || null,
+      externalLinksJson: extLinks.filter(l => l.platform && l.url).length > 0
+        ? JSON.stringify(extLinks.filter(l => l.platform && l.url))
+        : null,
       releaseDate: creationDate || null,
     });
   }
@@ -738,6 +756,49 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
             </div>
 
             {/* ═══ ORIGIN STORY ════════════════════════════════════════ */}
+            {/* ═══ EXTERNAL LINKS ═══════════════════════════════════ */}
+            <SectionDivider label="Find It Elsewhere" icon={<ExternalLink className="w-3.5 h-3.5" />} />
+            <div className="mb-6">
+              <p className="text-xs mb-3 leading-relaxed" style={{ color: "rgba(255,255,255,0.30)", fontStyle: "italic" }}>
+                Link to this work on other platforms (Spotify, SoundCloud, Bandcamp, YouTube, etc.)
+              </p>
+              <div className="space-y-2 mb-3">
+                {extLinks.map((link, i) => (
+                  <div key={i} className="flex gap-2 items-center">
+                    <Input
+                      value={link.platform}
+                      onChange={e => updateExtLink(i, "platform", e.target.value)}
+                      placeholder="Platform (e.g. Spotify)"
+                      className="w-32 flex-shrink-0 text-xs h-8"
+                      style={{ background: SURFACE3, border: `1px solid rgba(196,154,40,0.2)`, color: "rgba(255,255,255,0.85)", fontSize: "0.78rem" }}
+                    />
+                    <Input
+                      value={link.url}
+                      onChange={e => updateExtLink(i, "url", e.target.value)}
+                      placeholder="https://..."
+                      className="flex-1 text-xs h-8"
+                      style={{ background: SURFACE3, border: `1px solid rgba(196,154,40,0.2)`, color: "rgba(255,255,255,0.85)", fontSize: "0.78rem" }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeExtLink(i)}
+                      className="w-7 h-7 flex-shrink-0 rounded-lg flex items-center justify-center transition-colors hover:bg-red-900/30"
+                      style={{ border: "1px solid rgba(239,68,68,0.2)", color: "rgba(239,68,68,0.5)" }}
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <button
+                type="button"
+                onClick={addExtLink}
+                className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full transition-all hover:opacity-80"
+                style={{ background: "rgba(196,154,40,0.06)", border: "1px solid rgba(196,154,40,0.2)", color: "rgba(196,154,40,0.65)" }}
+              >
+                <Plus className="w-3 h-3" /> Add Link
+              </button>
+            </div>
             <SectionDivider label="Origin Story" icon={<Flame className="w-3.5 h-3.5" />} />
 
             <div className="mb-6">

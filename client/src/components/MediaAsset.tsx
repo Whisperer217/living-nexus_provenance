@@ -106,10 +106,21 @@ function CardMedia({
         />
       ) : (
         <div
-          className="absolute inset-0 flex items-center justify-center text-4xl"
-          style={{ background: bg ?? "var(--ln-coal)" }}
+          className="absolute inset-0 flex flex-col items-center justify-center gap-2"
+          style={{ background: bg ?? "linear-gradient(160deg, #130f1e 0%, #0a0812 50%, #060409 100%)" }}
         >
-          {emoji ?? <Music className="w-1/3 h-1/3 opacity-20 text-white" />}
+          {emoji ? (
+            <span className="text-4xl">{emoji}</span>
+          ) : (
+            <>
+              <div className="relative flex items-center justify-center" style={{ width: 48, height: 48 }}>
+                <div className="absolute inset-0 rounded-full" style={{ border: "1px solid rgba(196,154,40,0.22)" }} />
+                <div className="absolute inset-[8px] rounded-full" style={{ border: "1px solid rgba(196,154,40,0.12)" }} />
+                <Music className="w-4 h-4" style={{ color: "rgba(196,154,40,0.35)", filter: "drop-shadow(0 0 5px rgba(196,154,40,0.18))" }} />
+              </div>
+              <p className="text-[9px] tracking-[0.14em] uppercase" style={{ color: "rgba(196,154,40,0.30)", fontFamily: "'Cinzel', serif" }}>Awaiting Art</p>
+            </>
+          )}
         </div>
       )}
       {children}

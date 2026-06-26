@@ -5906,3 +5906,13 @@
 - [x] Add container prop to SelectContent in select.tsx (forwards to SelectPrimitive.Portal)
 - [x] Add drawerRootRef to CreativeDrawer root div
 - [x] Wire container={drawerRootRef.current} to both SelectContent instances (Genre + Status)
+
+## Parallel Skill Test — 8 Threads (Jun 26 2026)
+- [ ] T1: Fix remaining z-index issues in CreativeDrawer (popover, tooltip, dropdown-menu if used inside drawer)
+- [ ] T2: Verify drawer stability from Creator Domain, Archive, Song Detail (ErrorBoundary + no freeze)
+- [ ] T3: Improve Missing Cover Art placeholder — more elegant/sacred across all card types + SongDetailPage
+- [ ] T4: Contrast audit — scan discovery/explore pages for black/invisible text or image contrast issues
+- [ ] T5: Unify Edit Work drawer behavior — confirm identical experience from all surfaces
+- [ ] T6: Add External Links / Find It Elsewhere section to song pages + Creator Domain
+- [ ] T7: Improve provenance stamp visibility and update logic after edit save
+- [ ] T8: Make HAAI / Origin Story field prominent in CreativeDrawer

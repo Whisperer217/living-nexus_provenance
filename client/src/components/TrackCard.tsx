@@ -10,7 +10,7 @@
 ═══════════════════════════════════════════════════════════════════ */
 
 import { useState } from "react";
-import { Play, Heart, DollarSign, ExternalLink, ListPlus, SkipForward, Shield, Crown } from "lucide-react";
+import { Play, Heart, DollarSign, ExternalLink, ListPlus, SkipForward, Shield, Crown, Music } from "lucide-react";
 import { AiDisclosurePill } from "@/components/AiDisclosurePill";
 import { AddToMyListModal } from "@/components/AddToMyListModal";
 import { Track, usePlayer } from "@/contexts/PlayerContext";
@@ -204,10 +204,19 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
             loop
           />
         ) : (
+          /* Sacred void — relic rings placeholder */
           <div
-            className="w-full h-full"
-            style={{ background: "linear-gradient(135deg, #111111 0%, #0A0A0A 50%, #000000 100%)" }}
-          />
+            className="w-full h-full flex flex-col items-center justify-center gap-3"
+            style={{ background: "linear-gradient(160deg, #130f1e 0%, #0a0812 50%, #060409 100%)" }}
+          >
+            <div className="relative flex items-center justify-center" style={{ width: 52, height: 52 }}>
+              <div className="absolute inset-0 rounded-full" style={{ border: "1px solid rgba(196,154,40,0.22)", boxShadow: "0 0 14px rgba(196,154,40,0.07)" }} />
+              <div className="absolute inset-[8px] rounded-full" style={{ border: "1px solid rgba(196,154,40,0.13)" }} />
+              <div className="absolute inset-[16px] rounded-full" style={{ border: "1px solid rgba(196,154,40,0.07)" }} />
+              <Music className="w-4 h-4" style={{ color: "rgba(196,154,40,0.35)", filter: "drop-shadow(0 0 5px rgba(196,154,40,0.18))" }} />
+            </div>
+            <p className="text-[9px] tracking-[0.15em] uppercase text-center px-2" style={{ color: "rgba(196,154,40,0.35)", fontFamily: "'Cinzel', serif" }}>Awaiting Art</p>
+          </div>
         )}
       </div>
 
