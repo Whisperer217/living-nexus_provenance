@@ -1,21 +1,21 @@
 /*
   ╔══════════════════════════════════════════════════════════════════════════╗
-  ║  CREATIVE DRAWER — Living Nexus                                         ║
-  ║  A premium, sacred edit experience for creators.                        ║
+  ║  CREATIVE CHAPEL — Living Nexus                                         ║
+  ║  A sacred edit experience for creators. Tending to testimony.           ║
   ║                                                                         ║
-  ║  FREEZE FIX:                                                            ║
-  ║  • Backdrop uses onPointerDown + e.target===e.currentTarget guard       ║
-  ║    (prevents same-click-close from button click bubbling through portal)║
-  ║  • 120ms mount delay before backdrop becomes interactive                ║
-  ║  • Drawer panel stops pointer event propagation                         ║
-  ║  • overlayOpen uses "light" mode (no position:fixed — avoids layout     ║
-  ║    cascade that freezes the browser on SongDetailPage)                  ║
+  ║  FREEZE FIX v3 (permanent):                                             ║
+  ║  • overlayController REMOVED — was causing body.overflow reflow cascade ║
+  ║  • Scroll-lock targets .player-scroll-area div (not body)               ║
+  ║  • Mobile fallback: locks body.overflow if div not found                ║
+  ║  • Backdrop uses onPointerDown + target===currentTarget guard           ║
+  ║  • 120ms backdropActive delay prevents same-click-close                 ║
+  ║  • drawerContainerEl state (not ref) ensures Radix portals get          ║
+  ║    live DOM node — fixes dropdown-behind-drawer on all devices          ║
   ╚══════════════════════════════════════════════════════════════════════════╝
 */
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
-// overlayController intentionally removed — see FREEZE FIX v3 comment at top of file
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -91,39 +91,61 @@ const AI_CONSENT_OPTIONS = [
 /* ─── Design Tokens ──────────────────────────────────────────────────────── */
 
 const GOLD        = "#D4AF37";
-const GOLD_DIM    = "rgba(212,175,55,0.15)";
-const GOLD_BORDER = "rgba(212,175,55,0.28)";
-const GOLD_GLOW   = "rgba(212,175,55,0.08)";
-const SURFACE     = "rgba(8,6,16,0.99)";
-const SURFACE2    = "rgba(16,12,28,0.97)";
-const SURFACE3    = "rgba(22,16,38,0.95)";
-const TEXT_MUTED  = "rgba(255,255,255,0.42)";
-const TEXT_DIM    = "rgba(255,255,255,0.28)";
+const GOLD_BRIGHT = "#E8C84A";
+const GOLD_DIM    = "rgba(212,175,55,0.14)";
+const GOLD_BORDER = "rgba(212,175,55,0.26)";
+const GOLD_GLOW   = "rgba(212,175,55,0.07)";
+const SURFACE     = "rgba(6,4,14,0.99)";
+const SURFACE2    = "rgba(14,10,26,0.97)";
+const SURFACE3    = "rgba(20,14,36,0.95)";
+const TEXT_MUTED  = "rgba(255,255,255,0.40)";
+const TEXT_DIM    = "rgba(255,255,255,0.24)";
 
 /* ─── Sub-components ─────────────────────────────────────────────────────── */
 
 function SectionDivider({ label, icon }: { label: string; icon?: React.ReactNode }) {
   return (
-    <div className="flex items-center gap-3 my-7">
-      <div className="flex-1 h-px" style={{ background: "linear-gradient(90deg, transparent, rgba(212,175,55,0.22))" }} />
-      <div className="flex items-center gap-1.5">
-        {icon && <span style={{ color: GOLD, opacity: 0.7 }}>{icon}</span>}
-        <span className="text-xs tracking-[0.22em] uppercase" style={{ color: TEXT_MUTED, fontFamily: "'Cinzel', serif" }}>
+    <div className="flex items-center gap-3 my-9">
+      <div className="flex-1 h-px" style={{ background: "linear-gradient(90deg, transparent, rgba(212,175,55,0.28))" }} />
+      <div className="flex items-center gap-2">
+        {icon && <span style={{ color: GOLD, opacity: 0.65 }}>{icon}</span>}
+        <span className="text-xs tracking-[0.26em] uppercase" style={{ color: TEXT_MUTED, fontFamily: "'Cinzel', serif" }}>
           {label}
         </span>
       </div>
-      <div className="flex-1 h-px" style={{ background: "linear-gradient(90deg, rgba(212,175,55,0.22), transparent)" }} />
+      <div className="flex-1 h-px" style={{ background: "linear-gradient(90deg, rgba(212,175,55,0.28), transparent)" }} />
     </div>
   );
 }
 
 function FieldLabel({ children, hint }: { children: React.ReactNode; hint?: string }) {
   return (
-    <div className="mb-2">
-      <Label className="text-xs tracking-[0.14em] uppercase" style={{ color: TEXT_MUTED, fontFamily: "'Cinzel', serif" }}>
+    <div className="mb-2.5">
+      <Label className="text-xs tracking-[0.16em] uppercase" style={{ color: TEXT_MUTED, fontFamily: "'Cinzel', serif" }}>
         {children}
       </Label>
-      {hint && <p className="text-xs mt-0.5 leading-relaxed" style={{ color: TEXT_DIM }}>{hint}</p>}
+      {hint && <p className="text-xs mt-1 leading-relaxed" style={{ color: TEXT_DIM }}>{hint}</p>}
+    </div>
+  );
+}
+
+/* Sacred pulsing ring — used behind cover art when no art is present */
+function RelicRings() {
+  return (
+    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+      {[1, 2, 3].map((i) => (
+        <div
+          key={i}
+          className="absolute rounded-full"
+          style={{
+            width: 60 + i * 44,
+            height: 60 + i * 44,
+            border: `1px solid rgba(212,175,55,${0.18 - i * 0.04})`,
+            animation: `pulse ${2.4 + i * 0.6}s ease-in-out infinite`,
+            animationDelay: `${i * 0.4}s`,
+          }}
+        />
+      ))}
     </div>
   );
 }
@@ -143,7 +165,6 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
   const [aiDisclosure, setAiDisclosure] = useState<string>(song.aiDisclosure ?? "original");
   const [originStory, setOriginStory]   = useState(song.haaiOriginStory ?? "");
 
-  // External links — stored as JSON array of {platform: string, url: string}
   const parseLinks = (raw?: string | null): Array<{ platform: string; url: string }> => {
     if (!raw) return [];
     try { return JSON.parse(raw); } catch { return []; }
@@ -151,10 +172,11 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
   const [extLinks, setExtLinks] = useState<Array<{ platform: string; url: string }>>(
     parseLinks(song.externalLinksJson)
   );
-  const addExtLink = () => setExtLinks(prev => [...prev, { platform: "", url: "" }]);
+  const addExtLink    = () => setExtLinks(prev => [...prev, { platform: "", url: "" }]);
   const removeExtLink = (i: number) => setExtLinks(prev => prev.filter((_, idx) => idx !== i));
   const updateExtLink = (i: number, key: "platform" | "url", val: string) =>
     setExtLinks(prev => prev.map((l, idx) => idx === i ? { ...l, [key]: val } : l));
+
   const [lyrics, setLyrics]             = useState(song.lyricsText ?? "");
   const [creationDate, setCreationDate] = useState(
     song.releaseDate ? song.releaseDate.slice(0, 10) : ""
@@ -167,15 +189,15 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
   const coverInputRef                       = useRef<HTMLInputElement>(null);
 
   /* ── Video ── */
-  const [videoUrl, setVideoUrl]         = useState(song.videoUrl ?? "");
-  const [videoWid, setVideoWid]         = useState(song.videoWitnessId ?? "");
-  const [videoFile, setVideoFile]       = useState<File | null>(null);
+  const [videoUrl, setVideoUrl]             = useState(song.videoUrl ?? "");
+  const [videoWid, setVideoWid]             = useState(song.videoWitnessId ?? "");
+  const [videoFile, setVideoFile]           = useState<File | null>(null);
   const [videoUploading, setVideoUploading] = useState(false);
-  const videoInputRef                   = useRef<HTMLInputElement>(null);
-  const drawerRootRef                    = useRef<HTMLDivElement>(null);
-  /* T2 FIX: drawerRootRef.current is null on first render — use state so
-     SelectContent always gets the live DOM node as its portal container */
-  const [drawerContainerEl, setDrawerContainerEl] = useState<HTMLDivElement | null>(null);
+  const videoInputRef                       = useRef<HTMLInputElement>(null);
+
+  /* ── Drawer container ref — used for Radix portal targeting ── */
+  const drawerRootRef                                       = useRef<HTMLDivElement>(null);
+  const [drawerContainerEl, setDrawerContainerEl]           = useState<HTMLDivElement | null>(null);
 
   /* ── AI Caption ── */
   const [captionGenerating, setCaptionGenerating] = useState(false);
@@ -196,10 +218,29 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
     const t = setTimeout(() => setBackdropActive(true), 120);
     return () => clearTimeout(t);
   }, []);
-  /* T2 FIX: Set drawerContainerEl after mount so SelectContent portal has a live node */
+
+  /* ── T2 FIX: Set drawerContainerEl after mount so SelectContent portal has live node ── */
   useEffect(() => {
     if (drawerRootRef.current) setDrawerContainerEl(drawerRootRef.current);
   }, []);
+
+  /* ── FREEZE FIX: Scroll-lock targets .player-scroll-area div (not body) ── */
+  useEffect(() => {
+    const scrollArea = document.querySelector<HTMLElement>(".player-scroll-area");
+    if (scrollArea) {
+      const prev = scrollArea.style.overflow;
+      scrollArea.style.overflow = "hidden";
+      return () => { scrollArea.style.overflow = prev; };
+    } else {
+      // Mobile Safari fallback: lock body if scroll area div not found
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => { document.body.style.overflow = prev; };
+    }
+  }, []);
+
+  /* ── Stable onClose (prevents stale closure in backdrop handler) ── */
+  const stableOnClose = useCallback(() => onClose(), [onClose]);
 
   /* ── Mutations ── */
   const updateMetadata = trpc.songs.updateMetadata.useMutation({
@@ -305,9 +346,9 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
       try {
         const base64 = (ev.target?.result as string).split(",")[1];
         const videoBuf = await videoFile.arrayBuffer();
-        const hashBuf = await crypto.subtle.digest("SHA-256", videoBuf);
-        const hashArr = Array.from(new Uint8Array(hashBuf));
-        const hashHex = hashArr.map(b => b.toString(16).padStart(2, "0")).join("");
+        const hashBuf  = await crypto.subtle.digest("SHA-256", videoBuf);
+        const hashArr  = Array.from(new Uint8Array(hashBuf));
+        const hashHex  = hashArr.map(b => b.toString(16).padStart(2, "0")).join("");
         const videoWitnessId = `WID-VID-${hashHex.slice(0, 8).toUpperCase()}-${hashHex.slice(8, 16).toUpperCase()}`;
         await uploadVideoMutation.mutateAsync({
           songId: song.id,
@@ -329,9 +370,8 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
     if (!title.trim()) { toast.error("Add a title first"); return; }
     setCaptionGenerating(true);
     generateCaptionMutation.mutate({
-      title: title.trim(),
+      title,
       genre: genre || undefined,
-      workType: (song.contentType as any) || "audio",
     });
   }
 
@@ -345,21 +385,19 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
       genre: genre || null,
       caption: caption || null,
       description: description || null,
-      status: status as "Draft" | "Published" | "Unlisted",
+      status: status as "Published" | "Draft" | "Unlisted" | "Deleted",
       aiConsent: aiConsent as "prohibited" | "permitted_attribution" | "permitted",
-      aiDisclosure: aiDisclosure as "original" | "ai_assisted" | "ai_generated" | "human_authored_ai_instrument",
+      aiDisclosure: aiDisclosure as "original" | "human_authored_ai_instrument" | "ai_assisted" | "ai_generated",
       haaiOriginStory: originStory || null,
-      externalLinksJson: extLinks.filter(l => l.platform && l.url).length > 0
-        ? JSON.stringify(extLinks.filter(l => l.platform && l.url))
-        : null,
-      releaseDate: creationDate || null,
+      externalLinksJson: extLinks.length > 0 ? JSON.stringify(extLinks) : null,
+      releaseDate: creationDate || undefined,
     });
   }
 
-  /* ── Save lyrics separately ── */
+  /* ── Save Lyrics ── */
   function handleSaveLyrics() {
     setLyricsSaving(true);
-    updateLyrics.mutate({ songId: song.id, lyricsText: lyrics });
+    updateLyrics.mutate({ songId: song.id, lyricsText: lyrics || "" });
   }
 
   /* ── Delete ── */
@@ -368,110 +406,101 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
     deleteSong.mutate({ songId: song.id });
   }
 
-  /* ── FREEZE FIX: Stable onClose reference for Escape key ── */
-  const stableOnClose = useCallback(() => onClose(), [onClose]);
-
-  /* ── Keyboard ── */
+  /* ── Keyboard close ── */
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === "Escape") stableOnClose(); };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
   }, [stableOnClose]);
 
-  /* ── FREEZE FIX v3: Self-contained scroll lock on the actual scroll container ──
-     MainLayout renders a scrollable <div class="player-scroll-area"> NOT window scroll.
-     Locking body.overflow:hidden (what overlayController does) triggers a full browser
-     layout reflow + fires SongDetailPage's window.scroll listener + React setState =
-     main-thread lock (the freeze). Instead we lock the scroll container div directly.
-     This is zero-reflow: the div's overflow is toggled, body is untouched. */
-  useEffect(() => {
-    /* Lock the actual scroll container (MainLayout div) */
-    const scrollArea = document.querySelector<HTMLElement>(".player-scroll-area");
-    const prevDivOverflow = scrollArea?.style.overflowY ?? "";
-    if (scrollArea) scrollArea.style.overflowY = "hidden";
-    /* Mobile Safari fallback: if no scroll area found, lock body */
-    const prevBodyOverflow = document.body.style.overflow;
-    if (!scrollArea) document.body.style.overflow = "hidden";
-    return () => {
-      if (scrollArea) scrollArea.style.overflowY = prevDivOverflow;
-      else document.body.style.overflow = prevBodyOverflow;
-    };
-  }, []);
+  /* ─────────────────────────────────────────────────────────────────────── */
+  /* RENDER                                                                  */
+  /* ─────────────────────────────────────────────────────────────────────── */
 
-  /* ── Entrance animation ── */
-  const [visible, setVisible] = useState(false);
-  useEffect(() => { requestAnimationFrame(() => setVisible(true)); }, []);
-
-  /* ── FREEZE FIX: Backdrop pointer handler ── */
-  const handleBackdropPointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
-    // Only close if the pointer landed directly on the backdrop (not on any child)
-    if (!backdropActive) return;
-    if (e.target === e.currentTarget) stableOnClose();
-  }, [backdropActive, stableOnClose]);
-
-  /* ─── Render ─────────────────────────────────────────────────────────── */
   return createPortal(
     <div
-      ref={drawerRootRef}
-      className="fixed inset-0"
+      className="fixed inset-0 flex justify-end"
       style={{ zIndex: 9000 }}
-      aria-modal="true"
-      role="dialog"
-      aria-label="Creative Drawer"
+      onPointerDown={(e) => {
+        if (!backdropActive) return;
+        if (e.target === e.currentTarget) stableOnClose();
+      }}
     >
-      {/* ── FREEZE FIX: Backdrop uses onPointerDown + target guard ── */}
+      {/* ── Backdrop ── */}
       <div
-        className="absolute inset-0 transition-opacity duration-500"
+        className="absolute inset-0"
         style={{
-          background: "radial-gradient(ellipse at 65% 35%, rgba(30,15,55,0.88) 0%, rgba(0,0,0,0.94) 100%)",
-          opacity: visible ? 1 : 0,
-          cursor: backdropActive ? "pointer" : "default",
+          background: "rgba(4,2,10,0.72)",
+          backdropFilter: "blur(6px)",
+          WebkitBackdropFilter: "blur(6px)",
         }}
-        onPointerDown={handleBackdropPointerDown}
       />
 
-      {/* ── FREEZE FIX: Drawer stops pointer propagation ── */}
+      {/* ── Drawer Panel ── */}
       <div
-        className="absolute top-0 right-0 h-full flex flex-col"
+        ref={drawerRootRef}
+        className="relative flex flex-col h-full overflow-hidden"
         style={{
-          width: "min(620px, 100vw)",
+          width: "min(640px, 100vw)",
           background: SURFACE,
           borderLeft: `1px solid ${GOLD_BORDER}`,
-          boxShadow: `-32px 0 100px rgba(0,0,0,0.75), -4px 0 32px ${GOLD_GLOW}`,
-          transform: visible ? "translateX(0)" : "translateX(100%)",
-          transition: "transform 0.4s cubic-bezier(0.22,1,0.36,1)",
-          overflowY: "auto",
-          overflowX: "hidden",
+          boxShadow: `-24px 0 80px rgba(0,0,0,0.7), -4px 0 24px rgba(212,175,55,0.06)`,
+          animation: "slideInRight 0.32s cubic-bezier(0.22,1,0.36,1)",
         }}
         onPointerDown={(e) => e.stopPropagation()}
-        onClick={(e) => e.stopPropagation()}
       >
+        {/* Sacred geometric background texture */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            backgroundImage: `
+              radial-gradient(circle at 20% 20%, rgba(212,175,55,0.025) 0%, transparent 50%),
+              radial-gradient(circle at 80% 80%, rgba(212,175,55,0.018) 0%, transparent 50%),
+              radial-gradient(circle at 50% 50%, rgba(212,175,55,0.012) 0%, transparent 70%)
+            `,
+            zIndex: 0,
+          }}
+        />
+
         {/* ── Header ── */}
         <div
-          className="sticky top-0 flex items-center justify-between px-7 py-4"
+          className="relative flex items-center justify-between px-7 py-5 flex-shrink-0"
           style={{
-            background: `linear-gradient(180deg, ${SURFACE} 75%, transparent)`,
-            borderBottom: `1px solid ${GOLD_BORDER}`,
-            zIndex: 10,
+            borderBottom: `1px solid rgba(212,175,55,0.12)`,
+            background: `linear-gradient(180deg, rgba(14,10,26,0.98) 0%, transparent 100%)`,
+            zIndex: 1,
           }}
         >
-          <div>
-            <p className="text-xs tracking-[0.28em] uppercase mb-0.5" style={{ color: GOLD, fontFamily: "'Cinzel', serif", opacity: 0.65 }}>
-              Creative Drawer
-            </p>
-            <h2 className="text-sm font-semibold truncate max-w-[380px]" style={{ color: "rgba(255,255,255,0.88)", fontFamily: "'Cinzel', serif" }}>
-              {song.title}
-            </h2>
+          <div className="flex items-center gap-3">
+            {/* Sacred note glyph */}
+            <div
+              className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
+              style={{ background: GOLD_DIM, border: `1px solid ${GOLD_BORDER}` }}
+            >
+              <Music className="w-3.5 h-3.5" style={{ color: GOLD }} />
+            </div>
+            <div>
+              <h2
+                className="text-sm font-semibold tracking-[0.14em] uppercase"
+                style={{ color: GOLD, fontFamily: "'Cinzel', serif" }}
+              >
+                Creative Chapel
+              </h2>
+              <p className="text-xs" style={{ color: TEXT_DIM }}>
+                Tend to your testimony
+              </p>
+            </div>
           </div>
+
           <div className="flex items-center gap-2">
+            {/* Preview link */}
             {song.witnessId && (
               <a
                 href={`/song/${song.id}`}
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all hover:opacity-90"
-                style={{ background: GOLD_DIM, border: `1px solid ${GOLD_BORDER}`, color: GOLD, fontFamily: "'Cinzel', serif", letterSpacing: "0.08em" }}
-                title="View public page"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all hover:opacity-80"
+                style={{ background: GOLD_DIM, border: `1px solid ${GOLD_BORDER}`, color: GOLD, fontFamily: "'Cinzel', serif", letterSpacing: "0.06em" }}
               >
                 <Eye className="w-3 h-3" />
                 Preview
@@ -479,86 +508,124 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
             )}
             <button
               onClick={stableOnClose}
-              className="rounded-full p-2 transition-all hover:opacity-80"
-              style={{ color: TEXT_MUTED, background: "rgba(255,255,255,0.05)" }}
-              aria-label="Close"
+              className="w-8 h-8 rounded-full flex items-center justify-center transition-all hover:opacity-80"
+              style={{ background: "rgba(255,255,255,0.05)", border: `1px solid rgba(255,255,255,0.1)`, color: TEXT_MUTED }}
             >
               <X className="w-4 h-4" />
             </button>
           </div>
         </div>
 
-        {/* ── Body ── */}
-        <div className="flex-1 pb-8">
+        {/* ── Scrollable body ── */}
+        <div className="relative flex-1 overflow-y-auto" style={{ zIndex: 1 }}>
 
-          {/* ═══ HERO COVER ART ══════════════════════════════════════════ */}
+          {/* ═══════════════════════════════════════════════════════════════ */}
+          {/* ART HERO — The Majestic Centerpiece                            */}
+          {/* ═══════════════════════════════════════════════════════════════ */}
           <div
-            className="relative w-full overflow-hidden cursor-pointer"
-            style={{ height: 240, background: SURFACE2, borderBottom: `1px solid ${GOLD_BORDER}` }}
-            onClick={() => coverInputRef.current?.click()}
+            className="relative w-full cursor-pointer overflow-hidden"
+            style={{ height: 280, background: SURFACE2 }}
             onMouseEnter={() => setCoverHovered(true)}
             onMouseLeave={() => setCoverHovered(false)}
+            onClick={() => coverInputRef.current?.click()}
           >
             {coverUrl ? (
-              <img
-                src={coverUrl}
-                alt="Cover art"
-                className="w-full h-full object-cover"
-                style={{ transition: "transform 0.5s ease", transform: coverHovered ? "scale(1.04)" : "scale(1)" }}
-              />
+              <>
+                <img
+                  src={coverUrl}
+                  alt="Cover art"
+                  className="w-full h-full object-cover"
+                  style={{
+                    transition: "transform 0.7s cubic-bezier(0.22,1,0.36,1)",
+                    transform: coverHovered ? "scale(1.06)" : "scale(1)",
+                  }}
+                />
+                {/* Vignette overlay — always present */}
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    background: "linear-gradient(180deg, rgba(6,4,14,0.2) 0%, transparent 35%, transparent 55%, rgba(6,4,14,0.85) 100%)",
+                  }}
+                />
+              </>
             ) : (
-              <div className="w-full h-full flex flex-col items-center justify-center gap-3">
-                <div className="w-20 h-20 rounded-full flex items-center justify-center" style={{ background: GOLD_DIM, border: `1px solid ${GOLD_BORDER}` }}>
-                  <Music className="w-10 h-10" style={{ color: GOLD, opacity: 0.45 }} />
+              <>
+                {/* Sacred relic rings — empty state */}
+                <RelicRings />
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
+                  <div
+                    className="w-20 h-20 rounded-full flex items-center justify-center"
+                    style={{ background: GOLD_DIM, border: `1px solid ${GOLD_BORDER}` }}
+                  >
+                    <Music className="w-9 h-9" style={{ color: GOLD, opacity: 0.5 }} />
+                  </div>
+                  <span
+                    className="text-sm tracking-[0.22em] uppercase"
+                    style={{ color: TEXT_MUTED, fontFamily: "'Cinzel', serif" }}
+                  >
+                    Awaiting Art
+                  </span>
                 </div>
-                <span className="text-sm tracking-widest uppercase" style={{ color: TEXT_MUTED, fontFamily: "'Cinzel', serif" }}>
-                  No Cover Art
-                </span>
-              </div>
+              </>
             )}
 
-            {/* Bottom gradient */}
-            <div className="absolute inset-x-0 bottom-0" style={{ height: 90, background: "linear-gradient(0deg, rgba(8,6,16,0.9) 0%, transparent 100%)" }} />
-
-            {/* Hover overlay */}
+            {/* Hover overlay — ceremonial replace */}
             <div
-              className="absolute inset-0 flex flex-col items-center justify-center gap-2 transition-opacity duration-300"
-              style={{ background: "rgba(0,0,0,0.55)", opacity: coverHovered ? 1 : 0 }}
+              className="absolute inset-0 flex flex-col items-center justify-center gap-3 transition-all duration-400"
+              style={{
+                background: coverHovered ? "rgba(4,2,10,0.6)" : "transparent",
+                opacity: coverHovered ? 1 : 0,
+              }}
             >
               {coverUploading ? (
-                <Loader2 className="w-8 h-8 animate-spin" style={{ color: GOLD }} />
+                <Loader2 className="w-10 h-10 animate-spin" style={{ color: GOLD }} />
               ) : (
                 <>
-                  <div className="w-14 h-14 rounded-full flex items-center justify-center" style={{ background: GOLD_DIM, border: `1px solid ${GOLD_BORDER}` }}>
+                  <div
+                    className="w-16 h-16 rounded-full flex items-center justify-center"
+                    style={{
+                      background: GOLD_DIM,
+                      border: `1px solid ${GOLD_BORDER}`,
+                      boxShadow: `0 0 32px rgba(212,175,55,0.2)`,
+                    }}
+                  >
                     <ImageIcon className="w-7 h-7" style={{ color: GOLD }} />
                   </div>
-                  <span className="text-sm tracking-widest uppercase" style={{ color: GOLD, fontFamily: "'Cinzel', serif" }}>
-                    {coverUrl ? "Replace Art" : "Add Cover Art"}
-                  </span>
+                  <div className="text-center">
+                    <p
+                      className="text-sm font-semibold tracking-[0.18em] uppercase"
+                      style={{ color: GOLD, fontFamily: "'Cinzel', serif" }}
+                    >
+                      {coverUrl ? "Replace Art" : "Consecrate Art"}
+                    </p>
+                    <p className="text-xs mt-1" style={{ color: "rgba(212,175,55,0.5)" }}>
+                      JPG, PNG, WebP — max 5MB
+                    </p>
+                  </div>
                 </>
               )}
             </div>
 
-            {/* Bottom-left hint */}
-            <div className="absolute bottom-3 left-5 flex items-center gap-1.5">
-              <Upload className="w-3 h-3" style={{ color: GOLD, opacity: 0.6 }} />
-              <span className="text-xs" style={{ color: GOLD, opacity: 0.6 }}>
-                {coverUrl ? "Click to replace" : "Click to add cover art"}
-              </span>
-            </div>
-
-            {/* Provenance stamp badge — bottom right */}
+            {/* WID badge — bottom right */}
             {song.witnessId && (
               <div
-                className="absolute bottom-3 right-5 flex items-center gap-1.5 px-2.5 py-1 rounded-full"
-                style={{ background: "rgba(0,0,0,0.7)", border: `1px solid ${GOLD_BORDER}` }}
+                className="absolute bottom-4 right-5 flex items-center gap-1.5 px-2.5 py-1 rounded-full"
+                style={{ background: "rgba(4,2,10,0.8)", border: `1px solid ${GOLD_BORDER}` }}
               >
                 <Hash className="w-2.5 h-2.5" style={{ color: GOLD }} />
-                <span className="text-xs font-mono" style={{ color: GOLD, fontSize: "0.65rem", letterSpacing: "0.06em" }}>
+                <span className="text-xs font-mono" style={{ color: GOLD, fontSize: "0.62rem", letterSpacing: "0.06em" }}>
                   {song.witnessId.slice(0, 16)}…
                 </span>
               </div>
             )}
+
+            {/* Upload hint — bottom left */}
+            <div className="absolute bottom-4 left-5 flex items-center gap-1.5">
+              <Upload className="w-3 h-3" style={{ color: GOLD, opacity: 0.5 }} />
+              <span className="text-xs" style={{ color: "rgba(212,175,55,0.5)" }}>
+                {coverUrl ? "Click to replace" : "Click to add cover art"}
+              </span>
+            </div>
           </div>
 
           <input
@@ -570,10 +637,10 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
           />
 
           {/* ── Content sections ── */}
-          <div className="px-7 pt-7">
+          <div className="px-8 pt-8">
 
-            {/* ═══ TITLE ═══════════════════════════════════════════════ */}
-            <div className="mb-6">
+            {/* ═══ TITLE — The Most Prominent Field ═══════════════════════ */}
+            <div className="mb-8">
               <FieldLabel>Song / Work Name</FieldLabel>
               <Input
                 value={title}
@@ -582,28 +649,39 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
                 style={{
                   background: SURFACE2,
                   border: `1px solid ${GOLD_BORDER}`,
-                  color: "rgba(255,255,255,0.94)",
+                  borderBottom: `2px solid ${title ? GOLD : GOLD_BORDER}`,
+                  color: "rgba(255,255,255,0.96)",
                   fontFamily: "'Cinzel', serif",
-                  fontSize: "1.15rem",
+                  fontSize: "1.25rem",
                   fontWeight: 600,
-                  letterSpacing: "0.03em",
-                  padding: "0.7rem 1rem",
+                  letterSpacing: "0.04em",
+                  padding: "0.85rem 1.1rem",
                   height: "auto",
-                  boxShadow: title ? `0 0 24px ${GOLD_GLOW} inset` : "none",
-                  transition: "box-shadow 0.3s ease",
+                  boxShadow: title ? `0 0 32px rgba(212,175,55,0.06) inset, 0 4px 24px rgba(212,175,55,0.04)` : "none",
+                  transition: "all 0.35s ease",
+                  borderRadius: "0.5rem",
                 }}
               />
             </div>
 
-            {/* ═══ CORE METADATA ═══════════════════════════════════════ */}
-            <div className="grid grid-cols-2 gap-4 mb-6">
+            {/* ═══ CORE METADATA ═══════════════════════════════════════════ */}
+            <div className="grid grid-cols-2 gap-5 mb-7">
               <div>
                 <FieldLabel>Genre</FieldLabel>
                 <Select value={genre} onValueChange={setGenre}>
-                  <SelectTrigger style={{ background: SURFACE2, border: `1px solid ${GOLD_BORDER}`, color: "rgba(255,255,255,0.8)" }}>
+                  <SelectTrigger
+                    style={{
+                      background: SURFACE2,
+                      border: `1px solid ${GOLD_BORDER}`,
+                      color: "rgba(255,255,255,0.8)",
+                    }}
+                  >
                     <SelectValue placeholder="Select genre" />
                   </SelectTrigger>
-                  <SelectContent container={drawerContainerEl} style={{ background: "#0d0b1a", border: `1px solid ${GOLD_BORDER}` }}>
+                  <SelectContent
+                    container={drawerContainerEl}
+                    style={{ background: "#0c0a1c", border: `1px solid ${GOLD_BORDER}` }}
+                  >
                     {GENRES.map((g) => (
                       <SelectItem key={g} value={g} style={{ color: "rgba(255,255,255,0.8)" }}>{g}</SelectItem>
                     ))}
@@ -613,10 +691,19 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
               <div>
                 <FieldLabel>Visibility</FieldLabel>
                 <Select value={status} onValueChange={setStatus}>
-                  <SelectTrigger style={{ background: SURFACE2, border: `1px solid ${GOLD_BORDER}`, color: "rgba(255,255,255,0.8)" }}>
+                  <SelectTrigger
+                    style={{
+                      background: SURFACE2,
+                      border: `1px solid ${GOLD_BORDER}`,
+                      color: "rgba(255,255,255,0.8)",
+                    }}
+                  >
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent container={drawerContainerEl} style={{ background: "#0d0b1a", border: `1px solid ${GOLD_BORDER}` }}>
+                  <SelectContent
+                    container={drawerContainerEl}
+                    style={{ background: "#0c0a1c", border: `1px solid ${GOLD_BORDER}` }}
+                  >
                     {STATUS_OPTIONS.map((s) => (
                       <SelectItem key={s.value} value={s.value}>
                         <span style={{ color: s.color }}>{s.label}</span>
@@ -629,27 +716,39 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
             </div>
 
             {/* Creation Date */}
-            <div className="mb-6">
+            <div className="mb-7">
               <FieldLabel hint="When was this work originally created?">Original Creation Date</FieldLabel>
               <Input
                 type="date"
                 value={creationDate}
                 onChange={(e) => setCreationDate(e.target.value)}
-                style={{ background: SURFACE2, border: `1px solid ${GOLD_BORDER}`, color: "rgba(255,255,255,0.8)", colorScheme: "dark" }}
+                style={{
+                  background: SURFACE2,
+                  border: `1px solid ${GOLD_BORDER}`,
+                  color: "rgba(255,255,255,0.8)",
+                  colorScheme: "dark",
+                }}
               />
             </div>
 
-            {/* ═══ AI CAPTION ══════════════════════════════════════════ */}
+            {/* ═══ CAPTION & DESCRIPTION ═══════════════════════════════════ */}
             <SectionDivider label="Caption" icon={<Sparkles className="w-3.5 h-3.5" />} />
 
-            <div className="mb-6">
-              <div className="flex items-center justify-between mb-2">
+            <div className="mb-7">
+              <div className="flex items-start justify-between mb-2.5">
                 <FieldLabel hint="A short note visible on your work's public page">Caption</FieldLabel>
                 <button
                   onClick={handleGenerateCaption}
                   disabled={captionGenerating || !title.trim()}
-                  className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs transition-all hover:opacity-90 disabled:opacity-40"
-                  style={{ background: GOLD_DIM, border: `1px solid ${GOLD_BORDER}`, color: GOLD, fontFamily: "'Cinzel', serif", letterSpacing: "0.06em" }}
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs transition-all hover:opacity-90 disabled:opacity-40 flex-shrink-0 ml-3"
+                  style={{
+                    background: `linear-gradient(135deg, rgba(212,175,55,0.18), rgba(212,175,55,0.08))`,
+                    border: `1px solid ${GOLD_BORDER}`,
+                    color: GOLD,
+                    fontFamily: "'Cinzel', serif",
+                    letterSpacing: "0.08em",
+                    boxShadow: `0 0 16px rgba(212,175,55,0.06)`,
+                  }}
                 >
                   {captionGenerating
                     ? <Loader2 className="w-3 h-3 animate-spin" />
@@ -663,36 +762,47 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
                 onChange={(e) => setCaption(e.target.value)}
                 rows={3}
                 placeholder="A brief note about this work, or click AI Generate above…"
-                style={{ background: SURFACE2, border: `1px solid ${GOLD_BORDER}`, color: "rgba(255,255,255,0.8)", resize: "none" }}
+                style={{
+                  background: SURFACE2,
+                  border: `1px solid ${GOLD_BORDER}`,
+                  color: "rgba(255,255,255,0.82)",
+                  resize: "none",
+                  lineHeight: "1.65",
+                }}
               />
-              <p className="text-xs mt-1 text-right" style={{ color: TEXT_DIM }}>{caption.length} chars</p>
+              <p className="text-xs mt-1.5 text-right" style={{ color: TEXT_DIM }}>{caption.length} chars</p>
             </div>
 
-            {/* Description */}
-            <div className="mb-2">
+            <div className="mb-7">
               <FieldLabel hint="Extended description shown on the work's detail page">Description</FieldLabel>
               <Textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={4}
                 placeholder="Tell the story of this work in more depth…"
-                style={{ background: SURFACE2, border: `1px solid ${GOLD_BORDER}`, color: "rgba(255,255,255,0.8)", resize: "vertical", lineHeight: "1.65" }}
+                style={{
+                  background: SURFACE2,
+                  border: `1px solid ${GOLD_BORDER}`,
+                  color: "rgba(255,255,255,0.82)",
+                  resize: "vertical",
+                  lineHeight: "1.7",
+                }}
               />
             </div>
 
-            {/* ═══ ADD VIDEO ═══════════════════════════════════════════ */}
+            {/* ═══ ADD VIDEO ═══════════════════════════════════════════════ */}
             <SectionDivider label="Video" icon={<Video className="w-3.5 h-3.5" />} />
 
-            <div className="mb-6">
+            <div className="mb-7">
               <button
-                className="w-full flex items-center justify-between py-2.5 px-4 rounded-xl transition-all"
+                className="w-full flex items-center justify-between py-3 px-5 rounded-xl transition-all"
                 style={{
-                  background: videoExpanded ? GOLD_DIM : "rgba(255,255,255,0.03)",
+                  background: videoExpanded ? GOLD_DIM : "rgba(255,255,255,0.025)",
                   border: `1px solid ${videoExpanded ? GOLD_BORDER : "rgba(255,255,255,0.07)"}`,
                 }}
                 onClick={() => setVideoExpanded((v) => !v)}
               >
-                <div className="flex items-center gap-2.5">
+                <div className="flex items-center gap-3">
                   <Video className="w-4 h-4" style={{ color: GOLD, opacity: 0.75 }} />
                   <span className="text-sm" style={{ color: videoExpanded ? GOLD : "rgba(255,255,255,0.6)", fontFamily: "'Cinzel', serif", letterSpacing: "0.08em" }}>
                     {videoUrl ? "Music Video Attached" : "Add Music Video"}
@@ -714,7 +824,7 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
                     </div>
                   )}
                   <div
-                    className="rounded-xl p-5 flex flex-col items-center gap-3 cursor-pointer transition-all hover:opacity-90"
+                    className="rounded-xl p-6 flex flex-col items-center gap-3 cursor-pointer transition-all hover:opacity-90"
                     style={{ background: SURFACE2, border: `2px dashed ${GOLD_BORDER}` }}
                     onClick={() => videoInputRef.current?.click()}
                   >
@@ -739,7 +849,7 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
                       </>
                     ) : (
                       <>
-                        <Upload className="w-8 h-8" style={{ color: GOLD, opacity: 0.5 }} />
+                        <Upload className="w-8 h-8" style={{ color: GOLD, opacity: 0.45 }} />
                         <p className="text-sm" style={{ color: TEXT_MUTED }}>
                           {videoUrl ? "Click to replace video" : "Click to upload a music video"}
                         </p>
@@ -755,7 +865,7 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
                     onChange={(e) => { const f = e.target.files?.[0]; if (f) setVideoFile(f); }}
                   />
                   {videoWid && (
-                    <div className="flex items-center gap-2 px-3 py-2 rounded-lg" style={{ background: GOLD_DIM, border: `1px solid ${GOLD_BORDER}` }}>
+                    <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg" style={{ background: GOLD_DIM, border: `1px solid ${GOLD_BORDER}` }}>
                       <Hash className="w-3.5 h-3.5 flex-shrink-0" style={{ color: GOLD }} />
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-semibold" style={{ color: GOLD }}>Video Witness ID</p>
@@ -767,54 +877,18 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
               )}
             </div>
 
-            {/* ═══ ORIGIN STORY ════════════════════════════════════════ */}
-            {/* ═══ EXTERNAL LINKS ═══════════════════════════════════ */}
-            <SectionDivider label="Find It Elsewhere" icon={<ExternalLink className="w-3.5 h-3.5" />} />
-            <div className="mb-6">
-              <p className="text-xs mb-3 leading-relaxed" style={{ color: "rgba(255,255,255,0.30)", fontStyle: "italic" }}>
-                Link to this work on other platforms (Spotify, SoundCloud, Bandcamp, YouTube, etc.)
-              </p>
-              <div className="space-y-2 mb-3">
-                {extLinks.map((link, i) => (
-                  <div key={i} className="flex gap-2 items-center">
-                    <Input
-                      value={link.platform}
-                      onChange={e => updateExtLink(i, "platform", e.target.value)}
-                      placeholder="Platform (e.g. Spotify)"
-                      className="w-32 flex-shrink-0 text-xs h-8"
-                      style={{ background: SURFACE3, border: `1px solid rgba(196,154,40,0.2)`, color: "rgba(255,255,255,0.85)", fontSize: "0.78rem" }}
-                    />
-                    <Input
-                      value={link.url}
-                      onChange={e => updateExtLink(i, "url", e.target.value)}
-                      placeholder="https://..."
-                      className="flex-1 text-xs h-8"
-                      style={{ background: SURFACE3, border: `1px solid rgba(196,154,40,0.2)`, color: "rgba(255,255,255,0.85)", fontSize: "0.78rem" }}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => removeExtLink(i)}
-                      className="w-7 h-7 flex-shrink-0 rounded-lg flex items-center justify-center transition-colors hover:bg-red-900/30"
-                      style={{ border: "1px solid rgba(239,68,68,0.2)", color: "rgba(239,68,68,0.5)" }}
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-              <button
-                type="button"
-                onClick={addExtLink}
-                className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full transition-all hover:opacity-80"
-                style={{ background: "rgba(196,154,40,0.06)", border: "1px solid rgba(196,154,40,0.2)", color: "rgba(196,154,40,0.65)" }}
-              >
-                <Plus className="w-3 h-3" /> Add Link
-              </button>
-            </div>
+            {/* ═══ ORIGIN STORY — Living Testimony ════════════════════════ */}
             <SectionDivider label="Origin Story" icon={<Flame className="w-3.5 h-3.5" />} />
 
-            <div className="mb-6">
-              <p className="text-sm mb-4 leading-relaxed" style={{ color: "rgba(255,255,255,0.36)", fontStyle: "italic" }}>
+            <div className="mb-7 relative">
+              {/* Faint flame watermark */}
+              <div
+                className="absolute right-3 top-8 pointer-events-none"
+                style={{ color: GOLD, opacity: 0.04, fontSize: "5rem" }}
+              >
+                🔥
+              </div>
+              <p className="text-sm mb-5 leading-relaxed" style={{ color: "rgba(255,255,255,0.32)", fontStyle: "italic", fontFamily: "'Cormorant Garamond', serif", fontSize: "0.95rem" }}>
                 What was the spark, the moment, the train of thought that brought this work into being?
                 What human experience, emotion, or revelation birthed it?
                 This is living testimony — not metadata.
@@ -822,35 +896,38 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
               <Textarea
                 value={originStory}
                 onChange={(e) => setOriginStory(e.target.value)}
-                rows={7}
+                rows={8}
                 placeholder="Write the origin story of this work…"
                 style={{
                   background: SURFACE3,
-                  border: `1px solid rgba(212,175,55,0.25)`,
+                  border: `1px solid rgba(212,175,55,0.22)`,
+                  borderLeft: `3px solid ${originStory ? GOLD : "rgba(212,175,55,0.15)"}`,
                   color: "rgba(255,255,255,0.88)",
                   resize: "vertical",
-                  lineHeight: "1.75",
-                  fontSize: "0.9rem",
-                  boxShadow: originStory ? `0 0 20px rgba(212,175,55,0.05) inset` : "none",
-                  transition: "box-shadow 0.4s ease",
+                  lineHeight: "1.8",
+                  fontSize: "0.92rem",
+                  fontFamily: "'Cormorant Garamond', serif",
+                  boxShadow: originStory ? `0 0 28px rgba(212,175,55,0.06) inset` : "none",
+                  transition: "all 0.4s ease",
+                  padding: "1rem 1.1rem",
                 }}
               />
-              <p className="text-xs mt-1.5 text-right" style={{ color: TEXT_DIM }}>{originStory.length} / 5000</p>
+              <p className="text-xs mt-2 text-right" style={{ color: TEXT_DIM }}>{originStory.length} / 5000</p>
             </div>
 
-            {/* ═══ LYRICS ══════════════════════════════════════════════ */}
+            {/* ═══ LYRICS ══════════════════════════════════════════════════ */}
             <SectionDivider label="Lyrics" icon={<BookOpen className="w-3.5 h-3.5" />} />
 
-            <div className="mb-6">
+            <div className="mb-7">
               <button
-                className="w-full flex items-center justify-between py-2.5 px-4 rounded-xl transition-all"
+                className="w-full flex items-center justify-between py-3 px-5 rounded-xl transition-all"
                 style={{
-                  background: lyricsExpanded ? GOLD_DIM : "rgba(255,255,255,0.03)",
+                  background: lyricsExpanded ? GOLD_DIM : "rgba(255,255,255,0.025)",
                   border: `1px solid ${lyricsExpanded ? GOLD_BORDER : "rgba(255,255,255,0.07)"}`,
                 }}
                 onClick={() => setLyricsExpanded((v) => !v)}
               >
-                <div className="flex items-center gap-2.5">
+                <div className="flex items-center gap-3">
                   <BookOpen className="w-4 h-4" style={{ color: GOLD, opacity: 0.75 }} />
                   <span className="text-sm" style={{ color: lyricsExpanded ? GOLD : "rgba(255,255,255,0.6)", fontFamily: "'Cinzel', serif", letterSpacing: "0.08em" }}>
                     {lyrics ? "Edit Lyrics" : "Add Lyrics"}
@@ -865,29 +942,35 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
               </button>
 
               {lyricsExpanded && (
-                <div className="mt-3">
+                <div className="mt-4">
                   <Textarea
                     value={lyrics}
                     onChange={(e) => setLyrics(e.target.value)}
                     rows={14}
                     placeholder={"Verse 1\n…\n\nChorus\n…"}
                     style={{
-                      background: "rgba(12,8,24,0.97)",
+                      background: "rgba(10,6,22,0.98)",
                       border: `1px solid ${GOLD_BORDER}`,
                       color: "rgba(255,255,255,0.85)",
                       resize: "vertical",
-                      fontFamily: "monospace",
-                      fontSize: "0.85rem",
-                      lineHeight: "1.85",
+                      fontFamily: "'Space Mono', monospace",
+                      fontSize: "0.84rem",
+                      lineHeight: "1.9",
                     }}
                   />
-                  <div className="flex items-center justify-between mt-2.5">
+                  <div className="flex items-center justify-between mt-3">
                     <span className="text-xs" style={{ color: TEXT_DIM }}>Lyrics are saved separately.</span>
                     <Button
                       size="sm"
                       onClick={handleSaveLyrics}
                       disabled={lyricsSaving}
-                      style={{ background: GOLD_DIM, border: `1px solid ${GOLD_BORDER}`, color: GOLD, fontFamily: "'Cinzel', serif", letterSpacing: "0.06em" }}
+                      style={{
+                        background: GOLD_DIM,
+                        border: `1px solid ${GOLD_BORDER}`,
+                        color: GOLD,
+                        fontFamily: "'Cinzel', serif",
+                        letterSpacing: "0.06em",
+                      }}
                     >
                       {lyricsSaving ? <Loader2 className="w-3 h-3 animate-spin mr-1.5" /> : null}
                       Save Lyrics
@@ -897,32 +980,87 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
               )}
             </div>
 
-            {/* ═══ PROVENANCE STAMP ════════════════════════════════════ */}
+            {/* ═══ FIND IT ELSEWHERE ═══════════════════════════════════════ */}
+            <SectionDivider label="Find It Elsewhere" icon={<ExternalLink className="w-3.5 h-3.5" />} />
+
+            <div className="mb-7">
+              <p className="text-xs mb-4 leading-relaxed" style={{ color: "rgba(255,255,255,0.28)", fontStyle: "italic" }}>
+                Link to this work on other platforms (Spotify, SoundCloud, Bandcamp, YouTube, etc.)
+              </p>
+              <div className="space-y-2.5 mb-4">
+                {extLinks.map((link, i) => (
+                  <div key={i} className="flex gap-2.5 items-center">
+                    <Input
+                      value={link.platform}
+                      onChange={e => updateExtLink(i, "platform", e.target.value)}
+                      placeholder="Platform"
+                      className="w-32 flex-shrink-0 text-xs h-9"
+                      style={{ background: SURFACE3, border: `1px solid rgba(212,175,55,0.18)`, color: "rgba(255,255,255,0.85)", fontSize: "0.78rem" }}
+                    />
+                    <Input
+                      value={link.url}
+                      onChange={e => updateExtLink(i, "url", e.target.value)}
+                      placeholder="https://…"
+                      className="flex-1 text-xs h-9"
+                      style={{ background: SURFACE3, border: `1px solid rgba(212,175,55,0.18)`, color: "rgba(255,255,255,0.85)", fontSize: "0.78rem" }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeExtLink(i)}
+                      className="w-8 h-8 flex-shrink-0 rounded-lg flex items-center justify-center transition-colors hover:bg-red-900/30"
+                      style={{ border: "1px solid rgba(239,68,68,0.2)", color: "rgba(239,68,68,0.5)" }}
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <button
+                type="button"
+                onClick={addExtLink}
+                className="flex items-center gap-2 text-xs px-4 py-2 rounded-full transition-all hover:opacity-80"
+                style={{ background: "rgba(212,175,55,0.06)", border: "1px solid rgba(212,175,55,0.18)", color: "rgba(212,175,55,0.6)" }}
+              >
+                <Plus className="w-3 h-3" /> Add Link
+              </button>
+            </div>
+
+            {/* ═══ PROVENANCE STAMP ════════════════════════════════════════ */}
             <SectionDivider label="Provenance Stamp" icon={<Shield className="w-3.5 h-3.5" />} />
 
-            <div className="mb-6 rounded-xl p-5" style={{ background: "rgba(212,175,55,0.04)", border: `1px solid ${GOLD_BORDER}` }}>
-              <div className="flex items-start gap-3">
-                <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: GOLD_DIM, border: `1px solid ${GOLD_BORDER}` }}>
-                  <Shield className="w-4 h-4" style={{ color: GOLD }} />
+            <div
+              className="mb-7 rounded-xl p-6"
+              style={{
+                background: "linear-gradient(135deg, rgba(212,175,55,0.05) 0%, rgba(212,175,55,0.02) 100%)",
+                border: `1px solid ${GOLD_BORDER}`,
+                boxShadow: `0 0 32px rgba(212,175,55,0.04) inset`,
+              }}
+            >
+              <div className="flex items-start gap-4">
+                <div
+                  className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+                  style={{ background: GOLD_DIM, border: `1px solid ${GOLD_BORDER}` }}
+                >
+                  <Shield className="w-4.5 h-4.5" style={{ color: GOLD }} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold mb-1" style={{ color: GOLD, fontFamily: "'Cinzel', serif" }}>
+                  <p className="text-sm font-semibold mb-1.5" style={{ color: GOLD, fontFamily: "'Cinzel', serif", letterSpacing: "0.06em" }}>
                     Witness ID — Sovereign Stamp
                   </p>
                   {song.witnessId ? (
                     <>
-                      <p className="text-xs font-mono break-all mb-2" style={{ color: "rgba(212,175,55,0.75)", lineHeight: 1.6 }}>
+                      <p className="text-xs font-mono break-all mb-2.5" style={{ color: "rgba(212,175,55,0.72)", lineHeight: 1.65 }}>
                         {song.witnessId}
                       </p>
-                      <p className="text-xs leading-relaxed" style={{ color: TEXT_MUTED }}>
+                      <p className="text-xs leading-relaxed mb-3" style={{ color: TEXT_MUTED }}>
                         This cryptographic proof is permanently anchored. Editing metadata does not change the WID — only replacing the audio file generates a new stamp.
                       </p>
                       <a
                         href={`/verify/${song.witnessId}`}
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex items-center gap-1.5 mt-3 text-xs hover:opacity-80 transition-opacity"
-                        style={{ color: GOLD }}
+                        className="inline-flex items-center gap-1.5 text-xs hover:opacity-80 transition-opacity"
+                        style={{ color: GOLD_BRIGHT }}
                       >
                         <Eye className="w-3 h-3" />
                         Verify on-chain →
@@ -937,19 +1075,19 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
               </div>
             </div>
 
-            {/* ═══ CREATION DISCLOSURE ═════════════════════════════════ */}
+            {/* ═══ CREATION DISCLOSURE ═════════════════════════════════════ */}
             <SectionDivider label="Creation Disclosure" icon={<FileText className="w-3.5 h-3.5" />} />
 
-            <div className="mb-6">
+            <div className="mb-7">
               <button
-                className="w-full flex items-center justify-between py-2.5 px-4 rounded-xl transition-all"
+                className="w-full flex items-center justify-between py-3 px-5 rounded-xl transition-all"
                 style={{
-                  background: disclosureExpanded ? GOLD_DIM : "rgba(255,255,255,0.03)",
+                  background: disclosureExpanded ? GOLD_DIM : "rgba(255,255,255,0.025)",
                   border: `1px solid ${disclosureExpanded ? GOLD_BORDER : "rgba(255,255,255,0.07)"}`,
                 }}
                 onClick={() => setDisclosureExpanded((v) => !v)}
               >
-                <div className="flex items-center gap-2.5">
+                <div className="flex items-center gap-3">
                   <Shield className="w-4 h-4" style={{ color: GOLD, opacity: 0.75 }} />
                   <span className="text-sm" style={{ color: disclosureExpanded ? GOLD : "rgba(255,255,255,0.6)", fontFamily: "'Cinzel', serif", letterSpacing: "0.08em" }}>
                     AI Disclosure &amp; Training Consent
@@ -959,17 +1097,17 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
               </button>
 
               {disclosureExpanded && (
-                <div className="mt-5 space-y-6">
+                <div className="mt-6 space-y-7">
                   <div>
                     <FieldLabel hint="How was this work created?">Creation Method</FieldLabel>
-                    <div className="grid grid-cols-1 gap-2 mt-2">
+                    <div className="grid grid-cols-1 gap-2.5 mt-2.5">
                       {DISCLOSURE_OPTIONS.map((opt) => (
                         <button
                           key={opt.value}
                           onClick={() => setAiDisclosure(opt.value)}
-                          className="flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all"
+                          className="flex items-center gap-3.5 px-5 py-3.5 rounded-xl text-left transition-all"
                           style={{
-                            background: aiDisclosure === opt.value ? GOLD_DIM : "rgba(255,255,255,0.03)",
+                            background: aiDisclosure === opt.value ? GOLD_DIM : "rgba(255,255,255,0.025)",
                             border: `1px solid ${aiDisclosure === opt.value ? GOLD_BORDER : "rgba(255,255,255,0.07)"}`,
                             color: aiDisclosure === opt.value ? GOLD : "rgba(255,255,255,0.6)",
                           }}
@@ -982,20 +1120,23 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
                   </div>
                   <div>
                     <FieldLabel hint="Can this work be used to train AI models?">AI Training Consent</FieldLabel>
-                    <div className="space-y-2 mt-2">
+                    <div className="space-y-2.5 mt-2.5">
                       {AI_CONSENT_OPTIONS.map((opt) => (
                         <button
                           key={opt.value}
                           onClick={() => setAiConsent(opt.value)}
-                          className="w-full flex items-start gap-3 px-4 py-3 rounded-xl text-left transition-all"
+                          className="w-full flex items-start gap-3.5 px-5 py-3.5 rounded-xl text-left transition-all"
                           style={{
-                            background: aiConsent === opt.value ? GOLD_DIM : "rgba(255,255,255,0.03)",
+                            background: aiConsent === opt.value ? GOLD_DIM : "rgba(255,255,255,0.025)",
                             border: `1px solid ${aiConsent === opt.value ? GOLD_BORDER : "rgba(255,255,255,0.07)"}`,
                           }}
                         >
                           <div
                             className="mt-0.5 w-3.5 h-3.5 rounded-full flex-shrink-0"
-                            style={{ border: `2px solid ${aiConsent === opt.value ? GOLD : "rgba(255,255,255,0.25)"}`, background: aiConsent === opt.value ? GOLD : "transparent" }}
+                            style={{
+                              border: `2px solid ${aiConsent === opt.value ? GOLD : "rgba(255,255,255,0.22)"}`,
+                              background: aiConsent === opt.value ? GOLD : "transparent",
+                            }}
                           />
                           <div>
                             <p className="text-sm font-medium" style={{ color: aiConsent === opt.value ? GOLD : "rgba(255,255,255,0.75)" }}>{opt.label}</p>
@@ -1009,35 +1150,53 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
               )}
             </div>
 
-            {/* ═══ DANGER ZONE ═════════════════════════════════════════ */}
+            {/* ═══ DANGER ZONE ═════════════════════════════════════════════ */}
             <SectionDivider label="Danger Zone" />
 
-            <div className="rounded-xl p-5 mb-6" style={{ background: "rgba(239,68,68,0.04)", border: "1px solid rgba(239,68,68,0.16)" }}>
+            <div
+              className="rounded-xl p-6 mb-8"
+              style={{ background: "rgba(239,68,68,0.03)", border: "1px solid rgba(239,68,68,0.14)" }}
+            >
               {!deleteConfirm ? (
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium mb-0.5" style={{ color: "#ef4444", fontFamily: "'Cinzel', serif" }}>Remove This Work</p>
-                    <p className="text-xs leading-relaxed" style={{ color: "rgba(239,68,68,0.5)" }}>This cannot be undone. The testimony will be lost.</p>
+                    <p className="text-sm font-medium mb-1" style={{ color: "#ef4444", fontFamily: "'Cinzel', serif" }}>Remove This Work</p>
+                    <p className="text-xs leading-relaxed" style={{ color: "rgba(239,68,68,0.45)" }}>This cannot be undone. The testimony will be lost.</p>
                   </div>
-                  <Button size="sm" variant="outline" onClick={() => setDeleteConfirm(true)} style={{ borderColor: "rgba(239,68,68,0.35)", color: "#ef4444", background: "transparent" }}>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setDeleteConfirm(true)}
+                    style={{ borderColor: "rgba(239,68,68,0.3)", color: "#ef4444", background: "transparent" }}
+                  >
                     <Trash2 className="w-3.5 h-3.5 mr-1.5" />Delete
                   </Button>
                 </div>
               ) : (
                 <div>
-                  <div className="flex items-center gap-2 mb-3">
+                  <div className="flex items-center gap-2.5 mb-3">
                     <AlertCircle className="w-4 h-4 flex-shrink-0" style={{ color: "#ef4444" }} />
                     <p className="text-sm font-semibold" style={{ color: "#ef4444", fontFamily: "'Cinzel', serif" }}>Are you certain? This cannot be undone.</p>
                   </div>
-                  <p className="text-xs mb-4 leading-relaxed" style={{ color: "rgba(239,68,68,0.6)" }}>
+                  <p className="text-xs mb-5 leading-relaxed" style={{ color: "rgba(239,68,68,0.55)" }}>
                     Deleting this work will permanently remove it from the platform, including its Witness ID record, provenance chain, and all associated data.
                   </p>
                   <div className="flex gap-3">
-                    <Button size="sm" onClick={handleDelete} disabled={deleting} style={{ background: "#ef4444", color: "#fff", border: "none" }}>
+                    <Button
+                      size="sm"
+                      onClick={handleDelete}
+                      disabled={deleting}
+                      style={{ background: "#ef4444", color: "#fff", border: "none" }}
+                    >
                       {deleting ? <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" /> : <Trash2 className="w-3.5 h-3.5 mr-1.5" />}
                       Yes, Delete Forever
                     </Button>
-                    <Button size="sm" variant="outline" onClick={() => setDeleteConfirm(false)} style={{ borderColor: "rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.45)", background: "transparent" }}>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setDeleteConfirm(false)}
+                      style={{ borderColor: "rgba(255,255,255,0.15)", color: TEXT_MUTED, background: "transparent" }}
+                    >
                       Cancel
                     </Button>
                   </div>
@@ -1045,15 +1204,23 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
               )}
             </div>
 
-          </div>{/* end px-7 */}
+          </div>{/* end px-8 */}
         </div>
 
         {/* ── Footer / Save Bar ── */}
         <div
-          className="sticky bottom-0 px-7 py-5 flex items-center justify-between gap-3"
-          style={{ background: `linear-gradient(0deg, ${SURFACE} 65%, transparent)`, borderTop: `1px solid ${GOLD_BORDER}` }}
+          className="sticky bottom-0 px-8 py-6 flex items-center justify-between gap-4 flex-shrink-0"
+          style={{
+            background: `linear-gradient(0deg, ${SURFACE} 60%, transparent)`,
+            borderTop: `1px solid rgba(212,175,55,0.12)`,
+            zIndex: 2,
+          }}
         >
-          <button onClick={stableOnClose} className="text-sm transition-opacity hover:opacity-80" style={{ color: TEXT_MUTED }}>
+          <button
+            onClick={stableOnClose}
+            className="text-sm transition-opacity hover:opacity-70"
+            style={{ color: TEXT_MUTED }}
+          >
             Cancel
           </button>
           <Button
@@ -1061,14 +1228,19 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
             disabled={saving || saved}
             className="relative overflow-hidden"
             style={{
-              background: saved ? "rgba(34,197,94,0.15)" : `linear-gradient(135deg, rgba(212,175,55,0.22), rgba(212,175,55,0.1))`,
+              background: saved
+                ? "rgba(34,197,94,0.12)"
+                : `linear-gradient(135deg, rgba(212,175,55,0.24), rgba(212,175,55,0.1))`,
               border: `1px solid ${saved ? "rgba(34,197,94,0.4)" : GOLD_BORDER}`,
               color: saved ? "#22c55e" : GOLD,
               fontFamily: "'Cinzel', serif",
-              letterSpacing: "0.1em",
-              minWidth: 148,
-              transition: "all 0.3s ease",
-              boxShadow: saved ? "0 0 24px rgba(34,197,94,0.12)" : `0 0 24px ${GOLD_GLOW}`,
+              letterSpacing: "0.12em",
+              minWidth: 160,
+              padding: "0.65rem 1.5rem",
+              transition: "all 0.35s ease",
+              boxShadow: saved
+                ? "0 0 28px rgba(34,197,94,0.1)"
+                : `0 0 32px rgba(212,175,55,0.1), 0 0 8px rgba(212,175,55,0.06)`,
             }}
           >
             {saving ? (
@@ -1080,6 +1252,7 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
             )}
           </Button>
         </div>
+
       </div>
     </div>,
     document.body

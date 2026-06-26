@@ -5916,3 +5916,18 @@
 - [ ] T6: Add External Links / Find It Elsewhere section to song pages + Creator Domain
 - [ ] T7: Improve provenance stamp visibility and update logic after edit save
 - [ ] T8: Make HAAI / Origin Story field prominent in CreativeDrawer
+
+## Creative Chapel — Visual Elevation (Jun 26 2026)
+- [x] Elevated CreativeDrawer to "holy space" aesthetic — full visual rewrite
+- [x] Art hero enlarged to 280px with animated concentric gold relic rings (empty state)
+- [x] Sacred geometric background texture (radial gradients) on drawer panel
+- [x] Title field elevated: Cinzel serif, 1.25rem, gold bottom-border accent when filled
+- [x] Section dividers: wider spacing (my-9), symmetric gold gradient lines
+- [x] Origin Story: Cormorant Garamond font, left gold border accent, faint flame watermark
+- [x] AI Generate button: sacred gold gradient, Cinzel letterSpacing, glow shadow
+- [x] Footer Save button: wider (160px), more dramatic gold glow, Cinzel 0.12em tracking
+- [x] All 5 TypeScript errors fixed (songId removed from generateCaption, enum casts, null→undefined)
+- [x] 0 TypeScript errors, 340/340 tests pass
+- [x] All 4 call sites (SongDetailPage, ArchivePage, CreatorDomainPage, ProfilePage) retain ErrorBoundary
+- [x] drawerContainerEl state pattern preserved for Radix portal z-index fix
+- [x] Scroll lock targets .player-scroll-area with body fallback preserved
