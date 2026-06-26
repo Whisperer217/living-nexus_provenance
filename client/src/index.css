@@ -2971,3 +2971,261 @@ h1, h2, h3, h4, h5, h6,
     transform: scale(1.04);
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   LIVING ARCHITECTURE — Scroll-Activated Depth & Sacred Motion
+   Song Detail Page elevation system
+   All animations use transform/opacity only (GPU-accelerated, no layout thrash)
+═══════════════════════════════════════════════════════════════════ */
+
+/* ── T1: Cover Art Breathing — persistent, slow, reverent ── */
+@keyframes art-breathe {
+  0%, 100% {
+    transform: scale(1.000);
+  }
+  50% {
+    transform: scale(1.040);
+  }
+}
+
+.cover-art-breathe {
+  animation: art-breathe 14s ease-in-out infinite;
+  will-change: transform;
+  transform-origin: center center;
+}
+
+/* ── T2: Luminous Glow Ring — outer ring around cover art ── */
+@keyframes glow-ring-idle {
+  0%, 100% {
+    box-shadow:
+      0 0 0 2px rgba(196,154,40,0.12),
+      0 0 24px 4px rgba(196,154,40,0.08),
+      0 0 60px 8px rgba(196,154,40,0.04);
+  }
+  50% {
+    box-shadow:
+      0 0 0 2px rgba(196,154,40,0.22),
+      0 0 36px 8px rgba(196,154,40,0.14),
+      0 0 80px 16px rgba(196,154,40,0.07);
+  }
+}
+
+@keyframes glow-ring-active {
+  0%, 100% {
+    box-shadow:
+      0 0 0 2px rgba(196,154,40,0.50),
+      0 0 40px 10px rgba(196,154,40,0.22),
+      0 0 100px 24px rgba(196,154,40,0.10),
+      inset 0 0 30px rgba(196,154,40,0.04);
+  }
+  50% {
+    box-shadow:
+      0 0 0 2px rgba(212,175,55,0.70),
+      0 0 60px 16px rgba(196,154,40,0.32),
+      0 0 140px 36px rgba(196,154,40,0.15),
+      inset 0 0 50px rgba(196,154,40,0.07);
+  }
+}
+
+.glow-ring-idle {
+  animation: glow-ring-idle 6s ease-in-out infinite;
+  will-change: box-shadow;
+}
+
+.glow-ring-active {
+  animation: glow-ring-active 3.5s ease-in-out infinite;
+  will-change: box-shadow;
+}
+
+/* ── T3: Sacred Geometry Background — gothic arch pattern ── */
+/* SVG inline background — extremely slow drift, GPU-only */
+@keyframes sacred-geo-drift {
+  0%   { transform: translateY(0px) rotate(0deg); }
+  33%  { transform: translateY(-8px) rotate(0.3deg); }
+  66%  { transform: translateY(4px) rotate(-0.2deg); }
+  100% { transform: translateY(0px) rotate(0deg); }
+}
+
+.sacred-geo-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  opacity: 0.028;
+  will-change: transform;
+  animation: sacred-geo-drift 60s ease-in-out infinite;
+}
+
+.sacred-geo-bg svg {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  inset: 0;
+}
+
+/* ── T4: Living Buttons — metallic gold/silver sheath on hover ── */
+@keyframes living-btn-breathe {
+  0%, 100% { transform: scale(1.000); }
+  50%       { transform: scale(1.008); }
+}
+
+.living-btn {
+  position: relative;
+  transition:
+    box-shadow 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 0.35s ease,
+    background 0.35s ease,
+    transform 0.18s ease;
+  will-change: transform, box-shadow;
+}
+
+.living-btn::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: linear-gradient(
+    135deg,
+    rgba(212,175,55,0.00) 0%,
+    rgba(212,175,55,0.12) 40%,
+    rgba(255,255,255,0.06) 60%,
+    rgba(212,175,55,0.00) 100%
+  );
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+}
+
+.living-btn:hover::after,
+.living-btn:focus-visible::after {
+  opacity: 1;
+}
+
+.living-btn:hover {
+  box-shadow:
+    0 0 0 1px rgba(212,175,55,0.45),
+    0 4px 20px rgba(196,154,40,0.25),
+    0 8px 40px rgba(196,154,40,0.12);
+  transform: translateY(-1px) scale(1.012);
+}
+
+.living-btn:active {
+  transform: translateY(0px) scale(0.982);
+  box-shadow:
+    0 0 0 1px rgba(212,175,55,0.30),
+    0 2px 8px rgba(196,154,40,0.15);
+}
+
+/* Primary gold variant */
+.living-btn-primary {
+  animation: living-btn-breathe 8s ease-in-out infinite;
+}
+
+.living-btn-primary:hover {
+  animation: none;
+  box-shadow:
+    0 0 0 1px rgba(212,175,55,0.60),
+    0 4px 24px rgba(196,154,40,0.40),
+    0 8px 60px rgba(196,154,40,0.20),
+    inset 0 1px 0 rgba(255,255,255,0.12);
+  transform: translateY(-2px) scale(1.018);
+}
+
+/* ── T5: Living Stats — stat items with hover glow ── */
+.living-stat {
+  cursor: pointer;
+  transition:
+    transform 0.25s ease,
+    opacity 0.25s ease;
+  will-change: transform;
+}
+
+.living-stat:hover {
+  transform: translateY(-2px);
+}
+
+.living-stat:hover .living-stat-value {
+  text-shadow:
+    0 0 16px rgba(196,154,40,0.55),
+    0 0 32px rgba(196,154,40,0.25);
+}
+
+.living-stat-value {
+  transition: text-shadow 0.3s ease;
+}
+
+/* ── T6: Scroll Reveal — sections rise from translateY(20px) ── */
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity 0.65s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.65s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: opacity, transform;
+}
+
+.scroll-reveal.revealed {
+  opacity: 1;
+  transform: translateY(0px);
+}
+
+/* Staggered delays for child sections */
+.scroll-reveal-delay-1 { transition-delay: 0.08s; }
+.scroll-reveal-delay-2 { transition-delay: 0.16s; }
+.scroll-reveal-delay-3 { transition-delay: 0.24s; }
+.scroll-reveal-delay-4 { transition-delay: 0.32s; }
+.scroll-reveal-delay-5 { transition-delay: 0.40s; }
+
+/* ── T7: Waveform Strip — dedicated strip below cover art ── */
+@keyframes waveform-strip-breathe {
+  0%, 100% { opacity: 0.55; }
+  50%       { opacity: 0.85; }
+}
+
+.waveform-strip {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0 0 1.25rem 1.25rem;
+  margin-top: -2px; /* flush with art bottom */
+}
+
+.waveform-strip-canvas {
+  display: block;
+  width: 100%;
+  transition: opacity 0.5s ease;
+}
+
+.waveform-strip-canvas.playing {
+  animation: waveform-strip-breathe 2.5s ease-in-out infinite;
+}
+
+.waveform-strip::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(196,154,40,0.35) 20%,
+    rgba(212,175,55,0.60) 50%,
+    rgba(196,154,40,0.35) 80%,
+    transparent 100%
+  );
+  z-index: 2;
+}
+
+.waveform-strip::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(196,154,40,0.04) 0%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+}

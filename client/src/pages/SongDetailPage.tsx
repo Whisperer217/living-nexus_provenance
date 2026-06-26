@@ -49,6 +49,7 @@ import { CreatorHandle } from "@/components/CreatorHandle";
 import { CreativeDrawer } from "@/components/CreativeDrawer";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { SongDetailPageSkeleton } from "@/components/SongDetailPageSkeleton";
+import { useScrollReveal } from "@/hooks/useScrollReveal";
 
 // Slug keys stored in DB (safe ASCII, no charset issues); emoji shown in UI
 const REACTION_SLUGS = ["fire", "love", "wow", "clap", "thumbsup", "thumbsdown", "mindblown", "+"];
@@ -160,6 +161,8 @@ export default function SongDetailPage() {
   const heroRef = useRef<HTMLDivElement>(null);
   const [headerCollapsed, setHeaderCollapsed] = useState(false);
   const [readerOpen, setReaderOpen] = useState(false);
+  // Scroll reveal — below-fold sections rise into view
+  const scrollRevealRef = useScrollReveal<HTMLDivElement>({ threshold: 0.10, rootMargin: "0px 0px -30px 0px" });
 
   // Open the reader: if the work has storyboard pages use the in-page reader,
   // otherwise fall back to the BookDetailPage which handles raw PDFs.
@@ -482,6 +485,49 @@ export default function SongDetailPage() {
         {audioFileUrl && <meta name="twitter:player:stream" content={audioFileUrl} />}
         {audioFileUrl && <meta name="twitter:player:stream:content_type" content="audio/mpeg" />}
       </Helmet>
+      {/* ── T3: Sacred Geometry Background — gothic arch pattern, GPU-only drift ── */}
+      <div className="sacred-geo-bg" aria-hidden="true">
+        <svg viewBox="0 0 1440 900" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+          {/* Gothic arch columns — repeated across width */}
+          {[0, 240, 480, 720, 960, 1200].map((x) => (
+            <g key={x} transform={`translate(${x}, 0)`}>
+              {/* Pointed arch */}
+              <path
+                d={`M 60,900 L 60,400 Q 120,200 180,400 L 180,900`}
+                fill="none" stroke="#C49A28" strokeWidth="0.8" opacity="0.6"
+              />
+              {/* Inner arch detail */}
+              <path
+                d={`M 80,900 L 80,430 Q 120,260 160,430 L 160,900`}
+                fill="none" stroke="#C49A28" strokeWidth="0.4" opacity="0.4"
+              />
+              {/* Keystone ornament */}
+              <circle cx="120" cy="200" r="6" fill="none" stroke="#C49A28" strokeWidth="0.6" opacity="0.5" />
+              <circle cx="120" cy="200" r="2" fill="#C49A28" opacity="0.3" />
+              {/* Horizontal tracery */}
+              <line x1="60" y1="500" x2="180" y2="500" stroke="#C49A28" strokeWidth="0.4" opacity="0.3" />
+              <line x1="60" y1="600" x2="180" y2="600" stroke="#C49A28" strokeWidth="0.3" opacity="0.2" />
+            </g>
+          ))}
+          {/* Horizontal floor line */}
+          <line x1="0" y1="895" x2="1440" y2="895" stroke="#C49A28" strokeWidth="0.5" opacity="0.3" />
+          {/* Central rose window */}
+          <g transform="translate(720, 80)">
+            <circle cx="0" cy="0" r="60" fill="none" stroke="#C49A28" strokeWidth="0.6" opacity="0.4" />
+            <circle cx="0" cy="0" r="42" fill="none" stroke="#C49A28" strokeWidth="0.4" opacity="0.3" />
+            <circle cx="0" cy="0" r="24" fill="none" stroke="#C49A28" strokeWidth="0.4" opacity="0.25" />
+            {[0,45,90,135,180,225,270,315].map((deg) => (
+              <line
+                key={deg}
+                x1="0" y1="0"
+                x2={Math.cos(deg * Math.PI / 180) * 58}
+                y2={Math.sin(deg * Math.PI / 180) * 58}
+                stroke="#C49A28" strokeWidth="0.4" opacity="0.25"
+              />
+            ))}
+          </g>
+        </svg>
+      </div>
       {/* Ambient cathedral scrim — radial glow behind the hero */}
       <div
         className="pointer-events-none absolute inset-0 z-0"
@@ -568,6 +614,11 @@ export default function SongDetailPage() {
                   {showVideo ? <><ImageIcon size={12} /> Cover Art</> : <><Video size={12} /> Music Video</>}
                 </button>
               )}
+              {/* T2: Luminous Glow Ring wrapper — outer animated ring around cover art */}
+              <div
+                className={isThisTrackActive ? "glow-ring-active" : "glow-ring-idle"}
+                style={{ borderRadius: "1.35rem", display: "block" }}
+              >
               {/* Cover art — full-bleed cathedral sanctuary */}
               <div
                 className={`relative w-full overflow-hidden group cursor-pointer sg-hero-frame transition-all duration-700 ${isThisTrackActive ? "witness-card sacred-active" : ""}`}
@@ -578,14 +629,11 @@ export default function SongDetailPage() {
                   border: isThisTrackActive
                     ? "1px solid rgba(196,154,40,0.55)"
                     : "1px solid rgba(196,154,40,0.18)",
-                  boxShadow: isThisTrackActive
-                    ? undefined  /* sanctuary-glow animation handles this */
-                    : "0 8px 48px rgba(0,0,0,0.6), 0 0 0 1px rgba(196,154,40,0.06)",
                 }}
                 onClick={song.fileUrl ? handlePlay : ((song as any).contentType === "comic" || (song as any).contentType === "manuscript") ? handleReadNow : undefined}
               >
                 {song.coverArtUrl
-                  ? <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover" style={{ objectPosition: `${song.coverPositionX ?? 50}% ${song.coverPositionY ?? 50}%` }} />
+                  ? <img src={song.coverArtUrl} alt={song.title} className={`w-full h-full object-cover ${song.fileUrl ? "cover-art-breathe" : ""}`} style={{ objectPosition: `${song.coverPositionX ?? 50}% ${song.coverPositionY ?? 50}%` }} />
                   : (
                     /* Missing Art Sanctuary — sacred void, three relic rings, animated breathe */
                     <div
@@ -650,8 +698,7 @@ export default function SongDetailPage() {
                       )}
                     </div>
                   )}
-                {/* Waveform canvas overlay */}
-                <canvas ref={waveCanvasRef} width={800} height={60} className="absolute bottom-0 left-0 right-0 w-full" style={{ height: "60px", opacity: isPlaying ? 1 : 0.35, transition: "opacity 0.4s" }} />
+                {/* Waveform canvas — now moved to dedicated strip below art (see waveform-strip below) */}
                 {/* Play/pause overlay */}
                 {song.fileUrl && (
                   <div className={`absolute inset-0 flex items-center justify-center transition-all ${ isThisTrackActive ? "bg-black/25" : "bg-black/0 group-hover:bg-black/40" }`}>
@@ -678,6 +725,20 @@ export default function SongDetailPage() {
                   </div>
                 )}
               </div>
+              </div>{/* end glow-ring wrapper */}
+
+              {/* T7: Waveform Strip — dedicated strip below cover art */}
+              {song.fileUrl && (
+                <div className="waveform-strip mt-1" style={{ background: "rgba(0,0,0,0.55)", borderRadius: "0.75rem", border: "1px solid rgba(196,154,40,0.10)" }}>
+                  <canvas
+                    ref={waveCanvasRef}
+                    width={800}
+                    height={80}
+                    className={`waveform-strip-canvas${isPlaying ? " playing" : ""}`}
+                    style={{ height: "80px", opacity: isPlaying ? 0.9 : 0.35 }}
+                  />
+                </div>
+              )}
 
               {/* Primary CTA button — below art */}
               {(() => {
@@ -688,14 +749,14 @@ export default function SongDetailPage() {
                       /* Comics/manuscripts: READ NOW is primary, audio play is secondary if available */
                       <>
                         <button type="button" onClick={handleReadNow}
-                          className="w-full flex items-center justify-center gap-3 py-3.5 rounded-xl font-heading font-bold tracking-widest text-sm transition-all hover:scale-[1.02] active:scale-[0.98]"
+                          className="w-full flex items-center justify-center gap-3 py-3.5 rounded-xl font-heading font-bold tracking-widest text-sm living-btn living-btn-primary"
                           style={{ background: "rgba(196,154,40,0.92)", border: "1px solid rgba(196,154,40,0.6)", color: "#0A0B08", boxShadow: "0 4px 24px rgba(196,154,40,0.2)" }}>
                           <BookOpen size={16} style={{ color: "#0A0B08" }} />
                           READ NOW
                         </button>
                         {song.fileUrl && (
                           <button type="button" onClick={handlePlay}
-                            className="w-full flex items-center justify-center gap-3 py-2.5 rounded-xl font-heading font-bold tracking-widest text-xs transition-all hover:scale-[1.02] active:scale-[0.98]"
+                            className="w-full flex items-center justify-center gap-3 py-2.5 rounded-xl font-heading font-bold tracking-widest text-xs living-btn"
                             style={{ background: isPlaying ? "rgba(196,154,40,0.15)" : "rgba(196,154,40,0.08)", border: "1px solid rgba(196,154,40,0.35)", color: isPlaying ? "rgba(196,154,40,0.9)" : "rgba(196,154,40,0.7)" }}>
                             {isPlaying ? <Pause size={14} fill="currentColor" /> : <Play size={14} fill="currentColor" className="ml-0.5" />}
                             {isPlaying ? "NOW PLAYING" : "LISTEN"}
@@ -706,7 +767,7 @@ export default function SongDetailPage() {
                       /* Audio/lyrics: PLAY NOW is primary */
                       song.fileUrl && (
                         <button type="button" onClick={handlePlay}
-                          className="w-full flex items-center justify-center gap-3 py-3.5 rounded-xl font-heading font-bold tracking-widest text-sm transition-all hover:scale-[1.02] active:scale-[0.98]"
+                          className="w-full flex items-center justify-center gap-3 py-3.5 rounded-xl font-heading font-bold tracking-widest text-sm living-btn living-btn-primary"
                           style={{ background: isPlaying ? "rgba(196,154,40,0.15)" : "rgba(196,154,40,0.92)", border: "1px solid rgba(196,154,40,0.6)", color: isPlaying ? "rgba(196,154,40,0.9)" : "#0A0B08", boxShadow: "0 4px 24px rgba(196,154,40,0.2)" }}>
                           {isPlaying ? <Pause size={16} fill="currentColor" /> : <Play size={16} fill="currentColor" className="ml-0.5" />}
                           {isPlaying ? "NOW PLAYING" : "PLAY NOW"}
@@ -716,26 +777,22 @@ export default function SongDetailPage() {
                   </div>
                 );
               })()}
-              {/* Stats row — sacred metrics */}
+              {/* Stats row — sacred living metrics */}
               <div className="flex items-center justify-center gap-6 pt-2" style={{ borderTop: "1px solid rgba(196,154,40,0.08)" }}>
-                <div className="flex flex-col items-center gap-0.5">
-                  <span className="text-base font-bold" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>{song.playCount || 0}</span>
+                <div className="living-stat flex flex-col items-center gap-0.5" title={`${song.playCount || 0} plays`}>
+                  <span className="living-stat-value text-base font-bold" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>{song.playCount || 0}</span>
                   <span className="text-[10px] tracking-widest uppercase" style={{ color: "rgba(196,154,40,0.45)" }}>Plays</span>
                 </div>
                 <div className="w-px h-6" style={{ background: "rgba(196,154,40,0.12)" }} />
-                <div className="flex flex-col items-center gap-0.5">
-                  <span className="text-base font-bold" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>{comments?.length || 0}</span>
+                <div className="living-stat flex flex-col items-center gap-0.5" title={`${comments?.length || 0} voices`}>
+                  <span className="living-stat-value text-base font-bold" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>{comments?.length || 0}</span>
                   <span className="text-[10px] tracking-widest uppercase" style={{ color: "rgba(196,154,40,0.45)" }}>Voices</span>
                 </div>
-                {likeCount > 0 && (
-                  <>
-                    <div className="w-px h-6" style={{ background: "rgba(196,154,40,0.12)" }} />
-                    <div className="flex flex-col items-center gap-0.5">
-                      <span className="text-base font-bold" style={{ color: "var(--ln-ember)", fontFamily: "'Cinzel', serif" }}>{likeCount}</span>
-                      <span className="text-[10px] tracking-widest uppercase" style={{ color: "rgba(196,154,40,0.45)" }}>Loved</span>
-                    </div>
-                  </>
-                )}
+                <div className="w-px h-6" style={{ background: "rgba(196,154,40,0.12)" }} />
+                <div className="living-stat flex flex-col items-center gap-0.5" title={`${likeCount} loved`}>
+                  <span className="living-stat-value text-base font-bold" style={{ color: likeCount > 0 ? "var(--ln-ember)" : "var(--ln-smoke)", fontFamily: "'Cinzel', serif" }}>{likeCount}</span>
+                  <span className="text-[10px] tracking-widest uppercase" style={{ color: "rgba(196,154,40,0.45)" }}>Loved</span>
+                </div>
               </div>
             </div>
           </div>
@@ -1319,7 +1376,7 @@ export default function SongDetailPage() {
         </div>
 
         {/* ══ BELOW FOLD: Full-width sections ══ */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-6" ref={scrollRevealRef}>
           {/* ── LEFT COLUMN ── */}
           <div className="space-y-0">
 
@@ -1361,7 +1418,7 @@ export default function SongDetailPage() {
             ══════════════════════════════════════════════════════════════ */}
             {(song as any).haaiOriginStory && (
               <section
-                className="phi-section-lg"
+                className="phi-section-lg scroll-reveal scroll-reveal-delay-1"
                 style={{
                   borderTop: "1px solid rgba(196,154,40,0.10)",
                   paddingTop: "var(--phi-5)",
@@ -1493,6 +1550,7 @@ export default function SongDetailPage() {
 
               return (
                 <section
+                  className="scroll-reveal scroll-reveal-delay-2"
                   style={{
                     paddingTop: "var(--phi-5)",
                     paddingBottom: "var(--phi-5)",

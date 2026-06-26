@@ -5945,3 +5945,13 @@
 - [x] T4: Sacred geometry spacing — phi-section-lg between sections, sg-divider-wide between major zones
 - [x] T5: Elevate "Find It Elsewhere" external links to a proper sacred section with platform badges
 - [x] T6: Restructure below-fold left column order: Testimony → HAAI → Gallery → Lyrics
+
+## SongDetailPage — Living Architecture (Jun 26 2026)
+- [x] T1: Cover art breathing — @keyframes art-breathe (scale 1→1.04, 14s ease-in-out infinite) on cover img
+- [x] T2: Luminous glow ring — outer pulsing box-shadow wrapper (.glow-ring-idle/.glow-ring-active), intensifies when isThisTrackActive
+- [x] T3: Sacred geometry background — SVG gothic arch pattern (6 columns + rose window), fixed position, GPU-only drift animation
+- [x] T4: Living buttons — .living-btn metallic gold/silver sheath hover, breathing scale, glow shift on PLAY NOW / READ NOW
+- [x] T5: Living stats — .living-stat hover glow, always show Loved stat (not hidden when 0)
+- [x] T6: Scroll elevation — useScrollReveal hook (IntersectionObserver), Testimony + HAAI sections rise from translateY(20px) opacity:0
+- [x] T7: Waveform strip — dedicated 80px canvas strip below cover art, gold gradient overlay, breathing opacity when playing
+- [x] 0 TypeScript errors, 340/340 tests pass
