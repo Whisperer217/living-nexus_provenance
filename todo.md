@@ -5995,3 +5995,12 @@
 - [x] Fix getPublicSongs (drives discover, discoverInfinite, WorkCarousel, DiscoverySection, QuickRefSlider, LiveActivityPanel, QueueLoader): sort by COALESCE(releaseDate, DATE(createdAt)) DESC, createdAt DESC
 - [x] Fix DiscoverySection "New Arrivals" See All href from /explore?sort=newest (broken) to /explore?sort=new (correct)
 - [x] 0 TypeScript errors, 340/340 tests pass
+
+## Fix: Playlist/Collection Cascade Cleanup
+- [x] Root cause: audit collectionTracks join table and deleteSong logic to confirm orphaned rows
+- [x] Implement: after deleteSong, remove collectionTracks rows for that songId, then delete any collections with 0 remaining live tracks
+- [x] One-time DB cleanup: deleted 23 empty WID-ALB collections; 0 orphaned join rows found
+- [x] UI: filter out empty collections from the Collections & Playlists list (server-side via getCollectionsByCreator + getUserCollections)
+- [x] UI: graceful empty-state message if a collection is opened and has no tracks
+- [x] Add audit logging for auto-deleted collections (console.log with [CollectionCleanup] prefix)
+- [x] 0 TypeScript errors, 340/340 tests pass

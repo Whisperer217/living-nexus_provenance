@@ -153,7 +153,10 @@ function CollectionsSection() {
                 {isOpen && (
                   <div className="border-t" style={{ borderColor: "rgba(196,154,40,0.12)" }}>
                     {(tracks as any[]).length === 0 ? (
-                      <p className="text-xs p-4 text-center" style={{ color: "var(--ln-smoke)" }}>No tracks in this collection.</p>
+                      <div className="p-4 text-center space-y-2">
+                        <p className="text-xs" style={{ color: "var(--ln-smoke)" }}>All tracks in this collection have been removed.</p>
+                        <p className="text-[11px]" style={{ color: "var(--ln-iron)" }}>This album will be hidden from your Archive automatically.</p>
+                      </div>
                     ) : (
                       <div className="divide-y" style={{ borderColor: "rgba(196,154,40,0.08)" }}>
                         {(tracks as any[]).map((t: any, idx: number) => (

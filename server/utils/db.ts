@@ -547,6 +547,55 @@ export async function deleteSong(songId: number, userId: number) {
     .set({ status: "Deleted", isPublic: false, updatedAt: new Date() })
     .where(and(eq(songs.id, songId), eq(songs.userId, userId)));
   await db.execute(sql`UPDATE users SET songSlotsUsed = GREATEST(songSlotsUsed - 1, 0) WHERE id = ${userId}`);
+  // ── Cascade cleanup: remove this song from all join tables ──────────────────
+  // 1. Personal user collection tracks
+  await db.delete(userCollectionTracks).where(eq(userCollectionTracks.songId, songId));
+  // 2. Named playlist tracks
+  const { playlistTracks } = await import("../../drizzle/schema");
+  await db.delete(playlistTracks).where(eq(playlistTracks.songId, songId));
+  // 3. Personal playlistItems queue
+  const { playlistItems } = await import("../../drizzle/schema");
+  await db.delete(playlistItems).where(eq(playlistItems.songId, songId));
+  // ── Auto-delete empty personal user collections ──────────────────────────────
+  // Find all user collections owned by this user that now have zero tracks
+  const userCollsForUser = await db
+    .select({ id: userCollections.id })
+    .from(userCollections)
+    .where(eq(userCollections.userId, userId));
+  if (userCollsForUser.length > 0) {
+    const collIds = userCollsForUser.map((c: { id: number }) => c.id);
+    const trackCounts = await db
+      .select({ collectionId: userCollectionTracks.collectionId, cnt: sql<number>`count(*)` })
+      .from(userCollectionTracks)
+      .where(inArray(userCollectionTracks.collectionId, collIds))
+      .groupBy(userCollectionTracks.collectionId);
+    const nonEmptyIds = new Set(trackCounts.map((r: { collectionId: number }) => r.collectionId));
+    const emptyCollIds = collIds.filter((id: number) => !nonEmptyIds.has(id));
+    if (emptyCollIds.length > 0) {
+      console.log(`[CollectionCleanup] Auto-deleting ${emptyCollIds.length} empty user collection(s): [${emptyCollIds.join(', ')}] after song ${songId} deleted`);
+      await db.delete(userCollections).where(inArray(userCollections.id, emptyCollIds));
+    }
+  }
+  // ── Auto-delete empty named playlists ────────────────────────────────────────
+  const { playlists } = await import("../../drizzle/schema");
+  const userPlaylists = await db
+    .select({ id: playlists.id })
+    .from(playlists)
+    .where(eq(playlists.ownerId, userId));
+  if (userPlaylists.length > 0) {
+    const playlistIds = userPlaylists.map((p: { id: number }) => p.id);
+    const playlistTrackCounts = await db
+      .select({ playlistId: playlistTracks.playlistId, cnt: sql<number>`count(*)` })
+      .from(playlistTracks)
+      .where(inArray(playlistTracks.playlistId, playlistIds))
+      .groupBy(playlistTracks.playlistId);
+    const nonEmptyPlaylistIds = new Set(playlistTrackCounts.map((r: { playlistId: number }) => r.playlistId));
+    const emptyPlaylistIds = playlistIds.filter((id: number) => !nonEmptyPlaylistIds.has(id));
+    if (emptyPlaylistIds.length > 0) {
+      console.log(`[CollectionCleanup] Auto-deleting ${emptyPlaylistIds.length} empty playlist(s): [${emptyPlaylistIds.join(', ')}] after song ${songId} deleted`);
+      await db.delete(playlists).where(inArray(playlists.id, emptyPlaylistIds));
+    }
+  }
 }
 
 export async function reorderMySongs(userId: number, songIds: number[]) {
@@ -2231,8 +2280,9 @@ export async function getCollectionById(id: number) {
 export async function getSongsByCollectionId(collectionId: number) {
   const db = await getDb();
   if (!db) return [];
+  // Only return live (non-deleted) tracks — soft-deleted songs must not appear in the collection view
   return db.select().from(songs)
-    .where(eq(songs.collectionId, collectionId))
+    .where(and(eq(songs.collectionId, collectionId), sql`${songs.status} != 'Deleted'`))
     .orderBy(songs.trackOrder, songs.createdAt); // trackOrder preserves batch upload sequence; createdAt as tiebreaker
 }
 
@@ -2245,11 +2295,31 @@ export async function getCollectionForSong(songId: number) {
   return getCollectionById(song.collectionId);
 }
 
-/** Get all collections by a creator. */
+/** Get all collections by a creator — only returns collections with at least one live (non-deleted) track. */
 export async function getCollectionsByCreator(creatorId: number) {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(collections).where(eq(collections.creatorId, creatorId)).orderBy(desc(collections.createdAt));
+  // Join to songs to get live track count; exclude collections where all tracks have been deleted
+  const rows = await db
+    .select({
+      collection: collections,
+      liveTrackCount: sql<number>`count(${songs.id})`,
+    })
+    .from(collections)
+    .leftJoin(songs, and(
+      eq(songs.collectionId, collections.id),
+      sql`${songs.status} != 'Deleted'`,
+    ))
+    .where(eq(collections.creatorId, creatorId))
+    .groupBy(collections.id)
+    .orderBy(desc(collections.createdAt));
+  // Filter out empty shells (all tracks deleted) and attach live count
+  return rows
+    .filter((r: { liveTrackCount: number }) => Number(r.liveTrackCount) > 0)
+    .map((r: { collection: typeof collections.$inferSelect; liveTrackCount: number }) => ({
+      ...r.collection,
+      trackCount: Number(r.liveTrackCount),
+    }));
 }
 
 /** Update collection cover art URL and/or position. */
@@ -4170,7 +4240,10 @@ export async function getUserCollections(userId: number) {
     .groupBy(userCollectionTracks.collectionId);
 
   const countMap = Object.fromEntries(counts.map((c: { collectionId: number; count: number }) => [c.collectionId, Number(c.count)]));
-  return cols.map((c: { id: number; userId: number; name: string; description: string | null; sortOrder: number; createdAt: Date }) => ({ ...c, trackCount: countMap[c.id] ?? 0 }));
+  // Filter out empty collections (all tracks deleted) — no ghost shells in the Archive
+  return cols
+    .map((c: { id: number; userId: number; name: string; description: string | null; sortOrder: number; createdAt: Date }) => ({ ...c, trackCount: countMap[c.id] ?? 0 }))
+    .filter((c: { trackCount: number }) => c.trackCount > 0);
 }
 
 export async function createUserCollection(userId: number, name: string, description?: string) {
