@@ -581,6 +581,114 @@ export default function SongDetailPage() {
           </div>
         )}
         {/* ══════════════════════════════════════════════════════════════
+             CINEMATIC BANNER — Full-bleed panoramic header (from TrackPage)
+             Tall cover art banner with gradient overlay, genre badge, play
+        ══════════════════════════════════════════════════════════════ */}
+        {song.coverArtUrl && (
+          <div
+            className="relative w-full overflow-hidden rounded-2xl mb-8 cathedral-enter-art"
+            style={{
+              height: "clamp(220px, 36vw, 420px)",
+              background: "linear-gradient(135deg, #0d0b08, #000000)",
+              border: isThisTrackActive
+                ? "1px solid rgba(196,154,40,0.45)"
+                : "1px solid rgba(196,154,40,0.12)",
+              boxShadow: isThisTrackActive
+                ? "0 0 60px rgba(196,154,40,0.18), 0 8px 40px rgba(0,0,0,0.7)"
+                : "0 8px 40px rgba(0,0,0,0.5)",
+              transition: "box-shadow 0.7s ease, border-color 0.7s ease",
+            }}
+          >
+            {/* Full-bleed art */}
+            <img
+              src={song.coverArtUrl}
+              alt={song.title}
+              className={`w-full h-full object-cover transition-transform duration-[14000ms] ease-in-out ${isThisTrackActive ? "scale-[1.04]" : "scale-100"}`}
+              style={{ objectPosition: `${song.coverPositionX ?? 50}% ${song.coverPositionY ?? 50}%` }}
+            />
+            {/* Cinematic gradient overlay — bottom fade */}
+            <div
+              className="absolute inset-0"
+              style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.18) 40%, rgba(8,7,4,0.82) 100%)" }}
+            />
+            {/* Genre badge — top right */}
+            {song.genre && (
+              <div
+                className="absolute top-4 right-4 px-3 py-1 rounded-full text-xs tracking-widest uppercase"
+                style={{
+                  background: "rgba(0,0,0,0.55)",
+                  backdropFilter: "blur(8px)",
+                  border: "1px solid rgba(196,154,40,0.25)",
+                  color: "rgba(196,154,40,0.85)",
+                  fontFamily: "'Cinzel', serif",
+                  letterSpacing: "0.12em",
+                }}
+              >
+                {song.genre}
+              </div>
+            )}
+            {/* WID badge — top left */}
+            {song.witnessId && (
+              <div
+                className="absolute top-4 left-4 flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px]"
+                style={{
+                  background: "rgba(0,0,0,0.55)",
+                  backdropFilter: "blur(8px)",
+                  border: "1px solid rgba(196,154,40,0.20)",
+                  color: "rgba(196,154,40,0.75)",
+                  fontFamily: "'Cinzel', serif",
+                }}
+              >
+                <ShieldCheck className="w-3 h-3" /> WID
+              </div>
+            )}
+            {/* Bottom-left: title + artist overlay */}
+            <div className="absolute bottom-0 left-0 right-0 p-5 pb-6">
+              <h1
+                className="font-heading leading-tight mb-1"
+                style={{
+                  fontFamily: "'Cinzel', serif",
+                  fontSize: "clamp(1.4rem, 3.5vw, 2.4rem)",
+                  color: "rgba(255,255,255,0.96)",
+                  textShadow: "0 2px 20px rgba(0,0,0,0.8), 0 0 40px rgba(196,154,40,0.15)",
+                  letterSpacing: "0.03em",
+                }}
+              >
+                {song.title}
+              </h1>
+              <p
+                className="text-sm"
+                style={{ color: "rgba(196,154,40,0.80)", fontFamily: "'Cinzel', serif", letterSpacing: "0.06em" }}
+              >
+                {creator?.artistHandle || creator?.name || ""}
+              </p>
+            </div>
+            {/* Play button — bottom right */}
+            {song.fileUrl && (
+              <button
+                type="button"
+                onClick={handlePlay}
+                className="absolute bottom-5 right-5 flex items-center justify-center rounded-full transition-all hover:scale-105 active:scale-95"
+                style={{
+                  width: 52,
+                  height: 52,
+                  background: isThisTrackActive ? "rgba(196,154,40,0.25)" : "rgba(196,154,40,0.15)",
+                  border: "1px solid rgba(196,154,40,0.50)",
+                  color: "rgba(196,154,40,0.95)",
+                  backdropFilter: "blur(8px)",
+                  boxShadow: isThisTrackActive ? "0 0 24px rgba(196,154,40,0.35)" : "0 0 12px rgba(196,154,40,0.15)",
+                }}
+                aria-label={isPlaying ? "Pause" : "Play"}
+              >
+                {isPlaying
+                  ? <Pause size={22} fill="currentColor" />
+                  : <Play size={22} fill="currentColor" style={{ marginLeft: 2 }} />}
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* ══════════════════════════════════════════════════════════════
              CATHEDRAL HERO — Sacred two-column sanctuary
              Left: Cover Art Sanctuary (full-bleed, breathing, sg-hero-frame)
              Right: Testimony Chamber (dominant title, WID seal, sacred tools)

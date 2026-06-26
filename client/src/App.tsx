@@ -1,7 +1,7 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { lazy, Suspense, useEffect, useLayoutEffect } from "react";
-import { Route, Switch, Redirect, useLocation } from "wouter";
+import { Route, Switch, Redirect, useLocation, useParams } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { PlayerProvider } from "./contexts/PlayerContext";
@@ -25,6 +25,16 @@ function QrScanLogger() {
   return null;
 }
 
+/** Redirects legacy /track/:id URLs to the canonical /song/:id route. */
+function TrackRedirect() {
+  const { id } = useParams<{ id: string }>();
+  const [, navigate] = useLocation();
+  useEffect(() => {
+    if (id) navigate(`/song/${id}`, { replace: true });
+  }, [id, navigate]);
+  return null;
+}
+
 // Lazy-loaded page components — each becomes its own JS chunk
 // This cuts initial bundle size significantly; pages load on first visit only
 const HomePage = lazy(() => import("./pages/HomePage"));
@@ -34,7 +44,7 @@ const ManifestationStudio = lazy(() => import("./pages/manifestation-studio/Mani
 const BatchUploadPage = lazy(() => import("./pages/BatchUploadPage"));
 const LikedPage = lazy(() => import("./pages/LikedPage"));
 const ArchivePage = lazy(() => import("./pages/ArchivePage"));
-const TrackPage = lazy(() => import("./pages/TrackPage"));
+// TrackPage deprecated — /track/:id now redirects to /song/:id
 const SongDetailPage = lazy(() => import("./pages/SongDetailPage"));
 const CreatorProfilePage = lazy(() => import("./pages/CreatorProfilePage"));
 const DashboardPage = lazy(() => import("./pages/DashboardPage"));
@@ -199,7 +209,8 @@ function Router() {
                 <Route path="/game/:id" component={GameDetailPage} />
                 <Route path="/book/:id/studio" component={CreatorStudioPage} />
                 <Route path="/songs/:id" component={SongDetailPage} />
-                <Route path="/track/:id" component={TrackPage} />
+                {/* /track/:id → canonical /song/:id redirect (TrackPage deprecated) */}
+                <Route path="/track/:id" component={TrackRedirect} />
                 <Route path="/creator/:id" component={CreatorProfilePage} />
                 <Route path="/dashboard" component={DashboardPage} />
                 <Route path="/profile" component={ProfilePage} />

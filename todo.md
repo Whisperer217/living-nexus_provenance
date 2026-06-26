@@ -5963,3 +5963,11 @@
 - [ ] T4: Wire download button on SongDetailPage (free = direct, paid = checkout, none = hidden)
 - [ ] T5: Wire download button in PlayerBar (shows when track allows download)
 - [ ] T6: 0 TypeScript errors, 340/340 tests pass
+
+## Song Page Unification — Cinematic Banner + Route Redirect
+- [x] Blast radius scan: compared TrackPage (413 lines, in-memory only) vs SongDetailPage (2042 lines, full DB + sacred architecture)
+- [x] Add cinematic full-bleed panoramic banner above the two-column hero grid in SongDetailPage (clamp 220px–420px, gradient overlay, genre badge, WID badge, title/artist overlay, floating play button, playback-responsive border/shadow/scale)
+- [x] Wire /track/:id → /song/:id redirect via TrackRedirect component (useParams + useLocation + useEffect)
+- [x] Add useParams to wouter import in App.tsx
+- [x] Remove TrackPage lazy import (deprecated)
+- [x] 0 TypeScript errors, 340/340 tests pass
