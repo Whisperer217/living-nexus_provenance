@@ -854,6 +854,8 @@ export default function BatchUploadPage() {
   const [cards, setCards] = useState<TrackCard[]>([makeEmptyCard()]);
   const [detailCardId, setDetailCardId] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [witnessedCount, setWitnessedCount] = useState(0);
+  const [totalToWitness, setTotalToWitness] = useState(0);
   const [isDraggingGlobal, setIsDraggingGlobal] = useState(false);
   const globalDropRef = useRef<HTMLDivElement>(null);
   const albumCoverRef = useRef<HTMLInputElement>(null);
@@ -1032,6 +1034,8 @@ export default function BatchUploadPage() {
     const readyCards = cards.filter(c => c.audioStatus === "ready" && c.audioFile);
     if (!readyCards.length) { toast.error("No tracks ready — wait for WID generation"); return; }
     setIsUploading(true);
+    setWitnessedCount(0);
+    setTotalToWitness(readyCards.length);
     try {
       let resolvedAlbumCoverUrl = albumCoverUrl;
       if (albumCoverFile && !resolvedAlbumCoverUrl) {
@@ -1092,6 +1096,7 @@ export default function BatchUploadPage() {
           lyricsText: card.lyricsText.trim() || undefined,
           haaiOriginStory: card.haaiOriginStory?.trim() || undefined,
         });
+        setWitnessedCount(prev => prev + 1);
       }
 
       const result = await batchUpload.mutateAsync({
@@ -1606,9 +1611,11 @@ export default function BatchUploadPage() {
       >
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold" style={{ color: "#FFFFFF" }}>
-            {readyCount > 0
-              ? `${readyCount} track${readyCount > 1 ? "s" : ""} ready to witness`
-              : "Add audio files to begin"}
+            {isUploading
+              ? `${witnessedCount} of ${totalToWitness} track${totalToWitness > 1 ? "s" : ""} uploaded...`
+              : readyCount > 0
+                ? `${readyCount} track${readyCount > 1 ? "s" : ""} ready to witness`
+                : "Add audio files to begin"}
           </p>
           <p className="text-[11px] mt-0.5" style={{ color: "var(--ln-parchment)" }}>
             {albumName ? `"${albumName}"` : "Set a collection name above"}
@@ -1625,7 +1632,7 @@ export default function BatchUploadPage() {
         >
           {isUploading ? <Loader2 size={16} className="animate-spin" /> : <Fingerprint size={16} />}
           {isUploading
-            ? "Witnessing..."
+            ? `Witnessing ${witnessedCount} of ${totalToWitness}...`
             : `Witness ${readyCount > 0 ? readyCount : ""} Track${readyCount !== 1 ? "s" : ""}`}
         </Button>
       </div>
