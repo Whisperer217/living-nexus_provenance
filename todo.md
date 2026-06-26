@@ -5971,3 +5971,6 @@
 - [x] Add useParams to wouter import in App.tsx
 - [x] Remove TrackPage lazy import (deprecated)
 - [x] 0 TypeScript errors, 340/340 tests pass
+
+## Bug Fix: New Arrivals "See All" Empty State
+- [x] Fix /explore?sort=new showing "Nothing new this week" — root cause: contentType useState initializer defaulted to "audio" from cache even when no medium param present, causing a double-query race; when navigating to sort=new or sort=trending URLs, contentType now initializes to undefined (all content types shown); also reduced newThisWeek staleTime from 120s to 30s to prevent stale empty-result cache from persisting

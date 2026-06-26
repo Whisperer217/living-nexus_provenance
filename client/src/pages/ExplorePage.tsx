@@ -455,7 +455,12 @@ export default function ExplorePage() {
       music: "audio", lyrics: "lyrics", manuscripts: "manuscript", comics: "comic",
     };
     if (m && mediumMap[m]) return mediumMap[m];
-    return (getCache<string>(CACHE_KEYS.EXPLORE_TAB) as ContentType) ?? "audio";
+    // When navigating to /explore?sort=new or /explore with no medium param,
+    // do NOT default to "audio" — return undefined to show all content types.
+    // Only restore the cached tab when the user is on the plain /explore page.
+    const sort = p.get("sort");
+    if (!m && !sort) return (getCache<string>(CACHE_KEYS.EXPLORE_TAB) as ContentType) ?? "audio";
+    return undefined;
   });
 
   // Detect filter=creators from URL
@@ -523,7 +528,7 @@ export default function ExplorePage() {
   // New This Week query
   const { data: newThisWeekData, isLoading: newThisWeekLoading } = trpc.songs.newThisWeek.useQuery(
     { genre: activeGenre === "All" ? undefined : activeGenre, limit: 500, contentType: serverContentType },
-    { enabled: mode === "new", refetchOnWindowFocus: false, staleTime: 120_000 }
+    { enabled: mode === "new", refetchOnWindowFocus: false, staleTime: 30_000 }
   );
 
   // Trending query — respects the active content-type chip
