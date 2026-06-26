@@ -241,7 +241,7 @@ function TrackDetailPanel({
       />
       {/* Panel */}
       <div
-        className="fixed right-0 top-0 bottom-0 z-50 flex flex-col overflow-hidden"
+        className="fixed right-0 top-[56px] bottom-[72px] lg:bottom-0 z-50 flex flex-col overflow-hidden"
         style={{
           width: "min(480px, 100vw)",
           background: "#0D0D0D",
