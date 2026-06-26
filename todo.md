@@ -6004,3 +6004,10 @@
 - [x] UI: graceful empty-state message if a collection is opened and has no tracks
 - [x] Add audit logging for auto-deleted collections (console.log with [CollectionCleanup] prefix)
 - [x] 0 TypeScript errors, 340/340 tests pass
+
+## Fix: Restore Wrongly-Deleted Collections + Profile Tab Unification
+- [x] DB audit: 500 live songs had albumName set but collectionId = NULL — collection records were missing/deleted
+- [x] Restore: ran restore-collections.mjs — created 48 new WID-ALB collection records, linked 429 live songs
+- [x] Archive: all 52 collections now show with accurate live track counts
+- [x] Profile Collections & Playlists tab: now shows ALBUMS section (WID-ALB batch-upload albums) alongside personal userCollections and legacy playlists
+- [x] 0 TypeScript errors, 340/340 tests pass

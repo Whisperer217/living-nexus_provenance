@@ -16,7 +16,7 @@ import {
   CheckCircle, AlertCircle, Zap, LogOut,
   Fingerprint, ScrollText, Activity, Upload, Star, Layers, Eye, Users, Shield,
   Download, Trash2, AlertTriangle, Sun, Moon,
-  FolderOpen, Plus, ChevronDown, ChevronRight, GripVertical, LayoutGrid, Pencil,
+  FolderOpen, Plus, ChevronDown, ChevronRight, GripVertical, LayoutGrid, Pencil, Disc3,
 } from "lucide-react";
 import { AddToCollectionButton } from "@/components/AddToCollectionModal";
 import { toast } from "sonner";
@@ -215,6 +215,9 @@ export default function ProfilePage() {
   // ── Command center tab data ───────────────────────────────────────
   const { data: likedSongs = [] } = trpc.songs.getLikedOrdered.useQuery(undefined, { enabled: !!user && activeTab === "liked" });
   const { data: myCollections = [] } = trpc.userCollections.list.useQuery(undefined, { enabled: !!user && activeTab === "collections" });
+  // Batch-upload albums from the collections table (WID-ALB records)
+  const { data: myBatchAlbums = [] } = trpc.songs.getMyCollections.useQuery(undefined, { enabled: !!user && activeTab === "collections", staleTime: 30_000 });
+  const [expandedBatchAlbumId, setExpandedBatchAlbumId] = useState<number | null>(null);
   const [expandedCollectionId, setExpandedCollectionId] = useState<number | null>(null);
   const [creatingCollection, setCreatingCollection] = useState(false);
   const [newCollectionName, setNewCollectionName] = useState("");
@@ -1556,6 +1559,44 @@ export default function ProfilePage() {
                   </div>
                 );
               })
+            )}
+
+            {/* ── Batch Upload Albums section (WID-ALB collections from Archive) ── */}
+            {(myBatchAlbums as any[]).length > 0 && (
+              <div className="mt-6">
+                <div className="flex items-center gap-2 mb-3 pt-4 border-t border-white/[0.06]">
+                  <Disc3 size={11} className="text-[#C49A28]/60" />
+                  <span className="text-[11px] font-heading tracking-widest text-white/50">{(myBatchAlbums as any[]).length} ALBUMS</span>
+                  <span className="text-[10px] font-body text-white/25 ml-1">(from Archive)</span>
+                </div>
+                {(myBatchAlbums as any[]).map((album: any) => {
+                  const isExpanded = expandedBatchAlbumId === album.id;
+                  return (
+                    <div key={album.id} className="rounded-xl border border-white/[0.06] bg-[#000000] overflow-hidden mb-2">
+                      <div
+                        className="flex items-center gap-3 p-3 cursor-pointer hover:bg-white/[0.02] transition-all"
+                        onClick={() => setExpandedBatchAlbumId(isExpanded ? null : album.id)}
+                      >
+                        <div className="w-9 h-9 rounded-lg flex-shrink-0 overflow-hidden bg-[#0a0a08]">
+                          {album.coverArtUrl
+                            ? <img src={album.coverArtUrl} alt="" className="w-full h-full object-cover" />
+                            : <div className="w-full h-full flex items-center justify-center" style={{ background: "rgba(196,154,40,0.06)", border: "1px solid rgba(196,154,40,0.15)" }}><Disc3 size={14} className="text-[#C49A28]/60" /></div>}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[13px] font-body text-white/80 truncate">{album.name}</p>
+                          <p className="text-[11px] font-body text-white/40 mt-0.5">{album.trackCount ?? 0} tracks · <span className="text-[#C49A28]/60 font-mono text-[9px]">{album.collectionWid}</span></p>
+                        </div>
+                        {isExpanded ? <ChevronDown size={13} className="text-white/30 flex-shrink-0" /> : <ChevronRight size={13} className="text-white/30 flex-shrink-0" />}
+                      </div>
+                      {isExpanded && (
+                        <div className="border-t border-white/[0.04] px-3 py-2">
+                          <p className="text-[11px] font-body text-white/30 text-center py-4">Open Archive to manage this album</p>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             )}
 
             {/* ── Playlists section ── */}
