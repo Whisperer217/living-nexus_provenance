@@ -17,7 +17,7 @@ import {
   Play, Pause, SkipBack, SkipForward,
   Shuffle, Repeat, Volume2, VolumeX, Heart,
   ChevronDown, ChevronUp, Share2, Download,
-  MoreHorizontal, ExternalLink, List, Waves,
+  MoreHorizontal, ExternalLink, List, ListPlus, Waves,
   FolderPlus, Shield, GripHorizontal, Music2,
   DollarSign, MessageCircle, Send, Maximize2, X, Flag,
   BookOpen, Map,
@@ -109,7 +109,7 @@ function GlobalPlayerInner() {
   const {
     state, audioRef, allTracks, togglePlay, nextTrack, prevTrack,
     toggleShuffle, toggleRepeat, toggleMute, setVolume, seek, playTrack,
-    isReady,
+    isReady, appendToQueue,
   } = usePlayer();
   const [, navigate] = useLocation();
   const { user } = useAuth();
@@ -1384,6 +1384,19 @@ function GlobalPlayerInner() {
       {currentSongId && (
         <button onClick={() => { setShowContextMenu(false); setAddToCollectionOpen(true); }} className="flex items-center gap-2.5 w-full px-4 py-2.5 text-[12px] transition-colors hover:bg-white/5 text-left" style={{ color: "var(--ln-parchment)" }}>
           <FolderPlus size={13} style={{ color: "rgba(255,255,255,0.4)" }} /> Add to Collection
+        </button>
+      )}
+      {visTrack && (
+        <button
+          onClick={() => {
+            setShowContextMenu(false);
+            appendToQueue(visTrack);
+            toast.success(`“${visTrack.title}” added to queue`, { duration: 2000 });
+          }}
+          className="flex items-center gap-2.5 w-full px-4 py-2.5 text-[12px] transition-colors hover:bg-white/5 text-left"
+          style={{ color: "var(--ln-parchment)" }}
+        >
+          <ListPlus size={13} style={{ color: "rgba(255,255,255,0.4)" }} /> Add to Queue
         </button>
       )}
       {(() => {

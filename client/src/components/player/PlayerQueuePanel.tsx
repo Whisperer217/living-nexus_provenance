@@ -8,8 +8,9 @@
 ═══════════════════════════════════════════════════════════════════ */
 
 import React, { useRef, useState, useCallback, useEffect } from "react";
-import { List, LayoutList, FolderOpen, Music2, ExternalLink } from "lucide-react";
+import { List, LayoutList, FolderOpen, Music2, ExternalLink, BookmarkPlus } from "lucide-react";
 import { useLocation } from "wouter";
+import { SaveQueueAsPlaylistModal } from "./SaveQueueAsPlaylistModal";
 
 const GOLD = "#D4AF37";
 const GOLD_DIM = "rgba(212,175,55,0.65)";
@@ -451,6 +452,16 @@ export function PlayerQueuePanel({
         </div>
       )}
 
+      {/* ── Save Queue as Playlist ── */}
+      {tracks.length > 0 && (
+        <SaveQueueButton
+          tracks={tracks}
+          isDesktop={isDesktop}
+          accentDim={accentDim}
+          borderColor={borderColor}
+        />
+      )}
+
       {/* ── Collections link ── */}
       <button
         onClick={() => navigate("/profile?tab=collections")}
@@ -488,5 +499,62 @@ export function PlayerQueuePanel({
         <ExternalLink size={11} style={{ color: "rgba(255,255,255,0.25)" }} />
       </button>
     </div>
+  );
+}
+
+/** Inline button that opens the SaveQueueAsPlaylistModal */
+function SaveQueueButton({
+  tracks,
+  isDesktop,
+  accentDim,
+  borderColor,
+}: {
+  tracks: QueueTrack[];
+  isDesktop: boolean;
+  accentDim: string;
+  borderColor: string;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <button
+        onClick={() => setOpen(true)}
+        style={{
+          width: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginTop: "8px",
+          padding: "9px 12px",
+          borderRadius: "10px",
+          background: isDesktop ? "rgba(201,168,76,0.06)" : "rgba(201,168,76,0.06)",
+          border: `1px solid rgba(201,168,76,0.32)`,
+          cursor: "pointer",
+          transition: "background 0.15s",
+        }}
+        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "rgba(201,168,76,0.12)"; }}
+        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "rgba(201,168,76,0.06)"; }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <BookmarkPlus size={13} style={{ color: "#c9a84c" }} />
+          <span
+            style={{
+              fontSize: "10px",
+              fontWeight: 700,
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+              color: "#c9a84c",
+              fontFamily: "'Cinzel', serif",
+            }}
+          >
+            Save Queue as Playlist
+          </span>
+        </div>
+        <span style={{ fontSize: "10px", color: "rgba(201,168,76,0.5)" }}>
+          {tracks.length} track{tracks.length !== 1 ? "s" : ""}
+        </span>
+      </button>
+      {open && <SaveQueueAsPlaylistModal onClose={() => setOpen(false)} />}
+    </>
   );
 }

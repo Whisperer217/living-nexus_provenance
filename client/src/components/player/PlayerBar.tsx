@@ -38,7 +38,7 @@ export default function PlayerBar() {
   const {
     state, audioRef, allTracks, togglePlay, nextTrack, prevTrack,
     toggleShuffle, toggleRepeat, toggleMute, setVolume, seek,
-    openTheater, playTrack,
+    openTheater, playTrack, appendToQueue,
   } = usePlayer();
   const [, navigate] = useLocation();
   const { user } = useAuth();
@@ -180,7 +180,7 @@ export default function PlayerBar() {
   const volumePopupRef = useRef<HTMLDivElement>(null);  // portal card ref for outside-click
 
   // Context menu — fixed-position portal
-  const [contextMenuPos, setContextMenuPos] = useState<{ bottom: number; right: number } | null>(null);
+  const [contextMenuPos, setContextMenuPos] = useState<{ top: number; right: number } | null>(null);
   const contextMenuBtnRef = useRef<HTMLButtonElement>(null);
   const contextMenuPortalRef = useRef<HTMLDivElement>(null);
 
@@ -198,7 +198,8 @@ export default function PlayerBar() {
     const btn = contextMenuBtnRef.current;
     if (!btn) return;
     const rect = btn.getBoundingClientRect();
-    setContextMenuPos({ bottom: window.innerHeight - rect.top + 8, right: window.innerWidth - rect.right - 4 });
+    // Open below the button (above the player bar is wrong — use top: rect.bottom + 8)
+    setContextMenuPos({ top: rect.bottom + 8, right: window.innerWidth - rect.right - 4 });
     setShowContextMenu(true);
   }
 
@@ -1049,7 +1050,7 @@ export default function PlayerBar() {
       ref={contextMenuPortalRef}
       style={{
         position: "fixed",
-        bottom: contextMenuPos.bottom,
+        top: contextMenuPos.top,
         right: contextMenuPos.right,
         zIndex: 99999,
         background: "var(--ln-coal)",
@@ -1114,6 +1115,20 @@ export default function PlayerBar() {
         >
           <ListPlus size={13} style={{ color: "var(--ln-smoke)" }} />
           Add to List
+        </button>
+      )}
+      {currentTrack && (
+        <button
+          onClick={() => {
+            setShowContextMenu(false);
+            appendToQueue(currentTrack);
+            toast.success(`“${currentTrack.title}” added to queue`, { duration: 2000 });
+          }}
+          className="flex items-center gap-2.5 w-full px-4 py-2.5 text-[12px] font-body transition-colors hover:bg-white/5 text-left"
+          style={{ color: "var(--ln-parchment)" }}
+        >
+          <ListPlus size={13} style={{ color: "var(--ln-smoke)" }} />
+          Add to Queue
         </button>
       )}
       <button

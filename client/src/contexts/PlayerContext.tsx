@@ -156,6 +156,8 @@ interface PlayerContextValue {
   seek: (t: number) => void;
   toggleLike: (id: string) => void;
   addTrack: (t: Track) => void;
+  /** Append a track to the END of the current queue (Add to Queue). Session-only. */
+  appendToQueue: (t: Track) => void;
   /** Start a new single-track session. Rotates queueId. Does NOT merge into existing queue. */
   addAndPlay: (t: Track) => void;
   /**
@@ -774,6 +776,19 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   /**
+   * Append a track to the END of the current session queue.
+   * If the track is already in the queue, it is not duplicated.
+   * Session-only — never written to DB or localStorage.
+   */
+  const appendToQueue = useCallback((t: Track) => {
+    setState(s => {
+      const alreadyPresent = s.tracks.some(tr => tr.id === t.id);
+      if (alreadyPresent) return s;
+      return { ...s, tracks: [...s.tracks, t] };
+    });
+  }, []);
+
+  /**
    * Insert a track immediately after the current position in the session queue.
    * Session-only — never written to DB or localStorage.
    */
@@ -1022,7 +1037,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       queueId: state.queueId,
       playTrack, togglePlay, nextTrack, prevTrack,
       toggleShuffle, toggleRepeat, toggleMute, setVolume, seek,
-      toggleLike, addTrack, addAndPlay, playNext, setQueue, playQueueAt, patchTrack,
+      toggleLike, addTrack, appendToQueue, addAndPlay, playNext, setQueue, playQueueAt, patchTrack,
       openNowPlayingPanel, isNowPlayingPanelOpen, closeNowPlayingPanel,
       openTheater, isTheaterOpen, closeTheater,
       setProfileName, setProfileBio, setProfileLocation, setProfileWebsite, setProfileSocials,

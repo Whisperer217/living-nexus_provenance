@@ -5829,3 +5829,13 @@
 - [x] Root cause: Link (anchor) rendered as inline element, collapsing card height to 43px — aspect-ratio on child div was ignored
 - [x] Fix: moved cardWidth/flex-shrink-0/snap-start/aspect-ratio to Link element with display:block; inner div uses w-full h-full
 - [x] 0 TypeScript errors, 324/324 tests passing
+
+## Phase: Player Menu + Queue + Playlist Flow
+- [ ] Fix three-dot menu: open below player bar (top: rect.bottom + 8) not above
+- [ ] Add appendToQueue() to PlayerContext (appends to end of queue)
+- [ ] Add "Add to Queue" option in player three-dot context menu with toast feedback
+- [ ] Add "Add to Queue" option in StoreTrackCard context menu
+- [ ] Add "Save Queue as Playlist" button in PlayerQueuePanel
+- [ ] Build SaveQueueAsPlaylistModal: name, description, AI cover generation, save
+- [ ] Wire AI cover generation to playlists.create with coverArtUrl
+- [ ] Show saved playlists on creator profile under Collections/Domain

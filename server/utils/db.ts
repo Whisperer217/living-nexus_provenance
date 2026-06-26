@@ -1680,7 +1680,7 @@ export async function getReferencesForUser(userId: number) {
 
 export async function createPlaylist(data: {
   ownerId: number; name: string; description?: string;
-  isPublic?: boolean; isCollaborative?: boolean;
+  isPublic?: boolean; isCollaborative?: boolean; coverArtUrl?: string;
 }) {
   const db = await getDb();
   if (!db) return null;
@@ -1691,6 +1691,7 @@ export async function createPlaylist(data: {
     description: data.description ?? null,
     isPublic: data.isPublic ?? false,
     isCollaborative: data.isCollaborative ?? false,
+    ...(data.coverArtUrl ? { coverArtUrl: data.coverArtUrl } : {}),
   });
   return result.insertId as number;
 }

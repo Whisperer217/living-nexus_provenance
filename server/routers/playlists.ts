@@ -227,6 +227,7 @@ export const playlistsRouter = router({
         description: z.string().max(500).optional(),
         isPublic: z.boolean().optional(),
         isCollaborative: z.boolean().optional(),
+        coverArtUrl: z.string().url().optional(),
       }))
       .mutation(async ({ ctx, input }) => {
         const playlist = await getPlaylistById(input.id);
@@ -393,6 +394,38 @@ export const playlistsRouter = router({
                     .orderBy(descOp(playlistVersions.versionNum))
           .limit(20);
         return rows;
+      }),
+    /** Generate an AI cover image for a playlist based on a prompt and optional reference images */
+    generateCover: protectedProcedure
+      .input(z.object({
+        prompt: z.string().min(1).max(600),
+        referenceImageUrls: z.array(z.string().url()).max(4).optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { generateImage } = await import('../_core/imageGeneration');
+        const enrichedPrompt = `Playlist cover art for a music collection. Cathedral aesthetic, luminous, cinematic. ${input.prompt}`;
+        const originalImages = (input.referenceImageUrls ?? []).map(url => ({ url, mimeType: 'image/jpeg' as const }));
+        const result = await generateImage({ prompt: enrichedPrompt, originalImages });
+        return { url: result.url };
+      }),
+    /** Save the current session queue as a new named playlist with optional cover art */
+    saveQueueAsPlaylist: protectedProcedure
+      .input(z.object({
+        name: z.string().min(1).max(128),
+        description: z.string().max(500).optional(),
+        coverArtUrl: z.string().url().optional(),
+        isPublic: z.boolean().optional(),
+        songIds: z.array(z.number().int().positive()).min(1).max(500),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const { songIds, ...meta } = input;
+        const playlistId = await createPlaylist({ ownerId: ctx.user.id, ...meta });
+        if (!playlistId) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Failed to create playlist' });
+        // Add all tracks in order
+        for (const songId of songIds) {
+          await addTrackToPlaylist(playlistId, songId, ctx.user.id);
+        }
+        return { id: playlistId };
       }),
     /** Check which of the user's playlists already contain a given song */
     songInPlaylists: protectedProcedure
