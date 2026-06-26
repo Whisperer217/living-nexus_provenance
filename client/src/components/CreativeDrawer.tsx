@@ -157,6 +157,7 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
   const [videoFile, setVideoFile]       = useState<File | null>(null);
   const [videoUploading, setVideoUploading] = useState(false);
   const videoInputRef                   = useRef<HTMLInputElement>(null);
+  const drawerRootRef                    = useRef<HTMLDivElement>(null);
 
   /* ── AI Caption ── */
   const [captionGenerating, setCaptionGenerating] = useState(false);
@@ -381,6 +382,7 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
   /* ─── Render ─────────────────────────────────────────────────────────── */
   return createPortal(
     <div
+      ref={drawerRootRef}
       className="fixed inset-0"
       style={{ zIndex: 9000 }}
       aria-modal="true"
@@ -571,7 +573,7 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
                   <SelectTrigger style={{ background: SURFACE2, border: `1px solid ${GOLD_BORDER}`, color: "rgba(255,255,255,0.8)" }}>
                     <SelectValue placeholder="Select genre" />
                   </SelectTrigger>
-                  <SelectContent style={{ background: "#0d0b1a", border: `1px solid ${GOLD_BORDER}` }}>
+                  <SelectContent container={drawerRootRef.current} style={{ background: "#0d0b1a", border: `1px solid ${GOLD_BORDER}` }}>
                     {GENRES.map((g) => (
                       <SelectItem key={g} value={g} style={{ color: "rgba(255,255,255,0.8)" }}>{g}</SelectItem>
                     ))}
@@ -584,7 +586,7 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
                   <SelectTrigger style={{ background: SURFACE2, border: `1px solid ${GOLD_BORDER}`, color: "rgba(255,255,255,0.8)" }}>
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent style={{ background: "#0d0b1a", border: `1px solid ${GOLD_BORDER}` }}>
+                  <SelectContent container={drawerRootRef.current} style={{ background: "#0d0b1a", border: `1px solid ${GOLD_BORDER}` }}>
                     {STATUS_OPTIONS.map((s) => (
                       <SelectItem key={s.value} value={s.value}>
                         <span style={{ color: s.color }}>{s.label}</span>

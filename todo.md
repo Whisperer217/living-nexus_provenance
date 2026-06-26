@@ -5900,3 +5900,9 @@
 - [x] Wrap CreativeDrawer in ErrorBoundary (inline) at all four call sites: SongDetailPage, ArchivePage, CreatorDomainPage, ProfilePage
 - [x] Fix spurious ErrorBoundary tag accidentally added to BannerPositioner in ProfilePage
 - [x] 0 TypeScript errors, 340/340 tests pass
+
+## Dropdown Z-Index Fix (Jun 26 2026)
+- [x] Diagnose Select/dropdown rendering behind CreativeDrawer (z-50 vs zIndex:9000)
+- [x] Add container prop to SelectContent in select.tsx (forwards to SelectPrimitive.Portal)
+- [x] Add drawerRootRef to CreativeDrawer root div
+- [x] Wire container={drawerRootRef.current} to both SelectContent instances (Genre + Status)
