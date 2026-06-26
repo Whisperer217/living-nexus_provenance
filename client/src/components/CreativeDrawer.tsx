@@ -15,7 +15,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
-import { overlayOpen, overlayClose } from "@/lib/overlayController";
+// overlayController intentionally removed — see FREEZE FIX v3 comment at top of file
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -352,10 +352,19 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
     return () => window.removeEventListener("keydown", handler);
   }, [stableOnClose]);
 
-  /* ── Scroll lock — "light" mode only (no position:fixed) ── */
+  /* ── FREEZE FIX v3: Self-contained scroll lock on the actual scroll container ──
+     MainLayout renders a scrollable <div class="player-scroll-area"> NOT window scroll.
+     Locking body.overflow:hidden (what overlayController does) triggers a full browser
+     layout reflow + fires SongDetailPage's window.scroll listener + React setState =
+     main-thread lock (the freeze). Instead we lock the scroll container div directly.
+     This is zero-reflow: the div's overflow is toggled, body is untouched. */
   useEffect(() => {
-    overlayOpen("edit-track", "light");
-    return () => overlayClose("edit-track");
+    const scrollArea = document.querySelector<HTMLElement>(".player-scroll-area");
+    const prevOverflow = scrollArea?.style.overflowY ?? "";
+    if (scrollArea) scrollArea.style.overflowY = "hidden";
+    return () => {
+      if (scrollArea) scrollArea.style.overflowY = prevOverflow;
+    };
   }, []);
 
   /* ── Entrance animation ── */

@@ -30,6 +30,7 @@ import { usePlayer, Track } from "@/contexts/PlayerContext";
 
 import { EDIT_GENRES } from "@shared/contentTypes";
 import { CreatorIdentityStrip } from "@/components/CreatorIdentityStrip";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import { CreativeDrawer } from "@/components/CreativeDrawer";
 const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/HMNMkWUWAfVdTbRj3YmPCF/ln-navbar-icon-180_b914f927.png";
 
@@ -2247,8 +2248,9 @@ export default function ProfilePage() {
             </button>
           </div>
         </div>
-      {/* ── Creative Drawer ── */}
+      {/* ── Creative Drawer (ErrorBoundary prevents page freeze on crash) ── */}
       {editingSong && (
+        <ErrorBoundary inline>
         <CreativeDrawer
           song={{
             id: editingSong.id,
@@ -2274,6 +2276,7 @@ export default function ProfilePage() {
             utils.songs.mySongs.invalidate();
           }}
         />
+        </ErrorBoundary>
       )}
       </div>
     </div>

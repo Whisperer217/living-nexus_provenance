@@ -35,6 +35,7 @@ import { IdentityEditor } from "@/components/IdentityEditor";
 import { DomainEditor } from "@/components/domain/DomainEditor";
 import { DomainRenderer } from "@/components/domain/DomainRenderer";
 import { Helmet } from "react-helmet-async";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import { CreativeDrawer } from "@/components/CreativeDrawer";
 
 // ─── Section IDs ──────────────────────────────────────────────────
@@ -827,8 +828,9 @@ export default function CreatorDomainPage() {
           </main>
         </div>
       )}
-    {/* ── Creative Drawer ── */}
+    {/* ── Creative Drawer (ErrorBoundary prevents page freeze on crash) ── */}
     {editingSong && (
+      <ErrorBoundary inline>
       <CreativeDrawer
         song={{
           id: editingSong.id,
@@ -854,6 +856,7 @@ export default function CreatorDomainPage() {
           utils.songs.mySongs.invalidate();
         }}
       />
+      </ErrorBoundary>
     )}
     </div>
   );

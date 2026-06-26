@@ -47,6 +47,7 @@ import { QRShareModal } from "@/components/QRIdentityCard";
 import { CinematicComicReader, type BookPage } from "@/components/reader/CinematicComicReader";
 import { CreatorHandle } from "@/components/CreatorHandle";
 import { CreativeDrawer } from "@/components/CreativeDrawer";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import { SongDetailPageSkeleton } from "@/components/SongDetailPageSkeleton";
 
 // Slug keys stored in DB (safe ASCII, no charset issues); emoji shown in UI
@@ -1665,28 +1666,30 @@ export default function SongDetailPage() {
 
       {/* ── Owner: Creative Drawer ── */}
       {editingOpen && song && (
-        <CreativeDrawer
-          song={{
-            id: song.id,
-            title: song.title,
-            genre: song.genre ?? null,
-            caption: (song as any).caption ?? null,
-            coverArtUrl: song.coverArtUrl ?? null,
-            aiConsent: (song as any).aiConsent ?? null,
-            status: (song as any).status ?? "Published",
-            lyricsText: song.lyricsText ?? null,
-            haaiOriginStory: (song as any).haaiOriginStory ?? null,
-            aiDisclosure: (song as any).aiDisclosure ?? null,
-            contentType: (song as any).contentType ?? "audio",
-            releaseDate: (song as any).releaseDate ?? null,
-            description: (song as any).description ?? null,
-            witnessId: song.witnessId ?? null,
-            videoUrl: (song as any).videoUrl ?? null,
-            videoWitnessId: (song as any).videoWitnessId ?? null,
-          }}
-          onClose={handleEditClose}
-          onSaved={handleEditSaved}
-        />
+        <ErrorBoundary inline>
+          <CreativeDrawer
+            song={{
+              id: song.id,
+              title: song.title,
+              genre: song.genre ?? null,
+              caption: (song as any).caption ?? null,
+              coverArtUrl: song.coverArtUrl ?? null,
+              aiConsent: (song as any).aiConsent ?? null,
+              status: (song as any).status ?? "Published",
+              lyricsText: song.lyricsText ?? null,
+              haaiOriginStory: (song as any).haaiOriginStory ?? null,
+              aiDisclosure: (song as any).aiDisclosure ?? null,
+              contentType: (song as any).contentType ?? "audio",
+              releaseDate: (song as any).releaseDate ?? null,
+              description: (song as any).description ?? null,
+              witnessId: song.witnessId ?? null,
+              videoUrl: (song as any).videoUrl ?? null,
+              videoWitnessId: (song as any).videoWitnessId ?? null,
+            }}
+            onClose={handleEditClose}
+            onSaved={handleEditSaved}
+          />
+        </ErrorBoundary>
       )}
 
     </div>

@@ -19,6 +19,7 @@ import {
   Download, Lock, Coins, Layers, AlertTriangle, X,
   Library, ChevronRight, Layers2, Search,
 } from "lucide-react";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import { CreativeDrawer } from "@/components/CreativeDrawer";
 import { getLoginUrl } from "@/const";
 import { usePlayer } from "@/contexts/PlayerContext";
@@ -1352,8 +1353,9 @@ export default function ArchivePage() {
       </div>
     </div>
 
-    {/* Creative Drawer */}
+    {/* Creative Drawer (ErrorBoundary prevents page freeze on crash) */}
     {editingSong && (
+      <ErrorBoundary inline>
       <CreativeDrawer
         song={{
           id: editingSong.id,
@@ -1379,6 +1381,7 @@ export default function ArchivePage() {
           utils.songs.mySongs.invalidate();
         }}
       />
+      </ErrorBoundary>
     )}
 
     {/* Confirm Delete Modal */}

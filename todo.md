@@ -5890,3 +5890,13 @@
 - [x] Wire CreativeDrawer into CreatorDomainPage
 - [x] Wire CreativeDrawer into ProfilePage
 - [x] 340/340 tests pass, 0 TypeScript errors
+
+## Edit Work Freeze Fix v3 (Definitive) — Jun 26 2026
+
+- [x] Diagnose freeze root cause: overlayController sets body.overflow:hidden which triggers layout reflow + SongDetailPage window.scroll listener + React setState = main-thread lock
+- [x] Remove overlayController dependency from CreativeDrawer entirely
+- [x] Replace with self-contained scroll lock targeting .player-scroll-area div (zero-reflow)
+- [x] Add 120ms backdropActive mount delay to prevent same-click-close
+- [x] Wrap CreativeDrawer in ErrorBoundary (inline) at all four call sites: SongDetailPage, ArchivePage, CreatorDomainPage, ProfilePage
+- [x] Fix spurious ErrorBoundary tag accidentally added to BannerPositioner in ProfilePage
+- [x] 0 TypeScript errors, 340/340 tests pass
