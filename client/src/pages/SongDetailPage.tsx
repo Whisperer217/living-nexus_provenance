@@ -46,7 +46,7 @@ import { getContentTypeColors } from "@/lib/contentTypeColors";
 import { QRShareModal } from "@/components/QRIdentityCard";
 import { CinematicComicReader, type BookPage } from "@/components/reader/CinematicComicReader";
 import { CreatorHandle } from "@/components/CreatorHandle";
-import { EditChapel } from "@/components/EditChapel";
+import { CreativeDrawer } from "@/components/CreativeDrawer";
 import { SongDetailPageSkeleton } from "@/components/SongDetailPageSkeleton";
 
 // Slug keys stored in DB (safe ASCII, no charset issues); emoji shown in UI
@@ -1663,9 +1663,9 @@ export default function SongDetailPage() {
         </DialogContent>
       </Dialog>
 
-      {/* ── Owner: Edit Chapel ── */}
+      {/* ── Owner: Creative Drawer ── */}
       {editingOpen && song && (
-        <EditChapel
+        <CreativeDrawer
           song={{
             id: song.id,
             title: song.title,
@@ -1681,6 +1681,8 @@ export default function SongDetailPage() {
             releaseDate: (song as any).releaseDate ?? null,
             description: (song as any).description ?? null,
             witnessId: song.witnessId ?? null,
+            videoUrl: (song as any).videoUrl ?? null,
+            videoWitnessId: (song as any).videoWitnessId ?? null,
           }}
           onClose={handleEditClose}
           onSaved={handleEditSaved}

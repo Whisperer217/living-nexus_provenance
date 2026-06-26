@@ -19,7 +19,7 @@ import {
   Download, Lock, Coins, Layers, AlertTriangle, X,
   Library, ChevronRight, Layers2, Search,
 } from "lucide-react";
-import { EditChapel } from "@/components/EditChapel";
+import { CreativeDrawer } from "@/components/CreativeDrawer";
 import { getLoginUrl } from "@/const";
 import { usePlayer } from "@/contexts/PlayerContext";
 import MyListsTab from "@/components/MyListsTab";
@@ -1352,10 +1352,27 @@ export default function ArchivePage() {
       </div>
     </div>
 
-    {/* Edit Chapel */}
+    {/* Creative Drawer */}
     {editingSong && (
-      <EditChapel
-        song={editingSong}
+      <CreativeDrawer
+        song={{
+          id: editingSong.id,
+          title: editingSong.title,
+          genre: editingSong.genre ?? null,
+          caption: editingSong.caption ?? null,
+          coverArtUrl: editingSong.coverArtUrl ?? null,
+          aiConsent: editingSong.aiConsent ?? null,
+          status: editingSong.status ?? "Published",
+          lyricsText: editingSong.lyricsText ?? null,
+          haaiOriginStory: editingSong.haaiOriginStory ?? null,
+          aiDisclosure: editingSong.aiDisclosure ?? null,
+          contentType: editingSong.contentType ?? "audio",
+          releaseDate: editingSong.releaseDate ?? null,
+          description: editingSong.description ?? null,
+          witnessId: editingSong.witnessId ?? null,
+          videoUrl: editingSong.videoUrl ?? null,
+          videoWitnessId: editingSong.videoWitnessId ?? null,
+        }}
         onClose={() => setEditingSong(null)}
         onSaved={() => {
           setEditingSong(null);

@@ -35,7 +35,7 @@ import { IdentityEditor } from "@/components/IdentityEditor";
 import { DomainEditor } from "@/components/domain/DomainEditor";
 import { DomainRenderer } from "@/components/domain/DomainRenderer";
 import { Helmet } from "react-helmet-async";
-import { EditChapel } from "@/components/EditChapel";
+import { CreativeDrawer } from "@/components/CreativeDrawer";
 
 // ─── Section IDs ──────────────────────────────────────────────────
 type SectionId =
@@ -827,9 +827,9 @@ export default function CreatorDomainPage() {
           </main>
         </div>
       )}
-    {/* ── Edit Chapel ── */}
+    {/* ── Creative Drawer ── */}
     {editingSong && (
-      <EditChapel
+      <CreativeDrawer
         song={{
           id: editingSong.id,
           title: editingSong.title,
@@ -845,6 +845,8 @@ export default function CreatorDomainPage() {
           releaseDate: editingSong.releaseDate ?? null,
           description: editingSong.description ?? null,
           witnessId: editingSong.witnessId ?? null,
+          videoUrl: editingSong.videoUrl ?? null,
+          videoWitnessId: editingSong.videoWitnessId ?? null,
         }}
         onClose={() => setEditingSong(null)}
         onSaved={() => {

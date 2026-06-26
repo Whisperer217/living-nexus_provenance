@@ -5863,3 +5863,30 @@
 - [x] Add description + witnessId to SongDetailPage EditChapel props for full field parity
 - [x] Verify Archive onSaved cache invalidation (utils.songs.mySongs.invalidate)
 - [x] 340/340 tests passing, 0 TypeScript errors
+
+## Creative Drawer — Fix Freeze + New Premium Edit Experience
+- [ ] Fix EditChapel backdrop: change onClick to onPointerDown with e.target===e.currentTarget guard
+- [ ] Add 100ms mount delay before backdrop becomes interactive (prevents same-click-close)
+- [ ] Add e.stopPropagation() on drawer panel container
+- [ ] Pause SongDetailPage scroll listener when editingOpen is true
+- [ ] Build CreativeDrawer.tsx: cover art hero, title, video section, lyrics, AI caption generator, provenance stamp
+- [ ] Wire CreativeDrawer into SongDetailPage (replaces EditChapel)
+- [ ] Wire CreativeDrawer into Archive, Creator Domain, Profile pages
+- [ ] Ensure cache invalidation on save across all surfaces
+
+## Creative Drawer — Freeze Fix + New UX (Jun 26 2026)
+
+- [x] Diagnose freeze root cause (backdrop click fires on same event that opened drawer; body.overflow:hidden scroll storm)
+- [x] Build CreativeDrawer.tsx with 100ms mount delay + onPointerDown backdrop guard + stopPropagation on panel
+- [x] Cover art hero section (full-width, hover overlay, replace/upload)
+- [x] Title, Genre, Status, Release Date fields
+- [x] Add Video section (URL input + upload)
+- [x] Add Lyrics section (collapsible editor)
+- [x] AI Caption section (generate or edit)
+- [x] HAAI / Origin Story section
+- [x] Provenance Stamp section (WID display)
+- [x] Wire CreativeDrawer into SongDetailPage (replaces EditChapel, adds videoUrl/videoWitnessId)
+- [x] Wire CreativeDrawer into ArchivePage
+- [x] Wire CreativeDrawer into CreatorDomainPage
+- [x] Wire CreativeDrawer into ProfilePage
+- [x] 340/340 tests pass, 0 TypeScript errors

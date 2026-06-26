@@ -30,7 +30,7 @@ import { usePlayer, Track } from "@/contexts/PlayerContext";
 
 import { EDIT_GENRES } from "@shared/contentTypes";
 import { CreatorIdentityStrip } from "@/components/CreatorIdentityStrip";
-import { EditChapel } from "@/components/EditChapel";
+import { CreativeDrawer } from "@/components/CreativeDrawer";
 const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/HMNMkWUWAfVdTbRj3YmPCF/ln-navbar-icon-180_b914f927.png";
 
 /* ── Editable inline field ─────────────────────────────────────── */
@@ -2247,9 +2247,9 @@ export default function ProfilePage() {
             </button>
           </div>
         </div>
-      {/* ── Edit Chapel ── */}
+      {/* ── Creative Drawer ── */}
       {editingSong && (
-        <EditChapel
+        <CreativeDrawer
           song={{
             id: editingSong.id,
             title: editingSong.title,
@@ -2265,6 +2265,8 @@ export default function ProfilePage() {
             releaseDate: editingSong.releaseDate ?? null,
             description: editingSong.description ?? null,
             witnessId: editingSong.witnessId ?? null,
+            videoUrl: editingSong.videoUrl ?? null,
+            videoWitnessId: editingSong.videoWitnessId ?? null,
           }}
           onClose={() => setEditingSong(null)}
           onSaved={() => {
