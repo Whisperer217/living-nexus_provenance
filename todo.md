@@ -5987,3 +5987,11 @@
 - [x] Fix: when the tile's song is the currently playing track AND isPlaying is true, clicking should call pause() not play()
 - [x] Ensure fix covers HomePage, ExplorePage, CreatorProfilePage, DiscoverPage (all handlePlay functions now check currentTrackId === song.id first)
 - [x] Add regression note to prevent future recurrence
+
+## Fix: Discovery Sorting — Creator Date as Primary Sort Key
+- [x] Schema audit: songs.releaseDate (VARCHAR 'YYYY-MM-DD') is the creator-inputted date; 342/530 published songs have it set
+- [x] Root cause: getNewThisWeek and getPublicSongs both sorted by songs.createdAt DESC (system insert timestamp), ignoring creator-inputted releaseDate
+- [x] Fix getNewThisWeek: sort by COALESCE(releaseDate, DATE(createdAt)) DESC; apply same coalesced date to 180-day window filter
+- [x] Fix getPublicSongs (drives discover, discoverInfinite, WorkCarousel, DiscoverySection, QuickRefSlider, LiveActivityPanel, QueueLoader): sort by COALESCE(releaseDate, DATE(createdAt)) DESC, createdAt DESC
+- [x] Fix DiscoverySection "New Arrivals" See All href from /explore?sort=newest (broken) to /explore?sort=new (correct)
+- [x] 0 TypeScript errors, 340/340 tests pass

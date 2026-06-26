@@ -165,7 +165,7 @@ export function DiscoverySection() {
       ═══════════════════════════════════════════════════════════════ */}
       {newArrivals.length > 0 && (
         <section>
-          <SectionHeader title="New Arrivals" subtitle="Fresh manifestations" href="/explore?sort=newest" />
+          <SectionHeader title="New Arrivals" subtitle="Fresh manifestations" href="/explore?sort=new" />
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
             {newArrivals.map((item: ManifestationData, i: number) => (
               <ManifestationReveal key={item.id} index={i}>

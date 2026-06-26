@@ -435,12 +435,12 @@ export async function getPublicSongs(opts?: { genre?: string; search?: string; l
     ) as unknown as ReturnType<typeof eq>);
   }
   // When a specific creator is filtered (via creatorId option), respect their displayOrder.
-  // For global/mixed feeds, use newest-first unless randomized.
+  // For global/mixed feeds, sort by creator-inputted releaseDate first, fall back to createdAt.
   const orderExpr = opts?.randomize
     ? (opts.seed !== undefined ? sql`RAND(${opts.seed})` : sql`RAND()`)
     : (opts as any)?.creatorId
       ? sql`${songs.displayOrder} ASC, ${songs.createdAt} ASC`
-      : desc(songs.createdAt);
+      : sql`COALESCE(${songs.releaseDate}, DATE(${songs.createdAt})) DESC, ${songs.createdAt} DESC`;
   return db.select({
     song: songs,
     creator: { id: users.id, name: users.name, artistHandle: users.artistHandle, profilePhotoUrl: users.profilePhotoUrl, aiDisclosure: users.aiDisclosure, primaryGenre: users.primaryGenre, stripeAccountStatus: users.stripeAccountStatus, role: users.role },
@@ -3800,24 +3800,27 @@ export async function getNewThisWeek(opts?: { genre?: string; contentType?: "aud
   } else if (opts?.contentType) {
     baseConditions.push(eq(songs.contentType, opts.contentType) as ReturnType<typeof eq>);
   }
-  // First attempt: 180-day window, newest first
+  // Sort by creator-inputted releaseDate (VARCHAR 'YYYY-MM-DD') first, fall back to createdAt.
+  // COALESCE(releaseDate, DATE(createdAt)) gives a consistent date string for ordering.
+  const creatorDateSort = sql`COALESCE(${songs.releaseDate}, DATE(${songs.createdAt})) DESC, ${songs.createdAt} DESC`;
+  // First attempt: 180-day window, newest creator date first
   const windowConditions = [
     ...baseConditions,
-    sql`${songs.createdAt} >= ${windowStart}` as unknown as ReturnType<typeof eq>,
+    sql`COALESCE(${songs.releaseDate}, DATE(${songs.createdAt})) >= DATE(${windowStart})` as unknown as ReturnType<typeof eq>,
   ];
   const windowResults = await db.select({ song: songs, creator: creatorFields })
     .from(songs)
     .leftJoin(users, eq(songs.userId, users.id))
     .where(and(...windowConditions))
-    .orderBy(desc(songs.createdAt))
+    .orderBy(creatorDateSort)
     .limit(limit);
   if (windowResults.length > 0) return windowResults;
-  // Fallback: return the most recently registered works (no time restriction)
+  // Fallback: return the most recently created works (no time restriction)
   return db.select({ song: songs, creator: creatorFields })
     .from(songs)
     .leftJoin(users, eq(songs.userId, users.id))
     .where(and(...baseConditions))
-    .orderBy(desc(songs.createdAt))
+    .orderBy(creatorDateSort)
     .limit(limit);
 }
 
