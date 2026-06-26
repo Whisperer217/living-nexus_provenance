@@ -6018,3 +6018,16 @@
 - [x] Guard logic: if activeTrack.id === requested track id → togglePlay instead of restart (works for ALL 27 call sites automatically)
 - [x] Documented with TOGGLE-GUARD comment in PlayerContext so future developers understand the invariant
 - [x] 0 TypeScript errors, 340/340 tests pass
+
+## Feature: Unified Cinematic Song Header
+- [x] Build CinematicSongHeader component: mixed media (video/image), waveform canvas overlay, reactive gold glow border
+- [x] Remove old cinematic banner block (song.coverArtUrl conditional)
+- [x] Remove duplicate two-column grid (Cover Art Sanctuary left column)
+- [x] Replace with single CinematicSongHeader as the primary play surface
+- [x] Video/image toggle button in header top-right
+- [x] Reactive gold glow border: stronger/more luminous when playing
+- [x] Waveform canvas overlaid at bottom of header (not a separate strip)
+- [x] Ken Burns slow drift on cover art when track is active
+- [x] Single centered play/pause button bottom-right of header
+- [x] Stats row (Plays / Voices / Loved) below the header frame
+- [x] 0 TypeScript errors, 340/340 tests pass

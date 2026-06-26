@@ -45,6 +45,7 @@ import { safeAudioUrl } from "@shared/const";
 import { getContentTypeColors } from "@/lib/contentTypeColors";
 import { QRShareModal } from "@/components/QRIdentityCard";
 import { CinematicComicReader, type BookPage } from "@/components/reader/CinematicComicReader";
+import { CinematicSongHeader } from "@/components/CinematicSongHeader";
 import { CreatorHandle } from "@/components/CreatorHandle";
 import { CreativeDrawer } from "@/components/CreativeDrawer";
 import ErrorBoundary from "@/components/ErrorBoundary";
@@ -581,10 +582,9 @@ export default function SongDetailPage() {
           </div>
         )}
         {/* ══════════════════════════════════════════════════════════════
-             CINEMATIC BANNER — Full-bleed panoramic header (from TrackPage)
-             Tall cover art banner with gradient overlay, genre badge, play
+             CINEMATIC SONG HEADER — unified single play surface
         ══════════════════════════════════════════════════════════════ */}
-        {song.coverArtUrl && (
+        {false && (
           <div
             className="relative w-full overflow-hidden rounded-2xl mb-8 cathedral-enter-art"
             style={{
@@ -689,14 +689,36 @@ export default function SongDetailPage() {
         )}
 
         {/* ══════════════════════════════════════════════════════════════
-             CATHEDRAL HERO — Sacred two-column sanctuary
-             Left: Cover Art Sanctuary (full-bleed, breathing, sg-hero-frame)
-             Right: Testimony Chamber (dominant title, WID seal, sacred tools)
+             CINEMATIC SONG HEADER — unified single play surface
         ══════════════════════════════════════════════════════════════ */}
-        <div className="grid grid-cols-1 lg:grid-cols-[440px_1fr] gap-10 mb-10">
+        <CinematicSongHeader
+          title={song.title}
+          artistName={creator?.artistHandle ?? creator?.name ?? "Unknown Creator"}
+          genre={song.genre}
+          witnessId={song.witnessId}
+          coverArtUrl={song.coverArtUrl}
+          coverPositionX={song.coverPositionX}
+          coverPositionY={song.coverPositionY}
+          videoUrl={(song as any).videoUrl}
+          hasAudio={song.contentType !== "comic" && song.contentType !== "manuscript"}
+          contentType={song.contentType}
+          isOwner={isOwner}
+          isThisTrackActive={isThisTrackActive}
+          isPlaying={isPlaying}
+          playCount={song.playCount ?? 0}
+          commentCount={0}
+          likeCount={likeCount}
+          waveCanvasRef={waveCanvasRef as React.RefObject<HTMLCanvasElement>}
+          onPlay={handlePlay}
+          onReadNow={handleReadNow}
+          onEditArt={() => {}}
+        />
 
-          {/* ── LEFT: Cover Art Sanctuary ── */}
-          <div className="flex flex-col gap-5 cathedral-enter-art">
+        {/* ── TESTIMONY CHAMBER — single-column layout below the header ── */}
+        <div className="flex flex-col gap-10 mb-10">
+
+          {/* HIDDEN: old left column sentinel — kept for diff clarity */}
+          {false && <div className="flex flex-col gap-5 cathedral-enter-art">
             {/* Cover art — large, square, sticky on desktop */}
             <div>
               {/* Video player */}
@@ -905,8 +927,8 @@ export default function SongDetailPage() {
                 </div>
               </div>
             </div>
-          </div>
-          {/* ── RIGHT: Testimony Chamber ── */}
+          </div>}
+          {/* ── Testimony Chamber ── */}
           <div className="flex flex-col gap-6">
 
             {/* ══ TITLE SANCTUARY ══ */}
