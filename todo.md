@@ -5824,3 +5824,8 @@
 - [x] Add graceful trending fallback: if weekly score is all zero, sort by all-time playCount (allTimePlays weight raised from 0.01 to 0.1)
 - [x] Ensure discoverInfinite Explore page shows full published catalog with no extra filters (confirmed: only isPublic+Published filters)
 - [x] Add "New Arrivals" label clarification: show "Recently Added" when using fallback window
+
+## Phase N+Y: StoreTrackCard Blank Content Fix
+- [x] Root cause: Link (anchor) rendered as inline element, collapsing card height to 43px — aspect-ratio on child div was ignored
+- [x] Fix: moved cardWidth/flex-shrink-0/snap-start/aspect-ratio to Link element with display:block; inner div uses w-full h-full
+- [x] 0 TypeScript errors, 324/324 tests passing

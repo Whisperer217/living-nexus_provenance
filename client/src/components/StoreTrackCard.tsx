@@ -253,10 +253,13 @@ export function StoreTrackCard({ song, size = "md", allSongs, songIndex, isNew }
 
   return (
     <>
-      <Link href={`/song/${song.id}`}>
+      <Link
+        href={`/song/${song.id}`}
+        className={`block ${cardWidth} flex-shrink-0 snap-start`}
+        style={{ aspectRatio: "2/3" }}
+      >
         <div
-          className={`relative ${cardWidth} flex-shrink-0 snap-start cursor-pointer group`}
-          style={{ aspectRatio: "2/3" }}
+          className="relative w-full h-full cursor-pointer group"
           onMouseEnter={() => setHovered(true)}
           onMouseLeave={() => setHovered(false)}
         >
