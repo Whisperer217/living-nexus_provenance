@@ -29,7 +29,7 @@ import {
   X, Upload, Loader2, CheckCircle2, AlertCircle, Trash2,
   Music, Flame, BookOpen, Shield, ChevronDown, ChevronUp,
   ImageIcon, Eye, Video, Sparkles, Hash, FileText,
-  ExternalLink, Plus,
+  ExternalLink, Plus, Pencil,
 } from "lucide-react";
 
 /* ─── Types ─────────────────────────────────────────────────────────────── */
@@ -472,24 +472,34 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
           }}
         >
           <div className="flex items-center gap-3">
-            {/* Sacred note glyph */}
-            <div
-              className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
-              style={{ background: GOLD_DIM, border: `1px solid ${GOLD_BORDER}` }}
-            >
-              <Music className="w-3.5 h-3.5" style={{ color: GOLD }} />
-            </div>
-            <div>
-              <h2
-                className="text-sm font-semibold tracking-[0.14em] uppercase"
-                style={{ color: GOLD, fontFamily: "'Cinzel', serif" }}
-              >
-                Creative Chapel
-              </h2>
-              <p className="text-xs" style={{ color: TEXT_DIM }}>
-                Tend to your testimony
-              </p>
-            </div>
+            {/* Sacred glyph — adapts to content type */}
+            {(() => {
+              const ct = song.contentType ?? "audio";
+              const Icon = ct === "comic" ? BookOpen : ct === "manuscript" ? FileText : ct === "lyrics" ? Pencil : Music;
+              const label = ct === "comic" ? "Comic Chapel" : ct === "manuscript" ? "Manuscript Chapel" : ct === "lyrics" ? "Lyrics Chapel" : "Creative Chapel";
+              const subtitle = ct === "comic" ? "Tend to your visual testimony" : ct === "manuscript" ? "Tend to your written testimony" : ct === "lyrics" ? "Tend to your lyrical testimony" : "Tend to your testimony";
+              return (
+                <>
+                  <div
+                    className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
+                    style={{ background: GOLD_DIM, border: `1px solid ${GOLD_BORDER}` }}
+                  >
+                    <Icon className="w-3.5 h-3.5" style={{ color: GOLD }} />
+                  </div>
+                  <div>
+                    <h2
+                      className="text-sm font-semibold tracking-[0.14em] uppercase"
+                      style={{ color: GOLD, fontFamily: "'Cinzel', serif" }}
+                    >
+                      {label}
+                    </h2>
+                    <p className="text-xs" style={{ color: TEXT_DIM }}>
+                      {subtitle}
+                    </p>
+                  </div>
+                </>
+              );
+            })()}
           </div>
 
           <div className="flex items-center gap-2">
@@ -547,6 +557,19 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
                     background: "linear-gradient(180deg, rgba(6,4,14,0.2) 0%, transparent 35%, transparent 55%, rgba(6,4,14,0.85) 100%)",
                   }}
                 />
+                {/* Mobile tap hint — always visible on touch, hidden on hover-capable devices */}
+                <div
+                  className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-1.5 rounded-full pointer-events-none"
+                  style={{
+                    background: "rgba(4,2,10,0.7)",
+                    border: `1px solid ${GOLD_BORDER}`,
+                    opacity: coverHovered ? 0 : 1,
+                    transition: "opacity 0.3s",
+                  }}
+                >
+                  <ImageIcon className="w-3 h-3" style={{ color: GOLD, opacity: 0.7 }} />
+                  <span className="text-xs" style={{ color: GOLD, opacity: 0.7, fontFamily: "'Cinzel', serif", letterSpacing: "0.08em" }}>Tap to replace</span>
+                </div>
               </>
             ) : (
               <>
@@ -665,7 +688,7 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
             </div>
 
             {/* ═══ CORE METADATA ═══════════════════════════════════════════ */}
-            <div className="grid grid-cols-2 gap-5 mb-7">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-7">
               <div>
                 <FieldLabel>Genre</FieldLabel>
                 <Select value={genre} onValueChange={setGenre}>
@@ -805,7 +828,11 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
                 <div className="flex items-center gap-3">
                   <Video className="w-4 h-4" style={{ color: GOLD, opacity: 0.75 }} />
                   <span className="text-sm" style={{ color: videoExpanded ? GOLD : "rgba(255,255,255,0.6)", fontFamily: "'Cinzel', serif", letterSpacing: "0.08em" }}>
-                    {videoUrl ? "Music Video Attached" : "Add Music Video"}
+                    {(() => {
+                      const ct = song.contentType ?? "audio";
+                      if (videoUrl) return ct === "comic" ? "Trailer Attached" : ct === "manuscript" ? "Book Trailer Attached" : "Music Video Attached";
+                      return ct === "comic" ? "Add Comic Trailer" : ct === "manuscript" ? "Add Book Trailer" : "Add Music Video";
+                    })()}
                   </span>
                   {videoWid && (
                     <span className="text-xs px-1.5 py-0.5 rounded font-mono" style={{ background: GOLD_DIM, color: GOLD, fontSize: "0.6rem" }}>

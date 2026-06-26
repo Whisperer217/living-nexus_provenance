@@ -5931,3 +5931,10 @@
 - [x] All 4 call sites (SongDetailPage, ArchivePage, CreatorDomainPage, ProfilePage) retain ErrorBoundary
 - [x] drawerContainerEl state pattern preserved for Radix portal z-index fix
 - [x] Scroll lock targets .player-scroll-area with body fallback preserved
+
+## Creative Chapel — Mobile & Polish Audit (Jun 26 2026)
+- [x] Add slideInRight and pulse keyframe animations to index.css (missing — drawer appears instantly, rings are static)
+- [x] Fix mobile hover overlay: add touch-friendly cover art replace hint visible on mobile (no hover events on touch)
+- [x] Add externalLinksJson to ArchivePage, CreatorDomainPage, ProfilePage CreativeDrawer call sites (currently missing — links editor always starts empty)
+- [x] Adapt drawer header icon/label to contentType (comic → BookOpen, manuscript → FileText, audio → Music)
+- [x] Verify provenance stamp refresh on all 4 surfaces after save — updateMetadata.onSuccess invalidates both mySongs + getById on all surfaces

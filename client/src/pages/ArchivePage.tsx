@@ -1374,11 +1374,13 @@ export default function ArchivePage() {
           witnessId: editingSong.witnessId ?? null,
           videoUrl: editingSong.videoUrl ?? null,
           videoWitnessId: editingSong.videoWitnessId ?? null,
+          externalLinksJson: editingSong.externalLinksJson ?? null,
         }}
         onClose={() => setEditingSong(null)}
         onSaved={() => {
           setEditingSong(null);
           utils.songs.mySongs.invalidate();
+          utils.songs.getById.invalidate({ id: editingSong.id });
         }}
       />
       </ErrorBoundary>

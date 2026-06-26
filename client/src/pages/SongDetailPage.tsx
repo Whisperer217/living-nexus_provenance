@@ -1719,6 +1719,7 @@ export default function SongDetailPage() {
               witnessId: song.witnessId ?? null,
               videoUrl: (song as any).videoUrl ?? null,
               videoWitnessId: (song as any).videoWitnessId ?? null,
+              externalLinksJson: (song as any).externalLinksJson ?? null,
             }}
             onClose={handleEditClose}
             onSaved={handleEditSaved}

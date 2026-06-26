@@ -2947,3 +2947,27 @@ h1, h2, h3, h4, h5, h6,
     0 8px 48px rgba(0,0,0,0.70);
   animation: sanctuary-glow 3.5s ease-in-out infinite;
 }
+
+/* ── Creative Chapel Animations ─────────────────────────────────────────── */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Generic pulse for relic rings (scale + opacity breathe) */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.25;
+    transform: scale(1.04);
+  }
+}
