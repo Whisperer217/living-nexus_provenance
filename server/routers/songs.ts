@@ -934,6 +934,8 @@ export const songsRouter = router({
       headlineCaption: z.string().max(280).nullable().optional(),
       // Mood tags
       moodTags: z.array(z.string()).nullable().optional(),
+      // Release / creation date (ISO date string, e.g. "2024-03-15")
+      releaseDate: z.string().nullable().optional(),
     })).mutation(async ({ ctx, input }) => {
       const { songId, creditsJson, ...fields } = input;
       // If saving a complete HAAI declaration, stamp the declared timestamp

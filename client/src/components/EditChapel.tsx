@@ -7,7 +7,7 @@
   ╚══════════════════════════════════════════════════════════════════════════╝
 */
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { overlayOpen, overlayClose } from "@/lib/overlayController";
 import { trpc } from "@/lib/trpc";
@@ -37,6 +37,7 @@ import {
   ChevronDown,
   ChevronUp,
   ImageIcon,
+  Eye,
 } from "lucide-react";
 
 /* ─── Types ─────────────────────────────────────────────────────────────── */
@@ -54,6 +55,8 @@ export interface ChapelSong {
   aiDisclosure?: string | null;
   contentType?: string | null;
   releaseDate?: string | null;
+  description?: string | null;
+  witnessId?: string | null;
 }
 
 interface EditChapelProps {
@@ -72,50 +75,70 @@ const GENRES = [
 ];
 
 const STATUS_OPTIONS = [
-  { value: "Published", label: "Published", desc: "Visible to everyone", color: "#22c55e" },
-  { value: "Draft",     label: "Draft",     desc: "Hidden from public",   color: "#f59e0b" },
-  { value: "Unlisted",  label: "Unlisted",  desc: "Only via direct link", color: "#a855f7" },
+  { value: "Published", label: "Published", desc: "Visible to everyone",  color: "#22c55e" },
+  { value: "Draft",     label: "Draft",     desc: "Hidden from public",    color: "#f59e0b" },
+  { value: "Unlisted",  label: "Unlisted",  desc: "Only via direct link",  color: "#a855f7" },
 ];
 
 const DISCLOSURE_OPTIONS = [
-  { value: "original",                    label: "Human-Made — Original Work",            icon: "🕊️" },
-  { value: "human_authored_ai_instrument",label: "Human-Authored, AI as Instrument",      icon: "🎹" },
-  { value: "ai_assisted",                 label: "AI-Assisted — Human Direction",         icon: "🤝" },
-  { value: "ai_generated",               label: "AI-Generated",                           icon: "🤖" },
+  { value: "original",                     label: "Human-Made — Original Work",           icon: "🕊️" },
+  { value: "human_authored_ai_instrument", label: "Human-Authored, AI as Instrument",     icon: "🎹" },
+  { value: "ai_assisted",                  label: "AI-Assisted — Human Direction",        icon: "🤝" },
+  { value: "ai_generated",                 label: "AI-Generated",                         icon: "🤖" },
 ];
 
 const AI_CONSENT_OPTIONS = [
-  { value: "prohibited",             label: "No AI Training",           desc: "Human-Made — prohibit all AI training use" },
-  { value: "permitted_attribution",  label: "Attribution Required",     desc: "AI-Assisted — training permitted with credit" },
-  { value: "permitted",              label: "Open Training",            desc: "AI-Assisted Manifestation — open training" },
+  { value: "prohibited",            label: "No AI Training",        desc: "Human-Made — prohibit all AI training use" },
+  { value: "permitted_attribution", label: "Attribution Required",  desc: "AI-Assisted — training permitted with credit" },
+  { value: "permitted",             label: "Open Training",         desc: "AI-Assisted Manifestation — open training" },
 ];
 
-/* ─── Helpers ────────────────────────────────────────────────────────────── */
+/* ─── Design Tokens ──────────────────────────────────────────────────────── */
 
-const GOLD = "#D4AF37";
-const GOLD_DIM = "rgba(212,175,55,0.18)";
-const GOLD_BORDER = "rgba(212,175,55,0.25)";
-const SURFACE = "rgba(10,8,18,0.98)";
-const SURFACE2 = "rgba(18,14,30,0.95)";
-const TEXT_MUTED = "rgba(255,255,255,0.45)";
+const GOLD        = "#D4AF37";
+const GOLD_DIM    = "rgba(212,175,55,0.15)";
+const GOLD_BORDER = "rgba(212,175,55,0.28)";
+const GOLD_GLOW   = "rgba(212,175,55,0.08)";
+const SURFACE     = "rgba(8,6,16,0.99)";
+const SURFACE2    = "rgba(16,12,28,0.97)";
+const SURFACE3    = "rgba(22,16,38,0.95)";
+const TEXT_MUTED  = "rgba(255,255,255,0.42)";
+const TEXT_DIM    = "rgba(255,255,255,0.28)";
 
-function SectionDivider({ label }: { label: string }) {
+/* ─── Sub-components ─────────────────────────────────────────────────────── */
+
+function SectionDivider({ label, icon }: { label: string; icon?: React.ReactNode }) {
   return (
-    <div className="flex items-center gap-3 my-6">
-      <div className="flex-1 h-px" style={{ background: "linear-gradient(90deg, transparent, rgba(212,175,55,0.3))" }} />
-      <span className="text-xs tracking-[0.2em] uppercase" style={{ color: TEXT_MUTED, fontFamily: "'Cinzel', serif" }}>{label}</span>
-      <div className="flex-1 h-px" style={{ background: "linear-gradient(90deg, rgba(212,175,55,0.3), transparent)" }} />
+    <div className="flex items-center gap-3 my-7">
+      <div className="flex-1 h-px" style={{ background: "linear-gradient(90deg, transparent, rgba(212,175,55,0.22))" }} />
+      <div className="flex items-center gap-1.5">
+        {icon && <span style={{ color: GOLD, opacity: 0.7 }}>{icon}</span>}
+        <span
+          className="text-xs tracking-[0.22em] uppercase"
+          style={{ color: TEXT_MUTED, fontFamily: "'Cinzel', serif" }}
+        >
+          {label}
+        </span>
+      </div>
+      <div className="flex-1 h-px" style={{ background: "linear-gradient(90deg, rgba(212,175,55,0.22), transparent)" }} />
     </div>
   );
 }
 
 function FieldLabel({ children, hint }: { children: React.ReactNode; hint?: string }) {
   return (
-    <div className="mb-1.5">
-      <Label className="text-xs tracking-[0.15em] uppercase" style={{ color: TEXT_MUTED, fontFamily: "'Cinzel', serif" }}>
+    <div className="mb-2">
+      <Label
+        className="text-xs tracking-[0.14em] uppercase"
+        style={{ color: TEXT_MUTED, fontFamily: "'Cinzel', serif" }}
+      >
         {children}
       </Label>
-      {hint && <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.3)" }}>{hint}</p>}
+      {hint && (
+        <p className="text-xs mt-0.5 leading-relaxed" style={{ color: TEXT_DIM }}>
+          {hint}
+        </p>
+      )}
     </div>
   );
 }
@@ -129,6 +152,7 @@ export function EditChapel({ song, onClose, onSaved }: EditChapelProps) {
   const [title, setTitle]               = useState(song.title ?? "");
   const [genre, setGenre]               = useState(song.genre ?? "");
   const [caption, setCaption]           = useState(song.caption ?? "");
+  const [description, setDescription]   = useState(song.description ?? "");
   const [status, setStatus]             = useState<string>(song.status ?? "Published");
   const [aiConsent, setAiConsent]       = useState<string>(song.aiConsent ?? "prohibited");
   const [aiDisclosure, setAiDisclosure] = useState<string>(song.aiDisclosure ?? "original");
@@ -139,9 +163,9 @@ export function EditChapel({ song, onClose, onSaved }: EditChapelProps) {
   );
 
   /* ── Cover art ── */
-  const [coverUrl, setCoverUrl]         = useState(song.coverArtUrl ?? "");
+  const [coverUrl, setCoverUrl]             = useState(song.coverArtUrl ?? "");
   const [coverUploading, setCoverUploading] = useState(false);
-  const coverInputRef = useRef<HTMLInputElement>(null);
+  const coverInputRef                       = useRef<HTMLInputElement>(null);
 
   /* ── UI state ── */
   const [lyricsExpanded, setLyricsExpanded]         = useState(false);
@@ -151,6 +175,7 @@ export function EditChapel({ song, onClose, onSaved }: EditChapelProps) {
   const [deleting, setDeleting]                     = useState(false);
   const [saved, setSaved]                           = useState(false);
   const [lyricsSaving, setLyricsSaving]             = useState(false);
+  const [coverHovered, setCoverHovered]             = useState(false);
 
   /* ── Mutations ── */
   const updateMetadata = trpc.songs.updateMetadata.useMutation({
@@ -209,8 +234,8 @@ export function EditChapel({ song, onClose, onSaved }: EditChapelProps) {
       // Immediately persist cover art
       await updateMetadata.mutateAsync({ songId: song.id, coverArtUrl: url });
       toast.success("Cover art updated");
-    } catch (e: any) {
-      toast.error(e.message || "Cover upload failed");
+    } catch (e: unknown) {
+      toast.error((e as Error).message || "Cover upload failed");
     } finally {
       setCoverUploading(false);
     }
@@ -225,12 +250,13 @@ export function EditChapel({ song, onClose, onSaved }: EditChapelProps) {
       title: title.trim(),
       genre: genre || null,
       caption: caption || null,
-      status: status as any,
-      aiConsent: aiConsent as any,
-      aiDisclosure: aiDisclosure as any,
+      description: description || null,
+      status: status as "Draft" | "Published" | "Unlisted",
+      aiConsent: aiConsent as "prohibited" | "permitted_attribution" | "permitted",
+      aiDisclosure: aiDisclosure as "original" | "ai_assisted" | "ai_generated" | "human_authored_ai_instrument",
       haaiOriginStory: originStory || null,
       releaseDate: creationDate || null,
-    } as any);
+    });
   }
 
   /* ── Save lyrics separately ── */
@@ -274,7 +300,7 @@ export function EditChapel({ song, onClose, onSaved }: EditChapelProps) {
       <div
         className="absolute inset-0 transition-opacity duration-500"
         style={{
-          background: "radial-gradient(ellipse at 60% 40%, rgba(30,15,50,0.85) 0%, rgba(0,0,0,0.92) 100%)",
+          background: "radial-gradient(ellipse at 65% 35%, rgba(30,15,55,0.88) 0%, rgba(0,0,0,0.94) 100%)",
           opacity: visible ? 1 : 0,
         }}
         onClick={onClose}
@@ -284,408 +310,560 @@ export function EditChapel({ song, onClose, onSaved }: EditChapelProps) {
       <div
         className="absolute top-0 right-0 h-full flex flex-col"
         style={{
-          width: "min(520px, 100vw)",
+          width: "min(600px, 100vw)",
           background: SURFACE,
           borderLeft: `1px solid ${GOLD_BORDER}`,
-          boxShadow: `-24px 0 80px rgba(0,0,0,0.7), -4px 0 24px rgba(212,175,55,0.06)`,
+          boxShadow: `-32px 0 100px rgba(0,0,0,0.75), -4px 0 32px ${GOLD_GLOW}`,
           transform: visible ? "translateX(0)" : "translateX(100%)",
-          transition: "transform 0.38s cubic-bezier(0.22,1,0.36,1)",
+          transition: "transform 0.4s cubic-bezier(0.22,1,0.36,1)",
           overflowY: "auto",
           overflowX: "hidden",
         }}
       >
         {/* ── Header ── */}
         <div
-          className="sticky top-0 flex items-center justify-between px-6 py-4"
+          className="sticky top-0 flex items-center justify-between px-7 py-4"
           style={{
-            background: `linear-gradient(180deg, ${SURFACE} 80%, transparent)`,
+            background: `linear-gradient(180deg, ${SURFACE} 75%, transparent)`,
             borderBottom: `1px solid ${GOLD_BORDER}`,
             zIndex: 10,
           }}
         >
           <div>
-            <p className="text-xs tracking-[0.25em] uppercase mb-0.5" style={{ color: GOLD, fontFamily: "'Cinzel', serif", opacity: 0.7 }}>
+            <p
+              className="text-xs tracking-[0.28em] uppercase mb-0.5"
+              style={{ color: GOLD, fontFamily: "'Cinzel', serif", opacity: 0.65 }}
+            >
               Edit Chapel
             </p>
-            <h2 className="text-base font-semibold truncate max-w-[320px]" style={{ color: "rgba(255,255,255,0.9)", fontFamily: "'Cinzel', serif" }}>
+            <h2
+              className="text-sm font-semibold truncate max-w-[380px]"
+              style={{ color: "rgba(255,255,255,0.88)", fontFamily: "'Cinzel', serif" }}
+            >
               {song.title}
             </h2>
           </div>
-          <button
-            onClick={onClose}
-            className="rounded-full p-2 transition-all"
-            style={{ color: TEXT_MUTED, background: "rgba(255,255,255,0.04)" }}
-            aria-label="Close"
-          >
-            <X className="w-4 h-4" />
-          </button>
+          <div className="flex items-center gap-2">
+            {song.witnessId && (
+              <a
+                href={`/song/${song.witnessId}`}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all hover:opacity-90"
+                style={{
+                  background: GOLD_DIM,
+                  border: `1px solid ${GOLD_BORDER}`,
+                  color: GOLD,
+                  fontFamily: "'Cinzel', serif",
+                  letterSpacing: "0.08em",
+                }}
+                title="View public page"
+              >
+                <Eye className="w-3 h-3" />
+                Preview
+              </a>
+            )}
+            <button
+              onClick={onClose}
+              className="rounded-full p-2 transition-all hover:opacity-80"
+              style={{ color: TEXT_MUTED, background: "rgba(255,255,255,0.05)" }}
+              aria-label="Close"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
         {/* ── Body ── */}
-        <div className="flex-1 px-6 pb-8 pt-6 space-y-0">
+        <div className="flex-1 pb-8">
 
-          {/* ═══ COVER ART ═══════════════════════════════════════════════ */}
-          <div className="flex gap-5 items-start mb-8">
-            {/* Cover preview */}
-            <div
-              className="relative flex-shrink-0 rounded-xl overflow-hidden cursor-pointer group"
-              style={{
-                width: 120,
-                height: 120,
-                background: SURFACE2,
-                border: `1px solid ${GOLD_BORDER}`,
-                boxShadow: coverUrl ? `0 0 24px rgba(212,175,55,0.12)` : "none",
-              }}
-              onClick={() => coverInputRef.current?.click()}
-            >
-              {coverUrl ? (
-                <img src={coverUrl} alt="Cover art" className="w-full h-full object-cover" />
-              ) : (
-                <div className="w-full h-full flex flex-col items-center justify-center gap-1.5">
-                  <Music className="w-8 h-8" style={{ color: "rgba(212,175,55,0.3)" }} />
-                  <span className="text-xs" style={{ color: TEXT_MUTED }}>No Art</span>
+          {/* ═══ HERO COVER ART ══════════════════════════════════════════ */}
+          <div
+            className="relative w-full overflow-hidden cursor-pointer"
+            style={{
+              height: 220,
+              background: SURFACE2,
+              borderBottom: `1px solid ${GOLD_BORDER}`,
+            }}
+            onClick={() => coverInputRef.current?.click()}
+            onMouseEnter={() => setCoverHovered(true)}
+            onMouseLeave={() => setCoverHovered(false)}
+          >
+            {coverUrl ? (
+              <img
+                src={coverUrl}
+                alt="Cover art"
+                className="w-full h-full object-cover"
+                style={{ transition: "transform 0.5s ease", transform: coverHovered ? "scale(1.03)" : "scale(1)" }}
+              />
+            ) : (
+              <div className="w-full h-full flex flex-col items-center justify-center gap-3">
+                <div
+                  className="w-16 h-16 rounded-full flex items-center justify-center"
+                  style={{ background: GOLD_DIM, border: `1px solid ${GOLD_BORDER}` }}
+                >
+                  <Music className="w-8 h-8" style={{ color: GOLD, opacity: 0.5 }} />
                 </div>
-              )}
-              {/* Hover overlay */}
-              <div
-                className="absolute inset-0 flex flex-col items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                style={{ background: "rgba(0,0,0,0.65)" }}
-              >
-                {coverUploading ? (
-                  <Loader2 className="w-5 h-5 animate-spin" style={{ color: GOLD }} />
-                ) : (
-                  <>
-                    <ImageIcon className="w-5 h-5" style={{ color: GOLD }} />
-                    <span className="text-xs" style={{ color: GOLD }}>Replace</span>
-                  </>
-                )}
+                <span className="text-sm tracking-widest uppercase" style={{ color: TEXT_MUTED, fontFamily: "'Cinzel', serif" }}>
+                  No Cover Art
+                </span>
               </div>
+            )}
+
+            {/* Gradient overlay always present at bottom */}
+            <div
+              className="absolute inset-x-0 bottom-0"
+              style={{ height: 80, background: "linear-gradient(0deg, rgba(8,6,16,0.85) 0%, transparent 100%)" }}
+            />
+
+            {/* Hover overlay */}
+            <div
+              className="absolute inset-0 flex flex-col items-center justify-center gap-2 transition-opacity duration-300"
+              style={{
+                background: "rgba(0,0,0,0.55)",
+                opacity: coverHovered ? 1 : 0,
+              }}
+            >
+              {coverUploading ? (
+                <Loader2 className="w-7 h-7 animate-spin" style={{ color: GOLD }} />
+              ) : (
+                <>
+                  <div
+                    className="w-12 h-12 rounded-full flex items-center justify-center"
+                    style={{ background: GOLD_DIM, border: `1px solid ${GOLD_BORDER}` }}
+                  >
+                    <ImageIcon className="w-6 h-6" style={{ color: GOLD }} />
+                  </div>
+                  <span
+                    className="text-sm tracking-widest uppercase"
+                    style={{ color: GOLD, fontFamily: "'Cinzel', serif" }}
+                  >
+                    {coverUrl ? "Replace Art" : "Add Cover Art"}
+                  </span>
+                </>
+              )}
             </div>
 
-            {/* Title */}
-            <div className="flex-1 min-w-0">
+            {/* Bottom-left: upload hint */}
+            <div className="absolute bottom-3 left-4 flex items-center gap-1.5">
+              <Upload className="w-3 h-3" style={{ color: GOLD, opacity: 0.6 }} />
+              <span className="text-xs" style={{ color: GOLD, opacity: 0.6 }}>
+                {coverUrl ? "Click to replace" : "Click to add cover art"}
+              </span>
+            </div>
+          </div>
+
+          <input
+            ref={coverInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => { const f = e.target.files?.[0]; if (f) handleCoverUpload(f); }}
+          />
+
+          {/* ── Content sections ── */}
+          <div className="px-7 pt-7">
+
+            {/* ═══ TITLE ═══════════════════════════════════════════════ */}
+            <div className="mb-6">
               <FieldLabel>Title</FieldLabel>
               <Input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Work title"
-                className="text-base font-semibold"
                 style={{
                   background: SURFACE2,
                   border: `1px solid ${GOLD_BORDER}`,
-                  color: "rgba(255,255,255,0.92)",
+                  color: "rgba(255,255,255,0.94)",
                   fontFamily: "'Cinzel', serif",
-                  fontSize: "1.05rem",
+                  fontSize: "1.1rem",
+                  fontWeight: 600,
+                  letterSpacing: "0.03em",
+                  padding: "0.65rem 0.9rem",
+                  height: "auto",
+                  boxShadow: title ? `0 0 20px ${GOLD_GLOW} inset` : "none",
+                  transition: "box-shadow 0.3s ease",
                 }}
               />
-              <input
-                ref={coverInputRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={(e) => { const f = e.target.files?.[0]; if (f) handleCoverUpload(f); }}
-              />
-              <button
-                onClick={() => coverInputRef.current?.click()}
-                className="mt-2 text-xs flex items-center gap-1.5 transition-opacity hover:opacity-100 opacity-60"
-                style={{ color: GOLD }}
-              >
-                <Upload className="w-3 h-3" />
-                {coverUrl ? "Replace cover art" : "Add cover art"}
-              </button>
-            </div>
-          </div>
-
-          {/* ═══ CORE METADATA ═══════════════════════════════════════════ */}
-          <div className="grid grid-cols-2 gap-4 mb-6">
-            {/* Genre */}
-            <div>
-              <FieldLabel>Genre</FieldLabel>
-              <Select value={genre} onValueChange={setGenre}>
-                <SelectTrigger style={{ background: SURFACE2, border: `1px solid ${GOLD_BORDER}`, color: "rgba(255,255,255,0.8)" }}>
-                  <SelectValue placeholder="Select genre" />
-                </SelectTrigger>
-                <SelectContent style={{ background: "#0d0b18", border: `1px solid ${GOLD_BORDER}` }}>
-                  {GENRES.map((g) => (
-                    <SelectItem key={g} value={g} style={{ color: "rgba(255,255,255,0.8)" }}>{g}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
             </div>
 
-            {/* Status */}
-            <div>
-              <FieldLabel>Visibility</FieldLabel>
-              <Select value={status} onValueChange={setStatus}>
-                <SelectTrigger style={{ background: SURFACE2, border: `1px solid ${GOLD_BORDER}`, color: "rgba(255,255,255,0.8)" }}>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent style={{ background: "#0d0b18", border: `1px solid ${GOLD_BORDER}` }}>
-                  {STATUS_OPTIONS.map((s) => (
-                    <SelectItem key={s.value} value={s.value}>
-                      <span style={{ color: s.color }}>{s.label}</span>
-                      <span className="ml-2 text-xs" style={{ color: TEXT_MUTED }}>{s.desc}</span>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          {/* Creation Date */}
-          <div className="mb-6">
-            <FieldLabel hint="When was this work originally created? (Not the upload date)">Original Creation Date</FieldLabel>
-            <Input
-              type="date"
-              value={creationDate}
-              onChange={(e) => setCreationDate(e.target.value)}
-              style={{
-                background: SURFACE2,
-                border: `1px solid ${GOLD_BORDER}`,
-                color: "rgba(255,255,255,0.8)",
-                colorScheme: "dark",
-              }}
-            />
-          </div>
-
-          {/* Caption */}
-          <div className="mb-6">
-            <FieldLabel hint="A short note visible on your work's page">Caption</FieldLabel>
-            <Textarea
-              value={caption}
-              onChange={(e) => setCaption(e.target.value)}
-              rows={2}
-              placeholder="A brief note about this work…"
-              style={{
-                background: SURFACE2,
-                border: `1px solid ${GOLD_BORDER}`,
-                color: "rgba(255,255,255,0.8)",
-                resize: "none",
-              }}
-            />
-          </div>
-
-          {/* ═══ ORIGIN STORY ════════════════════════════════════════════ */}
-          <SectionDivider label="Origin Story" />
-
-          <div className="mb-6">
-            <div className="flex items-center gap-2 mb-2">
-              <Flame className="w-4 h-4" style={{ color: GOLD }} />
-              <FieldLabel>Where did this work come from?</FieldLabel>
-            </div>
-            <p className="text-xs mb-3 leading-relaxed" style={{ color: "rgba(255,255,255,0.38)", fontStyle: "italic" }}>
-              What was the spark, the moment, the train of thought that brought this work into being?
-              What human experience, emotion, or revelation birthed it?
-              This is living testimony — not metadata.
-            </p>
-            <Textarea
-              value={originStory}
-              onChange={(e) => setOriginStory(e.target.value)}
-              rows={6}
-              placeholder="Write the origin story of this work…"
-              style={{
-                background: "rgba(20,14,36,0.9)",
-                border: `1px solid rgba(212,175,55,0.3)`,
-                color: "rgba(255,255,255,0.88)",
-                resize: "vertical",
-                lineHeight: "1.7",
-                fontSize: "0.9rem",
-                boxShadow: originStory ? `0 0 16px rgba(212,175,55,0.06) inset` : "none",
-                transition: "box-shadow 0.4s ease",
-              }}
-            />
-            <p className="text-xs mt-1.5 text-right" style={{ color: TEXT_MUTED }}>
-              {originStory.length} / 5000
-            </p>
-          </div>
-
-          {/* ═══ LYRICS ══════════════════════════════════════════════════ */}
-          <SectionDivider label="Lyrics" />
-
-          <div className="mb-6">
-            <button
-              className="w-full flex items-center justify-between py-2 transition-opacity hover:opacity-80"
-              onClick={() => setLyricsExpanded((v) => !v)}
-            >
-              <div className="flex items-center gap-2">
-                <BookOpen className="w-4 h-4" style={{ color: GOLD }} />
-                <span className="text-xs tracking-[0.15em] uppercase" style={{ color: TEXT_MUTED, fontFamily: "'Cinzel', serif" }}>
-                  {lyrics ? "Edit Lyrics" : "Add Lyrics"}
-                </span>
-              </div>
-              {lyricsExpanded ? <ChevronUp className="w-4 h-4" style={{ color: TEXT_MUTED }} /> : <ChevronDown className="w-4 h-4" style={{ color: TEXT_MUTED }} />}
-            </button>
-
-            {lyricsExpanded && (
-              <div className="mt-3">
-                <Textarea
-                  value={lyrics}
-                  onChange={(e) => setLyrics(e.target.value)}
-                  rows={12}
-                  placeholder="Verse 1&#10;…&#10;&#10;Chorus&#10;…"
-                  style={{
-                    background: "rgba(14,10,26,0.95)",
-                    border: `1px solid ${GOLD_BORDER}`,
-                    color: "rgba(255,255,255,0.85)",
-                    resize: "vertical",
-                    fontFamily: "monospace",
-                    fontSize: "0.85rem",
-                    lineHeight: "1.8",
-                  }}
-                />
-                <div className="flex justify-end mt-2">
-                  <Button
-                    size="sm"
-                    onClick={handleSaveLyrics}
-                    disabled={lyricsSaving}
-                    style={{ background: GOLD_DIM, border: `1px solid ${GOLD_BORDER}`, color: GOLD }}
-                  >
-                    {lyricsSaving ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : null}
-                    Save Lyrics
-                  </Button>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* ═══ CREATION DISCLOSURE ═════════════════════════════════════ */}
-          <SectionDivider label="Creation Disclosure" />
-
-          <div className="mb-6">
-            <button
-              className="w-full flex items-center justify-between py-2 transition-opacity hover:opacity-80"
-              onClick={() => setDisclosureExpanded((v) => !v)}
-            >
-              <div className="flex items-center gap-2">
-                <Shield className="w-4 h-4" style={{ color: GOLD }} />
-                <span className="text-xs tracking-[0.15em] uppercase" style={{ color: TEXT_MUTED, fontFamily: "'Cinzel', serif" }}>
-                  AI Disclosure &amp; Training Consent
-                </span>
-              </div>
-              {disclosureExpanded ? <ChevronUp className="w-4 h-4" style={{ color: TEXT_MUTED }} /> : <ChevronDown className="w-4 h-4" style={{ color: TEXT_MUTED }} />}
-            </button>
-
-            {disclosureExpanded && (
-              <div className="mt-4 space-y-5">
-                {/* Creation method */}
-                <div>
-                  <FieldLabel hint="How was this work created?">Creation Method</FieldLabel>
-                  <div className="grid grid-cols-1 gap-2 mt-2">
-                    {DISCLOSURE_OPTIONS.map((opt) => (
-                      <button
-                        key={opt.value}
-                        onClick={() => setAiDisclosure(opt.value)}
-                        className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-all"
-                        style={{
-                          background: aiDisclosure === opt.value ? GOLD_DIM : "rgba(255,255,255,0.03)",
-                          border: `1px solid ${aiDisclosure === opt.value ? GOLD_BORDER : "rgba(255,255,255,0.08)"}`,
-                          color: aiDisclosure === opt.value ? GOLD : "rgba(255,255,255,0.6)",
-                        }}
-                      >
-                        <span className="text-base">{opt.icon}</span>
-                        <span className="text-sm">{opt.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* AI Training consent */}
-                <div>
-                  <FieldLabel hint="Can this work be used to train AI models?">AI Training Consent</FieldLabel>
-                  <div className="space-y-2 mt-2">
-                    {AI_CONSENT_OPTIONS.map((opt) => (
-                      <button
-                        key={opt.value}
-                        onClick={() => setAiConsent(opt.value)}
-                        className="w-full flex items-start gap-3 px-3 py-2.5 rounded-lg text-left transition-all"
-                        style={{
-                          background: aiConsent === opt.value ? GOLD_DIM : "rgba(255,255,255,0.03)",
-                          border: `1px solid ${aiConsent === opt.value ? GOLD_BORDER : "rgba(255,255,255,0.08)"}`,
-                        }}
-                      >
-                        <div
-                          className="mt-0.5 w-3.5 h-3.5 rounded-full flex-shrink-0"
-                          style={{
-                            border: `2px solid ${aiConsent === opt.value ? GOLD : "rgba(255,255,255,0.3)"}`,
-                            background: aiConsent === opt.value ? GOLD : "transparent",
-                          }}
-                        />
-                        <div>
-                          <p className="text-sm font-medium" style={{ color: aiConsent === opt.value ? GOLD : "rgba(255,255,255,0.75)" }}>{opt.label}</p>
-                          <p className="text-xs mt-0.5" style={{ color: TEXT_MUTED }}>{opt.desc}</p>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* ═══ DANGER ZONE ═════════════════════════════════════════════ */}
-          <SectionDivider label="Danger Zone" />
-
-          <div
-            className="rounded-xl p-4 mb-6"
-            style={{ background: "rgba(239,68,68,0.05)", border: "1px solid rgba(239,68,68,0.18)" }}
-          >
-            {!deleteConfirm ? (
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium" style={{ color: "#ef4444", fontFamily: "'Cinzel', serif" }}>Remove This Work</p>
-                  <p className="text-xs mt-0.5" style={{ color: "rgba(239,68,68,0.55)" }}>This cannot be undone. The testimony will be lost.</p>
-                </div>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => setDeleteConfirm(true)}
-                  style={{ borderColor: "rgba(239,68,68,0.4)", color: "#ef4444", background: "transparent" }}
-                >
-                  <Trash2 className="w-3.5 h-3.5 mr-1.5" />
-                  Delete
-                </Button>
-              </div>
-            ) : (
+            {/* ═══ CORE METADATA ═══════════════════════════════════════ */}
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              {/* Genre */}
               <div>
-                <div className="flex items-center gap-2 mb-3">
-                  <AlertCircle className="w-4 h-4 flex-shrink-0" style={{ color: "#ef4444" }} />
-                  <p className="text-sm font-semibold" style={{ color: "#ef4444", fontFamily: "'Cinzel', serif" }}>
-                    Are you certain? This cannot be undone.
-                  </p>
-                </div>
-                <p className="text-xs mb-4 leading-relaxed" style={{ color: "rgba(239,68,68,0.65)" }}>
-                  Deleting this work will permanently remove it from the platform, including its Witness ID record, provenance chain, and all associated data.
-                </p>
-                <div className="flex gap-3">
-                  <Button
-                    size="sm"
-                    onClick={handleDelete}
-                    disabled={deleting}
-                    style={{ background: "#ef4444", color: "#fff", border: "none" }}
+                <FieldLabel>Genre</FieldLabel>
+                <Select value={genre} onValueChange={setGenre}>
+                  <SelectTrigger
+                    style={{
+                      background: SURFACE2,
+                      border: `1px solid ${GOLD_BORDER}`,
+                      color: "rgba(255,255,255,0.8)",
+                    }}
                   >
-                    {deleting ? <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" /> : <Trash2 className="w-3.5 h-3.5 mr-1.5" />}
-                    Yes, Delete Forever
-                  </Button>
+                    <SelectValue placeholder="Select genre" />
+                  </SelectTrigger>
+                  <SelectContent style={{ background: "#0d0b1a", border: `1px solid ${GOLD_BORDER}` }}>
+                    {GENRES.map((g) => (
+                      <SelectItem key={g} value={g} style={{ color: "rgba(255,255,255,0.8)" }}>
+                        {g}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Status */}
+              <div>
+                <FieldLabel>Visibility</FieldLabel>
+                <Select value={status} onValueChange={setStatus}>
+                  <SelectTrigger
+                    style={{
+                      background: SURFACE2,
+                      border: `1px solid ${GOLD_BORDER}`,
+                      color: "rgba(255,255,255,0.8)",
+                    }}
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent style={{ background: "#0d0b1a", border: `1px solid ${GOLD_BORDER}` }}>
+                    {STATUS_OPTIONS.map((s) => (
+                      <SelectItem key={s.value} value={s.value}>
+                        <span style={{ color: s.color }}>{s.label}</span>
+                        <span className="ml-2 text-xs" style={{ color: TEXT_MUTED }}>{s.desc}</span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Creation Date */}
+            <div className="mb-6">
+              <FieldLabel hint="When was this work originally created? (Not the upload date)">
+                Original Creation Date
+              </FieldLabel>
+              <Input
+                type="date"
+                value={creationDate}
+                onChange={(e) => setCreationDate(e.target.value)}
+                style={{
+                  background: SURFACE2,
+                  border: `1px solid ${GOLD_BORDER}`,
+                  color: "rgba(255,255,255,0.8)",
+                  colorScheme: "dark",
+                }}
+              />
+            </div>
+
+            {/* Caption */}
+            <div className="mb-6">
+              <FieldLabel hint="A short note visible on your work's public page">Caption</FieldLabel>
+              <Textarea
+                value={caption}
+                onChange={(e) => setCaption(e.target.value)}
+                rows={2}
+                placeholder="A brief note about this work…"
+                style={{
+                  background: SURFACE2,
+                  border: `1px solid ${GOLD_BORDER}`,
+                  color: "rgba(255,255,255,0.8)",
+                  resize: "none",
+                }}
+              />
+            </div>
+
+            {/* Description */}
+            <div className="mb-2">
+              <FieldLabel hint="Extended description shown on the work's detail page">Description</FieldLabel>
+              <Textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                rows={3}
+                placeholder="Tell the story of this work in more depth…"
+                style={{
+                  background: SURFACE2,
+                  border: `1px solid ${GOLD_BORDER}`,
+                  color: "rgba(255,255,255,0.8)",
+                  resize: "vertical",
+                  lineHeight: "1.65",
+                }}
+              />
+            </div>
+
+            {/* ═══ ORIGIN STORY ════════════════════════════════════════ */}
+            <SectionDivider label="Origin Story" icon={<Flame className="w-3.5 h-3.5" />} />
+
+            <div className="mb-6">
+              <p
+                className="text-sm mb-4 leading-relaxed"
+                style={{ color: "rgba(255,255,255,0.36)", fontStyle: "italic" }}
+              >
+                What was the spark, the moment, the train of thought that brought this work into being?
+                What human experience, emotion, or revelation birthed it?
+                This is living testimony — not metadata.
+              </p>
+              <Textarea
+                value={originStory}
+                onChange={(e) => setOriginStory(e.target.value)}
+                rows={7}
+                placeholder="Write the origin story of this work…"
+                style={{
+                  background: SURFACE3,
+                  border: `1px solid rgba(212,175,55,0.25)`,
+                  color: "rgba(255,255,255,0.88)",
+                  resize: "vertical",
+                  lineHeight: "1.75",
+                  fontSize: "0.9rem",
+                  boxShadow: originStory ? `0 0 20px rgba(212,175,55,0.05) inset` : "none",
+                  transition: "box-shadow 0.4s ease",
+                }}
+              />
+              <p className="text-xs mt-1.5 text-right" style={{ color: TEXT_DIM }}>
+                {originStory.length} / 5000
+              </p>
+            </div>
+
+            {/* ═══ LYRICS ══════════════════════════════════════════════ */}
+            <SectionDivider label="Lyrics" icon={<BookOpen className="w-3.5 h-3.5" />} />
+
+            <div className="mb-6">
+              <button
+                className="w-full flex items-center justify-between py-2.5 px-4 rounded-xl transition-all"
+                style={{
+                  background: lyricsExpanded ? GOLD_DIM : "rgba(255,255,255,0.03)",
+                  border: `1px solid ${lyricsExpanded ? GOLD_BORDER : "rgba(255,255,255,0.07)"}`,
+                }}
+                onClick={() => setLyricsExpanded((v) => !v)}
+              >
+                <div className="flex items-center gap-2.5">
+                  <BookOpen className="w-4 h-4" style={{ color: GOLD, opacity: 0.75 }} />
+                  <span
+                    className="text-sm"
+                    style={{ color: lyricsExpanded ? GOLD : "rgba(255,255,255,0.6)", fontFamily: "'Cinzel', serif", letterSpacing: "0.08em" }}
+                  >
+                    {lyrics ? "Edit Lyrics" : "Add Lyrics"}
+                  </span>
+                  {lyrics && (
+                    <span className="text-xs px-1.5 py-0.5 rounded" style={{ background: GOLD_DIM, color: GOLD }}>
+                      {lyrics.split("\n").length} lines
+                    </span>
+                  )}
+                </div>
+                {lyricsExpanded
+                  ? <ChevronUp className="w-4 h-4" style={{ color: TEXT_MUTED }} />
+                  : <ChevronDown className="w-4 h-4" style={{ color: TEXT_MUTED }} />
+                }
+              </button>
+
+              {lyricsExpanded && (
+                <div className="mt-3">
+                  <Textarea
+                    value={lyrics}
+                    onChange={(e) => setLyrics(e.target.value)}
+                    rows={14}
+                    placeholder={"Verse 1\n…\n\nChorus\n…"}
+                    style={{
+                      background: "rgba(12,8,24,0.97)",
+                      border: `1px solid ${GOLD_BORDER}`,
+                      color: "rgba(255,255,255,0.85)",
+                      resize: "vertical",
+                      fontFamily: "monospace",
+                      fontSize: "0.85rem",
+                      lineHeight: "1.85",
+                    }}
+                  />
+                  <div className="flex items-center justify-between mt-2.5">
+                    <span className="text-xs" style={{ color: TEXT_DIM }}>
+                      Lyrics are saved separately from the main work metadata.
+                    </span>
+                    <Button
+                      size="sm"
+                      onClick={handleSaveLyrics}
+                      disabled={lyricsSaving}
+                      style={{
+                        background: GOLD_DIM,
+                        border: `1px solid ${GOLD_BORDER}`,
+                        color: GOLD,
+                        fontFamily: "'Cinzel', serif",
+                        letterSpacing: "0.06em",
+                      }}
+                    >
+                      {lyricsSaving ? <Loader2 className="w-3 h-3 animate-spin mr-1.5" /> : null}
+                      Save Lyrics
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* ═══ CREATION DISCLOSURE ═════════════════════════════════ */}
+            <SectionDivider label="Creation Disclosure" icon={<Shield className="w-3.5 h-3.5" />} />
+
+            <div className="mb-6">
+              <button
+                className="w-full flex items-center justify-between py-2.5 px-4 rounded-xl transition-all"
+                style={{
+                  background: disclosureExpanded ? GOLD_DIM : "rgba(255,255,255,0.03)",
+                  border: `1px solid ${disclosureExpanded ? GOLD_BORDER : "rgba(255,255,255,0.07)"}`,
+                }}
+                onClick={() => setDisclosureExpanded((v) => !v)}
+              >
+                <div className="flex items-center gap-2.5">
+                  <Shield className="w-4 h-4" style={{ color: GOLD, opacity: 0.75 }} />
+                  <span
+                    className="text-sm"
+                    style={{ color: disclosureExpanded ? GOLD : "rgba(255,255,255,0.6)", fontFamily: "'Cinzel', serif", letterSpacing: "0.08em" }}
+                  >
+                    AI Disclosure &amp; Training Consent
+                  </span>
+                </div>
+                {disclosureExpanded
+                  ? <ChevronUp className="w-4 h-4" style={{ color: TEXT_MUTED }} />
+                  : <ChevronDown className="w-4 h-4" style={{ color: TEXT_MUTED }} />
+                }
+              </button>
+
+              {disclosureExpanded && (
+                <div className="mt-5 space-y-6">
+                  {/* Creation method */}
+                  <div>
+                    <FieldLabel hint="How was this work created?">Creation Method</FieldLabel>
+                    <div className="grid grid-cols-1 gap-2 mt-2">
+                      {DISCLOSURE_OPTIONS.map((opt) => (
+                        <button
+                          key={opt.value}
+                          onClick={() => setAiDisclosure(opt.value)}
+                          className="flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all"
+                          style={{
+                            background: aiDisclosure === opt.value ? GOLD_DIM : "rgba(255,255,255,0.03)",
+                            border: `1px solid ${aiDisclosure === opt.value ? GOLD_BORDER : "rgba(255,255,255,0.07)"}`,
+                            color: aiDisclosure === opt.value ? GOLD : "rgba(255,255,255,0.6)",
+                          }}
+                        >
+                          <span className="text-lg">{opt.icon}</span>
+                          <span className="text-sm">{opt.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* AI Training consent */}
+                  <div>
+                    <FieldLabel hint="Can this work be used to train AI models?">AI Training Consent</FieldLabel>
+                    <div className="space-y-2 mt-2">
+                      {AI_CONSENT_OPTIONS.map((opt) => (
+                        <button
+                          key={opt.value}
+                          onClick={() => setAiConsent(opt.value)}
+                          className="w-full flex items-start gap-3 px-4 py-3 rounded-xl text-left transition-all"
+                          style={{
+                            background: aiConsent === opt.value ? GOLD_DIM : "rgba(255,255,255,0.03)",
+                            border: `1px solid ${aiConsent === opt.value ? GOLD_BORDER : "rgba(255,255,255,0.07)"}`,
+                          }}
+                        >
+                          <div
+                            className="mt-0.5 w-3.5 h-3.5 rounded-full flex-shrink-0"
+                            style={{
+                              border: `2px solid ${aiConsent === opt.value ? GOLD : "rgba(255,255,255,0.25)"}`,
+                              background: aiConsent === opt.value ? GOLD : "transparent",
+                            }}
+                          />
+                          <div>
+                            <p
+                              className="text-sm font-medium"
+                              style={{ color: aiConsent === opt.value ? GOLD : "rgba(255,255,255,0.75)" }}
+                            >
+                              {opt.label}
+                            </p>
+                            <p className="text-xs mt-0.5" style={{ color: TEXT_MUTED }}>{opt.desc}</p>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* ═══ DANGER ZONE ═════════════════════════════════════════ */}
+            <SectionDivider label="Danger Zone" />
+
+            <div
+              className="rounded-xl p-5 mb-6"
+              style={{ background: "rgba(239,68,68,0.04)", border: "1px solid rgba(239,68,68,0.16)" }}
+            >
+              {!deleteConfirm ? (
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p
+                      className="text-sm font-medium mb-0.5"
+                      style={{ color: "#ef4444", fontFamily: "'Cinzel', serif" }}
+                    >
+                      Remove This Work
+                    </p>
+                    <p className="text-xs leading-relaxed" style={{ color: "rgba(239,68,68,0.5)" }}>
+                      This cannot be undone. The testimony will be lost.
+                    </p>
+                  </div>
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => setDeleteConfirm(false)}
-                    style={{ borderColor: "rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.5)", background: "transparent" }}
+                    onClick={() => setDeleteConfirm(true)}
+                    style={{ borderColor: "rgba(239,68,68,0.35)", color: "#ef4444", background: "transparent" }}
                   >
-                    Cancel
+                    <Trash2 className="w-3.5 h-3.5 mr-1.5" />
+                    Delete
                   </Button>
                 </div>
-              </div>
-            )}
-          </div>
+              ) : (
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <AlertCircle className="w-4 h-4 flex-shrink-0" style={{ color: "#ef4444" }} />
+                    <p
+                      className="text-sm font-semibold"
+                      style={{ color: "#ef4444", fontFamily: "'Cinzel', serif" }}
+                    >
+                      Are you certain? This cannot be undone.
+                    </p>
+                  </div>
+                  <p className="text-xs mb-4 leading-relaxed" style={{ color: "rgba(239,68,68,0.6)" }}>
+                    Deleting this work will permanently remove it from the platform, including its Witness ID record,
+                    provenance chain, and all associated data.
+                  </p>
+                  <div className="flex gap-3">
+                    <Button
+                      size="sm"
+                      onClick={handleDelete}
+                      disabled={deleting}
+                      style={{ background: "#ef4444", color: "#fff", border: "none" }}
+                    >
+                      {deleting
+                        ? <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" />
+                        : <Trash2 className="w-3.5 h-3.5 mr-1.5" />
+                      }
+                      Yes, Delete Forever
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setDeleteConfirm(false)}
+                      style={{ borderColor: "rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.45)", background: "transparent" }}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
 
+          </div>{/* end px-7 */}
         </div>
 
         {/* ── Footer / Save Bar ── */}
         <div
-          className="sticky bottom-0 px-6 py-4 flex items-center justify-between gap-3"
+          className="sticky bottom-0 px-7 py-4 flex items-center justify-between gap-3"
           style={{
-            background: `linear-gradient(0deg, ${SURFACE} 70%, transparent)`,
+            background: `linear-gradient(0deg, ${SURFACE} 65%, transparent)`,
             borderTop: `1px solid ${GOLD_BORDER}`,
           }}
         >
@@ -703,15 +881,15 @@ export function EditChapel({ song, onClose, onSaved }: EditChapelProps) {
             className="relative overflow-hidden"
             style={{
               background: saved
-                ? "rgba(34,197,94,0.18)"
-                : `linear-gradient(135deg, rgba(212,175,55,0.22), rgba(212,175,55,0.12))`,
+                ? "rgba(34,197,94,0.15)"
+                : `linear-gradient(135deg, rgba(212,175,55,0.2), rgba(212,175,55,0.1))`,
               border: `1px solid ${saved ? "rgba(34,197,94,0.4)" : GOLD_BORDER}`,
               color: saved ? "#22c55e" : GOLD,
               fontFamily: "'Cinzel', serif",
               letterSpacing: "0.1em",
-              minWidth: 140,
+              minWidth: 148,
               transition: "all 0.3s ease",
-              boxShadow: saved ? "0 0 20px rgba(34,197,94,0.15)" : "0 0 20px rgba(212,175,55,0.08)",
+              boxShadow: saved ? "0 0 24px rgba(34,197,94,0.12)" : `0 0 24px ${GOLD_GLOW}`,
             }}
           >
             {saving ? (

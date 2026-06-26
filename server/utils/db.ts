@@ -639,6 +639,12 @@ export async function updateSongMetadata(
     title?: string;
     description?: string | null;
     headlineCaption?: string | null;
+    // Release / creation date
+    releaseDate?: string | null;
+    // HAAI Origin Story
+    haaiOriginStory?: string | null;
+    // Mood tags
+    moodTags?: string[] | null;
   }
 ) {
   const db = await getDb();
@@ -678,6 +684,9 @@ export async function updateSongMetadata(
   if (fields.title !== undefined) updateSet.title = fields.title;
   if (fields.description !== undefined) updateSet.description = fields.description;
   if (fields.headlineCaption !== undefined) updateSet.headlineCaption = fields.headlineCaption;
+  if (fields.releaseDate !== undefined) updateSet.releaseDate = fields.releaseDate;
+  if (fields.haaiOriginStory !== undefined) updateSet.haaiOriginStory = fields.haaiOriginStory;
+  if (fields.moodTags !== undefined) updateSet.moodTags = fields.moodTags;
   await db.update(songs).set(updateSet).where(and(eq(songs.id, songId), eq(songs.userId, userId)));
 }
 

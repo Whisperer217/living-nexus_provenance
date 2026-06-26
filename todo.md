@@ -5839,3 +5839,19 @@
 - [ ] Build SaveQueueAsPlaylistModal: name, description, AI cover generation, save
 - [ ] Wire AI cover generation to playlists.create with coverArtUrl
 - [ ] Show saved playlists on creator profile under Collections/Domain
+
+## Edit Chapel Audit & Elevation
+- [x] Fix server bug: releaseDate missing from updateMetadata Zod schema (was silently stripped by Zod)
+- [x] Fix server bug: haaiOriginStory missing from updateSongMetadata DB helper (was in router schema but never persisted to DB)
+- [x] Fix server bug: moodTags missing from updateSongMetadata DB helper (was in router schema but never persisted to DB)
+- [x] Add releaseDate, haaiOriginStory, moodTags to updateSongMetadata DB helper type + updateSet
+- [x] Remove `as any` cast from handleSave — releaseDate now properly typed in Zod schema
+- [x] Elevate EditChapel UI: wider drawer (600px), hero-style full-width cover art (220px tall)
+- [x] Add "Preview" link in header (opens public song page in new tab)
+- [x] Add description field (extended description, separate from caption)
+- [x] Origin Story section always visible (not collapsed) with larger textarea (7 rows)
+- [x] Lyrics section: improved toggle button with line count badge
+- [x] Creation Disclosure: improved toggle button styling
+- [x] Danger Zone: more spacious padding, cleaner layout
+- [x] Save footer: improved gold glow, consistent padding
+- [x] 340/340 tests passing, 0 TypeScript errors
