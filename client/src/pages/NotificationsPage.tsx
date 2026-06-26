@@ -4,7 +4,7 @@
    new tracks, tips — archived forever.
 ═══════════════════════════════════════════════════════════════════ */
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { useLocation } from "wouter";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -187,19 +187,9 @@ export default function NotificationsPage() {
     onError: (err) => toast.error(err.message),
   });
 
-  // Auto-mark all as read when page opens — clears the sidebar badge
-  useEffect(() => {
-    if (!user) return;
-    const t = setTimeout(() => {
-      markAllRead.mutate(undefined, {
-        onSuccess: () => {
-          utils.notifications.unreadCount.invalidate();
-          // Don't show toast on auto-mark
-        },
-      });
-    }, 1500); // slight delay so user sees unread state first
-    return () => clearTimeout(t);
-  }, [user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  // NOTE: Auto-mark-all-read on page open was intentionally removed.
+  // Notifications are only marked read when the user explicitly clicks them (handleClick in NotifRow)
+  // or uses the "Mark All Read" button. This preserves unread state until the user acts.
 
   if (!user) {
     return (
