@@ -2873,7 +2873,7 @@ h1, h2, h3, h4, h5, h6,
 
 /* ── Gold Corner Brackets — four-corner architectural frame ── */
 .sg-corner-frame {
-  position: relative;
+  /* position: relative removed — was overriding absolute inset-0 on card frame divs */
 }
 .sg-corner-frame::before,
 .sg-corner-frame::after {
