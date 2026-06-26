@@ -1679,6 +1679,8 @@ export default function SongDetailPage() {
             aiDisclosure: (song as any).aiDisclosure ?? null,
             contentType: (song as any).contentType ?? "audio",
             releaseDate: (song as any).releaseDate ?? null,
+            description: (song as any).description ?? null,
+            witnessId: song.witnessId ?? null,
           }}
           onClose={handleEditClose}
           onSaved={handleEditSaved}

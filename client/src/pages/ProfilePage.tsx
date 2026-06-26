@@ -16,7 +16,7 @@ import {
   CheckCircle, AlertCircle, Zap, LogOut,
   Fingerprint, ScrollText, Activity, Upload, Star, Layers, Eye, Users, Shield,
   Download, Trash2, AlertTriangle, Sun, Moon,
-  FolderOpen, Plus, ChevronDown, ChevronRight, GripVertical, LayoutGrid,
+  FolderOpen, Plus, ChevronDown, ChevronRight, GripVertical, LayoutGrid, Pencil,
 } from "lucide-react";
 import { AddToCollectionButton } from "@/components/AddToCollectionModal";
 import { toast } from "sonner";
@@ -30,6 +30,7 @@ import { usePlayer, Track } from "@/contexts/PlayerContext";
 
 import { EDIT_GENRES } from "@shared/contentTypes";
 import { CreatorIdentityStrip } from "@/components/CreatorIdentityStrip";
+import { EditChapel } from "@/components/EditChapel";
 const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/HMNMkWUWAfVdTbRj3YmPCF/ln-navbar-icon-180_b914f927.png";
 
 /* ── Editable inline field ─────────────────────────────────────── */
@@ -202,6 +203,7 @@ export default function ProfilePage() {
   }, [search]);
   const [showAddTestimony, setShowAddTestimony] = useState(false);
   const [testimonyContent, setTestimonyContent] = useState("");
+  const [editingSong, setEditingSong] = useState<any | null>(null);
   const [testimonyLinkedWorks, setTestimonyLinkedWorks] = useState<string[]>([]);
 
   // ── Identity data ────────────────────────────────────────────────
@@ -1345,6 +1347,15 @@ export default function ProfilePage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      type="button"
+                      onClick={() => setEditingSong(song)}
+                      className="p-2 rounded-lg text-[#C49A28] hover:bg-white/[0.1] transition-all"
+                      style={{ background: "rgba(196,154,40,0.08)", border: "1px solid rgba(196,154,40,0.22)" }}
+                      title="Edit Work"
+                    >
+                      <Pencil size={12} />
+                    </button>
                     <button type="button" onClick={() => navigate(`/song/${song.id}`)} className="p-2 rounded-lg bg-white/[0.06] text-white/60 hover:text-[#A78BFA] hover:bg-white/[0.1] transition-all" title="Open song page"><ExternalLink size={12} /></button>
                     {song.witnessId && (
                       <button
@@ -2236,6 +2247,32 @@ export default function ProfilePage() {
             </button>
           </div>
         </div>
+      {/* ── Edit Chapel ── */}
+      {editingSong && (
+        <EditChapel
+          song={{
+            id: editingSong.id,
+            title: editingSong.title,
+            genre: editingSong.genre ?? null,
+            caption: editingSong.caption ?? null,
+            coverArtUrl: editingSong.coverArtUrl ?? null,
+            aiConsent: editingSong.aiConsent ?? null,
+            status: editingSong.status ?? "Published",
+            lyricsText: editingSong.lyricsText ?? null,
+            haaiOriginStory: editingSong.haaiOriginStory ?? null,
+            aiDisclosure: editingSong.aiDisclosure ?? null,
+            contentType: editingSong.contentType ?? "audio",
+            releaseDate: editingSong.releaseDate ?? null,
+            description: editingSong.description ?? null,
+            witnessId: editingSong.witnessId ?? null,
+          }}
+          onClose={() => setEditingSong(null)}
+          onSaved={() => {
+            setEditingSong(null);
+            utils.songs.mySongs.invalidate();
+          }}
+        />
+      )}
       </div>
     </div>
   );

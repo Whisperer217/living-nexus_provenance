@@ -5855,3 +5855,11 @@
 - [x] Danger Zone: more spacious padding, cleaner layout
 - [x] Save footer: improved gold glow, consistent padding
 - [x] 340/340 tests passing, 0 TypeScript errors
+
+## Edit Chapel Unification — All Four Access Points
+- [x] Audit all four creator surfaces for EditChapel integration status
+- [x] Wire EditChapel into Creator Domain page (Manifestations section) — Pencil button on each song row, onSaved invalidates mySongs
+- [x] Wire EditChapel into Profile page (Works tab song rows) — Pencil button (gold, visible on hover), onSaved invalidates mySongs
+- [x] Add description + witnessId to SongDetailPage EditChapel props for full field parity
+- [x] Verify Archive onSaved cache invalidation (utils.songs.mySongs.invalidate)
+- [x] 340/340 tests passing, 0 TypeScript errors

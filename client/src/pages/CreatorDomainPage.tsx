@@ -27,7 +27,7 @@ import {
   User, LayoutGrid, BookOpen, Music, FileText, BarChart2,
   Globe, ExternalLink, Eye, Edit3, ChevronRight, Loader2,
   Shield, Headphones, Heart, DollarSign, Upload, Layers,
-  Sparkles, ArrowLeft,
+  Sparkles, ArrowLeft, Pencil,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -35,6 +35,7 @@ import { IdentityEditor } from "@/components/IdentityEditor";
 import { DomainEditor } from "@/components/domain/DomainEditor";
 import { DomainRenderer } from "@/components/domain/DomainRenderer";
 import { Helmet } from "react-helmet-async";
+import { EditChapel } from "@/components/EditChapel";
 
 // ─── Section IDs ──────────────────────────────────────────────────
 type SectionId =
@@ -117,6 +118,7 @@ export default function CreatorDomainPage() {
 
   const [testimonyContent, setTestimonyContent] = useState("");
   const [showAddTestimony, setShowAddTestimony] = useState(false);
+  const [editingSong, setEditingSong] = useState<any | null>(null);
 
   // Auth guard
   if (authLoading || profileLoading) {
@@ -575,15 +577,25 @@ export default function CreatorDomainPage() {
                         <div className="flex items-center gap-1 text-xs" style={{ color: "var(--ln-smoke)" }}>
                           <Headphones className="w-3 h-3" /> {song.playCount || 0}
                         </div>
-                        <Link href={`/song/${song.id}`}>
+                        <div className="flex items-center gap-1.5">
                           <button
+                            onClick={() => setEditingSong(song)}
                             className="w-8 h-8 rounded-lg flex items-center justify-center transition-all hover:bg-white/[0.06]"
-                            style={{ border: "1px solid rgba(196,154,40,0.1)", color: "var(--ln-smoke)" }}
-                            title="View song page"
+                            style={{ border: "1px solid rgba(196,154,40,0.22)", color: "var(--ln-gold)" }}
+                            title="Edit Work"
                           >
-                            <ExternalLink className="w-3.5 h-3.5" />
+                            <Pencil className="w-3.5 h-3.5" />
                           </button>
-                        </Link>
+                          <Link href={`/song/${song.id}`}>
+                            <button
+                              className="w-8 h-8 rounded-lg flex items-center justify-center transition-all hover:bg-white/[0.06]"
+                              style={{ border: "1px solid rgba(196,154,40,0.1)", color: "var(--ln-smoke)" }}
+                              title="View song page"
+                            >
+                              <ExternalLink className="w-3.5 h-3.5" />
+                            </button>
+                          </Link>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -815,6 +827,32 @@ export default function CreatorDomainPage() {
           </main>
         </div>
       )}
+    {/* ── Edit Chapel ── */}
+    {editingSong && (
+      <EditChapel
+        song={{
+          id: editingSong.id,
+          title: editingSong.title,
+          genre: editingSong.genre ?? null,
+          caption: editingSong.caption ?? null,
+          coverArtUrl: editingSong.coverArtUrl ?? null,
+          aiConsent: editingSong.aiConsent ?? null,
+          status: editingSong.status ?? "Published",
+          lyricsText: editingSong.lyricsText ?? null,
+          haaiOriginStory: editingSong.haaiOriginStory ?? null,
+          aiDisclosure: editingSong.aiDisclosure ?? null,
+          contentType: editingSong.contentType ?? "audio",
+          releaseDate: editingSong.releaseDate ?? null,
+          description: editingSong.description ?? null,
+          witnessId: editingSong.witnessId ?? null,
+        }}
+        onClose={() => setEditingSong(null)}
+        onSaved={() => {
+          setEditingSong(null);
+          utils.songs.mySongs.invalidate();
+        }}
+      />
+    )}
     </div>
   );
 }
