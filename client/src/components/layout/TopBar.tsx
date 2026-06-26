@@ -43,6 +43,11 @@ function InlinePlayer() {
   const [shuffle, setShuffle] = useState(false);
   const [repeat, setRepeat] = useState(false);
   const seekBarRef = useRef<HTMLDivElement>(null);
+  const [location] = useLocation();
+
+  /* ── Song-page suppression: detect if we're viewing the currently playing track ── */
+  const songPageMatch = location.match(/^\/(?:song|songs|track)\/([^/?#]+)/);
+  const songPageId = songPageMatch ? songPageMatch[1] : null;
 
   /* ── Download mutations ── */
   const downloadMutation = trpc.songs.download.useMutation({
@@ -84,9 +89,13 @@ function InlinePlayer() {
     );
   }
 
+  /* ── Determine if we're on this track's detail page ── */
+  const isOnThisTrackPage = !!(songPageId && track?.id && songPageId === String(track.id));
+
   return (
     <div className="flex-1 flex items-center gap-2 px-4 min-w-0 max-w-[700px] mx-auto">
-      {/* Artwork — tap to expand */}
+      {/* Artwork — hidden when on the track's own detail page (already the page hero) */}
+      {!isOnThisTrackPage && (
       <button
         onClick={expand}
         className="shrink-0 rounded overflow-hidden transition-transform hover:scale-105"
@@ -106,8 +115,10 @@ function InlinePlayer() {
           </div>
         )}
       </button>
+      )}
 
-      {/* Title + Artist — tap to expand */}
+      {/* Title + Artist — hidden when on the track's own detail page */}
+      {!isOnThisTrackPage && (
       <button
         onClick={expand}
         className="flex flex-col text-left shrink-0 min-w-0"
@@ -127,6 +138,7 @@ function InlinePlayer() {
           {track.artist}
         </span>
       </button>
+      )}
 
       {/* Time + Seek bar + Time */}
       <div className="flex-1 flex items-center gap-2 min-w-0">

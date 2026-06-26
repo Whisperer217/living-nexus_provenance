@@ -111,8 +111,13 @@ function GlobalPlayerInner() {
     toggleShuffle, toggleRepeat, toggleMute, setVolume, seek, playTrack,
     isReady, appendToQueue,
   } = usePlayer();
-  const [, navigate] = useLocation();
+  const [location, navigate] = useLocation();
   const { user } = useAuth();
+
+  /* ── Song-page suppression: hide player when viewing the currently playing track ── */
+  // Parse the song ID from /song/:id, /songs/:id, or /track/:id routes
+  const songPageMatch = location.match(/^\/(?:song|songs|track)\/([^/?#]+)/);
+  const songPageId = songPageMatch ? songPageMatch[1] : null;
 
   const isDesktop = useIsDesktop();
 
@@ -602,6 +607,8 @@ function GlobalPlayerInner() {
   /* ── Render nothing if no track ever loaded ── */
   if (!visTrack && tracks.length === 0) return null;
 
+  /* ── Song-page suppression check is applied after isMini is declared below ── */
+
   /* ══════════════════════════════════════════════════════════════
      PORTAL CONTENT
   ══════════════════════════════════════════════════════════════ */
@@ -614,6 +621,13 @@ function GlobalPlayerInner() {
      GlobalPlayer only renders on desktop when EXPANDED (centered modal).
      On mobile it renders in all states (bottom sheet). ── */
   if (isDesktop && isMini) return null;
+
+  /* ── Suppress player when user is on the detail page of the currently playing track ──
+     Mobile: hide the bottom sheet entirely — the song page IS the player.
+     Desktop: hide the mini strip (TopBar InlinePlayer handles it); expanded modal still works.
+     Navigating away restores the player automatically. ── */
+  const isOnCurrentSongPage = !!(songPageId && currentTrack?.id && songPageId === String(currentTrack.id));
+  if (isOnCurrentSongPage && isMini) return null;
 
   /* ── Desktop expanded = centered modal (decision #3) ── */
   const desktopExpandedStyle: React.CSSProperties = isDesktop && isExpanded ? {
