@@ -6060,3 +6060,10 @@
 - [x] Fix newThisWeek tRPC limit cap: raised from max(100) to max(500) — frontend was sending 500, Zod was silently capping/rejecting
 - [x] Fix empty state text: "Nothing new this week / last 7 days" corrected to "Nothing new yet / No recent works found" (window is 180 days, not 7)
 - [x] Sort order confirmed correct: COALESCE(releaseDate, DATE(createdAt)) DESC — uses creator-inputted date first
+
+## Mobile Playback Background Recovery
+- [ ] Instrument PlayerContext: log play() rejections with error name/message, audio.readyState, audio.networkState, document.visibilityState, and page lifecycle events (visibilitychange, pageshow, pagehide, freeze, resume)
+- [ ] After instrumentation ships: confirm failure mode from logs on locked-screen test
+- [ ] Implement centralized recoverPlayback() function in PlayerContext
+- [ ] Hook recoverPlayback() into: visibilitychange (visible), pageshow (persisted bfcache), resume (Page Lifecycle API), and focus events
+- [ ] TypeScript: 0 errors | tests pass

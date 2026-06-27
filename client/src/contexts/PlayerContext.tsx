@@ -591,6 +591,57 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       return { ...s, currentIdx: next, isPlaying: true, isReady: false, duration: 0, currentTime: 0 };
     };
 
+    // ── Playback instrumentation helper ────────────────────────────────────────
+    // Wraps audio.play() with structured logging so we can confirm exactly why
+    // play() fails when the screen is locked or the page is backgrounded.
+    // Logs are prefixed [LN-PLAYER] so they are easy to grep in mobile DevTools.
+    const instrumentedPlay = (src: string, reason: string): Promise<void> => {
+      const a = audioRef.current;
+      if (!a) return Promise.resolve();
+      console.log(`[LN-PLAYER] play() attempt | reason=${reason} | src=${src.slice(-40)} | readyState=${a.readyState} | networkState=${a.networkState} | paused=${a.paused} | visibility=${document.visibilityState}`);
+      return a.play().then(() => {
+        console.log(`[LN-PLAYER] play() SUCCESS | reason=${reason} | visibility=${document.visibilityState}`);
+      }).catch((err: unknown) => {
+        const name = err instanceof Error ? err.name : 'UnknownError';
+        const msg  = err instanceof Error ? err.message : String(err);
+        console.warn(`[LN-PLAYER] play() REJECTED | reason=${reason} | error=${name}: ${msg} | readyState=${a.readyState} | networkState=${a.networkState} | visibility=${document.visibilityState}`);
+        // Re-throw so callers can decide whether to swallow
+        throw err;
+      });
+    };
+
+    // ── Page lifecycle instrumentation ───────────────────────────────────────────
+    const onVisibilityChange = () => {
+      const a = audioRef.current;
+      const s = stateRef.current;
+      console.log(`[LN-PLAYER] visibilitychange → ${document.visibilityState} | isPlaying=${s.isPlaying} | paused=${a?.paused} | src=${(a?.src ?? '').slice(-40)} | readyState=${a?.readyState}`);
+    };
+    const onPageShow = (e: PageTransitionEvent) => {
+      const a = audioRef.current;
+      const s = stateRef.current;
+      console.log(`[LN-PLAYER] pageshow | persisted=${e.persisted} | isPlaying=${s.isPlaying} | paused=${a?.paused} | readyState=${a?.readyState}`);
+    };
+    const onPageHide = (e: PageTransitionEvent) => {
+      const a = audioRef.current;
+      const s = stateRef.current;
+      console.log(`[LN-PLAYER] pagehide | persisted=${e.persisted} | isPlaying=${s.isPlaying} | paused=${a?.paused}`);
+    };
+    const onFreeze = () => {
+      const a = audioRef.current;
+      const s = stateRef.current;
+      console.log(`[LN-PLAYER] freeze (Page Lifecycle) | isPlaying=${s.isPlaying} | paused=${a?.paused}`);
+    };
+    const onResume = () => {
+      const a = audioRef.current;
+      const s = stateRef.current;
+      console.log(`[LN-PLAYER] resume (Page Lifecycle) | isPlaying=${s.isPlaying} | paused=${a?.paused} | readyState=${a?.readyState}`);
+    };
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    window.addEventListener('pageshow', onPageShow);
+    window.addEventListener('pagehide', onPageHide);
+    document.addEventListener('freeze', onFreeze);
+    document.addEventListener('resume', onResume);
+
     const onEnded = () => {
       setState(s => advanceToNext(s, true));
     };
@@ -639,6 +690,11 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       audio.removeEventListener("play", onPlay);
       audio.removeEventListener("pause", onPause);
       audio.removeEventListener("error", onError);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+      window.removeEventListener('pageshow', onPageShow);
+      window.removeEventListener('pagehide', onPageHide);
+      document.removeEventListener('freeze', onFreeze);
+      document.removeEventListener('resume', onResume);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
