@@ -876,7 +876,7 @@ export default function CreatorProfilePage() {
   const profileUrl = typeof window !== "undefined" ? window.location.href : "";
 
   return (
-    <div className="min-h-screen" style={{ background: "var(--ln-coal)" }}>
+    <div className="min-h-screen">
       {/* ── Procedural Sacred Canvas — deterministic per creator, 2–5% opacity ── */}
       {creator?.id != null && (
         <SacredCanvas seed={creator.id} parallax />

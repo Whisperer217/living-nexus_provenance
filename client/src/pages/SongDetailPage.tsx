@@ -416,7 +416,6 @@ export default function SongDetailPage() {
   return (
     <div
       className={`min-h-screen pb-8 transition-all duration-700 cathedral-enter ${isThisTrackActive ? "harmonic-resonance" : ""}`}
-      style={{ background: "var(--ln-coal)" }}
     >
       {/* ══ STICKY MOBILE MANIFESTATION HEADER (slides in after hero scrolls past) ══ */}
       <div
