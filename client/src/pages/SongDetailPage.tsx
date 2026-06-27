@@ -51,6 +51,7 @@ import { CreativeDrawer } from "@/components/CreativeDrawer";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { SongDetailPageSkeleton } from "@/components/SongDetailPageSkeleton";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
+import { SacredCanvas } from "@/components/SacredCanvas";
 
 // Slug keys stored in DB (safe ASCII, no charset issues); emoji shown in UI
 const REACTION_SLUGS = ["fire", "love", "wow", "clap", "thumbsup", "thumbsdown", "mindblown", "+"];
@@ -488,49 +489,10 @@ export default function SongDetailPage() {
         {audioFileUrl && <meta name="twitter:player:stream" content={audioFileUrl} />}
         {audioFileUrl && <meta name="twitter:player:stream:content_type" content="audio/mpeg" />}
       </Helmet>
-      {/* ── T3: Sacred Geometry Background — gothic arch pattern, GPU-only drift ── */}
-      <div className="sacred-geo-bg" aria-hidden="true">
-        <svg viewBox="0 0 1440 900" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
-          {/* Gothic arch columns — repeated across width */}
-          {[0, 240, 480, 720, 960, 1200].map((x) => (
-            <g key={x} transform={`translate(${x}, 0)`}>
-              {/* Pointed arch */}
-              <path
-                d={`M 60,900 L 60,400 Q 120,200 180,400 L 180,900`}
-                fill="none" stroke="#C49A28" strokeWidth="0.8" opacity="0.6"
-              />
-              {/* Inner arch detail */}
-              <path
-                d={`M 80,900 L 80,430 Q 120,260 160,430 L 160,900`}
-                fill="none" stroke="#C49A28" strokeWidth="0.4" opacity="0.4"
-              />
-              {/* Keystone ornament */}
-              <circle cx="120" cy="200" r="6" fill="none" stroke="#C49A28" strokeWidth="0.6" opacity="0.5" />
-              <circle cx="120" cy="200" r="2" fill="#C49A28" opacity="0.3" />
-              {/* Horizontal tracery */}
-              <line x1="60" y1="500" x2="180" y2="500" stroke="#C49A28" strokeWidth="0.4" opacity="0.3" />
-              <line x1="60" y1="600" x2="180" y2="600" stroke="#C49A28" strokeWidth="0.3" opacity="0.2" />
-            </g>
-          ))}
-          {/* Horizontal floor line */}
-          <line x1="0" y1="895" x2="1440" y2="895" stroke="#C49A28" strokeWidth="0.5" opacity="0.3" />
-          {/* Central rose window */}
-          <g transform="translate(720, 80)">
-            <circle cx="0" cy="0" r="60" fill="none" stroke="#C49A28" strokeWidth="0.6" opacity="0.4" />
-            <circle cx="0" cy="0" r="42" fill="none" stroke="#C49A28" strokeWidth="0.4" opacity="0.3" />
-            <circle cx="0" cy="0" r="24" fill="none" stroke="#C49A28" strokeWidth="0.4" opacity="0.25" />
-            {[0,45,90,135,180,225,270,315].map((deg) => (
-              <line
-                key={deg}
-                x1="0" y1="0"
-                x2={Math.cos(deg * Math.PI / 180) * 58}
-                y2={Math.sin(deg * Math.PI / 180) * 58}
-                stroke="#C49A28" strokeWidth="0.4" opacity="0.25"
-              />
-            ))}
-          </g>
-        </svg>
-      </div>
+      {/* ── Procedural Sacred Canvas — deterministic per creator, 2–5% opacity ── */}
+      {creator?.id != null && (
+        <SacredCanvas seed={creator.id} parallax />
+      )}
       {/* Ambient cathedral scrim — radial glow behind the hero */}
       <div
         className="pointer-events-none absolute inset-0 z-0"

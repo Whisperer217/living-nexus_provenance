@@ -42,6 +42,7 @@ import { ManifestationShelf, StandaloneShelf, type ShelfTrack } from "@/componen
 import { LayoutGrid } from "lucide-react";
 import { CreatorIdentityStrip } from "@/components/CreatorIdentityStrip";
 import { EditChapel } from "@/components/EditChapel";
+import { SacredCanvas } from "@/components/SacredCanvas";
 
 // ─── Context Menu ─────────────────────────────────────────────────────────────
 interface ContextMenuProps {
@@ -876,6 +877,10 @@ export default function CreatorProfilePage() {
 
   return (
     <div className="min-h-screen" style={{ background: "var(--ln-coal)" }}>
+      {/* ── Procedural Sacred Canvas — deterministic per creator, 2–5% opacity ── */}
+      {creator?.id != null && (
+        <SacredCanvas seed={creator.id} parallax />
+      )}
       <Helmet>
         <title>{profileTitle}</title>
         <meta name="description" content={profileDesc} />

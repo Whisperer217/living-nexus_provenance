@@ -32,6 +32,7 @@ import { EDIT_GENRES } from "@shared/contentTypes";
 import { CreatorIdentityStrip } from "@/components/CreatorIdentityStrip";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { CreativeDrawer } from "@/components/CreativeDrawer";
+import { SacredCanvas } from "@/components/SacredCanvas";
 const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/HMNMkWUWAfVdTbRj3YmPCF/ln-navbar-icon-180_b914f927.png";
 
 /* ── Editable inline field ─────────────────────────────────────── */
@@ -481,6 +482,10 @@ export default function ProfilePage() {
 
   return (
     <div className="animate-fade-up pb-4">
+      {/* ── Procedural Sacred Canvas — deterministic per creator, 2–5% opacity ── */}
+      {profile?.id != null && (
+        <SacredCanvas seed={profile.id} />
+      )}
       {/* ── Banner wrapper with gold border ── */}
       <div
         className="relative h-[360px] group"
