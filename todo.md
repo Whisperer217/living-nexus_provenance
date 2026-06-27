@@ -6042,3 +6042,16 @@
 - [x] Archive identity per content type: doctrine→illuminated manuscript, combat→military field manual, music→sacred score, research→library catalog
 - [x] Depth layers: archive paper grain, engraved linework, architectural framing, subtle lighting, content surface
 - [x] TypeScript: 0 errors
+
+## Archive Layout Redesign (Schematic v1.0)
+- [x] Rebuild SongDetailPage to match Living Nexus Archive Page Layout Schematic v1.0
+- [x] Locked 1280px container, 12-column grid, 24px gutter
+- [x] Module B+C: Hero row — 6/12 media | 6/12 info with play, share, gift, like, edit actions
+- [x] Module D: About This Work (full width, quill icon)
+- [x] Module E: Provenance Timeline (schematic horizontal style, 4 nodes)
+- [x] Module F: Manifestations accordion (EvidencePanel)
+- [x] Module G: Witnesses accordion (WitnessesPanel)
+- [x] Module H: Comments accordion (inline post + list)
+- [x] Module I: Technical Metadata accordion (locked, 2-col grid)
+- [x] Module J: Footer Band — Chain of Witness (3-col: text | seal | tagline)
+- [x] TypeScript: 0 errors
