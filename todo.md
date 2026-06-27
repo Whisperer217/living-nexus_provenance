@@ -6031,3 +6031,7 @@
 - [x] Single centered play/pause button bottom-right of header
 - [x] Stats row (Plays / Voices / Loved) below the header frame
 - [x] 0 TypeScript errors, 340/340 tests pass
+- [ ] Pass 2 refactor: analyze and extract Users-domain database functions from server/utils/db.ts into server/db/users.ts without behavior changes
+- [ ] Pass 2 refactor: add server/db/users.ts exports to server/db/index.ts
+- [ ] Pass 2 refactor: verify Users-domain extraction with TypeScript check and full test suite
+

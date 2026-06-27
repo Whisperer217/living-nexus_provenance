@@ -4,8 +4,8 @@
  * Clean entry point for the domain-organized data layer.
  *
  * Pass 1: Songs domain extracted.
+ * Pass 2: Users domain extracted.
  * Future passes will add:
- *   export * from "./users";
  *   export * from "./playlists";
  *   export * from "./comments";
  *   export * from "./tips";
@@ -17,3 +17,4 @@
  */
 
 export * from "./songs";
+export * from "./users";
