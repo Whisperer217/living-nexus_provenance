@@ -345,11 +345,11 @@ interface SacredCanvasProps {
   seed: number;
   /** Enable 0.5 px parallax on scroll */
   parallax?: boolean;
-  /** Override base opacity (default: 0.028) */
+  /** Override base opacity (default: 0.07 — visibly subtle on dark backgrounds) */
   opacity?: number;
 }
 
-export function SacredCanvas({ seed, parallax = false, opacity = 0.028 }: SacredCanvasProps) {
+export function SacredCanvas({ seed, parallax = false, opacity = 0.07 }: SacredCanvasProps) {
   const W = 1440;
   const H = 900;
   const svgRef = useRef<SVGSVGElement>(null);
@@ -422,7 +422,7 @@ export function SacredCanvas({ seed, parallax = false, opacity = 0.028 }: Sacred
               rx={W * 0.28}
               ry={H * 0.32}
               fill="black"
-              opacity="0.72"
+              opacity="0.55"
             />
           </mask>
         </defs>
