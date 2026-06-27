@@ -5,9 +5,9 @@
  *
  * Pass 1: Songs domain extracted.
  * Pass 2: Users domain extracted.
+ * Pass 3: Comments domain extracted.
  * Future passes will add:
  *   export * from "./playlists";
- *   export * from "./comments";
  *   export * from "./tips";
  *   export * from "./admin";
  *   ... etc.
@@ -18,3 +18,4 @@
 
 export * from "./songs";
 export * from "./users";
+export * from "./comments";
