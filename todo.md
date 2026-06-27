@@ -6055,3 +6055,8 @@
 - [x] Module I: Technical Metadata accordion (locked, 2-col grid)
 - [x] Module J: Footer Band — Chain of Witness (3-col: text | seal | tagline)
 - [x] TypeScript: 0 errors
+
+## Explore Sorting + New This Week Fix
+- [x] Fix newThisWeek tRPC limit cap: raised from max(100) to max(500) — frontend was sending 500, Zod was silently capping/rejecting
+- [x] Fix empty state text: "Nothing new this week / last 7 days" corrected to "Nothing new yet / No recent works found" (window is 180 days, not 7)
+- [x] Sort order confirmed correct: COALESCE(releaseDate, DATE(createdAt)) DESC — uses creator-inputted date first

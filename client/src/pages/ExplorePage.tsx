@@ -1385,9 +1385,9 @@ export default function ExplorePage() {
             {mode === "new" ? (
               <>
                 <div className="text-5xl mb-4">🌱</div>
-                <div className="font-heading text-[17px] text-white/50 mb-2">Nothing new this week</div>
+                <div className="font-heading text-[17px] text-white/50 mb-2">Nothing new yet</div>
                 <div className="text-[13px] font-body text-white/40 max-w-xs mx-auto">
-                  No tracks were published in the last 7 days. Check back soon — or be the first to drop something new.
+                  No recent works found. Check back soon — or be the first to drop something new.
                 </div>
                 <button
                   className="mt-5 text-xs px-4 py-2 rounded-full transition-colors"

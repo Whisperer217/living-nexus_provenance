@@ -257,7 +257,7 @@ export const songsRouter = router({
      * Returns works published within the last 90 days, newest first, in canonical FeedRow[] shape.
      * Falls back to all-time newest if no works exist within the window.
      */
-    newThisWeek: publicProcedure.input(z.object({ genre: z.string().optional(), contentType: z.enum(["audio", "lyrics", "manuscript", "comic", "written", "game"]).optional(), limit: z.number().max(100).optional() }).optional()).query(async ({ input }) => getNewThisWeek(input ?? {})),
+    newThisWeek: publicProcedure.input(z.object({ genre: z.string().optional(), contentType: z.enum(["audio", "lyrics", "manuscript", "comic", "written", "game"]).optional(), limit: z.number().max(500).optional() }).optional()).query(async ({ input }) => getNewThisWeek(input ?? {})),
     updateCredits: protectedProcedure.input(z.object({ songId: z.number().int(), creditsJson: z.string().max(4096) })).mutation(async ({ ctx, input }) => {
       const song = await getSongById(input.songId);
       if (!song) throw new TRPCError({ code: "NOT_FOUND", message: "Song not found" });
