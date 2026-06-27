@@ -48,6 +48,15 @@ import { CinematicComicReader, type BookPage } from "@/components/reader/Cinemat
 import { CinematicSongHeader } from "@/components/CinematicSongHeader";
 import { CreatorHandle } from "@/components/CreatorHandle";
 import { CreativeDrawer } from "@/components/CreativeDrawer";
+import {
+  ArchiveFrame,
+  ArtifactPanel,
+  ArchiveSection,
+  ClassificationStamp,
+  WIDCertificate,
+  MetadataRow,
+  getArchiveIdentity,
+} from "@/components/ArchiveLayout";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { SongDetailPageSkeleton } from "@/components/SongDetailPageSkeleton";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
@@ -107,6 +116,7 @@ export default function SongDetailPage() {
   );
   const reactionCounts: Record<string, number> = reactionsData?.counts ?? {};
   const myReactionsSet = new Set<string>(reactionsData?.mine ?? []);
+  // Archive layout aliases (populated after evidenceItems is declared below)
   const toggleReactionMutation = trpc.songs.toggleReaction.useMutation({
     onMutate: async ({ type }) => {
       await utils.songs.getReactions.cancel({ songId });
@@ -163,6 +173,7 @@ export default function SongDetailPage() {
   const heroRef = useRef<HTMLDivElement>(null);
   const [headerCollapsed, setHeaderCollapsed] = useState(false);
   const [readerOpen, setReaderOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   // Scroll reveal — below-fold sections rise into view
   const scrollRevealRef = useScrollReveal<HTMLDivElement>({ threshold: 0.10, rootMargin: "0px 0px -30px 0px" });
 
@@ -212,6 +223,11 @@ export default function SongDetailPage() {
     { songId },
     { enabled: songId > 0, staleTime: 30_000 }
   );
+  // Archive layout aliases
+  const reactionData = reactionCounts;
+  const myReactionData = Object.fromEntries(REACTION_SLUGS.map(s => [s, myReactionsSet.has(s)]));
+  const reactMutation = toggleReactionMutation;
+  const provenanceItems = evidenceItems;
 
   const song = songData?.song;
   const creator = songData?.creator;
@@ -675,373 +691,267 @@ export default function SongDetailPage() {
           onEditArt={() => {}}
         />
 
-        {/* ── TESTIMONY CHAMBER — single-column layout below the header ── */}
-        <div className="flex flex-col gap-10 mb-10">
+        {/* ══════════════════════════════════════════════════════════════
+             ARCHIVE LAYOUT — authenticated artifact inside the Living Nexus Archive
+        ══════════════════════════════════════════════════════════════ */}
+        {(() => {
+          const archiveIdentity = getArchiveIdentity((song as any).contentType);
+          return (
+            <ArchiveFrame identity={archiveIdentity}>
 
-          {/* HIDDEN: old left column sentinel — kept for diff clarity */}
-          {false && <div className="flex flex-col gap-5 cathedral-enter-art">
-            {/* Cover art — large, square, sticky on desktop */}
-            <div>
-              {/* Video player */}
-              {(song as any).videoUrl && (
-                <div className="w-full rounded-2xl overflow-hidden mb-3" style={{ aspectRatio: "16/9", background: "var(--ln-coal)" }}>
-                  {showVideo ? (
-                    <video ref={videoDetailRef} src={(song as any).videoUrl} className="w-full h-full object-contain" controls playsInline autoPlay={isPlaying} muted={false} />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center cursor-pointer group relative" onClick={() => setShowVideo(true)} style={{ background: "var(--ln-coal)" }}>
-                      {song.coverArtUrl
-                        ? <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover" style={{ objectPosition: `${song.coverPositionX ?? 50}% ${song.coverPositionY ?? 50}%` }} />
-                        : <Music className="w-16 h-16 opacity-10" style={{ color: "var(--ln-gold)" }} />}
-                      <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <div className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold" style={{ background: "var(--ln-gold)", color: "var(--ln-coal)" }}>
-                          <Video size={14} /> Watch Video
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-              {(song as any).videoUrl && (
-                <button onClick={() => setShowVideo(v => !v)} className="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg mb-3 transition-all"
-                  style={{ background: showVideo ? "rgba(196,154,40,0.08)" : "var(--ln-coal)", color: showVideo ? "var(--ln-gold)" : "var(--ln-iron)", border: `1px solid ${showVideo ? "rgba(196,154,40,0.3)" : "var(--ln-gold)"}` }}>
-                  {showVideo ? <><ImageIcon size={12} /> Cover Art</> : <><Video size={12} /> Music Video</>}
-                </button>
-              )}
-              {/* T2: Luminous Glow Ring wrapper — outer animated ring around cover art */}
-              <div
-                className={isThisTrackActive ? "glow-ring-active" : "glow-ring-idle"}
-                style={{ borderRadius: "1.35rem", display: "block" }}
-              >
-              {/* Cover art — full-bleed cathedral sanctuary */}
-              <div
-                className={`relative w-full overflow-hidden group cursor-pointer sg-hero-frame transition-all duration-700 ${isThisTrackActive ? "witness-card sacred-active" : ""}`}
-                style={{
-                  aspectRatio: "1/1",
-                  background: "linear-gradient(135deg, #0d0b08, #000000)",
-                  borderRadius: "1.25rem",
-                  border: isThisTrackActive
-                    ? "1px solid rgba(196,154,40,0.55)"
-                    : "1px solid rgba(196,154,40,0.18)",
-                }}
-                onClick={song.fileUrl ? handlePlay : ((song as any).contentType === "comic" || (song as any).contentType === "manuscript") ? handleReadNow : undefined}
-              >
-                {song.coverArtUrl
-                  ? <img src={song.coverArtUrl} alt={song.title} className={`w-full h-full object-cover ${song.fileUrl ? "cover-art-breathe" : ""}`} style={{ objectPosition: `${song.coverPositionX ?? 50}% ${song.coverPositionY ?? 50}%` }} />
-                  : (
-                    /* Missing Art Sanctuary — sacred void, three relic rings, animated breathe */
-                    <div
-                      className="w-full h-full flex flex-col items-center justify-center gap-6 missing-art-void"
-                      style={{
-                        background: "linear-gradient(160deg, #130f1e 0%, #0a0812 45%, #060409 100%)",
-                      }}
-                    >
-                      {/* Sacred geometry ornament — three concentric relic rings */}
-                      <div className="relative flex items-center justify-center" style={{ width: 120, height: 120 }}>
-                        {/* Outer ring — slow breathe */}
-                        <div
-                          className="absolute inset-0 rounded-full relic-ring-outer"
-                          style={{ border: "1px solid rgba(196,154,40,0.20)", boxShadow: "0 0 20px rgba(196,154,40,0.06)" }}
-                        />
-                        {/* Middle ring */}
-                        <div
-                          className="absolute inset-[14px] rounded-full relic-ring-inner"
-                          style={{ border: "1px solid rgba(196,154,40,0.14)" }}
-                        />
-                        {/* Inner ring — tightest */}
-                        <div
-                          className="absolute inset-[28px] rounded-full"
-                          style={{ border: "1px solid rgba(196,154,40,0.08)" }}
-                        />
-                        {/* Center icon */}
-                        <Music
-                          className="relic-icon"
-                          style={{ width: 30, height: 30, color: "rgba(196,154,40,0.40)", filter: "drop-shadow(0 0 8px rgba(196,154,40,0.22))" }}
-                        />
-                      </div>
-                      <div className="text-center px-8">
-                        <p
-                          className="font-heading tracking-[0.18em] uppercase mb-2"
-                          style={{ fontSize: "0.78rem", color: "rgba(196,154,40,0.52)", textShadow: "0 0 20px rgba(196,154,40,0.18)" }}
-                        >
-                          Awaiting Visual Testimony
-                        </p>
-                        <p
-                          className="text-xs"
-                          style={{ color: "rgba(255,255,255,0.18)", lineHeight: 1.6 }}
-                        >
-                          This work has not yet received its cover art
-                        </p>
-                      </div>
-                      {isOwner && (
-                        <button
-                          type="button"
-                          onClick={e => { e.stopPropagation(); setEditingOpen(true); }}
-                          className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all hover:scale-105 active:scale-95 btn-gold-glow"
-                          style={{
-                            background: "rgba(196,154,40,0.10)",
-                            border: "1px solid rgba(196,154,40,0.42)",
-                            color: "var(--ln-gold)",
-                            fontFamily: "'Cinzel', serif",
-                            letterSpacing: "0.06em",
-                            boxShadow: "0 0 16px rgba(196,154,40,0.12)",
-                          }}
-                        >
-                          <ImageIcon size={14} /> Bestow Cover Art
-                        </button>
-                      )}
-                    </div>
-                  )}
-                {/* Waveform canvas — now moved to dedicated strip below art (see waveform-strip below) */}
-                {/* Play/pause overlay */}
-                {song.fileUrl && (
-                  <div className={`absolute inset-0 flex items-center justify-center transition-all ${ isThisTrackActive ? "bg-black/25" : "bg-black/0 group-hover:bg-black/40" }`}>
-                    <div className={`w-20 h-20 rounded-full flex items-center justify-center shadow-2xl transition-all ${ isThisTrackActive ? "opacity-100 scale-100" : "opacity-0 group-hover:opacity-100 group-hover:scale-100 scale-90" }`}
-                      style={{ background: "rgba(196,154,40,0.92)", boxShadow: "0 0 40px rgba(196,154,40,0.4)" }}>
-                      {isPlaying ? <Pause className="w-8 h-8" style={{ color: "#0A0B08" }} /> : <Play className="w-8 h-8 ml-1" style={{ color: "#0A0B08" }} />}
-                    </div>
-                  </div>
-                )}
-                {/* READ NOW overlay for comics/manuscripts */}
-                {!song.fileUrl && ((song as any).contentType === "comic" || (song as any).contentType === "manuscript") && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/40 transition-all">
-                    <div className="opacity-0 group-hover:opacity-100 transition-all flex items-center gap-2 px-6 py-3 rounded-full" style={{ background: "rgba(196,154,40,0.92)", boxShadow: "0 0 40px rgba(196,154,40,0.4)" }}>
-                      <BookOpen className="w-5 h-5" style={{ color: "#0A0B08" }} />
-                      <span className="text-sm font-heading font-bold tracking-widest" style={{ color: "#0A0B08" }}>READ NOW</span>
-                    </div>
-                  </div>
-                )}
-                {/* Live indicator */}
-                {isThisTrackActive && (
-                  <div className="absolute top-3 right-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{ background: "rgba(0,0,0,0.75)", border: "1px solid rgba(196,154,40,0.4)" }}>
-                    <div className="live-wave scale-75"><span /><span /><span /><span /><span /></div>
-                    <span className="text-[9px] font-heading tracking-widest" style={{ color: "rgba(196,154,40,0.8)" }}>LIVE</span>
-                  </div>
-                )}
-              </div>
-              </div>{/* end glow-ring wrapper */}
+              {/* ── ARTIFACT PANEL — unified record ── */}
+              <ArtifactPanel identity={archiveIdentity}>
+                <ClassificationStamp
+                  identity={archiveIdentity}
+                  witnessId={song.witnessId}
+                  registeredAt={song.createdAt}
+                />
 
-              {/* T7: Waveform Strip — dedicated strip below cover art */}
-              {song.fileUrl && (
-                <div className="waveform-strip mt-1" style={{ background: "rgba(0,0,0,0.55)", borderRadius: "0.75rem", border: "1px solid rgba(196,154,40,0.10)" }}>
-                  <canvas
-                    ref={waveCanvasRef}
-                    width={800}
-                    height={80}
-                    className={`waveform-strip-canvas${isPlaying ? " playing" : ""}`}
-                    style={{ height: "80px", opacity: isPlaying ? 0.9 : 0.35 }}
-                  />
-                </div>
-              )}
-
-              {/* Primary CTA button — below art */}
-              {(() => {
-                const isReadable = (song as any).contentType === "comic" || (song as any).contentType === "manuscript";
-                return (
-                  <div className="mt-4 flex flex-col gap-2">
-                    {isReadable ? (
-                      /* Comics/manuscripts: READ NOW is primary, audio play is secondary if available */
-                      <>
-                        <button type="button" onClick={handleReadNow}
-                          className="w-full flex items-center justify-center gap-3 py-3.5 rounded-xl font-heading font-bold tracking-widest text-sm living-btn living-btn-primary"
-                          style={{ background: "rgba(196,154,40,0.92)", border: "1px solid rgba(196,154,40,0.6)", color: "#0A0B08", boxShadow: "0 4px 24px rgba(196,154,40,0.2)" }}>
-                          <BookOpen size={16} style={{ color: "#0A0B08" }} />
-                          READ NOW
-                        </button>
-                        {song.fileUrl && (
-                          <button type="button" onClick={handlePlay}
-                            className="w-full flex items-center justify-center gap-3 py-2.5 rounded-xl font-heading font-bold tracking-widest text-xs living-btn"
-                            style={{ background: isPlaying ? "rgba(196,154,40,0.15)" : "rgba(196,154,40,0.08)", border: "1px solid rgba(196,154,40,0.35)", color: isPlaying ? "rgba(196,154,40,0.9)" : "rgba(196,154,40,0.7)" }}>
-                            {isPlaying ? <Pause size={14} fill="currentColor" /> : <Play size={14} fill="currentColor" className="ml-0.5" />}
-                            {isPlaying ? "NOW PLAYING" : "LISTEN"}
-                          </button>
-                        )}
-                      </>
-                    ) : (
-                      /* Audio/lyrics: PLAY NOW is primary */
-                      song.fileUrl && (
-                        <button type="button" onClick={handlePlay}
-                          className="w-full flex items-center justify-center gap-3 py-3.5 rounded-xl font-heading font-bold tracking-widest text-sm living-btn living-btn-primary"
-                          style={{ background: isPlaying ? "rgba(196,154,40,0.15)" : "rgba(196,154,40,0.92)", border: "1px solid rgba(196,154,40,0.6)", color: isPlaying ? "rgba(196,154,40,0.9)" : "#0A0B08", boxShadow: "0 4px 24px rgba(196,154,40,0.2)" }}>
-                          {isPlaying ? <Pause size={16} fill="currentColor" /> : <Play size={16} fill="currentColor" className="ml-0.5" />}
-                          {isPlaying ? "NOW PLAYING" : "PLAY NOW"}
-                        </button>
-                      )
-                    )}
-                  </div>
-                );
-              })()}
-              {/* Stats row — sacred living metrics */}
-              <div className="flex items-center justify-center gap-6 pt-2" style={{ borderTop: "1px solid rgba(196,154,40,0.08)" }}>
-                <div className="living-stat flex flex-col items-center gap-0.5" title={`${song.playCount || 0} plays`}>
-                  <span className="living-stat-value text-base font-bold" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>{song.playCount || 0}</span>
-                  <span className="text-[10px] tracking-widest uppercase" style={{ color: "rgba(196,154,40,0.45)" }}>Plays</span>
-                </div>
-                <div className="w-px h-6" style={{ background: "rgba(196,154,40,0.12)" }} />
-                <div className="living-stat flex flex-col items-center gap-0.5" title={`${comments?.length || 0} voices`}>
-                  <span className="living-stat-value text-base font-bold" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>{comments?.length || 0}</span>
-                  <span className="text-[10px] tracking-widest uppercase" style={{ color: "rgba(196,154,40,0.45)" }}>Voices</span>
-                </div>
-                <div className="w-px h-6" style={{ background: "rgba(196,154,40,0.12)" }} />
-                <div className="living-stat flex flex-col items-center gap-0.5" title={`${likeCount} loved`}>
-                  <span className="living-stat-value text-base font-bold" style={{ color: likeCount > 0 ? "var(--ln-ember)" : "var(--ln-smoke)", fontFamily: "'Cinzel', serif" }}>{likeCount}</span>
-                  <span className="text-[10px] tracking-widest uppercase" style={{ color: "rgba(196,154,40,0.45)" }}>Loved</span>
-                </div>
-              </div>
-            </div>
-          </div>}
-          {/* ── Testimony Chamber ── */}
-          <div className="flex flex-col gap-6">
-
-            {/* ══ TITLE SANCTUARY ══ */}
-            <div className="space-y-4 cathedral-enter-title">
-              {/* Luminous title */}
-              <h1
-                className="leading-tight"
-                style={{
-                  fontFamily: "'Cinzel', serif",
-                  color: "var(--ln-parchment)",
-                  fontSize: "clamp(1.75rem, 4vw, 2.75rem)",
-                  fontWeight: 700,
-                  letterSpacing: "0.02em",
-                  textShadow: isThisTrackActive
-                    ? "0 0 40px rgba(196,154,40,0.35), 0 2px 8px rgba(0,0,0,0.8)"
-                    : "0 2px 8px rgba(0,0,0,0.6)",
-                  transition: "text-shadow 0.7s ease",
-                }}
-              >
-                {song.title}
-              </h1>
-
-              {/* Creator whisper */}
-              {creator && (
-                <div className="flex items-center gap-3">
-                  <div className="w-px h-5" style={{ background: "rgba(196,154,40,0.3)" }} />
-                  <CreatorHandle userId={creator.id} handle={creator.artistHandle} displayName={creator.name} role={(creator as any).role} size="md" />
-                </div>
-              )}
-
-              {/* Content type + genre + BPM chips */}
-              {(() => { const _ctc = getContentTypeColors((song as any).contentType ?? "audio"); return (
-                <div className="flex flex-wrap gap-1.5">
-                  <Badge style={{ background: _ctc.chipBg, color: _ctc.text, border: `1px solid ${_ctc.chipBorder}`, fontSize: "11px" }}>{_ctc.icon} {_ctc.label}</Badge>
-                  {song.genre && song.genre.split(",").map((g: string) => g.trim()).filter(Boolean).map((g: string, i: number) => (
-                    <Badge key={i} style={{ background: _ctc.chipBg, color: _ctc.text, border: `1px solid ${_ctc.chipBorder}`, fontSize: "11px" }}>{g}</Badge>
-                  ))}
-                  {song.bpm && <Badge style={{ background: "var(--ln-coal)", color: "var(--ln-smoke)", border: "1px solid #C49A28", fontSize: "11px" }}>{song.bpm} BPM</Badge>}
-                  {song.keySignature && <Badge style={{ background: "var(--ln-coal)", color: "var(--ln-smoke)", border: "1px solid #C49A28", fontSize: "11px" }}>{song.keySignature}</Badge>}
-                </div>
-              ); })()}
-
-              {/* Caption / description */}
-              {(song as any).caption && (
-                <p
-                  className="text-sm leading-relaxed"
+                {/* Title */}
+                <h1
+                  className="leading-tight mb-3"
                   style={{
-                    color: "var(--ln-smoke)",
-                    fontFamily: "'Cormorant Garamond', serif",
-                    fontStyle: "italic",
-                    fontSize: "1rem",
-                    borderLeft: "2px solid rgba(196,154,40,0.35)",
-                    paddingLeft: "14px",
+                    fontFamily: "'Cinzel', serif",
+                    color: "var(--ln-parchment)",
+                    fontSize: "clamp(1.75rem, 4vw, 3rem)",
+                    fontWeight: 700,
+                    letterSpacing: "0.02em",
+                    textShadow: isThisTrackActive
+                      ? "0 0 40px rgba(196,154,40,0.35), 0 2px 8px rgba(0,0,0,0.8)"
+                      : "0 2px 8px rgba(0,0,0,0.6)",
+                    transition: "text-shadow 0.7s ease",
                   }}
                 >
-                  {(song as any).caption}
-                </p>
-              )}
+                  {song.title}
+                </h1>
 
-              {/* Sacred geometry divider */}
-              <div className="sg-divider"><div className="sg-divider-pip" /></div>
-            </div>
-
-            {/* ══ WITNESSED WORK — Sacred Provenance Seal ══ */}
-            <div
-              className={`rounded-2xl overflow-hidden transition-all duration-700 cathedral-enter-wid ${song.witnessId ? "wid-origin-glow" : ""}`}
-              style={{
-                background: "rgba(196,154,40,0.03)",
-                border: song.witnessId ? "1px solid rgba(196,154,40,0.4)" : "1px solid rgba(196,154,40,0.15)",
-              }}
-            >
-              {/* Header */}
-              <div
-                className="flex items-center gap-2.5 px-5 py-4"
-                style={{
-                  borderBottom: "1px solid rgba(196,154,40,0.12)",
-                  background: "linear-gradient(90deg, rgba(196,154,40,0.06) 0%, transparent 100%)",
-                }}
-              >
-                <ShieldCheck className="w-5 h-5 flex-shrink-0" style={{ color: "rgba(196,154,40,0.9)" }} />
-                <span className="text-base font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)", letterSpacing: "0.04em" }}>Witnessed Work</span>
-                {evidenceItems.length > 0 && (
-                  <span className="text-xs px-1.5 py-0.5 rounded ml-1" style={{ background: "rgba(196,154,40,0.1)", color: "rgba(196,154,40,0.7)", border: "1px solid rgba(196,154,40,0.2)" }}>
-                    {evidenceItems.length} artifact{evidenceItems.length !== 1 ? "s" : ""}
-                  </span>
+                {/* Creator */}
+                {creator && (
+                  <div className="flex items-center gap-3 mb-5">
+                    <div className="w-px h-5" style={{ background: archiveIdentity.accentDim }} />
+                    <CreatorHandle
+                      userId={creator.id}
+                      handle={creator.artistHandle}
+                      displayName={creator.name}
+                      role={(creator as any).role}
+                      size="md"
+                    />
+                  </div>
                 )}
-                {song.witnessId && (
-                  <WIDPanel
-                    witnessId={song.witnessId}
-                    songTitle={song.title}
-                    creatorName={creator?.artistHandle || creator?.name}
-                    registeredAt={song.createdAt}
-                    coverArtUrl={song.coverArtUrl}
-                    certificateUrl={song.certificateUrl}
-                    haaiVisualConcept={(song as any).haaiVisualConcept}
-                    haaiStyleLanguage={(song as any).haaiStyleLanguage}
-                    haaiInstrumentation={(song as any).haaiInstrumentation}
-                    haaiVocalConveyance={(song as any).haaiVocalConveyance}
-                    haaiLyricalInspiration={(song as any).haaiLyricalInspiration}
-                    haaiEmotionalTone={(song as any).haaiEmotionalTone}
-                    haaiDeclaredAt={(song as any).haaiDeclaredAt}
-                  />
-                )}
-              </div>
 
-              <div className="px-5 py-4 space-y-3">
-                {/* WID hash + content type inline */}
-                <div className="flex flex-wrap gap-2">
-                  {song.witnessId && (
-                    <div className="flex items-center gap-1 px-2.5 py-1 rounded-full font-mono" style={{ background: "rgba(74,222,128,0.06)", border: "1px solid rgba(74,222,128,0.2)" }}>
-                      <Hash size={10} style={{ color: "rgba(74,222,128,0.7)" }} />
-                      <span className="text-[11px]" style={{ color: "rgba(74,222,128,0.7)" }}>{song.witnessId.slice(0, 24)}…</span>
-                    </div>
+                {/* Metadata table */}
+                <div className="mb-5 space-y-0">
+                  {song.genre && (
+                    <MetadataRow
+                      label="Genre"
+                      value={song.genre}
+                      accent={archiveIdentity.accentDim}
+                    />
                   )}
-                  {song.witnessId && song.createdAt && (
-                    <span className="text-[11px] flex items-center" style={{ color: "rgba(255,255,255,0.3)" }}>
-                      Registered {new Date(song.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}
-                    </span>
+                  {(song.bpm || song.keySignature) && (
+                    <MetadataRow
+                      label="Key / Tempo"
+                      value={[song.keySignature, song.bpm ? `${song.bpm} BPM` : null].filter(Boolean).join(" · ")}
+                      accent={archiveIdentity.accentDim}
+                    />
+                  )}
+                  {song.createdAt && (
+                    <MetadataRow
+                      label="Registered"
+                      value={new Date(song.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
+                      accent={archiveIdentity.accentDim}
+                    />
+                  )}
+                  {(song as any).contentType && (
+                    <MetadataRow
+                      label="Classification"
+                      value={archiveIdentity.classification}
+                      accent={archiveIdentity.accentDim}
+                    />
                   )}
                 </div>
 
-                {/* Testimony excerpt */}
-                {((song as any).headlineCaption || (song as any).description) && (
-                  <p className="text-sm leading-relaxed" style={{ color: "var(--ln-smoke)", fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic" }}>
-                    "{((song as any).headlineCaption || (song as any).description || "").slice(0, 220)}{(((song as any).headlineCaption || (song as any).description || "").length > 220 ? "…" : "")}"
+                {/* Caption / description */}
+                {(song as any).caption && (
+                  <p
+                    className="text-base leading-relaxed mb-5"
+                    style={{
+                      color: "var(--ln-bone)",
+                      fontFamily: "'Cormorant Garamond', serif",
+                      fontStyle: "italic",
+                      fontSize: "1.05rem",
+                      borderLeft: `2px solid ${archiveIdentity.accentDim}`,
+                      paddingLeft: "1rem",
+                    }}
+                  >
+                    {(song as any).caption}
                   </p>
                 )}
 
-                {/* Framing statement */}
-                <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.22)" }}>
-                  The manifestation itself is the primary evidence of this work's existence and authorship. Supplementary proof artifacts can be attached by the creator.
-                </p>
+                {/* WID Certificate */}
+                {song.witnessId && (
+                  <div className="mb-5">
+                    <WIDCertificate
+                      witnessId={song.witnessId}
+                      creatorName={creator?.artistHandle || creator?.name || "Unknown Creator"}
+                      registeredAt={song.createdAt}
+                      certificateUrl={song.certificateUrl}
+                      identity={archiveIdentity}
+                    />
+                  </div>
+                )}
 
-                {/* ── Supplementary Artifacts — inline list ── */}
-                {evidenceItems.length > 0 && (
-                  <div className="space-y-2 pt-1">
-                    <p className="text-[10px] font-heading tracking-widest uppercase" style={{ color: "rgba(196,154,40,0.5)" }}>Proof Artifacts</p>
-                    {evidenceItems.map((item: any) => {
+                {/* Action tools */}
+                <div className="flex flex-wrap gap-2.5 pt-4" style={{ borderTop: `1px solid ${archiveIdentity.accentDim.replace(/[\d.]+\)$/, "0.12)")}` }}>
+                  {!isOwner && (
+                    <Button size="sm" variant="outline" onClick={e => toggleLike(e)}
+                      style={isLiked
+                        ? { borderColor: "rgba(239,68,68,0.6)", color: "var(--ln-ember)" }
+                        : { borderColor: archiveIdentity.accentDim, color: "var(--ln-smoke)" }}>
+                      <Heart className="w-3.5 h-3.5 mr-1" fill={isLiked ? "currentColor" : "none"} />
+                      {isLiked ? "Liked" : "Like"}
+                      {likeCount > 0 && <span className="ml-1 text-[11px] tabular-nums opacity-70">{likeCount >= 1000 ? `${(likeCount / 1000).toFixed(1)}k` : likeCount}</span>}
+                    </Button>
+                  )}
+                  {!isOwner && <AddToPlaylistButton songId={song.id} variant="full" />}
+                  {!isOwner && <AddToNamedPlaylistPopover songId={song.id} songTitle={song.title} variant="full" />}
+                  {/* Download */}
+                  {(() => {
+                    const dlPerm = (song as any).downloadPermission as string | undefined;
+                    const tipCents = (song as any).downloadTipThresholdCents as number | undefined;
+                    if (!dlPerm || dlPerm === "none") return null;
+                    if (dlPerm === "free") return (
+                      <Button size="sm" variant="outline"
+                        onClick={() => {
+                          if (!user) { toast.info("Sign in to download this track"); return; }
+                          downloadMutation.mutate({ songId: song.id });
+                        }}
+                        disabled={downloadMutation.isPending}
+                        style={{ borderColor: archiveIdentity.accentDim, color: "var(--ln-smoke)" }}>
+                        <Download className="w-3.5 h-3.5 mr-1" />
+                        {downloadMutation.isPending ? "…" : "Download"}
+                      </Button>
+                    );
+                    if (dlPerm === "tip_required" && tipCents) return (
+                      <Button size="sm" variant="outline"
+                        onClick={() => {
+                          if (!user) { toast.info("Sign in to download"); return; }
+                          setTipOpen(true);
+                        }}
+                        style={{ borderColor: archiveIdentity.accentDim, color: "var(--ln-smoke)" }}>
+                        <Download className="w-3.5 h-3.5 mr-1" />
+                        Download (Gift ${(tipCents / 100).toFixed(2)}+)
+                      </Button>
+                    );
+                    return null;
+                  })()}
+                  {/* Share */}
+                  <Button size="sm" variant="outline"
+                    onClick={() => { navigator.clipboard.writeText(window.location.href); toast.success("Link copied"); }}
+                    style={{ borderColor: archiveIdentity.accentDim, color: "var(--ln-smoke)" }}>
+                    <Share2 className="w-3.5 h-3.5 mr-1" />Share
+                  </Button>
+                  {/* Gift */}
+                  {!isOwner && (
+                    <Button size="sm" variant="outline"
+                      onClick={() => { if (!user) { toast.info("Sign in to gift"); return; } setTipOpen(true); }}
+                      style={{ borderColor: archiveIdentity.accentDim, color: "var(--ln-smoke)" }}>
+                      <DollarSign className="w-3.5 h-3.5 mr-1" />Gift
+                    </Button>
+                  )}
+                  {/* Owner edit */}
+                  {isOwner && (
+                    <Button size="sm" variant="outline"
+                      onClick={() => setDrawerOpen(true)}
+                      style={{ borderColor: archiveIdentity.accentColor, color: archiveIdentity.accentColor }}>
+                      <Pencil className="w-3.5 h-3.5 mr-1" />Edit Record
+                    </Button>
+                  )}
+                  <FlagContentButton workId={song.id} workType={(song as any).contentType === 'manuscript' ? 'manuscript' : (song as any).contentType === 'comic' ? 'comic' : (song as any).contentType === 'lyrics' ? 'lyrics' : 'audio'} />
+                </div>
+              </ArtifactPanel>
+
+              {/* ── ORIGIN STORY ── */}
+              {(() => {
+                const hasOrigin = !!(song as any).originStory;
+                const hasHaai = !!(song as any).haaiDisclosureLevel;
+                if (!hasOrigin && !hasHaai) return null;
+                const discInfo = (() => {
+                  const level = (song as any).haaiDisclosureLevel;
+                  if (!level) return null;
+                  const map: Record<string, { label: string; desc: string }> = {
+                    human_only: { label: "Human Only", desc: "This work was created entirely without AI assistance." },
+                    ai_assisted: { label: "AI-Assisted", desc: "AI tools were used in the creation of this work." },
+                    ai_generated: { label: "AI-Generated", desc: "This work was primarily generated by AI." },
+                    haai: { label: "HAAI — Human-Authored, AI-Informed", desc: "The human is the author. AI served as a tool in service of the creator's vision." },
+                  };
+                  return map[level] ?? null;
+                })();
+                const haaiFields: { key: string; label: string }[] = [
+                  { key: "haaiAiRole", label: "AI Role" },
+                  { key: "haaiHumanContribution", label: "Human Contribution" },
+                  { key: "haaiToolsUsed", label: "Tools Used" },
+                  { key: "haaiCreativeProcess", label: "Creative Process" },
+                ].filter(f => !!(song as any)[f.key]);
+                return (
+                  <ArchiveSection label="Origin Story" accent={archiveIdentity.accentDim}>
+                    {hasOrigin && (
+                      <p
+                        className="text-base leading-relaxed mb-6"
+                        style={{
+                          color: "var(--ln-bone)",
+                          fontFamily: "'Cormorant Garamond', serif",
+                          fontSize: "1.05rem",
+                          lineHeight: 1.85,
+                        }}
+                      >
+                        {(song as any).originStory}
+                      </p>
+                    )}
+                    {discInfo && (
+                      <div className="rounded-sm px-4 py-3 mb-4" style={{ background: archiveIdentity.headerBg, border: archiveIdentity.borderStyle }}>
+                        <p className="text-[10px] tracking-[0.18em] uppercase mb-1" style={{ fontFamily: "'Cinzel', serif", color: archiveIdentity.accentColor }}>{discInfo.label}</p>
+                        <p className="text-sm leading-relaxed" style={{ color: "var(--ln-bone)", fontFamily: "'Cormorant Garamond', serif" }}>{discInfo.desc}</p>
+                        {(song as any).haaiDeclaredAt && (
+                          <p className="text-[10px] mt-2" style={{ color: archiveIdentity.accentDim, fontFamily: "'Space Mono', monospace" }}>
+                            Declared {new Date((song as any).haaiDeclaredAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                    {haaiFields.length > 0 && (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {haaiFields.map(f => (
+                          <div key={f.key} className="rounded-sm px-4 py-3" style={{ background: archiveIdentity.headerBg, border: archiveIdentity.borderStyle }}>
+                            <p className="text-[9px] tracking-[0.18em] uppercase mb-1.5" style={{ fontFamily: "'Cinzel', serif", color: archiveIdentity.accentDim }}>{f.label}</p>
+                            <p className="text-sm leading-relaxed" style={{ color: "var(--ln-bone)", fontFamily: "'Cormorant Garamond', serif" }}>{(song as any)[f.key]}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </ArchiveSection>
+                );
+              })()}
+
+              {/* ── PROVENANCE RECORD ── */}
+              <ArchiveSection label="Provenance Record" accent={archiveIdentity.accentDim}>
+                {/* Provenance items */}
+                {provenanceItems && provenanceItems.length > 0 && (
+                  <div className="space-y-3 mb-6">
+                    {provenanceItems.map((item: any) => {
                       const iconMap: Record<string, any> = { file: FileText, link: Link2, note: StickyNote };
                       const colorMap: Record<string, string> = { file: "rgba(196,154,40,0.8)", link: "rgba(96,165,250,0.8)", note: "rgba(167,243,208,0.8)" };
-                      const labelMap: Record<string, string> = { file: "File", link: "Link", note: "Note" };
                       const Icon = iconMap[item.type] ?? FileText;
-                      const color = colorMap[item.type] ?? "rgba(196,154,40,0.8)";
+                      const color = colorMap[item.type] ?? archiveIdentity.accentColor;
                       return (
-                        <div key={item.id} className="flex items-start gap-3 rounded-xl px-4 py-3" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(196,154,40,0.1)" }}>
-                          <div className="flex-shrink-0 mt-0.5 p-1.5 rounded-lg" style={{ background: "rgba(196,154,40,0.07)" }}>
+                        <div key={item.id} className="flex items-start gap-3 px-4 py-3 rounded-sm" style={{ background: archiveIdentity.headerBg, border: archiveIdentity.borderStyle }}>
+                          <div className="flex-shrink-0 mt-0.5 p-1.5 rounded" style={{ background: "rgba(196,154,40,0.07)" }}>
                             <Icon className="w-3.5 h-3.5" style={{ color }} />
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
                               <span className="text-sm font-medium truncate" style={{ color: "var(--ln-parchment)" }}>{item.title}</span>
-                              <span className="text-[10px] px-1.5 py-0.5 rounded uppercase tracking-wide" style={{ background: "rgba(196,154,40,0.06)", color, border: `1px solid ${color.replace("0.8", "0.25")}` }}>{labelMap[item.type] ?? item.type}</span>
+                              <span className="text-[9px] px-1.5 py-0.5 rounded uppercase tracking-wide" style={{ background: "rgba(196,154,40,0.06)", color, border: `1px solid ${color.replace("0.8", "0.25")}` }}>{item.type}</span>
                             </div>
                             {item.type === "note" && item.noteBody && (
                               <p className="text-xs mt-1 leading-relaxed" style={{ color: "var(--ln-smoke)" }}>{item.noteBody}</p>
@@ -1057,376 +967,252 @@ export default function SongDetailPage() {
                                 <Hash className="w-2.5 h-2.5" />{item.hash.slice(0, 16)}…
                               </div>
                             )}
-                            <p className="text-[10px] mt-1" style={{ color: "rgba(255,255,255,0.25)" }}>Added {new Date(item.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}</p>
                           </div>
                         </div>
                       );
                     })}
                   </div>
                 )}
-
-                {/* Certificate link */}
-                {song.certificateUrl && (
-                  <a href={song.certificateUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-xs hover:underline" style={{ color: "var(--ln-gold)" }}>
-                    <ExternalLink className="w-3 h-3" />View Provenance Certificate
-                  </a>
+                <ActivationPanel songId={songId} songTitle={song.title} />
+                <div className="mt-6">
+                  <ProvenanceTimeline songId={songId} ownerId={song.userId} />
+                </div>
+                <div className="mt-4">
+                  <LineageGraph songId={songId} songTitle={song.title} ownerId={song.userId} />
+                </div>
+                <div className="mt-4">
+                  <WitnessesPanel songId={songId} ownerId={song.userId} />
+                </div>
+                <div className="mt-4">
+                  <EvidencePanel
+                    songId={songId}
+                    isOwner={isOwner}
+                    manifestation={{
+                      coverArtUrl: song.coverArtUrl,
+                      fileUrl: song.fileUrl,
+                      headlineCaption: (song as any).headlineCaption,
+                      description: (song as any).description,
+                      title: song.title,
+                    }}
+                  />
+                </div>
+                {/* Sovereign Stamp */}
+                {(song as any).sovereignStampId && (
+                  <div className="mt-4 rounded-sm px-4 py-3" style={{ background: archiveIdentity.headerBg, border: archiveIdentity.borderStyle }}>
+                    <div className="flex items-start gap-3">
+                      <span style={{ fontSize: "18px", lineHeight: 1 }}>🔏</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold mb-1" style={{ fontFamily: "'Cinzel', serif", color: archiveIdentity.accentColor }}>Sovereign Stamp Applied</p>
+                        <p className="text-xs font-mono break-all" style={{ color: "var(--ln-parchment)" }}>{(song as any).sovereignStampId}</p>
+                        <p className="text-[11px] mt-1" style={{ color: "var(--ln-smoke)" }}>Near-ultrasonic tone embedded — 17 U.S.C. § 102(a)</p>
+                      </div>
+                    </div>
+                  </div>
                 )}
-              </div>
-            </div>
+                {/* Harmonic Signature downloads */}
+                {isOwner && (song as any).harmonicSignature && (
+                  <div className="flex flex-wrap gap-2 mt-4">
+                    <a href={`/api/harmonic/${song.id}/audio`} download className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-sm hover:opacity-80 transition-opacity" style={{ background: archiveIdentity.headerBg, border: archiveIdentity.borderStyle, color: archiveIdentity.accentColor }}>
+                      <Download className="w-3 h-3" />Harmonic Tone (.wav)
+                    </a>
+                    <a href={`/api/harmonic/${song.id}/image`} download className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-sm hover:opacity-80 transition-opacity" style={{ background: archiveIdentity.headerBg, border: archiveIdentity.borderStyle, color: archiveIdentity.accentColor }}>
+                      <Download className="w-3 h-3" />Waveform Image (.png)
+                    </a>
+                  </div>
+                )}
+              </ArchiveSection>
 
-            {/* ── Sacred Tools ── */}
-            <div className="flex flex-wrap gap-2.5 cathedral-enter-tools">
-              {!isOwner && (
-                <Button size="sm" variant="outline" onClick={e => toggleLike(e)}
-                  style={isLiked ? { borderColor: "rgba(239,68,68,0.6)", color: "var(--ln-ember)" } : { borderColor: "#C3AB7D", color: "var(--ln-smoke)" }}>
-                  <Heart className="w-3.5 h-3.5 mr-1" fill={isLiked ? "currentColor" : "none"} />
-                  {isLiked ? "Liked" : "Like"}
-                  {likeCount > 0 && <span className="ml-1 text-[11px] tabular-nums opacity-70">{likeCount >= 1000 ? `${(likeCount / 1000).toFixed(1)}k` : likeCount}</span>}
-                </Button>
-              )}
-              {!isOwner && <AddToPlaylistButton songId={song.id} variant="full" />}
-              {!isOwner && <AddToNamedPlaylistPopover songId={song.id} songTitle={song.title} variant="full" />}
-              {/* Download */}
+              {/* ── FIND IT ELSEWHERE ── */}
               {(() => {
-                const dlPerm = (song as any).downloadPermission as string | undefined;
-                const tipCents = (song as any).downloadTipThresholdCents as number | undefined;
-                if (!dlPerm || dlPerm === "none") return null;
-                if (dlPerm === "free") return (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => {
-                      if (!user) { toast.info("Sign in to download this track"); return; }
-                      downloadMutation.mutate({ songId: song.id });
-                    }}
-                    disabled={downloadMutation.isPending}
-                    className="living-btn transition-all"
-                    style={{
-                      borderColor: "rgba(34,197,94,0.45)",
-                      color: "rgba(34,197,94,0.9)",
-                      background: "rgba(34,197,94,0.06)",
-                      boxShadow: "0 0 12px rgba(34,197,94,0.08)",
-                    }}
-                  >
-                    <Download className="w-3.5 h-3.5 mr-1.5" />{downloadMutation.isPending ? "…" : "Free Download"}
-                  </Button>
+                const raw = (song as any).externalLinksJson;
+                if (!raw) return null;
+                let links: Array<{ platform: string; url: string }> = [];
+                try { links = JSON.parse(raw); } catch { return null; }
+                if (!links.length) return null;
+                return (
+                  <ArchiveSection label="Find It Elsewhere" accent={archiveIdentity.accentDim}>
+                    <div className="flex flex-wrap gap-3">
+                      {links.map((link, i) => (
+                        <a key={i} href={link.url} target="_blank" rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-sm text-sm font-medium transition-all hover:scale-[1.02]"
+                          style={{ background: archiveIdentity.headerBg, border: archiveIdentity.borderStyle, color: archiveIdentity.accentColor, fontFamily: "'Cinzel', serif", letterSpacing: "0.04em" }}>
+                          <ExternalLink className="w-3.5 h-3.5" />
+                          {link.platform}
+                        </a>
+                      ))}
+                    </div>
+                  </ArchiveSection>
                 );
-                if (dlPerm === "tipped") return (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => {
-                      if (!user) { toast.info("Sign in to download this track"); return; }
-                      tipDownloadMutation.mutate({ songId: song.id, origin: window.location.origin });
-                    }}
-                    disabled={tipDownloadMutation.isPending}
-                    title={`Gift $${((tipCents ?? 179) / 100).toFixed(2)} to unlock download`}
-                    className="living-btn transition-all"
-                    style={{
-                      borderColor: "rgba(212,175,55,0.45)",
-                      color: "rgba(212,175,55,0.95)",
-                      background: "rgba(212,175,55,0.07)",
-                      boxShadow: "0 0 14px rgba(212,175,55,0.10)",
-                    }}
-                  >
-                    <Download className="w-3.5 h-3.5 mr-1.5" />{tipDownloadMutation.isPending ? "Processing…" : `Download — $${((tipCents ?? 179) / 100).toFixed(2)}`}
-                  </Button>
-                );
-                return null;
               })()}
-              <Button
-                size="sm" variant="outline"
-                onClick={() => setVersionHistoryOpen(true)}
-                className="gap-1.5 transition-all hover:scale-105 active:scale-95"
-                style={{ borderColor: "rgba(196,154,40,0.35)", color: "var(--ln-gold)", background: "rgba(196,154,40,0.04)" }}
-              >
-                <History className="w-3.5 h-3.5" />Versions
-              </Button>
-              <Button
-                size="sm" variant="outline"
-                onClick={() => setShareOpen(true)}
-                className="gap-1.5 transition-all hover:scale-105 active:scale-95"
-                style={{ borderColor: "rgba(196,154,40,0.2)", color: "var(--ln-smoke)", background: "rgba(255,255,255,0.02)" }}
-              >
-                <Share2 className="w-3.5 h-3.5" />Share
-              </Button>
-              {song && (
-                <Link href={`/constellation/${song.id}`}>
-                  <Button
-                    size="sm" variant="outline"
-                    className="gap-1.5 transition-all hover:scale-105 active:scale-95"
-                    style={{ borderColor: "rgba(138,43,226,0.45)", color: "rgba(192,132,252,0.9)", background: "rgba(138,43,226,0.04)" }}
-                  >
-                    <Network className="w-3.5 h-3.5" />Cosmos
-                  </Button>
-                </Link>
-              )}
-              {song && (
-                <QRShareModal entity={{ type: "song", id: song.id, slug: String(song.id), name: song.title, subtitle: song.artistHandle || song.creatorName || undefined, description: song.description ?? undefined, thumbnailUrl: song.coverArtUrl ?? undefined }}
-                  trigger={
-                    <Button
-                      size="sm" variant="outline"
-                      className="gap-1.5 transition-all hover:scale-105 active:scale-95"
-                      style={{ borderColor: "rgba(196,154,40,0.25)", color: "rgba(232,223,200,0.65)", background: "rgba(196,154,40,0.03)" }}
-                    >
-                      <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h2v2h-2zm4 0h3v3h-3zm0 4v3h-3v-3"/></svg>
-                      ID Card
-                    </Button>
-                  }
-                />
-              )}
-              {!isOwner && (
-                <FlagContentButton workId={song.id} workType="audio" workTitle={song.title} size="sm" className="px-2 py-1 rounded border border-zinc-800 hover:border-red-800/60" />
-              )}
-              {isOwner && (
-                <Button
-                  size="sm"
-                  onClick={() => setEditingOpen(true)}
-                  className="gap-1.5 btn-gold-glow transition-all hover:scale-105 active:scale-95"
-                  style={{
-                    background: "rgba(196,154,40,0.12)",
-                    border: "1px solid rgba(196,154,40,0.5)",
-                    color: "var(--ln-gold)",
-                    fontFamily: "'Cinzel', serif",
-                    letterSpacing: "0.05em",
-                    fontWeight: 600,
-                  }}
-                >
-                  <Pencil size={13} />
-                  Edit Work
-                </Button>
-              )}
-            </div>
 
-            {/* ── Missing cover art alert (owner only) ── */}
-            {isOwner && !song.coverArtUrl && (
-              <div className="flex items-start gap-3 rounded-xl px-4 py-3" style={{ background: "rgba(234,179,8,0.06)", border: "1px solid rgba(234,179,8,0.35)" }}>
-                <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: "#eab308" }} />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold" style={{ color: "#eab308", fontFamily: "'Cinzel', serif" }}>Missing Cover Art</p>
-                  <p className="text-xs mt-0.5" style={{ color: "rgba(234,179,8,0.7)" }}>This work has no cover art. Add one so it displays correctly across the platform.</p>
-                </div>
-                <Button size="sm" variant="outline" onClick={() => setEditingOpen(true)}
-                  style={{ borderColor: "rgba(234,179,8,0.4)", color: "#eab308", flexShrink: 0, fontSize: "11px" }}>
-                  Add Art
-                </Button>
-              </div>
-            )}
+              {/* ── GALLERY ── */}
+              {(() => {
+                const rawGallery = (song as any).galleryImagesJson;
+                if (!rawGallery) return null;
+                let gallery: { url: string; caption?: string }[] = [];
+                try { gallery = typeof rawGallery === "string" ? JSON.parse(rawGallery) : rawGallery; } catch { return null; }
+                if (!gallery.length) return null;
+                return (
+                  <ArchiveSection label="Gallery" accent={archiveIdentity.accentDim}>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                      {gallery.map((img, i) => (
+                        <div key={i} className="space-y-1">
+                          <div className="overflow-hidden aspect-square" style={{ border: archiveIdentity.borderStyle }}>
+                            <img src={img.url} alt={img.caption || `Gallery image ${i + 1}`}
+                              className="w-full h-full object-cover hover:scale-105 transition-transform duration-300 cursor-pointer"
+                              onClick={() => window.open(img.url, "_blank")} />
+                          </div>
+                          {img.caption && <p className="text-[10px] leading-tight px-1" style={{ color: "var(--ln-iron)" }}>{img.caption}</p>}
+                        </div>
+                      ))}
+                    </div>
+                  </ArchiveSection>
+                );
+              })()}
 
-            {/* ── Tip panel ── */}
-            {tipsEnabled && !isOwner && (
-              <div className="rounded-2xl p-5" style={{ background: "linear-gradient(135deg, rgba(44,52,56,0.6), #000000)", border: "1px solid rgba(196,154,40,0.3)" }}>
-                <div className="flex items-center gap-2 mb-3">
-                  <DollarSign className="w-4 h-4" style={{ color: "var(--ln-gold)" }} />
-                  <p className="text-sm font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-gold)" }}>Gift {creator?.artistHandle || creator?.name}</p>
-                  <span className="text-xs ml-auto" style={{ color: "var(--ln-iron)" }}>90% to artist</span>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {["1", "2", "5", "10", "25"].map(amt => (
-                    <button key={amt} onClick={() => { setTipAmount(amt); tipMutation.mutate({ songId: song.id, amountCents: Math.round(parseFloat(amt) * 100), origin: window.location.origin }); }} disabled={tipMutation.isPending}
-                      className="px-4 py-2 rounded-lg text-sm font-bold transition-all hover:scale-105 active:scale-95 disabled:opacity-60"
-                      style={{ background: "var(--ln-gold)", color: "var(--ln-parchment)" }}>${amt}</button>
-                  ))}
-                  <button onClick={() => setTipOpen(true)} className="px-4 py-2 rounded-lg text-sm font-medium transition-all hover:scale-105 active:scale-95" style={{ background: "var(--ln-coal)", color: "var(--ln-parchment)", border: "1px solid #C3AB7D" }}>Custom</button>
-                </div>
-              </div>
-            )}
-
-            {/* ── Sovereign Stamp ── */}
-            {(song as any).sovereignStampId && (
-              <div className="rounded-2xl p-4" style={{ background: "rgba(196,154,40,0.04)", border: "1px solid rgba(196,154,40,0.3)" }}>
-                <div className="flex items-start gap-3">
-                  <span style={{ fontSize: "18px", lineHeight: 1 }}>🔏</span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold mb-1" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-gold)" }}>Sovereign Stamp Applied</p>
-                    <p className="text-xs font-mono break-all" style={{ color: "#E2E8F0" }}>{(song as any).sovereignStampId}</p>
-                    <p className="text-[11px] mt-1" style={{ color: "var(--ln-smoke)" }}>Near-ultrasonic tone embedded — 17 U.S.C. § 102(a)</p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* ── Find It Elsewhere — External Links (elevated sacred section) ── */}
-            {(() => {
-              const raw = (song as any).externalLinksJson;
-              if (!raw) return null;
-              let links: Array<{ platform: string; url: string }> = [];
-              try { links = JSON.parse(raw); } catch { return null; }
-              if (!links.length) return null;
-              return (
-                <div
-                  className="rounded-2xl overflow-hidden"
-                  style={{
-                    background: "linear-gradient(135deg, rgba(196,154,40,0.04) 0%, rgba(8,6,16,0.98) 100%)",
-                    border: "1px solid rgba(196,154,40,0.22)",
-                  }}
-                >
-                  {/* Section header */}
+              {/* ── LYRICS ── */}
+              {song.lyricsText && (
+                <ArchiveSection label="Lyrics" accent={archiveIdentity.accentDim}>
                   <div
-                    className="flex items-center gap-3 px-5 py-4"
-                    style={{
-                      borderBottom: "1px solid rgba(196,154,40,0.10)",
-                      background: "linear-gradient(90deg, rgba(196,154,40,0.06) 0%, transparent 100%)",
+                    className="relative px-6 py-6 rounded-sm"
+                    style={{ background: archiveIdentity.headerBg, border: archiveIdentity.borderStyle, borderLeft: `3px solid ${archiveIdentity.accentDim}` }}
+                    onCopy={e => {
+                      const selected = window.getSelection()?.toString() ?? "";
+                      const registeredDate = song.createdAt ? new Date(song.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }) : "Unknown";
+                      const cert = song.witnessId ? [
+                        "\n\n═══════════════════════════════",
+                        "WITNESS ID CERTIFICATE",
+                        `WID: ${song.witnessId}`,
+                        `Creator: ${creator?.artistHandle || creator?.name || "Unknown Artist"}`,
+                        `Registered: ${registeredDate}`,
+                        `Verify: https://www.livingnexus.org/verify/${song.witnessId}`,
+                        "═══════════════════════════════",
+                      ].join("\n") : "";
+                      e.clipboardData.setData("text/plain", selected + cert);
+                      e.preventDefault();
                     }}
                   >
-                    <ExternalLink className="w-4 h-4 flex-shrink-0" style={{ color: "rgba(196,154,40,0.7)" }} />
-                    <span
-                      className="text-sm font-semibold tracking-[0.08em] uppercase"
-                      style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)", letterSpacing: "0.06em" }}
-                    >
-                      Find It Elsewhere
-                    </span>
+                    <pre className="text-sm leading-8 whitespace-pre-wrap font-sans" style={{ color: "var(--ln-parchment)" }}>
+                      {song.lyricsText}
+                    </pre>
+                    {song.witnessId && (
+                      <div className="mt-4 pt-4" style={{ borderTop: `1px solid ${archiveIdentity.accentDim.replace(/[\d.]+\)$/, "0.12)")}` }}>
+                        <pre className="text-xs font-mono whitespace-pre-wrap" style={{ color: "var(--ln-smoke)" }}>{[
+                          "═══════════════════════════════",
+                          "WITNESS ID CERTIFICATE",
+                          `WID: ${song.witnessId}`,
+                          `Creator: ${creator?.artistHandle || creator?.name || "Unknown Artist"}`,
+                          `Registered: ${song.createdAt ? new Date(song.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }) : "Unknown"}`,
+                          `Verify: https://www.livingnexus.org/verify/${song.witnessId}`,
+                          "═══════════════════════════════",
+                        ].join("\n")}</pre>
+                      </div>
+                    )}
+                    {(song as any).lyricsWid && (
+                      <div className="mt-3 px-3 py-2 rounded flex items-center gap-2" style={{ background: "rgba(196,154,40,0.04)", border: "1px solid rgba(196,154,40,0.15)" }}>
+                        <Shield className="w-3 h-3 flex-shrink-0" style={{ color: "var(--ln-gold)" }} />
+                        <div className="min-w-0">
+                          <p className="text-[9px] font-heading tracking-widest uppercase mb-0.5" style={{ color: "rgba(196,154,40,0.6)" }}>Lyrics Witness ID (WID-LYR)</p>
+                          <p className="text-[11px] font-mono truncate" style={{ color: "var(--ln-gold)" }}>{(song as any).lyricsWid}</p>
+                          {(song as any).lyricsFileName && (
+                            <p className="text-[9px] mt-0.5" style={{ color: "var(--ln-smoke)" }}>{(song as any).lyricsFileName}</p>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  {/* Platform links */}
-                  <div className="px-5 py-5 flex flex-wrap gap-3">
-                    {links.map((link, i) => (
-                      <a
-                        key={i}
-                        href={link.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all hover:scale-[1.03] active:scale-[0.97]"
-                        style={{
-                          background: "rgba(196,154,40,0.08)",
-                          border: "1px solid rgba(196,154,40,0.28)",
-                          color: "rgba(212,175,55,0.90)",
-                          fontFamily: "'Cinzel', serif",
-                          letterSpacing: "0.04em",
-                          boxShadow: "0 2px 12px rgba(196,154,40,0.08)",
-                        }}
-                      >
-                        <ExternalLink className="w-3.5 h-3.5" />
-                        {link.platform}
-                      </a>
-                    ))}
+                </ArchiveSection>
+              )}
+
+              {/* ── VOICES — Comments ── */}
+              <ArchiveSection label="Voices" accent={archiveIdentity.accentDim}>
+                {/* Emoji reactions */}
+                {reactionData && (
+                  <div className="flex flex-wrap gap-2 mb-6">
+                    {REACTION_SLUGS.map(slug => {
+                      const count = reactionData[slug] ?? 0;
+                      const myReaction = myReactionData?.[slug] ?? false;
+                      return (
+                        <button key={slug} type="button"
+                          onClick={() => reactMutation.mutate({ songId: song.id, type: slug })}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-sm transition-all hover:scale-105"
+                          style={{
+                            background: myReaction ? archiveIdentity.headerBg : "rgba(255,255,255,0.03)",
+                            border: myReaction ? archiveIdentity.borderStyle : "1px solid rgba(255,255,255,0.06)",
+                            color: myReaction ? archiveIdentity.accentColor : "var(--ln-smoke)",
+                          }}>
+                          <span>{REACTION_EMOJI[slug]}</span>
+                          {count > 0 && <span className="text-xs tabular-nums">{count}</span>}
+                        </button>
+                      );
+                    })}
                   </div>
-                </div>
-              );
-            })()}
-            {/* ── Harmonic Signature ── creator-only download buttons */}
-            {isOwner && (song as any).harmonicSignature && (
-              <div className="flex flex-wrap gap-2">
-                <a href={`/api/harmonic/${song.id}/audio`} download className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full hover:opacity-80 transition-opacity" style={{ background: "rgba(196,154,40,0.12)", border: "1px solid rgba(196,154,40,0.3)", color: "var(--ln-gold)" }}>
-                  <Download className="w-3 h-3" />Harmonic Tone (.wav)
-                </a>
-                <a href={`/api/harmonic/${song.id}/image`} download className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full hover:opacity-80 transition-opacity" style={{ background: "rgba(196,154,40,0.12)", border: "1px solid rgba(196,154,40,0.3)", color: "var(--ln-gold)" }}>
-                  <Download className="w-3 h-3" />Waveform Image (.png)
-                </a>
-              </div>
-            )}
-
-            {/* ══ RESONANCE FIELD — Reactions, Activity, Related ══ */}
-            {/* ══ RESONANCE FIELD — Reactions (right column, desktop) ══ */}
-            {/* Emoji Reactions */}
-            <div className="p-4" style={{ background: "var(--ln-coal)", border: "1px solid #C49A28" }}>
-              <div className="flex flex-wrap gap-2 justify-center">
-                {REACTION_SLUGS.map((slug: string) => (
-                  <button type="button" key={slug} onClick={() => handleReaction(slug)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm transition-all hover:scale-110 active:scale-95"
-                    style={{
-                      background: myReactionsSet.has(slug) ? "rgba(196,154,40,0.15)" : "var(--ln-coal)",
-                      border: `1px solid ${myReactionsSet.has(slug) ? "rgba(196,154,40,0.3)" : "var(--ln-gold)"}`,
-                    }}>
-                    <span>{REACTION_EMOJI[slug] ?? slug}</span>
-                    {reactionCounts[slug] ? <span className="text-xs" style={{ color: "var(--ln-smoke)" }}>{reactionCounts[slug]}</span> : null}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Unified Interaction Thread */}
-            <div className="p-4" style={{ background: "var(--ln-coal)", border: "1px solid #C49A28" }}>
-              <h3 className="text-sm font-semibold mb-3 flex items-center gap-2 flex-wrap" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>
-                <MessageSquare className="w-4 h-4" />
-                Activity
-                {eventThread && eventThread.length > 0 && (
-                  <span className="text-xs font-normal" style={{ color: "var(--ln-smoke)" }}>{eventThread.length}</span>
                 )}
-                {song.witnessId && (
-                  <span className="ml-auto text-[10px] font-mono px-2 py-0.5 rounded-full" style={{ background: "rgba(196,154,40,0.08)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.2)" }}>
-                    WID-linked
-                  </span>
-                )}
-              </h3>
 
-              {/* Comment input */}
-              <div className="flex gap-2 mb-4">
-                <div className="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold"
-                  style={{ background: "var(--ln-coal)" }}>
-                  {user ? (user.name || "?").charAt(0).toUpperCase() : "?"}
-                </div>
-                <div className="flex-1 space-y-2">
-                  <Input placeholder="Write a comment..." value={commentText} onChange={(e) => setCommentText(e.target.value)}
-                    onPaste={(e) => {
-                      // Strip WID certificate block that gets appended when copying from the lyrics panel
-                      const raw = e.clipboardData.getData("text/plain");
-                      const widIdx = raw.indexOf("\n═══");
-                      if (widIdx !== -1) {
-                        e.preventDefault();
-                        const clean = raw.slice(0, widIdx).trim();
-                        setCommentText(prev => prev + clean);
-                      }
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && !e.shiftKey && commentText.trim()) {
-                        e.preventDefault();
-                        commentMutation.mutate({ songId: song.id, content: commentText.trim() });
-                      }
-                    }}
-                    style={{ background: "var(--ln-coal)", border: "1px solid #C49A28", color: "var(--ln-parchment)", fontSize: "13px" }} />
-                  {commentText.trim() && (
-                    <Button size="sm"
-                      onClick={() => commentMutation.mutate({ songId: song.id, content: commentText.trim() })}
-                      disabled={commentMutation.isPending}
-                      style={{ background: "var(--ln-gold)", color: "var(--ln-parchment)" }}>
-                      Post
-                    </Button>
+                {/* Comment input */}
+                <div className="mb-6">
+                  {user ? (
+                    <div className="flex gap-3">
+                      <div className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold mt-0.5"
+                        style={{ background: archiveIdentity.headerBg, border: archiveIdentity.borderStyle, color: archiveIdentity.accentColor }}>
+                        {(user.name || "?").charAt(0).toUpperCase()}
+                      </div>
+                      <div className="flex-1 space-y-2">
+                        <Textarea
+                          placeholder="Leave a voice on this record…"
+                          value={commentText}
+                          onChange={e => setCommentText(e.target.value)}
+                          rows={2}
+                          style={{ background: "rgba(255,255,255,0.02)", border: archiveIdentity.borderStyle, color: "var(--ln-parchment)", fontSize: "13px", resize: "none", fontFamily: "'Cormorant Garamond', serif" }}
+                        />
+                        {commentText.trim() && (
+                          <Button size="sm"
+                            onClick={() => commentMutation.mutate({ songId: song.id, content: commentText.trim() })}
+                            disabled={commentMutation.isPending}
+                            style={{ background: archiveIdentity.accentColor, color: "var(--ln-void)", fontFamily: "'Cinzel', serif", letterSpacing: "0.08em", fontSize: "11px" }}>
+                            {commentMutation.isPending ? "…" : "Record Voice"}
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-center py-3" style={{ color: "var(--ln-smoke)", fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic" }}>
+                      Sign in to leave a voice on this record
+                    </p>
                   )}
                 </div>
-              </div>
 
-              {/* Threaded comment list — from comments.list (supports replies) */}
-              <div className="space-y-3 max-h-[420px] overflow-y-auto pr-1">
-                {comments && comments.length > 0 ? (
-                  (comments as any[]).map((c: any) => {
-                    const initial = (c.authorName || "A").charAt(0).toUpperCase();
-                    const timeStr = new Date(c.createdAt).toLocaleDateString();
-                    const isReplying = replyingTo?.id === c.id;
-                    return (
-                      <div key={c.id}>
-                        {/* Top-level comment */}
-                        <div className="flex gap-2">
-                          <div className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold"
-                            style={{ background: "var(--ln-coal)" }}>
-                            <span style={{ color: "var(--ln-smoke)" }}>{initial}</span>
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-0.5">
-                              <span className="text-xs font-medium" style={{ color: "var(--ln-parchment)" }}>{c.authorName || "Anonymous"}</span>
-                              <span className="text-[10px] ml-auto" style={{ color: "var(--ln-coal)" }}>{timeStr}</span>
+                {/* Comment list */}
+                <div className="space-y-4">
+                  {comments && comments.length > 0 ? (
+                    comments.map((c: any) => {
+                      const isReplying = replyingTo?.id === c.id;
+                      return (
+                        <div key={c.id} className="space-y-2">
+                          <div className="flex gap-3">
+                            <div className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold mt-0.5"
+                              style={{ background: archiveIdentity.headerBg, border: archiveIdentity.borderStyle, color: archiveIdentity.accentColor }}>
+                              {(c.authorName || "A").charAt(0).toUpperCase()}
                             </div>
-                            <p className="text-sm" style={{ color: "var(--ln-smoke)" }}>{c.content}</p>
-                            <button
-                              onClick={() => { setReplyingTo(isReplying ? null : { id: c.id, authorName: c.authorName || "Anonymous" }); setReplyText(""); }}
-                              className="text-[10px] mt-1 transition-colors"
-                              style={{ color: isReplying ? "var(--ln-gold)" : "var(--ln-iron)" }}
-                            >
-                              {isReplying ? "Cancel" : `Reply`}
-                              {c.replies?.length > 0 && !isReplying && ` · ${c.replies.length} ${c.replies.length === 1 ? "reply" : "replies"}`}
-                            </button>
-                          </div>
-                        </div>
-
-                        {/* Inline reply input */}
-                        {isReplying && (
-                          <div className="ml-9 mt-2 flex gap-2">
-                            <div className="w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center text-[10px] font-bold"
-                              style={{ background: "var(--ln-coal)" }}>
-                              {user ? (user.name || "?").charAt(0).toUpperCase() : "?"}
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-xs font-medium" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>{c.authorName || "Anonymous"}</span>
+                                <span className="text-[9px]" style={{ color: "var(--ln-smoke)" }}>{new Date(c.createdAt).toLocaleDateString()}</span>
+                              </div>
+                              <p className="text-sm leading-relaxed" style={{ color: "var(--ln-bone)", fontFamily: "'Cormorant Garamond', serif", fontSize: "0.97rem" }}>{c.content}</p>
+                              <div className="flex items-center gap-3 mt-1.5">
+                                <button type="button" onClick={() => { setReplyingTo(isReplying ? null : c); setReplyText(""); }}
+                                  className="text-[10px] tracking-wide hover:underline"
+                                  style={{ color: archiveIdentity.accentDim }}>
+                                  {isReplying ? "Cancel" : `Reply · ${c.replies?.length ?? 0}`}
+                                </button>
+                              </div>
                             </div>
-                            <div className="flex-1 space-y-1.5">
+                          </div>
+                          {isReplying && (
+                            <div className="ml-10 flex gap-2">
                               <Input
-                                placeholder={`Reply to ${replyingTo?.authorName ?? "comment"}…`}
+                                placeholder={`Reply to ${c.authorName ?? "comment"}…`}
                                 value={replyText}
                                 onChange={e => setReplyText(e.target.value)}
                                 onKeyDown={e => {
@@ -1436,530 +1222,94 @@ export default function SongDetailPage() {
                                   }
                                   if (e.key === "Escape") { setReplyingTo(null); setReplyText(""); }
                                 }}
-                                style={{ background: "var(--ln-coal)", border: "1px solid #C49A28", color: "var(--ln-parchment)", fontSize: "12px", height: "32px" }}
+                                style={{ background: "rgba(255,255,255,0.02)", border: archiveIdentity.borderStyle, color: "var(--ln-parchment)", fontSize: "12px", height: "32px" }}
                                 autoFocus
                               />
                               {replyText.trim() && (
                                 <Button size="sm"
                                   onClick={() => replyMutation.mutate({ songId: song.id, parentId: c.id, content: replyText.trim() })}
                                   disabled={replyMutation.isPending}
-                                  className="h-6 text-[11px] px-2"
-                                  style={{ background: "var(--ln-gold)", color: "var(--ln-parchment)" }}>
-                                  Post reply
+                                  className="h-8 text-[11px] px-2 flex-shrink-0"
+                                  style={{ background: archiveIdentity.accentColor, color: "var(--ln-void)" }}>
+                                  Post
                                 </Button>
                               )}
                             </div>
-                          </div>
-                        )}
-
-                        {/* Nested replies */}
-                        {c.replies?.length > 0 && (
-                          <div className="ml-9 mt-2 space-y-2 pl-3" style={{ borderLeft: "1px solid #C49A28" }}>
-                            {(c.replies as any[]).map((r: any) => (
-                              <div key={r.id} className="flex gap-2">
-                                <div className="w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center text-[10px] font-bold"
-                                  style={{ background: "var(--ln-coal)" }}>
-                                  <span style={{ color: "var(--ln-iron)" }}>{(r.authorName || "A").charAt(0).toUpperCase()}</span>
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-2 mb-0.5">
-                                    <span className="text-[11px] font-medium" style={{ color: "var(--ln-smoke)" }}>{r.authorName || "Anonymous"}</span>
-                                    <span className="text-[9px] ml-auto" style={{ color: "var(--ln-coal)" }}>{new Date(r.createdAt).toLocaleDateString()}</span>
+                          )}
+                          {c.replies?.length > 0 && (
+                            <div className="ml-10 space-y-2 pl-3" style={{ borderLeft: `1px solid ${archiveIdentity.accentDim.replace(/[\d.]+\)$/, "0.20)")}` }}>
+                              {(c.replies as any[]).map((r: any) => (
+                                <div key={r.id} className="flex gap-2">
+                                  <div className="w-5 h-5 rounded-full flex-shrink-0 flex items-center justify-center text-[9px] font-bold"
+                                    style={{ background: archiveIdentity.headerBg, color: archiveIdentity.accentDim }}>
+                                    {(r.authorName || "A").charAt(0).toUpperCase()}
                                   </div>
-                                  <p className="text-xs" style={{ color: "var(--ln-smoke)" }}>{r.content}</p>
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2 mb-0.5">
+                                      <span className="text-[10px] font-medium" style={{ color: "var(--ln-smoke)" }}>{r.authorName || "Anonymous"}</span>
+                                      <span className="text-[9px]" style={{ color: "var(--ln-iron)" }}>{new Date(r.createdAt).toLocaleDateString()}</span>
+                                    </div>
+                                    <p className="text-xs" style={{ color: "var(--ln-smoke)" }}>{r.content}</p>
+                                  </div>
                                 </div>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })
-                ) : (
-                  <p className="text-xs text-center py-4" style={{ color: "var(--ln-iron)" }}>Be the first to comment</p>
-                )}
-              </div>
-            </div>
-
-            {/* Related */}
-            {relatedData && relatedData.length > 0 && (
-              <div className="p-4" style={{ background: "var(--ln-coal)", border: "1px solid #C49A28" }}>
-                <h3 className="text-sm font-semibold mb-3" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>Related</h3>
-                <div className="space-y-1">
-                  {relatedData.map((item: any) => <RelatedCard key={item.song.id} item={item} />)}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* ══ BELOW FOLD: Full-width sections ══ */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-6" ref={scrollRevealRef}>
-          {/* ── LEFT COLUMN ── */}
-          <div className="space-y-0">
-
-            {/* ══ RESONANCE ACTIVITY STRIP — near playback ══ */}
-            {eventThread && eventThread.length > 0 && (
-              <div
-                className="rounded-xl px-4 py-3 flex flex-wrap items-center gap-2 mb-8"
-                style={{ background: "rgba(196,154,40,0.04)", border: "1px solid rgba(196,154,40,0.12)" }}
-              >
-                <span className="text-[9px] font-heading tracking-widest uppercase flex-shrink-0" style={{ color: "rgba(196,154,40,0.45)" }}>Resonance</span>
-                <div className="flex flex-wrap gap-1.5 flex-1 min-w-0">
-                  {(eventThread as any[]).slice(0, 5).map((ev: any, i: number) => {
-                    const isComment = ev.type === "comment";
-                    const isTip = ev.type === "tip";
-                    const isReaction = ev.type === "reaction";
-                    return (
-                      <span key={i} className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full"
-                        style={{ background: "rgba(196,154,40,0.08)", color: "var(--ln-smoke)", border: "1px solid rgba(196,154,40,0.12)" }}>
-                        {isTip && <span style={{ color: "var(--ln-gold)" }}>$</span>}
-                        {isReaction && <span>{ev.emoji ?? "✨"}</span>}
-                        {isComment && <span style={{ color: "rgba(196,154,40,0.5)" }}>"</span>}
-                        <span className="truncate max-w-[120px]">{ev.authorName || ev.creatorName || "Witness"}</span>
-                        {isTip && ev.amountCents && (
-                          <span style={{ color: "var(--ln-gold)" }}>${(ev.amountCents / 100).toFixed(0)}</span>
-                        )}
-                      </span>
-                    );
-                  })}
-                  {eventThread.length > 5 && (
-                    <span className="text-[10px]" style={{ color: "rgba(196,154,40,0.4)" }}>+{eventThread.length - 5} more</span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <p className="text-sm text-center py-6" style={{ color: "var(--ln-iron)", fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic" }}>
+                      No voices recorded yet. Be the first.
+                    </p>
                   )}
                 </div>
-              </div>
-            )}
+              </ArchiveSection>
 
-            {/* ══════════════════════════════════════════════════════════════
-                 T1 — TESTIMONY SANCTUARY — Origin Story as the heavy piece
-                 Full-width, Cormorant Garamond, gold left pillar, breathing room
-            ══════════════════════════════════════════════════════════════ */}
-            {(song as any).haaiOriginStory && (
-              <section
-                className="phi-section-lg scroll-reveal scroll-reveal-delay-1"
-                style={{
-                  borderTop: "1px solid rgba(196,154,40,0.10)",
-                  paddingTop: "var(--phi-5)",
-                  paddingBottom: "var(--phi-5)",
-                }}
-              >
-                {/* Section overline */}
-                <div className="flex items-center gap-3 mb-8">
-                  <span
-                    className="text-xs tracking-[0.20em] uppercase"
-                    style={{ fontFamily: "'Cinzel', serif", color: "rgba(212,175,55,0.55)" }}
-                  >
-                    Testimony
-                  </span>
-                  <div style={{ flex: 1, height: 1, background: "rgba(212,175,55,0.12)" }} />
-                </div>
-
-                {/* Testimony card — gold left pillar, Cormorant Garamond, flame watermark */}
-                <div
-                  className="relative overflow-hidden rounded-2xl"
-                  style={{
-                    background: "linear-gradient(135deg, rgba(196,154,40,0.04) 0%, rgba(8,6,16,0.98) 60%)",
-                    border: "1px solid rgba(196,154,40,0.22)",
-                    boxShadow: "0 4px 40px rgba(0,0,0,0.5), inset 0 0 60px rgba(196,154,40,0.03)",
-                  }}
-                >
-                  {/* Flame watermark — faint sacred geometry behind the text */}
-                  <div
-                    className="pointer-events-none absolute inset-0"
-                    style={{
-                      background: "radial-gradient(ellipse 55% 65% at 85% 50%, rgba(196,154,40,0.06) 0%, transparent 70%)",
-                    }}
-                  />
-                  {/* Gold left pillar */}
-                  <div
-                    className="absolute left-0 top-0 bottom-0"
-                    style={{
-                      width: "3px",
-                      background: "linear-gradient(to bottom, transparent 0%, rgba(196,154,40,0.7) 20%, rgba(196,154,40,0.9) 50%, rgba(196,154,40,0.7) 80%, transparent 100%)",
-                    }}
-                  />
-                  <div className="relative px-8 py-8 pl-10">
-                    {/* Opening quote mark */}
-                    <div
-                      className="mb-4"
-                      style={{
-                        fontFamily: "'Cormorant Garamond', serif",
-                        fontSize: "4rem",
-                        lineHeight: 0.8,
-                        color: "rgba(196,154,40,0.20)",
-                        userSelect: "none",
-                      }}
-                    >
-                      &#8220;
-                    </div>
-                    <p
-                      className="leading-[1.85] whitespace-pre-wrap"
-                      style={{
-                        fontFamily: "'Cormorant Garamond', serif",
-                        fontSize: "clamp(1.05rem, 2vw, 1.22rem)",
-                        color: "var(--ln-bone)",
-                        fontWeight: 500,
-                        letterSpacing: "0.015em",
-                      }}
-                    >
-                      {(song as any).haaiOriginStory}
-                    </p>
-                    {/* Creator attribution */}
-                    <div className="mt-6 flex items-center gap-3">
-                      <div style={{ width: 28, height: 1, background: "rgba(196,154,40,0.4)" }} />
-                      <span
-                        className="text-sm"
-                        style={{
-                          fontFamily: "'Cinzel', serif",
-                          color: "rgba(196,154,40,0.65)",
-                          letterSpacing: "0.06em",
-                        }}
-                      >
-                        {creator?.artistHandle || creator?.name || "The Creator"}
-                      </span>
-                    </div>
+              {/* ── RELATED WORKS ── */}
+              {relatedData && relatedData.length > 0 && (
+                <ArchiveSection label="Related Works" accent={archiveIdentity.accentDim}>
+                  <div className="space-y-1">
+                    {relatedData.map((item: any) => <RelatedCard key={item.song.id} item={item} />)}
                   </div>
-                </div>
-              </section>
-            )}
+                </ArchiveSection>
+              )}
 
-            {/* ══ SACRED DIVIDER ══ */}
-            {(song as any).haaiOriginStory && (
-              <div className="sg-divider-wide" style={{ margin: "0 0 0 0" }}>
-                <div className="sg-divider-wide-center">
-                  <div className="sg-divider-wide-center-dot" />
-                </div>
-              </div>
-            )}
-
-            {/* ══════════════════════════════════════════════════════════════
-                 T2 — HAAI DISCLOSURE — Always visible, never collapsed
-                 Human-Authored, AI-Informed — act of integrity, not shame
-            ══════════════════════════════════════════════════════════════ */}
-            {(() => {
-              const disc = (song as any).aiDisclosure || creator?.aiDisclosure;
-              const hasHaai = disc === "human_authored_ai_instrument";
-              const hasAiDisc = disc && disc !== "original";
-              const discMap: Record<string, { label: string; desc: string }> = {
-                ai_generated: {
-                  label: "AI-Assisted Manifestation",
-                  desc: "This work was created with significant AI generation. The creator shaped the vision, direction, and curation.",
-                },
-                ai_assisted: {
-                  label: "AI-Assisted",
-                  desc: "AI tools were used in the creation of this work. The creator remains the primary author.",
-                },
-                human_authored_ai_instrument: {
-                  label: "HAAI — Human-Authored, AI-Informed",
-                  desc: "The human is the author. AI served as an instrument — a tool in service of the creator's sovereign vision. The testimony, the intent, and the meaning are entirely human.",
-                },
-              };
-              const haaiFields = [
-                { key: "haaiVisualConcept", label: "Visual Concept" },
-                { key: "haaiStyleLanguage", label: "Style Language" },
-                { key: "haaiInstrumentation", label: "Instrumentation" },
-                { key: "haaiVocalConveyance", label: "Vocal Conveyance" },
-                { key: "haaiLyricalInspiration", label: "Lyrical Inspiration" },
-                { key: "haaiEmotionalTone", label: "Emotional Tone" },
-              ].filter(f => (song as any)[f.key]);
-
-              if (!hasAiDisc && haaiFields.length === 0) return null;
-              const discInfo = discMap[disc] ?? { label: disc, desc: "" };
-
-              return (
-                <section
-                  className="scroll-reveal scroll-reveal-delay-2"
-                  style={{
-                    paddingTop: "var(--phi-5)",
-                    paddingBottom: "var(--phi-5)",
-                    borderTop: "1px solid rgba(196,154,40,0.08)",
-                  }}
-                >
-                  {/* Section overline */}
-                  <div className="flex items-center gap-3 mb-8">
-                    <span
-                      className="text-xs tracking-[0.20em] uppercase"
-                      style={{ fontFamily: "'Cinzel', serif", color: "rgba(212,175,55,0.55)" }}
-                    >
-                      Authorship Disclosure
-                    </span>
-                    <div style={{ flex: 1, height: 1, background: "rgba(212,175,55,0.12)" }} />
-                  </div>
-
-                  {/* HAAI banner */}
-                  <div
-                    className="rounded-2xl p-6 mb-6"
-                    style={{
-                      background: hasHaai
-                        ? "linear-gradient(135deg, rgba(196,154,40,0.07) 0%, rgba(8,6,16,0.97) 100%)"
-                        : "rgba(196,154,40,0.03)",
-                      border: hasHaai
-                        ? "1px solid rgba(196,154,40,0.30)"
-                        : "1px solid rgba(196,154,40,0.12)",
-                    }}
-                  >
-                    <div className="flex items-start gap-4">
-                      <div
-                        className="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center"
-                        style={{ background: "rgba(196,154,40,0.10)", border: "1px solid rgba(196,154,40,0.25)" }}
-                      >
-                        <ShieldCheck className="w-5 h-5" style={{ color: "var(--ln-gold)" }} />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p
-                          className="text-base font-semibold mb-2"
-                          style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)", letterSpacing: "0.03em" }}
-                        >
-                          {discInfo.label}
-                        </p>
-                        {discInfo.desc && (
-                          <p className="text-sm leading-relaxed" style={{ color: "var(--ln-smoke)", fontFamily: "'Cormorant Garamond', serif", fontSize: "1rem" }}>
-                            {discInfo.desc}
-                          </p>
-                        )}
-                        {(song as any).haaiDeclaredAt && (
-                          <p className="text-[11px] mt-3" style={{ color: "rgba(196,154,40,0.45)", fontFamily: "'Space Mono', monospace" }}>
-                            Declared {new Date((song as any).haaiDeclaredAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* HAAI structured fields — only for HAAI works */}
-                  {hasHaai && haaiFields.length > 0 && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {haaiFields.map(f => (
-                        <div
-                          key={f.key}
-                          className="rounded-xl p-4"
-                          style={{
-                            background: "rgba(196,154,40,0.03)",
-                            border: "1px solid rgba(196,154,40,0.12)",
-                          }}
-                        >
-                          <p
-                            className="text-[10px] tracking-[0.18em] uppercase mb-2"
-                            style={{ fontFamily: "'Cinzel', serif", color: "rgba(196,154,40,0.50)" }}
-                          >
-                            {f.label}
-                          </p>
-                          <p
-                            className="text-sm leading-relaxed"
-                            style={{ color: "var(--ln-bone)", fontFamily: "'Cormorant Garamond', serif", fontSize: "0.97rem" }}
-                          >
-                            {(song as any)[f.key]}
-                          </p>
+              {/* ── CREDITS ── */}
+              {(() => {
+                const rawCredits = (song as any)?.creditsJson;
+                const coWriters: string[] = Array.isArray((song as any)?.coWriters) ? (song as any).coWriters : [];
+                let credits: { role: string; name: string }[] = [];
+                if (rawCredits) { try { credits = JSON.parse(rawCredits); } catch { /* ignore */ } }
+                const allCredits = [...credits, ...coWriters.map((name: string) => ({ role: "Co-Writer", name }))];
+                if (allCredits.length === 0) return null;
+                return (
+                  <ArchiveSection label="Credits" accent={archiveIdentity.accentDim}>
+                    <div className="grid grid-cols-2 gap-x-8 gap-y-3">
+                      {allCredits.map((c: { role: string; name: string }, i: number) => (
+                        <div key={i} className="flex items-center gap-2.5">
+                          <span className="text-[9px] uppercase tracking-widest flex-shrink-0 px-1.5 py-0.5 rounded-sm"
+                            style={{
+                              background: c.role.toLowerCase() === "publisher" ? "rgba(59,130,246,0.18)" : archiveIdentity.headerBg,
+                              color: c.role.toLowerCase() === "publisher" ? "#93C5FD" : archiveIdentity.accentColor,
+                              border: `1px solid ${c.role.toLowerCase() === "publisher" ? "rgba(59,130,246,0.3)" : archiveIdentity.accentDim.replace(/[\d.]+\)$/, "0.25)")}`,
+                              minWidth: "64px",
+                              textAlign: "center",
+                              fontFamily: "'Cinzel', serif",
+                            }}
+                          >{c.role}</span>
+                          <span className="text-sm" style={{ color: "var(--ln-parchment)", fontFamily: "'Cormorant Garamond', serif" }}>{c.name}</span>
                         </div>
                       ))}
                     </div>
-                  )}
+                  </ArchiveSection>
+                );
+              })()}
 
-                  {/* BPM / Key metadata — inline with HAAI, not a separate footnote */}
-                  {(song.bpm || song.keySignature) && (
-                    <div className="flex flex-wrap gap-2 mt-5">
-                      {song.bpm && (
-                        <span className="text-[11px] px-3 py-1 rounded-full" style={{ background: "rgba(196,154,40,0.06)", color: "rgba(196,154,40,0.6)", border: "1px solid rgba(196,154,40,0.15)" }}>
-                          {song.bpm} BPM
-                        </span>
-                      )}
-                      {song.keySignature && (
-                        <span className="text-[11px] px-3 py-1 rounded-full" style={{ background: "rgba(196,154,40,0.06)", color: "rgba(196,154,40,0.6)", border: "1px solid rgba(196,154,40,0.15)" }}>
-                          {song.keySignature}
-                        </span>
-                      )}
-                    </div>
-                  )}
-                </section>
-              );
-            })()}
-
-            {/* ── GALLERY ── */}
-            {(() => {
-              const rawGallery = (song as any).galleryImagesJson;
-              if (!rawGallery) return null;
-              let gallery: { url: string; caption?: string }[] = [];
-              try { gallery = typeof rawGallery === 'string' ? JSON.parse(rawGallery) : rawGallery; } catch { return null; }
-              if (!gallery.length) return null;
-              return (
-                <section style={{ paddingTop: "var(--phi-4)", paddingBottom: "var(--phi-4)", borderTop: "1px solid rgba(196,154,40,0.08)" }}>
-                  <div className="flex items-center gap-3 mb-6">
-                    <span className="text-xs tracking-[0.20em] uppercase" style={{ fontFamily: "'Cinzel', serif", color: "rgba(212,175,55,0.55)" }}>Gallery</span>
-                    <div style={{ flex: 1, height: 1, background: "rgba(212,175,55,0.12)" }} />
-                  </div>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                    {gallery.map((img, i) => (
-                      <div key={i} className="space-y-1">
-                        <div className="rounded-xl overflow-hidden aspect-square bg-black/30">
-                          <img
-                            src={img.url}
-                            alt={img.caption || `Gallery image ${i + 1}`}
-                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300 cursor-pointer"
-                            onClick={() => window.open(img.url, '_blank')}
-                          />
-                        </div>
-                        {img.caption && (
-                          <p className="text-[10px] leading-tight px-1" style={{ color: "var(--ln-iron)" }}>{img.caption}</p>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </section>
-              );
-            })()}
-          </div>
-        </div>
-
-        {/* ── ACTIVATION — stage-based funding progress ── */}
-        <ActivationPanel songId={songId} songTitle={song.title} />
-        {/* ── PROVENANCE TIMELINE ── */}
-        <ProvenanceTimeline
-          songId={songId}
-          ownerId={song.userId}
-          className="mt-6"
-        />
-        {/* ── LINEAGE GRAPH ── */}
-        <LineageGraph
-          songId={songId}
-          songTitle={song.title}
-          ownerId={song.userId}
-          className="mt-4"
-        />
-        {/* ── WITNESSES PANEL ── */}
-        <WitnessesPanel
-          songId={songId}
-          ownerId={song.userId}
-          className="mt-4"
-        />
-        {/* ── WITNESSED WORK — proof attachment layer ── */}
-        <EvidencePanel
-          songId={songId}
-          isOwner={isOwner}
-          manifestation={{
-            coverArtUrl: song.coverArtUrl,
-            fileUrl: song.fileUrl,
-            headlineCaption: (song as any).headlineCaption,
-            description: (song as any).description,
-            witnessId: song.witnessId,
-            title: song.title,
-            contentType: (song as any).contentType ?? "audio",
-            pagesJson: (song as any).pagesJson,
-          }}
-          onPlay={handlePlay}
-          onOpenReader={handleReadNow}
-        />
-
-        {/* ── LYRICS — full width, bottom of page, collapsed by default ── */}
-        {song.lyricsText && (
-          <div className="mt-6 rounded-2xl overflow-hidden" style={{ background: "var(--ln-coal)", border: `1px solid ${song.isLyricsOnly ? "rgba(196,154,40,0.3)" : "var(--ln-gold)"}` }}>
-            <button type="button" className="w-full flex items-center justify-between px-5 py-4" onClick={() => setShowLyrics(!showLyrics)}>
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>Lyrics</span>
-                {song.isLyricsOnly && (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold" style={{ background: "rgba(196,154,40,0.08)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.3)", letterSpacing: "0.06em" }}>
-                    <Shield className="w-2.5 h-2.5" /> LYRICS PROTECTED — Audio Not Yet Attached
-                  </span>
-                )}
-                <span className="text-xs ml-2" style={{ color: "var(--ln-smoke)" }}>{showLyrics ? "Tap to collapse" : "Tap to expand"}</span>
-              </div>
-              {showLyrics
-                ? <ChevronUp className="w-4 h-4" style={{ color: "#E2E8F0" }} />
-                : <ChevronDown className="w-4 h-4" style={{ color: "#E2E8F0" }} />}
-            </button>
-            {showLyrics && (
-              <div className="px-5 pb-5"
-                onCopy={e => {
-                  if (!song.witnessId) return;
-                  const selected = window.getSelection()?.toString() || "";
-                  if (!selected.trim()) return;
-                  const registeredDate = song.createdAt
-                    ? new Date(song.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
-                    : "Unknown date";
-                  const creatorName = creator?.artistHandle || creator?.name || "Unknown Artist";
-                  const cert = [
-                    "",
-                    "═══════════════════════════════",
-                    "WITNESS ID CERTIFICATE",
-                    `WID: ${song.witnessId}`,
-                    `Creator: ${creatorName}`,
-                    `Registered: ${registeredDate}`,
-                    `Verify: https://www.livingnexus.org/verify/${song.witnessId}`,
-                    "═══════════════════════════════",
-                  ].join("\n");
-                  e.clipboardData.setData("text/plain", selected + cert);
-                  e.preventDefault();
-                }}>
-                <pre className="text-sm leading-7 whitespace-pre-wrap font-sans" style={{ color: "var(--ln-parchment)" }}>
-                  {song.lyricsText}
-                </pre>
-                {song.witnessId && (
-                  <div className="mt-4 pt-4" style={{ borderTop: "1px solid rgba(196,154,40,0.12)" }}>
-                    <pre className="text-xs font-mono whitespace-pre-wrap" style={{ color: "#E2E8F0" }}>{[
-                      "═══════════════════════════════",
-                      "WITNESS ID CERTIFICATE",
-                      `WID: ${song.witnessId}`,
-                      `Creator: ${creator?.artistHandle || creator?.name || "Unknown Artist"}`,
-                      `Registered: ${song.createdAt ? new Date(song.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }) : "Unknown"}`,
-                      `Verify: https://www.livingnexus.org/verify/${song.witnessId}`,
-                      "═══════════════════════════════",
-                    ].join("\n")}</pre>
-                  </div>
-                )}
-                {(song as any).lyricsWid && (
-                  <div className="mt-3 px-3 py-2 rounded-lg flex items-center gap-2" style={{ background: "rgba(196,154,40,0.04)", border: "1px solid rgba(196,154,40,0.15)" }}>
-                    <Shield className="w-3 h-3 flex-shrink-0" style={{ color: "var(--ln-gold)" }} />
-                    <div className="min-w-0">
-                      <p className="text-[9px] font-heading tracking-widest uppercase mb-0.5" style={{ color: "rgba(196,154,40,0.6)" }}>Lyrics Witness ID (WID-LYR)</p>
-                      <p className="text-[11px] font-mono truncate" style={{ color: "var(--ln-gold)" }}>{(song as any).lyricsWid}</p>
-                      {(song as any).lyricsFileName && (
-                        <p className="text-[9px] mt-0.5" style={{ color: "var(--ln-smoke)" }}>{(song as any).lyricsFileName}</p>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        )}
+            </ArchiveFrame>
+          );
+                })()}
       </div>
-
-      {/* ── CREDITS ── */}
-      {(() => {
-        const rawCredits = (song as any)?.creditsJson;
-        const coWriters: string[] = Array.isArray((song as any)?.coWriters) ? (song as any).coWriters : [];
-        let credits: { role: string; name: string }[] = [];
-        if (rawCredits) {
-          try { credits = JSON.parse(rawCredits); } catch { /* ignore */ }
-        }
-        const coWriterCredits = coWriters.map((name: string) => ({ role: "Co-Writer", name }));
-        const allCredits = [...credits, ...coWriterCredits];
-        if (allCredits.length === 0) return null;
-        return (
-          <div className="mt-4 rounded-2xl overflow-hidden" style={{ background: "var(--ln-coal)", border: "1px solid #C49A28" }}>
-            <div className="px-5 py-4">
-              <h3 className="text-sm font-semibold mb-3" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>Credits</h3>
-              <div className="grid grid-cols-2 gap-x-6 gap-y-2">
-                {allCredits.map((c: { role: string; name: string }, i: number) => (
-                  <div key={i} className="flex items-center gap-2.5">
-                    <span
-                      className="text-[9px] uppercase tracking-widest flex-shrink-0 px-1.5 py-0.5 rounded"
-                      style={{
-                        background: c.role.toLowerCase() === "publisher" ? "rgba(59,130,246,0.18)" : "rgba(196,154,40,0.12)",
-                        color: c.role.toLowerCase() === "publisher" ? "#93C5FD" : "rgba(196,154,40,0.85)",
-                        border: `1px solid ${c.role.toLowerCase() === "publisher" ? "rgba(59,130,246,0.3)" : "rgba(196,154,40,0.2)"}`,
-                        minWidth: "64px",
-                        textAlign: "center",
-                      }}
-                    >{c.role}</span>
-                    <span className="text-sm" style={{ color: "var(--ln-parchment)" }}>{c.name}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        );
-      })()}
-
       {/* Gift Modal */}
       <Dialog open={tipOpen} onOpenChange={setTipOpen}>
         <DialogContent style={{ background: "var(--ln-coal)", border: "1px solid #C3AB7D", maxHeight: "min(90dvh, 90vh)", overflowY: "auto", paddingBottom: "max(1.5rem, env(safe-area-inset-bottom, 1.5rem))" }}>
@@ -2099,7 +1449,7 @@ export default function SongDetailPage() {
       </Dialog>
 
       {/* ── Owner: Creative Drawer ── */}
-      {editingOpen && song && (
+      {(editingOpen || drawerOpen) && song && (
         <ErrorBoundary inline>
           <CreativeDrawer
             song={{

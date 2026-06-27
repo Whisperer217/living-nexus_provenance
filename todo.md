@@ -6035,3 +6035,10 @@
 - [ ] Pass 2 refactor: add server/db/users.ts exports to server/db/index.ts
 - [ ] Pass 2 refactor: verify Users-domain extraction with TypeScript check and full test suite
 
+
+## Phase Archive Layout Redesign
+- [x] Build ArchiveLayout component (ArchiveFrame, ArtifactPanel, ArchiveSection, ClassificationStamp, WIDCertificate, MetadataRow, getArchiveIdentity)
+- [x] Wire ArchiveLayout into SongDetailPage — replaces testimony chamber + below-fold
+- [x] Archive identity per content type: doctrine→illuminated manuscript, combat→military field manual, music→sacred score, research→library catalog
+- [x] Depth layers: archive paper grain, engraved linework, architectural framing, subtle lighting, content surface
+- [x] TypeScript: 0 errors
