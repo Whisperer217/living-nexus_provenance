@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { getLoginUrl } from "@/const";
 import { addWIDSnapshot } from "@/lib/lnxCache";
@@ -26,7 +27,7 @@ import { useAudioMetadata } from "@/hooks/useAudioMetadata";
 import { HAAIDeclarationForm, EMPTY_HAAI } from "@/components/HAAIDeclarationForm";
 import { StoryboardBuilder } from "@/components/reader/StoryboardBuilder";
 import {
-  UPLOAD_GENRES as GENRES,
+  EDIT_GENRES as GENRES,
   MOODS,
   MANUSCRIPT_CATEGORIES,
   COMIC_CATEGORIES,
@@ -1542,20 +1543,21 @@ export default function UploadPage() {
                       </span>
                     )}
                   </label>
-                  <div className="flex flex-wrap gap-2">
-                    {creatorProfile?.primaryGenre && !GENRES.includes(creatorProfile.primaryGenre) && (
-                      <button type="button" key="profile-genre" onClick={() => setGenre(genre === creatorProfile.primaryGenre ? "" : (creatorProfile.primaryGenre ?? ""))} className="px-3 py-1 rounded-full text-xs transition-all"
-                        style={{ background: genre === creatorProfile.primaryGenre ? "rgba(196,154,40,0.2)" : "var(--ln-coal)", color: genre === creatorProfile.primaryGenre ? "var(--ln-gold)" : "rgba(232,223,200,0.45)", border: `1px solid ${genre === creatorProfile.primaryGenre ? "rgba(196,154,40,0.4)" : "rgba(196,154,40,0.15)"}` }}>
-                        {creatorProfile.primaryGenre}
-                      </button>
-                    )}
-                    {GENRES.map(g => (
-                      <button type="button" key={g} onClick={() => setGenre(g === genre ? "" : g)} className="px-3 py-1 rounded-full text-xs transition-all"
-                        style={{ background: genre === g ? "rgba(196,154,40,0.2)" : "var(--ln-coal)", color: genre === g ? "var(--ln-gold)" : "rgba(232,223,200,0.45)", border: `1px solid ${genre === g ? "rgba(196,154,40,0.4)" : "rgba(196,154,40,0.15)"}` }}>
-                        {g}
-                      </button>
-                    ))}
-                  </div>
+                  <Select value={genre || ""} onValueChange={v => setGenre(v)}>
+                    <SelectTrigger className="h-9 text-xs" style={{ background: "#1E1B12", border: "1px solid rgba(196,154,40,0.40)", color: genre ? "var(--ln-parchment)" : "rgba(232,223,200,0.45)" }}>
+                      <SelectValue placeholder="Select genre" />
+                    </SelectTrigger>
+                    <SelectContent position="popper" side="bottom" sideOffset={4} style={{ background: "#0A0A0A", border: "1px solid rgba(196,154,40,0.5)", maxHeight: 260, overflowY: "auto" }}>
+                      {creatorProfile?.primaryGenre && !GENRES.includes(creatorProfile.primaryGenre as typeof GENRES[number]) && (
+                        <SelectItem key="profile-genre" value={creatorProfile.primaryGenre} style={{ color: "var(--ln-gold)", fontSize: "12px" }}>
+                          {creatorProfile.primaryGenre} (profile default)
+                        </SelectItem>
+                      )}
+                      {GENRES.map(g => (
+                        <SelectItem key={g} value={g} style={{ color: "#E8DFC8", fontSize: "12px" }}>{g}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               ) : (
                 <div>

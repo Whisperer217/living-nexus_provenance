@@ -6067,3 +6067,6 @@
 - [ ] Implement centralized recoverPlayback() function in PlayerContext
 - [ ] Hook recoverPlayback() into: visibilitychange (visible), pageshow (persisted bfcache), resume (Page Lifecycle API), and focus events
 - [ ] TypeScript: 0 errors | tests pass
+
+## Genre Selector Fix — Individual Upload
+- [x] Replace limited UPLOAD_GENRES chip buttons in UploadPage with full EDIT_GENRES dropdown (Select) matching batch upload format
