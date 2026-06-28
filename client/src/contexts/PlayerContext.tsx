@@ -517,31 +517,53 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     /** Advance to the next track, applying crossfade/gapless/standard transition */
     const advanceToNext = (s: typeof stateRef.current, fromEnded: boolean) => {
       const settings = playbackSettingsRef.current;
-      const tracks = s.tracks.filter(t => !!t.audioUrl);
+      // IMPORTANT: currentIdx is an index into s.tracks (the full unfiltered array).
+      // We must NOT filter tracks and then use currentIdx to index into the filtered
+      // result — that causes index mismatch and wrong/missing track advancement.
+      const allTracks = s.tracks;
+      const playableTracks = allTracks.filter(t => !!t.audioUrl);
+
       if (s.isRepeat) {
         audio.currentTime = 0;
         audio.play().catch(() => {});
         return s;
       }
-      let next = s.currentIdx + 1;
+
+      let next: number;
+
       if (s.isShuffle) {
-        if (tracks.length > 1) {
-          let rand = Math.floor(Math.random() * (tracks.length - 1));
-          if (rand >= s.currentIdx) rand += 1;
-          next = rand;
-        } else {
-          next = 0;
+        // Pick a random index from allTracks that is different from currentIdx
+        // and has a valid audioUrl.
+        const candidates = allTracks
+          .map((t, i) => ({ t, i }))
+          .filter(({ t, i }) => !!t.audioUrl && i !== s.currentIdx);
+        if (candidates.length === 0) {
+          // Only one playable track — repeat it
+          audio.currentTime = 0;
+          audio.play().catch(() => {});
+          return s;
+        }
+        const pick = candidates[Math.floor(Math.random() * candidates.length)];
+        next = pick.i;
+      } else {
+        // Sequential: find the next index >= currentIdx+1 that has an audioUrl
+        next = s.currentIdx + 1;
+        while (next < allTracks.length && !allTracks[next]?.audioUrl) {
+          next++;
         }
       }
-      if (next >= tracks.length) {
+
+      if (next >= allTracks.length) {
         audio.pause();
         audio.currentTime = 0;
         return { ...s, isPlaying: false, isReady: false, duration: 0, currentTime: 0 };
       }
-      const nextTrackData = tracks[next];
+      const nextTrackData = allTracks[next];
       if (!nextTrackData?.audioUrl) {
         return { ...s, currentIdx: next, isPlaying: false, isReady: false, duration: 0, currentTime: 0 };
       }
+      // Suppress unused variable warning — playableTracks used for length check only
+      void playableTracks;
 
       const mode = settings.transitionMode;
 

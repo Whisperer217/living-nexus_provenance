@@ -659,8 +659,12 @@ function GlobalPlayerInner() {
 
   const glassBg = isDesktop ? GLASS_BG_DESKTOP : GLASS_BG_MOBILE;
   // Adaptive blur: reduce GPU cost during active playback (Decision #3)
+  // On mobile, drop backdropFilter entirely during playback — having both
+  // backdropFilter and animated boxShadow on the same element forces the GPU
+  // to re-composite the blur layer on every glow RAF frame, causing sluggishness.
+  // The glass background color provides sufficient visual depth without the blur.
   const glassBlur = state.isPlaying
-    ? (isDesktop ? "blur(4px)" : "blur(4px)")
+    ? (isDesktop ? "blur(4px)" : "none")
     : (isDesktop ? GLASS_BLUR_DESKTOP : GLASS_BLUR_MOBILE);
 
   const content = (
