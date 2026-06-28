@@ -35,6 +35,7 @@ import AddToPlaylistButton from "@/components/AddToPlaylistButton";
 import AddToNamedPlaylistPopover from "@/components/AddToNamedPlaylistPopover";
 import { WIDPanel } from "@/components/WIDPanel";
 import { ActivationPanel } from "@/components/ActivationPanel";
+import { ChainOfRecordFooter } from "@/components/ChainOfRecordFooter";
 import { ProvenanceTimeline } from "@/components/ProvenanceTimeline";
 import { LineageGraph } from "@/components/LineageGraph";
 import { WitnessesPanel } from "@/components/WitnessesPanel";
@@ -1772,25 +1773,7 @@ export default function SongDetailPage() {
 
         {/* ── ACTIVATION — stage-based funding progress ── */}
         <ActivationPanel songId={songId} songTitle={song.title} />
-        {/* ── PROVENANCE TIMELINE ── */}
-        <ProvenanceTimeline
-          songId={songId}
-          ownerId={song.userId}
-          className="mt-6"
-        />
-        {/* ── LINEAGE GRAPH ── */}
-        <LineageGraph
-          songId={songId}
-          songTitle={song.title}
-          ownerId={song.userId}
-          className="mt-4"
-        />
-        {/* ── WITNESSES PANEL ── */}
-        <WitnessesPanel
-          songId={songId}
-          ownerId={song.userId}
-          className="mt-4"
-        />
+
         {/* ── WITNESSED WORK — proof attachment layer ── */}
         <EvidencePanel
           songId={songId}
@@ -1919,6 +1902,13 @@ export default function SongDetailPage() {
           </div>
         );
       })()}
+
+      {/* ══ CHAIN OF RECORD — three-column expandable footer zone ══ */}
+      <ChainOfRecordFooter
+        songId={songId}
+        songTitle={song.title}
+        ownerId={song.userId}
+      />
 
       {/* Gift Modal */}
       <Dialog open={tipOpen} onOpenChange={setTipOpen}>
