@@ -1260,10 +1260,16 @@ Please respond in Suno-ready format:
                             </div>
                           </div>
                         )}
-                        <div style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.55rem', color: 'var(--ln-smoke)', lineHeight: 1.5, marginBottom: 8 }}>
+                        <div
+                          style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.55rem', color: 'var(--ln-smoke)', lineHeight: 1.5, marginBottom: 8, userSelect: 'text', WebkitUserSelect: 'text' }}
+                          onClick={e => e.stopPropagation()}
+                        >
                           {img.prompt}
                         </div>
                         <div className="flex items-center gap-2 flex-wrap">
+                          <button onClick={() => { navigator.clipboard.writeText(img.prompt).then(() => toast.success('Prompt copied')); }} className="flex items-center gap-1 px-2.5 py-1.5 rounded transition-all hover:opacity-80" style={{ background: `${modeColor}18`, border: `1px solid ${modeColor}44`, color: modeColor, fontFamily: "'Space Mono', monospace", fontSize: '0.55rem' }}>
+                            <Copy className="w-3 h-3" /> COPY PROMPT
+                          </button>
                           <button onClick={() => handleDownloadImage(img.url, i)} className="flex items-center gap-1 px-2.5 py-1.5 rounded transition-all hover:opacity-80" style={{ background: `${modeColor}18`, border: `1px solid ${modeColor}44`, color: modeColor, fontFamily: "'Space Mono', monospace", fontSize: '0.55rem' }}>
                             <Download className="w-3 h-3" /> DOWNLOAD
                           </button>
@@ -1773,7 +1779,10 @@ Please respond in Suno-ready format:
                               <div style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.45rem', color: 'var(--ln-smoke)', opacity: 0.6 }}>AUTO-REGISTERED</div>
                             </div>
                           )}
-                          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.6rem', color: 'var(--ln-parchment)', lineHeight: 1.6, marginBottom: 4 }}>
+                          <div
+                            style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.6rem', color: 'var(--ln-parchment)', lineHeight: 1.6, marginBottom: 4, userSelect: 'text', WebkitUserSelect: 'text' }}
+                            onClick={e => e.stopPropagation()}
+                          >
                             {img.prompt}
                           </div>
                           {img.enrichedPrompt !== img.prompt && (
@@ -1785,6 +1794,9 @@ Please respond in Suno-ready format:
                             {new Date(img.generatedAt).toLocaleTimeString()}
                           </div>
                           <div className="flex items-center gap-2 flex-wrap">
+                            <button onClick={() => { navigator.clipboard.writeText(img.prompt).then(() => toast.success('Prompt copied')); }} className="flex items-center gap-1.5 px-3 py-1.5 rounded transition-all hover:opacity-80" style={{ background: `${modeColor}18`, border: `1px solid ${modeColor}44`, color: modeColor, fontFamily: "'Space Mono', monospace", fontSize: '0.6rem' }}>
+                              <Copy className="w-3 h-3" /> COPY PROMPT
+                            </button>
                             <button onClick={() => handleDownloadImage(img.url, i)} className="flex items-center gap-1.5 px-3 py-1.5 rounded transition-all hover:opacity-80" style={{ background: `${modeColor}18`, border: `1px solid ${modeColor}44`, color: modeColor, fontFamily: "'Space Mono', monospace", fontSize: '0.6rem' }}>
                               <Download className="w-3 h-3" /> DOWNLOAD
                             </button>
