@@ -65,7 +65,7 @@ const PANELS: Record<NavMode, ModePanel> = {
       {
         links: [
           { icon: <LayoutGrid size={14} />, label: "Discover", path: "/", description: "Featured works & creators" },
-          { icon: <Star size={14} />, label: "New Arrivals", path: "/discover", description: "Recently witnessed works" },
+          { icon: <Star size={14} />, label: "New Arrivals", path: "/explore?mode=new", description: "Recently registered works" },
           { icon: <TrendingUp size={14} />, label: "Trending", path: "/explore?sort=trending", description: "Most played this week" },
         ],
       },

@@ -442,8 +442,9 @@ export default function ExplorePage() {
   const [mode, setMode] = useState<ExploreMode>(() => {
     const p = new URLSearchParams(typeof window !== "undefined" ? window.location.search : "");
     const s = p.get("sort");
-    if (s === "new") return "new";
-    if (s === "trending") return "trending";
+    const m = p.get("mode");
+    if (s === "new" || m === "new") return "new";
+    if (s === "trending" || m === "trending") return "trending";
     return "infinite";
   });
   // "store" = StoreTrackCard shelf rows; "classic" = creator-grouped pan-rows
