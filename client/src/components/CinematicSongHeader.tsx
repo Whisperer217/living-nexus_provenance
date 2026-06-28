@@ -231,21 +231,7 @@ export function CinematicSongHeader({
               {showVideoMode ? <><ImageIcon className="w-3 h-3" /> Cover Art</> : <><Video className="w-3 h-3" /> Music Video</>}
             </button>
           )}
-          {genre && (
-            <div
-              className="px-3 py-1 rounded-full text-xs tracking-widest uppercase pointer-events-none"
-              style={{
-                background: "rgba(0,0,0,0.55)",
-                backdropFilter: "blur(8px)",
-                border: "1px solid rgba(196,154,40,0.25)",
-                color: "rgba(196,154,40,0.85)",
-                fontFamily: "'Cinzel', serif",
-                letterSpacing: "0.12em",
-              }}
-            >
-              {genre}
-            </div>
-          )}
+
         </div>
 
         {/* ── Live indicator (top-right when active) ── */}

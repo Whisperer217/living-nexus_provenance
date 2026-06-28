@@ -572,22 +572,7 @@ export default function SongDetailPage() {
               className="absolute inset-0"
               style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.18) 40%, rgba(8,7,4,0.82) 100%)" }}
             />
-            {/* Genre badge — top right */}
-            {song.genre && (
-              <div
-                className="absolute top-4 right-4 px-3 py-1 rounded-full text-xs tracking-widest uppercase"
-                style={{
-                  background: "rgba(0,0,0,0.55)",
-                  backdropFilter: "blur(8px)",
-                  border: "1px solid rgba(196,154,40,0.25)",
-                  color: "rgba(196,154,40,0.85)",
-                  fontFamily: "'Cinzel', serif",
-                  letterSpacing: "0.12em",
-                }}
-              >
-                {song.genre}
-              </div>
-            )}
+
             {/* WID badge — top left */}
             {song.witnessId && (
               <div
@@ -894,31 +879,6 @@ export default function SongDetailPage() {
 
             {/* ══ TITLE SANCTUARY ══ */}
             <div className="space-y-4 cathedral-enter-title">
-              {/* Luminous title */}
-              <h1
-                className="leading-tight"
-                style={{
-                  fontFamily: "'Cinzel', serif",
-                  color: "var(--ln-parchment)",
-                  fontSize: "clamp(1.75rem, 4vw, 2.75rem)",
-                  fontWeight: 700,
-                  letterSpacing: "0.02em",
-                  textShadow: isThisTrackActive
-                    ? "0 0 40px rgba(196,154,40,0.35), 0 2px 8px rgba(0,0,0,0.8)"
-                    : "0 2px 8px rgba(0,0,0,0.6)",
-                  transition: "text-shadow 0.7s ease",
-                }}
-              >
-                {song.title}
-              </h1>
-
-              {/* Creator whisper */}
-              {creator && (
-                <div className="flex items-center gap-3">
-                  <div className="w-px h-5" style={{ background: "rgba(196,154,40,0.3)" }} />
-                  <CreatorHandle userId={creator.id} handle={creator.artistHandle} displayName={creator.name} role={(creator as any).role} size="md" />
-                </div>
-              )}
 
               {/* Content type + genre + BPM chips */}
               {(() => { const _ctc = getContentTypeColors((song as any).contentType ?? "audio"); return (
