@@ -730,7 +730,7 @@ Please respond in Suno-ready format:
 
   // Download with WID provenance metadata embedded via server-side sharp PNG processing.
   // `index` is the quiver image DB id when downloading from Quiver, or a session index otherwise.
-  const handleDownloadImage = async (url: string, index: number | string) => {
+  const handleDownloadImage = async (url: string, index: number | string, generatedAt?: string) => {
     // If index is a numeric DB id, use the metadata endpoint; otherwise fall back to plain download
     const isDbId = typeof index === 'number' && index > 0;
     try {
@@ -757,7 +757,9 @@ Please respond in Suno-ready format:
       const objectUrl = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = objectUrl;
-      const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+      const ts = generatedAt
+        ? new Date(generatedAt).toISOString().replace(/[:.]/g, '-').slice(0, 19)
+        : new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
       a.download = `keeper-vision-${ts}.png`;
       a.click();
       URL.revokeObjectURL(objectUrl);
@@ -1270,7 +1272,7 @@ Please respond in Suno-ready format:
                           <button onClick={() => { navigator.clipboard.writeText(img.prompt).then(() => toast.success('Prompt copied')); }} className="flex items-center gap-1 px-2.5 py-1.5 rounded transition-all hover:opacity-80" style={{ background: `${modeColor}18`, border: `1px solid ${modeColor}44`, color: modeColor, fontFamily: "'Space Mono', monospace", fontSize: '0.55rem' }}>
                             <Copy className="w-3 h-3" /> COPY PROMPT
                           </button>
-                          <button onClick={() => handleDownloadImage(img.url, i)} className="flex items-center gap-1 px-2.5 py-1.5 rounded transition-all hover:opacity-80" style={{ background: `${modeColor}18`, border: `1px solid ${modeColor}44`, color: modeColor, fontFamily: "'Space Mono', monospace", fontSize: '0.55rem' }}>
+                          <button onClick={() => handleDownloadImage(img.url, img.widId ? parseInt(img.widId.split('-').pop() ?? '0', 16) || i : i, img.generatedAt)} className="flex items-center gap-1 px-2.5 py-1.5 rounded transition-all hover:opacity-80" style={{ background: `${modeColor}18`, border: `1px solid ${modeColor}44`, color: modeColor, fontFamily: "'Space Mono', monospace", fontSize: '0.55rem' }}>
                             <Download className="w-3 h-3" /> DOWNLOAD
                           </button>
                           <button onClick={() => handleRemixImage(img)} disabled={isGeneratingImage} className="flex items-center gap-1 px-2.5 py-1.5 rounded transition-all hover:opacity-80 disabled:opacity-40" style={{ background: `${modeColor}18`, border: `1px solid ${modeColor}44`, color: modeColor, fontFamily: "'Space Mono', monospace", fontSize: '0.55rem' }}>
@@ -1797,7 +1799,7 @@ Please respond in Suno-ready format:
                             <button onClick={() => { navigator.clipboard.writeText(img.prompt).then(() => toast.success('Prompt copied')); }} className="flex items-center gap-1.5 px-3 py-1.5 rounded transition-all hover:opacity-80" style={{ background: `${modeColor}18`, border: `1px solid ${modeColor}44`, color: modeColor, fontFamily: "'Space Mono', monospace", fontSize: '0.6rem' }}>
                               <Copy className="w-3 h-3" /> COPY PROMPT
                             </button>
-                            <button onClick={() => handleDownloadImage(img.url, i)} className="flex items-center gap-1.5 px-3 py-1.5 rounded transition-all hover:opacity-80" style={{ background: `${modeColor}18`, border: `1px solid ${modeColor}44`, color: modeColor, fontFamily: "'Space Mono', monospace", fontSize: '0.6rem' }}>
+                            <button onClick={() => handleDownloadImage(img.url, img.widId ? parseInt(img.widId.split('-').pop() ?? '0', 16) || i : i, img.generatedAt)} className="flex items-center gap-1.5 px-3 py-1.5 rounded transition-all hover:opacity-80" style={{ background: `${modeColor}18`, border: `1px solid ${modeColor}44`, color: modeColor, fontFamily: "'Space Mono', monospace", fontSize: '0.6rem' }}>
                               <Download className="w-3 h-3" /> DOWNLOAD
                             </button>
                             <button onClick={() => handleRemixImage(img)} disabled={isGeneratingImage} className="flex items-center gap-1.5 px-3 py-1.5 rounded transition-all hover:opacity-80 disabled:opacity-40" style={{ background: `${modeColor}18`, border: `1px solid ${modeColor}44`, color: modeColor, fontFamily: "'Space Mono', monospace", fontSize: '0.6rem' }}>
