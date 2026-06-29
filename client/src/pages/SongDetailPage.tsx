@@ -1866,6 +1866,8 @@ export default function SongDetailPage() {
         )}
       </div>
 
+      {/* ── CREDITS + CHAIN OF RECORD — inside max-w-6xl for consistent padding ── */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 pb-8">
       {/* ── CREDITS ── */}
       {(() => {
         const rawCredits = (song as any)?.creditsJson;
@@ -1909,6 +1911,7 @@ export default function SongDetailPage() {
         songTitle={song.title}
         ownerId={song.userId}
       />
+      </div>
 
       {/* Gift Modal */}
       <Dialog open={tipOpen} onOpenChange={setTipOpen}>

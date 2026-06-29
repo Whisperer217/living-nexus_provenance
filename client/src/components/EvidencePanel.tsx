@@ -180,8 +180,8 @@ export function EvidencePanel({ songId, isOwner, manifestation, onPlay, onOpenRe
   const { user } = useAuth();
   const utils = trpc.useUtils();
 
-  // Default expanded — the witnessed work IS the primary content, not a secondary detail
-  const [expanded, setExpanded] = useState(true);
+  // Default collapsed — keeps the page compact; user expands to view proof artifacts
+  const [expanded, setExpanded] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [formType, setFormType] = useState<"file" | "link" | "note">("file");
   const [formTitle, setFormTitle] = useState("");
