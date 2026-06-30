@@ -12,7 +12,6 @@ import {
   Sparkles, Download, ImageIcon,
 } from "lucide-react";
 import { VisionChamberRitual, WitnessedImageReveal } from "@/components/VisionChamberRitual";
-import { useFontSize } from "@/hooks/useFontSize";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -405,9 +404,6 @@ export default function KeeperComposePage() {
   const arc = composedWork ? deriveArc(composedWork.sections) : [];
   const previewArc = derivePreviewArc(prompt);
   const modeColor = MODE_COLORS[activeMode as AgentMode] ?? "#C9A84C";
-
-  // Font size preference (S / M / L) — persisted to localStorage
-  const { level: fsLevel, cycle: cycleFontSize, sizes: fs } = useFontSize();
 
   // Detect mobile
   const [isMobile, setIsMobile] = useState(() => typeof window !== "undefined" && window.innerWidth < 768);
@@ -809,25 +805,14 @@ Please respond in Suno-ready format:
           <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.6rem", color: "var(--ln-smoke)", letterSpacing: "0.15em" }}>
             COMPOSITION SURFACE · CINEMATIC MODE
           </div>
-          <div className="flex items-center gap-2">
-            {/* Font size toggle in cinematic */}
-            <button
-              onClick={cycleFontSize}
-              title={`Text size: ${fsLevel.toUpperCase()}`}
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded transition-all hover:opacity-80"
-              style={{ border: "1px solid var(--ln-panel-border)", color: "var(--ln-smoke)", fontFamily: "'Space Mono', monospace", fontSize: "0.55rem" }}
-            >
-              Aa <span style={{ fontSize: "0.45rem", opacity: 0.7 }}>{fsLevel.toUpperCase()}</span>
-            </button>
-            <button
-              onClick={() => setCinematic(false)}
-              className="flex items-center gap-2 px-3 py-1.5 rounded transition-all hover:opacity-80"
-              style={{ border: "1px solid var(--ln-panel-border)", color: "var(--ln-smoke)", fontFamily: "'Space Mono', monospace", fontSize: "0.6rem" }}
-            >
-              <Minimize2 className="w-3 h-3" />
-              EXIT
-            </button>
-          </div>
+          <button
+            onClick={() => setCinematic(false)}
+            className="flex items-center gap-2 px-3 py-1.5 rounded transition-all hover:opacity-80"
+            style={{ border: "1px solid var(--ln-panel-border)", color: "var(--ln-smoke)", fontFamily: "'Space Mono', monospace", fontSize: "0.6rem" }}
+          >
+            <Minimize2 className="w-3 h-3" />
+            EXIT
+          </button>
         </div>
 
         {/* Swipe hint on mobile */}
@@ -886,7 +871,7 @@ Please respond in Suno-ready format:
                   [{s.label}]
                 </div>
                 {(s.tone || s.delivery) && (
-                  <div style={{ color: "var(--ln-smoke)", fontFamily: "'Space Mono', monospace", fontSize: fs.terminalSm, fontStyle: "italic" }}>
+                  <div style={{ color: "var(--ln-smoke)", fontFamily: "'Space Mono', monospace", fontSize: "0.6rem", fontStyle: "italic" }}>
                     {s.tone && <span>tone: {s.tone}</span>}
                     {s.tone && s.delivery && <span> · </span>}
                     {s.delivery && <span>delivery: {s.delivery}</span>}
@@ -894,7 +879,7 @@ Please respond in Suno-ready format:
                 )}
                 <div
                   className="whitespace-pre-line leading-relaxed"
-                  style={{ color: "var(--ln-parchment)", fontFamily: "'Georgia', serif", fontSize: fs.lyricsBody, lineHeight: fs.lineHeight }}
+                  style={{ color: "var(--ln-parchment)", fontFamily: "'Georgia', serif", fontSize: "1.1rem", lineHeight: 1.9 }}
                 >
                   {s.lyrics || <span style={{ opacity: 0.3 }}>(instrumental)</span>}
                 </div>
@@ -1045,23 +1030,6 @@ Please respond in Suno-ready format:
             COMPOSE
           </span>
           <div className="flex-1" />
-          {/* Font size toggle */}
-          <button
-            onClick={cycleFontSize}
-            title={`Text size: ${fsLevel.toUpperCase()} — tap to cycle`}
-            className="flex items-center justify-center w-7 h-7 rounded transition-all hover:opacity-80 flex-shrink-0"
-            style={{
-              background: "transparent",
-              border: `1px solid ${modeColor}44`,
-              color: modeColor,
-              fontFamily: "'Space Mono', monospace",
-              fontSize: "0.5rem",
-              fontWeight: 700,
-              letterSpacing: "0.05em",
-            }}
-          >
-            {fsLevel.toUpperCase()}
-          </button>
           {/* Mode selector pill */}
           <div className="flex gap-1">
             {MODES.map(m => {
@@ -1439,7 +1407,7 @@ Please respond in Suno-ready format:
                       {(s.tone || s.delivery) && (
                         <div
                           className="mb-2 italic"
-                          style={{ color: "var(--ln-smoke)", fontFamily: "'Space Mono', monospace", fontSize: fs.terminalSm, lineHeight: 1.6 }}
+                          style={{ color: "var(--ln-smoke)", fontFamily: "'Space Mono', monospace", fontSize: "0.6rem", lineHeight: 1.6 }}
                         >
                           {s.tone && <span>tone: {s.tone}</span>}
                           {s.tone && s.delivery && <span>  ·  </span>}
@@ -1448,9 +1416,9 @@ Please respond in Suno-ready format:
                       )}
                       <div
                         className="whitespace-pre-line"
-                        style={{ color: "var(--ln-parchment)", fontFamily: "'Georgia', serif", fontSize: fs.lyricsBody, lineHeight: fs.lineHeight }}
+                        style={{ color: "var(--ln-parchment)", fontFamily: "'Georgia', serif", fontSize: "0.9rem", lineHeight: 2.0 }}
                       >
-                        {s.lyrics || <span style={{ opacity: 0.3, fontFamily: "'Space Mono', monospace", fontSize: fs.terminalLabel }}>(instrumental)</span>}
+                        {s.lyrics || <span style={{ opacity: 0.3, fontFamily: "'Space Mono', monospace", fontSize: "0.65rem" }}>(instrumental)</span>}
                       </div>
                     </div>
                   </div>
@@ -1540,22 +1508,6 @@ Please respond in Suno-ready format:
           COMPOSE
         </span>
         <div className="flex-1" />
-        {/* Font size toggle */}
-        <button
-          onClick={cycleFontSize}
-          title={`Text size: ${fsLevel.toUpperCase()} — click to cycle S → M → L`}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded transition-all hover:opacity-80"
-          style={{
-            background: "transparent",
-            border: `1px solid ${modeColor}44`,
-            color: modeColor,
-            fontFamily: "'Space Mono', monospace",
-            fontSize: "0.6rem",
-            letterSpacing: "0.08em",
-          }}
-        >
-          Aa <span style={{ fontSize: "0.5rem", opacity: 0.8 }}>{fsLevel.toUpperCase()}</span>
-        </button>
         <button
           onClick={() => setCinematic(true)}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded transition-all hover:opacity-80"
@@ -1942,14 +1894,14 @@ Please respond in Suno-ready format:
                     >
                       <div
                         className="text-xs uppercase tracking-widest mb-2"
-                        style={{ color: modeColor, fontFamily: "'Space Mono', monospace", fontSize: fs.terminalLabel }}
+                        style={{ color: modeColor, fontFamily: "'Space Mono', monospace", fontSize: "0.55rem" }}
                       >
                         [{s.label}]
                       </div>
                       {(s.tone || s.delivery) && (
                         <div
                           className="mb-2 italic"
-                          style={{ color: "var(--ln-smoke)", fontFamily: "'Space Mono', monospace", fontSize: fs.terminalSm }}
+                          style={{ color: "var(--ln-smoke)", fontFamily: "'Space Mono', monospace", fontSize: "0.55rem" }}
                         >
                           {s.tone && <span>tone: {s.tone}</span>}
                           {s.tone && s.delivery && <span>  ·  </span>}
@@ -1958,7 +1910,7 @@ Please respond in Suno-ready format:
                       )}
                       <div
                         className="whitespace-pre-line leading-relaxed"
-                        style={{ color: "var(--ln-parchment)", fontFamily: "'Space Mono', monospace", fontSize: fs.terminalMd, lineHeight: fs.lineHeight }}
+                        style={{ color: "var(--ln-parchment)", fontFamily: "'Space Mono', monospace", fontSize: "0.7rem", lineHeight: 1.9 }}
                       >
                         {s.lyrics || <span style={{ opacity: 0.3 }}>(instrumental)</span>}
                       </div>

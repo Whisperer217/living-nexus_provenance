@@ -6070,12 +6070,3 @@
 
 ## Genre Selector Fix — Individual Upload
 - [x] Replace limited UPLOAD_GENRES chip buttons in UploadPage with full EDIT_GENRES dropdown (Select) matching batch upload format
-
-## Build Queue: Font Size Toggle (Compose / Keeper)
-- [x] Create useFontSize hook (client/src/hooks/useFontSize.ts) — three levels S/M/L, persisted to localStorage under "ln-compose-font-size"
-- [x] Add font size toggle button to KeeperComposePage mobile header (cycles S→M→L, shows current level)
-- [x] Add font size toggle button to KeeperComposePage desktop header (Aa + level label, before CINEMATIC button)
-- [x] Add font size toggle button to KeeperComposePage cinematic mode top bar (Aa + level label, next to EXIT)
-- [x] Wire fs.lyricsBody + fs.lineHeight into all three lyrics output zones (cinematic, mobile, desktop)
-- [x] Wire fs.terminalSm + fs.terminalLabel into section labels and tone/delivery annotations in all three zones
-- [x] TypeScript: 0 errors
