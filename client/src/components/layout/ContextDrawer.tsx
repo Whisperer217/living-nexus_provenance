@@ -21,12 +21,12 @@ import {
   FolderOpen, Settings, LogOut, LogIn,
   Shield, BookMarked,
   LayoutGrid, LayoutDashboard, X, ExternalLink,
-  Download,
+  Download, PenTool,
 } from "lucide-react";
 
 // ── Types ─────────────────────────────────────────────────────────
 
-export type NavMode = "home" | "explore" | "profile" | "upload" | "archive";
+export type NavMode = "home" | "explore" | "profile" | "compose" | "upload" | "archive";
 
 // Version string — keep in sync with WhatsNewModal
 export const WHATS_NEW_VERSION = "v2.47.0";
@@ -128,6 +128,21 @@ const PANELS: Record<NavMode, ModePanel> = {
         links: [
           { icon: <Settings size={14} />, label: "Settings", path: "/settings/billing", authOnly: true },
           { icon: <LogOut size={14} />, label: "Log Out", path: "__logout__", authOnly: true, danger: true },
+        ],
+      },
+    ],
+  },
+
+  compose: {
+    icon: <PenTool size={17} />,
+    title: "Compose",
+    subtitle: "Create & craft your work",
+    sections: [
+      {
+        links: [
+          { icon: <Sparkles size={14} />, label: "AI Compose", path: "/compose", description: "Generate images, music & more", authOnly: true, gold: true },
+          { icon: <Sparkles size={14} />, label: "Prompt Studio", path: "/keeper-compose", description: "Lyrics \u2192 AI music prompt" },
+          { icon: <BookOpen size={14} />, label: "Book Studio", path: "/book-studio", description: "Write & illustrate your book", authOnly: true },
         ],
       },
     ],
