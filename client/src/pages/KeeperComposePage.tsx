@@ -1241,7 +1241,7 @@ Please respond in Suno-ready format:
                   <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "var(--compose-xs)", color: modeColor, letterSpacing: "0.08em" }}>SESSION VISIONS ({imageHistory.length})</div>
                     {imageHistory.map((img, i) => (
                     <div key={i} className="rounded overflow-hidden" style={{ border: `1px solid ${modeColor}30` }}>
-                      <div className="relative">
+                      <div className="relative cursor-zoom-in" onClick={() => setLightboxImage({ url: img.url, prompt: img.prompt, widId: img.widId })} title="Tap to enlarge">
                         {i === latestImageIdx ? (
                           <WitnessedImageReveal style={{ display: 'block' }}>
                             <img src={img.url} alt={img.prompt} className="w-full block" style={{ maxHeight: '300px', objectFit: 'cover' }} />
@@ -1759,7 +1759,7 @@ Please respond in Suno-ready format:
                     <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 'var(--compose-xs)', color: modeColor, letterSpacing: '0.08em' }}>SESSION VISIONS — {imageHistory.length} IMAGE{imageHistory.length !== 1 ? 'S' : ''}</div>
                     {imageHistory.map((img, i) => (
                       <div key={i} className="rounded overflow-hidden" style={{ border: `1px solid ${modeColor}30` }}>
-                        <div className="relative">
+                        <div className="relative cursor-zoom-in" onClick={() => setLightboxImage({ url: img.url, prompt: img.prompt, widId: img.widId })} title="Click to enlarge">
                           {i === latestImageIdx ? (
                             <WitnessedImageReveal style={{ display: 'block' }}>
                               <img src={img.url} alt={img.prompt} className="w-full block" style={{ maxHeight: '480px', objectFit: 'contain', background: '#0a0a0a' }} />
@@ -2134,6 +2134,22 @@ Please respond in Suno-ready format:
                   WID: {lightboxImage.widId}
                 </div>
               )}
+              <div className="flex gap-2 mt-3">
+                <button
+                  onClick={() => handleDownloadImage(lightboxImage.url, 0)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded transition-all hover:opacity-80"
+                  style={{ background: `${modeColor}18`, border: `1px solid ${modeColor}44`, color: modeColor, fontFamily: "'Space Mono', monospace", fontSize: '0.55rem' }}
+                >
+                  <Download className="w-3 h-3" /> DOWNLOAD
+                </button>
+                <button
+                  onClick={() => { setLightboxImage(null); }}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded transition-all hover:opacity-80"
+                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)', color: 'var(--ln-smoke)', fontFamily: "'Space Mono', monospace", fontSize: '0.55rem' }}
+                >
+                  CLOSE
+                </button>
+              </div>
             </div>
             <button
               onClick={() => setLightboxImage(null)}
