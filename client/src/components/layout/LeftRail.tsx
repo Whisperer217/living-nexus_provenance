@@ -14,11 +14,11 @@
    capture touch events globally, or manipulate the body in any way.
 ═══════════════════════════════════════════════════════════════════ */
 import { useLocation, useRouter } from "wouter";
-import { Home, Compass, User, Upload, Archive, ExternalLink, PenTool } from "lucide-react";
+import { Home, Compass, User, Upload, Archive, ExternalLink } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 
-export type NavMode = "home" | "explore" | "profile" | "compose" | "upload" | "archive";
+export type NavMode = "home" | "explore" | "profile" | "upload" | "archive";
 
 const LOGO_URL =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/HMNMkWUWAfVdTbRj3YmPCF/ln-navbar-icon-180_b914f927.png";
@@ -33,7 +33,6 @@ const RAIL_ITEMS: Array<{
   { id: "home",    icon: Home,    label: "Home",     path: "/"        },
   { id: "explore", icon: Compass, label: "Explore",  path: "/explore" },
   { id: "profile", icon: User,    label: "Profile",  path: "/profile", authRequired: true },
-  { id: "compose", icon: PenTool, label: "Compose",  path: "/compose", authRequired: true },
   { id: "upload",  icon: Upload,  label: "Register", path: "/upload",  authRequired: true },
   { id: "archive", icon: Archive, label: "LNA",  path: "/archive", authRequired: true },
 ];
