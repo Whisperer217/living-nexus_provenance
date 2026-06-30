@@ -12,6 +12,7 @@ import {
   Sparkles, Download, ImageIcon,
 } from "lucide-react";
 import { VisionChamberRitual, WitnessedImageReveal } from "@/components/VisionChamberRitual";
+import PinchZoomImage from "@/components/PinchZoomImage";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -2119,11 +2120,10 @@ Please respond in Suno-ready format:
             style={{ border: `1px solid ${modeColor}44`, boxShadow: `0 0 40px ${modeColor}22` }}
             onClick={e => e.stopPropagation()}
           >
-            <img
+            <PinchZoomImage
               src={lightboxImage.url}
               alt={lightboxImage.prompt}
-              className="w-full block"
-              style={{ maxHeight: '70vh', objectFit: 'contain', background: 'var(--ln-obsidian)' }}
+              maxHeight="70vh"
             />
             <div className="p-3" style={{ background: 'var(--ln-panel)' }}>
               <div style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.6rem', color: 'var(--ln-parchment)', lineHeight: 1.5 }}>
