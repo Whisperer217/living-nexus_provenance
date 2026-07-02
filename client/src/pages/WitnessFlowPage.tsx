@@ -413,9 +413,11 @@ export default function WitnessFlowPage() {
   );
 
   // Fetch play audit stats
+  // verifyWid returns `songId` (not `id`); normalizedSongById returns `id` — resolve both
+  const resolvedSongId: number | undefined = (song as any)?.id ?? (song as any)?.songId;
   const { data: playStats } = trpc.songs.playAuditStats.useQuery(
-    { songId: song?.id! },
-    { enabled: !!song?.id }
+    { songId: resolvedSongId! },
+    { enabled: !!resolvedSongId }
   );
 
   const activeStepDef = STEPS.find(s => s.key === activeStep)!;
@@ -595,9 +597,9 @@ export default function WitnessFlowPage() {
         </div>
 
         {/* Back link */}
-        {song?.id && (
+        {resolvedSongId && (
           <div className="text-center">
-            <Link href={`/song/${song.id}`}>
+            <Link href={`/song/${resolvedSongId}`}>
               <span className="text-xs text-zinc-600 hover:text-zinc-400 transition-colors cursor-pointer">
                 ← Back to work
               </span>
