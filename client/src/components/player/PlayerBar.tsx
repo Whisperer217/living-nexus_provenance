@@ -38,7 +38,7 @@ export default function PlayerBar() {
   const {
     state, audioRef, allTracks, togglePlay, nextTrack, prevTrack,
     toggleShuffle, toggleRepeat, toggleMute, setVolume, seek,
-    openTheater, playTrack, appendToQueue,
+    openTheater, playTrack, appendToQueue, playNext,
   } = usePlayer();
   const [, navigate] = useLocation();
   const { user } = useAuth();
@@ -1114,21 +1114,21 @@ export default function PlayerBar() {
           style={{ color: "var(--ln-parchment)" }}
         >
           <ListPlus size={13} style={{ color: "var(--ln-smoke)" }} />
-          Add to List
+          Add to My List
         </button>
       )}
       {currentTrack && (
         <button
           onClick={() => {
             setShowContextMenu(false);
-            appendToQueue(currentTrack);
-            toast.success(`“${currentTrack.title}” added to queue`, { duration: 2000 });
+            playNext(currentTrack);
+            toast.success(`"${currentTrack.title}" plays next`, { duration: 2000 });
           }}
           className="flex items-center gap-2.5 w-full px-4 py-2.5 text-[12px] font-body transition-colors hover:bg-white/5 text-left"
           style={{ color: "var(--ln-parchment)" }}
         >
-          <ListPlus size={13} style={{ color: "var(--ln-smoke)" }} />
-          Add to Queue
+          <SkipForward size={13} style={{ color: "var(--ln-smoke)" }} />
+          Play Next
         </button>
       )}
       <button

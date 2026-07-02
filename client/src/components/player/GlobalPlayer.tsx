@@ -22,7 +22,7 @@ import {
   DollarSign, MessageCircle, Send, Maximize2, X, Flag,
   BookOpen, Map,
 } from "lucide-react";
-import { AddToCollectionModal } from "@/components/AddToCollectionModal";
+import { AddToMyListModal } from "@/components/AddToMyListModal";
 import { useLocation } from "wouter";
 import React, { useState, useCallback, useRef, useEffect, useMemo, memo } from "react";
 import { createPortal } from "react-dom";
@@ -109,7 +109,7 @@ function GlobalPlayerInner() {
   const {
     state, audioRef, allTracks, togglePlay, nextTrack, prevTrack,
     toggleShuffle, toggleRepeat, toggleMute, setVolume, seek, playTrack,
-    isReady, appendToQueue,
+    isReady, appendToQueue, playNext,
   } = usePlayer();
   const [location, navigate] = useLocation();
   const { user } = useAuth();
@@ -986,8 +986,8 @@ function GlobalPlayerInner() {
               </button>
             )}
             {currentSongId && (
-              <button onClick={e => { e.stopPropagation(); setAddToCollectionOpen(true); }} className="p-1.5 transition-colors" style={{ color: isDesktop ? "rgba(212,175,55,0.65)" : "rgba(192,132,252,0.6)" }} title="Add to Collection">
-                <FolderPlus size={15} />
+              <button onClick={e => { e.stopPropagation(); setAddToCollectionOpen(true); }} className="p-1.5 transition-colors" style={{ color: isDesktop ? "rgba(212,175,55,0.65)" : "rgba(192,132,252,0.6)" }} title="Add to My List">
+                <ListPlus size={15} />
               </button>
             )}
             {tipsEnabled && currentSongId && (
@@ -1401,20 +1401,20 @@ function GlobalPlayerInner() {
       </button>
       {currentSongId && (
         <button onClick={() => { setShowContextMenu(false); setAddToCollectionOpen(true); }} className="flex items-center gap-2.5 w-full px-4 py-2.5 text-[12px] transition-colors hover:bg-white/5 text-left" style={{ color: "var(--ln-parchment)" }}>
-          <FolderPlus size={13} style={{ color: "rgba(255,255,255,0.4)" }} /> Add to Collection
+          <ListPlus size={13} style={{ color: "rgba(255,255,255,0.4)" }} /> Add to My List
         </button>
       )}
       {visTrack && (
         <button
           onClick={() => {
             setShowContextMenu(false);
-            appendToQueue(visTrack);
-            toast.success(`“${visTrack.title}” added to queue`, { duration: 2000 });
+            playNext(visTrack);
+            toast.success(`"${visTrack.title}" plays next`, { duration: 2000 });
           }}
           className="flex items-center gap-2.5 w-full px-4 py-2.5 text-[12px] transition-colors hover:bg-white/5 text-left"
           style={{ color: "var(--ln-parchment)" }}
         >
-          <ListPlus size={13} style={{ color: "rgba(255,255,255,0.4)" }} /> Add to Queue
+          <SkipForward size={13} style={{ color: "rgba(255,255,255,0.4)" }} /> Play Next
         </button>
       )}
       {(() => {
@@ -1732,7 +1732,7 @@ function GlobalPlayerInner() {
           onClose={() => setTipOpen(false)}
         />
       )}
-      <AddToCollectionModal
+      <AddToMyListModal
         open={!!(addToCollectionOpen && currentSongId)}
         songId={currentSongId ?? 0}
         songTitle={visTrack?.title ?? ""}

@@ -24,8 +24,8 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Link, useLocation } from "wouter";
-import { Play, Pause, Shield, MoreVertical, FolderPlus, ExternalLink, Copy, SkipForward, Flame, Heart, Music } from "lucide-react";
-import { AddToCollectionModal } from "@/components/AddToCollectionModal";
+import { Play, Pause, Shield, MoreVertical, ListPlus, ExternalLink, Copy, SkipForward, Flame, Heart, Music } from "lucide-react";
+import { AddToMyListModal } from "@/components/AddToMyListModal";
 import { createPortal } from "react-dom";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { toast } from "sonner";
@@ -101,10 +101,10 @@ function CollectionMenuItem({ songId, songTitle, onMenuClose }: {
         className="w-full flex items-center gap-3 px-4 py-2.5 text-xs hover:bg-white/5 transition-colors text-left"
         style={{ color: "var(--ln-parchment)" }}
       >
-        <FolderPlus className="w-3.5 h-3.5 opacity-60" />
-        Add to Collection
+        <ListPlus className="w-3.5 h-3.5 opacity-60" />
+        Add to My List
       </button>
-      <AddToCollectionModal
+      <AddToMyListModal
         songId={songId}
         songTitle={songTitle}
         open={open}
