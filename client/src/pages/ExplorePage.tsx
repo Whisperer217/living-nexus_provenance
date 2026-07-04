@@ -528,13 +528,13 @@ export default function ExplorePage() {
 
   // New This Week query
   const { data: newThisWeekData, isLoading: newThisWeekLoading } = trpc.songs.newThisWeek.useQuery(
-    { genre: activeGenre === "All" ? undefined : activeGenre, limit: 500, contentType: serverContentType },
+    { genre: activeGenre === "All" ? undefined : activeGenre, limit: 2000, contentType: serverContentType },
     { enabled: mode === "new", refetchOnWindowFocus: false, staleTime: 30_000 }
   );
 
   // Trending query — respects the active content-type chip
   const { data: trendingData, isLoading: trendingLoading } = trpc.songs.trending.useQuery(
-    { genre: activeGenre === "All" ? undefined : activeGenre, limit: 500, contentType: serverContentType },
+    { genre: activeGenre === "All" ? undefined : activeGenre, limit: 2000, contentType: serverContentType },
     { enabled: mode === "trending", refetchOnWindowFocus: false, staleTime: 60_000 }
   );
 
@@ -600,7 +600,7 @@ export default function ExplorePage() {
     {
       genre: activeGenre === "All" ? undefined : activeGenre,
       search: query || undefined,
-      limit: 500,
+      limit: 2000,
       randomize: true,
       seed,
       contentType: serverContentType,
@@ -1103,15 +1103,14 @@ export default function ExplorePage() {
                 if (!genreMap.has(g)) genreMap.set(g, []);
                 genreMap.get(g)!.push(s);
               }
-              // Also show an "All" row with first 20 tracks
+              // Show an "All" row with all tracks (no cap) — queue spans full visible catalog
               const rows: React.ReactElement[] = [];
               if (storeSongs.length > 0) {
-                const topSlice = storeSongs.slice(0, 20);
                 rows.push(
                   <ShowcaseRow key="__all" title={mode === "trending" ? "Trending" : mode === "new" ? "New This Week" : "All Tracks"} seeAllHref="/explore" className="px-6">
-                    {topSlice.map((song: ReturnType<typeof exploreMapToSongData>, idx: number) => (
-                      // Namespace key with row context to prevent collision with genre rows
-                      <StoreTrackCard key={`__all-${song.id}`} song={song} size="md" allSongs={topSlice} songIndex={idx} isNew={mode === "new"} />
+                    {storeSongs.map((song: ReturnType<typeof exploreMapToSongData>, idx: number) => (
+                      // Queue = full storeSongs so playback continues across all genres
+                      <StoreTrackCard key={`__all-${song.id}`} song={song} size="md" allSongs={storeSongs} songIndex={idx} isNew={mode === "new"} />
                     ))}
                   </ShowcaseRow>
                 );
@@ -1120,12 +1119,17 @@ export default function ExplorePage() {
                 if (genreSongs.length < 3) return; // skip tiny rows
                 // Sanitize genre for use in key (remove spaces/special chars)
                 const genreKey = genre.replace(/[^a-zA-Z0-9]/g, "_");
+                // Find each genre song's index in the full storeSongs list so the queue
+                // continues across genres after the last track in this row.
                 rows.push(
                   <ShowcaseRow key={genre} title={genre} seeAllHref={`/explore?genre=${encodeURIComponent(genre)}`} className="px-6">
-                    {genreSongs.map((song: ReturnType<typeof exploreMapToSongData>, idx: number) => (
-                      // Namespace key with genre to prevent collision with __all row
-                      <StoreTrackCard key={`${genreKey}-${song.id}`} song={song} size="md" allSongs={genreSongs} songIndex={idx} isNew={mode === "new"} />
-                    ))}
+                    {genreSongs.map((song: ReturnType<typeof exploreMapToSongData>) => {
+                      const globalIdx = storeSongs.findIndex((s: ReturnType<typeof exploreMapToSongData>) => s.id === song.id);
+                      return (
+                        // Queue = full storeSongs; start at this song's global position
+                        <StoreTrackCard key={`${genreKey}-${song.id}`} song={song} size="md" allSongs={storeSongs} songIndex={globalIdx >= 0 ? globalIdx : 0} isNew={mode === "new"} />
+                      );
+                    })}
                   </ShowcaseRow>
                 );
               });
@@ -1144,15 +1148,17 @@ export default function ExplorePage() {
             {creatorGroups.map(({ creator, items }) => {
               const artistName = creator?.artistHandle || creator?.name || "Unknown";
               const initial = artistName.charAt(0).toUpperCase();
-              const creatorQueue = items
+              // Full-page queue — playback continues across all creators, not just this row
+              const fullQueue = songs
                 .filter((s: any) => !!s.song.fileUrl)
                 .map(itemToTrack);
               const handleCreatorPlay = (item: any) => {
                 // ExploreCard passes { song, creator } — convert to track for queue
                 const track = itemToTrack(item);
-                const startIdx = creatorQueue.findIndex((t: any) => t.id === track.id);
-                if (creatorQueue.length > 0) {
-                  playQueueAt(creatorQueue, startIdx >= 0 ? startIdx : 0, "EXPLORE");
+                // Find position in the full queue so playback continues past this creator's row
+                const startIdx = fullQueue.findIndex((t: any) => t.id === track.id);
+                if (fullQueue.length > 0) {
+                  playQueueAt(fullQueue, startIdx >= 0 ? startIdx : 0, "EXPLORE");
                 } else {
                   addAndPlay(track);
                 }

@@ -6070,3 +6070,10 @@
 
 ## Genre Selector Fix — Individual Upload
 - [x] Replace limited UPLOAD_GENRES chip buttons in UploadPage with full EDIT_GENRES dropdown (Select) matching batch upload format
+
+## Explore Queue + Catalog Uncap
+- [x] Remove genre-bound queue wall: playing any track on Explore queues all visible songs (full storeSongs), not just the genre row
+- [x] Classic view: queue now spans all songs on the page, not just the creator's tracks
+- [x] Raise server max limits: discover/trending/newThisWeek from 500 → 2000
+- [x] Raise client limits: trending/newThisWeek/randomize queries from 500 → 2000
+- [x] Remove topSlice 20-cap on "All Tracks" row — all loaded songs display in the row

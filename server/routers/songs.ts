@@ -216,7 +216,7 @@ export const songsRouter = router({
      * Returns paginated public works in canonical FeedRow[] shape { song: SongRecord, creator: CreatorSummary }.
      * All clients (web, mobile) MUST use coreDataTypes.ts FeedRow for type safety.
      */
-    discover: publicProcedure.input(z.object({ genre: z.string().optional(), search: z.string().optional(), limit: z.number().max(500).optional(), offset: z.number().optional(), randomize: z.boolean().optional(), seed: z.number().optional(), contentType: z.enum(["audio", "lyrics", "manuscript", "comic", "written", "game"]).optional() }).optional()).query(async ({ input }) => getPublicSongs(input ?? {})),
+    discover: publicProcedure.input(z.object({ genre: z.string().optional(), search: z.string().optional(), limit: z.number().max(2000).optional(), offset: z.number().optional(), randomize: z.boolean().optional(), seed: z.number().optional(), contentType: z.enum(["audio", "lyrics", "manuscript", "comic", "written", "game"]).optional() }).optional()).query(async ({ input }) => getPublicSongs(input ?? {})),
     /**
      * @version 1.0.0
      * Cursor-based infinite-scroll variant of discover.
@@ -251,13 +251,13 @@ export const songsRouter = router({
      * Returns trending works scored by weekly plays + likes in canonical FeedRow[] shape.
      * Score: weeklyPlays * 3 + weeklyLikes * 5 + allTimePlays * 0.01 (recency-weighted).
      */
-    trending: publicProcedure.input(z.object({ genre: z.string().optional(), limit: z.number().max(500).optional(), contentType: z.enum(["audio", "lyrics", "manuscript", "comic", "written", "game"]).optional() }).optional()).query(async ({ input }) => getTrendingWorks(input ?? {})),
+    trending: publicProcedure.input(z.object({ genre: z.string().optional(), limit: z.number().max(2000).optional(), contentType: z.enum(["audio", "lyrics", "manuscript", "comic", "written", "game"]).optional() }).optional()).query(async ({ input }) => getTrendingWorks(input ?? {})),
     /**
      * @version 1.0.0
      * Returns works published within the last 90 days, newest first, in canonical FeedRow[] shape.
      * Falls back to all-time newest if no works exist within the window.
      */
-    newThisWeek: publicProcedure.input(z.object({ genre: z.string().optional(), contentType: z.enum(["audio", "lyrics", "manuscript", "comic", "written", "game"]).optional(), limit: z.number().max(500).optional() }).optional()).query(async ({ input }) => getNewThisWeek(input ?? {})),
+    newThisWeek: publicProcedure.input(z.object({ genre: z.string().optional(), contentType: z.enum(["audio", "lyrics", "manuscript", "comic", "written", "game"]).optional(), limit: z.number().max(2000).optional() }).optional()).query(async ({ input }) => getNewThisWeek(input ?? {})),
     updateCredits: protectedProcedure.input(z.object({ songId: z.number().int(), creditsJson: z.string().max(4096) })).mutation(async ({ ctx, input }) => {
       const song = await getSongById(input.songId);
       if (!song) throw new TRPCError({ code: "NOT_FOUND", message: "Song not found" });
