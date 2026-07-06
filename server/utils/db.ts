@@ -138,6 +138,17 @@ export async function getUserById(id: number) {
   return result.length > 0 ? result[0] : undefined;
 }
 
+/** Look up a user by their artistHandle (exact, then case-insensitive). */
+export async function getUserByHandle(handle: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const exact = await db.select().from(users).where(eq(users.artistHandle, handle)).limit(1);
+  if (exact.length > 0) return exact[0];
+  const lower = handle.toLowerCase();
+  const ci = await db.select().from(users).where(sql`LOWER(${users.artistHandle}) = ${lower}`).limit(1);
+  return ci.length > 0 ? ci[0] : undefined;
+}
+
 // ─── Name History ────────────────────────────────────────────────────────────
 
 /** Record an initial registration name (oldName = null) or a name change. */

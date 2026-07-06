@@ -15,7 +15,7 @@ import {
   addComment, createSong, deleteSong, getAllCreators,
   getCommentsBySong, getPublicSongs, getSongById,
   getSongsByUser, getSongWithCreator, getTipsBySong, reorderSongs, getNextDisplayOrder,
-  getUserById, incrementPlayCount, recordDownload,
+  getUserById, getUserByHandle, incrementPlayCount, recordDownload,
   recordLicense, recordSlotPurchase, recordTip,
   updateSongLyrics, updateSongLyricsWithWid, updateSongStatus, getRelatedSongs, updateSongVideo,
   updateUserProfile, updateUserStripeAccount,
@@ -187,6 +187,12 @@ const KEEPER_PRESETS = [
 export const profileRouter = router({
     me: protectedProcedure.query(async ({ ctx }) => getUserById(ctx.user.id)),
     getById: publicProcedure.input(z.object({ userId: z.number() })).query(async ({ input }) => getUserById(input.userId)),
+    /** Resolve a creator by artistHandle — used for human-readable share URLs */
+    getByHandle: publicProcedure.input(z.object({ handle: z.string() })).query(async ({ input }) => {
+      const user = await getUserByHandle(input.handle);
+      if (!user) return null;
+      return { id: user.id, name: user.name, artistHandle: user.artistHandle };
+    }),
     /** Lightweight creator card data for handle pop-ups — returns only public fields */
     getCreatorMini: publicProcedure.input(z.object({ userId: z.number().int().positive() })).query(async ({ input }) => {
       const user = await getUserById(input.userId);

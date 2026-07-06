@@ -414,8 +414,18 @@ export default function CreatorProfilePage() {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
   const [, navigate] = useLocation();
-  const creatorId = parseInt(id || "0");
   const utils = trpc.useUtils();
+
+  // Support both numeric IDs (/creator/123) and handle slugs (/creator/slimdoggyaimusic)
+  const isNumeric = /^\d+$/.test(id || "");
+  const numericId = isNumeric ? parseInt(id || "0") : 0;
+
+  // Resolve handle → numeric ID when URL uses a slug
+  const handleQuery = trpc.profile.getByHandle.useQuery(
+    { handle: id || "" },
+    { enabled: !isNumeric && !!id, staleTime: 60_000 }
+  );
+  const creatorId = isNumeric ? numericId : (handleQuery.data?.id ?? 0);
   const [tipOpen, setTipOpen] = useState(false);
   const [tipSuccess, setTipSuccess] = useState(false);
   const [showDomainEditor, setShowDomainEditor] = useState(false);
@@ -829,7 +839,9 @@ export default function CreatorProfilePage() {
     tipMutation.mutate({ creatorId: creator.id, amountCents: cents, origin: window.location.origin });
   };
 
-  if (isLoading) return (
+    // While resolving a handle slug, show loading until we have the numeric ID
+  const isResolvingHandle = !isNumeric && handleQuery.isLoading;
+  if (isLoading || isResolvingHandle) return (
     <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--ln-coal)" }}>
       <div className="space-y-2 text-center">
         <div className="w-12 h-12 rounded-full mx-auto animate-pulse" style={{ background: "rgba(196,154,40,0.25)" }} />
@@ -837,7 +849,17 @@ export default function CreatorProfilePage() {
       </div>
     </div>
   );
-
+  // Handle not found — only show after handle resolution is complete
+  if (!isNumeric && !handleQuery.isLoading && !handleQuery.data) return (
+    <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--ln-coal)" }}>
+      <div className="text-center">
+        <p style={{ color: "var(--ln-smoke)" }}>Creator not found.</p>
+        <Link href="/">
+          <Button className="mt-4" style={{ background: "var(--ln-gold)", color: "var(--ln-parchment)" }}>Go Home</Button>
+        </Link>
+      </div>
+    </div>
+  );
   if (!data) return (
     <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--ln-coal)" }}>
       <div className="text-center">
