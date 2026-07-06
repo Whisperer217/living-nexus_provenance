@@ -1034,8 +1034,16 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const queueContextLabel = QUEUE_CONTEXT_LABELS[state.queueContext] ?? "Now Playing";
 
   // ── Play Audit (Trust Layer) ─────────────────────────────────────────────────
-  const playSessionRef = useRef<{ sessionId: string; songId: number; witnessId?: string; reported: boolean } | null>(null);
+  // Session shape: reported = qualified play fired; completionReported = full listen fired
+  const playSessionRef = useRef<{
+    sessionId: string;
+    songId: number;
+    witnessId?: string;
+    reported: boolean;
+    completionReported: boolean;
+  } | null>(null);
   const recordPlayMutation = trpc.songs.recordPlay.useMutation();
+  const markPlayCompletedMutation = trpc.songs.markPlayCompleted.useMutation();
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -1053,37 +1061,61 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
           songId,
           witnessId: track.witnessId,
           reported: false,
+          completionReported: false,
         };
       }
     };
 
     const onTimeUpdate = () => {
       const session = playSessionRef.current;
-      if (!session || session.reported) return;
+      if (!session) return;
       const elapsed = audio.currentTime;
-      if (elapsed >= MIN_PLAY_SECONDS) {
+      const total = audio.duration;
+
+      // Phase 1: record qualified play at 30s threshold
+      if (!session.reported && elapsed >= MIN_PLAY_SECONDS) {
         session.reported = true;
         recordPlayMutation.mutate({
           songId: session.songId,
           witnessId: session.witnessId,
           sessionId: session.sessionId,
           durationSeconds: Math.floor(elapsed),
-          totalDurationSeconds: audio.duration > 0 ? Math.floor(audio.duration) : undefined,
+          totalDurationSeconds: total > 0 ? Math.floor(total) : undefined,
+        });
+      }
+
+      // Phase 2: mark as full listen when >= 80% heard (only after qualified play recorded)
+      if (session.reported && !session.completionReported && total > 0 && elapsed >= total * 0.8) {
+        session.completionReported = true;
+        markPlayCompletedMutation.mutate({
+          sessionId: session.sessionId,
+          durationSeconds: Math.floor(elapsed),
         });
       }
     };
 
     const onEnded = () => {
       const session = playSessionRef.current;
-      if (session && !session.reported && audio.currentTime >= MIN_PLAY_SECONDS) {
-        session.reported = true;
-        recordPlayMutation.mutate({
-          songId: session.songId,
-          witnessId: session.witnessId,
-          sessionId: session.sessionId,
-          durationSeconds: Math.floor(audio.currentTime),
-          totalDurationSeconds: audio.duration > 0 ? Math.floor(audio.duration) : undefined,
-        });
+      if (session) {
+        // If qualified play not yet recorded (very short track or edge case)
+        if (!session.reported && audio.currentTime >= MIN_PLAY_SECONDS) {
+          session.reported = true;
+          recordPlayMutation.mutate({
+            songId: session.songId,
+            witnessId: session.witnessId,
+            sessionId: session.sessionId,
+            durationSeconds: Math.floor(audio.currentTime),
+            totalDurationSeconds: audio.duration > 0 ? Math.floor(audio.duration) : undefined,
+          });
+        }
+        // Track ended = full listen — mark completed if not already done
+        if (session.reported && !session.completionReported) {
+          session.completionReported = true;
+          markPlayCompletedMutation.mutate({
+            sessionId: session.sessionId,
+            durationSeconds: Math.floor(audio.currentTime || audio.duration || 0),
+          });
+        }
       }
       playSessionRef.current = null;
     };

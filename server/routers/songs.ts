@@ -991,6 +991,23 @@ export const songsRouter = router({
         });
         return { ...result, minThreshold: MIN_PLAY_SECONDS };
       }),
+    // Mark a previously recorded play as completed (>= 80% of track heard)
+    markPlayCompleted: publicProcedure
+      .input(z.object({
+        sessionId: z.string().min(8).max(64),
+        durationSeconds: z.number().min(0),
+      }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) return { updated: false };
+        const { sql: drizzleSql } = await import("drizzle-orm");
+        await db.execute(drizzleSql`
+          UPDATE playEvents
+          SET completed = TRUE, durationSeconds = ${Math.floor(input.durationSeconds)}
+          WHERE sessionId = ${input.sessionId} AND completed = FALSE
+        `);
+        return { updated: true };
+      }),
     // Get play audit stats for a song
     playAuditStats: publicProcedure
       .input(z.object({ songId: z.number().int().positive() }))
