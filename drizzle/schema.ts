@@ -789,6 +789,9 @@ export const collections = mysqlTable("collections", {
   coverPositionX: float("coverPositionX").default(50).notNull(),
   coverPositionY: float("coverPositionY").default(50).notNull(),
   trackCount: int("trackCount").notNull().default(0),
+  // Creator-defined default presentation for visitors ("carousel" = Tile, "list" = List)
+  // Visitors can toggle temporarily, but this is the canonical default that always loads first.
+  defaultView: mysqlEnum("defaultView", ["carousel", "list"]).default("carousel").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 export type Collection = typeof collections.$inferSelect;

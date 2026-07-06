@@ -2346,6 +2346,19 @@ export async function updateCollectionCover(
   );
 }
 
+/** Update the creator-defined default view mode for an album (carousel = Tile, list = List) */
+export async function updateCollectionDefaultView(
+  collectionId: number,
+  creatorId: number,
+  defaultView: "carousel" | "list"
+) {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(collections).set({ defaultView }).where(
+    and(eq(collections.id, collectionId), eq(collections.creatorId, creatorId))
+  );
+}
+
 // ─── Creator Analytics ────────────────────────────────────────────────────────
 export async function getCreatorAnalytics(creatorId: number) {
   const db = await getDb();

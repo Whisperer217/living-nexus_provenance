@@ -1,0 +1,1 @@
+ALTER TABLE `collections` ADD `defaultView` enum('carousel','list') DEFAULT 'carousel' NOT NULL;

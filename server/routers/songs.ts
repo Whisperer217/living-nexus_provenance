@@ -42,7 +42,7 @@ import {
   recordNameChange, getNameHistory, getOriginalName,
   createCollection, updateCollectionPdf, linkSongsToCollection,
   getCollectionByWid, getSongsByCollectionId, getCollectionForSong,
-  getCollectionsByCreator, updateCollectionCover,
+  getCollectionsByCreator, updateCollectionCover, updateCollectionDefaultView,
   getAllSupporters, getSupporterByUserId, recordPlatformGift, getPublishedCountByUser,
   getNewEventCountForCreator, touchActivityVisit, touchDashboardVisit, getDashboardDeltas,
   getSongReactions, toggleSongReaction,
@@ -1533,6 +1533,14 @@ ${workType === "manuscript" || workType === "comic" ? "Category" : "Genre"}: ${i
       const { url } = await storagePut(`collection-covers/${ctx.user.id}-${input.collectionId}-${Date.now()}.jpg`, buffer, input.mimeType);
       await updateCollectionCover(input.collectionId, ctx.user.id, { coverArtUrl: url });
       return { url };
+    }),
+    // ── Update Collection Default View ────────────────────────────────────────────────────────
+    updateCollectionDefaultView: protectedProcedure.input(z.object({
+      collectionId: z.number().int().positive(),
+      defaultView: z.enum(["carousel", "list"]),
+    })).mutation(async ({ ctx, input }) => {
+      await updateCollectionDefaultView(input.collectionId, ctx.user.id, input.defaultView);
+      return { success: true };
     }),
     /* Stub: worker stats for MissionControlPage (backend worker not yet deployed) */
     getWorkerStats: protectedProcedure.query(async () => {

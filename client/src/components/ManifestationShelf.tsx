@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { triggerTaggedDownload } from "@/lib/downloadTrack";
 import { Link } from "wouter";
-import { Play, Pause, ChevronLeft, ChevronRight, Shield, Music, BookOpen, FileText, Film, Package, Layers, LayoutGrid, List, ChevronDown, ChevronUp as ChevronUpIcon, Clock, Headphones, Download, Share2, Pencil } from "lucide-react";
+import { Play, Pause, ChevronLeft, ChevronRight, Shield, Music, BookOpen, FileText, Film, Package, Layers, LayoutGrid, List, ChevronDown, ChevronUp as ChevronUpIcon, Clock, Headphones, Download, Share2, Pencil, Pin } from "lucide-react";
 import { MediaAsset } from "@/components/MediaAsset";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
@@ -34,6 +34,10 @@ export interface ShelfAlbum {
   tracks: ShelfTrack[];
   medium?: "music" | "books" | "comics" | "manuscripts" | "artifacts" | "merch" | "video" | "other";
   projectSlug?: string | null;
+  /** Creator-defined canonical default view. Visitors can toggle temporarily but this is the initial state. */
+  defaultView?: "carousel" | "list" | null;
+  /** Collection DB id — needed for the owner to persist their view choice */
+  collectionId?: number | null;
 }
 
 interface ManifestationShelfProps {
@@ -415,11 +419,19 @@ export function ManifestationShelf({
   const [canScrollRight, setCanScrollRight] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const dragStart = useRef({ x: 0, scrollLeft: 0 });
-  // View mode: auto-default to list when there are many tracks
+  // View mode: use creator-defined default if set, otherwise fall back to track-count heuristic
   const [viewMode, setViewMode] = useState<"carousel" | "list">(
-    album.tracks.length >= 12 ? "list" : "carousel"
+    album.defaultView ?? (album.tracks.length >= 12 ? "list" : "carousel")
   );
   const LIST_INITIAL = 12;
+
+  // Owner-only: persist the current view as the canonical default for all visitors
+  const setDefaultViewMutation = trpc.songs.updateCollectionDefaultView.useMutation({
+    onSuccess: () => toast.success("Default view saved"),
+    onError: () => toast.error("Could not save default view"),
+  });
+  const isCurrentViewDefault = viewMode === (album.defaultView ?? null);
+  const canSetDefault = isOwner && !!album.collectionId && !isCurrentViewDefault;
   const [listExpanded, setListExpanded] = useState(false);
 
   const updateScrollState = useCallback(() => {
@@ -610,6 +622,28 @@ export function ManifestationShelf({
           >
             <LayoutGrid className="w-3.5 h-3.5" />
           </button>
+
+          {/* Owner: Set current view as canonical default */}
+          {isOwner && album.collectionId && (
+            <button
+              className="h-8 px-2 rounded-full flex items-center gap-1 transition-all text-[10px] font-bold tracking-wide"
+              style={{
+                background: canSetDefault ? "rgba(196,154,40,0.12)" : "rgba(196,154,40,0.06)",
+                color: canSetDefault ? "var(--ln-gold)" : "rgba(196,154,40,0.35)",
+                border: `1px solid ${canSetDefault ? "rgba(196,154,40,0.35)" : "rgba(196,154,40,0.1)"}`,
+                cursor: canSetDefault ? "pointer" : "default",
+              }}
+              onClick={() => {
+                if (!canSetDefault || !album.collectionId) return;
+                setDefaultViewMutation.mutate({ collectionId: album.collectionId, defaultView: viewMode });
+              }}
+              title={isCurrentViewDefault ? "This is already the default view" : `Set ${viewMode === "list" ? "List" : "Tile"} as default for visitors`}
+              aria-label="Set as default view"
+            >
+              <Pin className="w-3 h-3" />
+              <span>{isCurrentViewDefault ? "DEFAULT" : "SET DEFAULT"}</span>
+            </button>
+          )}
 
           {/* Scroll arrows — only in carousel mode on desktop */}
           {viewMode === "carousel" && (
