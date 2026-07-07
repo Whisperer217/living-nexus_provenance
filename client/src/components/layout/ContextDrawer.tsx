@@ -21,7 +21,7 @@ import {
   FolderOpen, Settings, LogOut, LogIn,
   Shield, BookMarked,
   LayoutGrid, LayoutDashboard, X, ExternalLink,
-  Download, PenTool,
+  Download, PenTool, Palette,
 } from "lucide-react";
 
 // ── Types ─────────────────────────────────────────────────────────
@@ -97,6 +97,7 @@ const PANELS: Record<NavMode, ModePanel> = {
           { icon: <FileText size={14} />, label: "Lyrics", path: "/explore?medium=lyrics" },
           { icon: <BookOpen size={14} />, label: "Manuscripts", path: "/explore?medium=manuscripts" },
           { icon: <Image size={14} />, label: "Comics & Visual Art", path: "/explore?medium=comics" },
+          { icon: <Palette size={14} />, label: "Visual Works", path: "/visual-works", description: "Photography, art & imagery" },
         ],
       },
       {
@@ -156,6 +157,7 @@ const PANELS: Record<NavMode, ModePanel> = {
       {
         links: [
           { icon: <Shield size={14} />, label: "Register Work", path: "/upload", description: "Issue a Witness ID", authOnly: true, gold: true },
+          { icon: <Palette size={14} />, label: "Register Visual Works", path: "/visual-works/new", description: "Photography, art & imagery", authOnly: true },
           { icon: <Sparkles size={14} />, label: "Prompt Studio", path: "/keeper-compose", description: "Lyrics → AI music prompt" },
           { icon: <Users size={14} />, label: "Guide Directory", path: "/guides", description: "Browse guide characters" },
           { icon: <Shield size={14} />, label: "Register Guide Character", path: "/guides/upload", description: "Register a guide entity", authOnly: true, gold: true },

@@ -80,6 +80,7 @@ import { globalActivityRouter }    from "./globalActivity";
 import { booksRouter }             from "./books";
 import { externalPlaylistsRouter } from "./externalPlaylists";
 import { projectsRouter }          from "./projects";
+import { visualWorksRouter }       from "./visualWorks";
 
 // Re-export the Stripe webhook handler (lives in the payment domain)
 export { handleStripeWebhook } from "./stripeWebhook";
@@ -157,6 +158,9 @@ export const appRouter = router({
   books:             booksRouter,
   externalPlaylists: externalPlaylistsRouter,
   projects:          projectsRouter,
+
+  // Visual Works domain
+  visualWorks: visualWorksRouter,
 });
 
 export type AppRouter = typeof appRouter;

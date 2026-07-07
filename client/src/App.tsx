@@ -110,6 +110,9 @@ const OnboardingManifest = lazy(() => import("./pages/OnboardingManifest"));
 const DeveloperDashboardPage = lazy(() => import("./pages/DeveloperDashboardPage"));
 const DevelopersPage = lazy(() => import("./pages/DevelopersPage"));
 const LicensedDownloadsPage = lazy(() => import("./pages/LicensedDownloadsPage"));
+const VisualWorksPage = lazy(() => import("./pages/VisualWorksPage"));
+const VisualWorksNewPage = lazy(() => import("./pages/VisualWorksNewPage"));
+const VisualWorksDetailPage = lazy(() => import("./pages/VisualWorksDetailPage"));
 
 // Minimal fallback shown while a page chunk loads (typically <200ms on CDN)
 function PageLoader() {
@@ -267,6 +270,10 @@ function Router() {
                 <Route path="/guide/:id" component={GuideDetailPage} />
                 <Route path="/collection/:slug" component={CollectionPage} />
                 <Route path="/constellation/:songId" component={ConstellationPage} />
+                {/* ── Visual Works — 6th Creative Medium ── */}
+                <Route path="/visual-works" component={VisualWorksPage} />
+                <Route path="/visual-works/new" component={VisualWorksNewPage} />
+                <Route path="/visual-works/:id" component={VisualWorksDetailPage} />
                 <Route path="/developer" component={DeveloperDashboardPage} />
                 <Route path="/developers" component={DevelopersPage} />
                 {/* ── Stability redirects — dead routes → canonical destinations ── */}

@@ -6077,3 +6077,18 @@
 - [x] Raise server max limits: discover/trending/newThisWeek from 500 → 2000
 - [x] Raise client limits: trending/newThisWeek/randomize queries from 500 → 2000
 - [x] Remove topSlice 20-cap on "All Tracks" row — all loaded songs display in the row
+
+## Phase N: Visual Works — 6th Creative Medium
+- [x] Add visualWorks and visualItems tables to drizzle/schema.ts
+- [x] Run db:push — tables created in production DB
+- [x] server/db/visualWorks.ts — DB helpers (createCollection, getCollection, getPublicCollections, getMyCollections, addItem, publishCollection)
+- [x] server/routers/visualWorks.ts — tRPC router (createCollection, uploadItem, publishCollection, getPublicCollections, getMyCollections, getCollection)
+- [x] Wire visualWorksRouter into server/routers/index.ts
+- [x] CosmicMediumIcon.tsx — add "visual" medium type, rose/pink color token (#FDA4AF), VisualGlyph SVG
+- [x] UploadPage.tsx — add 6th tile (Visual Works), Before You Register checklist, visual mode section with CTA
+- [x] VisualWorksPage.tsx — public browse page with masonry grid, WID pills, empty states
+- [x] VisualWorksNewPage.tsx — 3-step registration flow (meta → images → seal)
+- [x] VisualWorksDetailPage.tsx — collection detail with lightbox, masonry grid, provenance display
+- [x] App.tsx — lazy imports + routes for /visual-works, /visual-works/new, /visual-works/:id
+- [x] ContextDrawer.tsx — Visual Works link in Explore "By Medium" + Register section
+- [x] TypeScript check — zero errors

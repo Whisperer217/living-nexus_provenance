@@ -19,3 +19,4 @@
 export * from "./songs";
 export * from "./users";
 export * from "./comments";
+export * from "./visualWorks";

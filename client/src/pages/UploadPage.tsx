@@ -213,7 +213,7 @@ export default function UploadPage() {
 
   const { extractMetadata, isExtracting: isExtractingMeta } = useAudioMetadata();
 
-  const [uploadMode, setUploadMode] = useState<"audio" | "lyrics" | "manuscript" | "comic" | "game">("audio");
+  const [uploadMode, setUploadMode] = useState<"audio" | "lyrics" | "manuscript" | "comic" | "game" | "visual">("audio");
   const [gameUrl, setGameUrl] = useState("");
   const [gameDownloadUrl, setGameDownloadUrl] = useState("");
   const [gameEngine, setGameEngine] = useState("");
@@ -930,10 +930,10 @@ export default function UploadPage() {
           <div className="flex items-start justify-between gap-4">
             <div>
               <h1 className="text-2xl md:text-3xl font-bold mb-1" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>
-                {uploadMode === "audio" ? "Register Track" : uploadMode === "lyrics" ? "Register Lyrics" : uploadMode === "manuscript" ? "Register Manuscript" : uploadMode === "game" ? "Register Game" : "Register Comic / Novel"}
+                {uploadMode === "audio" ? "Register Track" : uploadMode === "lyrics" ? "Register Lyrics" : uploadMode === "manuscript" ? "Register Manuscript" : uploadMode === "game" ? "Register Game" : uploadMode === "visual" ? "Register Visual Works" : "Register Comic / Novel"}
               </h1>
               <p className="text-sm" style={{ color: "#E2E8F0" }}>
-                {uploadMode === "audio" ? "Register your music with cryptographic provenance — BDDT Publishing / Command Domains LLC" : uploadMode === "lyrics" ? "Register your lyrics with a cryptographic Witness ID — authorship sealed at creation" : uploadMode === "manuscript" ? "Seal your manuscript with provenance — every word, dated and verified" : uploadMode === "game" ? "Register your game as a witnessed manifestation — playable, versioned, provenance-sealed" : "Register your comic or novel — art and story, sealed with a Witness ID"}
+                {uploadMode === "audio" ? "Register your music with cryptographic provenance — BDDT Publishing / Command Domains LLC" : uploadMode === "lyrics" ? "Register your lyrics with a cryptographic Witness ID — authorship sealed at creation" : uploadMode === "manuscript" ? "Seal your manuscript with provenance — every word, dated and verified" : uploadMode === "game" ? "Register your game as a witnessed manifestation — playable, versioned, provenance-sealed" : uploadMode === "visual" ? "Register your visual works — photography, art, and imagery sealed with a Witness ID" : "Register your comic or novel — art and story, sealed with a Witness ID"}
               </p>
             </div>
             <button
@@ -1038,6 +1038,13 @@ export default function UploadPage() {
                     label="Game"
                     onClick={() => { setUploadMode("game"); setAudioFile(null); setDocumentFile(null); setWitnessData(null); }}
                   />
+                  <CosmicMediumIcon
+                    medium="visual"
+                    size={38}
+                    active={uploadMode === "visual"}
+                    label="Visual Works"
+                    onClick={() => { setUploadMode("visual"); setAudioFile(null); setDocumentFile(null); setWitnessData(null); }}
+                  />
                 </div>
               </div>
 
@@ -1107,6 +1114,21 @@ export default function UploadPage() {
                       { label: "Download URL", note: "Direct link to ZIP, EXE, or APK for downloadable games", required: false },
                       { label: "Game engine", note: "e.g. Unity WebGL, Twine, Construct, GDevelop, RPG Maker", required: false },
                       { label: "Creator notes", note: "Controls, lore, or dev notes for players", required: false },
+                    ],
+                  },
+                  visual: {
+                    icon: "🎨",
+                    color: "#FDA4AF",
+                    title: "Before You Register Visual Works",
+                    items: [
+                      { label: "Collection title", note: "Name for your photo album, portfolio, or series", required: true },
+                      { label: "At least one image", note: "JPEG, PNG, WebP, or GIF — up to 20 MB per image", required: true },
+                      { label: "Creator name", required: true },
+                      { label: "Description", note: "What this collection represents or documents", required: false },
+                      { label: "Medium type", note: "Photography / Painting / Illustration / Digital art / AI-generated / Mixed media", required: false },
+                      { label: "Creation date", note: "When the work was originally created", required: false },
+                      { label: "Licensing", note: "All rights reserved, Creative Commons, etc.", required: false },
+                      { label: "AI assistance disclosure", note: "None / Assisted / Generated — required for AI-generated imagery", required: false },
                     ],
                   },
                 };
@@ -1333,6 +1355,75 @@ export default function UploadPage() {
                   </div>
                 </div>
               )}
+              {uploadMode === "visual" && (
+                <div className="rounded-xl p-4 space-y-3" style={{ background: "rgba(253,164,175,0.05)", border: "1px solid rgba(253,164,175,0.2)" }}>
+                  <p className="text-xs font-heading tracking-widest uppercase" style={{ color: "#FDA4AF" }}>🎨 Visual Works — Collection Details</p>
+                  <p className="text-xs" style={{ color: "#B8A88A" }}>Visual Works are registered as a collection. Use the <strong style={{ color: "#FDA4AF" }}>Batch Upload</strong> flow to upload multiple images at once. You can also register a single image here as a one-piece collection.</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-xs font-medium block mb-1" style={{ color: "var(--ln-parchment)" }}>Medium Type</label>
+                      <select
+                        className="w-full rounded-lg px-3 py-2 text-sm"
+                        style={{ background: "var(--ln-coal)", border: "1px solid rgba(253,164,175,0.25)", color: "var(--ln-parchment)" }}
+                        onChange={e => (window as any).__visualMediumType = e.target.value}
+                      >
+                        <option value="">Select medium (optional)</option>
+                        <option value="Photography">Photography</option>
+                        <option value="Painting">Painting</option>
+                        <option value="Illustration">Illustration</option>
+                        <option value="Digital Art">Digital Art</option>
+                        <option value="AI-Generated">AI-Generated</option>
+                        <option value="Mixed Media">Mixed Media</option>
+                        <option value="Concept Art">Concept Art</option>
+                        <option value="Graphic Design">Graphic Design</option>
+                        <option value="Wallpaper">Wallpaper</option>
+                        <option value="Other">Other</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium block mb-1" style={{ color: "var(--ln-parchment)" }}>AI Disclosure</label>
+                      <select
+                        className="w-full rounded-lg px-3 py-2 text-sm"
+                        style={{ background: "var(--ln-coal)", border: "1px solid rgba(253,164,175,0.25)", color: "var(--ln-parchment)" }}
+                        onChange={e => (window as any).__visualHaaiDisclosure = e.target.value}
+                      >
+                        <option value="none">None — 100% human-made</option>
+                        <option value="assisted">AI-Assisted</option>
+                        <option value="generated">AI-Generated</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium block mb-1" style={{ color: "var(--ln-parchment)" }}>Style / Subject</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Abstract, Portrait, Landscape, Fantasy..."
+                      className="w-full rounded-lg px-3 py-2 text-sm"
+                      style={{ background: "var(--ln-coal)", border: "1px solid rgba(253,164,175,0.25)", color: "var(--ln-parchment)" }}
+                      onChange={e => (window as any).__visualStyle = e.target.value}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium block mb-1" style={{ color: "var(--ln-parchment)" }}>Origin Story <span style={{ color: "#5A6A72" }}>(optional)</span></label>
+                    <textarea
+                      placeholder="What inspired this collection? What story does it tell?"
+                      rows={3}
+                      className="w-full rounded-lg px-3 py-2 text-sm resize-none"
+                      style={{ background: "var(--ln-coal)", border: "1px solid rgba(253,164,175,0.25)", color: "var(--ln-parchment)" }}
+                      onChange={e => (window as any).__visualOriginStory = e.target.value}
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => navigate("/visual-works/new")}
+                    className="w-full rounded-lg py-2.5 text-sm font-semibold transition-all hover:opacity-90"
+                    style={{ background: "linear-gradient(135deg, #FDA4AF 0%, #F43F5E 100%)", color: "#fff" }}
+                  >
+                    Open Visual Works Registration →
+                  </button>
+                </div>
+              )}
+
               <div onClick={() => coverInputRef.current?.click()} className="rounded-xl p-5 text-center cursor-pointer transition-all hover:bg-white/5"
                 style={{ border: `2px dashed ${coverFile ? "var(--ln-gold)" : "rgba(196,154,40,0.15)"}`, background: coverFile ? "rgba(196,154,40,0.04)" : "var(--ln-coal)" }}>
                 <input ref={coverInputRef} type="file" accept="image/*" className="hidden"

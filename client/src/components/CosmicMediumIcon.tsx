@@ -11,7 +11,7 @@
 
 import React from "react";
 
-type MediumType = "audio" | "lyrics" | "manuscript" | "comic" | "game";
+type MediumType = "audio" | "lyrics" | "manuscript" | "comic" | "game" | "visual";
 
 interface CosmicMediumIconProps {
   medium: MediumType;
@@ -31,6 +31,7 @@ export const MEDIUM_COLORS: Record<MediumType, { primary: string; glow: string; 
   manuscript: { primary: "var(--ln-seal-bright)",  glow: "rgba(74,222,128,0.30)",  bg: "rgba(22,163,74,0.12)",   border: "rgba(74,222,128,0.40)"  },
   comic:      { primary: "#F87171",  glow: "rgba(248,113,113,0.30)", bg: "rgba(220,38,38,0.12)",   border: "rgba(248,113,113,0.40)" },
   game:       { primary: "#34D399",  glow: "rgba(52,211,153,0.30)",  bg: "rgba(16,185,129,0.12)",  border: "rgba(52,211,153,0.40)"  },
+  visual:     { primary: "#FDA4AF",  glow: "rgba(253,164,175,0.30)", bg: "rgba(244,63,94,0.10)",   border: "rgba(253,164,175,0.40)" },
 };
 
 // ── SVG Glyphs ────────────────────────────────────────────────────────────────
@@ -178,12 +179,43 @@ function ComicGlyph({ color, size }: { color: string; size: number }) {
   );
 }
 
+function VisualGlyph({ color, size }: { color: string; size: number }) {
+  const s = size;
+  return (
+    <svg width={s} height={s} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      {/* Outer sacred ring */}
+      <circle cx="24" cy="24" r="21" stroke={color} strokeWidth="0.6" strokeDasharray="2 4" opacity="0.4" />
+      {/* Aperture / lens iris — 6 blades */}
+      <path d="M24 10 L28 20 L24 24 Z" fill={color} opacity="0.18" />
+      <path d="M38 14 L28 20 L24 24 Z" fill={color} opacity="0.18" />
+      <path d="M38 34 L28 28 L24 24 Z" fill={color} opacity="0.18" />
+      <path d="M24 38 L20 28 L24 24 Z" fill={color} opacity="0.18" />
+      <path d="M10 34 L20 28 L24 24 Z" fill={color} opacity="0.18" />
+      <path d="M10 14 L20 20 L24 24 Z" fill={color} opacity="0.18" />
+      {/* Lens outer ring */}
+      <circle cx="24" cy="24" r="14" stroke={color} strokeWidth="1.2" opacity="0.7" />
+      {/* Lens inner ring */}
+      <circle cx="24" cy="24" r="8" stroke={color} strokeWidth="0.8" opacity="0.5" />
+      {/* Center aperture dot */}
+      <circle cx="24" cy="24" r="3" fill={color} opacity="0.9" />
+      {/* Highlight glint */}
+      <circle cx="21" cy="21" r="1.2" fill={color} opacity="0.6" />
+      {/* Star sparks */}
+      <circle cx="7"  cy="8"  r="0.8" fill={color} opacity="0.6" />
+      <circle cx="41" cy="40" r="0.8" fill={color} opacity="0.6" />
+      <circle cx="40" cy="8"  r="0.5" fill={color} opacity="0.4" />
+      <circle cx="8"  cy="40" r="0.5" fill={color} opacity="0.4" />
+    </svg>
+  );
+}
+
 const GLYPHS: Record<MediumType, React.FC<{ color: string; size: number }>> = {
   audio:      MusicGlyph,
   lyrics:     LyricsGlyph,
   manuscript: ManuscriptGlyph,
   comic:      ComicGlyph,
   game:       GameGlyph,
+  visual:     VisualGlyph,
 };
 
 export const MEDIUM_LABELS: Record<MediumType, string> = {
@@ -192,6 +224,7 @@ export const MEDIUM_LABELS: Record<MediumType, string> = {
   manuscript: "Manuscripts",
   comic:      "Comics",
   game:       "Games",
+  visual:     "Visual Works",
 };
 
 // ── Main component ─────────────────────────────────────────────────────────────

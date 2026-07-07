@@ -2038,3 +2038,96 @@ export const trackDownloadGrants = mysqlTable("trackDownloadGrants", {
 }));
 export type TrackDownloadGrant = typeof trackDownloadGrants.$inferSelect;
 export type InsertTrackDownloadGrant = typeof trackDownloadGrants.$inferInsert;
+
+// ─── Visual Works — 6th Creative Medium ──────────────────────────────────────
+//
+// A Visual Work is a collection of images (photo album, art portfolio, series,
+// concept art set, etc.) registered as a first-class medium on Living Nexus.
+//
+// Model mirrors the album/collection pattern:
+//   visualWorks  → the collection (WID-VWC — Visual Works Collection)
+//   visualItems  → individual images inside a collection (WID-VIS — Visual Item)
+//
+// Provenance: every upload of an image version is a new visualItem row.
+// The creative journey (sketch → draft → iteration → final) is fully archived.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const visualWorks = mysqlTable("visualWorks", {
+  id: int("id").autoincrement().primaryKey(),
+  creatorId: int("creatorId").notNull(),
+  // Collection-level WID — WID-VWC-XXXXXXXX-XXXXXXXX
+  collectionWid: varchar("collectionWid", { length: 64 }).unique(),
+  // Core identity
+  title: varchar("title", { length: 512 }).notNull(),
+  description: text("description"),
+  // Visual medium type
+  mediumType: varchar("mediumType", { length: 64 }),
+  style: varchar("style", { length: 256 }),
+  subject: varchar("subject", { length: 256 }),
+  keywords: text("keywords"),
+  // Licensing & copyright
+  license: varchar("license", { length: 128 }),
+  copyright: varchar("copyright", { length: 256 }),
+  // Cover image
+  coverUrl: text("coverUrl"),
+  // AI assistance disclosure — none | assisted | generated
+  haaiDisclosure: varchar("haaiDisclosure", { length: 32 }).default("none"),
+  // Origin story / creator testimony
+  originStory: text("originStory"),
+  // Visibility
+  status: varchar("status", { length: 16 }).default("draft").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().notNull(),
+}, (t) => ({
+  vwCreatorIdx: index("vw_creator_idx").on(t.creatorId),
+  vwStatusIdx:  index("vw_status_idx").on(t.status),
+  vwWidIdx:     index("vw_wid_idx").on(t.collectionWid),
+}));
+
+export type VisualWork = typeof visualWorks.$inferSelect;
+export type InsertVisualWork = typeof visualWorks.$inferInsert;
+
+// ─── Visual Items — individual images within a Visual Works collection ────────
+export const visualItems = mysqlTable("visualItems", {
+  id: int("id").autoincrement().primaryKey(),
+  collectionId: int("collectionId").notNull(),
+  creatorId: int("creatorId").notNull(),
+  // Individual image WID — WID-VIS-XXXXXXXX-XXXXXXXX
+  witnessId: varchar("witnessId", { length: 64 }).unique(),
+  // Image storage
+  imageUrl: text("imageUrl").notNull(),
+  imageKey: varchar("imageKey", { length: 512 }),
+  thumbnailUrl: text("thumbnailUrl"),
+  // Item-level metadata
+  title: varchar("title", { length: 512 }),
+  description: text("description"),
+  mediumType: varchar("mediumType", { length: 64 }),
+  style: varchar("style", { length: 256 }),
+  subject: varchar("subject", { length: 256 }),
+  dimensions: varchar("dimensions", { length: 64 }),
+  resolution: varchar("resolution", { length: 32 }),
+  aspectRatio: varchar("aspectRatio", { length: 16 }),
+  colorProfile: varchar("colorProfile", { length: 32 }),
+  cameraInfo: varchar("cameraInfo", { length: 256 }),
+  // AI assistance disclosure — none | assisted | generated
+  haaiDisclosure: varchar("haaiDisclosure", { length: 32 }).default("none"),
+  // Creation date (user-declared)
+  creationDate: varchar("creationDate", { length: 32 }),
+  license: varchar("license", { length: 128 }),
+  copyright: varchar("copyright", { length: 256 }),
+  keywords: text("keywords"),
+  // Provenance version label (e.g. "Sketch", "Draft", "Final")
+  versionLabel: varchar("versionLabel", { length: 64 }),
+  displayOrder: int("displayOrder").default(0),
+  contentHash: varchar("contentHash", { length: 64 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().notNull(),
+}, (t) => ({
+  viCollectionIdx: index("vi_collection_idx").on(t.collectionId),
+  viCreatorIdx:    index("vi_creator_idx").on(t.creatorId),
+  viWidIdx:        index("vi_wid_idx").on(t.witnessId),
+  viOrderIdx:      index("vi_order_idx").on(t.collectionId, t.displayOrder),
+}));
+
+export type VisualItem = typeof visualItems.$inferSelect;
+export type InsertVisualItem = typeof visualItems.$inferInsert;

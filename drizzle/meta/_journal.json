@@ -834,6 +834,13 @@
       "when": 1783373917833,
       "tag": "0119_nosy_hannibal_king",
       "breakpoints": true
+    },
+    {
+      "idx": 120,
+      "version": "5",
+      "when": 1783382927628,
+      "tag": "0120_faithful_shinko_yamashiro",
+      "breakpoints": true
     }
   ]
 }
