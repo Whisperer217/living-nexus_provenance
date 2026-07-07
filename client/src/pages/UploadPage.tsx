@@ -23,6 +23,7 @@ import { getLoginUrl } from "@/const";
 import { addWIDSnapshot } from "@/lib/lnxCache";
 import { runUploadPipeline, type UploadMetadata } from "@/lib/uploadPipeline";
 import { CosmicMediumIcon } from "@/components/CosmicMediumIcon";
+import { AIPlatformAdvisory } from "@/components/AIPlatformAdvisory";
 import { useAudioMetadata } from "@/hooks/useAudioMetadata";
 import { HAAIDeclarationForm, EMPTY_HAAI } from "@/components/HAAIDeclarationForm";
 import { StoryboardBuilder } from "@/components/reader/StoryboardBuilder";
@@ -1862,6 +1863,15 @@ export default function UploadPage() {
                         />
                       )}
                     </div>
+                    {/* Contextual AI Licensing Advisory */}
+                    <AIPlatformAdvisory
+                      activePlatforms={[
+                        aiToolSuno ? "suno" : "",
+                        aiToolUdio ? "udio" : "",
+                        aiToolSonato ? "sonato" : "",
+                      ].filter(Boolean)}
+                      className="mt-3"
+                    />
                   </div>
                 )}
               </div>

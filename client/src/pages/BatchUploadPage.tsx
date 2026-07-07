@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 
 import { EDIT_GENRES as GENRES } from "@shared/contentTypes";
+import { AIPlatformAdvisory } from "@/components/AIPlatformAdvisory";
 import { useAudioMetadata } from "@/hooks/useAudioMetadata";
 // ── WID crypto helpers ────────────────────────────────────────────────────────
 async function sha256Hex(buffer: ArrayBuffer): Promise<string> {
@@ -544,6 +545,15 @@ function TrackDetailPanel({
                     style={{ background: "rgba(22,22,22,0.8)", border: "1px solid rgba(196,154,40,0.4)", color: "#FFFFFF" }}
                   />
                 )}
+                {/* Contextual AI Licensing Advisory */}
+                <AIPlatformAdvisory
+                  activePlatforms={[
+                    card.aiToolSuno ? "suno" : "",
+                    card.aiToolUdio ? "udio" : "",
+                    card.aiToolSonato ? "sonato" : "",
+                  ].filter(Boolean)}
+                  className="mt-3"
+                />
               </div>
             )}
           </div>

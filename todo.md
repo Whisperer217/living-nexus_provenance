@@ -6078,6 +6078,7 @@
 - [x] Raise client limits: trending/newThisWeek/randomize queries from 500 → 2000
 - [x] Remove topSlice 20-cap on "All Tracks" row — all loaded songs display in the row
 
+<<<<<<< Updated upstream
 ## Phase N: Visual Works — 6th Creative Medium
 - [x] Add visualWorks and visualItems tables to drizzle/schema.ts
 - [x] Run db:push — tables created in production DB
@@ -6105,4 +6106,15 @@
 - [x] Upload button label adapts: Upload N → Uploading N/M → Retry N Failed → ✓ All Uploaded
 - [x] Separate gold "Continue to Provenance Seal" CTA appears only when all images are sealed
 - [x] Thumbnail strip in Seal step shows final ordered sequence before WID-VWC generation
+=======
+## Phase N+2: Contextual AI Licensing Advisory
+- [x] AIPlatformAdvisory component created — data-driven, zero UI changes needed to add new platforms
+- [x] AI_PLATFORMS config with 11 platforms: Suno, Udio, Sonato, Midjourney, DALL-E/ChatGPT, Adobe Firefly, Stable Diffusion, Runway, ElevenLabs, Claude, Gemini
+- [x] Each platform entry: name, category, advisory text, official licensing URL, link label
+- [x] Panel styled as gold-accented contextual guidance (not a warning/error)
+- [x] "View Licensing Terms" external link with arrow icon for each active platform
+- [x] Advisory wired into UploadPage — appears below Suno/Udio/Sonato toggles when active
+- [x] Advisory wired into BatchUploadPage — appears below per-card tool checkboxes when active
+- [x] AIPlatformSelector convenience component exported for future use in Visual Works and other flows
+>>>>>>> Stashed changes
 - [x] TypeScript check — zero errors
