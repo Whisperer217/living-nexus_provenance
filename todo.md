@@ -6118,3 +6118,8 @@
 - [x] AIPlatformSelector convenience component exported for future use in Visual Works and other flows
 >>>>>>> Stashed changes
 - [x] TypeScript check — zero errors
+
+## Bug Fixes — Reported by Slimdoggy (Jul 6 2026)
+- [x] BUG-1: Comments posted from global player show as Anonymous — fixed: GlobalPlayer now uses c.authorName (was c.user?.name which does not exist on the comment shape)
+- [x] BUG-2: Mini-player (TopBar InlinePlayer) has no volume control — fixed: added Volume2/VolumeX button with vertical popup slider, outside-click dismiss, mute toggle, live % label
+- [x] BUG-3: Signals left pane does not show creator/hero names — fixed: show sig.title (contains actorName) as primary; legacy rows without title show sig.actorName as gold byline above body

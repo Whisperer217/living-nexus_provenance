@@ -202,9 +202,22 @@ export default function RightRail() {
             >
               <SignalIcon type={sig.type} />
               <div className="flex-1 min-w-0">
-                <p className="text-[11px] leading-snug line-clamp-2" style={{ color: "rgba(255,255,255,0.75)" }}>
-                  {sig.body ?? sig.title ?? "New signal"}
+                {/* When title is present it already contains the actor name (e.g. "Slimdoggy commented on…") */}
+                {/* When title is absent (legacy rows), show actorName as a gold byline above the body */}
+                {!sig.title && sig.actorName && (
+                  <p className="text-[10px] font-semibold mb-0.5" style={{ color: "rgba(212,175,55,0.85)" }}>
+                    {sig.actorName}
+                  </p>
+                )}
+                <p className="text-[11px] leading-snug line-clamp-2" style={{ color: sig.title ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,0.65)" }}>
+                  {sig.title ?? sig.body ?? "New signal"}
                 </p>
+                {/* Body is the comment/content preview — show as secondary line when title is also present */}
+                {sig.body && sig.title && (
+                  <p className="text-[10px] leading-snug line-clamp-1 mt-0.5" style={{ color: "rgba(255,255,255,0.40)" }}>
+                    {sig.body}
+                  </p>
+                )}
                 <p className="text-[10px] mt-0.5" style={{ color: "rgba(255,255,255,0.3)" }}>
                   {sig.createdAt ? timeAgo(typeof sig.createdAt === "number" ? sig.createdAt : new Date(sig.createdAt).getTime()) : ""}
                 </p>

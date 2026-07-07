@@ -1508,11 +1508,11 @@ function GlobalPlayerInner() {
             comments.map((c: any) => (
               <div key={c.id} className="flex gap-2.5 group">
                 <div className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-[11px] font-bold" style={{ background: "rgba(212,175,55,0.15)", color: "rgba(212,175,55,0.8)" }}>
-                  {(c.user?.name || c.user?.username || "?").charAt(0).toUpperCase()}
+                  {(c.authorName || "?").charAt(0).toUpperCase()}
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-baseline gap-2">
-                    <span className="text-[11px] font-semibold" style={{ color: "#F5EDD8" }}>{c.user?.name || c.user?.username || "Anonymous"}</span>
+                    <span className="text-[11px] font-semibold" style={{ color: "#F5EDD8" }}>{c.authorName || "Anonymous"}</span>
                     {c.createdAt && <span className="text-[9px]" style={{ color: "rgba(255,255,255,0.3)" }}>{new Date(c.createdAt).toLocaleDateString()}</span>}
                     {user && c.id && (
                       <button

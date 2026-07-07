@@ -17,7 +17,7 @@ import { useHarmonic } from "@/contexts/HarmonicContext";
 import {
   Upload, Bell, LogIn, LogOut, CheckCircle2, Zap, Search, User, Settings,
   SkipBack, SkipForward, Play, Pause, Shuffle, Repeat, PictureInPicture2,
-  ChevronDown, Music, ShieldCheck, Sparkles, Download,
+  ChevronDown, Music, ShieldCheck, Sparkles, Download, Volume2, VolumeX,
 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 
@@ -38,11 +38,24 @@ function fmtTime(s: number): string {
 
 /* ── Inline Player (center zone) ── */
 function InlinePlayer() {
-  const { state, togglePlay, seek, nextTrack, prevTrack } = usePlayer();
+  const { state, togglePlay, seek, nextTrack, prevTrack, setVolume, toggleMute } = usePlayer();
   const { expand } = useWSP();
   const [shuffle, setShuffle] = useState(false);
   const [repeat, setRepeat] = useState(false);
   const seekBarRef = useRef<HTMLDivElement>(null);
+  const [showVolumeSlider, setShowVolumeSlider] = useState(false);
+  const volumeRef = useRef<HTMLDivElement>(null);
+  // Close volume popup on outside click
+  useEffect(() => {
+    if (!showVolumeSlider) return;
+    const handler = (e: MouseEvent) => {
+      if (volumeRef.current && !volumeRef.current.contains(e.target as Node)) {
+        setShowVolumeSlider(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [showVolumeSlider]);
   const [location] = useLocation();
 
   /* ── Song-page suppression: detect if we're viewing the currently playing track ── */
@@ -279,6 +292,56 @@ function InlinePlayer() {
           );
           return null;
         })()}
+        {/* Volume */}
+        <div ref={volumeRef} className="relative">
+          <button
+            onClick={() => setShowVolumeSlider(v => !v)}
+            className="p-1.5 rounded transition-all hover:bg-white/5"
+            style={{ color: state.isMuted ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.5)" }}
+            aria-label="Volume"
+            title={state.isMuted ? "Unmute" : `Volume ${Math.round(state.volume * 100)}%`}
+          >
+            {state.isMuted ? <VolumeX size={13} /> : <Volume2 size={13} />}
+          </button>
+          {showVolumeSlider && (
+            <div
+              className="absolute bottom-full right-0 mb-2 rounded-xl p-3 flex flex-col items-center gap-2"
+              style={{
+                background: "rgba(13,13,13,0.97)",
+                border: "1px solid rgba(196,154,40,0.35)",
+                boxShadow: "0 0 20px rgba(196,154,40,0.12), 0 8px 24px rgba(0,0,0,0.8)",
+                zIndex: 99999,
+                minWidth: 44,
+              }}
+            >
+              <span className="text-[9px] font-mono" style={{ color: "rgba(196,154,40,0.8)" }}>
+                {state.isMuted ? "MUTE" : `${Math.round(state.volume * 100)}%`}
+              </span>
+              <input
+                type="range"
+                min="0" max="1" step="0.01"
+                value={state.isMuted ? 0 : state.volume}
+                onChange={e => { if (state.isMuted) toggleMute(); setVolume(parseFloat(e.target.value)); }}
+                className="volume-slider-vertical"
+                style={{
+                  background: `linear-gradient(to top, #E8DFC8 ${
+                    state.isMuted ? 0 : state.volume * 100
+                  }%, rgba(44,52,56,0.8) ${
+                    state.isMuted ? 0 : state.volume * 100
+                  }%)`,
+                }}
+              />
+              <button
+                onClick={toggleMute}
+                className="p-1 rounded-full transition-all"
+                style={{ color: state.isMuted ? "rgba(196,154,40,0.9)" : "rgba(255,255,255,0.3)" }}
+                title={state.isMuted ? "Unmute" : "Mute"}
+              >
+                <VolumeX size={10} />
+              </button>
+            </div>
+          )}
+        </div>
         {/* PiP / Expand */}
         <button
           onClick={expand}
