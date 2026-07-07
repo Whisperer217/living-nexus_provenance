@@ -6092,3 +6092,17 @@
 - [x] App.tsx — lazy imports + routes for /visual-works, /visual-works/new, /visual-works/:id
 - [x] ContextDrawer.tsx — Visual Works link in Explore "By Medium" + Register section
 - [x] TypeScript check — zero errors
+
+## Phase N+1: Visual Works Upload UX Improvements
+- [x] Drag-to-reorder images (HTML5 DnD, no external lib) — order preserved in provenance seal
+- [x] Per-image animated progress bar (queued → reading → uploading → sealed) with phase labels
+- [x] FileReader onprogress used for byte-level read tracking (0–40%)
+- [x] Smooth ticker for network upload phase (40–90%), completes to 100% on seal
+- [x] Global progress strip at top of upload step (total sealed / total, overall %)
+- [x] List / Grid view toggle for image panel
+- [x] Position badges (#1, #2…) on each image to show current order
+- [x] Drag handle dots on list items; drag-over highlight + translateX indicator
+- [x] Upload button label adapts: Upload N → Uploading N/M → Retry N Failed → ✓ All Uploaded
+- [x] Separate gold "Continue to Provenance Seal" CTA appears only when all images are sealed
+- [x] Thumbnail strip in Seal step shows final ordered sequence before WID-VWC generation
+- [x] TypeScript check — zero errors
