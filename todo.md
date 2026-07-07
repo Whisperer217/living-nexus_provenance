@@ -6123,3 +6123,17 @@
 - [x] BUG-1: Comments posted from global player show as Anonymous — fixed: GlobalPlayer now uses c.authorName (was c.user?.name which does not exist on the comment shape)
 - [x] BUG-2: Mini-player (TopBar InlinePlayer) has no volume control — fixed: added Volume2/VolumeX button with vertical popup slider, outside-click dismiss, mute toggle, live % label
 - [x] BUG-3: Signals left pane does not show creator/hero names — fixed: show sig.title (contains actorName) as primary; legacy rows without title show sig.actorName as gold byline above body
+
+## Nav Architecture Fix + Suno Advisory Update (Jul 2026)
+- [ ] Fix My Profile sidebar nav to route to /creator/:id (public domain) — subtitle: "Your public domain"
+- [ ] Add "Edit Profile" button on the public creator page (owner-only, links to /profile settings)
+- [ ] Update My Works subtitle to "All registered works" for clarity
+- [ ] Update Suno advisory text to mention active litigation and DMCA §1201 stream-ripping allegation
+
+## Nav Architecture Fix + Suno Advisory Update (Jul 2026)
+- [x] My Profile nav in ContextDrawer now routes to /creator/:artistHandle (or /creator/:id fallback) — the creator's actual public domain
+- [x] My Profile description updated from "Public creator page" to "Your public domain"
+- [x] My Works description updated to "Your registered works ledger"
+- [x] __my_public_profile__ sentinel handled in handleLinkClick — uses user.artistHandle when set, falls back to user.id
+- [x] Suno advisory updated with active Sony Music litigation notice and July 2026 federal hearing reference
+- [x] TypeScript — zero errors

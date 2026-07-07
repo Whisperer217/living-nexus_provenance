@@ -42,7 +42,7 @@ export const AI_PLATFORMS: AIPlatformEntry[] = [
     name: "Suno",
     category: "Music",
     advisory:
-      "Suno's commercial-use rights depend on your subscription tier. Free-plan generations are licensed for non-commercial use only. Pro and Premier subscribers receive a commercial license for tracks generated on their account. Please verify that your current plan covers the intended commercial use of this work before publishing.",
+      "Suno's commercial-use rights depend on your subscription tier. Free-plan generations are licensed for non-commercial use only. Pro and Premier subscribers receive a commercial license for tracks generated on their account. Please verify that your current plan covers the intended commercial use of this work before publishing. Note: As of mid-2026, Suno is a defendant in active copyright litigation brought by Sony Music. A federal hearing is scheduled for July 2026 that may affect the commercial status of AI-generated music on this platform. Living Nexus encourages creators to monitor these developments and verify their rights before commercial release.",
     licensingUrl: "https://suno.com/terms",
     licensingLabel: "View Suno Terms of Service",
   },

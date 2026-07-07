@@ -118,8 +118,8 @@ const PANELS: Record<NavMode, ModePanel> = {
       {
         links: [
           { icon: <LayoutGrid size={14} />, label: "My Domain", path: "/domain", description: "Creator Domain Command Center", authOnly: true, gold: true },
-          { icon: <User size={14} />, label: "My Profile", path: "/profile", description: "Public creator page", authOnly: true },
-          { icon: <Music size={14} />, label: "My Works", path: "/profile?tab=works", description: "All registered works", authOnly: true },
+          { icon: <User size={14} />, label: "My Profile", path: "__my_public_profile__", description: "Your public domain", authOnly: true },
+          { icon: <Music size={14} />, label: "My Works", path: "/profile?tab=works", description: "Your registered works ledger", authOnly: true },
           { icon: <FolderOpen size={14} />, label: "Collections", path: "/profile?tab=collections", description: "Curated playlists", authOnly: true },
           { icon: <LayoutDashboard size={14} />, label: "Dashboard", path: "/dashboard", description: "Creator analytics & slots", authOnly: true },
         ],
@@ -245,6 +245,17 @@ export default function ContextDrawer({
         logout().finally(() => { onClose(); navigate("/"); });
         return;
       }
+      if (path === "__my_public_profile__") {
+        // Route to the creator's actual public domain page
+        // Prefer artistHandle slug (e.g. /creator/slimdoggyaimusic) for a clean URL;
+        // fall back to numeric id if handle is not set yet.
+        const dest = user
+          ? `/creator/${user.artistHandle || user.id}`
+          : "/profile";
+        navigate(dest);
+        onClose();
+        return;
+      }
       if (path.startsWith("__external__")) {
         window.open(path.replace("__external__", ""), "_blank", "noopener,noreferrer");
         onClose();
@@ -253,7 +264,7 @@ export default function ContextDrawer({
       navigate(path);
       onClose();
     },
-    [navigate, onClose, logout]
+    [navigate, onClose, logout, user]
   );
 
   const handleWhatsNew = useCallback(() => {
