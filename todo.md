@@ -6154,3 +6154,11 @@
 - [x] RULE: Visitor mode — empty modules hidden from visitors; only modules with count > 0 shown
 - [x] RULE: Domain History (ProvenanceTrailBlock) hidden from visitors — isOwner guard added to DomainRenderer
 - [x] TypeScript — zero errors
+
+## Creator Domain Hub — Navigation Fix (Jul 8, 2026)
+- [x] ROOT CAUSE: scrollIntoView targeted IDs that did not exist in the DOM (zero id= attrs in profile page). Cards animated but getElementById() returned null every time.
+- [x] FIX 1: Added section IDs to DomainRenderer BlockWrapper (shelf_music→section-music, shelf_books→section-books, shelf_comics→section-comics, shelf_manuscripts→section-manuscripts, shelf_artifacts→section-artifacts, shelf_merch→section-merch, shelf_collections→section-collections, shelf_games→section-games, provenance_trail→section-provenance)
+- [x] FIX 2: Added section IDs to CreatorProfilePage sections (section-music, section-albums, section-books, section-collections, section-standalone, section-gallery, section-testimony, section-projects)
+- [x] FIX 3: Rewrote all 11 hub cards as native <a href="#section-id"> anchors (same-page) or wouter <Link href="/route"> (separate pages). No JS navigate(), no DOM queries — browser handles scroll natively.
+- [x] Architecture: one card, one destination. Music→#section-music, Albums→#section-albums, Playlists→/playlists, Books→#section-books, Comics→#section-books, Lyrics→#section-standalone, Games→#section-games, Visual Works→/visual-works?creator=:handle, Testimony→#section-testimony, Witnesses→/creator/:handle#section-testimony, Activity→#section-music
+- [x] TypeScript: 0 errors

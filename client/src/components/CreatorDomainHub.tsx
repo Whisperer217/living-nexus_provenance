@@ -9,10 +9,15 @@
  *   • Mobile: 2-col thumb-first grid
  *   • Creator Mode: all 11 modules visible; empty at 40% opacity with "Register" CTA
  *   • Visitor Mode: only modules with count > 0 are shown (no empty clutter)
- *   • Same-page sections: scrollIntoView (no hash navigation that resets the page)
- *   • Separate pages (Visual Works, etc.): real route navigation
+ *   • Navigation: every card is a real <a> link — one card, one destination, zero JS
+ *   • Same-page sections: href="#section-id" — browser handles scroll natively
+ *   • Separate pages (Visual Works, Playlists, etc.): real route hrefs
+ *
+ * Root cause of previous bug: scrollIntoView targeted IDs that did not exist in the DOM.
+ * Fix: use native <a href="#section-id"> anchors. The browser finds the element by ID
+ * and scrolls to it reliably. No JS, no navigate(), no DOM queries.
  */
-import { useLocation } from "wouter";
+import { Link } from "wouter";
 import {
   Music2, FileText, BookOpen, Layers, Gamepad2, ListMusic,
   Album, MessageSquareQuote, Users, Image, Activity,
@@ -22,18 +27,23 @@ import { trpc } from "@/lib/trpc";
 
 // ─── Module definition ────────────────────────────────────────────────────────
 
-type NavAction =
-  | { type: "scroll"; sectionId: string }   // scrollIntoView on the same page
-  | { type: "route"; path: string };         // wouter navigate to a different page
-
 interface ModuleDef {
   key: string;
   label: string;
   sublabel: string;
   icon: React.ComponentType<{ className?: string }>;
   color: string;
-  nav: (creatorHandle: string) => NavAction;
-  registerPath?: string;
+  /**
+   * href(creatorHandle) returns the navigation destination.
+   *
+   * For sections on the creator profile page: "#section-id"
+   * For separate pages: "/route?params"
+   *
+   * Using plain href strings means the browser handles navigation natively —
+   * no JS, no navigate(), no scrollIntoView(), no DOM queries.
+   */
+  href: (creatorHandle: string) => string;
+  registerHref?: string;
   registerLabel?: string;
 }
 
@@ -44,8 +54,8 @@ const MODULES: ModuleDef[] = [
     sublabel: "Tracks & singles",
     icon: Music2,
     color: "#C49A28",
-    nav: () => ({ type: "scroll", sectionId: "section-music" }),
-    registerPath: "/upload",
+    href: () => "#section-music",
+    registerHref: "/upload",
     registerLabel: "Register your first track",
   },
   {
@@ -54,8 +64,8 @@ const MODULES: ModuleDef[] = [
     sublabel: "Collections & albums",
     icon: Album,
     color: "#A78BFA",
-    nav: () => ({ type: "scroll", sectionId: "section-collections" }),
-    registerPath: "/upload",
+    href: () => "#section-albums",
+    registerHref: "/upload",
     registerLabel: "Create your first album",
   },
   {
@@ -64,8 +74,8 @@ const MODULES: ModuleDef[] = [
     sublabel: "Curated sequences",
     icon: ListMusic,
     color: "#34D399",
-    nav: () => ({ type: "scroll", sectionId: "section-playlists" }),
-    registerPath: "/playlists/new",
+    href: () => "/playlists",
+    registerHref: "/playlists/new",
     registerLabel: "Build your first playlist",
   },
   {
@@ -74,8 +84,8 @@ const MODULES: ModuleDef[] = [
     sublabel: "Manuscripts & prose",
     icon: BookOpen,
     color: "#F97316",
-    nav: () => ({ type: "scroll", sectionId: "section-books" }),
-    registerPath: "/upload?type=manuscript",
+    href: () => "#section-books",
+    registerHref: "/upload?type=manuscript",
     registerLabel: "Register your first book",
   },
   {
@@ -84,8 +94,8 @@ const MODULES: ModuleDef[] = [
     sublabel: "Sequential art",
     icon: Layers,
     color: "#EC4899",
-    nav: () => ({ type: "scroll", sectionId: "section-comics" }),
-    registerPath: "/upload?type=comic",
+    href: () => "#section-books",
+    registerHref: "/upload?type=comic",
     registerLabel: "Register your first comic",
   },
   {
@@ -94,8 +104,8 @@ const MODULES: ModuleDef[] = [
     sublabel: "Written works",
     icon: FileText,
     color: "#60A5FA",
-    nav: () => ({ type: "scroll", sectionId: "section-lyrics" }),
-    registerPath: "/upload?type=lyrics",
+    href: () => "#section-standalone",
+    registerHref: "/upload?type=lyrics",
     registerLabel: "Register your first lyrics",
   },
   {
@@ -104,8 +114,8 @@ const MODULES: ModuleDef[] = [
     sublabel: "Interactive works",
     icon: Gamepad2,
     color: "#FBBF24",
-    nav: () => ({ type: "scroll", sectionId: "section-games" }),
-    registerPath: "/upload?type=game",
+    href: () => "#section-games",
+    registerHref: "/upload?type=game",
     registerLabel: "Register your first game",
   },
   {
@@ -114,8 +124,8 @@ const MODULES: ModuleDef[] = [
     sublabel: "Art & image collections",
     icon: Image,
     color: "#FDA4AF",
-    nav: (handle) => ({ type: "route", path: `/visual-works?creator=${handle}` }),
-    registerPath: "/visual-works/new",
+    href: (handle) => `/visual-works?creator=${handle}`,
+    registerHref: "/visual-works/new",
     registerLabel: "Register your first collection",
   },
   {
@@ -124,8 +134,8 @@ const MODULES: ModuleDef[] = [
     sublabel: "Creator statements",
     icon: MessageSquareQuote,
     color: "#818CF8",
-    nav: () => ({ type: "scroll", sectionId: "section-testimony" }),
-    registerPath: "/testimony/new",
+    href: () => "#section-testimony",
+    registerHref: "/testimony/new",
     registerLabel: "Write your first testimony",
   },
   {
@@ -134,7 +144,7 @@ const MODULES: ModuleDef[] = [
     sublabel: "Your witness community",
     icon: Users,
     color: "#6EE7B7",
-    nav: () => ({ type: "scroll", sectionId: "section-witnesses" }),
+    href: (handle) => `/creator/${handle}#section-testimony`,
   },
   {
     key: "activity",
@@ -142,7 +152,7 @@ const MODULES: ModuleDef[] = [
     sublabel: "Latest manifestations",
     icon: Activity,
     color: "#94A3B8",
-    nav: () => ({ type: "scroll", sectionId: "section-activity" }),
+    href: () => "#section-music",
   },
 ];
 
@@ -177,44 +187,20 @@ function ModuleCard({
   creatorHandle: string;
   isOwner: boolean;
 }) {
-  const [, navigate] = useLocation();
   const count = mod?.count ?? 0;
   const previews = mod?.previews ?? [];
   const isEmpty = count === 0;
   const Icon = def.icon;
 
-  const handleClick = () => {
-    // Empty card + owner → go to registration page
-    if (isEmpty && isOwner && def.registerPath) {
-      navigate(def.registerPath);
-      return;
-    }
+  // Determine the navigation destination.
+  // Empty card + owner → go to registration page.
+  // Otherwise → go to the module's content destination.
+  const destination = isEmpty && isOwner && def.registerHref
+    ? def.registerHref
+    : def.href(creatorHandle);
 
-    const action = def.nav(creatorHandle);
-
-    if (action.type === "scroll") {
-      // Smooth scroll to the section on the same page — no page reset
-      const el = document.getElementById(action.sectionId);
-      if (el) {
-        el.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
-    } else {
-      // Navigate to a separate page
-      navigate(action.path);
-    }
-  };
-
-  return (
-    <button
-      type="button"
-      onClick={handleClick}
-      className="group relative w-full text-left rounded-2xl overflow-hidden transition-all duration-200 focus:outline-none focus-visible:ring-2 active:scale-95"
-      style={{
-        background: "rgba(255,255,255,0.03)",
-        border: `1px solid rgba(255,255,255,${isEmpty ? "0.06" : "0.10"})`,
-        opacity: isEmpty ? 0.42 : 1,
-      }}
-    >
+  const cardContent = (
+    <>
       {/* Hover glow */}
       <div
         className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
@@ -282,7 +268,7 @@ function ModuleCard({
 
           {/* Count badge or Add CTA */}
           <div className="flex-shrink-0 flex items-center gap-1">
-            {isEmpty && isOwner && def.registerPath ? (
+            {isEmpty && isOwner && def.registerHref ? (
               <div
                 className="flex items-center gap-1 text-xs px-1.5 py-0.5 rounded-full"
                 style={{ background: `${def.color}20`, color: def.color }}
@@ -315,7 +301,47 @@ function ModuleCard({
           </p>
         )}
       </div>
-    </button>
+    </>
+  );
+
+  const cardClassName =
+    "group relative w-full text-left rounded-2xl overflow-hidden transition-all duration-200 focus:outline-none focus-visible:ring-2 active:scale-95 block";
+
+  const cardStyle: React.CSSProperties = {
+    background: "rgba(255,255,255,0.03)",
+    border: `1px solid rgba(255,255,255,${isEmpty ? "0.06" : "0.10"})`,
+    opacity: isEmpty ? 0.42 : 1,
+    textDecoration: "none",
+  };
+
+  // Hash anchors (#section-id) work as plain <a> tags — browser scrolls natively.
+  // External routes use wouter <Link> for client-side navigation.
+  if (destination.startsWith("#")) {
+    return (
+      <a
+        href={destination}
+        className={cardClassName}
+        style={cardStyle}
+        onClick={(e) => {
+          // Smooth scroll for same-page anchors
+          const targetId = destination.slice(1);
+          const el = document.getElementById(targetId);
+          if (el) {
+            e.preventDefault();
+            el.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+          // If element not found, let the browser handle the hash navigation naturally
+        }}
+      >
+        {cardContent}
+      </a>
+    );
+  }
+
+  return (
+    <Link href={destination} className={cardClassName} style={cardStyle}>
+      {cardContent}
+    </Link>
   );
 }
 

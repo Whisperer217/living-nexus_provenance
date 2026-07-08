@@ -1776,7 +1776,7 @@ export default function CreatorProfilePage() {
         <DomainRenderer userId={creator.id} isOwner={isOwner} />
         {/* ── Projects Section (top priority) ── */}
         {(creatorProjects as any[]).length > 0 && (
-          <section className="py-6 overflow-hidden">
+          <section id="section-projects" className="py-6 overflow-hidden">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-base font-bold" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>
                 Projects
@@ -1865,7 +1865,7 @@ export default function CreatorProfilePage() {
           const bookWorks = songs.filter((s: any) => s.contentType === "comic" || s.contentType === "manuscript");
           if (!bookWorks.length) return null;
           return (
-            <section className="py-6">
+            <section id="section-books" className="py-6">
               <h2 className="text-base font-bold mb-5" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>
                 Works
               </h2>
@@ -1903,7 +1903,7 @@ export default function CreatorProfilePage() {
         })()}
 
         {featuredSongs.length > 0 && (
-          <section className="py-6">
+          <section id="section-music" className="py-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-base font-bold" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>
                 Featured Songs
@@ -1945,7 +1945,7 @@ export default function CreatorProfilePage() {
           const albumEntries = Array.from(albumMap.entries());
           if (!albumEntries.length) return null;
           return (
-            <section className="py-4">
+            <section id="section-albums" className="py-4">
               <h2 className="text-base font-bold mb-4" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>Albums</h2>
               <div className="space-y-5">
                 {albumEntries.map(([albumName, albumSongs]) => {
@@ -2012,7 +2012,7 @@ export default function CreatorProfilePage() {
 
         {/* ── Registered Collections (owner-only: visitors see published works already) ── */}
         {isOwner && creatorCollections && creatorCollections.length > 0 && (
-          <section className="py-4">
+          <section id="section-collections" className="py-4">
             <h2 className="text-base font-bold mb-4" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-gold)" }}>
               <Library className="inline w-4 h-4 mr-2 mb-0.5" />
               Registered Collections
@@ -2073,7 +2073,7 @@ export default function CreatorProfilePage() {
             downloadPermission: s.downloadPermission ?? null,
           }));
           return (
-            <section className="py-4 pb-32">
+            <section id="section-standalone" className="py-4 pb-32">
               <StandaloneShelf
                 tracks={standaloneTracks}
                 playingId={playingId}
@@ -2101,7 +2101,7 @@ export default function CreatorProfilePage() {
 
         {/* ── Image Gallery Shelf ── */}
         {galleryImages.length > 0 && (
-          <section className="py-6 pb-8">
+          <section id="section-gallery" className="py-6 pb-8">
             <div className="flex items-center gap-2 mb-4">
               <Camera className="w-4 h-4" style={{ color: "var(--ln-gold)" }} />
               <h2 className="text-base font-bold" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>
@@ -2143,7 +2143,7 @@ export default function CreatorProfilePage() {
 
         {/* ── Witness Testimonies ── */}
         {(creatorTestimonies as any[]).length > 0 && (
-          <section className="py-6 pb-12">
+          <section id="section-testimony" className="py-6 pb-12">
             <h2 className="text-base font-bold mb-4" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>
               Testimonies
             </h2>

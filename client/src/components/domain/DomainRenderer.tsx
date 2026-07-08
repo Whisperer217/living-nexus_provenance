@@ -459,11 +459,27 @@ function CollectionsShelfBlock({ userId, isOwner }: { userId: number; isOwner: b
   );
 }
 
+// ── Block type → stable section anchor ID ────────────────────────────────────
+const BLOCK_SECTION_IDS: Record<string, string> = {
+  shelf_music:        "section-music",
+  shelf_books:        "section-books",
+  shelf_comics:       "section-comics",
+  shelf_manuscripts:  "section-manuscripts",
+  shelf_artifacts:    "section-artifacts",
+  shelf_merch:        "section-merch",
+  shelf_collections:  "section-collections",
+  shelf_games:        "section-games",
+  provenance_trail:   "section-provenance",
+  bio:                "section-bio",
+  hero:               "section-hero",
+};
+
 // ── Block wrapper ─────────────────────────────────────────────────────────────
-function BlockWrapper({ size, children }: { size: string; children: React.ReactNode }) {
+function BlockWrapper({ size, blockType, children }: { size: string; blockType?: string; children: React.ReactNode }) {
   const paddingClass = size === "full" ? "px-0" : "px-4";
+  const sectionId = blockType ? BLOCK_SECTION_IDS[blockType] : undefined;
   return (
-    <div className={`w-full ${paddingClass}`}>
+    <div id={sectionId} className={`w-full ${paddingClass}`}>
       {children}
     </div>
   );
@@ -494,7 +510,7 @@ export function DomainRenderer({ userId, isOwner = false }: DomainRendererProps)
         const cfg = block.config ?? {};
 
         return (
-          <BlockWrapper key={`${block.blockType}-${i}`} size={block.size}>
+          <BlockWrapper key={`${block.blockType}-${i}`} size={block.size} blockType={block.blockType}>
             {block.blockType === "hero" && (
               <HeroBlock userId={userId} config={cfg as HeroBlockConfig} />
             )}
