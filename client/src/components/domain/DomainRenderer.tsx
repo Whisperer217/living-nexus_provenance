@@ -192,7 +192,11 @@ function DistributionLinksBlock({ userId, config }: { userId: number; config: Di
 }
 
 // ── ProvenanceTrailBlock ──────────────────────────────────────────────────────
-function ProvenanceTrailBlock({ userId, config }: { userId: number; config: ProvenanceTrailBlockConfig }) {
+function ProvenanceTrailBlock({ userId, config, isOwner }: { userId: number; config: ProvenanceTrailBlockConfig; isOwner?: boolean }) {
+  // Domain History is an administrative record — visible to the creator only.
+  // Visitors see the creator's published archive, not their management history.
+  if (!isOwner) return null;
+
   const maxItems = config.maxItems ?? 10;
   const { data: versions = [] } = trpc.domain.getPublicVersionHistory.useQuery(
     { userId, limit: maxItems },
@@ -522,7 +526,7 @@ export function DomainRenderer({ userId, isOwner = false }: DomainRendererProps)
               <DistributionLinksBlock userId={userId} config={cfg as DistributionLinksBlockConfig} />
             )}
             {block.blockType === "provenance_trail" && (
-              <ProvenanceTrailBlock userId={userId} config={cfg as ProvenanceTrailBlockConfig} />
+              <ProvenanceTrailBlock userId={userId} config={cfg as ProvenanceTrailBlockConfig} isOwner={isOwner} />
             )}
             {block.blockType === "custom_text" && (
               <CustomTextBlock config={cfg as CustomTextBlockConfig} />

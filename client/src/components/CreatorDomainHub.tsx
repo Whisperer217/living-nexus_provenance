@@ -5,10 +5,12 @@
  * One screen. Zero hunting. Every module a one-tap portal.
  *
  * Design principles:
- *   • Desktop: cinematic grid — 3-col module cards with count badges and cover previews
- *   • Mobile: stacked full-width portal cards, thumb-first, no horizontal scroll
- *   • Empty modules: reduced opacity (40%) with "Register your first [X]" CTA
- *   • Scrolling reveals content — never locates navigation
+ *   • Desktop: cinematic grid — 4-col module cards with count badges and cover previews
+ *   • Mobile: 2-col thumb-first grid
+ *   • Creator Mode: all 11 modules visible; empty at 40% opacity with "Register" CTA
+ *   • Visitor Mode: only modules with count > 0 are shown (no empty clutter)
+ *   • Same-page sections: scrollIntoView (no hash navigation that resets the page)
+ *   • Separate pages (Visual Works, etc.): real route navigation
  */
 import { useLocation } from "wouter";
 import {
@@ -17,18 +19,21 @@ import {
   ChevronRight, Plus,
 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
-import { useAuth } from "@/_core/hooks/useAuth";
 
 // ─── Module definition ────────────────────────────────────────────────────────
+
+type NavAction =
+  | { type: "scroll"; sectionId: string }   // scrollIntoView on the same page
+  | { type: "route"; path: string };         // wouter navigate to a different page
 
 interface ModuleDef {
   key: string;
   label: string;
   sublabel: string;
   icon: React.ComponentType<{ className?: string }>;
-  color: string;           // CSS color for icon + accent
-  path: (creatorId: string) => string;
-  registerPath?: string;   // where to go when empty + owner
+  color: string;
+  nav: (creatorHandle: string) => NavAction;
+  registerPath?: string;
   registerLabel?: string;
 }
 
@@ -39,7 +44,7 @@ const MODULES: ModuleDef[] = [
     sublabel: "Tracks & singles",
     icon: Music2,
     color: "#C49A28",
-    path: (id) => `/creator/${id}#music`,
+    nav: () => ({ type: "scroll", sectionId: "section-music" }),
     registerPath: "/upload",
     registerLabel: "Register your first track",
   },
@@ -49,7 +54,7 @@ const MODULES: ModuleDef[] = [
     sublabel: "Collections & albums",
     icon: Album,
     color: "#A78BFA",
-    path: (id) => `/creator/${id}#collections`,
+    nav: () => ({ type: "scroll", sectionId: "section-collections" }),
     registerPath: "/upload",
     registerLabel: "Create your first album",
   },
@@ -59,7 +64,7 @@ const MODULES: ModuleDef[] = [
     sublabel: "Curated sequences",
     icon: ListMusic,
     color: "#34D399",
-    path: (id) => `/creator/${id}#playlists`,
+    nav: () => ({ type: "scroll", sectionId: "section-playlists" }),
     registerPath: "/playlists/new",
     registerLabel: "Build your first playlist",
   },
@@ -69,7 +74,7 @@ const MODULES: ModuleDef[] = [
     sublabel: "Manuscripts & prose",
     icon: BookOpen,
     color: "#F97316",
-    path: (id) => `/creator/${id}#books`,
+    nav: () => ({ type: "scroll", sectionId: "section-books" }),
     registerPath: "/upload?type=manuscript",
     registerLabel: "Register your first book",
   },
@@ -79,7 +84,7 @@ const MODULES: ModuleDef[] = [
     sublabel: "Sequential art",
     icon: Layers,
     color: "#EC4899",
-    path: (id) => `/creator/${id}#comics`,
+    nav: () => ({ type: "scroll", sectionId: "section-comics" }),
     registerPath: "/upload?type=comic",
     registerLabel: "Register your first comic",
   },
@@ -89,7 +94,7 @@ const MODULES: ModuleDef[] = [
     sublabel: "Written works",
     icon: FileText,
     color: "#60A5FA",
-    path: (id) => `/creator/${id}#lyrics`,
+    nav: () => ({ type: "scroll", sectionId: "section-lyrics" }),
     registerPath: "/upload?type=lyrics",
     registerLabel: "Register your first lyrics",
   },
@@ -99,7 +104,7 @@ const MODULES: ModuleDef[] = [
     sublabel: "Interactive works",
     icon: Gamepad2,
     color: "#FBBF24",
-    path: (id) => `/creator/${id}#games`,
+    nav: () => ({ type: "scroll", sectionId: "section-games" }),
     registerPath: "/upload?type=game",
     registerLabel: "Register your first game",
   },
@@ -109,7 +114,7 @@ const MODULES: ModuleDef[] = [
     sublabel: "Art & image collections",
     icon: Image,
     color: "#FDA4AF",
-    path: (id) => `/visual-works?creator=${id}`,
+    nav: (handle) => ({ type: "route", path: `/visual-works?creator=${handle}` }),
     registerPath: "/visual-works/new",
     registerLabel: "Register your first collection",
   },
@@ -119,7 +124,7 @@ const MODULES: ModuleDef[] = [
     sublabel: "Creator statements",
     icon: MessageSquareQuote,
     color: "#818CF8",
-    path: (id) => `/creator/${id}#testimony`,
+    nav: () => ({ type: "scroll", sectionId: "section-testimony" }),
     registerPath: "/testimony/new",
     registerLabel: "Write your first testimony",
   },
@@ -129,7 +134,7 @@ const MODULES: ModuleDef[] = [
     sublabel: "Your witness community",
     icon: Users,
     color: "#6EE7B7",
-    path: (id) => `/creator/${id}#witnesses`,
+    nav: () => ({ type: "scroll", sectionId: "section-witnesses" }),
   },
   {
     key: "activity",
@@ -137,7 +142,7 @@ const MODULES: ModuleDef[] = [
     sublabel: "Latest manifestations",
     icon: Activity,
     color: "#94A3B8",
-    path: (id) => `/creator/${id}#activity`,
+    nav: () => ({ type: "scroll", sectionId: "section-activity" }),
   },
 ];
 
@@ -155,9 +160,8 @@ interface HubData {
 
 interface Props {
   creatorId: number;
-  creatorHandle: string;   // artistHandle or numeric id string for URL
+  creatorHandle: string;
   isOwner: boolean;
-  onModuleClick?: (key: string) => void;  // optional: scroll to section instead of navigate
 }
 
 // ─── Module Card ─────────────────────────────────────────────────────────────
@@ -167,13 +171,11 @@ function ModuleCard({
   mod,
   creatorHandle,
   isOwner,
-  onClick,
 }: {
   def: ModuleDef;
   mod: HubModule | undefined;
   creatorHandle: string;
   isOwner: boolean;
-  onClick: () => void;
 }) {
   const [, navigate] = useLocation();
   const count = mod?.count ?? 0;
@@ -182,10 +184,23 @@ function ModuleCard({
   const Icon = def.icon;
 
   const handleClick = () => {
+    // Empty card + owner → go to registration page
     if (isEmpty && isOwner && def.registerPath) {
       navigate(def.registerPath);
+      return;
+    }
+
+    const action = def.nav(creatorHandle);
+
+    if (action.type === "scroll") {
+      // Smooth scroll to the section on the same page — no page reset
+      const el = document.getElementById(action.sectionId);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
     } else {
-      onClick();
+      // Navigate to a separate page
+      navigate(action.path);
     }
   };
 
@@ -193,7 +208,7 @@ function ModuleCard({
     <button
       type="button"
       onClick={handleClick}
-      className="group relative w-full text-left rounded-2xl overflow-hidden transition-all duration-200 focus:outline-none focus-visible:ring-2"
+      className="group relative w-full text-left rounded-2xl overflow-hidden transition-all duration-200 focus:outline-none focus-visible:ring-2 active:scale-95"
       style={{
         background: "rgba(255,255,255,0.03)",
         border: `1px solid rgba(255,255,255,${isEmpty ? "0.06" : "0.10"})`,
@@ -206,7 +221,7 @@ function ModuleCard({
         style={{ background: `radial-gradient(ellipse at 30% 50%, ${def.color}12 0%, transparent 70%)` }}
       />
 
-      {/* Cover art strip — 3 thumbnails */}
+      {/* Cover art strip — up to 3 thumbnails */}
       {previews.length > 0 && (
         <div className="flex h-16 sm:h-20 overflow-hidden">
           {previews.slice(0, 3).map((p, i) => (
@@ -231,7 +246,7 @@ function ModuleCard({
               )}
             </div>
           ))}
-          {/* Fill remaining slots */}
+          {/* Fill remaining slots with tinted empty divs */}
           {Array.from({ length: Math.max(0, 3 - previews.length) }).map((_, i) => (
             <div
               key={`empty-${i}`}
@@ -245,7 +260,7 @@ function ModuleCard({
       {/* Card body */}
       <div className="p-3 sm:p-4">
         <div className="flex items-start justify-between gap-2">
-          <div className="flex items-center gap-2.5 min-w-0">
+          <div className="flex items-center gap-2 min-w-0">
             <div
               className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center"
               style={{ background: `${def.color}18` }}
@@ -254,26 +269,25 @@ function ModuleCard({
             </div>
             <div className="min-w-0">
               <div
-                className="font-heading text-sm font-semibold leading-tight truncate"
+                className="font-heading text-xs sm:text-sm font-semibold leading-tight"
                 style={{ color: "rgba(255,255,255,0.92)" }}
               >
                 {def.label}
               </div>
-              <div className="text-xs mt-0.5 truncate" style={{ color: "rgba(255,255,255,0.38)" }}>
+              <div className="text-xs mt-0.5 truncate hidden sm:block" style={{ color: "rgba(255,255,255,0.38)" }}>
                 {def.sublabel}
               </div>
             </div>
           </div>
 
-          {/* Count badge or action */}
-          <div className="flex-shrink-0 flex items-center gap-1.5">
+          {/* Count badge or Add CTA */}
+          <div className="flex-shrink-0 flex items-center gap-1">
             {isEmpty && isOwner && def.registerPath ? (
               <div
-                className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full"
+                className="flex items-center gap-1 text-xs px-1.5 py-0.5 rounded-full"
                 style={{ background: `${def.color}20`, color: def.color }}
               >
                 <Plus className="w-3 h-3" />
-                <span>Add</span>
               </div>
             ) : count > 0 ? (
               <div
@@ -294,9 +308,9 @@ function ModuleCard({
           </div>
         </div>
 
-        {/* Empty owner CTA */}
+        {/* Empty owner CTA text */}
         {isEmpty && isOwner && def.registerLabel && (
-          <p className="mt-2 text-xs" style={{ color: `${def.color}80` }}>
+          <p className="mt-1.5 text-xs" style={{ color: `${def.color}80` }}>
             {def.registerLabel}
           </p>
         )}
@@ -307,29 +321,19 @@ function ModuleCard({
 
 // ─── Hub ─────────────────────────────────────────────────────────────────────
 
-export function CreatorDomainHub({ creatorId, creatorHandle, isOwner, onModuleClick }: Props) {
-  const [, navigate] = useLocation();
-
+export function CreatorDomainHub({ creatorId, creatorHandle, isOwner }: Props) {
   const { data: hub, isLoading } = trpc.profile.creatorHub.useQuery(
     { creatorId },
     { staleTime: 60_000, enabled: creatorId > 0 }
   );
 
-  const handleModuleClick = (def: ModuleDef) => {
-    if (onModuleClick) {
-      onModuleClick(def.key);
-    } else {
-      navigate(def.path(creatorHandle));
-    }
-  };
-
   if (isLoading) {
     return (
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 animate-pulse">
-        {MODULES.map((m) => (
+        {Array.from({ length: 8 }).map((_, i) => (
           <div
-            key={m.key}
-            className="h-28 rounded-2xl"
+            key={i}
+            className="h-24 rounded-2xl"
             style={{ background: "rgba(255,255,255,0.04)" }}
           />
         ))}
@@ -340,7 +344,18 @@ export function CreatorDomainHub({ creatorId, creatorHandle, isOwner, onModuleCl
   const modules = (hub as HubData | undefined)?.modules ?? {};
   const totalPlays = (hub as HubData | undefined)?.totalPlays ?? 0;
 
-  // Compute total registered works across all content-type modules
+  // ── Visitor mode: hide empty modules ──────────────────────────────────────
+  // Owners always see all modules (to manage and build their archive).
+  // Visitors only see modules that have at least one published work.
+  const visibleModules = isOwner
+    ? MODULES
+    : MODULES.filter((def) => (modules[def.key]?.count ?? 0) > 0);
+
+  if (!isOwner && visibleModules.length === 0) {
+    return null; // Nothing to show visitors yet
+  }
+
+  // Compute total registered works across content-type modules
   const totalWorks =
     (modules.music?.count ?? 0) +
     (modules.lyrics?.count ?? 0) +
@@ -378,16 +393,14 @@ export function CreatorDomainHub({ creatorId, creatorHandle, isOwner, onModuleCl
       </div>
 
       {/* ── Module grid ── */}
-      {/* Desktop: 3-col. Tablet: 2-col. Mobile: 2-col (compact). */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-3">
-        {MODULES.map((def) => (
+        {visibleModules.map((def) => (
           <ModuleCard
             key={def.key}
             def={def}
             mod={modules[def.key]}
             creatorHandle={creatorHandle}
             isOwner={isOwner}
-            onClick={() => handleModuleClick(def)}
           />
         ))}
       </div>

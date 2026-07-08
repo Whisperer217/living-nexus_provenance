@@ -6148,3 +6148,9 @@
 - [x] Hub inserted into CreatorProfilePage between CreatorIdentitySection and DomainRenderer
 - [x] "Creator Domain" section label above the hub grid
 - [x] TypeScript — zero errors
+
+## Creator Domain Hub — Bug Fix + Visibility Rules (Jul 2026)
+- [x] BUG: Hub module cards did not navigate — replaced hash-based navigate() with scrollIntoView for same-page sections; real route navigate() only for separate pages
+- [x] RULE: Visitor mode — empty modules hidden from visitors; only modules with count > 0 shown
+- [x] RULE: Domain History (ProvenanceTrailBlock) hidden from visitors — isOwner guard added to DomainRenderer
+- [x] TypeScript — zero errors
