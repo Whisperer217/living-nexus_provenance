@@ -43,6 +43,7 @@ import { LayoutGrid } from "lucide-react";
 import { CreatorIdentityStrip } from "@/components/CreatorIdentityStrip";
 import { EditChapel } from "@/components/EditChapel";
 import { SacredCanvas } from "@/components/SacredCanvas";
+import { CreatorDomainHub } from "@/components/CreatorDomainHub";
 
 // ─── Context Menu ─────────────────────────────────────────────────────────────
 interface ContextMenuProps {
@@ -1755,6 +1756,22 @@ export default function CreatorProfilePage() {
             <DomainEditor userId={creator.id} onClose={() => setShowDomainEditor(false)} />
           </div>
         )}
+        {/* ── Creator Domain Hub — one screen, zero hunting ── */}
+        <div className="py-6">
+          <div className="mb-3">
+            <span
+              className="text-xs font-mono tracking-widest uppercase"
+              style={{ color: "rgba(196,154,40,0.6)" }}
+            >
+              Creator Domain
+            </span>
+          </div>
+          <CreatorDomainHub
+            creatorId={creator.id}
+            creatorHandle={creator.artistHandle || String(creator.id)}
+            isOwner={isOwner}
+          />
+        </div>
         {/* ── Domain Renderer (block-based layout) ── */}
         <DomainRenderer userId={creator.id} isOwner={isOwner} />
         {/* ── Projects Section (top priority) ── */}

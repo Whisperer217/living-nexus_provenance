@@ -492,6 +492,73 @@ export const profileRouter = router({
           .where(eqOp(usersTable.id, ctx.user.id));
         return { ok: true, mode: input.mode };
       }),
+
+    /**
+     * Creator Domain Hub — returns counts + 3-item previews for all 11 modules
+     * in a single round-trip. Used by the hub architecture on CreatorProfilePage.
+     */
+    creatorHub: publicProcedure
+      .input(z.object({ creatorId: z.number().int().positive() }))
+      .query(async ({ input }) => {
+        const { creatorId } = input;
+
+        // All public published songs for this creator
+        const allSongs = await getSongsByUser(creatorId);
+        const publicSongs = (allSongs as any[]).filter((s: any) => s.isPublic && s.status === 'Published');
+
+        // Split by contentType
+        const music       = publicSongs.filter((s: any) => s.contentType === 'audio' || !s.contentType);
+        const lyrics      = publicSongs.filter((s: any) => s.contentType === 'lyrics');
+        const manuscripts = publicSongs.filter((s: any) => s.contentType === 'manuscript');
+        const comics      = publicSongs.filter((s: any) => s.contentType === 'comic');
+        const games       = publicSongs.filter((s: any) => s.contentType === 'game');
+
+        // Playlists
+        const playlistRows = await getPlaylistsByUser(creatorId);
+        const publicPlaylists = (playlistRows as any[]).filter((p: any) => p.isPublic !== false);
+
+        // Collections (album-style)
+        const collectionRows = await getCollectionsByCreator(creatorId);
+
+        // Testimony
+        const testimonyCount = await getTestimonyCount(creatorId);
+        const testimonyRows  = await getTestimoniesByCreator(creatorId, 3);
+
+        // Witnesses
+        const witnessCount = await getWitnessCount(creatorId);
+
+        // Visual Works
+        const { getVisualWorksByCreator } = await import('../db/visualWorks');
+        const visualRows   = await getVisualWorksByCreator(creatorId);
+        const publicVisual = (visualRows as any[]).filter((v: any) => v.status === 'published');
+
+        // Total plays
+        const totalPlays = await getCreatorTotalPlays(creatorId);
+
+        const preview = (arr: any[], n = 3) =>
+          arr.slice(0, n).map((item: any) => ({
+            id: item.id,
+            title: item.title ?? item.name ?? '',
+            coverArtUrl: item.coverArtUrl ?? item.coverUrl ?? null,
+            wid: item.wid ?? item.collectionWid ?? null,
+          }));
+
+        return {
+          totalPlays,
+          modules: {
+            music:       { count: music.length,                  previews: preview(music) },
+            lyrics:      { count: lyrics.length,                 previews: preview(lyrics) },
+            manuscripts: { count: manuscripts.length,            previews: preview(manuscripts) },
+            comics:      { count: comics.length,                 previews: preview(comics) },
+            games:       { count: games.length,                  previews: preview(games) },
+            playlists:   { count: publicPlaylists.length,        previews: preview(publicPlaylists) },
+            collections: { count: (collectionRows as any[]).length, previews: preview(collectionRows as any[]) },
+            testimony:   { count: testimonyCount,                previews: (testimonyRows as any[]).slice(0, 3).map((t: any) => ({ id: t.id, title: t.title ?? 'Testimony', coverArtUrl: null, wid: t.wid ?? null })) },
+            witnesses:   { count: witnessCount,                  previews: [] as { id: number; title: string; coverArtUrl: string | null; wid: string | null }[] },
+            visual:      { count: publicVisual.length,           previews: preview(publicVisual) },
+          },
+        };
+      }),
   });
 
 

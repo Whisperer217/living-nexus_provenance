@@ -6137,3 +6137,14 @@
 - [x] __my_public_profile__ sentinel handled in handleLinkClick — uses user.artistHandle when set, falls back to user.id
 - [x] Suno advisory updated with active Sony Music litigation notice and July 2026 federal hearing reference
 - [x] TypeScript — zero errors
+
+## Creator Domain Hub — Phase 1 (Architecture)
+- [x] creatorHub tRPC procedure — single round-trip returning counts + 3-item previews for all 11 modules
+- [x] CreatorDomainHub component — 11 module portal cards, 2-col mobile / 3-col tablet / 4-col desktop
+- [x] Empty modules at 40% opacity with "Register your first [X]" CTA (owner) or muted state (visitor)
+- [x] Cover art strip (3 thumbnails) per card when content exists
+- [x] Count badge per module in gold pill
+- [x] Quick stats strip: total works, total plays, witness count
+- [x] Hub inserted into CreatorProfilePage between CreatorIdentitySection and DomainRenderer
+- [x] "Creator Domain" section label above the hub grid
+- [x] TypeScript — zero errors
