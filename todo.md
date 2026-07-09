@@ -6201,3 +6201,8 @@
 - [x] NEW FEATURE: Archive deep-link auto-opens editor — /archive?song=<id> now auto-opens the CreativeDrawer for that song when songs have loaded (deepLinkEditorOpened ref prevents double-open)
 - [x] Resolved two git conflict markers in todo.md (kept both sides)
 - [x] TypeScript: 0 errors | Vitest: 340/340 passing
+
+## Creator Collection Route Fix (Jul 9, 2026)
+- [x] ROOT CAUSE: App.tsx registered 7 hardcoded /creator/:handle/{medium} routes but CreatorCollectionPage used useParams({ medium }) — no route ever defined :medium param so it was always undefined → isValidMedium false → query disabled → "Creator not found" without ever hitting the server
+- [x] FIX: Collapsed 7 hardcoded routes into single /creator/:handle/:medium route in App.tsx
+- [x] TypeScript: 0 errors

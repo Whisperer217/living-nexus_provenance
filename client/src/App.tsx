@@ -217,13 +217,7 @@ function Router() {
                 <Route path="/songs/:id" component={SongDetailPage} />
                 {/* /track/:id → canonical /song/:id redirect (TrackPage deprecated) */}
                 <Route path="/track/:id" component={TrackRedirect} />
-                <Route path="/creator/:handle/music" component={CreatorCollectionPage} />
-                <Route path="/creator/:handle/albums" component={CreatorCollectionPage} />
-                <Route path="/creator/:handle/books" component={CreatorCollectionPage} />
-                <Route path="/creator/:handle/lyrics" component={CreatorCollectionPage} />
-                <Route path="/creator/:handle/games" component={CreatorCollectionPage} />
-                <Route path="/creator/:handle/visual" component={CreatorCollectionPage} />
-                <Route path="/creator/:handle/playlists" component={CreatorCollectionPage} />
+                <Route path="/creator/:handle/:medium" component={CreatorCollectionPage} />
                 <Route path="/creator/:id" component={CreatorProfilePage} />
                 <Route path="/dashboard" component={DashboardPage} />
                 <Route path="/profile" component={ProfilePage} />
