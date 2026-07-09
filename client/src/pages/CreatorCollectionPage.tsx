@@ -26,6 +26,13 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { usePlayer, type Track, type QueueContext } from "@/contexts/PlayerContext";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 // ─── Medium configuration ─────────────────────────────────────────────────────
 type Medium = "music" | "albums" | "books" | "lyrics" | "games" | "visual" | "playlists";
@@ -306,7 +313,8 @@ export default function CreatorCollectionPage() {
   const { playQueueAt } = usePlayer();
 
   const [search, setSearch] = useState("");
-  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+  type SortMode = "newest" | "oldest" | "alpha";
+  const [sortMode, setSortMode] = useState<SortMode>("newest");
 
   const isValidMedium = VALID_MEDIUMS.has(medium ?? "");
   const med = (medium ?? "music") as Medium;
@@ -333,6 +341,23 @@ export default function CreatorCollectionPage() {
   const creatorHandle = creator?.artistHandle || handle || String(resolvedCreatorId);
 
   // Filter + sort works
+  // ── Sort helpers ─────────────────────────────────────────────────────────
+  function applySortWorks(arr: any[]) {
+    if (sortMode === "alpha") return [...arr].sort((a, b) => (a.title ?? "").localeCompare(b.title ?? ""));
+    if (sortMode === "oldest") return [...arr].reverse();
+    return arr; // newest — server already returns newest-first
+  }
+  function applySortCols(arr: any[]) {
+    if (sortMode === "alpha") return [...arr].sort((a, b) => (a.title ?? "").localeCompare(b.title ?? ""));
+    if (sortMode === "oldest") return [...arr].reverse();
+    return arr;
+  }
+  function applySortPlaylists(arr: any[]) {
+    if (sortMode === "alpha") return [...arr].sort((a, b) => (a.name ?? "").localeCompare(b.name ?? ""));
+    if (sortMode === "oldest") return [...arr].reverse();
+    return arr;
+  }
+
   const displayWorks = useMemo(() => {
     const works = data?.works ?? [];
     const filtered = search
@@ -341,8 +366,9 @@ export default function CreatorCollectionPage() {
           (w.genre ?? "").toLowerCase().includes(search.toLowerCase())
         )
       : works;
-    return sortDir === "desc" ? filtered : [...filtered].reverse();
-  }, [data?.works, search, sortDir]);
+    return applySortWorks(filtered);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data?.works, search, sortMode]);
 
   const displayCollections = useMemo(() => {
     const cols = data?.collections ?? [];
@@ -351,8 +377,9 @@ export default function CreatorCollectionPage() {
           (c.title ?? "").toLowerCase().includes(search.toLowerCase())
         )
       : cols;
-    return sortDir === "desc" ? filtered : [...filtered].reverse();
-  }, [data?.collections, search, sortDir]);
+    return applySortCols(filtered);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data?.collections, search, sortMode]);
 
   const displayPlaylists = useMemo(() => {
     const pls = data?.playlists ?? [];
@@ -361,8 +388,9 @@ export default function CreatorCollectionPage() {
           (p.name ?? "").toLowerCase().includes(search.toLowerCase())
         )
       : pls;
-    return sortDir === "desc" ? filtered : [...filtered].reverse();
-  }, [data?.playlists, search, sortDir]);
+    return applySortPlaylists(filtered);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data?.playlists, search, sortMode]);
 
   const totalCount =
     displayWorks.length + displayCollections.length + displayPlaylists.length;
@@ -433,32 +461,43 @@ export default function CreatorCollectionPage() {
           borderBottom: `1px solid ${config.color}22`,
         }}
       >
-        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center gap-3">
-          {/* Back to creator domain */}
+        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center gap-2 min-w-0">
+          {/* ── Back to Creator Domain breadcrumb ── */}
           <Link href={`/creator/${creatorHandle}`}>
             <button
-              className="flex items-center gap-1.5 text-xs transition-opacity hover:opacity-70"
-              style={{ color: "rgba(255,255,255,0.5)" }}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all hover:opacity-80 active:scale-95 flex-shrink-0"
+              style={{
+                background: "rgba(255,255,255,0.06)",
+                border: "1px solid rgba(255,255,255,0.10)",
+                color: "rgba(255,255,255,0.65)",
+                WebkitTapHighlightColor: "transparent",
+              }}
             >
-              <ChevronLeft className="w-4 h-4" />
-              <span>{creator.artistHandle ?? creator.name ?? "Creator"}</span>
+              <ChevronLeft className="w-3.5 h-3.5" />
+              <span className="max-w-[120px] truncate">
+                {creator.artistHandle ?? creator.name ?? "Creator"}
+              </span>
             </button>
           </Link>
-          <span style={{ color: "rgba(255,255,255,0.2)" }}>/</span>
+
+          {/* Separator */}
+          <span className="flex-shrink-0" style={{ color: "rgba(255,255,255,0.18)" }}>/</span>
+
           {/* Medium label */}
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 flex-shrink-0">
             <Icon className="w-4 h-4" style={{ color: config.color }} />
             <span
-              className="text-sm font-semibold"
+              className="text-sm font-semibold hidden sm:inline"
               style={{ color: config.color, fontFamily: "'Cinzel', serif" }}
             >
               {config.label}
             </span>
           </div>
+
           {/* Count badge */}
           {totalCount > 0 && (
             <span
-              className="ml-auto text-xs px-2 py-0.5 rounded-full"
+              className="text-xs px-2 py-0.5 rounded-full flex-shrink-0"
               style={{
                 background: `${config.color}18`,
                 color: config.color,
@@ -555,18 +594,55 @@ export default function CreatorCollectionPage() {
               className="pl-8 h-8 text-xs bg-transparent border-white/10 text-white placeholder:text-white/30 focus:border-white/20"
             />
           </div>
-          <button
-            onClick={() => setSortDir((d) => (d === "desc" ? "asc" : "desc"))}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all hover:opacity-70"
-            style={{
-              background: "rgba(255,255,255,0.05)",
-              border: "1px solid rgba(255,255,255,0.08)",
-              color: "rgba(255,255,255,0.6)",
-            }}
-          >
-            {sortDir === "desc" ? <SortDesc className="w-3.5 h-3.5" /> : <SortAsc className="w-3.5 h-3.5" />}
-            {sortDir === "desc" ? "Newest" : "Oldest"}
-          </button>
+          {/* ── Sort dropdown ── */}
+          <Select value={sortMode} onValueChange={(v) => setSortMode(v as SortMode)}>
+            <SelectTrigger
+              className="h-8 w-[110px] text-xs border-white/10 focus:ring-0"
+              style={{
+                background: "rgba(255,255,255,0.05)",
+                color: "rgba(255,255,255,0.7)",
+              }}
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent
+              style={{
+                background: "#141210",
+                border: "1px solid rgba(255,255,255,0.10)",
+              }}
+            >
+              <SelectItem
+                value="newest"
+                className="text-xs focus:bg-white/10"
+                style={{ color: "rgba(255,255,255,0.8)" }}
+              >
+                <span className="flex items-center gap-1.5">
+                  <Clock className="w-3 h-3" />
+                  Newest
+                </span>
+              </SelectItem>
+              <SelectItem
+                value="oldest"
+                className="text-xs focus:bg-white/10"
+                style={{ color: "rgba(255,255,255,0.8)" }}
+              >
+                <span className="flex items-center gap-1.5">
+                  <SortAsc className="w-3 h-3" />
+                  Oldest
+                </span>
+              </SelectItem>
+              <SelectItem
+                value="alpha"
+                className="text-xs focus:bg-white/10"
+                style={{ color: "rgba(255,255,255,0.8)" }}
+              >
+                <span className="flex items-center gap-1.5">
+                  <Hash className="w-3 h-3" />
+                  A → Z
+                </span>
+              </SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       )}
 
