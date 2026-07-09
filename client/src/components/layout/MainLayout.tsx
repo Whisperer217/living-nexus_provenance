@@ -32,7 +32,7 @@ import TopBar from "@/components/layout/TopBar";
 import { WhatsNewModal } from "@/components/WhatsNewModal";
 import { trpc } from "@/lib/trpc";
 import { useLightsMode } from "@/contexts/LightsModeContext";
-import { Menu, X, Bell } from "lucide-react";
+import { Menu, X, Bell, Sparkles } from "lucide-react";
 import { Z } from "@/lib/viewportLayers";
 
 const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/HMNMkWUWAfVdTbRj3YmPCF/ln-navbar-icon-180_b914f927.png";
@@ -178,6 +178,18 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           <img src={LOGO_URL} alt="LN" className="w-7 h-7 object-contain" />
           <span className="font-display text-base gold-shimmer">Living Nexus</span>
         </div>
+
+        {/* Compose shortcut — mobile only */}
+        {!!user && (
+          <button
+            onClick={() => navigate("/keeper-compose")}
+            className="flex items-center justify-center rounded-lg transition-all"
+            style={{ minWidth: 44, minHeight: 44, color: "rgba(255,255,255,0.4)", WebkitTapHighlightColor: "transparent" }}
+            aria-label="Compose"
+          >
+            <Sparkles size={18} />
+          </button>
+        )}
 
         {/* Bell */}
         {!!user && (
