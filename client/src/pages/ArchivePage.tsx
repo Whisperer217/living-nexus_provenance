@@ -54,10 +54,21 @@ function formatDate(date: Date | string | null | undefined): string {
 }
 
 /* ── CollectionsSection — batch upload albums ───────────────────── */
-function CollectionsSection() {
+function CollectionsSection({ initialExpandedId }: { initialExpandedId?: number | null }) {
   const { data: collections = [], isLoading } = trpc.songs.getMyCollections.useQuery();
   const utils = trpc.useUtils();
-  const [expanded, setExpanded] = useState<number | null>(null);
+  const [expanded, setExpanded] = useState<number | null>(initialExpandedId ?? null);
+  const expandedRef = useRef<HTMLDivElement | null>(null);
+
+  // Auto-scroll to the deep-linked album once data loads
+  useEffect(() => {
+    if (initialExpandedId && expandedRef.current) {
+      setTimeout(() => {
+        expandedRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 300);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [collections.length]);
   const { data: tracks = [] } = trpc.songs.getCollectionTracks.useQuery(
     { collectionId: expanded! },
     { enabled: expanded !== null }
@@ -114,8 +125,12 @@ function CollectionsSection() {
           {(collections as any[]).map((col: any) => {
             const isOpen = expanded === col.id;
             return (
-              <div key={col.id} className="rounded-xl overflow-hidden"
-                style={{ border: "1px solid rgba(196,154,40,0.18)", background: "var(--ln-coal)" }}>
+              <div
+                key={col.id}
+                ref={isOpen && col.id === initialExpandedId ? expandedRef : undefined}
+                className="rounded-xl overflow-hidden"
+                style={{ border: "1px solid rgba(196,154,40,0.18)", background: "var(--ln-coal)" }}
+              >
                 {/* Header row */}
                 <div
                   className="flex items-center gap-3 p-3 cursor-pointer hover:bg-white/5 transition-colors"
@@ -286,7 +301,24 @@ export default function ArchivePage() {
   const utils = trpc.useUtils();
   const [editingSong, setEditingSong] = useState<any | null>(null);
   const [deletingSong, setDeletingSong] = useState<any | null>(null);
-  const [activeTab, setActiveTab] = useState<"tracks" | "collections" | "external" | "witnessed">("tracks");
+
+  // ── Deep-link: read URL params on mount ─────────────────────────────────────
+  // Supported params:
+  //   ?tab=tracks|collections|external|witnessed  — switch to tab
+  //   ?collection=<id>                            — switch to collections tab + expand album
+  //   ?song=<id>                                  — switch to tracks tab + highlight song
+  const urlParams = new URLSearchParams(window.location.search);
+  const deepLinkTab = urlParams.get("tab") as "tracks" | "collections" | "external" | "witnessed" | null;
+  const deepLinkCollectionId = urlParams.get("collection") ? Number(urlParams.get("collection")) : null;
+  const deepLinkSongId = urlParams.get("song") ? Number(urlParams.get("song")) : null;
+
+  const initialTab: "tracks" | "collections" | "external" | "witnessed" =
+    deepLinkCollectionId ? "collections" :
+    deepLinkSongId ? "tracks" :
+    (deepLinkTab && ["tracks", "collections", "external", "witnessed"].includes(deepLinkTab)) ? deepLinkTab :
+    "tracks";
+
+  const [activeTab, setActiveTab] = useState<"tracks" | "collections" | "external" | "witnessed">(initialTab);
 
   // ── Witnessed Works (Witness Subscription Archive) ────────────────────────────────────────────
   const [witnessArchivePage, setWitnessArchivePage] = useState(0);
@@ -309,6 +341,17 @@ export default function ArchivePage() {
   const [localSongs, setLocalSongs] = useState<any[]>([]);
   const draggedId = useRef<number | null>(null);
   const dragOverId = useRef<number | null>(null);
+
+  // Deep-link: ref for scrolling to a specific song
+  const deepLinkSongRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    if (deepLinkSongId && deepLinkSongRef.current) {
+      setTimeout(() => {
+        deepLinkSongRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 400);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [localSongs.length]);
 
   // Filter + sort state
   const [statusFilter, setStatusFilter] = useState<"All" | "Published" | "Draft" | "Deleted">("All");
@@ -699,7 +742,7 @@ export default function ArchivePage() {
         {activeTab === "collections" && (
           <div className="space-y-8">
             {/* ── Batch Upload Albums (userCollections) ── */}
-            <CollectionsSection />
+            <CollectionsSection initialExpandedId={deepLinkCollectionId} />
             {/* ── Named Playlists ── */}
             <div>
               <h3 className="text-xs font-bold tracking-widest mb-3 flex items-center gap-2"
@@ -1223,10 +1266,12 @@ export default function ArchivePage() {
               const hasAudio = !!song.fileUrl;
               const isDeleted = song.status === "Deleted";
               const isSelected = selectedIds.has(song.id);
+              const isDeepLinked = deepLinkSongId === song.id;
 
               return (
                 <div
                   key={song.id}
+                  ref={isDeepLinked ? deepLinkSongRef : undefined}
                   draggable={!batchMode && !isDeleted}
                   onDragStart={(e) => !batchMode && handleDragStart(e, song.id)}
                   onDragOver={(e) => !batchMode && handleDragOver(e, song.id)}
@@ -1241,9 +1286,12 @@ export default function ArchivePage() {
                     background: isSelected
                       ? "rgba(196,154,40,0.05)"
                       : isDeleted ? "var(--ln-coal)" : "var(--ln-coal)",
-                    border: isSelected
+                    border: isDeepLinked
+                      ? "2px solid rgba(196,154,40,0.8)"
+                      : isSelected
                       ? "1px solid rgba(196,154,40,0.3)"
                       : `1px solid ${isDeleted ? "color-mix(in srgb, var(--lnx-red) 20%, transparent)" : "var(--ln-gold)"}`,
+                    boxShadow: isDeepLinked ? "0 0 0 3px rgba(196,154,40,0.15)" : undefined,
                     cursor: batchMode ? (isDeleted ? "default" : "pointer") : (hasAudio && !isDeleted ? "pointer" : "default"),
                     opacity: isDeleted ? 0.6 : 1,
                   }}
