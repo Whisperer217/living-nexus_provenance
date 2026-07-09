@@ -566,15 +566,25 @@ export const profileRouter = router({
      */
     getCreatorCollection: publicProcedure
       .input(z.object({
-        creatorId: z.number().int().positive(),
+        // Accept EITHER a numeric creatorId OR a string handle — resolved server-side.
+        // This eliminates the two-step client-side resolution race condition.
+        creatorId: z.number().int().positive().optional(),
+        handle: z.string().optional(),
         medium: z.enum(['music', 'albums', 'books', 'lyrics', 'games', 'visual', 'playlists']),
         limit: z.number().int().min(1).max(500).default(200),
         offset: z.number().int().min(0).default(0),
       }))
       .query(async ({ input }) => {
-        const { creatorId, medium, limit, offset } = input;
-        const creator = await getUserById(creatorId);
+        const { medium, limit, offset } = input;
+        // Resolve creator from handle (string) or creatorId (number)
+        let creator: Awaited<ReturnType<typeof getUserById>> | undefined;
+        if (input.handle) {
+          creator = await getUserByHandle(input.handle) ?? undefined;
+        } else if (input.creatorId) {
+          creator = await getUserById(input.creatorId) ?? undefined;
+        }
         if (!creator) return null;
+        const creatorId = creator.id;
 
         if (medium === 'albums') {
           const cols = await getCollectionsByCreator(creatorId);

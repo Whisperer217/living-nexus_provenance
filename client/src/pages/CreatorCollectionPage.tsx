@@ -308,31 +308,29 @@ export default function CreatorCollectionPage() {
   const [search, setSearch] = useState("");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
 
-  // Resolve handle → numeric ID
-  const handleQuery = trpc.profile.getByHandle.useQuery(
-    { handle: handle ?? "" },
-    { enabled: !!handle && isNaN(Number(handle)), staleTime: 300_000 }
-  );
-  const creatorId = isNaN(Number(handle))
-    ? (handleQuery.data?.id ?? 0)
-    : Number(handle);
-
   const isValidMedium = VALID_MEDIUMS.has(medium ?? "");
   const med = (medium ?? "music") as Medium;
   const config = MEDIUM_CONFIG[med] ?? MEDIUM_CONFIG.music;
   const Icon = config.icon;
 
-  const { data, isLoading, error } = trpc.profile.getCreatorCollection.useQuery(
-    { creatorId, medium: med },
+  // Single round-trip: pass handle directly to the server procedure.
+  // The server resolves handle → creator internally, eliminating the
+  // two-step client-side race condition that caused "Creator not found".
+  const isNumericHandle = /^\d+$/.test(handle ?? "");
+  const { data, isLoading } = trpc.profile.getCreatorCollection.useQuery(
+    isNumericHandle
+      ? { creatorId: Number(handle), medium: med }
+      : { handle: handle ?? "", medium: med },
     {
-      enabled: creatorId > 0 && isValidMedium,
+      enabled: !!handle && isValidMedium,
       staleTime: 60_000,
     }
   );
 
-  const isOwner = user?.id === creatorId;
   const creator = data?.creator;
-  const creatorHandle = creator?.artistHandle || String(creatorId);
+  const resolvedCreatorId = creator?.id ?? 0;
+  const isOwner = user?.id === resolvedCreatorId;
+  const creatorHandle = creator?.artistHandle || handle || String(resolvedCreatorId);
 
   // Filter + sort works
   const displayWorks = useMemo(() => {
@@ -390,8 +388,8 @@ export default function CreatorCollectionPage() {
     if (queue.length) playQueueAt(queue, 0, "CREATOR_PAGE");
   };
 
-  // Loading state
-  if (isLoading || (isNaN(Number(handle)) && handleQuery.isLoading)) {
+  // Loading state — single query now, no two-step resolution
+  if (isLoading) {
     return (
       <div
         className="min-h-screen flex items-center justify-center"
