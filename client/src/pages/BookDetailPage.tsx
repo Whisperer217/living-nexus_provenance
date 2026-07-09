@@ -454,6 +454,21 @@ export default function BookDetailPage() {
                   Creator Studio
                 </Link>
               )}
+              {isOwner && (
+                <Link href={`/archive?tab=tracks&song=${bookId}`}>
+                  <button
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all hover:opacity-80 active:scale-95"
+                    style={{
+                      background: "rgba(196,154,40,0.06)",
+                      border: "1px solid rgba(196,154,40,0.25)",
+                      color: "var(--ln-gold)",
+                      WebkitTapHighlightColor: "transparent",
+                    }}
+                  >
+                    Edit in Archive →
+                  </button>
+                </Link>
+              )}
               <FlagContentButton workId={bookId} workType={isComic ? "comic" : "manuscript"} />
             </div>
           </div>

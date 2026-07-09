@@ -5,8 +5,9 @@
  * Shows hero metadata, provenance WID, and a masonry image grid.
  */
 import React, { useState } from "react";
-import { useLocation, useParams } from "wouter";
+import { useLocation, useParams, Link } from "wouter";
 import { trpc } from "@/lib/trpc";
+import { useAuth } from "@/_core/hooks/useAuth";
 
 const ACCENT = "#FDA4AF";
 const ACCENT_BG = "rgba(253,164,175,0.08)";
@@ -30,6 +31,7 @@ export default function VisualWorksDetailPage() {
   const [, navigate] = useLocation();
   const params = useParams<{ id: string }>();
   const id = parseInt(params.id ?? "0", 10);
+  const { user } = useAuth();
 
   const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
 
@@ -60,6 +62,7 @@ export default function VisualWorksDetailPage() {
   }
 
   const { collection, items } = data;
+  const isOwner = !!user && user.id === (collection as any).creatorId;
 
   return (
     <div className="min-h-screen" style={{ background: "var(--ln-void, #0A0806)" }}>
@@ -199,6 +202,25 @@ export default function VisualWorksDetailPage() {
             {collection.collectionWid && (
               <div className="mt-3">
                 <WIDPill wid={collection.collectionWid} prefix="WID-VWC" />
+              </div>
+            )}
+
+            {/* Owner: Edit in Archive deep-link */}
+            {isOwner && (
+              <div className="mt-3">
+                <Link href={`/archive?tab=tracks&song=${id}`}>
+                  <button
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all hover:opacity-80 active:scale-95"
+                    style={{
+                      background: "rgba(196,154,40,0.08)",
+                      border: "1px solid rgba(196,154,40,0.25)",
+                      color: "var(--ln-gold, #C49A28)",
+                      WebkitTapHighlightColor: "transparent",
+                    }}
+                  >
+                    Edit in Archive →
+                  </button>
+                </Link>
               </div>
             )}
 
