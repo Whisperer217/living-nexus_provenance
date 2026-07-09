@@ -9,13 +9,11 @@
  *   • Mobile: 2-col thumb-first grid
  *   • Creator Mode: all 11 modules visible; empty at 40% opacity with "Register" CTA
  *   • Visitor Mode: only modules with count > 0 are shown (no empty clutter)
- *   • Navigation: every card is a real <a> link — one card, one destination, zero JS
- *   • Same-page sections: href="#section-id" — browser handles scroll natively
- *   • Separate pages (Visual Works, Playlists, etc.): real route hrefs
+ *   • Navigation: every card is a real wouter <Link> — one card, one dedicated collection page
  *
- * Root cause of previous bug: scrollIntoView targeted IDs that did not exist in the DOM.
- * Fix: use native <a href="#section-id"> anchors. The browser finds the element by ID
- * and scrolls to it reliably. No JS, no navigate(), no DOM queries.
+ * Architecture: Creator Domain is the front door. Each card is a gateway to a dedicated
+ * collection page (/creator/:handle/:medium). No same-page scrolling. No anchor hacks.
+ * One card → one URL → one page. This is the archive model.
  */
 import { Link } from "wouter";
 import {
@@ -54,7 +52,7 @@ const MODULES: ModuleDef[] = [
     sublabel: "Tracks & singles",
     icon: Music2,
     color: "#C49A28",
-    href: () => "#section-music",
+    href: (handle) => `/creator/${handle}/music`,
     registerHref: "/upload",
     registerLabel: "Register your first track",
   },
@@ -64,7 +62,7 @@ const MODULES: ModuleDef[] = [
     sublabel: "Collections & albums",
     icon: Album,
     color: "#A78BFA",
-    href: () => "#section-albums",
+    href: (handle) => `/creator/${handle}/albums`,
     registerHref: "/upload",
     registerLabel: "Create your first album",
   },
@@ -74,8 +72,8 @@ const MODULES: ModuleDef[] = [
     sublabel: "Curated sequences",
     icon: ListMusic,
     color: "#34D399",
-    href: () => "/playlists",
-    registerHref: "/playlists/new",
+    href: (handle) => `/creator/${handle}/playlists`,
+    registerHref: "/playlists",
     registerLabel: "Build your first playlist",
   },
   {
@@ -84,7 +82,7 @@ const MODULES: ModuleDef[] = [
     sublabel: "Manuscripts & prose",
     icon: BookOpen,
     color: "#F97316",
-    href: () => "#section-books",
+    href: (handle) => `/creator/${handle}/books`,
     registerHref: "/upload?type=manuscript",
     registerLabel: "Register your first book",
   },
@@ -94,7 +92,7 @@ const MODULES: ModuleDef[] = [
     sublabel: "Sequential art",
     icon: Layers,
     color: "#EC4899",
-    href: () => "#section-books",
+    href: (handle) => `/creator/${handle}/books`,
     registerHref: "/upload?type=comic",
     registerLabel: "Register your first comic",
   },
@@ -104,7 +102,7 @@ const MODULES: ModuleDef[] = [
     sublabel: "Written works",
     icon: FileText,
     color: "#60A5FA",
-    href: () => "#section-standalone",
+    href: (handle) => `/creator/${handle}/lyrics`,
     registerHref: "/upload?type=lyrics",
     registerLabel: "Register your first lyrics",
   },
@@ -114,7 +112,7 @@ const MODULES: ModuleDef[] = [
     sublabel: "Interactive works",
     icon: Gamepad2,
     color: "#FBBF24",
-    href: () => "#section-games",
+    href: (handle) => `/creator/${handle}/games`,
     registerHref: "/upload?type=game",
     registerLabel: "Register your first game",
   },
@@ -124,7 +122,7 @@ const MODULES: ModuleDef[] = [
     sublabel: "Art & image collections",
     icon: Image,
     color: "#FDA4AF",
-    href: (handle) => `/visual-works?creator=${handle}`,
+    href: (handle) => `/creator/${handle}/visual`,
     registerHref: "/visual-works/new",
     registerLabel: "Register your first collection",
   },
@@ -134,7 +132,7 @@ const MODULES: ModuleDef[] = [
     sublabel: "Creator statements",
     icon: MessageSquareQuote,
     color: "#818CF8",
-    href: () => "#section-testimony",
+    href: (handle) => `/creator/${handle}#section-testimony`,
     registerHref: "/testimony/new",
     registerLabel: "Write your first testimony",
   },
@@ -152,7 +150,7 @@ const MODULES: ModuleDef[] = [
     sublabel: "Latest manifestations",
     icon: Activity,
     color: "#94A3B8",
-    href: () => "#section-music",
+    href: (handle) => `/creator/${handle}/music`,
   },
 ];
 
@@ -314,30 +312,8 @@ function ModuleCard({
     textDecoration: "none",
   };
 
-  // Hash anchors (#section-id) work as plain <a> tags — browser scrolls natively.
-  // External routes use wouter <Link> for client-side navigation.
-  if (destination.startsWith("#")) {
-    return (
-      <a
-        href={destination}
-        className={cardClassName}
-        style={cardStyle}
-        onClick={(e) => {
-          // Smooth scroll for same-page anchors
-          const targetId = destination.slice(1);
-          const el = document.getElementById(targetId);
-          if (el) {
-            e.preventDefault();
-            el.scrollIntoView({ behavior: "smooth", block: "start" });
-          }
-          // If element not found, let the browser handle the hash navigation naturally
-        }}
-      >
-        {cardContent}
-      </a>
-    );
-  }
-
+  // All destinations are now real routes — use wouter <Link> for client-side navigation.
+  // Testimony/witnesses use hash anchors on the profile page (still valid).
   return (
     <Link href={destination} className={cardClassName} style={cardStyle}>
       {cardContent}

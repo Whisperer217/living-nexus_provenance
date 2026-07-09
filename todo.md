@@ -6162,3 +6162,17 @@
 - [x] FIX 3: Rewrote all 11 hub cards as native <a href="#section-id"> anchors (same-page) or wouter <Link href="/route"> (separate pages). No JS navigate(), no DOM queries — browser handles scroll natively.
 - [x] Architecture: one card, one destination. Music→#section-music, Albums→#section-albums, Playlists→/playlists, Books→#section-books, Comics→#section-books, Lyrics→#section-standalone, Games→#section-games, Visual Works→/visual-works?creator=:handle, Testimony→#section-testimony, Witnesses→/creator/:handle#section-testimony, Activity→#section-music
 - [x] TypeScript: 0 errors
+
+## Creator Domain — Hierarchical Archive Refactor (Jul 9, 2026)
+- [x] Build CreatorCollectionPage: shared layout with creator header, back-to-domain breadcrumb, medium-specific grid, sort/filter controls
+- [x] Route: /creator/:handle/music — Music Library (audio tracks, cover grid, play buttons)
+- [x] Route: /creator/:handle/albums — Albums Collection (collection cards)
+- [x] Route: /creator/:handle/books — Books Library (manuscripts + comics, cover grid)
+- [x] Route: /creator/:handle/lyrics — Lyrics Library (standalone lyrics/written works)
+- [x] Route: /creator/:handle/games — Games Collection (game cards)
+- [x] Route: /creator/:handle/visual — Visual Gallery (image grid)
+- [x] Route: /creator/:handle/playlists — Playlists (creator-scoped)
+- [x] Update CreatorDomainHub: all 11 cards navigate to /creator/:handle/:medium routes (not hash anchors)
+- [x] Register all 7 new routes in App.tsx (before /creator/:id to avoid route conflicts)
+- [x] tRPC: profile.getCreatorCollection procedure — filters by medium (music/albums/books/lyrics/games/visual/playlists)
+- [x] TypeScript: 0 errors

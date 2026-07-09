@@ -559,6 +559,63 @@ export const profileRouter = router({
           },
         };
       }),
+
+    /**
+     * Returns all published works for a creator filtered by medium.
+     * Used by the dedicated collection pages (/creator/:handle/music, /albums, etc.)
+     */
+    getCreatorCollection: publicProcedure
+      .input(z.object({
+        creatorId: z.number().int().positive(),
+        medium: z.enum(['music', 'albums', 'books', 'lyrics', 'games', 'visual', 'playlists']),
+        limit: z.number().int().min(1).max(500).default(200),
+        offset: z.number().int().min(0).default(0),
+      }))
+      .query(async ({ input }) => {
+        const { creatorId, medium, limit, offset } = input;
+        const creator = await getUserById(creatorId);
+        if (!creator) return null;
+
+        if (medium === 'albums') {
+          const cols = await getCollectionsByCreator(creatorId);
+          return { creator, works: [] as any[], collections: cols as any[], playlists: [] as any[] };
+        }
+
+        if (medium === 'playlists') {
+          const { getDb: getDb2 } = await import('../utils/db');
+          const { playlists: playlistsTable } = await import('../../drizzle/schema');
+          const { eq: eqOp, and: andOp, desc: descOp } = await import('drizzle-orm');
+          const db2 = await getDb2();
+          const rows = await db2
+            .select()
+            .from(playlistsTable)
+            .where(andOp(eqOp(playlistsTable.ownerId, creatorId), eqOp(playlistsTable.isPublic, true)))
+            .orderBy(descOp((playlistsTable as any).updatedAt))
+            .limit(limit);
+          return { creator, works: [] as any[], collections: [] as any[], playlists: rows as any[] };
+        }
+
+        if (medium === 'visual') {
+          const { getVisualWorksByCreator } = await import('../db/visualWorks');
+          const rows = await getVisualWorksByCreator(creatorId);
+          const published = (rows as any[]).filter((v: any) => v.status === 'published');
+          return { creator, works: published.slice(offset, offset + limit), collections: [] as any[], playlists: [] as any[] };
+        }
+
+        // music, lyrics, books (manuscripts+comics), games — filter songs by contentType
+        const contentTypeMap: Record<string, string[]> = {
+          music:  ['audio'],
+          lyrics: ['lyrics'],
+          books:  ['manuscript', 'comic'],
+          games:  ['game'],
+        };
+        const types = contentTypeMap[medium] ?? ['audio'];
+        const allSongs = await getSongsByUser(creatorId);
+        const filtered = (allSongs as any[])
+          .filter((s: any) => s.isPublic && s.status === 'Published' && types.includes(s.contentType ?? 'audio'))
+          .slice(offset, offset + limit);
+        return { creator, works: filtered, collections: [] as any[], playlists: [] as any[] };
+      }),
   });
 
 
