@@ -113,11 +113,8 @@ const LicensedDownloadsPage = lazy(() => import("./pages/LicensedDownloadsPage")
 const VisualWorksPage = lazy(() => import("./pages/VisualWorksPage"));
 const VisualWorksNewPage = lazy(() => import("./pages/VisualWorksNewPage"));
 const VisualWorksDetailPage = lazy(() => import("./pages/VisualWorksDetailPage"));
-<<<<<<< Updated upstream
 const CreatorCollectionPage = lazy(() => import("./pages/CreatorCollectionPage"));
-=======
 const CollectionStudioPage = lazy(() => import("./pages/CollectionStudioPage"));
->>>>>>> Stashed changes
 
 // Minimal fallback shown while a page chunk loads (typically <200ms on CDN)
 function PageLoader() {

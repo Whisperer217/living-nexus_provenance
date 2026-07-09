@@ -1594,22 +1594,6 @@ export default function ProfilePage() {
                         {isExpanded ? <ChevronDown size={13} className="text-white/30 flex-shrink-0" /> : <ChevronRight size={13} className="text-white/30 flex-shrink-0" />}
                       </div>
                       {isExpanded && (
-<<<<<<< Updated upstream
-                        <div className="border-t border-white/[0.04] px-3 py-3 flex justify-center">
-                          <Link href={`/archive?tab=collections&collection=${album.id}`}>
-                            <button
-                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all hover:opacity-80 active:scale-95"
-                              style={{
-                                background: "rgba(196,154,40,0.10)",
-                                border: "1px solid rgba(196,154,40,0.25)",
-                                color: "var(--ln-gold)",
-                                WebkitTapHighlightColor: "transparent",
-                              }}
-                            >
-                              Edit in Archive →
-                            </button>
-                          </Link>
-=======
                         <div className="border-t border-white/[0.04] px-3 py-2">
                           <div className="flex items-center justify-center gap-3 py-3">
                             <Link
@@ -1629,7 +1613,6 @@ export default function ProfilePage() {
                               Edit in Archive
                             </Link>
                           </div>
->>>>>>> Stashed changes
                         </div>
                       )}
                     </div>
