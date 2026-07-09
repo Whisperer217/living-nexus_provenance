@@ -5,8 +5,8 @@
              improved track numbers, drag handles, auth guard.
 ═══════════════════════════════════════════════════════════════════ */
 
-import { useEffect, useState, useRef } from "react";
-import { Link, useLocation } from "wouter";
+import { useEffect, useState, useRef, useCallback, useMemo } from "react";
+import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { PullToRefreshIndicator } from "@/components/PullToRefreshIndicator";
@@ -307,20 +307,25 @@ function ConfirmDeleteModal({
 /* ── Page ───────────────────────────────────────────────────────── */
 export default function ArchivePage() {
   const { isAuthenticated, loading } = useAuth();
-  const [,] = useLocation();
   const utils = trpc.useUtils();
   const [editingSong, setEditingSong] = useState<any | null>(null);
   const [deletingSong, setDeletingSong] = useState<any | null>(null);
 
-  // ── Deep-link: read URL params on mount ─────────────────────────────────────
+  // ── Deep-link: read URL params once on mount (stable via useMemo) ─────────────────────────────────────
   // Supported params:
   //   ?tab=tracks|collections|external|witnessed  — switch to tab
   //   ?collection=<id>                            — switch to collections tab + expand album
   //   ?song=<id>                                  — switch to tracks tab + highlight song
-  const urlParams = new URLSearchParams(window.location.search);
-  const deepLinkTab = urlParams.get("tab") as "tracks" | "collections" | "external" | "witnessed" | null;
-  const deepLinkCollectionId = urlParams.get("collection") ? Number(urlParams.get("collection")) : null;
-  const deepLinkSongId = urlParams.get("song") ? Number(urlParams.get("song")) : null;
+  // useMemo with [] ensures these are computed once on mount, not every render.
+  const { deepLinkTab, deepLinkCollectionId, deepLinkSongId } = useMemo(() => {
+    const p = new URLSearchParams(window.location.search);
+    return {
+      deepLinkTab: p.get("tab") as "tracks" | "collections" | "external" | "witnessed" | null,
+      deepLinkCollectionId: p.get("collection") ? Number(p.get("collection")) : null,
+      deepLinkSongId: p.get("song") ? Number(p.get("song")) : null,
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const initialTab: "tracks" | "collections" | "external" | "witnessed" =
     deepLinkCollectionId ? "collections" :
@@ -411,6 +416,17 @@ export default function ArchivePage() {
   useEffect(() => {
     if (songs) setLocalSongs(songs);
   }, [songs]);
+
+  // Deep-link: auto-open editor when ?song=<id> is present and songs have loaded
+  const deepLinkEditorOpened = useRef(false);
+  useEffect(() => {
+    if (!deepLinkSongId || deepLinkEditorOpened.current || !songs) return;
+    const target = songs.find((s: any) => s.id === deepLinkSongId);
+    if (target) {
+      deepLinkEditorOpened.current = true;
+      setEditingSong(target);
+    }
+  }, [songs, deepLinkSongId]);
 
   // Clear selection when exiting batch mode
   useEffect(() => {
@@ -1546,12 +1562,14 @@ export default function ArchivePage() {
           downloadPermission: (editingSong as any).downloadPermission ?? null,
           downloadTipThresholdCents: (editingSong as any).downloadTipThresholdCents ?? null,
         }}
-        onClose={() => setEditingSong(null)}
-        onSaved={() => {
+        onClose={useCallback(() => setEditingSong(null), [])}
+        onSaved={useCallback(() => {
+          const id = editingSong?.id;
           setEditingSong(null);
           utils.songs.mySongs.invalidate();
-          utils.songs.getById.invalidate({ id: editingSong.id });
-        }}
+          if (id) utils.songs.getById.invalidate({ id });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        }, [editingSong?.id, utils])}
       />
       </ErrorBoundary>
     )}

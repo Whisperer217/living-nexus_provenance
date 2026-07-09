@@ -6078,7 +6078,6 @@
 - [x] Raise client limits: trending/newThisWeek/randomize queries from 500 → 2000
 - [x] Remove topSlice 20-cap on "All Tracks" row — all loaded songs display in the row
 
-<<<<<<< Updated upstream
 ## Phase N: Visual Works — 6th Creative Medium
 - [x] Add visualWorks and visualItems tables to drizzle/schema.ts
 - [x] Run db:push — tables created in production DB
@@ -6106,7 +6105,7 @@
 - [x] Upload button label adapts: Upload N → Uploading N/M → Retry N Failed → ✓ All Uploaded
 - [x] Separate gold "Continue to Provenance Seal" CTA appears only when all images are sealed
 - [x] Thumbnail strip in Seal step shows final ordered sequence before WID-VWC generation
-=======
+
 ## Phase N+2: Contextual AI Licensing Advisory
 - [x] AIPlatformAdvisory component created — data-driven, zero UI changes needed to add new platforms
 - [x] AI_PLATFORMS config with 11 platforms: Suno, Udio, Sonato, Midjourney, DALL-E/ChatGPT, Adobe Firefly, Stable Diffusion, Runway, ElevenLabs, Claude, Gemini
@@ -6116,7 +6115,6 @@
 - [x] Advisory wired into UploadPage — appears below Suno/Udio/Sonato toggles when active
 - [x] Advisory wired into BatchUploadPage — appears below per-card tool checkboxes when active
 - [x] AIPlatformSelector convenience component exported for future use in Visual Works and other flows
->>>>>>> Stashed changes
 - [x] TypeScript check — zero errors
 
 ## Bug Fixes — Reported by Slimdoggy (Jul 6 2026)
@@ -6163,7 +6161,6 @@
 - [x] Architecture: one card, one destination. Music→#section-music, Albums→#section-albums, Playlists→/playlists, Books→#section-books, Comics→#section-books, Lyrics→#section-standalone, Games→#section-games, Visual Works→/visual-works?creator=:handle, Testimony→#section-testimony, Witnesses→/creator/:handle#section-testimony, Activity→#section-music
 - [x] TypeScript: 0 errors
 
-<<<<<<< Updated upstream
 ## Creator Domain — Hierarchical Archive Refactor (Jul 9, 2026)
 - [x] Build CreatorCollectionPage: shared layout with creator header, back-to-domain breadcrumb, medium-specific grid, sort/filter controls
 - [x] Route: /creator/:handle/music — Music Library (audio tracks, cover grid, play buttons)
@@ -6176,7 +6173,7 @@
 - [x] Update CreatorDomainHub: all 11 cards navigate to /creator/:handle/:medium routes (not hash anchors)
 - [x] Register all 7 new routes in App.tsx (before /creator/:id to avoid route conflicts)
 - [x] tRPC: profile.getCreatorCollection procedure — filters by medium (music/albums/books/lyrics/games/visual/playlists)
-=======
+
 ## Collection Studio — Phase 1 (Album Studio) — Jul 9, 2026
 - [x] Schema: add description, visibility, updatedAt to collections table
 - [x] Schema: add collectionVersions table (audit log)
@@ -6192,5 +6189,15 @@
 - [x] Route: /studio/collection/:id registered in App.tsx
 - [x] Entry points: ArchivePage album card → 'Studio' pill button
 - [x] Entry points: ProfilePage album expanded row → 'Open Collection Studio' button
->>>>>>> Stashed changes
 - [x] TypeScript: 0 errors
+
+## Work Editor Lockup Fix + Archive Deep-Link Editor (Jul 9, 2026)
+- [x] ROOT CAUSE 1: CreativeDrawer used manual body.overflow / scrollArea.overflow manipulation that leaked scroll-lock state when navigating away mid-edit (OverlayRouteGuard called overlayCloseAll() but CreativeDrawer's cleanup still tried to restore a stale overflow value)
+- [x] FIX 1: Replaced manual scroll-lock in CreativeDrawer with overlayOpen("edit-track") / overlayClose("edit-track") so OverlayRouteGuard can safely clean up on navigation
+- [x] ROOT CAUSE 2: ArchivePage called new URLSearchParams(window.location.search) directly in render (new object every render) and had const [,] = useLocation() subscription causing unnecessary re-renders on every navigation
+- [x] FIX 2: Moved URL param parsing into useMemo([]) so it runs once on mount; removed unused useLocation() subscription
+- [x] ROOT CAUSE 3: onSaved/onClose callbacks in ArchivePage and CreatorDomainPage were inline arrow functions (new reference every render), causing CreativeDrawer to see stale closures over editingSong.id
+- [x] FIX 3: Wrapped onSaved and onClose in useCallback with correct dependency arrays in both ArchivePage and CreatorDomainPage
+- [x] NEW FEATURE: Archive deep-link auto-opens editor — /archive?song=<id> now auto-opens the CreativeDrawer for that song when songs have loaded (deepLinkEditorOpened ref prevents double-open)
+- [x] Resolved two git conflict markers in todo.md (kept both sides)
+- [x] TypeScript: 0 errors | Vitest: 340/340 passing

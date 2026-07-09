@@ -3,10 +3,11 @@
   ║  CREATIVE CHAPEL — Living Nexus                                         ║
   ║  A sacred edit experience for creators. Tending to testimony.           ║
   ║                                                                         ║
-  ║  FREEZE FIX v3 (permanent):                                             ║
-  ║  • overlayController REMOVED — was causing body.overflow reflow cascade ║
-  ║  • Scroll-lock targets .player-scroll-area div (not body)               ║
-  ║  • Mobile fallback: locks body.overflow if div not found                ║
+  ║  FREEZE FIX v4 (permanent):                                             ║
+  ║  • Scroll-lock now uses overlayController (overlayOpen/overlayClose)    ║
+  ║    so OverlayRouteGuard can safely clean up on navigation               ║
+  ║  • Removed manual body.overflow / scrollArea.overflow manipulation      ║
+  ║    which leaked scroll-lock state when navigating away mid-edit         ║
   ║  • Backdrop uses onPointerDown + target===currentTarget guard           ║
   ║  • 120ms backdropActive delay prevents same-click-close                 ║
   ║  • drawerContainerEl state (not ref) ensures Radix portals get          ║
@@ -15,6 +16,7 @@
 */
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { overlayOpen, overlayClose } from "@/lib/overlayController";
 import { createPortal } from "react-dom";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
@@ -231,19 +233,10 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
     if (drawerRootRef.current) setDrawerContainerEl(drawerRootRef.current);
   }, []);
 
-  /* ── FREEZE FIX: Scroll-lock targets .player-scroll-area div (not body) ── */
+  /* ── Scroll-lock via overlayController so OverlayRouteGuard can clean up ── */
   useEffect(() => {
-    const scrollArea = document.querySelector<HTMLElement>(".player-scroll-area");
-    if (scrollArea) {
-      const prev = scrollArea.style.overflow;
-      scrollArea.style.overflow = "hidden";
-      return () => { scrollArea.style.overflow = prev; };
-    } else {
-      // Mobile Safari fallback: lock body if scroll area div not found
-      const prev = document.body.style.overflow;
-      document.body.style.overflow = "hidden";
-      return () => { document.body.style.overflow = prev; };
-    }
+    overlayOpen("edit-track", "full");
+    return () => { overlayClose("edit-track"); };
   }, []);
 
   /* ── Stable onClose (prevents stale closure in backdrop handler) ── */

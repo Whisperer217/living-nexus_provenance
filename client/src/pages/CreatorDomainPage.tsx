@@ -17,7 +17,7 @@
    a full-width live preview of the public creator page.
 ═══════════════════════════════════════════════════════════════════ */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Link, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -853,12 +853,14 @@ export default function CreatorDomainPage() {
           downloadPermission: (editingSong as any).downloadPermission ?? null,
           downloadTipThresholdCents: (editingSong as any).downloadTipThresholdCents ?? null,
         }}
-        onClose={() => setEditingSong(null)}
-        onSaved={() => {
+        onClose={useCallback(() => setEditingSong(null), [])}
+        onSaved={useCallback(() => {
+          const id = editingSong?.id;
           setEditingSong(null);
           utils.songs.mySongs.invalidate();
-          utils.songs.getById.invalidate({ id: editingSong.id });
-        }}
+          if (id) utils.songs.getById.invalidate({ id });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        }, [editingSong?.id, utils])}
       />
       </ErrorBoundary>
     )}
