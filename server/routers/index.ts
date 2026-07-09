@@ -70,6 +70,9 @@ import { workerRouter }  from "./worker";
 import { keeperRouter }       from "./keeper";
 import { promptStudioRouter } from "./promptStudio";
 
+// ── Collection Studio domain ────────────────────────────────────────────────
+import { collectionStudioRouter } from "./collectionStudio";
+
 // ── Platform domain ───────────────────────────────────────────────────────────
 import { platformRouter }          from "./platform";
 import { testimonyRouter }         from "./testimony";
@@ -161,6 +164,9 @@ export const appRouter = router({
 
   // Visual Works domain
   visualWorks: visualWorksRouter,
+
+  // Collection Studio
+  collectionStudio: collectionStudioRouter,
 });
 
 export type AppRouter = typeof appRouter;

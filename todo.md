@@ -6163,6 +6163,7 @@
 - [x] Architecture: one card, one destination. Music→#section-music, Albums→#section-albums, Playlists→/playlists, Books→#section-books, Comics→#section-books, Lyrics→#section-standalone, Games→#section-games, Visual Works→/visual-works?creator=:handle, Testimony→#section-testimony, Witnesses→/creator/:handle#section-testimony, Activity→#section-music
 - [x] TypeScript: 0 errors
 
+<<<<<<< Updated upstream
 ## Creator Domain — Hierarchical Archive Refactor (Jul 9, 2026)
 - [x] Build CreatorCollectionPage: shared layout with creator header, back-to-domain breadcrumb, medium-specific grid, sort/filter controls
 - [x] Route: /creator/:handle/music — Music Library (audio tracks, cover grid, play buttons)
@@ -6175,4 +6176,21 @@
 - [x] Update CreatorDomainHub: all 11 cards navigate to /creator/:handle/:medium routes (not hash anchors)
 - [x] Register all 7 new routes in App.tsx (before /creator/:id to avoid route conflicts)
 - [x] tRPC: profile.getCreatorCollection procedure — filters by medium (music/albums/books/lyrics/games/visual/playlists)
+=======
+## Collection Studio — Phase 1 (Album Studio) — Jul 9, 2026
+- [x] Schema: add description, visibility, updatedAt to collections table
+- [x] Schema: add collectionVersions table (audit log)
+- [x] DB helpers: getCollectionForStudio, reorderCollectionTracks, removeFromCollectionById, addToCollectionById, replaceInCollectionById, getCreatorSongsNotInCollection, logCollectionVersion, getCollectionVersionHistory
+- [x] tRPC router: collectionStudio — getCollection, updateMeta, uploadCover, reorderTracks, removeTrack, addTrack, replaceTrack, getVersionHistory, getAvailableSongs
+- [x] CollectionStudioPage: metadata editor (title, description, visibility)
+- [x] CollectionStudioPage: cover art upload with preview
+- [x] CollectionStudioPage: drag-and-drop track reorder (@dnd-kit)
+- [x] CollectionStudioPage: remove track (unlinks, does not delete)
+- [x] CollectionStudioPage: add track — picker from creator's archive
+- [x] CollectionStudioPage: replace track — swap modal (pick from archive)
+- [x] CollectionStudioPage: version history log (right panel)
+- [x] Route: /studio/collection/:id registered in App.tsx
+- [x] Entry points: ArchivePage album card → 'Studio' pill button
+- [x] Entry points: ProfilePage album expanded row → 'Open Collection Studio' button
+>>>>>>> Stashed changes
 - [x] TypeScript: 0 errors

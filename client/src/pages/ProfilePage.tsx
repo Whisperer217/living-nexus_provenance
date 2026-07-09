@@ -1594,6 +1594,7 @@ export default function ProfilePage() {
                         {isExpanded ? <ChevronDown size={13} className="text-white/30 flex-shrink-0" /> : <ChevronRight size={13} className="text-white/30 flex-shrink-0" />}
                       </div>
                       {isExpanded && (
+<<<<<<< Updated upstream
                         <div className="border-t border-white/[0.04] px-3 py-3 flex justify-center">
                           <Link href={`/archive?tab=collections&collection=${album.id}`}>
                             <button
@@ -1608,6 +1609,27 @@ export default function ProfilePage() {
                               Edit in Archive →
                             </button>
                           </Link>
+=======
+                        <div className="border-t border-white/[0.04] px-3 py-2">
+                          <div className="flex items-center justify-center gap-3 py-3">
+                            <Link
+                              href={`/studio/collection/${album.id}`}
+                              onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                              className="flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-full hover:opacity-80 transition-opacity"
+                              style={{ background: "rgba(196,154,40,0.10)", border: "1px solid rgba(196,154,40,0.25)", color: "var(--ln-gold)", fontFamily: "'Cinzel', serif" }}
+                            >
+                              Open Collection Studio
+                            </Link>
+                            <Link
+                              href={`/archive?tab=collections&collection=${album.id}`}
+                              onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                              className="flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-full hover:opacity-80 transition-opacity"
+                              style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.4)" }}
+                            >
+                              Edit in Archive
+                            </Link>
+                          </div>
+>>>>>>> Stashed changes
                         </div>
                       )}
                     </div>

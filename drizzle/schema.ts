@@ -792,6 +792,9 @@ export const collections = mysqlTable("collections", {
   // Creator-defined default presentation for visitors ("carousel" = Tile, "list" = List)
   // Visitors can toggle temporarily, but this is the canonical default that always loads first.
   defaultView: mysqlEnum("defaultView", ["carousel", "list"]).default("carousel").notNull(),
+  description: text("description"),
+  visibility: mysqlEnum("visibility", ["public", "unlisted", "private"]).default("public").notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 export type Collection = typeof collections.$inferSelect;
@@ -2131,3 +2134,29 @@ export const visualItems = mysqlTable("visualItems", {
 
 export type VisualItem = typeof visualItems.$inferSelect;
 export type InsertVisualItem = typeof visualItems.$inferInsert;
+
+// ─── Collection Version History ───────────────────────────────────────────────
+// Audit log for every structural change to a WID-ALB collection.
+// Covers: created, meta_updated, cover_updated, track_added, track_removed,
+//         track_replaced, tracks_reordered.
+export const collectionVersions = mysqlTable("collection_versions", {
+  id: int("id").autoincrement().primaryKey(),
+  collectionId: int("collectionId").notNull(),   // FK → collections.id
+  actorId: int("actorId").notNull(),             // FK → users.id (who made the change)
+  eventType: mysqlEnum("eventType", [
+    "created",
+    "meta_updated",
+    "cover_updated",
+    "track_added",
+    "track_removed",
+    "track_replaced",
+    "tracks_reordered",
+  ]).notNull(),
+  description: text("description"),             // Human-readable summary of the change
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (t) => ({
+  cvCollectionIdx: index("cv_collection_idx").on(t.collectionId),
+  cvActorIdx:      index("cv_actor_idx").on(t.actorId),
+}));
+export type CollectionVersion = typeof collectionVersions.$inferSelect;
+export type InsertCollectionVersion = typeof collectionVersions.$inferInsert;

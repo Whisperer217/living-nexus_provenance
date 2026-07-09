@@ -148,6 +148,16 @@ function CollectionsSection({ initialExpandedId }: { initialExpandedId?: number 
                       {col.trackCount ?? 0} tracks
                     </p>
                   </div>
+                  {/* Collection Studio link */}
+                  <Link
+                    href={`/studio/collection/${col.id}`}
+                    onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                    className="flex items-center gap-1 text-xs px-2 py-1 rounded-full flex-shrink-0 hover:opacity-80 transition-opacity"
+                    style={{ background: "rgba(196,154,40,0.08)", border: "1px solid rgba(196,154,40,0.2)", color: "var(--ln-gold)" }}
+                    title="Open in Collection Studio"
+                  >
+                    <Pencil size={10} /> Studio
+                  </Link>
                   {/* Play all */}
                   {isOpen && tracks.length > 0 && (
                     <button

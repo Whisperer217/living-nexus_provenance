@@ -4,6 +4,7 @@ import {
   activationContributions,
   audioVersions,
   collections,
+  collectionVersions,
   events,
   likes,
   playEvents,
@@ -1988,4 +1989,176 @@ export async function getGrantsReceivedByUser(
     .orderBy(desc(trackDownloadGrants.createdAt))
     .limit(limit);
   return rows;
+}
+
+// ─── Collection Studio Helpers ────────────────────────────────────────────────
+
+/** Log a version event for a WID-ALB collection. */
+export async function logCollectionVersion(opts: {
+  collectionId: number;
+  actorId: number;
+  eventType: "created" | "meta_updated" | "cover_updated" | "track_added" | "track_removed" | "track_replaced" | "tracks_reordered";
+  description?: string;
+}) {
+  const db = await getDb();
+  if (!db) return;
+  await db.insert(collectionVersions).values({
+    collectionId: opts.collectionId,
+    actorId: opts.actorId,
+    eventType: opts.eventType,
+    description: opts.description ?? null,
+  });
+}
+
+/** Return the full version history for a collection, newest first, with actor name. */
+export async function getCollectionVersionHistory(collectionId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db
+    .select({
+      id: collectionVersions.id,
+      eventType: collectionVersions.eventType,
+      description: collectionVersions.description,
+      createdAt: collectionVersions.createdAt,
+      actorId: collectionVersions.actorId,
+      actorName: users.name,
+    })
+    .from(collectionVersions)
+    .leftJoin(users, eq(collectionVersions.actorId, users.id))
+    .where(eq(collectionVersions.collectionId, collectionId))
+    .orderBy(desc(collectionVersions.createdAt))
+    .limit(100);
+}
+
+/** Update mutable metadata on a WID-ALB collection. */
+export async function updateCollectionMeta(
+  collectionId: number,
+  creatorId: number,
+  data: { name?: string; description?: string; visibility?: "public" | "unlisted" | "private" }
+) {
+  const db = await getDb();
+  if (!db) return null;
+  const update: Record<string, unknown> = {};
+  if (data.name !== undefined) update.name = data.name;
+  if (data.description !== undefined) update.description = data.description;
+  if (data.visibility !== undefined) update.visibility = data.visibility;
+  if (Object.keys(update).length === 0) return null;
+  await db
+    .update(collections)
+    .set(update as any)
+    .where(and(eq(collections.id, collectionId), eq(collections.creatorId, creatorId)));
+  return true;
+}
+
+/** Reorder tracks in a WID-ALB collection by providing the full ordered list of song IDs. */
+export async function reorderCollectionTracks(
+  collectionId: number,
+  creatorId: number,
+  orderedSongIds: number[]
+) {
+  const db = await getDb();
+  if (!db) return;
+  const [col] = await db
+    .select({ id: collections.id })
+    .from(collections)
+    .where(and(eq(collections.id, collectionId), eq(collections.creatorId, creatorId)))
+    .limit(1);
+  if (!col) throw new Error("Collection not found or not owned by caller.");
+  for (let i = 0; i < orderedSongIds.length; i++) {
+    await db
+      .update(songs)
+      .set({ trackOrder: i + 1 })
+      .where(and(eq(songs.id, orderedSongIds[i]), eq(songs.collectionId, collectionId)));
+  }
+}
+
+/** Remove a song from a WID-ALB collection (unlinks; does not delete the song). */
+export async function removeFromCollectionById(
+  collectionId: number,
+  songId: number,
+  creatorId: number
+) {
+  const db = await getDb();
+  if (!db) return;
+  await db
+    .update(songs)
+    .set({ collectionId: null, trackOrder: 0 } as any)
+    .where(and(eq(songs.id, songId), eq(songs.collectionId, collectionId), eq(songs.userId, creatorId)));
+  await db
+    .update(collections)
+    .set({ trackCount: sql`GREATEST(0, trackCount - 1)` })
+    .where(eq(collections.id, collectionId));
+}
+
+/** Add an existing song to a WID-ALB collection at the end. */
+export async function addToCollectionById(
+  collectionId: number,
+  songId: number,
+  creatorId: number
+) {
+  const db = await getDb();
+  if (!db) return;
+  const [maxRow] = await db
+    .select({ maxOrder: sql<number>`MAX(trackOrder)` })
+    .from(songs)
+    .where(eq(songs.collectionId, collectionId));
+  const nextOrder = ((maxRow?.maxOrder as number) ?? 0) + 1;
+  await db
+    .update(songs)
+    .set({ collectionId, trackOrder: nextOrder } as any)
+    .where(and(eq(songs.id, songId), eq(songs.userId, creatorId)));
+  await db
+    .update(collections)
+    .set({ trackCount: sql`trackCount + 1` })
+    .where(eq(collections.id, collectionId));
+}
+
+/** Replace one song in a WID-ALB collection with another, preserving track order position. */
+export async function replaceInCollectionById(
+  collectionId: number,
+  oldSongId: number,
+  newSongId: number,
+  creatorId: number
+) {
+  const db = await getDb();
+  if (!db) return;
+  const [oldSong] = await db
+    .select({ trackOrder: songs.trackOrder })
+    .from(songs)
+    .where(and(eq(songs.id, oldSongId), eq(songs.collectionId, collectionId)))
+    .limit(1);
+  const position = oldSong?.trackOrder ?? 0;
+  await db
+    .update(songs)
+    .set({ collectionId: null, trackOrder: 0 } as any)
+    .where(eq(songs.id, oldSongId));
+  await db
+    .update(songs)
+    .set({ collectionId, trackOrder: position } as any)
+    .where(and(eq(songs.id, newSongId), eq(songs.userId, creatorId)));
+}
+
+/** Return all published songs owned by a creator that are NOT in any WID-ALB collection. */
+export async function getCreatorSongsNotInCollection(creatorId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db
+    .select({
+      id: songs.id,
+      title: songs.title,
+      genre: songs.genre,
+      coverArtUrl: songs.coverArtUrl,
+      witnessId: songs.witnessId,
+      status: songs.status,
+      createdAt: songs.createdAt,
+    })
+    .from(songs)
+    .where(
+      and(
+        eq(songs.userId, creatorId),
+        eq(songs.status, "Published"),
+        isNull(songs.collectionId)
+      )
+    )
+    .orderBy(desc(songs.createdAt));
 }

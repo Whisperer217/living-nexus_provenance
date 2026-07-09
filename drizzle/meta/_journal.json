@@ -841,6 +841,13 @@
       "when": 1783382927628,
       "tag": "0120_faithful_shinko_yamashiro",
       "breakpoints": true
+    },
+    {
+      "idx": 121,
+      "version": "5",
+      "when": 1783620045537,
+      "tag": "0121_open_sage",
+      "breakpoints": true
     }
   ]
 }
