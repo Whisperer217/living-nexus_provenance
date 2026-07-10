@@ -205,24 +205,7 @@ export default function VisualWorksDetailPage() {
               </div>
             )}
 
-            {/* Owner: Edit in Archive deep-link */}
-            {isOwner && (
-              <div className="mt-3">
-                <Link href={`/archive?tab=tracks&song=${id}`}>
-                  <button
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all hover:opacity-80 active:scale-95"
-                    style={{
-                      background: "rgba(196,154,40,0.08)",
-                      border: "1px solid rgba(196,154,40,0.25)",
-                      color: "var(--ln-gold, #C49A28)",
-                      WebkitTapHighlightColor: "transparent",
-                    }}
-                  >
-                    Edit in Archive →
-                  </button>
-                </Link>
-              </div>
-            )}
+
 
             {/* Origin story */}
             {collection.originStory && (

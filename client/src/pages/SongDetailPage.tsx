@@ -1157,23 +1157,7 @@ export default function SongDetailPage() {
                   Edit Work
                 </Button>
               )}
-              {isOwner && (
-                <Link href={`/archive?tab=tracks&song=${song.id}`}>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="gap-1.5 transition-all hover:opacity-80 active:scale-95"
-                    style={{
-                      background: "rgba(196,154,40,0.06)",
-                      border: "1px solid rgba(196,154,40,0.25)",
-                      color: "var(--ln-gold)",
-                      fontSize: "11px",
-                    }}
-                  >
-                    Edit in Archive →
-                  </Button>
-                </Link>
-              )}
+
             </div>
 
             {/* ── Missing cover art alert (owner only) ── */}

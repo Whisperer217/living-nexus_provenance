@@ -64,7 +64,6 @@ const NAV_ITEMS: NavItem[] = [
   { id: "works",      icon: Shield,       label: "Manifestations",   description: "Registered works & Witness IDs" },
   { id: "testimony",  icon: FileText,     label: "Testimony",        description: "Witnessed statements & declarations" },
   { id: "analytics",  icon: BarChart2,    label: "Analytics",        description: "Plays, likes, gifts, downloads" },
-  { id: "public",     icon: Globe,        label: "Public Domain",    description: "Live visitor view of your domain" },
 ];
 
 // ─── Stat Card ────────────────────────────────────────────────────
@@ -120,6 +119,16 @@ export default function CreatorDomainPage() {
   const [testimonyContent, setTestimonyContent] = useState("");
   const [showAddTestimony, setShowAddTestimony] = useState(false);
   const [editingSong, setEditingSong] = useState<any | null>(null);
+
+  // Stable callbacks for CreativeDrawer — must be at top level (hooks rules)
+  const handleDrawerClose = useCallback(() => setEditingSong(null), []);
+  const handleDrawerSaved = useCallback(() => {
+    const id = editingSong?.id;
+    setEditingSong(null);
+    utils.songs.mySongs.invalidate();
+    if (id) utils.songs.getById.invalidate({ id });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editingSong?.id, utils]);
 
   // Auth guard
   if (authLoading || profileLoading) {
@@ -768,62 +777,6 @@ export default function CreatorDomainPage() {
               </section>
             )}
 
-            {/* ── Public Domain ── */}
-            {activeSection === "public" && (
-              <section>
-                <SectionHeader
-                  icon={Globe}
-                  title="Public Domain"
-                  description="This is how visitors see your Creator Domain. Switch to Preview mode for a full-width view."
-                  publicDomainUrl={publicDomainUrl}
-                />
-                <div className="flex flex-col sm:flex-row gap-3 mb-6">
-                  <button
-                    onClick={() => setPreviewMode(true)}
-                    className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all hover:opacity-90"
-                    style={{ background: "var(--ln-gold)", color: "#000" }}
-                  >
-                    <Eye className="w-4 h-4" /> Enter Preview Mode
-                  </button>
-                  <a
-                    href={publicDomainUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all hover:opacity-90"
-                    style={{ border: "1px solid rgba(196,154,40,0.3)", color: "var(--ln-gold)" }}
-                  >
-                    <ExternalLink className="w-4 h-4" /> Open in New Tab
-                  </a>
-                  <button
-                    onClick={copyPublicLink}
-                    className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm transition-all hover:opacity-80"
-                    style={{ border: "1px solid rgba(196,154,40,0.1)", color: "var(--ln-smoke)" }}
-                  >
-                    Copy Link
-                  </button>
-                </div>
-                {/* Compact domain preview */}
-                <div
-                  className="rounded-xl overflow-hidden"
-                  style={{ border: "1px solid rgba(196,154,40,0.12)" }}
-                >
-                  <div
-                    className="px-4 py-2 flex items-center gap-2"
-                    style={{ background: "rgba(196,154,40,0.06)", borderBottom: "1px solid rgba(196,154,40,0.08)" }}
-                  >
-                    <div className="flex gap-1">
-                      {[1,2,3].map(i => <div key={i} className="w-2 h-2 rounded-full" style={{ background: "rgba(196,154,40,0.25)" }} />)}
-                    </div>
-                    <span className="text-xs font-mono" style={{ color: "var(--ln-smoke)" }}>
-                      {window.location.origin}{publicDomainUrl}
-                    </span>
-                  </div>
-                  <div className="p-4">
-                    <DomainRenderer userId={user.id} isOwner={false} />
-                  </div>
-                </div>
-              </section>
-            )}
 
           </main>
         </div>
@@ -853,14 +806,8 @@ export default function CreatorDomainPage() {
           downloadPermission: (editingSong as any).downloadPermission ?? null,
           downloadTipThresholdCents: (editingSong as any).downloadTipThresholdCents ?? null,
         }}
-        onClose={useCallback(() => setEditingSong(null), [])}
-        onSaved={useCallback(() => {
-          const id = editingSong?.id;
-          setEditingSong(null);
-          utils.songs.mySongs.invalidate();
-          if (id) utils.songs.getById.invalidate({ id });
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        }, [editingSong?.id, utils])}
+        onClose={handleDrawerClose}
+        onSaved={handleDrawerSaved}
       />
       </ErrorBoundary>
     )}

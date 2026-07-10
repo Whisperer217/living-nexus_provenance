@@ -6206,3 +6206,9 @@
 - [x] ROOT CAUSE: App.tsx registered 7 hardcoded /creator/:handle/{medium} routes but CreatorCollectionPage used useParams({ medium }) — no route ever defined :medium param so it was always undefined → isValidMedium false → query disabled → "Creator not found" without ever hitting the server
 - [x] FIX: Collapsed 7 hardcoded routes into single /creator/:handle/:medium route in App.tsx
 - [x] TypeScript: 0 errors
+
+## Creator Domain + Work Page Fixes (Jul 10, 2026)
+- [x] FIX 1 (React error #310): useCallback hooks were called inside JSX conditional block ({editingSong && ...}) in CreatorDomainPage — violates Rules of Hooks. Moved handleDrawerClose and handleDrawerSaved to top level of component before early-return guards.
+- [x] FIX 2: Removed "Public Domain" from Creator Domain left nav (NAV_ITEMS array) and its corresponding section block — duplicated the "View Public Domain" button already in the header.
+- [x] FIX 3: Removed "Edit in Archive →" button from SongDetailPage, BookDetailPage, and VisualWorksDetailPage — redundant on individual work pages where "Edit Work" already provides direct editor access.
+- [x] TypeScript: 0 errors
