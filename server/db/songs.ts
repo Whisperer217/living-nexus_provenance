@@ -837,11 +837,19 @@ export async function getCollectionForSong(songId: number) {
 export async function getCollectionsByCreator(creatorId: number) {
   const db = await getDb();
   if (!db) return [];
-  // Join to songs to get live track count; exclude collections where all tracks have been deleted
+  // Join to songs to get live track count + first track cover art as fallback
   const rows = await db
     .select({
       collection: collections,
       liveTrackCount: sql<number>`count(${songs.id})`,
+      firstTrackCoverArtUrl: sql<string | null>`(
+        SELECT s2.coverArtUrl FROM songs s2
+        WHERE s2.collectionId = ${collections.id}
+          AND s2.status != 'Deleted'
+          AND s2.coverArtUrl IS NOT NULL
+        ORDER BY s2.trackOrder ASC, s2.id ASC
+        LIMIT 1
+      )`,
     })
     .from(collections)
     .leftJoin(songs, and(
@@ -851,12 +859,14 @@ export async function getCollectionsByCreator(creatorId: number) {
     .where(eq(collections.creatorId, creatorId))
     .groupBy(collections.id)
     .orderBy(desc(collections.createdAt));
-  // Filter out empty shells (all tracks deleted) and attach live count
+  // Filter out empty shells (all tracks deleted) and attach live count + cover fallback
   return rows
     .filter((r: { liveTrackCount: number }) => Number(r.liveTrackCount) > 0)
-    .map((r: { collection: typeof collections.$inferSelect; liveTrackCount: number }) => ({
+    .map((r: { collection: typeof collections.$inferSelect; liveTrackCount: number; firstTrackCoverArtUrl: string | null }) => ({
       ...r.collection,
       trackCount: Number(r.liveTrackCount),
+      // Use album-level cover art if set; fall back to first track's cover art
+      coverArtUrl: r.collection.coverArtUrl ?? r.firstTrackCoverArtUrl ?? null,
     }));
 }
 

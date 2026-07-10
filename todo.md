@@ -6235,3 +6235,10 @@
 - [x] Album Fix E: Archive CollectionsSection cover art — was always showing Library icon placeholder; fixed to render `col.coverArtUrl` when available
 - [x] Album Fix F: Collection Studio no play action — added `Play Album` button to CollectionStudioPage header; wired to `usePlayer.playQueueAt` via new `handlePlayAlbum` callback
 - [x] Mobile review: Albums grid (2-col mobile), AlbumDetailPage hero (flex-col sm:flex-row), track list (hidden sm:block for duration), all pages have pb-24/pb-32 for player bar — all responsive
+
+## Phase New-Issues: Album Art, Pagination, Artist Name Consistency
+
+- [x] Cover Art Fix: Albums page tiles missing cover art despite data existing in DB — root cause: collections table has null coverArtUrl for most albums; added firstTrackCoverArtUrl fallback in getCollectionsByCreator (joins to first track by trackOrder); also fixed search/sort to use collection.name instead of collection.title
+- [x] Pagination: Music/Lyrics/Books/Games collection pages show hard cap of 200 — implemented 200-per-page prev/next pagination; server returns totalCount; breadcrumb and header show total; pagination resets on search/sort change; page scrolls to top on navigation
+- [x] Artist Name: PlayerTrack.artist now uses artistHandle ?? name ?? "Unknown" across all queue-building locations — CreatorCollectionPage (handlePlayAll + WorkCard onPlay), ProfilePage (handlePlayAll + track click), AlbumDetailPage, CollectionStudioPage
+- [x] Unknown Fix: Collection Studio Play Album now uses user?.artistHandle ?? user?.name from useAuth() instead of col?.creatorName (which was never populated by the getCollection procedure)

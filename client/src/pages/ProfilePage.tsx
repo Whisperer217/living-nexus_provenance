@@ -1164,7 +1164,7 @@ export default function ProfilePage() {
             const tracks: Track[] = playable.map((s: any) => ({
               id: String(s.id),
               title: s.title,
-              artist: profile?.name || user?.name || "Unknown",
+              artist: profile?.artistHandle ?? profile?.name ?? user?.artistHandle ?? user?.name ?? "Unknown",
               genre: s.genre || "",
               audioUrl: s.fileUrl,
               artUrl: s.coverArtUrl || undefined,
@@ -1304,7 +1304,7 @@ export default function ProfilePage() {
                         .map((s: any) => ({
                           id: String(s.id),
                           title: s.title,
-                          artist: profile?.name || user?.name || "Unknown",
+                          artist: profile?.artistHandle ?? profile?.name ?? user?.artistHandle ?? user?.name ?? "Unknown",
                           genre: s.genre || "",
                           audioUrl: s.fileUrl,
                           artUrl: s.coverArtUrl || undefined,

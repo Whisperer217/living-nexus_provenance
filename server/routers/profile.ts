@@ -621,10 +621,11 @@ export const profileRouter = router({
         };
         const types = contentTypeMap[medium] ?? ['audio'];
         const allSongs = await getSongsByUser(creatorId);
-        const filtered = (allSongs as any[])
-          .filter((s: any) => s.isPublic && s.status === 'Published' && types.includes(s.contentType ?? 'audio'))
-          .slice(offset, offset + limit);
-        return { creator, works: filtered, collections: [] as any[], playlists: [] as any[] };
+        const allFiltered = (allSongs as any[])
+          .filter((s: any) => s.isPublic && s.status === 'Published' && types.includes(s.contentType ?? 'audio'));
+        const totalCount = allFiltered.length;
+        const filtered = allFiltered.slice(offset, offset + limit);
+        return { creator, works: filtered, collections: [] as any[], playlists: [] as any[], totalCount };
       }),
   });
 

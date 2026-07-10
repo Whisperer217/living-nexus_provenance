@@ -487,7 +487,7 @@ export default function CollectionStudioPage() {
     playQueueAt(playable.map((t) => ({
       id: String(t.id),
       title: t.title,
-      artist: col?.creatorName ?? "Unknown",
+      artist: user?.artistHandle ?? user?.name ?? "Unknown",
       genre: t.genre ?? "",
       audioUrl: t.fileUrl ?? undefined,
       artUrl: t.coverArtUrl ?? undefined,

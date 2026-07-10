@@ -18,7 +18,7 @@ import React, { useState, useMemo } from "react";
 import { Link, useParams, useLocation } from "wouter";
 import {
   Music2, FileText, BookOpen, Layers, Gamepad2, ListMusic,
-  Album, Image, ChevronLeft, Play, Search, SortAsc, SortDesc,
+  Album, Image, ChevronLeft, ChevronRight, Play, Search, SortAsc, SortDesc,
   Clock, Hash, Loader2, AlertCircle,
 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
@@ -315,6 +315,8 @@ export default function CreatorCollectionPage() {
   const [search, setSearch] = useState("");
   type SortMode = "newest" | "oldest" | "alpha";
   const [sortMode, setSortMode] = useState<SortMode>("newest");
+  const PAGE_SIZE = 200;
+  const [page, setPage] = useState(0);
 
   const isValidMedium = VALID_MEDIUMS.has(medium ?? "");
   const med = (medium ?? "music") as Medium;
@@ -327,8 +329,8 @@ export default function CreatorCollectionPage() {
   const isNumericHandle = /^\d+$/.test(handle ?? "");
   const { data, isLoading } = trpc.profile.getCreatorCollection.useQuery(
     isNumericHandle
-      ? { creatorId: Number(handle), medium: med }
-      : { handle: handle ?? "", medium: med },
+      ? { creatorId: Number(handle), medium: med, limit: PAGE_SIZE, offset: page * PAGE_SIZE }
+      : { handle: handle ?? "", medium: med, limit: PAGE_SIZE, offset: page * PAGE_SIZE },
     {
       enabled: !!handle && isValidMedium,
       staleTime: 60_000,
@@ -348,7 +350,7 @@ export default function CreatorCollectionPage() {
     return arr; // newest — server already returns newest-first
   }
   function applySortCols(arr: any[]) {
-    if (sortMode === "alpha") return [...arr].sort((a, b) => (a.title ?? "").localeCompare(b.title ?? ""));
+    if (sortMode === "alpha") return [...arr].sort((a, b) => (a.name ?? "").localeCompare(b.name ?? ""));
     if (sortMode === "oldest") return [...arr].reverse();
     return arr;
   }
@@ -374,7 +376,7 @@ export default function CreatorCollectionPage() {
     const cols = data?.collections ?? [];
     const filtered = search
       ? cols.filter((c: any) =>
-          (c.title ?? "").toLowerCase().includes(search.toLowerCase())
+          (c.name ?? "").toLowerCase().includes(search.toLowerCase())
         )
       : cols;
     return applySortCols(filtered);
@@ -392,8 +394,22 @@ export default function CreatorCollectionPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data?.playlists, search, sortMode]);
 
+  // Server-provided total (for paginated mediums); fall back to local count for albums/playlists
+  const serverTotalCount = (data as any)?.totalCount as number | undefined;
   const totalCount =
-    displayWorks.length + displayCollections.length + displayPlaylists.length;
+    serverTotalCount ?? (displayWorks.length + displayCollections.length + displayPlaylists.length);
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE);
+  const hasPrev = page > 0;
+  const hasNext = page < totalPages - 1;
+
+  // Reset to page 0 when search or sort changes
+  const prevSearch = React.useRef(search);
+  const prevSort = React.useRef(sortMode);
+  if (prevSearch.current !== search || prevSort.current !== sortMode) {
+    prevSearch.current = search;
+    prevSort.current = sortMode;
+    if (page !== 0) setPage(0);
+  }
 
   // Handle play all (music only)
   const handlePlayAll = () => {
@@ -403,7 +419,7 @@ export default function CreatorCollectionPage() {
       .map((w: any) => ({
         id: String(w.id),
         title: w.title ?? "Untitled",
-        artist: creator?.name ?? creator?.artistHandle ?? "Unknown",
+        artist: creator?.artistHandle ?? creator?.name ?? "Unknown",
         genre: w.genre ?? "",
         artUrl: w.coverArtUrl ?? undefined,
         audioUrl: w.fileUrl ?? undefined,
@@ -681,7 +697,7 @@ export default function CreatorCollectionPage() {
                   const t: Track = {
                     id: String(w.id),
                     title: w.title ?? "Untitled",
-                    artist: creator?.name ?? creator?.artistHandle ?? "Unknown",
+                    artist: creator?.artistHandle ?? creator?.name ?? "Unknown",
                     genre: w.genre ?? "",
                     artUrl: w.coverArtUrl ?? undefined,
                     audioUrl: w.fileUrl ?? undefined,
@@ -722,6 +738,33 @@ export default function CreatorCollectionPage() {
             {displayPlaylists.map((pl: any) => (
               <PlaylistCard key={pl.id} playlist={pl} />
             ))}
+          </div>
+        )}
+
+        {/* ── Pagination controls ── */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center gap-4 pt-8 pb-4">
+            <button
+              onClick={() => { setPage(p => Math.max(0, p - 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+              disabled={!hasPrev}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium transition-all disabled:opacity-30 disabled:cursor-not-allowed hover:opacity-80 active:scale-95"
+              style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.10)', color: 'rgba(255,255,255,0.7)' }}
+            >
+              <ChevronLeft className="w-4 h-4" />
+              Previous
+            </button>
+            <span className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
+              Page {page + 1} of {totalPages}
+            </span>
+            <button
+              onClick={() => { setPage(p => Math.min(totalPages - 1, p + 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+              disabled={!hasNext}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium transition-all disabled:opacity-30 disabled:cursor-not-allowed hover:opacity-80 active:scale-95"
+              style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.10)', color: 'rgba(255,255,255,0.7)' }}
+            >
+              Next
+              <ChevronRight className="w-4 h-4" />
+            </button>
           </div>
         )}
       </div>
