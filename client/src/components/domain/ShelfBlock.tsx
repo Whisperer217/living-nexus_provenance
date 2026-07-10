@@ -267,10 +267,11 @@ export function ShelfBlock({ userId, config, medium, isOwner = false }: ShelfBlo
     el.scrollBy({ left: dir === "right" ? 300 : -300, behavior: "smooth" });
   };
 
+  const creatorName = creatorData?.creator?.artistHandle ?? creatorData?.creator?.name ?? "Unknown";
   const buildTrack = (s: CreatorSong): Track => ({
     id: String(s.id),
     title: s.title,
-    artist: s.displayName ?? "Unknown",
+    artist: creatorName,
     genre: s.genre ?? "",
     audioUrl: s.fileUrl ?? undefined,
     artUrl: s.coverArtUrl ?? undefined,

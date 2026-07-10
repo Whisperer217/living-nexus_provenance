@@ -423,7 +423,7 @@ export default function DashboardPage() {
         {/* Stats Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           {[
-            { label: "Songs Published", value: songs?.length ?? 0, icon: Music, color: "var(--ln-gold)", delta: null },
+            { label: "Registered Works", value: songs?.length ?? 0, icon: Music, color: "var(--ln-gold)", delta: null },
             { label: "Total Plays", value: (songs ?? []).reduce((a: number, s: any) => a + (s.playCount || 0), 0), icon: BarChart2, color: "var(--ln-gold)", delta: (dashboardDeltas as any)?.newPlays ?? 0 },
             { label: "Song Slots", value: `${slotsUsed}/${slotsTotal}`, icon: Shield, color: slotsUsed > slotsTotal ? "var(--lnx-red)" : "var(--lnx-green)", delta: null },
             { label: "Gifts Received", value: (songs ?? []).reduce((a: number, s: any) => a + (s.tipCount || 0), 0), icon: Gift, color: "var(--ln-seal-bright)", delta: (dashboardDeltas as any)?.newTips ?? 0 },

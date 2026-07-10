@@ -6212,3 +6212,9 @@
 - [x] FIX 2: Removed "Public Domain" from Creator Domain left nav (NAV_ITEMS array) and its corresponding section block — duplicated the "View Public Domain" button already in the header.
 - [x] FIX 3: Removed "Edit in Archive →" button from SongDetailPage, BookDetailPage, and VisualWorksDetailPage — redundant on individual work pages where "Edit Work" already provides direct editor access.
 - [x] TypeScript: 0 errors
+
+## Four-Issue Fix Batch (Jul 10, 2026)
+- [x] FIX A: Edit Work pencil on public Creator Domain (/creator/:id) freezes page — stabilized onEditTrack/onClose/onSaved with useCallback in CreatorProfilePage
+- [x] FIX B: Global Player shows "Unknown" creator when playing from Creator Domain Records section — fixed ShelfBlock.buildTrack to use creatorData.creator.artistHandle/name instead of non-existent displayName field
+- [x] FIX C: Music tiles on CreatorCollectionPage (/creator/:handle/music) are dead — fixed audioUrl → fileUrl field name mismatch in handlePlayAll and onPlay handler
+- [x] FIX D: Creator Dashboard stats — renamed "Songs Published" to "Registered Works" (count already covers all mediums via mySongs)

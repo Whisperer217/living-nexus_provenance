@@ -5,7 +5,7 @@
    tip jar, social links. Divine Noir aesthetic.
 ═══════════════════════════════════════════════════════════════════ */
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { triggerTaggedDownload } from "@/lib/downloadTrack";
 import { Helmet } from "react-helmet-async";
@@ -497,6 +497,17 @@ export default function CreatorProfilePage() {
   });
   const playMutation = trpc.songs.play.useMutation();
   const [editingChapelSong, setEditingChapelSong] = useState<any | null>(null);
+
+  // ── Stable callbacks for EditChapel — MUST be at top level, before any early returns ──
+  // Using useCallback prevents ManifestationShelf from re-rendering on every parent render,
+  // which was causing the scroll-lock interaction to freeze the page.
+  const handleChapelClose = useCallback(() => setEditingChapelSong(null), []);
+  const handleChapelSaved = useCallback(() => { setEditingChapelSong(null); refetch(); }, [refetch]);
+  const handleEditTrack = useCallback((track: any) => {
+    // data may be undefined before the early-return guard; guard here too
+    const songList: any[] = (data as any)?.songs ?? [];
+    setEditingChapelSong(songList.find((s: any) => s.id === track.id) ?? track);
+  }, [data]);
 
   // ── Build stats — admin profile + honored contributors ────────────────────
   // Honored handles receive the 🐛 BUGS KILLED pill as a gift from the platform.
@@ -2001,7 +2012,7 @@ export default function CreatorProfilePage() {
                       onPlayAll={(albumTracks) => handleShelfPlayAll(albumTracks)}
                       isOwner={isOwner}
                       onDeleteTrack={(id) => deleteMutation.mutate({ songId: id })}
-                      onEditTrack={isOwner ? (track) => setEditingChapelSong(songs.find((s: any) => s.id === track.id) ?? track) : undefined}
+                      onEditTrack={isOwner ? handleEditTrack : undefined}
                     />
                   );
                 })}
@@ -2079,7 +2090,7 @@ export default function CreatorProfilePage() {
                 playingId={playingId}
                 onPlayTrack={(track, allTracks) => handleShelfPlay(track, allTracks)}
                 isOwner={isOwner}
-                onEditTrack={isOwner ? (track) => setEditingChapelSong(songs.find((s: any) => s.id === track.id) ?? track) : undefined}
+                onEditTrack={isOwner ? handleEditTrack : undefined}
               />
             </section>
           );
@@ -2898,8 +2909,8 @@ export default function CreatorProfilePage() {
       {editingChapelSong && (
         <EditChapel
           song={editingChapelSong}
-          onClose={() => setEditingChapelSong(null)}
-          onSaved={() => { setEditingChapelSong(null); refetch(); }}
+          onClose={handleChapelClose}
+          onSaved={handleChapelSaved}
         />
       )}
     </div>
