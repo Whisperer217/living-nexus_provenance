@@ -177,7 +177,7 @@ function WorkCard({ work, onPlay }: { work: any; onPlay?: (work: any) => void })
 // ─── Album Card ───────────────────────────────────────────────────────────────
 function AlbumCard({ collection }: { collection: any }) {
   return (
-    <Link href={`/collection/${collection.wid || collection.id}`}>
+    <Link href={`/album/${collection.collectionWid}`}>
       <div
         className="group relative rounded-xl overflow-hidden cursor-pointer transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
         style={{
@@ -189,7 +189,7 @@ function AlbumCard({ collection }: { collection: any }) {
           {collection.coverArtUrl ? (
             <img
               src={collection.coverArtUrl}
-              alt={collection.title}
+              alt={collection.name}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             />
           ) : (
@@ -203,16 +203,16 @@ function AlbumCard({ collection }: { collection: any }) {
             className="text-sm font-semibold truncate"
             style={{ color: "var(--ln-parchment, #F5EFD7)", fontFamily: "'Cinzel', serif" }}
           >
-            {collection.title}
+            {collection.name}
           </p>
           {collection.trackCount != null && (
             <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.45)" }}>
               {collection.trackCount} track{collection.trackCount !== 1 ? "s" : ""}
             </p>
           )}
-          {collection.wid && (
+          {collection.collectionWid && (
             <p className="text-[9px] font-mono mt-1 truncate" style={{ color: "rgba(167,139,250,0.6)" }}>
-              {collection.wid}
+              {collection.collectionWid}
             </p>
           )}
         </div>

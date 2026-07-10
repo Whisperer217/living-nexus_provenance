@@ -136,9 +136,20 @@ function CollectionsSection({ initialExpandedId }: { initialExpandedId?: number 
                   className="flex items-center gap-3 p-3 cursor-pointer hover:bg-white/5 transition-colors"
                   onClick={() => setExpanded(isOpen ? null : col.id)}
                 >
-                  <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
+                  <div className="w-10 h-10 rounded-lg flex-shrink-0 overflow-hidden"
                     style={{ background: "rgba(196,154,40,0.08)" }}>
-                    <Library className="w-5 h-5" style={{ color: "var(--ln-gold)" }} />
+                    {col.coverArtUrl ? (
+                      <img
+                        src={col.coverArtUrl}
+                        alt={col.name}
+                        className="w-full h-full object-cover"
+                        style={{ objectPosition: `${col.coverPositionX ?? 50}% ${col.coverPositionY ?? 50}%` }}
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Library className="w-5 h-5" style={{ color: "var(--ln-gold)" }} />
+                      </div>
+                    )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold truncate" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>

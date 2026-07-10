@@ -67,6 +67,7 @@ import {
   ImagePlus,
   Loader2,
   Music,
+  Play,
   Plus,
   RefreshCw,
   Save,
@@ -81,6 +82,8 @@ import {
   X,
   CheckCircle2,
 } from "lucide-react";
+import { usePlayer } from "@/contexts/PlayerContext";
+import type { Track as PlayerTrack } from "@/contexts/PlayerContext";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -89,6 +92,7 @@ interface Track {
   title: string;
   genre?: string | null;
   coverArtUrl?: string | null;
+  fileUrl?: string | null;
   witnessId?: string | null;
   durationSeconds?: number | null;
   trackOrder?: number | null;
@@ -473,7 +477,24 @@ export default function CollectionStudioPage() {
   // Remove confirm
   const [removeTarget, setRemoveTarget] = useState<number | null>(null);
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+  const { playQueueAt } = usePlayer();
+
+  const handlePlayAlbum = useCallback(() => {
+    const playable = tracks.filter((t) => t.fileUrl);
+    if (!playable.length) { toast.error("No playable tracks in this album."); return; }
+    const col = (data?.collection as any);
+    playQueueAt(playable.map((t) => ({
+      id: String(t.id),
+      title: t.title,
+      artist: col?.creatorName ?? "Unknown",
+      genre: t.genre ?? "",
+      audioUrl: t.fileUrl ?? undefined,
+      artUrl: t.coverArtUrl ?? undefined,
+      witnessId: t.witnessId ?? undefined,
+    } satisfies PlayerTrack)), 0, "PLAYLIST");
+    toast.success(`Playing: ${col?.name ?? "Album"}`);
+  }, [tracks, data, playQueueAt]);
 
   // ── Sync server data → local state ───────────────────────────────────────
   useEffect(() => {
@@ -700,6 +721,15 @@ export default function CollectionStudioPage() {
           </div>
 
           <div className="flex items-center gap-2 flex-shrink-0">
+            <Button
+              size="sm"
+              onClick={handlePlayAlbum}
+              disabled={tracks.filter((t) => t.fileUrl).length === 0}
+              className="gap-1.5 text-xs bg-amber-600 hover:bg-amber-500 text-black font-semibold"
+            >
+              <Play className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Play Album</span>
+            </Button>
             {(metaDirty || coverBase64) && (
               <span className="text-xs text-amber-400 hidden sm:inline">Unsaved changes</span>
             )}

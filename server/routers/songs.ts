@@ -1546,6 +1546,16 @@ ${workType === "manuscript" || workType === "comic" ? "Category" : "Genre"}: ${i
     getWorkerStats: protectedProcedure.query(async () => {
       return { stats: { pending: 0, claimed: 0, completed: 0, failed: 0 }, recent: [] as any[] };
     }),
+    // ── Public Album Detail — fetch WID-ALB collection + tracks by collectionWid ──────────────────
+    getPublicAlbum: publicProcedure
+      .input(z.object({ collectionWid: z.string().min(1) }))
+      .query(async ({ input }) => {
+        const collection = await getCollectionByWid(input.collectionWid);
+        if (!collection) throw new TRPCError({ code: "NOT_FOUND", message: "Album not found." });
+        const tracks = await getSongsByCollectionId(collection.id);
+        const creator = await getUserById(collection.creatorId);
+        return { collection, tracks, creator };
+      }),
   });
 
 

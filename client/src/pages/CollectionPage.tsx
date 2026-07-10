@@ -102,7 +102,7 @@ export default function CollectionPage() {
       <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4">
         <Music2 className="w-12 h-12 text-muted-foreground" />
         <p className="text-muted-foreground">Collection not found.</p>
-        <Button variant="outline" onClick={() => navigate(-1 as any)}>Go back</Button>
+        <Button variant="outline" onClick={() => window.history.back()}>Go back</Button>
       </div>
     );
   }
@@ -117,7 +117,7 @@ export default function CollectionPage() {
       {/* ── Back nav ── */}
       <div className="max-w-5xl mx-auto px-4 pt-6">
         <button
-          onClick={() => navigate(-1 as any)}
+          onClick={() => window.history.back()}
           className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6"
         >
           <ChevronLeft className="w-4 h-4" /> Back

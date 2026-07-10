@@ -6218,3 +6218,20 @@
 - [x] FIX B: Global Player shows "Unknown" creator when playing from Creator Domain Records section — fixed ShelfBlock.buildTrack to use creatorData.creator.artistHandle/name instead of non-existent displayName field
 - [x] FIX C: Music tiles on CreatorCollectionPage (/creator/:handle/music) are dead — fixed audioUrl → fileUrl field name mismatch in handlePlayAll and onPlay handler
 - [x] FIX D: Creator Dashboard stats — renamed "Songs Published" to "Registered Works" (count already covers all mediums via mySongs)
+
+## Phase Album-Fix: Album/Collection Defects
+- [ ] Album Fix A+B: AlbumCard uses collection.wid (undefined) and collection.title (undefined) — change to collection.collectionWid and collection.name
+- [ ] Album Fix C: /collection/:slug route hits manifestedCollections (wrong table) — create /album/:collectionWid public route + songs.getPublicAlbum procedure
+- [ ] Album Fix D: Go Back button on Collection not found page is dead — wire to window.history.back()
+- [ ] Album Fix E: Archive CollectionsSection always shows Library icon — add conditional coverArtUrl rendering
+- [ ] Album Fix F: CollectionStudioPage has no play action — add Play Album button to header
+
+## Phase Album-Fix: Album/Collection Defects
+
+- [x] Album Fix A: AlbumCard cover art — was using non-existent `wid`/`title` fields; fixed to `collectionWid`/`name` and `coverArtUrl` from collections table
+- [x] Album Fix B: AlbumCard routing — link was building `/collection/-1` due to `wid` being undefined; fixed to `/album/:collectionWid`
+- [x] Album Fix C: Collection detail NOT_FOUND — created new `AlbumDetailPage` at `/album/:collectionWid` backed by `songs.getPublicAlbum` procedure; added route to App.tsx
+- [x] Album Fix D: Go Back button dead — fixed `navigate(-1 as any)` → `window.history.back()` in CollectionPage (both error state and back nav)
+- [x] Album Fix E: Archive CollectionsSection cover art — was always showing Library icon placeholder; fixed to render `col.coverArtUrl` when available
+- [x] Album Fix F: Collection Studio no play action — added `Play Album` button to CollectionStudioPage header; wired to `usePlayer.playQueueAt` via new `handlePlayAlbum` callback
+- [x] Mobile review: Albums grid (2-col mobile), AlbumDetailPage hero (flex-col sm:flex-row), track list (hidden sm:block for duration), all pages have pb-24/pb-32 for player bar — all responsive

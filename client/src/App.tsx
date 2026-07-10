@@ -115,6 +115,7 @@ const VisualWorksNewPage = lazy(() => import("./pages/VisualWorksNewPage"));
 const VisualWorksDetailPage = lazy(() => import("./pages/VisualWorksDetailPage"));
 const CreatorCollectionPage = lazy(() => import("./pages/CreatorCollectionPage"));
 const CollectionStudioPage = lazy(() => import("./pages/CollectionStudioPage"));
+const AlbumDetailPage = lazy(() => import("./pages/AlbumDetailPage"));
 
 // Minimal fallback shown while a page chunk loads (typically <200ms on CDN)
 function PageLoader() {
@@ -272,6 +273,7 @@ function Router() {
                 <Route path="/guides" component={GuideDirectoryPage} />
                 <Route path="/guides/upload" component={GuideUploadWizard} />
                 <Route path="/guide/:id" component={GuideDetailPage} />
+                <Route path="/album/:collectionWid" component={AlbumDetailPage} />
                 <Route path="/collection/:slug" component={CollectionPage} />
                 <Route path="/constellation/:songId" component={ConstellationPage} />
                 {/* ── Visual Works — 6th Creative Medium ── */}
