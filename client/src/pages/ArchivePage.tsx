@@ -1262,6 +1262,8 @@ export default function ArchivePage() {
                   { type: "comic", label: "Comic / Novel", icon: "◈" },
                   { type: "manuscript", label: "Manuscript", icon: "⊞" },
                   { type: "lyrics", label: "Lyrics", icon: "≡" },
+                  { type: "image", label: "Visual Works", icon: "⬡" },
+                  { type: "game", label: "Game", icon: "▷" },
                 ] as const).map(({ type, label, icon }) => (
                   <Link key={type} href={`${uploadHref}?type=${type}`}>
                     <button
@@ -1420,11 +1422,13 @@ export default function ArchivePage() {
                         </button>
                       )}
 
-                      {/* View page — route books/manuscripts/comics to /book/:id */}
+                      {/* View page — route by contentType */}
                       {!isDeleted && (() => {
-                        const isBook = song.contentType === "manuscript" || song.contentType === "comic";
-                        const viewHref = isBook ? `/book/${song.id}` : `/song/${song.id}`;
-                        const viewTitle = isBook ? "View book page" : "View song page";
+                        const ct = song.contentType ?? "audio";
+                        const isBook = ct === "manuscript" || ct === "comic";
+                        const isGame = ct === "game";
+                        const viewHref = isBook ? `/book/${song.id}` : isGame ? `/game/${song.id}` : `/song/${song.id}`;
+                        const viewTitle = isBook ? "View book page" : isGame ? "View game page" : "View song page";
                         return (
                           <Link href={viewHref}>
                             <button

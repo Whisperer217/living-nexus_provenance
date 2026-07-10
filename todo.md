@@ -6242,3 +6242,17 @@
 - [x] Pagination: Music/Lyrics/Books/Games collection pages show hard cap of 200 — implemented 200-per-page prev/next pagination; server returns totalCount; breadcrumb and header show total; pagination resets on search/sort change; page scrolls to top on navigation
 - [x] Artist Name: PlayerTrack.artist now uses artistHandle ?? name ?? "Unknown" across all queue-building locations — CreatorCollectionPage (handlePlayAll + WorkCard onPlay), ProfilePage (handlePlayAll + track click), AlbumDetailPage, CollectionStudioPage
 - [x] Unknown Fix: Collection Studio Play Album now uses user?.artistHandle ?? user?.name from useAuth() instead of col?.creatorName (which was never populated by the getCollection procedure)
+
+## Phase Cover-Art-Migration + Archive Visual Works
+- [x] Album cover art data migration: backfill collections.coverArtUrl from first track's coverArtUrl for all collections where coverArtUrl is null
+- [x] Archive Visual Works tab: identify contentType enum value for visual works (contentType='image'), included in unified My Works tab with medium filter pills
+
+## Archive "My Works" Unification + Medium Filter (Jul 10, 2026)
+- [x] Rename "My Tracks" tab to "My Works" in ArchivePage tab bar
+- [x] Add medium filter pill row to My Works tab (All | Music | Lyrics | Manuscripts | Comics | Games | Visual Works)
+- [x] Medium filter maps contentType values: audio→Music, lyrics→Lyrics, manuscript→Manuscripts, comic→Comics, game→Games, image→Visual Works
+- [x] Add medium badge pill to each work row in My Works list (shows the medium type)
+- [x] Update track count label from "N tracks" to "N works" in toolbar
+- [x] Update empty state type selector to include Visual Works (image) and Games
+- [x] Update deep-link param validation to accept "tracks" as legacy alias for "works" (tab value still 'tracks' internally — no change needed)
+- [x] Update view-page routing for image contentType to /visual-works/:id (if applicable) — image works route to /song/:id for now (no dedicated visual detail page per song)
