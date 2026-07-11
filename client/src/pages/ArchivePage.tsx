@@ -18,6 +18,7 @@ import {
   Play, ListMusic, Trash2, GripVertical, Shield, CheckSquare, Square,
   Download, Lock, Coins, Layers, AlertTriangle, X,
   Library, ChevronRight, Layers2, Search,
+  Image, BookOpen, Gamepad2, FileText, ScrollText,
 } from "lucide-react";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { CreativeDrawer } from "@/components/CreativeDrawer";
@@ -384,6 +385,17 @@ export default function ArchivePage() {
   const [missingArtFilter, setMissingArtFilter] = useState(false);
   const [sortBy, setSortBy] = useState<"newest" | "oldest" | "title">("newest");
   const [trackSearch, setTrackSearch] = useState("");
+  const [mediumFilter, setMediumFilter] = useState<"all" | "audio" | "lyrics" | "manuscript" | "comic" | "game" | "image">("all");
+
+  // Medium display config — color-coded per contentType
+  const MEDIUM_CONFIG: Record<string, { label: string; icon: React.ReactNode; color: string; border: string; bg: string }> = {
+    audio:      { label: "Music",        icon: <Music size={11} />,      color: "#A78BFA", border: "rgba(167,139,250,0.4)",  bg: "rgba(124,58,237,0.12)"  },
+    lyrics:     { label: "Lyrics",       icon: <ScrollText size={11} />, color: "#F5C451", border: "rgba(245,196,81,0.4)",   bg: "rgba(208,161,95,0.12)"  },
+    manuscript: { label: "Manuscripts",  icon: <FileText size={11} />,   color: "#4ADE80", border: "rgba(74,222,128,0.4)",  bg: "rgba(22,163,74,0.12)"   },
+    comic:      { label: "Comics",       icon: <BookOpen size={11} />,   color: "#F87171", border: "rgba(248,113,113,0.4)", bg: "rgba(220,38,38,0.12)"   },
+    game:       { label: "Games",        icon: <Gamepad2 size={11} />,   color: "#34D399", border: "rgba(52,211,153,0.4)",  bg: "rgba(16,185,129,0.12)"  },
+    image:      { label: "Visual Works", icon: <Image size={11} />,      color: "#FDA4AF", border: "rgba(253,164,175,0.4)", bg: "rgba(244,63,94,0.10)"   },
+  };
 
   const buildTrack = (song: any) => ({
     id: String(song.id),
@@ -630,6 +642,9 @@ export default function ArchivePage() {
     if (statusFilter !== "All") {
       list = list.filter((s: any) => s.status === statusFilter);
     }
+    if (mediumFilter !== "all") {
+      list = list.filter((s: any) => (s.contentType ?? "audio") === mediumFilter);
+    }
     if (missingArtFilter) {
       list = list.filter((s: any) => !s.coverArtUrl);
     }
@@ -768,7 +783,7 @@ export default function ArchivePage() {
                 ? { background: "var(--ln-gold)", color: "var(--ln-parchment)" }
                 : { color: "var(--ln-smoke)" }}
             >
-              {tab === "tracks" && <><Music size={13} /> My Tracks</>}
+              {tab === "tracks" && <><Music size={13} /> My Works</>}
               {tab === "collections" && <><Layers2 size={13} /> Collections &amp; Playlists</>}
               {tab === "external" && <><Globe size={13} /> External</>}
               {tab === "witnessed" && <><Eye size={13} /> My Archive</>}
@@ -927,6 +942,50 @@ export default function ArchivePage() {
           </div>
         )}
 
+        {/* ── Medium filter pills ─────────────────────────────── */}
+        {activeTab === "tracks" && !songsLoading && displaySongs.length > 0 && (() => {
+          const mediumCounts: Record<string, number> = {};
+          displaySongs.forEach((s: any) => {
+            const ct = (s.contentType ?? "audio") as string;
+            mediumCounts[ct] = (mediumCounts[ct] ?? 0) + 1;
+          });
+          const activeMediums = Object.keys(MEDIUM_CONFIG).filter(m => (mediumCounts[m] ?? 0) > 0);
+          if (activeMediums.length <= 1) return null;
+          return (
+            <div className="flex items-center gap-1.5 flex-wrap mb-3">
+              <button
+                onClick={() => setMediumFilter("all")}
+                className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium transition-all"
+                style={mediumFilter === "all"
+                  ? { background: "rgba(196,154,40,0.12)", border: "1px solid var(--ln-gold)", color: "var(--ln-gold)" }
+                  : { background: "transparent", border: "1px solid rgba(255,255,255,0.12)", color: "var(--ln-smoke)" }
+                }
+              >
+                All <span className="opacity-60 ml-0.5">({displaySongs.length})</span>
+              </button>
+              {activeMediums.map(m => {
+                const cfg = MEDIUM_CONFIG[m];
+                const active = mediumFilter === m;
+                return (
+                  <button
+                    key={m}
+                    onClick={() => setMediumFilter(m as any)}
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium transition-all"
+                    style={active
+                      ? { background: cfg.bg, border: `1px solid ${cfg.border}`, color: cfg.color }
+                      : { background: "transparent", border: "1px solid rgba(255,255,255,0.12)", color: "var(--ln-smoke)" }
+                    }
+                  >
+                    {cfg.icon}
+                    <span className="ml-0.5">{cfg.label}</span>
+                    <span className="opacity-60 ml-0.5">({mediumCounts[m] ?? 0})</span>
+                  </button>
+                );
+              })}
+            </div>
+          );
+        })()}
+
         {/* ── Filter + Sort bar ─────────────────────────────────── */}
         {activeTab === "tracks" && !songsLoading && displaySongs.length > 0 && (
           <div className="flex flex-wrap items-center gap-2 mb-3">
@@ -1029,7 +1088,7 @@ export default function ArchivePage() {
             {/* Left: count + batch toggle */}
             <div className="flex items-center gap-3">
               <p className="text-xs" style={{ color: "#E2E8F0" }}>
-                {nonDeletedCount} {nonDeletedCount === 1 ? "track" : "tracks"}
+                {nonDeletedCount} {nonDeletedCount === 1 ? "work" : "works"}
               </p>
               <button
                 onClick={() => setBatchMode(b => !b)}
@@ -1375,11 +1434,28 @@ export default function ArchivePage() {
 
                   {/* Title + WID + genre */}
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm truncate"
-                      style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>
-                      {song.title}
-                    </p>
-                    {/* WID in monospace — always shown if present */}
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <p className="font-medium text-sm truncate"
+                        style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>
+                        {song.title}
+                      </p>
+                      {/* Medium badge */}
+                      {(() => {
+                        const ct = (song.contentType ?? "audio") as string;
+                        const cfg = MEDIUM_CONFIG[ct];
+                        if (!cfg) return null;
+                        return (
+                          <span
+                            className="flex-shrink-0 inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-medium leading-none"
+                            style={{ background: cfg.bg, border: `1px solid ${cfg.border}`, color: cfg.color }}
+                          >
+                            {cfg.icon}
+                            <span className="ml-0.5">{cfg.label}</span>
+                          </span>
+                        );
+                      })()}
+                    </div>
+                      {/* WID in monospace — always shown if present */}
                     {song.witnessId && (
                       <p
                         className="font-mono text-[11px] truncate mt-0.5 tracking-tight"
