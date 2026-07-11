@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import {
   Plus, ListMusic, Users, Lock, Globe, Trash2, Play,
   UserPlus, Check, X, Music, ChevronRight, Loader2,
-  Search, PlusCircle,
+  Search, PlusCircle, Share2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -370,6 +370,20 @@ function PlaylistDetail({
         >
           <Play size={12} className="mr-1" fill="currentColor" /> Play All
         </Button>
+        {/* Share playlist */}
+        {playlist.isPublic && (
+          <Button
+            onClick={() => {
+              const url = `${window.location.origin}/playlists?id=${playlist.id}`;
+              navigator.clipboard.writeText(url).then(() => toast.success("Playlist link copied!"));
+            }}
+            size="sm"
+            variant="outline"
+            className="border-[#C49A28]/30 text-[#C49A28] hover:bg-[#C49A28]/10 text-xs bg-transparent"
+          >
+            <Share2 size={12} className="mr-1" /> Share
+          </Button>
+        )}
         {isOwner && playlist.isCollaborative && (
           <Button
             onClick={() => setShowInvite(v => !v)}

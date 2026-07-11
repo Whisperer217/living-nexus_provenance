@@ -6256,3 +6256,11 @@
 - [x] Update empty state type selector to include Visual Works (image) and Games
 - [x] Update deep-link param validation to accept "tracks" as legacy alias for "works" (tab value still 'tracks' internally — no change needed)
 - [x] Update view-page routing for image contentType to /visual-works/:id (if applicable) — image works route to /song/:id for now (no dedicated visual detail page per song)
+
+## Per-Track & Collection Share Icons (Jul 11, 2026)
+- [x] Collection Studio: add play icon to each track row (uses global player addAndPlay)
+- [x] Album Detail (public): add like, comment, share icons to each track row
+- [x] Album Detail (public): add share icon to album header (beside Play Album button)
+- [x] Playlist Detail: add share icon to playlist header
+- [x] Visual Works Detail: add share icon to collection header and per-item share
+- [x] Share behavior: copy URL to clipboard + toast "Link copied" (consistent with song detail share)

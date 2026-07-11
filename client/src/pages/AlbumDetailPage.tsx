@@ -3,14 +3,167 @@
  * Route: /album/:collectionWid
  *
  * Displays the album cover, metadata, and track list.
- * Supports Play All and per-track play via the Global Player.
+ * Supports Play All, per-track play, like, comment, and share.
+ * Share on album header copies the album URL to clipboard.
  */
-import { useRoute, useLocation } from "wouter";
+import { useState } from "react";
+import { useRoute, useLocation, Link } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { usePlayer } from "@/contexts/PlayerContext";
 import type { Track } from "@/contexts/PlayerContext";
-import { Play, ChevronLeft, Music, Clock, Disc3 } from "lucide-react";
+import { Play, ChevronLeft, Music, Clock, Disc3, Share2, Heart, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { useLike } from "@/hooks/useLike";
+import { useAuth } from "@/_core/hooks/useAuth";
+
+// ─── Per-track row with like / comment / share ─────────────────────────────
+
+function TrackRow({
+  track,
+  idx,
+  isActive,
+  isPlaying,
+  canPlay,
+  onPlay,
+  collectionWid,
+  albumCoverArtUrl,
+}: {
+  track: any;
+  idx: number;
+  isActive: boolean;
+  isPlaying: boolean;
+  canPlay: boolean;
+  onPlay: () => void;
+  collectionWid: string;
+  albumCoverArtUrl?: string | null;
+}) {
+  const { user } = useAuth();
+  const { liked, toggle: toggleLike } = useLike(track.id);
+  const { data: likeCountData } = trpc.songs.getLikeCount.useQuery(
+    { songId: track.id },
+    { enabled: !!track.id }
+  );
+  const likeCount = likeCountData?.count ?? 0;
+
+  const handleShare = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const url = track.witnessId
+      ? `https://www.livingnexus.org/share/${encodeURIComponent(track.witnessId)}`
+      : `${window.location.origin}/song/${track.id}`;
+    navigator.clipboard.writeText(url).then(() => toast.success("Link copied!"));
+  };
+
+  const handleLike = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    toggleLike(e);
+  };
+
+  return (
+    <div
+      key={track.id}
+      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors group ${canPlay ? "cursor-pointer hover:bg-white/5" : "opacity-40"}`}
+      style={isActive ? { background: "rgba(196,154,40,0.08)" } : undefined}
+      onClick={() => canPlay && onPlay()}
+    >
+      {/* Track number / playing indicator */}
+      <div className="w-6 text-center flex-shrink-0">
+        {isPlaying ? (
+          <span className="inline-flex gap-0.5 items-end h-4">
+            {[0, 1, 2].map(i => (
+              <span key={i} className="w-0.5 rounded-full animate-pulse"
+                style={{ height: `${8 + i * 4}px`, background: "var(--ln-gold, #C49A28)", animationDelay: `${i * 0.15}s` }} />
+            ))}
+          </span>
+        ) : (
+          <span className="text-xs" style={{ color: isActive ? "var(--ln-gold, #C49A28)" : "var(--ln-iron, #555570)" }}>
+            {idx + 1}
+          </span>
+        )}
+      </div>
+
+      {/* Cover art thumbnail */}
+      <div className="w-9 h-9 rounded-md overflow-hidden flex-shrink-0"
+        style={{ background: "rgba(196,154,40,0.06)", border: "1px solid rgba(196,154,40,0.1)" }}>
+        {(track.coverArtUrl ?? albumCoverArtUrl) ? (
+          <img
+            src={track.coverArtUrl ?? albumCoverArtUrl}
+            alt={track.title}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <Music size={12} style={{ color: "var(--ln-gold, #C49A28)", opacity: 0.4 }} />
+          </div>
+        )}
+      </div>
+
+      {/* Title + WID */}
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium truncate"
+          style={{ color: isActive ? "var(--ln-gold, #C49A28)" : "var(--ln-parchment, #F5EFD7)" }}>
+          {track.title ?? "Untitled"}
+        </p>
+        {track.witnessId && (
+          <p className="text-[10px] font-mono truncate mt-0.5" style={{ color: "rgba(196,154,40,0.45)" }}>
+            {track.witnessId}
+          </p>
+        )}
+      </div>
+
+      {/* Duration */}
+      {track.durationSeconds && (
+        <span className="hidden sm:block text-xs flex-shrink-0 w-10 text-right"
+          style={{ color: "var(--ln-iron, #555570)" }}>
+          {Math.floor(track.durationSeconds / 60)}:{String(track.durationSeconds % 60).padStart(2, "0")}
+        </span>
+      )}
+
+      {/* Action icons — like / comment / share */}
+      <div
+        className="flex items-center gap-0.5 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Like */}
+        <button
+          onClick={handleLike}
+          className="flex items-center gap-0.5 px-1.5 py-1 rounded-md transition-colors hover:bg-white/8"
+          title={liked ? "Unlike" : "Like"}
+        >
+          <Heart
+            size={13}
+            fill={liked ? "currentColor" : "none"}
+            style={{ color: liked ? "#F87171" : "var(--ln-smoke, #8a8a9a)" }}
+          />
+          {likeCount > 0 && (
+            <span className="text-[10px]" style={{ color: "var(--ln-smoke, #8a8a9a)" }}>{likeCount}</span>
+          )}
+        </button>
+
+        {/* Comment — links to song detail */}
+        <Link href={`/song/${track.id}#comments`} onClick={e => e.stopPropagation()}>
+          <button
+            className="flex items-center gap-0.5 px-1.5 py-1 rounded-md transition-colors hover:bg-white/8"
+            title="View comments"
+          >
+            <MessageSquare size={13} style={{ color: "var(--ln-smoke, #8a8a9a)" }} />
+          </button>
+        </Link>
+
+        {/* Share */}
+        <button
+          onClick={handleShare}
+          className="flex items-center gap-0.5 px-1.5 py-1 rounded-md transition-colors hover:bg-white/8"
+          title="Copy link"
+        >
+          <Share2 size={13} style={{ color: "var(--ln-smoke, #8a8a9a)" }} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ─── Main page ─────────────────────────────────────────────────────────────
 
 export default function AlbumDetailPage() {
   const [, params] = useRoute("/album/:collectionWid");
@@ -51,6 +204,13 @@ export default function AlbumDetailPage() {
     const queue = buildQueue();
     if (!queue.length) return;
     playQueueAt(queue, index, "PLAYLIST");
+  };
+
+  const handleShareAlbum = () => {
+    const url = data?.collection?.collectionWid
+      ? `${window.location.origin}/album/${encodeURIComponent(data.collection.collectionWid)}`
+      : window.location.href;
+    navigator.clipboard.writeText(url).then(() => toast.success("Album link copied!"));
   };
 
   // ── Loading ──────────────────────────────────────────────────────────────
@@ -152,17 +312,28 @@ export default function AlbumDetailPage() {
             </p>
           )}
 
-          {/* Play All */}
-          {playableTracks.length > 0 && (
+          {/* Play All + Share Album */}
+          <div className="flex items-center gap-3 mt-3 flex-wrap">
+            {playableTracks.length > 0 && (
+              <button
+                onClick={handlePlayAll}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-full font-semibold text-sm transition-all hover:opacity-90 active:scale-95"
+                style={{ background: "var(--ln-gold, #C49A28)", color: "#0a0812", fontFamily: "'Cinzel', serif" }}
+              >
+                <Play size={16} fill="currentColor" />
+                Play Album
+              </button>
+            )}
             <button
-              onClick={handlePlayAll}
-              className="mt-3 flex items-center gap-2 px-5 py-2.5 rounded-full font-semibold text-sm transition-all hover:opacity-90 active:scale-95 w-fit"
-              style={{ background: "var(--ln-gold, #C49A28)", color: "#0a0812", fontFamily: "'Cinzel', serif" }}
+              onClick={handleShareAlbum}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-full font-semibold text-sm transition-all hover:opacity-80 active:scale-95"
+              style={{ background: "rgba(196,154,40,0.10)", border: "1px solid rgba(196,154,40,0.28)", color: "var(--ln-gold, #C49A28)", fontFamily: "'Cinzel', serif" }}
+              title="Share this album"
             >
-              <Play size={16} fill="currentColor" />
-              Play Album
+              <Share2 size={15} />
+              Share
             </button>
-          )}
+          </div>
         </div>
       </div>
 
@@ -173,7 +344,7 @@ export default function AlbumDetailPage() {
           style={{ color: "var(--ln-iron, #555570)", borderColor: "rgba(255,255,255,0.06)", fontFamily: "'Cinzel', serif" }}>
           <span className="w-6 text-center">#</span>
           <span className="flex-1">TITLE</span>
-          <span className="hidden sm:block w-20 text-right"><Clock size={12} /></span>
+          <span className="hidden sm:block w-10 text-right"><Clock size={12} /></span>
         </div>
 
         {tracks.length === 0 ? (
@@ -187,66 +358,20 @@ export default function AlbumDetailPage() {
               const isActive = currentTrackId === String(track.id);
               const isPlaying = isActive && playerState.isPlaying;
               const playableIdx = playableIndices.indexOf(idx);
-              const canPlay = track.fileUrl;
+              const canPlay = !!track.fileUrl;
 
               return (
-                <div
+                <TrackRow
                   key={track.id}
-                  onClick={() => canPlay && handlePlayTrack(playableIdx)}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors group ${canPlay ? "cursor-pointer hover:bg-white/5" : "opacity-40"}`}
-                  style={isActive ? { background: "rgba(196,154,40,0.08)" } : undefined}
-                >
-                  {/* Track number / playing indicator */}
-                  <div className="w-6 text-center flex-shrink-0">
-                    {isPlaying ? (
-                      <span className="inline-flex gap-0.5 items-end h-4">
-                        {[0, 1, 2].map(i => (
-                          <span key={i} className="w-0.5 rounded-full animate-pulse"
-                            style={{ height: `${8 + i * 4}px`, background: "var(--ln-gold, #C49A28)", animationDelay: `${i * 0.15}s` }} />
-                        ))}
-                      </span>
-                    ) : (
-                      <span className="text-xs" style={{ color: isActive ? "var(--ln-gold, #C49A28)" : "var(--ln-iron, #555570)" }}>
-                        {idx + 1}
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Cover art thumbnail */}
-                  <div className="w-9 h-9 rounded-md overflow-hidden flex-shrink-0"
-                    style={{ background: "rgba(196,154,40,0.06)", border: "1px solid rgba(196,154,40,0.1)" }}>
-                    {(track.coverArtUrl ?? collection.coverArtUrl) ? (
-                      <img
-                        src={track.coverArtUrl ?? collection.coverArtUrl}
-                        alt={track.title}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <Music size={12} style={{ color: "var(--ln-gold, #C49A28)", opacity: 0.4 }} />
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Title + WID */}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate"
-                      style={{ color: isActive ? "var(--ln-gold, #C49A28)" : "var(--ln-parchment, #F5EFD7)" }}>
-                      {track.title ?? "Untitled"}
-                    </p>
-                    {track.witnessId && (
-                      <p className="text-[10px] font-mono truncate mt-0.5" style={{ color: "rgba(196,154,40,0.45)" }}>
-                        {track.witnessId}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Play icon on hover */}
-                  {canPlay && !isActive && (
-                    <Play size={14} className="flex-shrink-0 opacity-0 group-hover:opacity-60 transition-opacity"
-                      style={{ color: "var(--ln-gold, #C49A28)" }} />
-                  )}
-                </div>
+                  track={track}
+                  idx={idx}
+                  isActive={isActive}
+                  isPlaying={isPlaying}
+                  canPlay={canPlay}
+                  onPlay={() => handlePlayTrack(playableIdx)}
+                  collectionWid={collectionWid}
+                  albumCoverArtUrl={collection.coverArtUrl}
+                />
               );
             })}
           </div>

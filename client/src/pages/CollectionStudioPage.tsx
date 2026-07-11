@@ -108,12 +108,14 @@ function SortableTrackRow({
   onRemove,
   onReplace,
   isSaving,
+  onPlay,
 }: {
   track: Track;
   index: number;
   onRemove: (id: number) => void;
   onReplace: (id: number) => void;
   isSaving: boolean;
+  onPlay?: () => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: track.id });
@@ -197,6 +199,19 @@ function SortableTrackRow({
 
       {/* Actions */}
       <div className="flex items-center gap-1 flex-shrink-0">
+        {/* Play button — only shown when track has audio */}
+        {track.fileUrl && onPlay && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="w-7 h-7 transition-colors"
+            style={{ color: "var(--ln-gold, #C49A28)" }}
+            onClick={(e) => { e.stopPropagation(); onPlay(); }}
+            title="Play this track"
+          >
+            <Play className="w-3.5 h-3.5" fill="currentColor" />
+          </Button>
+        )}
         <Button
           variant="ghost"
           size="icon"
@@ -495,6 +510,22 @@ export default function CollectionStudioPage() {
     } satisfies PlayerTrack)), 0, "PLAYLIST");
     toast.success(`Playing: ${col?.name ?? "Album"}`);
   }, [tracks, data, playQueueAt]);
+
+  const handlePlayTrack = useCallback((trackId: number) => {
+    const playable = tracks.filter((t) => t.fileUrl);
+    if (!playable.length) return;
+    const idx = playable.findIndex((t) => t.id === trackId);
+    if (idx < 0) return;
+    playQueueAt(playable.map((t) => ({
+      id: String(t.id),
+      title: t.title,
+      artist: user?.artistHandle ?? user?.name ?? "Unknown",
+      genre: t.genre ?? "",
+      audioUrl: t.fileUrl ?? undefined,
+      artUrl: t.coverArtUrl ?? undefined,
+      witnessId: t.witnessId ?? undefined,
+    } satisfies PlayerTrack)), idx, "PLAYLIST");
+  }, [tracks, user, playQueueAt]);
 
   // ── Sync server data → local state ───────────────────────────────────────
   useEffect(() => {
@@ -954,6 +985,7 @@ export default function CollectionStudioPage() {
                       onRemove={(id) => setRemoveTarget(id)}
                       onReplace={(id) => setReplaceTarget(id)}
                       isSaving={removeTrack.isPending || replaceTrack.isPending}
+                      onPlay={track.fileUrl ? () => handlePlayTrack(track.id) : undefined}
                     />
                   ))}
                 </div>

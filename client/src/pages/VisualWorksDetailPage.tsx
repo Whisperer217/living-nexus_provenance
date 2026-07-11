@@ -8,6 +8,8 @@ import React, { useState } from "react";
 import { useLocation, useParams, Link } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { Share2 } from "lucide-react";
+import { toast } from "sonner";
 
 const ACCENT = "#FDA4AF";
 const ACCENT_BG = "rgba(253,164,175,0.08)";
@@ -198,12 +200,23 @@ export default function VisualWorksDetailPage() {
               <span>· {new Date(collection.createdAt).toLocaleDateString()}</span>
             </div>
 
-            {/* WID */}
-            {collection.collectionWid && (
-              <div className="mt-3">
+            {/* WID + Share row */}
+            <div className="flex items-center gap-3 mt-3 flex-wrap">
+              {collection.collectionWid && (
                 <WIDPill wid={collection.collectionWid} prefix="WID-VWC" />
-              </div>
-            )}
+              )}
+              <button
+                onClick={() => {
+                  const url = window.location.href;
+                  navigator.clipboard.writeText(url).then(() => toast.success("Collection link copied!"));
+                }}
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-all hover:opacity-80"
+                style={{ background: ACCENT_BG, border: `1px solid ${ACCENT_BORDER}`, color: ACCENT }}
+              >
+                <Share2 size={11} />
+                Share Collection
+              </button>
+            </div>
 
 
 
@@ -245,12 +258,30 @@ export default function VisualWorksDetailPage() {
                     className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-2"
                     style={{ background: "linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%)" }}
                   >
-                    {item.witnessId && (
-                      <p className="text-[8px] font-mono" style={{ color: ACCENT }}>{item.witnessId}</p>
-                    )}
-                    {item.versionLabel && (
-                      <p className="text-[8px]" style={{ color: "#8B9BA3" }}>{item.versionLabel}</p>
-                    )}
+                    <div className="flex items-end justify-between">
+                      <div>
+                        {item.witnessId && (
+                          <p className="text-[8px] font-mono" style={{ color: ACCENT }}>{item.witnessId}</p>
+                        )}
+                        {item.versionLabel && (
+                          <p className="text-[8px]" style={{ color: "#8B9BA3" }}>{item.versionLabel}</p>
+                        )}
+                      </div>
+                      {/* Per-item share */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const url = item.witnessId
+                            ? `${window.location.origin}/share/${encodeURIComponent(item.witnessId)}`
+                            : window.location.href;
+                          navigator.clipboard.writeText(url).then(() => toast.success("Link copied!"));
+                        }}
+                        className="p-1 rounded-full transition-colors hover:bg-white/20"
+                        title="Share this image"
+                      >
+                        <Share2 size={11} style={{ color: "rgba(255,255,255,0.8)" }} />
+                      </button>
+                    </div>
                   </div>
                   {/* AI badge */}
                   {item.haaiDisclosure && item.haaiDisclosure !== "none" && (
