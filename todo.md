@@ -6278,3 +6278,10 @@
 - [x] ManifestationShelf: download icon added to TrackCard (carousel/tile mode) for parity with list mode
 - [ ] Collection Studio: album-level download settings panel (downloadMode, bundlePrice) — deferred to next pass
 - [x] Tooltip/title text: title attribute set on Download Album button with context-aware text
+
+## Download Album Fix + Edit Work Restore (Jul 11, 2026)
+- [x] AlbumDetailPage: remove project permission gate — always show Download Album button, zips all tracks with downloadPermission=free
+- [x] AlbumDetailPage: smart label — 'Download Album' (all free), 'Download (N free)' (mixed), 'Download Album' (none, shows toast on click)
+- [x] ManifestationShelf: same fix — Download button always visible, uses per-track downloadPermission filter
+- [x] No new backend procedure needed — downloadPermission already returned by getSongsByCollectionId → getPublicAlbum → ShelfTrack
+- [x] Edit Work button: confirmed present in SongDetailPage (isOwner gated) — was not missing, user was viewing while logged out

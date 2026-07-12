@@ -520,41 +520,29 @@ export function ManifestationShelf({
   const albumCoverY = album.coverPositionY ?? 50;
   const trackCount = album.tracks.length;
 
-  // ── Album download ──────────────────────────────────────────────────────────
+  // ── Album download — per-track downloadPermission, no project gate ───────────
   const [albumDownloading, setAlbumDownloading] = useState(false);
-  const { data: albumDownloadInfo } = trpc.projects.getAlbumDownload.useQuery(
-    { projectId: album.projectId! },
-    { enabled: !!album.projectId, staleTime: 60_000 }
+
+  const freeDownloadTracks = album.tracks.filter(
+    (t) => (t as any).downloadPermission === 'free' && t.fileUrl
   );
-  const downloadAlbumMutation = trpc.projects.downloadAlbum.useMutation({
-    onError: (e) => toast.error(e.message),
-  });
-  const createAlbumCheckoutMutation = trpc.projects.createAlbumDownloadCheckout.useMutation({
-    onSuccess: (data) => { if (data.url) window.location.href = data.url; },
-    onError: (e) => toast.error(e.message),
-  });
+  const hasFreeDownloads = freeDownloadTracks.length > 0;
 
   const handleAlbumDownload = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!album.projectId) return;
-    const perm = albumDownloadInfo?.permission ?? 'none';
-    if (perm === 'none') { toast.error('Album downloads are not enabled for this collection.'); return; }
-    if (perm === 'tipped' && !albumDownloadInfo?.unlocked) {
-      createAlbumCheckoutMutation.mutate({ projectId: album.projectId, origin: window.location.origin });
+    if (!hasFreeDownloads) {
+      toast.error('No free downloads available for this album.');
       return;
     }
-    // Free or already-unlocked tipped
     setAlbumDownloading(true);
     try {
-      const result = await downloadAlbumMutation.mutateAsync({ projectId: album.projectId });
-      if (!result.tracks.length) { toast.error('No downloadable tracks found.'); return; }
-      // Sequential per-track downloads using the existing tagged download helper
-      for (const t of result.tracks) {
-        await triggerTaggedDownload(t.id);
+      for (const t of freeDownloadTracks) {
+        await triggerTaggedDownload((t as any).id);
+        await new Promise(res => setTimeout(res, 200));
       }
-      toast.success(`Downloaded ${result.tracks.length} track${result.tracks.length !== 1 ? 's' : ''}`);
+      toast.success(`Downloading ${freeDownloadTracks.length} track${freeDownloadTracks.length !== 1 ? 's' : ''}…`);
     } catch {
-      // error already shown by mutation onError
+      toast.error('Download failed. Please try again.');
     } finally {
       setAlbumDownloading(false);
     }
@@ -628,25 +616,23 @@ export function ManifestationShelf({
                 <Play className="w-2.5 h-2.5" fill="currentColor" />
               </button>
             )}
-            {/* Download Album — only when a projectId is present and permission is not 'none' */}
-            {album.projectId && albumDownloadInfo && albumDownloadInfo.permission !== 'none' && (
-              <button
-                type="button"
-                onClick={handleAlbumDownload}
-                disabled={albumDownloading || downloadAlbumMutation.isPending || createAlbumCheckoutMutation.isPending}
-                className="flex items-center justify-center w-5 h-5 rounded-full transition-all hover:scale-110 disabled:opacity-50"
-                style={{ background: "rgba(196,154,40,0.12)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.3)" }}
-                title={
-                  albumDownloadInfo.permission === 'tipped' && !albumDownloadInfo.unlocked
-                    ? `Gift $${((albumDownloadInfo.priceCents ?? 499) / 100).toFixed(2)} to download album`
-                    : 'Download album'
-                }
-              >
-                {albumDownloading
-                  ? <span className="text-[8px]" style={{ color: 'var(--ln-gold)' }}>...</span>
-                  : <Download className="w-2.5 h-2.5" />}
-              </button>
-            )}
+            {/* Download Album — always shown; downloads all free-permission tracks */}
+            <button
+              type="button"
+              onClick={handleAlbumDownload}
+              disabled={albumDownloading}
+              className="flex items-center justify-center w-5 h-5 rounded-full transition-all hover:scale-110 disabled:opacity-50"
+              style={{ background: "rgba(196,154,40,0.12)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.3)" }}
+              title={
+                !hasFreeDownloads
+                  ? 'No free downloads available'
+                  : `Download ${freeDownloadTracks.length} free track${freeDownloadTracks.length !== 1 ? 's' : ''}`
+              }
+            >
+              {albumDownloading
+                ? <span className="text-[8px]" style={{ color: 'var(--ln-gold)' }}>...</span>
+                : <Download className="w-2.5 h-2.5" />}
+            </button>
             {/* Share — copies album or project link to clipboard */}
             <button
               type="button"

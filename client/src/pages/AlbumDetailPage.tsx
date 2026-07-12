@@ -213,41 +213,36 @@ export default function AlbumDetailPage() {
     navigator.clipboard.writeText(url).then(() => toast.success("Album link copied!"));
   };
 
-  // ── Album download ──────────────────────────────────────────────────────────
+  // ── Album download — uses per-track downloadPermission, no project gate ───────
   const [albumDownloading, setAlbumDownloading] = useState(false);
-  const { data: albumDownloadInfo } = trpc.projects.getAlbumDownload.useQuery(
-    { projectId: data?.projectId! },
-    { enabled: !!data?.projectId, staleTime: 60_000 }
+
+  // Tracks the user can download right now (free permission + has audio file)
+  const freeDownloadTracks = (data?.tracks ?? []).filter(
+    (t: any) => t.downloadPermission === 'free' && t.fileUrl
   );
-  const downloadAlbumMutation = trpc.projects.downloadAlbum.useMutation({
-    onError: (e) => toast.error(e.message),
-  });
-  const createAlbumCheckoutMutation = trpc.projects.createAlbumDownloadCheckout.useMutation({
-    onSuccess: (d) => { if (d.url) window.location.href = d.url; },
-    onError: (e) => toast.error(e.message),
-  });
+  const hasFreeDownloads = freeDownloadTracks.length > 0;
+  const allFree = hasFreeDownloads && freeDownloadTracks.length === (data?.tracks ?? []).filter((t: any) => t.fileUrl).length;
 
   const handleAlbumDownload = async () => {
-    if (!data?.projectId) return;
-    const perm = albumDownloadInfo?.permission ?? 'none';
-    if (perm === 'none') { toast.error('Album downloads are not enabled for this collection.'); return; }
-    if (perm === 'tipped' && !albumDownloadInfo?.unlocked) {
-      createAlbumCheckoutMutation.mutate({ projectId: data.projectId, origin: window.location.origin });
+    if (!hasFreeDownloads) {
+      toast.error('No free downloads available for this album.');
       return;
     }
     setAlbumDownloading(true);
     try {
-      const result = await downloadAlbumMutation.mutateAsync({ projectId: data.projectId });
-      if (!result.tracks.length) { toast.error('No downloadable tracks found.'); return; }
-      for (const t of result.tracks) {
+      for (const t of freeDownloadTracks) {
         const a = document.createElement('a');
         a.href = t.fileUrl;
-        a.download = `${t.title}.mp3`;
+        a.download = `${t.title ?? 'track'}.mp3`;
+        document.body.appendChild(a);
         a.click();
+        document.body.removeChild(a);
+        // Small delay to avoid browser blocking multiple downloads
+        await new Promise(res => setTimeout(res, 200));
       }
-      toast.success(`Downloaded ${result.tracks.length} track${result.tracks.length !== 1 ? 's' : ''}`);
+      toast.success(`Downloading ${freeDownloadTracks.length} track${freeDownloadTracks.length !== 1 ? 's' : ''}…`);
     } catch {
-      // error shown by mutation onError
+      toast.error('Download failed. Please try again.');
     } finally {
       setAlbumDownloading(false);
     }
@@ -364,23 +359,29 @@ export default function AlbumDetailPage() {
                 Play Album
               </button>
             )}
-            {/* Download Album — only shown when permission is free or tipped */}
-            {data?.projectId && albumDownloadInfo && albumDownloadInfo.permission !== 'none' && (
-              <button
-                onClick={handleAlbumDownload}
-                disabled={albumDownloading || downloadAlbumMutation.isPending || createAlbumCheckoutMutation.isPending}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-full font-semibold text-sm transition-all hover:opacity-80 active:scale-95 disabled:opacity-50"
-                style={{ background: "rgba(196,154,40,0.10)", border: "1px solid rgba(196,154,40,0.28)", color: "var(--ln-gold, #C49A28)", fontFamily: "'Cinzel', serif" }}
-                title={
-                  albumDownloadInfo.permission === 'tipped' && !albumDownloadInfo.unlocked
-                    ? `Gift $${((albumDownloadInfo.priceCents ?? 499) / 100).toFixed(2)} to download album`
-                    : 'Download album'
-                }
-              >
-                <Download size={15} />
-                {albumDownloading ? 'Downloading…' : albumDownloadInfo.permission === 'tipped' && !albumDownloadInfo.unlocked ? `Gift & Download ($${((albumDownloadInfo.priceCents ?? 499) / 100).toFixed(2)})` : 'Download Album'}
-              </button>
-            )}
+            {/* Download Album — always shown; downloads all free-permission tracks */}
+            <button
+              onClick={handleAlbumDownload}
+              disabled={albumDownloading}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-full font-semibold text-sm transition-all hover:opacity-80 active:scale-95 disabled:opacity-50"
+              style={{ background: "rgba(196,154,40,0.10)", border: "1px solid rgba(196,154,40,0.28)", color: "var(--ln-gold, #C49A28)", fontFamily: "'Cinzel', serif" }}
+              title={
+                !hasFreeDownloads
+                  ? 'No free downloads available for this album'
+                  : allFree
+                  ? 'Download all tracks'
+                  : `Download ${freeDownloadTracks.length} of ${(data?.tracks ?? []).filter((t: any) => t.fileUrl).length} free tracks`
+              }
+            >
+              <Download size={15} />
+              {albumDownloading
+                ? 'Downloading…'
+                : !hasFreeDownloads
+                ? 'Download Album'
+                : allFree
+                ? 'Download Album'
+                : `Download (${freeDownloadTracks.length} free)`}
+            </button>
             <button
               onClick={handleShareAlbum}
               className="flex items-center gap-2 px-4 py-2.5 rounded-full font-semibold text-sm transition-all hover:opacity-80 active:scale-95"
