@@ -1985,6 +1985,7 @@ export default function CreatorProfilePage() {
                     projectId: matchingProject?.id ?? null,
                     defaultView: (collection?.defaultView as "carousel" | "list" | null) ?? null,
                     collectionId: collection?.id ?? null,
+                    collectionWid: collection?.collectionWid ?? null,
                     tracks: albumSongs.map((s: any) => ({
                       id: s.id,
                       title: s.title,

@@ -40,6 +40,8 @@ export interface ShelfAlbum {
   defaultView?: "carousel" | "list" | null;
   /** Collection DB id — needed for the owner to persist their view choice */
   collectionId?: number | null;
+  /** WID-ALB identifier — used for single-ZIP album download */
+  collectionWid?: string | null;
 }
 
 interface ManifestationShelfProps {
@@ -535,14 +537,39 @@ export function ManifestationShelf({
       return;
     }
     setAlbumDownloading(true);
+    toast.success(`Preparing album ZIP with ${freeDownloadTracks.length} track${freeDownloadTracks.length !== 1 ? 's' : ''}…`);
     try {
-      for (const t of freeDownloadTracks) {
-        await triggerTaggedDownload((t as any).id);
-        await new Promise(res => setTimeout(res, 200));
+      if (album.collectionWid) {
+        // Single album ZIP — all free tracks bundled in track order with WID metadata
+        const response = await fetch(`/api/download/album/${encodeURIComponent(album.collectionWid)}`, {
+          credentials: 'include',
+        });
+        if (!response.ok) {
+          const err = await response.json().catch(() => ({ error: 'Download failed' }));
+          throw new Error((err as any).error ?? 'Download failed');
+        }
+        const blob = await response.blob();
+        const objectUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = objectUrl;
+        const cd = response.headers.get('Content-Disposition') ?? '';
+        const match = cd.match(/filename\*=UTF-8''([^;]+)/) ?? cd.match(/filename="([^"]+)"/);
+        a.download = match ? decodeURIComponent(match[1]) : `${album.name ?? 'album'}.zip`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(objectUrl), 10_000);
+        toast.success('Album downloaded!');
+      } else {
+        // Fallback: per-track downloads (no collectionWid available)
+        for (const t of freeDownloadTracks) {
+          await triggerTaggedDownload((t as any).id);
+          await new Promise(res => setTimeout(res, 200));
+        }
+        toast.success(`Downloaded ${freeDownloadTracks.length} track${freeDownloadTracks.length !== 1 ? 's' : ''}`);
       }
-      toast.success(`Downloading ${freeDownloadTracks.length} track${freeDownloadTracks.length !== 1 ? 's' : ''}…`);
-    } catch {
-      toast.error('Download failed. Please try again.');
+    } catch (err: any) {
+      toast.error((err as any)?.message ?? 'Download failed. Please try again.');
     } finally {
       setAlbumDownloading(false);
     }
