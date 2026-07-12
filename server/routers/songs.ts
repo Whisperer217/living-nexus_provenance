@@ -159,6 +159,7 @@ import {
   createApiKey,
   listApiKeys,
   revokeApiKey,
+  getProjectIdByCollectionId,
 } from "../utils/db";
 import { FOUNDER_PRICE_EARLY_CENTS, FOUNDER_PRICE_LATE_CENTS, FOUNDER_THRESHOLD, LICENSE_PRICE_CENTS, LICENSE_SLOTS, SLOT_PACKAGES, getSlotPackage, type SlotPackageId } from "../services/livingArchiveProducts";
 import { ENV } from "../_core/env";
@@ -1554,7 +1555,8 @@ ${workType === "manuscript" || workType === "comic" ? "Category" : "Genre"}: ${i
         if (!collection) throw new TRPCError({ code: "NOT_FOUND", message: "Album not found." });
         const tracks = await getSongsByCollectionId(collection.id);
         const creator = await getUserById(collection.creatorId);
-        return { collection, tracks, creator };
+        const projectId = await getProjectIdByCollectionId(collection.id);
+        return { collection, tracks, creator, projectId };
       }),
   });
 

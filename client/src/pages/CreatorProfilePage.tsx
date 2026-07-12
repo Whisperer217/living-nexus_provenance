@@ -1982,6 +1982,7 @@ export default function CreatorProfilePage() {
                     coverPositionY: albumCoverY,
                     medium,
                     projectSlug: matchingProject?.slug ?? null,
+                    projectId: matchingProject?.id ?? null,
                     defaultView: (collection?.defaultView as "carousel" | "list" | null) ?? null,
                     collectionId: collection?.id ?? null,
                     tracks: albumSongs.map((s: any) => ({

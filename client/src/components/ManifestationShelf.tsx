@@ -34,6 +34,8 @@ export interface ShelfAlbum {
   tracks: ShelfTrack[];
   medium?: "music" | "books" | "comics" | "manuscripts" | "artifacts" | "merch" | "video" | "other";
   projectSlug?: string | null;
+  /** Project DB id — needed for album download permission checks and Stripe checkout */
+  projectId?: number | null;
   /** Creator-defined canonical default view. Visitors can toggle temporarily but this is the initial state. */
   defaultView?: "carousel" | "list" | null;
   /** Collection DB id — needed for the owner to persist their view choice */
@@ -78,6 +80,22 @@ function TrackCard({
   const duration = track.durationSeconds
     ? `${Math.floor(track.durationSeconds / 60)}:${String(Math.round(track.durationSeconds % 60)).padStart(2, "0")}`
     : null;
+
+  const downloadMutation = trpc.songs.download.useMutation({
+    onSuccess: async (_data: { url: string }, vars: { songId: number }) => {
+      try { await triggerTaggedDownload(vars.songId); }
+      catch (e: unknown) { toast.error(e instanceof Error ? e.message : 'Download failed'); }
+    },
+    onError: (e) => toast.error(e.message),
+  });
+  const handleDownload = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!track.downloadPermission || track.downloadPermission === 'none') {
+      toast.error('Downloads are not enabled for this track.');
+      return;
+    }
+    downloadMutation.mutate({ songId: track.id });
+  };
 
   return (
     <div
@@ -194,14 +212,30 @@ function TrackCard({
       </div>
       {/* Track info */}
       <div className="p-2.5">
-        <Link href={`/song/${track.id}`} onClick={(e: React.MouseEvent) => e.stopPropagation()}>
-          <p
-            className="text-xs font-semibold truncate leading-tight hover:text-[#C49A28] transition-colors"
-            style={{ fontFamily: "'Cinzel', serif", color: isPlaying ? "var(--ln-gold)" : "var(--ln-parchment)" }}
-          >
-            {track.title}
-          </p>
-        </Link>
+        <div className="flex items-start justify-between gap-1">
+          <Link href={`/song/${track.id}`} onClick={(e: React.MouseEvent) => e.stopPropagation()} className="flex-1 min-w-0">
+            <p
+              className="text-xs font-semibold truncate leading-tight hover:text-[#C49A28] transition-colors"
+              style={{ fontFamily: "'Cinzel', serif", color: isPlaying ? "var(--ln-gold)" : "var(--ln-parchment)" }}
+            >
+              {track.title}
+            </p>
+          </Link>
+          {/* Download icon — only when downloadPermission is free or tipped */}
+          {track.downloadPermission && track.downloadPermission !== 'none' && (
+            <button
+              onClick={handleDownload}
+              disabled={downloadMutation.isPending}
+              className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-50"
+              title={track.downloadPermission === 'tipped' ? 'Download (tip required)' : 'Download track'}
+              style={{ color: 'rgba(196,154,40,0.7)' }}
+            >
+              {downloadMutation.isPending
+                ? <span className="text-[8px]" style={{ color: 'var(--ln-gold)' }}>...</span>
+                : <Download className="w-3 h-3" />}
+            </button>
+          )}
+        </div>
         {track.genre && (
           <p className="text-[10px] truncate mt-0.5" style={{ color: "var(--ln-smoke)" }}>
             {track.genre}
@@ -486,6 +520,46 @@ export function ManifestationShelf({
   const albumCoverY = album.coverPositionY ?? 50;
   const trackCount = album.tracks.length;
 
+  // ── Album download ──────────────────────────────────────────────────────────
+  const [albumDownloading, setAlbumDownloading] = useState(false);
+  const { data: albumDownloadInfo } = trpc.projects.getAlbumDownload.useQuery(
+    { projectId: album.projectId! },
+    { enabled: !!album.projectId, staleTime: 60_000 }
+  );
+  const downloadAlbumMutation = trpc.projects.downloadAlbum.useMutation({
+    onError: (e) => toast.error(e.message),
+  });
+  const createAlbumCheckoutMutation = trpc.projects.createAlbumDownloadCheckout.useMutation({
+    onSuccess: (data) => { if (data.url) window.location.href = data.url; },
+    onError: (e) => toast.error(e.message),
+  });
+
+  const handleAlbumDownload = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!album.projectId) return;
+    const perm = albumDownloadInfo?.permission ?? 'none';
+    if (perm === 'none') { toast.error('Album downloads are not enabled for this collection.'); return; }
+    if (perm === 'tipped' && !albumDownloadInfo?.unlocked) {
+      createAlbumCheckoutMutation.mutate({ projectId: album.projectId, origin: window.location.origin });
+      return;
+    }
+    // Free or already-unlocked tipped
+    setAlbumDownloading(true);
+    try {
+      const result = await downloadAlbumMutation.mutateAsync({ projectId: album.projectId });
+      if (!result.tracks.length) { toast.error('No downloadable tracks found.'); return; }
+      // Sequential per-track downloads using the existing tagged download helper
+      for (const t of result.tracks) {
+        await triggerTaggedDownload(t.id);
+      }
+      toast.success(`Downloaded ${result.tracks.length} track${result.tracks.length !== 1 ? 's' : ''}`);
+    } catch {
+      // error already shown by mutation onError
+    } finally {
+      setAlbumDownloading(false);
+    }
+  };
+
   return (
     <div
       className="rounded-2xl overflow-hidden"
@@ -554,21 +628,24 @@ export function ManifestationShelf({
                 <Play className="w-2.5 h-2.5" fill="currentColor" />
               </button>
             )}
-            {/* Download Album — inline icon button, only when project slug available */}
-            {album.projectSlug && (
-              <Link
-                href={`/project/${album.projectSlug}`}
-                onClick={(e: React.MouseEvent) => e.stopPropagation()}
+            {/* Download Album — only when a projectId is present and permission is not 'none' */}
+            {album.projectId && albumDownloadInfo && albumDownloadInfo.permission !== 'none' && (
+              <button
+                type="button"
+                onClick={handleAlbumDownload}
+                disabled={albumDownloading || downloadAlbumMutation.isPending || createAlbumCheckoutMutation.isPending}
+                className="flex items-center justify-center w-5 h-5 rounded-full transition-all hover:scale-110 disabled:opacity-50"
+                style={{ background: "rgba(196,154,40,0.12)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.3)" }}
+                title={
+                  albumDownloadInfo.permission === 'tipped' && !albumDownloadInfo.unlocked
+                    ? `Gift $${((albumDownloadInfo.priceCents ?? 499) / 100).toFixed(2)} to download album`
+                    : 'Download album'
+                }
               >
-                <button
-                  type="button"
-                  className="flex items-center justify-center w-5 h-5 rounded-full transition-all hover:scale-110"
-                  style={{ background: "rgba(196,154,40,0.12)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.3)" }}
-                  title="Download album"
-                >
-                  <Download className="w-2.5 h-2.5" />
-                </button>
-              </Link>
+                {albumDownloading
+                  ? <span className="text-[8px]" style={{ color: 'var(--ln-gold)' }}>...</span>
+                  : <Download className="w-2.5 h-2.5" />}
+              </button>
             )}
             {/* Share — copies album or project link to clipboard */}
             <button

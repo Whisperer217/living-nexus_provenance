@@ -6170,3 +6170,39 @@ export async function getGrantsReceivedByUser(
     .limit(limit);
   return rows;
 }
+
+/**
+ * Find the project that contains the most songs from a given collection.
+ * Used by AlbumDetailPage to resolve projectId from collectionId for album download checks.
+ * Returns the projectId of the best-matching project, or null if none found.
+ */
+export async function getProjectIdByCollectionId(collectionId: number): Promise<number | null> {
+  const db = await getDb();
+  if (!db) return null;
+  // Get all songIds in this collection
+  const collectionTracks = await db
+    .select({ songId: songs.id })
+    .from(songs)
+    .where(eq(songs.collectionId, collectionId));
+  if (!collectionTracks.length) return null;
+  const songIds = collectionTracks.map((r: { songId: number }) => r.songId);
+  // Find which project has the most overlap with these songs
+  const rows = await db
+    .select({ projectId: projectSongs.projectId })
+    .from(projectSongs)
+    .where(inArray(projectSongs.songId, songIds));
+  if (!rows.length) return null;
+  // Count by projectId and return the one with the most matches
+  const counts: Record<number, number> = {};
+  for (const r of rows as Array<{ projectId: number }>) {
+    counts[r.projectId] = (counts[r.projectId] ?? 0) + 1;
+  }
+  let bestId: number | null = null;
+  let bestCount = 0;
+  for (const pidStr of Object.keys(counts)) {
+    const pid = Number(pidStr);
+    const c = counts[pid];
+    if (c > bestCount) { bestCount = c; bestId = pid; }
+  }
+  return bestId;
+}

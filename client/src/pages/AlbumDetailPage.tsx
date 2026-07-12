@@ -11,7 +11,7 @@ import { useRoute, useLocation, Link } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { usePlayer } from "@/contexts/PlayerContext";
 import type { Track } from "@/contexts/PlayerContext";
-import { Play, ChevronLeft, Music, Clock, Disc3, Share2, Heart, MessageSquare } from "lucide-react";
+import { Play, ChevronLeft, Music, Clock, Disc3, Share2, Heart, MessageSquare, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useLike } from "@/hooks/useLike";
@@ -213,6 +213,46 @@ export default function AlbumDetailPage() {
     navigator.clipboard.writeText(url).then(() => toast.success("Album link copied!"));
   };
 
+  // ── Album download ──────────────────────────────────────────────────────────
+  const [albumDownloading, setAlbumDownloading] = useState(false);
+  const { data: albumDownloadInfo } = trpc.projects.getAlbumDownload.useQuery(
+    { projectId: data?.projectId! },
+    { enabled: !!data?.projectId, staleTime: 60_000 }
+  );
+  const downloadAlbumMutation = trpc.projects.downloadAlbum.useMutation({
+    onError: (e) => toast.error(e.message),
+  });
+  const createAlbumCheckoutMutation = trpc.projects.createAlbumDownloadCheckout.useMutation({
+    onSuccess: (d) => { if (d.url) window.location.href = d.url; },
+    onError: (e) => toast.error(e.message),
+  });
+
+  const handleAlbumDownload = async () => {
+    if (!data?.projectId) return;
+    const perm = albumDownloadInfo?.permission ?? 'none';
+    if (perm === 'none') { toast.error('Album downloads are not enabled for this collection.'); return; }
+    if (perm === 'tipped' && !albumDownloadInfo?.unlocked) {
+      createAlbumCheckoutMutation.mutate({ projectId: data.projectId, origin: window.location.origin });
+      return;
+    }
+    setAlbumDownloading(true);
+    try {
+      const result = await downloadAlbumMutation.mutateAsync({ projectId: data.projectId });
+      if (!result.tracks.length) { toast.error('No downloadable tracks found.'); return; }
+      for (const t of result.tracks) {
+        const a = document.createElement('a');
+        a.href = t.fileUrl;
+        a.download = `${t.title}.mp3`;
+        a.click();
+      }
+      toast.success(`Downloaded ${result.tracks.length} track${result.tracks.length !== 1 ? 's' : ''}`);
+    } catch {
+      // error shown by mutation onError
+    } finally {
+      setAlbumDownloading(false);
+    }
+  };
+
   // ── Loading ──────────────────────────────────────────────────────────────
   if (isLoading) {
     return (
@@ -312,7 +352,7 @@ export default function AlbumDetailPage() {
             </p>
           )}
 
-          {/* Play All + Share Album */}
+          {/* Play All + Download + Share Album */}
           <div className="flex items-center gap-3 mt-3 flex-wrap">
             {playableTracks.length > 0 && (
               <button
@@ -322,6 +362,23 @@ export default function AlbumDetailPage() {
               >
                 <Play size={16} fill="currentColor" />
                 Play Album
+              </button>
+            )}
+            {/* Download Album — only shown when permission is free or tipped */}
+            {data?.projectId && albumDownloadInfo && albumDownloadInfo.permission !== 'none' && (
+              <button
+                onClick={handleAlbumDownload}
+                disabled={albumDownloading || downloadAlbumMutation.isPending || createAlbumCheckoutMutation.isPending}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-full font-semibold text-sm transition-all hover:opacity-80 active:scale-95 disabled:opacity-50"
+                style={{ background: "rgba(196,154,40,0.10)", border: "1px solid rgba(196,154,40,0.28)", color: "var(--ln-gold, #C49A28)", fontFamily: "'Cinzel', serif" }}
+                title={
+                  albumDownloadInfo.permission === 'tipped' && !albumDownloadInfo.unlocked
+                    ? `Gift $${((albumDownloadInfo.priceCents ?? 499) / 100).toFixed(2)} to download album`
+                    : 'Download album'
+                }
+              >
+                <Download size={15} />
+                {albumDownloading ? 'Downloading…' : albumDownloadInfo.permission === 'tipped' && !albumDownloadInfo.unlocked ? `Gift & Download ($${((albumDownloadInfo.priceCents ?? 499) / 100).toFixed(2)})` : 'Download Album'}
               </button>
             )}
             <button

@@ -6264,3 +6264,17 @@
 - [x] Playlist Detail: add share icon to playlist header
 - [x] Visual Works Detail: add share icon to collection header and per-item share
 - [x] Share behavior: copy URL to clipboard + toast "Link copied" (consistent with song detail share)
+
+## Collection Download Feature — Music First (Jul 11, 2026)
+- [x] Schema: not needed — used existing projects.albumDownloadPermission + albumDownloadPriceCents fields
+- [x] Backend: used existing projects.getAlbumDownload + projects.downloadAlbum procedures (already built)
+- [x] Backend: used existing projects.downloadAlbum (returns tracks array with fileUrls for client-side download)
+- [x] Backend: used existing projects.createAlbumDownloadCheckout (Stripe checkout already built)
+- [x] Backend: existing Stripe webhook already handles this via projects.downloadAlbum permission check
+- [x] AlbumDetailPage: Download Album button in header (between Play Album and Share)
+- [x] AlbumDetailPage: per-track download icon already present in track rows (existing implementation)
+- [x] AlbumDetailPage: smart button label — shows price for tipped+locked, 'Download Album' for free/unlocked, hidden for none
+- [x] ManifestationShelf: Download Album button wired to real projects.downloadAlbum flow (replaces stub)
+- [x] ManifestationShelf: download icon added to TrackCard (carousel/tile mode) for parity with list mode
+- [ ] Collection Studio: album-level download settings panel (downloadMode, bundlePrice) — deferred to next pass
+- [x] Tooltip/title text: title attribute set on Download Album button with context-aware text
