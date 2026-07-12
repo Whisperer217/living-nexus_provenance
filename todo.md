@@ -6296,3 +6296,8 @@
 - [x] AlbumDetailPage: per-track Download icon (↓) added to TrackRow hover actions — only shown when downloadPermission=free
 - [x] AlbumDetailPage: per-track ExternalLink icon added to TrackRow hover actions — navigates to /song/:id
 - [x] TypeScript: 0 errors
+
+## Restore Doctrine & Ethics Visibility
+- [x] Add PLATFORM section to ContextDrawer with Manifesto, Code of Ethics/Terms, Privacy, Attribution, Lexicon, Founders links
+- [x] Build SiteFooter component with all doctrine links visible on every page (rendered in MainLayout)
+- [x] Declaration modal accessible from Manifesto page (existing button preserved)

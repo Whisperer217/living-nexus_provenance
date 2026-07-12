@@ -22,6 +22,7 @@ import {
   Shield, BookMarked,
   LayoutGrid, LayoutDashboard, X, ExternalLink,
   Download, PenTool, Palette,
+  ScrollText, Scale, Heart, Library,
 } from "lucide-react";
 
 // ── Types ─────────────────────────────────────────────────────────
@@ -67,6 +68,17 @@ const PANELS: Record<NavMode, ModePanel> = {
           { icon: <LayoutGrid size={14} />, label: "Discover", path: "/", description: "Featured works & creators" },
           { icon: <Star size={14} />, label: "New Arrivals", path: "/explore?mode=new", description: "Recently registered works" },
           { icon: <TrendingUp size={14} />, label: "Trending", path: "/explore?sort=trending", description: "Most played this week" },
+        ],
+      },
+      {
+        heading: "Platform",
+        links: [
+          { icon: <ScrollText size={14} />, label: "Manifesto", path: "/manifesto", description: "The Living Nexus doctrine" },
+          { icon: <Scale size={14} />, label: "Code of Ethics & Terms", path: "/terms", description: "Platform principles and terms" },
+          { icon: <Shield size={14} />, label: "Privacy Policy", path: "/privacy", description: "How we protect your data" },
+          { icon: <Heart size={14} />, label: "Attribution", path: "/attribution", description: "Contributors & builders" },
+          { icon: <Library size={14} />, label: "Lexicon", path: "/lexicon", description: "Terminology & definitions" },
+          { icon: <Users size={14} />, label: "Founding Creators", path: "/founders", description: "The first witnesses" },
         ],
       },
       {

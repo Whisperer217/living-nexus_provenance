@@ -28,6 +28,7 @@ import WitnessSurfacePlayer from "@/components/player/WitnessSurfacePlayer";
 import TheaterPlayer from "@/components/player/TheaterPlayer";
 import MarketplaceDrawer from "@/components/MarketplaceDrawer";
 import ScrollToTopButton from "@/components/layout/ScrollToTopButton";
+import SiteFooter from "@/components/layout/SiteFooter";
 import TopBar from "@/components/layout/TopBar";
 import { WhatsNewModal } from "@/components/WhatsNewModal";
 import { trpc } from "@/lib/trpc";
@@ -237,6 +238,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
             style={{ overscrollBehaviorX: "none", overscrollBehaviorY: "none", touchAction: "pan-y" }}
           >
             {children}
+            <SiteFooter />
           </div>
         </main>
       </div>
