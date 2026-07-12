@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useLike } from "@/hooks/useLike";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { triggerTaggedDownload } from "@/lib/downloadTrack";
 
 // ─── Per-track row with like / comment / share ─────────────────────────────
 
@@ -229,18 +230,15 @@ export default function AlbumDetailPage() {
       return;
     }
     setAlbumDownloading(true);
+    toast.success(`Preparing ${freeDownloadTracks.length} track${freeDownloadTracks.length !== 1 ? 's' : ''} for download…`);
     try {
       for (const t of freeDownloadTracks) {
-        const a = document.createElement('a');
-        a.href = t.fileUrl;
-        a.download = `${t.title ?? 'track'}.mp3`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        // Small delay to avoid browser blocking multiple downloads
-        await new Promise(res => setTimeout(res, 200));
+        // Use triggerTaggedDownload which routes through /api/download/:songId
+        // This avoids cross-origin issues with direct CloudFront URLs
+        await triggerTaggedDownload((t as any).id);
+        // Small delay between tracks to avoid browser blocking multiple downloads
+        await new Promise(res => setTimeout(res, 400));
       }
-      toast.success(`Downloading ${freeDownloadTracks.length} track${freeDownloadTracks.length !== 1 ? 's' : ''}…`);
     } catch {
       toast.error('Download failed. Please try again.');
     } finally {
