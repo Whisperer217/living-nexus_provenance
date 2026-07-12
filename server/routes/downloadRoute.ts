@@ -21,7 +21,7 @@ import path from "path";
 import fs from "fs";
 import NodeID3 from "node-id3";
 import JSZip from "jszip";
-import { getSongWithCreator, getUserTipTotalForSong, recordDownload, getSongsByUser } from "../utils/db";
+import { getSongWithCreator, getUserTipTotalForSong, recordDownload, getSongsByUser, getCollectionByWid, getSongsByCollectionId, getUserById } from "../utils/db";
 import { ENV } from "../_core/env";
 import { sdk } from "../_core/sdk";
 import type { Song } from "../../drizzle/schema";
@@ -476,6 +476,177 @@ downloadRouter.get("/api/download/batch-info", async (req: Request, res: Respons
   }
 
   res.json({ totalTracks: activeSongs.length, batchSize: BATCH_SIZE, batches });
+});
+
+// ── Album ZIP Download ──────────────────────────────────────────────────────
+// GET /api/download/album/:collectionWid
+// Public endpoint — downloads all free tracks in track order as a single ZIP.
+// Each MP3 inside the ZIP is WID-tagged with ID3 metadata.
+// Filename convention: {trackNumber}_{title} - {artist} [{WID}].mp3
+// ZIP filename: {albumName} - {artist} [{collectionWid}].zip
+downloadRouter.get("/api/download/album/:collectionWid", async (req: Request, res: Response) => {
+  const { collectionWid } = req.params;
+  if (!collectionWid || !collectionWid.startsWith("WID-ALB-")) {
+    res.status(400).json({ error: "Invalid collection WID." });
+    return;
+  }
+
+  // 1. Load collection
+  const collection = await getCollectionByWid(collectionWid);
+  if (!collection) {
+    res.status(404).json({ error: "Album not found." });
+    return;
+  }
+
+  // 2. Load tracks in track order (trackOrder asc, then createdAt)
+  const allTracks = await getSongsByCollectionId(collection.id);
+  const freeTracks = (allTracks as Song[]).filter(
+    (t: Song) => t.downloadPermission === "free" && t.fileUrl
+  );
+
+  if (freeTracks.length === 0) {
+    res.status(403).json({ error: "No free downloads available for this album." });
+    return;
+  }
+
+  // 3. Load creator info
+  const creator = await getUserById(collection.creatorId);
+  const creatorName = creator?.artistHandle
+    ? `@${creator.artistHandle}`
+    : (creator?.name ?? "Unknown Artist");
+  const safeArtist = sanitizeFilename(creatorName.replace(/^@/, ""));
+  const safeAlbum = sanitizeFilename(collection.name);
+
+  // 4. Fetch all audio + cover art in parallel (same pattern as batch download)
+  type AlbumTrackAssets = {
+    track: Song;
+    trackNum: string;
+    witnessId: string;
+    verifyUrl: string;
+    year: string;
+    audioBuffer: Buffer | null;
+    coverBuffer: Buffer | null;
+  };
+
+  const trackAssets = await Promise.all(
+    freeTracks.map(async (track, i): Promise<AlbumTrackAssets> => {
+      const trackNum = String(i + 1).padStart(2, "0");
+      const witnessId = track.witnessId ?? "UNWITNESSED";
+      const verifyUrl = `https://www.livingnexus.org/verify/${witnessId}`;
+      const year = new Date(track.createdAt).getFullYear().toString();
+      const [audioBuffer, coverBuffer] = await Promise.all([
+        track.fileUrl ? fetchBytes(track.fileUrl) : Promise.resolve(null),
+        track.coverArtUrl ? fetchBytes(track.coverArtUrl) : Promise.resolve(null),
+      ]);
+      return { track, trackNum, witnessId, verifyUrl, year, audioBuffer, coverBuffer };
+    })
+  );
+
+  // 5. Build ZIP
+  const zip = new JSZip();
+
+  const readmeLines = [
+    `Album:    ${collection.name}`,
+    `Artist:   ${creatorName}`,
+    `WID:      ${collectionWid}`,
+    `Verify:   https://www.livingnexus.org/verify/${collectionWid}`,
+    `Platform: Living Nexus — Sovereign Music`,
+    `© Command Domains LLC · BDDT Publishing`,
+    ``,
+    `--- TRACKS ---`,
+    ``,
+  ];
+
+  for (const { track, trackNum, witnessId, verifyUrl, year, audioBuffer, coverBuffer } of trackAssets) {
+    const safeTitle = sanitizeFilename(track.title);
+    const widShort = witnessId.length > 20 ? witnessId.slice(0, 20) : witnessId;
+    const mp3Filename = `${trackNum}_${safeTitle} - ${safeArtist} [${widShort}].mp3`;
+
+    readmeLines.push(`${trackNum}. ${track.title} — ${witnessId}`);
+    readmeLines.push(`    Verify: ${verifyUrl}`);
+    readmeLines.push(``);
+
+    if (!audioBuffer) {
+      console.warn(`[album-zip] Could not fetch audio for track ${track.id} (${track.title})`);
+      continue;
+    }
+
+    const tags: NodeID3.Tags = {
+      title: track.title,
+      artist: creatorName,
+      album: collection.name,
+      trackNumber: String(trackAssets.findIndex(a => a.track.id === track.id) + 1),
+      year,
+      genre: track.genre || undefined,
+      comment: { language: "eng", text: `Witness ID: ${witnessId}` },
+      ...(track.lyricsText ? {
+        unsynchronisedLyrics: { language: "eng", text: track.lyricsText },
+      } : {}),
+      userDefinedText: [
+        { description: "LNWID",         value: witnessId },
+        { description: "LN_CREATOR",    value: creatorName },
+        { description: "LN_ALBUM_WID",  value: collectionWid },
+        { description: "LN_TIMESTAMP",  value: track.createdAt.toISOString() },
+        { description: "LN_VERIFY_URL", value: verifyUrl },
+        { description: "LN_PLATFORM",   value: "Living Nexus — Sovereign Music" },
+        { description: "LN_DOCTRINE",   value: "Command Domains LLC · BDDT Publishing · Genesis Day March 20 2026" },
+        { description: "LN_AI_CONSENT", value: track.aiConsent ?? "prohibited" },
+      ],
+    };
+    if (coverBuffer) {
+      tags.image = {
+        mime: "image/jpeg",
+        type: { id: 3, name: "front cover" },
+        description: "Cover Art",
+        imageBuffer: coverBuffer,
+      };
+    }
+
+    const taggedBuffer = NodeID3.write(tags, audioBuffer);
+    zip.file(mp3Filename, taggedBuffer);
+
+    if (track.lyricsText) {
+      const lyricsHeader = [
+        `Title:    ${track.title}`,
+        `Artist:   ${creatorName}`,
+        `Album:    ${collection.name}`,
+        `Year:     ${year}`,
+        `WID:      ${witnessId}`,
+        `Verify:   ${verifyUrl}`,
+        ``,
+        `--- LYRICS ---`,
+        ``,
+      ].join("\n");
+      zip.file(`${trackNum}_${safeTitle}_lyrics.txt`, lyricsHeader + track.lyricsText);
+    }
+  }
+
+  zip.file("README.txt", readmeLines.join("\n"));
+
+  // 6. Generate ZIP buffer
+  const zipBuffer = await zip.generateAsync({ type: "nodebuffer", compression: "DEFLATE" });
+
+  // 7. Record downloads (non-fatal)
+  try {
+    let userId: number | undefined;
+    try {
+      const user = await sdk.authenticateRequest(req);
+      userId = user?.id;
+    } catch { /* anonymous download */ }
+    for (const { track } of trackAssets) {
+      await recordDownload({ songId: track.id, userId }).catch(() => {});
+    }
+  } catch { /* non-fatal */ }
+
+  // 8. Stream ZIP
+  const widAlbumShort = collectionWid.slice(0, 24);
+  const zipFilename = `${safeAlbum} - ${safeArtist} [${widAlbumShort}].zip`;
+  res.setHeader("Content-Type", "application/zip");
+  res.setHeader("Content-Disposition", safeContentDisposition(zipFilename));
+  res.setHeader("Content-Length", zipBuffer.length.toString());
+  res.setHeader("Cache-Control", "no-store");
+  res.setHeader("X-LN-Album-WID", collectionWid);
+  res.end(zipBuffer);
 });
 
 // ── APK Download Route ─────────────────────────────────────────────────────────────────────────────────

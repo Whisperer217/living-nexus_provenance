@@ -11,7 +11,7 @@ import { useRoute, useLocation, Link } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { usePlayer } from "@/contexts/PlayerContext";
 import type { Track } from "@/contexts/PlayerContext";
-import { Play, ChevronLeft, Music, Clock, Disc3, Share2, Heart, MessageSquare, Download } from "lucide-react";
+import { Play, ChevronLeft, Music, Clock, Disc3, Share2, Heart, MessageSquare, Download, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useLike } from "@/hooks/useLike";
@@ -159,6 +159,34 @@ function TrackRow({
         >
           <Share2 size={13} style={{ color: "var(--ln-smoke, #8a8a9a)" }} />
         </button>
+
+        {/* Download track (only if free) */}
+        {track.downloadPermission === 'free' && track.fileUrl && (
+          <button
+            onClick={async (e) => {
+              e.stopPropagation();
+              try {
+                await triggerTaggedDownload(track.id);
+              } catch {
+                toast.error('Download failed.');
+              }
+            }}
+            className="flex items-center gap-0.5 px-1.5 py-1 rounded-md transition-colors hover:bg-white/8"
+            title="Download track"
+          >
+            <Download size={13} style={{ color: "var(--ln-smoke, #8a8a9a)" }} />
+          </button>
+        )}
+
+        {/* Song page link */}
+        <Link href={`/song/${track.id}`} onClick={e => e.stopPropagation()}>
+          <button
+            className="flex items-center gap-0.5 px-1.5 py-1 rounded-md transition-colors hover:bg-white/8"
+            title="Open song page"
+          >
+            <ExternalLink size={13} style={{ color: "var(--ln-smoke, #8a8a9a)" }} />
+          </button>
+        </Link>
       </div>
     </div>
   );
@@ -230,17 +258,31 @@ export default function AlbumDetailPage() {
       return;
     }
     setAlbumDownloading(true);
-    toast.success(`Preparing ${freeDownloadTracks.length} track${freeDownloadTracks.length !== 1 ? 's' : ''} for download…`);
+    toast.success(`Preparing album ZIP with ${freeDownloadTracks.length} track${freeDownloadTracks.length !== 1 ? 's' : ''}…`);
     try {
-      for (const t of freeDownloadTracks) {
-        // Use triggerTaggedDownload which routes through /api/download/:songId
-        // This avoids cross-origin issues with direct CloudFront URLs
-        await triggerTaggedDownload((t as any).id);
-        // Small delay between tracks to avoid browser blocking multiple downloads
-        await new Promise(res => setTimeout(res, 400));
+      // Single album ZIP endpoint — all free tracks bundled in track order
+      const response = await fetch(`/api/download/album/${encodeURIComponent(collectionWid)}`, {
+        credentials: 'include',
+      });
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({ error: 'Download failed' }));
+        throw new Error((err as any).error ?? 'Download failed');
       }
-    } catch {
-      toast.error('Download failed. Please try again.');
+      const blob = await response.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = objectUrl;
+      // Use filename from Content-Disposition header if available
+      const cd = response.headers.get('Content-Disposition') ?? '';
+      const match = cd.match(/filename\*=UTF-8''([^;]+)/) ?? cd.match(/filename="([^"]+)"/);
+      a.download = match ? decodeURIComponent(match[1]) : `${data?.collection?.name ?? 'album'}.zip`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(objectUrl), 10_000);
+      toast.success('Album downloaded!');
+    } catch (err: any) {
+      toast.error((err as any)?.message ?? 'Download failed. Please try again.');
     } finally {
       setAlbumDownloading(false);
     }

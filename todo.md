@@ -6285,3 +6285,14 @@
 - [x] ManifestationShelf: same fix — Download button always visible, uses per-track downloadPermission filter
 - [x] No new backend procedure needed — downloadPermission already returned by getSongsByCollectionId → getPublicAlbum → ShelfTrack
 - [x] Edit Work button: confirmed present in SongDetailPage (isOwner gated) — was not missing, user was viewing while logged out
+
+## Album ZIP Download + Per-Track Icons Fix (Jul 12, 2026)
+- [x] New server endpoint GET /api/download/album/:collectionWid — builds single ZIP with all free tracks in track order
+- [x] Each MP3 in ZIP: WID-tagged ID3 metadata, trackNumber set, cover art embedded, filename {trackNum}_{title} - {artist} [{WID}].mp3
+- [x] ZIP includes README.txt with album metadata and per-track WID/verify URLs
+- [x] Companion lyrics.txt added per track if lyricsText exists
+- [x] Parallel fetch of audio + cover art (same pattern as batch download) for performance
+- [x] AlbumDetailPage: Download Album button now calls /api/download/album/:collectionWid → single ZIP download
+- [x] AlbumDetailPage: per-track Download icon (↓) added to TrackRow hover actions — only shown when downloadPermission=free
+- [x] AlbumDetailPage: per-track ExternalLink icon added to TrackRow hover actions — navigates to /song/:id
+- [x] TypeScript: 0 errors
