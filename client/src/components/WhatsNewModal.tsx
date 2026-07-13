@@ -10,14 +10,25 @@ import {
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 
-const CURRENT_VERSION = "v2.49.0";
+const CURRENT_VERSION = "v2.50.0";
 const STORAGE_KEY = `living-nexus-whats-new-seen-${CURRENT_VERSION}`;
 
 const UPDATES = [
   {
+    version: "v2.50.0",
+    date: "Jul 13, 2026",
+    label: "Latest",
+    items: [
+      { icon: Download, text: "Album ZIP download — Download Album now bundles all free tracks into a single ZIP with full ID3 metadata: title, artist, album name, track number, year, genre, and embedded album artwork. Streaming ZIP generation means the download starts immediately regardless of album size. Works on both the Album Detail page and Creator Public Domain." },
+      { icon: Shield, text: "Production stability — Fixed HTTP 500/503 errors on download endpoints caused by the CDN proxy not being trusted by Express. All download routes now work correctly on the live site." },
+      { icon: Zap, text: "Auto-refresh eliminated — Opening the site fresh or after a cache clear no longer triggers an automatic page reload 1–3 minutes later. The service worker update cycle now only reloads when a genuine platform update is available." },
+      { icon: Shield, text: "Doctrine & Ethics restored — The Manifesto, Code of Ethics & Terms, Privacy Policy, Attribution, Lexicon, and Founding Creators pages are now accessible from the Home navigation panel and from the site footer on every page." },
+    ],
+  },
+  {
     version: "v2.49.0",
     date: "Jun 22, 2026",
-    label: "Latest",
+    label: "",
     items: [
       { icon: Zap, text: "Hamburger menu fix — Tapping the menu icon on Android was freezing the entire app. Root cause: the overlay system was setting touchAction:none on document.body, which kills all touch events in Android Chrome. Fixed — menus, buttons, and drawers are fully responsive again." },
       { icon: Shield, text: "Pull to Refresh stability — The PTR gesture no longer interferes with any other touch interactions. All event listeners are now scoped to the scroll container only, never the document." },
