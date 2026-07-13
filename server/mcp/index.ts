@@ -75,6 +75,7 @@ const mcpRateLimit = rateLimit({
   max: 60,
   standardHeaders: true,
   legacyHeaders: false,
+  validate: false,
   message: { error: "Rate limit exceeded. Max 60 requests per minute." },
   keyGenerator: (req) => {
     const authHeader = req.headers.authorization ?? "";

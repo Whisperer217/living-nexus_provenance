@@ -55,6 +55,11 @@ async function startServer() {
   const app = express();
   const server = createServer(app);
 
+  // Trust the first proxy hop (Manus CDN / load balancer).
+  // Required so express-rate-limit can read X-Forwarded-For without throwing
+  // ERR_ERL_UNEXPECTED_X_FORWARDED_FOR, which causes a 500 on every rate-limited route.
+  app.set("trust proxy", 1);
+
   // Gzip compression — saves 60-80% on JSON/HTML payloads
   app.use(compression({ level: 6, threshold: 1024 }));
 
@@ -109,11 +114,14 @@ async function startServer() {
   app.use(express.urlencoded({ limit: "10mb", extended: true }));
 
   // Rate limiting for public write endpoints — prevents spam/play-count inflation
+  // validate:false suppresses the ERR_ERL_UNEXPECTED_X_FORWARDED_FOR warning;
+  // trust proxy (set above) is the real fix — validate:false is belt-and-suspenders.
   const publicWriteLimit = rateLimit({
     windowMs: 60 * 1000, // 1 minute window
     max: 30,             // 30 requests per IP per minute
     standardHeaders: true,
     legacyHeaders: false,
+    validate: false,
     message: { error: "Too many requests, please slow down." },
   });
   app.use("/api/trpc/comments.add", publicWriteLimit);
@@ -126,6 +134,7 @@ async function startServer() {
     max: 5,
     standardHeaders: true,
     legacyHeaders: false,
+    validate: false,
     message: { error: "Too many bulk download requests. Please wait before trying again." },
   });
   app.use("/api/bulk-download", bulkDownloadLimit);
