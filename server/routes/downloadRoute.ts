@@ -21,6 +21,8 @@ import path from "path";
 import fs from "fs";
 import NodeID3 from "node-id3";
 import JSZip from "jszip";
+import { ZipArchive } from "archiver";
+import { Readable } from "stream";
 import { getSongWithCreator, getUserTipTotalForSong, recordDownload, getSongsByUser, getCollectionByWid, getSongsByCollectionId, getUserById } from "../utils/db";
 import { ENV } from "../_core/env";
 import { sdk } from "../_core/sdk";
@@ -480,7 +482,9 @@ downloadRouter.get("/api/download/batch-info", async (req: Request, res: Respons
 
 // ── Album ZIP Download ──────────────────────────────────────────────────────
 // GET /api/download/album/:collectionWid
-// Public endpoint — downloads all free tracks in track order as a single ZIP.
+// Public endpoint — streams all free tracks in track order as a single ZIP.
+// Uses archiver for streaming ZIP generation: bytes flow to the client as each
+// track is processed — no full-album buffer in memory, no serverless timeout.
 // Each MP3 inside the ZIP is WID-tagged with ID3 metadata.
 // Filename convention: {trackNumber}_{title} - {artist} [{WID}].mp3
 // ZIP filename: {albumName} - {artist} [{collectionWid}].zip
@@ -498,7 +502,7 @@ downloadRouter.get("/api/download/album/:collectionWid", async (req: Request, re
     return;
   }
 
-  // 2. Load tracks in track order (trackOrder asc, then createdAt)
+  // 2. Load tracks in track order
   const allTracks = await getSongsByCollectionId(collection.id);
   const freeTracks = (allTracks as Song[]).filter(
     (t: Song) => t.downloadPermission === "free" && t.fileUrl
@@ -517,34 +521,31 @@ downloadRouter.get("/api/download/album/:collectionWid", async (req: Request, re
   const safeArtist = sanitizeFilename(creatorName.replace(/^@/, ""));
   const safeAlbum = sanitizeFilename(collection.name);
 
-  // 4. Fetch all audio + cover art in parallel (same pattern as batch download)
-  type AlbumTrackAssets = {
-    track: Song;
-    trackNum: string;
-    witnessId: string;
-    verifyUrl: string;
-    year: string;
-    audioBuffer: Buffer | null;
-    coverBuffer: Buffer | null;
-  };
+  // 4. Pre-fetch cover art once (shared across all tracks) — small file, safe to buffer
+  const coverBuffer = freeTracks[0]?.coverArtUrl
+    ? await fetchBytes(freeTracks[0].coverArtUrl)
+    : null;
 
-  const trackAssets = await Promise.all(
-    freeTracks.map(async (track, i): Promise<AlbumTrackAssets> => {
-      const trackNum = String(i + 1).padStart(2, "0");
-      const witnessId = track.witnessId ?? "UNWITNESSED";
-      const verifyUrl = `https://www.livingnexus.org/verify/${witnessId}`;
-      const year = new Date(track.createdAt).getFullYear().toString();
-      const [audioBuffer, coverBuffer] = await Promise.all([
-        track.fileUrl ? fetchBytes(track.fileUrl) : Promise.resolve(null),
-        track.coverArtUrl ? fetchBytes(track.coverArtUrl) : Promise.resolve(null),
-      ]);
-      return { track, trackNum, witnessId, verifyUrl, year, audioBuffer, coverBuffer };
-    })
-  );
+  // 5. Send headers immediately — streaming starts now
+  const widAlbumShort = collectionWid.slice(0, 24);
+  const zipFilename = `${safeAlbum} - ${safeArtist} [${widAlbumShort}].zip`;
+  res.setHeader("Content-Type", "application/zip");
+  res.setHeader("Content-Disposition", safeContentDisposition(zipFilename));
+  res.setHeader("Cache-Control", "no-store");
+  res.setHeader("X-LN-Album-WID", collectionWid);
+  // Note: no Content-Length — streaming ZIP size is unknown upfront
 
-  // 5. Build ZIP
-  const zip = new JSZip();
+  // 6. Create streaming archiver and pipe directly to response
+  const archive = new ZipArchive({ zlib: { level: 6 } });
+  archive.pipe(res);
 
+  archive.on("error", (err) => {
+    console.error(`[album-zip] archiver error for ${collectionWid}:`, err);
+    // Headers already sent — can't send error JSON, just destroy
+    if (!res.writableEnded) res.destroy();
+  });
+
+  // 7. Build README lines (we know all metadata upfront)
   const readmeLines = [
     `Album:    ${collection.name}`,
     `Artist:   ${creatorName}`,
@@ -557,7 +558,15 @@ downloadRouter.get("/api/download/album/:collectionWid", async (req: Request, re
     ``,
   ];
 
-  for (const { track, trackNum, witnessId, verifyUrl, year, audioBuffer, coverBuffer } of trackAssets) {
+  // 8. Process tracks sequentially — fetch, tag, append, stream
+  //    Sequential (not parallel) keeps memory bounded: only 1 track in RAM at a time.
+  const downloadedTrackIds: number[] = [];
+  for (let i = 0; i < freeTracks.length; i++) {
+    const track = freeTracks[i];
+    const trackNum = String(i + 1).padStart(2, "0");
+    const witnessId = track.witnessId ?? "UNWITNESSED";
+    const verifyUrl = `https://www.livingnexus.org/verify/${witnessId}`;
+    const year = new Date(track.createdAt).getFullYear().toString();
     const safeTitle = sanitizeFilename(track.title);
     const widShort = witnessId.length > 20 ? witnessId.slice(0, 20) : witnessId;
     const mp3Filename = `${trackNum}_${safeTitle} - ${safeArtist} [${widShort}].mp3`;
@@ -566,16 +575,19 @@ downloadRouter.get("/api/download/album/:collectionWid", async (req: Request, re
     readmeLines.push(`    Verify: ${verifyUrl}`);
     readmeLines.push(``);
 
+    // Fetch audio bytes for this track
+    const audioBuffer = track.fileUrl ? await fetchBytes(track.fileUrl) : null;
     if (!audioBuffer) {
-      console.warn(`[album-zip] Could not fetch audio for track ${track.id} (${track.title})`);
+      console.warn(`[album-zip] Could not fetch audio for track ${track.id} (${track.title}) — skipping`);
       continue;
     }
 
+    // Embed ID3 tags
     const tags: NodeID3.Tags = {
       title: track.title,
       artist: creatorName,
       album: collection.name,
-      trackNumber: String(trackAssets.findIndex(a => a.track.id === track.id) + 1),
+      trackNumber: String(i + 1),
       year,
       genre: track.genre || undefined,
       comment: { language: "eng", text: `Witness ID: ${witnessId}` },
@@ -603,10 +615,12 @@ downloadRouter.get("/api/download/album/:collectionWid", async (req: Request, re
     }
 
     const taggedBuffer = NodeID3.write(tags, audioBuffer);
-    zip.file(mp3Filename, taggedBuffer);
+    // Append tagged MP3 as a readable stream — archiver streams it immediately
+    archive.append(Readable.from(taggedBuffer), { name: mp3Filename });
 
+    // Append lyrics file if present
     if (track.lyricsText) {
-      const lyricsHeader = [
+      const lyricsContent = [
         `Title:    ${track.title}`,
         `Artist:   ${creatorName}`,
         `Album:    ${collection.name}`,
@@ -616,37 +630,31 @@ downloadRouter.get("/api/download/album/:collectionWid", async (req: Request, re
         ``,
         `--- LYRICS ---`,
         ``,
+        track.lyricsText,
       ].join("\n");
-      zip.file(`${trackNum}_${safeTitle}_lyrics.txt`, lyricsHeader + track.lyricsText);
+      archive.append(Readable.from(lyricsContent), { name: `${trackNum}_${safeTitle}_lyrics.txt` });
     }
+
+    downloadedTrackIds.push(track.id);
   }
 
-  zip.file("README.txt", readmeLines.join("\n"));
+  // 9. Append README and finalize — this flushes remaining bytes and closes the ZIP
+  archive.append(Readable.from(readmeLines.join("\n")), { name: "README.txt" });
+  await archive.finalize();
 
-  // 6. Generate ZIP buffer
-  const zipBuffer = await zip.generateAsync({ type: "nodebuffer", compression: "DEFLATE" });
-
-  // 7. Record downloads (non-fatal)
-  try {
-    let userId: number | undefined;
+  // 10. Record downloads asynchronously (non-fatal, after response is sent)
+  setImmediate(async () => {
     try {
-      const user = await sdk.authenticateRequest(req);
-      userId = user?.id;
-    } catch { /* anonymous download */ }
-    for (const { track } of trackAssets) {
-      await recordDownload({ songId: track.id, userId }).catch(() => {});
-    }
-  } catch { /* non-fatal */ }
-
-  // 8. Stream ZIP
-  const widAlbumShort = collectionWid.slice(0, 24);
-  const zipFilename = `${safeAlbum} - ${safeArtist} [${widAlbumShort}].zip`;
-  res.setHeader("Content-Type", "application/zip");
-  res.setHeader("Content-Disposition", safeContentDisposition(zipFilename));
-  res.setHeader("Content-Length", zipBuffer.length.toString());
-  res.setHeader("Cache-Control", "no-store");
-  res.setHeader("X-LN-Album-WID", collectionWid);
-  res.end(zipBuffer);
+      let userId: number | undefined;
+      try {
+        const user = await sdk.authenticateRequest(req);
+        userId = user?.id;
+      } catch { /* anonymous download */ }
+      for (const trackId of downloadedTrackIds) {
+        await recordDownload({ songId: trackId, userId }).catch(() => {});
+      }
+    } catch { /* non-fatal */ }
+  });
 });
 
 // ── APK Download Route ─────────────────────────────────────────────────────────────────────────────────
