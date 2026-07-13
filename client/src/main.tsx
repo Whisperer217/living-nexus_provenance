@@ -159,10 +159,26 @@ if ("serviceWorker" in navigator) {
         console.warn("[SW] Registration failed:", err);
       });
     // When the SW controller changes (new SW took over after skipWaiting),
-    // reload the page immediately so stale chunk hashes are never used.
-    // This is the primary defense against "Failed to fetch dynamically imported module".
+    // reload the page so stale chunk hashes are never used.
+    //
+    // CRITICAL GUARD: only reload if there was ALREADY a controller before
+    // this change. On a fresh tab or after cache clear, there is no previous
+    // controller. The new SW installs and calls clients.claim(), which fires
+    // controllerchange — but no reload is needed. Without this guard, every
+    // fresh visit triggers an automatic reload ~1-3 minutes after landing.
+    //
+    // hadController is captured BEFORE the listener fires so it reflects the
+    // state at registration time, not at the moment of the change event.
+    const hadController = !!navigator.serviceWorker.controller;
     navigator.serviceWorker.addEventListener("controllerchange", () => {
-      console.log("[SW] Controller changed — reloading for fresh chunks");
+      if (!hadController) {
+        // First activation — SW just claimed an uncontrolled page. No reload.
+        console.log("[SW] Controller set for first time — no reload needed");
+        return;
+      }
+      // Genuine update: a waiting SW was told SKIP_WAITING and took over.
+      // Reload so the browser fetches fresh chunk hashes.
+      console.log("[SW] Controller changed after update — reloading for fresh chunks");
       window.location.reload();
     });
   });

@@ -1,5 +1,5 @@
 /**
- * Living Nexus — Production Service Worker v5
+ * Living Nexus — Production Service Worker v6
  * ============================================
  * Strategy map:
  *   /api/**                  → Network First  (fresh data, cache fallback offline)
@@ -18,7 +18,7 @@
 
 // ─── Version ─────────────────────────────────────────────────────────────────
 // Bump CACHE_VERSION on every deploy to bust old caches.
-const CACHE_VERSION  = "ln-v5";
+const CACHE_VERSION  = "ln-v6";
 const STATIC_CACHE   = `${CACHE_VERSION}-static`;
 const DYNAMIC_CACHE  = `${CACHE_VERSION}-dynamic`;
 const AUDIO_CACHE    = `${CACHE_VERSION}-audio`;
