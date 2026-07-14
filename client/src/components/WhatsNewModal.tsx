@@ -9,8 +9,9 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
+import { PLATFORM_VERSION } from "@/platformVersion";
 
-const CURRENT_VERSION = "v2.50.0";
+const CURRENT_VERSION = PLATFORM_VERSION;
 const STORAGE_KEY = `living-nexus-whats-new-seen-${CURRENT_VERSION}`;
 
 const UPDATES = [

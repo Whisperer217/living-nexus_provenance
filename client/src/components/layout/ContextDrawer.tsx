@@ -24,13 +24,14 @@ import {
   Download, PenTool, Palette,
   ScrollText, Scale, Heart, Library,
 } from "lucide-react";
+import { PLATFORM_VERSION } from "@/platformVersion";
 
 // ── Types ─────────────────────────────────────────────────────────
 
 export type NavMode = "home" | "explore" | "profile" | "compose" | "upload" | "archive";
 
-// Version string — keep in sync with WhatsNewModal CURRENT_VERSION
-export const WHATS_NEW_VERSION = "v2.50.0";
+// Re-export so callers that previously imported WHATS_NEW_VERSION still work.
+export const WHATS_NEW_VERSION = PLATFORM_VERSION;
 
 interface PanelLink {
   icon: React.ReactNode;
