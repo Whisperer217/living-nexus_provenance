@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { useAuth } from "@/_core/hooks/useAuth";
 import {
   Shield, Upload, Music, Video, DollarSign, Users, BookOpen, FolderOpen,
   ChevronRight, Maximize2, MessageCircle, Zap, Download, CreditCard,
@@ -632,19 +633,24 @@ interface WhatsNewModalProps {
   forceOpen?: boolean;
   onClose?: () => void;
 }
-
 export function WhatsNewModal({ forceOpen = false, onClose }: WhatsNewModalProps) {
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState<"updates" | "howto">("updates");
+  const { isAuthenticated, loading: authLoading } = useAuth();
 
   useEffect(() => {
+    // forceOpen (e.g. from the "What's New" button) always shows regardless of auth.
     if (forceOpen) { setOpen(true); return; }
+    // Auto-show only fires once auth has resolved and the user is logged in.
+    if (authLoading) return;
+    if (!isAuthenticated) return;
+    // Show only when this version hasn't been seen yet.
     const seen = localStorage.getItem(STORAGE_KEY);
     if (!seen) {
       const t = setTimeout(() => setOpen(true), 1200);
       return () => clearTimeout(t);
     }
-  }, [forceOpen]);
+  }, [forceOpen, isAuthenticated, authLoading]);
 
   function handleClose() {
     localStorage.setItem(STORAGE_KEY, "1");
