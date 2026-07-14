@@ -234,8 +234,13 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
   }, []);
 
   /* ── Scroll-lock via overlayController so OverlayRouteGuard can clean up ── */
+  // IMPORTANT: Use "light" mode (overflow:hidden only, NO position:fixed).
+  // The "full" mode sets position:fixed on body, which changes the containing
+  // block for every fixed child (PlayerBar, GlobalPlayer, mobile header) and
+  // triggers a massive layout-recalculation cascade that freezes the browser.
+  // "light" mode is sufficient — the backdrop already blocks background interaction.
   useEffect(() => {
-    overlayOpen("edit-track", "full");
+    overlayOpen("edit-track", "light");
     return () => { overlayClose("edit-track"); };
   }, []);
 

@@ -78,14 +78,14 @@ sitemapRouter.get("/sitemap.xml", async (_req: Request, res: Response) => {
         // Use a raw query to get distinct creator IDs from published songs
         const { sql } = await import("drizzle-orm");
         const creatorRows = await db.execute(
-          sql`SELECT DISTINCT u.id, u.updated_at FROM users u
-              INNER JOIN songs s ON s.user_id = u.id
-              WHERE s.is_public = 1 AND s.status = 'Published'
+          sql`SELECT DISTINCT u.id, u.updatedAt FROM users u
+              INNER JOIN songs s ON s.userId = u.id
+              WHERE s.isPublic = 1 AND s.status = 'Published'
               LIMIT 2000`
         ) as any;
         const rows = Array.isArray(creatorRows) ? creatorRows : (creatorRows?.rows ?? []);
         for (const row of rows) {
-          const lastmod = toW3CDate((row as any).updated_at);
+          const lastmod = toW3CDate((row as any).updatedAt || (row as any).updated_at);
           urls.push(
             `  <url>\n    <loc>${escXml(`${CANONICAL_ORIGIN}/creator/${(row as any).id}`)}</loc>\n    <lastmod>${lastmod}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>`
           );

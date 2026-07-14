@@ -322,6 +322,15 @@ export default function ArchivePage() {
   const utils = trpc.useUtils();
   const [editingSong, setEditingSong] = useState<any | null>(null);
   const [deletingSong, setDeletingSong] = useState<any | null>(null);
+  // Stable callbacks for CreativeDrawer — MUST be at top level, never inside JSX
+  const handleDrawerClose = useCallback(() => setEditingSong(null), []);
+  const handleDrawerSaved = useCallback(() => {
+    setEditingSong((prev: any) => {
+      if (prev?.id) utils.songs.getById.invalidate({ id: prev.id });
+      return null;
+    });
+    utils.songs.mySongs.invalidate();
+  }, [utils]);
 
   // ── Deep-link: read URL params once on mount (stable via useMemo) ─────────────────────────────────────
   // Supported params:
@@ -1653,14 +1662,8 @@ export default function ArchivePage() {
           downloadPermission: (editingSong as any).downloadPermission ?? null,
           downloadTipThresholdCents: (editingSong as any).downloadTipThresholdCents ?? null,
         }}
-        onClose={useCallback(() => setEditingSong(null), [])}
-        onSaved={useCallback(() => {
-          const id = editingSong?.id;
-          setEditingSong(null);
-          utils.songs.mySongs.invalidate();
-          if (id) utils.songs.getById.invalidate({ id });
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        }, [editingSong?.id, utils])}
+        onClose={handleDrawerClose}
+        onSaved={handleDrawerSaved}
       />
       </ErrorBoundary>
     )}

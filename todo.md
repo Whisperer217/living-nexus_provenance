@@ -6301,3 +6301,8 @@
 - [x] Add PLATFORM section to ContextDrawer with Manifesto, Code of Ethics/Terms, Privacy, Attribution, Lexicon, Founders links
 - [x] Build SiteFooter component with all doctrine links visible on every page (rendered in MainLayout)
 - [x] Declaration modal accessible from Manifesto page (existing button preserved)
+
+## Edit Work Crash Fixes (Jul 14, 2026)
+- [x] Fix ArchivePage React error #310 — useCallback called inside JSX (illegal hook call) causing "Too many re-renders" crash when clicking Edit on any track from the Archive page; moved stable callbacks to top-level component scope
+- [x] Fix CreativeDrawer browser freeze — overlayOpen("edit-track", "full") sets position:fixed on body, triggering layout-recalculation cascade that freezes the tab; changed to "light" mode (overflow:hidden only)
+- [x] Fix sitemap.xml SQL error — s.user_id and s.is_public are wrong column names; corrected to s.userId and s.isPublic (camelCase as defined in Drizzle schema)
