@@ -6306,3 +6306,9 @@
 - [x] Fix ArchivePage React error #310 — useCallback called inside JSX (illegal hook call) causing "Too many re-renders" crash when clicking Edit on any track from the Archive page; moved stable callbacks to top-level component scope
 - [x] Fix CreativeDrawer browser freeze — overlayOpen("edit-track", "full") sets position:fixed on body, triggering layout-recalculation cascade that freezes the tab; changed to "light" mode (overflow:hidden only)
 - [x] Fix sitemap.xml SQL error — s.user_id and s.is_public are wrong column names; corrected to s.userId and s.isPublic (camelCase as defined in Drizzle schema)
+
+## Admin Database Export (Jul 16, 2026)
+- [x] Add GET /api/admin/db-export REST endpoint — owner/admin-only, exports all 60 platform tables as structured JSON, uses raw mysql2 pool query, logs the export action
+- [x] Add getPool() export to server/utils/db.ts for raw SQL access outside Drizzle
+- [x] Add DbExportSection component to AdminUsersPage DataRightsTab — gold-styled card with download button, loading spinner, and last-exported timestamp
+- [x] Register dbExportRouter in server/_core/index.ts

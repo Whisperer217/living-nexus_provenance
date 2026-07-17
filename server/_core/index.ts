@@ -15,6 +15,7 @@ import { uploadRouter } from "../routes/uploadRoute";
 import { stampRouter } from "../routes/stampRoute";
 import { downloadRouter } from "../routes/downloadRoute";
 import { physicalExportRouter } from "../services/physicalExport";
+import { dbExportRouter } from "../routes/dbExportRoute";
 import { harmonicRouter } from "../routes/harmonicRoute";
 import { publicApiRouter } from "../routes/publicApiRoute";
 import { oembedRouter } from "../routes/oembedRoute";
@@ -153,6 +154,8 @@ async function startServer() {
   app.use(bulkDownloadRouter);
   // Physical distribution export (admin-only)
   app.use(physicalExportRouter);
+  // Full database export for migration (owner/admin-only)
+  app.use(dbExportRouter);
   // Harmonic Signature — GET /api/harmonic/:songId/audio and /api/harmonic/:songId/image
   app.use("/api/harmonic", harmonicRouter);
   // Public REST API v1 (Plex/Jellyfin/external clients)

@@ -2056,6 +2056,89 @@ function DataRightsTab() {
           </Button>
         </div>
       </div>
+
+      {/* Full Database Export */}
+      <DbExportSection />
+    </div>
+  );
+}
+
+// ── Full Database Export Section ─────────────────────────────────────────────
+function DbExportSection() {
+  const [exporting, setExporting] = useState(false);
+  const [lastExportedAt, setLastExportedAt] = useState<string | null>(null);
+
+  const handleExport = async () => {
+    setExporting(true);
+    try {
+      const res = await fetch("/api/admin/db-export", {
+        method: "GET",
+        credentials: "include",
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: "Export failed" }));
+        toast.error(err.error || "Database export failed");
+        return;
+      }
+      const blob = await res.blob();
+      const now = new Date().toISOString().slice(0, 10);
+      const filename = `living-nexus-db-export-${now}.json`;
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      setLastExportedAt(new Date().toLocaleString());
+      toast.success(`Database exported as ${filename}`);
+    } catch (err: any) {
+      toast.error(err?.message || "Export failed — check console");
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  return (
+    <div
+      className="rounded-xl p-6 mt-6"
+      style={{ background: CARD, border: `1px solid ${BORDER}` }}
+    >
+      <div className="flex items-center gap-3 mb-4">
+        <Database className="w-5 h-5" style={{ color: GOLD }} />
+        <h3 className="text-base font-semibold" style={{ color: TEXT }}>Full Database Export</h3>
+        <span
+          className="text-xs px-2 py-0.5 rounded-full font-medium"
+          style={{ background: "rgba(196,154,40,0.15)", color: GOLD, border: `1px solid rgba(196,154,40,0.4)` }}
+        >
+          Owner Only
+        </span>
+      </div>
+      <p className="text-sm mb-1" style={{ color: SUBTEXT }}>
+        Downloads all platform tables as a structured JSON file — for sovereign migration, backup, or data portability.
+        Includes all user records, tracks, provenance events, tips, licenses, WIDs, and platform data.
+      </p>
+      <p className="text-xs mb-5" style={{ color: MUTED }}>
+        Gated to admin accounts only. Large databases may take 10–30 seconds to generate.
+        File size scales with platform data volume.
+      </p>
+      {lastExportedAt && (
+        <p className="text-xs mb-3" style={{ color: GREEN }}>
+          ✓ Last exported this session: {lastExportedAt}
+        </p>
+      )}
+      <Button
+        onClick={handleExport}
+        disabled={exporting}
+        style={{ background: GOLD, color: BG, fontWeight: 600 }}
+      >
+        {exporting ? (
+          <><Loader2 className="w-4 h-4 animate-spin mr-2" />Generating Export…</>
+        ) : (
+          <><Database className="w-4 h-4 mr-2" />Download Full Database (JSON)</>
+        )}
+      </Button>
     </div>
   );
 }

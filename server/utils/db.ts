@@ -96,6 +96,12 @@ export async function getDb() {
   return _db;
 }
 
+/** Returns the raw mysql2 Pool for use in raw SQL queries (e.g. bulk export). */
+export async function getPool(): Promise<mysql.Pool | null> {
+  await getDb(); // ensure pool is initialized
+  return _pool;
+}
+
 // ─── Users ────────────────────────────────────────────────────────────────────
 
 export async function upsertUser(user: InsertUser): Promise<void> {
