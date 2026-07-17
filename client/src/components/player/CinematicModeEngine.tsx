@@ -33,7 +33,8 @@ export type CinematicMode =
   | "archive-artifact"
   | "retro-signal"
   | "shelf-playback"
-  | "cosmos";
+  | "cosmos"
+  | "music-video";
 
 const MODE_LABELS: Record<CinematicMode, string> = {
   "living-canvas": "Living Canvas",
@@ -41,6 +42,7 @@ const MODE_LABELS: Record<CinematicMode, string> = {
   "retro-signal": "Retro Signal",
   "shelf-playback": "Shelf Playback",
   cosmos: "Cosmos",
+  "music-video": "Music Video",
 };
 
 const MODE_ORDER: CinematicMode[] = [
@@ -49,6 +51,7 @@ const MODE_ORDER: CinematicMode[] = [
   "retro-signal",
   "shelf-playback",
   "cosmos",
+  "music-video",
 ];
 
 const STORAGE_KEY = "ln-cinematic-mode";
@@ -1055,6 +1058,215 @@ function CosmosPlayback({
   );
 }
 
+// ─── Mode: Music Video ───────────────────────────────────────────────────────
+// AI-generated looping MP4 plays full-screen behind the audio controls.
+// Falls back to LivingCanvas art if no music video has been generated yet.
+
+function MusicVideoPlayback({
+  track,
+  isPlaying,
+  currentTime,
+  duration,
+  progress,
+  onTogglePlay,
+  onSeek,
+  onNext,
+  onPrev,
+}: Omit<CinematicModeEngineProps, "onClose" | "onPlayIdx" | "queue" | "currentIdx">) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [scriptFrames, setScriptFrames] = useState<Array<{ frame: number; scene: string; mood: string }>>([]);
+  const [currentSceneIdx, setCurrentSceneIdx] = useState(0);
+  const [videoLoaded, setVideoLoaded] = useState(false);
+  const [videoError, setVideoError] = useState(false);
+
+  const musicVideoUrl = track.musicVideoUrl;
+  const musicVideoStatus = track.musicVideoStatus;
+  const isGenerating = musicVideoStatus === "generating";
+  const hasMusicVideo = !!musicVideoUrl && !videoError;
+
+  // Parse the visual script so we can show scene labels
+  useEffect(() => {
+    if (!track.musicVideoScript) return;
+    try {
+      const parsed = JSON.parse(track.musicVideoScript);
+      if (Array.isArray(parsed)) setScriptFrames(parsed);
+    } catch { /* ignore */ }
+  }, [track.musicVideoScript]);
+
+  // Advance scene label every FRAME_HOLD_SECS (4s) in sync with the video loop
+  useEffect(() => {
+    if (!scriptFrames.length || !isPlaying) return;
+    const FRAME_HOLD_SECS = 4;
+    const totalFrames = scriptFrames.length;
+    const loopDuration = totalFrames * FRAME_HOLD_SECS;
+    const idx = Math.floor((currentTime % loopDuration) / FRAME_HOLD_SECS) % totalFrames;
+    setCurrentSceneIdx(idx);
+  }, [currentTime, scriptFrames, isPlaying]);
+
+  // Sync muted video playback with the audio player state
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v || !hasMusicVideo) return;
+    if (isPlaying) {
+      v.play().catch(() => {});
+    } else {
+      v.pause();
+    }
+  }, [isPlaying, hasMusicVideo]);
+
+  const currentScene = scriptFrames[currentSceneIdx];
+
+  return (
+    <div className="absolute inset-0">
+      {/* Background: AI music video loop OR fallback to cover art */}
+      {hasMusicVideo ? (
+        <>
+          {/* Blurred cover art as bg while video loads */}
+          {track.artUrl && (
+            <img
+              src={track.artUrl}
+              alt=""
+              className="absolute inset-0 w-full h-full object-cover"
+              style={{ filter: "blur(32px) brightness(0.3) saturate(1.4)", transform: "scale(1.08)", zIndex: 0 }}
+              aria-hidden
+            />
+          )}
+          {/* AI-generated music video loop — muted, loops forever */}
+          <video
+            ref={videoRef}
+            src={musicVideoUrl!}
+            className="absolute inset-0 w-full h-full object-cover"
+            style={{ zIndex: 1, opacity: videoLoaded ? 1 : 0, transition: "opacity 0.8s ease" }}
+            autoPlay
+            loop
+            muted
+            playsInline
+            onCanPlay={() => setVideoLoaded(true)}
+            onError={() => setVideoError(true)}
+          />
+        </>
+      ) : (
+        /* Fallback: use the standard ArtBase while video is generating */
+        <ArtBase track={track} />
+      )}
+
+      {/* Bottom gradient for controls legibility */}
+      <div
+        className="absolute inset-x-0 bottom-0 pointer-events-none z-[2]"
+        style={{ height: "55%", background: "linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.5) 55%, transparent 100%)" }}
+      />
+      {/* Top gradient */}
+      <div
+        className="absolute inset-x-0 top-0 pointer-events-none z-[2]"
+        style={{ height: "20%", background: "linear-gradient(to bottom, rgba(0,0,0,0.65) 0%, transparent 100%)" }}
+      />
+
+      {/* Scene label overlay — fades in/out with each frame */}
+      {hasMusicVideo && currentScene && (
+        <div
+          className="absolute left-1/2 -translate-x-1/2 z-[4] text-center"
+          style={{ top: "18%" }}
+        >
+          <div
+            className="inline-flex flex-col items-center gap-1 px-4 py-2 rounded-xl"
+            style={{
+              background: "rgba(0,0,0,0.5)",
+              border: "1px solid rgba(196,154,40,0.2)",
+              backdropFilter: "blur(8px)",
+            }}
+          >
+            <span className="text-[9px] font-mono uppercase tracking-widest" style={{ color: "rgba(196,154,40,0.6)" }}>
+              Scene {currentScene.frame} · {currentScene.mood}
+            </span>
+            <span className="text-[12px] font-medium" style={{ color: "rgba(245,237,216,0.85)", fontFamily: "'Cinzel', serif" }}>
+              {currentScene.scene}
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* Generating indicator */}
+      {isGenerating && !hasMusicVideo && (
+        <div
+          className="absolute left-1/2 -translate-x-1/2 z-[4]"
+          style={{ top: "18%" }}
+        >
+          <div
+            className="flex items-center gap-2 px-4 py-2 rounded-full"
+            style={{
+              background: "rgba(0,0,0,0.6)",
+              border: "1px solid rgba(196,154,40,0.3)",
+              backdropFilter: "blur(8px)",
+            }}
+          >
+            <div
+              className="w-2 h-2 rounded-full animate-pulse"
+              style={{ background: "var(--ln-gold)" }}
+            />
+            <span className="text-[10px] font-mono" style={{ color: "rgba(196,154,40,0.8)" }}>
+              AI Music Video Generating…
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* No video yet — not generating */}
+      {!hasMusicVideo && !isGenerating && (
+        <div
+          className="absolute left-1/2 -translate-x-1/2 z-[4]"
+          style={{ top: "18%" }}
+        >
+          <div
+            className="flex items-center gap-2 px-4 py-2 rounded-full"
+            style={{
+              background: "rgba(0,0,0,0.6)",
+              border: "1px solid rgba(196,154,40,0.2)",
+              backdropFilter: "blur(8px)",
+            }}
+          >
+            <span className="text-[10px] font-mono" style={{ color: "rgba(196,154,40,0.5)" }}>
+              Music video will generate after upload
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* WID badge */}
+      {track.witnessId && (
+        <div className="absolute top-16 left-4 z-[4]">
+          <Link
+            href={`/verify/${track.witnessId}`}
+            className="flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-bold"
+            style={{
+              background: "rgba(0,0,0,0.7)",
+              border: "1px solid rgba(74,222,128,0.4)",
+              color: "var(--ln-seal-bright, #4ade80)",
+              backdropFilter: "blur(8px)",
+            }}
+          >
+            <Shield size={9} /> {track.witnessId}
+          </Link>
+        </div>
+      )}
+
+      {/* Controls */}
+      <div className="absolute inset-x-0 bottom-0 pb-8 z-[4] flex flex-col items-center gap-4">
+        <ControlsBar
+          track={track}
+          isPlaying={isPlaying}
+          currentTime={currentTime}
+          duration={duration}
+          progress={progress}
+          onTogglePlay={onTogglePlay}
+          onSeek={onSeek}
+          onNext={onNext}
+          onPrev={onPrev}
+        />
+      </div>
+    </div>
+  );
+}
+
 // ─── Main Engine ──────────────────────────────────────────────────────────────
 
 export function CinematicModeEngine(props: CinematicModeEngineProps) {
@@ -1081,6 +1293,7 @@ export function CinematicModeEngine(props: CinematicModeEngineProps) {
       {mode === "retro-signal" && <RetroSignal {...sharedProps} />}
       {mode === "shelf-playback" && <ShelfPlayback {...sharedProps} />}
       {mode === "cosmos" && <CosmosPlayback {...sharedProps} />}
+      {mode === "music-video" && <MusicVideoPlayback {...sharedProps} />}
 
       {/* Top chrome — always on top of mode content */}
       <div

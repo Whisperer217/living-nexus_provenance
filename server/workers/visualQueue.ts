@@ -21,6 +21,7 @@ import { eq, and, desc, sql, or } from "drizzle-orm";
 import { getDb } from "../utils/db";
 import { visualQueue, songs, users } from "../../drizzle/schema";
 import { getOrGenerateEmbedVideo } from "../services/embedVideo";
+import { generateMusicVideo } from "../services/musicVideoService";
 import { storagePut } from "../utils/storage";
 import { notifyOwner } from "../_core/notification";
 
@@ -256,9 +257,22 @@ async function processNextBatch(): Promise<void> {
         .where(eq(visualQueue.id, job.id));
 
       try {
-        // Fetch song data
+        // Fetch song data (include music video fields + metadata for AI script generation)
         const [song] = await db
-          .select({ id: songs.id, coverArtUrl: songs.coverArtUrl, fileUrl: songs.fileUrl, autoVideoUrl: songs.autoVideoUrl })
+          .select({
+            id: songs.id,
+            title: songs.title,
+            genre: songs.genre,
+            moodTags: songs.moodTags,
+            caption: songs.caption,
+            description: songs.description,
+            lyricsText: songs.lyricsText,
+            coverArtUrl: songs.coverArtUrl,
+            fileUrl: songs.fileUrl,
+            autoVideoUrl: songs.autoVideoUrl,
+            musicVideoUrl: songs.musicVideoUrl,
+            musicVideoStatus: songs.musicVideoStatus,
+          })
           .from(songs)
           .where(eq(songs.id, job.songId))
           .limit(1);
@@ -309,6 +323,27 @@ async function processNextBatch(): Promise<void> {
           await db.update(songs)
             .set({ visualReady: true })
             .where(eq(songs.id, job.songId));
+        }
+
+        // ── Step 2: AI Music Video Loop (non-blocking, fire-and-forget) ──────────
+        // Only trigger if the song has cover art and no music video yet.
+        // We do NOT await this — it runs in the background so the visual queue
+        // job completes immediately and the embed video is available right away.
+        if (song.coverArtUrl && !song.musicVideoUrl && song.musicVideoStatus !== 'generating') {
+          generateMusicVideo({
+            songId: song.id,
+            title: song.title,
+            genre: song.genre,
+            moodTags: song.moodTags as string[] | null,
+            caption: song.caption,
+            description: song.description,
+            lyricsText: song.lyricsText,
+            coverArtUrl: song.coverArtUrl,
+            musicVideoUrl: song.musicVideoUrl,
+          }).catch(err => {
+            console.error(`[VisualQueue] Music video generation failed for song ${song.id}:`, err);
+          });
+          console.log(`[VisualQueue] ↳ Music video generation queued for song ${song.id}`);
         }
 
         // Mark job complete

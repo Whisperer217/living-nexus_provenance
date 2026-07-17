@@ -297,6 +297,15 @@ export const songs = mysqlTable("songs", {
   // false (default) = pending visual generation
   visualReady: boolean("visualReady").default(false).notNull(),
 
+  // ─── AI Music Video Loop ───────────────────────────────────────────────────
+  // AI-generated looping music video (6 cinematic frames → MP4, auto-generated from metadata/lyrics/cover art)
+  // musicVideoStatus: null = not started, 'pending' = queued, 'generating' = in progress, 'complete' = done, 'failed' = error
+  musicVideoStatus: mysqlEnum("musicVideoStatus", ["pending", "generating", "complete", "failed"]),
+  // LLM-generated visual script used to produce the frames
+  musicVideoScript: text("musicVideoScript"),
+  // S3 URL of the final looping MP4
+  musicVideoUrl: text("musicVideoUrl"),
+
   // Status
   status: mysqlEnum("status", ["Draft", "Published", "Unlisted", "Deleted"]).default("Published").notNull(),
 

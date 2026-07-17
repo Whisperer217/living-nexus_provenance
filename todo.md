@@ -6312,3 +6312,25 @@
 - [x] Add getPool() export to server/utils/db.ts for raw SQL access outside Drizzle
 - [x] Add DbExportSection component to AdminUsersPage DataRightsTab — gold-styled card with download button, loading spinner, and last-exported timestamp
 - [x] Register dbExportRouter in server/_core/index.ts
+
+## AI Music Video Loop Pipeline (Jul 17, 2026)
+- [ ] Add musicVideoUrl, musicVideoScript, musicVideoStatus columns to songs schema
+- [ ] Run pnpm db:push to apply migration
+- [ ] Build musicVideoService: LLM generates visual script from metadata/lyrics/caption, generateImage produces 6 frames using cover art as reference, ffmpeg assembles looping MP4
+- [ ] Wire musicVideoService into visualQueue worker (auto-triggers on upload)
+- [ ] Add 'music-video' cinematic mode to CinematicModeEngine that plays the AI loop video
+- [ ] Expose musicVideoUrl in songs.getById tRPC response
+- [ ] Add musicVideoUrl to Track interface in PlayerContext
+- [ ] Show "Music Video" mode badge on song detail page when musicVideoUrl is available
+
+## AI Music Video Loop Pipeline
+- [x] Add musicVideoUrl, musicVideoScript, musicVideoStatus columns to songs schema
+- [x] Apply DB migration for new columns
+- [x] Build musicVideoService.ts (LLM script → generateImage frames → ffmpeg MP4 → S3)
+- [x] Wire musicVideoService into visualQueue worker (auto-triggers after upload)
+- [x] Add music-video CinematicMode type, label, and order
+- [x] Build MusicVideoPlayback component (full-screen video loop + scene labels)
+- [x] Wire MusicVideoPlayback into CinematicModeEngine render switch
+- [x] Add musicVideoUrl/Script/Status to Track interface in PlayerContext
+- [x] Map musicVideoUrl/Script/Status in SongDetailPage track builder
+- [x] Create Dockerfile with ffmpeg for production deployment

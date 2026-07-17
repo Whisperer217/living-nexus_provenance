@@ -348,6 +348,9 @@ export default function SongDetailPage() {
       creatorRole: song.creator?.role ?? undefined,
       downloadPermission: (song as any).downloadPermission ?? null,
       downloadTipThresholdCents: (song as any).downloadTipThresholdCents ?? null,
+      musicVideoUrl: (song as any).musicVideoUrl ?? null,
+      musicVideoScript: (song as any).musicVideoScript ?? null,
+      musicVideoStatus: (song as any).musicVideoStatus ?? null,
     };
     const relatedTracks = (relatedData ?? []).map((item: any) => ({
       id: String(item.song.id),

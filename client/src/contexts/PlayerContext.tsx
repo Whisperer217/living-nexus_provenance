@@ -68,6 +68,9 @@ export interface Track {
   fadeOutSeconds?: number | null;
   downloadPermission?: "none" | "free" | "tipped" | null;
   downloadTipThresholdCents?: number | null;
+  musicVideoUrl?: string | null;
+  musicVideoScript?: string | null;
+  musicVideoStatus?: "pending" | "generating" | "complete" | "failed" | null;
 }
 
 /** Describes WHERE the current queue was built from */

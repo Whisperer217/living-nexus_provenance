@@ -848,6 +848,13 @@
       "when": 1783620045537,
       "tag": "0121_open_sage",
       "breakpoints": true
+    },
+    {
+      "idx": 122,
+      "version": "5",
+      "when": 1784328139826,
+      "tag": "0122_late_silver_sable",
+      "breakpoints": true
     }
   ]
 }
