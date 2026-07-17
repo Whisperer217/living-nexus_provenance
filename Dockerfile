@@ -13,11 +13,13 @@ RUN apt-get update -qq && \
 FROM base AS builder
 WORKDIR /app
 
-# Install pnpm
-RUN npm install -g pnpm@9
+# Install pnpm (match the version in package.json engines field)
+RUN npm install -g pnpm@10
 
-# Copy manifests first for layer caching
+# Copy manifests AND patches dir before install — pnpm requires patches to be
+# present when reading pnpm-lock.yaml (patchedDependencies: wouter@3.7.1)
 COPY package.json pnpm-lock.yaml ./
+COPY patches/ ./patches/
 RUN pnpm install --frozen-lockfile
 
 # Copy source and build
@@ -28,7 +30,7 @@ RUN pnpm build
 FROM base AS runner
 WORKDIR /app
 
-RUN npm install -g pnpm@9
+RUN npm install -g pnpm@10
 
 # Copy built artefacts and production deps
 COPY --from=builder /app/dist ./dist
