@@ -16,6 +16,7 @@ import { stampRouter } from "../routes/stampRoute";
 import { downloadRouter } from "../routes/downloadRoute";
 import { physicalExportRouter } from "../services/physicalExport";
 import { dbExportRouter } from "../routes/dbExportRoute";
+import { sovereignArchiveRouter } from "../routes/sovereignArchiveRoute";
 import { harmonicRouter } from "../routes/harmonicRoute";
 import { publicApiRouter } from "../routes/publicApiRoute";
 import { oembedRouter } from "../routes/oembedRoute";
@@ -156,6 +157,8 @@ async function startServer() {
   app.use(physicalExportRouter);
   // Full database export for migration (owner/admin-only)
   app.use(dbExportRouter);
+  // Sovereign Archive — structured ZIP export with audio, WID, lyrics, tone, artwork, video
+  app.use(sovereignArchiveRouter);
   // Harmonic Signature — GET /api/harmonic/:songId/audio and /api/harmonic/:songId/image
   app.use("/api/harmonic", harmonicRouter);
   // Public REST API v1 (Plex/Jellyfin/external clients)

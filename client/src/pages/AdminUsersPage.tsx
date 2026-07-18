@@ -18,6 +18,7 @@ import {
   Gift, RotateCcw, Copy, CreditCard, ExternalLink, History, Video, Play, CheckCircle, Crown, UserX, AlertTriangle,
   Trash2, Database, Globe, Lock, ArrowRight, Pin, PinOff, RefreshCw,
   CheckSquare, Square, Download, FileJson, ListChecks,
+  FolderArchive, Music, Image, FileText, AudioWaveform, Film,
 } from "lucide-react";
 import { getLoginUrl } from "@/const";
 
@@ -2096,46 +2097,76 @@ const ALL_TABLES = [
   "paymentReconciliationLog", "bookPurchases", "keeperSkins", "marketplaceItems",
 ];
 
-function triggerDownload(data: object, filename: string) {
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
+// ── Trigger a blob download from a URL ──────────────────────────────────────
+function triggerBlobDownload(url: string, filename: string) {
   const a = document.createElement("a");
   a.href = url;
   a.download = filename;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+}
+
+// ── Sovereign Archive Export ─────────────────────────────────────────────────
+// Packages each track as a structured ZIP:
+//   songs/{slug}-{id}/
+//     audio/        ← original audio file
+//     artwork/      ← cover art image
+//     video/        ← AI music video loop
+//     lyrics/       ← plain text lyrics
+//     tone/         ← harmonic signature + frequency profile
+//     wid/          ← full WID document
+//     metadata/     ← all DB fields as JSON
+// ─────────────────────────────────────────────────────────────────────────────
+interface SongManifestItem {
+  id: number;
+  title: string;
+  userId: number;
+  status: string;
+  hasAudio: boolean;
+  hasArtwork: boolean;
+  hasVideo: boolean;
+  hasLyrics: boolean;
+  hasTone: boolean;
+  hasWid: boolean;
+  createdAt: string;
+}
+
+interface ArchiveBatchJob {
+  id: string;
+  offset: number;
+  limit: number;
+  batchNum: number;
+  status: "queued" | "running" | "done" | "error";
+  error?: string;
+  tracksInBatch?: number;
+  filename?: string;
 }
 
 function DbExportSection() {
-  // ── Manifest state ──────────────────────────────────────────────────────────
-  const [manifest, setManifest] = useState<Record<string, { rowCount: number }> | null>(null);
+  const [manifest, setManifest] = useState<SongManifestItem[] | null>(null);
   const [loadingManifest, setLoadingManifest] = useState(false);
-
-  // ── Table selection ─────────────────────────────────────────────────────────
-  const [selectedTables, setSelectedTables] = useState<Set<string>>(new Set(ALL_TABLES));
-  const allSelected = selectedTables.size === ALL_TABLES.length;
-
-  // ── Batch config ────────────────────────────────────────────────────────────
-  const [batchSize, setBatchSize] = useState<number>(500);
-  const [customBatch, setCustomBatch] = useState("");
-  const effectiveBatch = customBatch ? Math.max(1, Math.min(10000, parseInt(customBatch) || 500)) : batchSize;
-
-  // ── Queue state ─────────────────────────────────────────────────────────────
-  const [queue, setQueue] = useState<BatchJob[]>([]);
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [batchSize, setBatchSize] = useState<number>(20);
+  const [customBatch, setCustomBatch] = useState<string>("");
+  const [queue, setQueue] = useState<ArchiveBatchJob[]>([]);
   const [running, setRunning] = useState(false);
   const [completedCount, setCompletedCount] = useState(0);
   const [totalJobs, setTotalJobs] = useState(0);
 
-  // ── Load manifest ────────────────────────────────────────────────────────────
+  const effectiveBatch = customBatch ? Math.min(100, Math.max(1, parseInt(customBatch, 10) || 20)) : batchSize;
+  const allSelected = manifest != null && selectedIds.size === manifest.length;
+
+  // ── Load manifest ──────────────────────────────────────────────────────────
   const loadManifest = async () => {
     setLoadingManifest(true);
     try {
-      const res = await fetch("/api/admin/db-export/manifest", { credentials: "include" });
-      if (!res.ok) { toast.error("Failed to load manifest"); return; }
+      const res = await fetch("/api/admin/sovereign-archive/manifest", { credentials: "include" });
+      if (!res.ok) { toast.error("Failed to load track manifest"); return; }
       const data = await res.json();
-      setManifest(data.tables);
+      setManifest(data.songs);
+      // Select all by default
+      setSelectedIds(new Set(data.songs.map((s: SongManifestItem) => s.id)));
     } catch (e: any) {
       toast.error(e.message || "Manifest load failed");
     } finally {
@@ -2143,36 +2174,41 @@ function DbExportSection() {
     }
   };
 
-  // ── Toggle table selection ───────────────────────────────────────────────────
-  const toggleTable = (t: string) => {
-    setSelectedTables(prev => {
+  const toggleTrack = (id: number) => {
+    setSelectedIds(prev => {
       const next = new Set(prev);
-      if (next.has(t)) next.delete(t); else next.add(t);
+      if (next.has(id)) next.delete(id); else next.add(id);
       return next;
     });
   };
+
   const toggleAll = () => {
-    setSelectedTables(allSelected ? new Set() : new Set(ALL_TABLES));
+    if (!manifest) return;
+    setSelectedIds(allSelected ? new Set() : new Set(manifest.map(s => s.id)));
   };
 
-  // ── Build and run the queue ──────────────────────────────────────────────────
-  const startBatchExport = async () => {
-    if (selectedTables.size === 0) { toast.error("Select at least one table"); return; }
-    if (!manifest) { toast.error("Load the manifest first"); return; }
+  // ── Build and run the archive queue ───────────────────────────────────────
+  const startArchiveExport = async () => {
+    if (!manifest || selectedIds.size === 0) {
+      toast.error("Select at least one track");
+      return;
+    }
 
-    // Build jobs: one job per batch per table
-    const jobs: BatchJob[] = [];
-    for (const table of ALL_TABLES) {
-      if (!selectedTables.has(table)) continue;
-      const rowCount = manifest[table]?.rowCount ?? 0;
-      if (rowCount === 0) {
-        // Still include empty tables as a single batch (returns 0 rows)
-        jobs.push({ id: `${table}-0`, table, offset: 0, limit: effectiveBatch, status: "queued" });
-      } else {
-        for (let offset = 0; offset < rowCount; offset += effectiveBatch) {
-          jobs.push({ id: `${table}-${offset}`, table, offset, limit: effectiveBatch, status: "queued" });
-        }
-      }
+    // Get selected songs in order
+    const selected = manifest.filter(s => selectedIds.has(s.id));
+    const total = selected.length;
+
+    // Build jobs — each job is one batch of effectiveBatch tracks
+    const jobs: ArchiveBatchJob[] = [];
+    for (let offset = 0; offset < total; offset += effectiveBatch) {
+      const batchNum = Math.floor(offset / effectiveBatch) + 1;
+      jobs.push({
+        id: `batch-${batchNum}`,
+        offset,
+        limit: effectiveBatch,
+        batchNum,
+        status: "queued",
+      });
     }
 
     setQueue(jobs);
@@ -2180,218 +2216,263 @@ function DbExportSection() {
     setCompletedCount(0);
     setRunning(true);
 
-    const dateSlug = new Date().toISOString().slice(0, 10);
     let done = 0;
-
-    // Process sequentially — one batch at a time
     for (let i = 0; i < jobs.length; i++) {
       const job = jobs[i];
-
-      // Mark as running
       setQueue(prev => prev.map(j => j.id === job.id ? { ...j, status: "running" } : j));
 
       try {
-        const url = `/api/admin/db-export/batch?table=${encodeURIComponent(job.table)}&offset=${job.offset}&limit=${job.limit}`;
+        const url = `/api/admin/sovereign-archive/batch?offset=${job.offset}&limit=${job.limit}&batch=${job.batchNum}`;
         const res = await fetch(url, { credentials: "include" });
+
         if (!res.ok) {
           const err = await res.json().catch(() => ({ error: "Batch failed" }));
           setQueue(prev => prev.map(j => j.id === job.id ? { ...j, status: "error", error: err.error } : j));
           continue;
         }
-        const data = await res.json();
-        const batchNum = Math.floor(job.offset / job.limit) + 1;
-        const filename = `ln-export-${dateSlug}-${job.table}-batch${batchNum}.json`;
 
-        // Hand off the file immediately
-        triggerDownload({
-          exportedAt: new Date().toISOString(),
-          platform: "Living Nexus",
-          table: job.table,
-          batchNumber: batchNum,
-          offset: job.offset,
-          limit: job.limit,
-          rowCount: data.rowCount,
-          hasMore: data.hasMore,
-          rows: data.rows,
-        }, filename);
+        // The response is a ZIP blob — trigger download immediately
+        const blob = await res.blob();
+        const dateSlug = new Date().toISOString().slice(0, 10);
+        const filename = `ln-sovereign-archive-${dateSlug}-batch${job.batchNum}.zip`;
+        const objectUrl = URL.createObjectURL(blob);
+        triggerBlobDownload(objectUrl, filename);
+        URL.revokeObjectURL(objectUrl);
 
         done++;
         setCompletedCount(done);
         setQueue(prev => prev.map(j => j.id === job.id
-          ? { ...j, status: "done", rowCount: data.rowCount, filename }
+          ? { ...j, status: "done", filename }
           : j
         ));
 
-        // Small pause between batches to avoid overwhelming the DB
-        await new Promise(r => setTimeout(r, 150));
-
+        // Small pause between batches
+        await new Promise(r => setTimeout(r, 300));
       } catch (e: any) {
         setQueue(prev => prev.map(j => j.id === job.id ? { ...j, status: "error", error: e.message } : j));
       }
     }
 
     setRunning(false);
-    toast.success(`Export complete — ${done} batch file${done !== 1 ? "s" : ""} downloaded`);
+    toast.success(`Sovereign Archive complete — ${done} ZIP file${done !== 1 ? "s" : ""} downloaded`);
   };
 
-  const stopExport = () => setRunning(false);
+  const folderStructure = [
+    { icon: <Music className="w-3 h-3" />, label: "audio/", desc: "Original audio file (MP3/WAV)" },
+    { icon: <Image className="w-3 h-3" />, label: "artwork/", desc: "Cover art image" },
+    { icon: <Film className="w-3 h-3" />, label: "video/", desc: "AI music video loop (if generated)" },
+    { icon: <FileText className="w-3 h-3" />, label: "lyrics/", desc: "Plain text lyrics" },
+    { icon: <AudioWaveform className="w-3 h-3" />, label: "tone/", desc: "Harmonic signature + frequency profile" },
+    { icon: <Shield className="w-3 h-3" />, label: "wid/", desc: "Full WID document (hash, signature, chain)" },
+    { icon: <Database className="w-3 h-3" />, label: "metadata/", desc: "All DB fields as JSON" },
+  ];
 
-  // ── Derived stats ────────────────────────────────────────────────────────────
-  const totalSelectedRows = manifest
-    ? Array.from(selectedTables).reduce((s, t) => s + (manifest[t]?.rowCount ?? 0), 0)
-    : 0;
-  const estimatedBatches = Math.max(selectedTables.size, Math.ceil(totalSelectedRows / effectiveBatch));
+  const progressPct = totalJobs > 0 ? Math.round((completedCount / totalJobs) * 100) : 0;
 
   return (
     <div className="rounded-xl p-6 mt-6" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
       {/* Header */}
-      <div className="flex items-center gap-3 mb-2">
-        <Database className="w-5 h-5" style={{ color: GOLD }} />
-        <h3 className="text-base font-semibold" style={{ color: TEXT }}>Sovereign Data Export</h3>
-        <span className="text-xs px-2 py-0.5 rounded-full font-medium"
-          style={{ background: "rgba(196,154,40,0.15)", color: GOLD, border: `1px solid rgba(196,154,40,0.4)` }}>
-          Owner Only
-        </span>
+      <div className="flex items-center gap-3 mb-1">
+        <FolderArchive className="w-5 h-5" style={{ color: GOLD }} />
+        <h3 className="text-base font-semibold" style={{ color: TEXT }}>Sovereign Creative Archive</h3>
+        <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: "#78350f22", color: GOLD }}>Owner Only</span>
       </div>
-      <p className="text-sm mb-4" style={{ color: SUBTEXT }}>
-        Select tables, choose a batch size, and the system builds a download queue — each batch is handed off to you as a separate JSON file as soon as it completes.
+      <p className="text-xs mb-5" style={{ color: SUBTEXT }}>
+        Download your complete creative works as structured ZIP archives. Each track is packaged with all 7 layers of its sovereign identity.
       </p>
 
-      {/* Step 1 — Load Manifest */}
-      {!manifest ? (
-        <div className="mb-5">
-          <p className="text-xs mb-2" style={{ color: MUTED }}>Step 1 — Load row counts to plan your export</p>
-          <Button onClick={loadManifest} disabled={loadingManifest}
-            style={{ background: "rgba(196,154,40,0.15)", color: GOLD, border: `1px solid rgba(196,154,40,0.4)` }}>
-            {loadingManifest
-              ? <><Loader2 className="w-4 h-4 animate-spin mr-2" />Loading manifest…</>
-              : <><ListChecks className="w-4 h-4 mr-2" />Load Table Manifest</>}
-          </Button>
+      {/* Folder structure preview */}
+      <div className="rounded-lg p-4 mb-5" style={{ background: "#0a0a0a", border: `1px solid ${BORDER}` }}>
+        <div className="text-xs font-mono mb-2" style={{ color: GOLD }}>songs/tunnel-vision-2580014/</div>
+        <div className="space-y-1">
+          {folderStructure.map(({ icon, label, desc }) => (
+            <div key={label} className="flex items-center gap-2">
+              <span style={{ color: MUTED }}>├──</span>
+              <span style={{ color: GOLD }}>{icon}</span>
+              <span className="text-xs font-mono" style={{ color: TEXT }}>{label}</span>
+              <span className="text-xs" style={{ color: MUTED }}>← {desc}</span>
+            </div>
+          ))}
         </div>
+      </div>
+
+      {/* Step 1: Load manifest */}
+      {!manifest ? (
+        <button
+          onClick={loadManifest}
+          disabled={loadingManifest}
+          className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-opacity"
+          style={{ background: GOLD, color: "#000" }}
+        >
+          {loadingManifest ? <Loader2 className="w-4 h-4 animate-spin" /> : <ListChecks className="w-4 h-4" />}
+          {loadingManifest ? "Loading tracks…" : "Load Track Manifest"}
+        </button>
       ) : (
         <>
-          {/* Step 2 — Table selection */}
-          <div className="mb-5">
+          {/* Track list */}
+          <div className="mb-4">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-xs font-semibold" style={{ color: MUTED }}>Step 2 — Select Tables</p>
-              <button onClick={toggleAll} className="flex items-center gap-1 text-xs"
-                style={{ color: GOLD }}>
-                {allSelected
-                  ? <><CheckSquare className="w-3.5 h-3.5" /> Deselect All</>
-                  : <><Square className="w-3.5 h-3.5" /> Select All ({ALL_TABLES.length})</>}
+              <span className="text-xs font-medium" style={{ color: TEXT }}>
+                {selectedIds.size} of {manifest.length} tracks selected
+              </span>
+              <button
+                onClick={toggleAll}
+                className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg transition-opacity"
+                style={{ background: BORDER, color: TEXT }}
+              >
+                {allSelected ? <CheckSquare className="w-3.5 h-3.5" style={{ color: GOLD }} /> : <Square className="w-3.5 h-3.5" />}
+                {allSelected ? "Deselect All" : "Select All"}
               </button>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-1 max-h-48 overflow-y-auto pr-1"
-              style={{ scrollbarWidth: "thin" }}>
-              {ALL_TABLES.map(t => {
-                const rows = manifest[t]?.rowCount ?? 0;
-                const checked = selectedTables.has(t);
-                return (
-                  <button key={t} onClick={() => toggleTable(t)}
-                    className="flex items-center gap-1.5 px-2 py-1.5 rounded text-left transition-colors"
+            <div className="rounded-lg overflow-hidden" style={{ border: `1px solid ${BORDER}` }}>
+              <div className="max-h-64 overflow-y-auto">
+                {manifest.map((song) => (
+                  <div
+                    key={song.id}
+                    onClick={() => toggleTrack(song.id)}
+                    className="flex items-center gap-3 px-3 py-2 cursor-pointer transition-colors hover:opacity-80"
                     style={{
-                      background: checked ? "rgba(196,154,40,0.1)" : "rgba(255,255,255,0.03)",
-                      border: `1px solid ${checked ? "rgba(196,154,40,0.35)" : BORDER}`,
-                    }}>
-                    {checked
-                      ? <CheckSquare className="w-3 h-3 flex-shrink-0" style={{ color: GOLD }} />
-                      : <Square className="w-3 h-3 flex-shrink-0" style={{ color: MUTED }} />}
-                    <span className="text-xs truncate" style={{ color: checked ? TEXT : MUTED }}>{t}</span>
-                    <span className="text-xs ml-auto font-mono flex-shrink-0"
-                      style={{ color: rows > 0 ? GOLD : MUTED }}>{rows > 0 ? rows.toLocaleString() : "0"}</span>
-                  </button>
-                );
-              })}
+                      background: selectedIds.has(song.id) ? "#78350f15" : "transparent",
+                      borderBottom: `1px solid ${BORDER}`,
+                    }}
+                  >
+                    {selectedIds.has(song.id)
+                      ? <CheckSquare className="w-4 h-4 shrink-0" style={{ color: GOLD }} />
+                      : <Square className="w-4 h-4 shrink-0" style={{ color: MUTED }} />
+                    }
+                    <div className="flex-1 min-w-0">
+                      <div className="text-xs font-medium truncate" style={{ color: TEXT }}>{song.title}</div>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        {song.hasAudio && <span className="text-xs" style={{ color: MUTED }}>🎵</span>}
+                        {song.hasArtwork && <span className="text-xs" style={{ color: MUTED }}>🖼</span>}
+                        {song.hasVideo && <span className="text-xs" style={{ color: MUTED }}>🎬</span>}
+                        {song.hasLyrics && <span className="text-xs" style={{ color: MUTED }}>📝</span>}
+                        {song.hasTone && <span className="text-xs" style={{ color: MUTED }}>〰</span>}
+                        {song.hasWid && <span className="text-xs" style={{ color: GOLD }}>🔐</span>}
+                      </div>
+                    </div>
+                    <span className="text-xs shrink-0" style={{ color: MUTED }}>#{song.id}</span>
+                  </div>
+                ))}
+              </div>
             </div>
-            <p className="text-xs mt-2" style={{ color: MUTED }}>
-              {selectedTables.size} of {ALL_TABLES.length} tables selected · {totalSelectedRows.toLocaleString()} total rows
-            </p>
           </div>
 
-          {/* Step 3 — Batch size */}
-          <div className="mb-5">
-            <p className="text-xs font-semibold mb-2" style={{ color: MUTED }}>Step 3 — Batch Size (rows per file)</p>
-            <div className="flex flex-wrap gap-2 mb-2">
-              {BATCH_PRESETS.map(n => (
-                <button key={n} onClick={() => { setBatchSize(n); setCustomBatch(""); }}
-                  className="px-3 py-1 rounded text-xs font-semibold transition-colors"
+          {/* Batch size selector */}
+          <div className="mb-4">
+            <div className="text-xs font-medium mb-2" style={{ color: TEXT }}>Batch Size (tracks per ZIP)</div>
+            <div className="flex items-center gap-2 flex-wrap">
+              {[10, 20, 30, 50].map(n => (
+                <button
+                  key={n}
+                  onClick={() => { setBatchSize(n); setCustomBatch(""); }}
+                  className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
                   style={{
-                    background: batchSize === n && !customBatch ? GOLD : "rgba(196,154,40,0.1)",
-                    color: batchSize === n && !customBatch ? BG : GOLD,
-                    border: `1px solid rgba(196,154,40,0.4)`,
-                  }}>
+                    background: effectiveBatch === n && !customBatch ? GOLD : BORDER,
+                    color: effectiveBatch === n && !customBatch ? "#000" : TEXT,
+                  }}
+                >
                   {n}
                 </button>
               ))}
-              <div className="flex items-center gap-1">
-                <Input
-                  type="number" min={1} max={10000}
-                  placeholder="Custom…"
-                  value={customBatch}
-                  onChange={e => setCustomBatch(e.target.value)}
-                  className="w-24 h-7 text-xs"
-                  style={{ background: "rgba(255,255,255,0.05)", borderColor: BORDER, color: TEXT }}
-                />
-              </div>
+              <input
+                type="number"
+                placeholder="Custom…"
+                value={customBatch}
+                onChange={e => setCustomBatch(e.target.value)}
+                className="w-20 px-2 py-1.5 rounded-lg text-xs outline-none"
+                style={{ background: BORDER, color: TEXT, border: `1px solid ${customBatch ? GOLD : BORDER}` }}
+                min={1}
+                max={100}
+              />
             </div>
-            <p className="text-xs" style={{ color: MUTED }}>
-              ~{estimatedBatches} batch file{estimatedBatches !== 1 ? "s" : ""} · each handed off to you as it completes
+            <p className="text-xs mt-1.5" style={{ color: MUTED }}>
+              {selectedIds.size} tracks → {Math.ceil(selectedIds.size / effectiveBatch)} ZIP file{Math.ceil(selectedIds.size / effectiveBatch) !== 1 ? "s" : ""}, {effectiveBatch} tracks each
             </p>
           </div>
 
-          {/* Step 4 — Launch */}
-          <div className="flex items-center gap-3 mb-5">
-            <Button onClick={startBatchExport} disabled={running || selectedTables.size === 0}
-              style={{ background: GOLD, color: BG, fontWeight: 600 }}>
-              {running
-                ? <><Loader2 className="w-4 h-4 animate-spin mr-2" />Running Queue…</>
-                : <><Download className="w-4 h-4 mr-2" />Start Batch Export</>}
-            </Button>
-            {running && (
-              <Button variant="outline" onClick={stopExport}
-                style={{ borderColor: RED, color: RED }}>
-                Stop
-              </Button>
-            )}
-          </div>
-
-          {/* Queue progress */}
+          {/* Progress bar */}
           {queue.length > 0 && (
-            <div className="rounded-lg p-4" style={{ background: "rgba(0,0,0,0.3)", border: `1px solid ${BORDER}` }}>
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-semibold" style={{ color: TEXT }}>Download Queue</span>
-                <span className="text-xs font-mono" style={{ color: GOLD }}>
-                  {completedCount} / {totalJobs} complete
+            <div className="mb-4">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs" style={{ color: TEXT }}>
+                  {running ? `Packaging batch ${completedCount + 1} of ${totalJobs}…` : `Complete — ${completedCount} ZIP${completedCount !== 1 ? "s" : ""} downloaded`}
                 </span>
+                <span className="text-xs font-mono" style={{ color: GOLD }}>{progressPct}%</span>
               </div>
-              {/* Overall progress bar */}
-              <div className="w-full rounded-full h-1.5 mb-3" style={{ background: "rgba(255,255,255,0.08)" }}>
-                <div className="h-1.5 rounded-full transition-all duration-300"
-                  style={{ width: `${totalJobs > 0 ? (completedCount / totalJobs) * 100 : 0}%`, background: GOLD }} />
+              <div className="h-2 rounded-full overflow-hidden" style={{ background: BORDER }}>
+                <div
+                  className="h-full rounded-full transition-all duration-300"
+                  style={{ width: `${progressPct}%`, background: GOLD }}
+                />
               </div>
-              {/* Job list — show last 20 */}
-              <div className="space-y-1 max-h-48 overflow-y-auto" style={{ scrollbarWidth: "thin" }}>
-                {queue.slice(-20).reverse().map(job => (
-                  <div key={job.id} className="flex items-center gap-2 text-xs py-0.5">
-                    {job.status === "queued" && <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: MUTED }} />}
-                    {job.status === "running" && <Loader2 className="w-3 h-3 animate-spin flex-shrink-0" style={{ color: GOLD }} />}
-                    {job.status === "done" && <CheckCircle className="w-3 h-3 flex-shrink-0" style={{ color: GREEN }} />}
-                    {job.status === "error" && <XCircle className="w-3 h-3 flex-shrink-0" style={{ color: RED }} />}
-                    <span style={{ color: job.status === "done" ? TEXT : job.status === "error" ? RED : MUTED }}>
-                      {job.table}
+              {/* Job list */}
+              <div className="mt-3 space-y-1 max-h-40 overflow-y-auto">
+                {queue.map(job => (
+                  <div key={job.id} className="flex items-center gap-2 text-xs">
+                    {job.status === "queued" && <div className="w-3 h-3 rounded-full shrink-0" style={{ background: BORDER }} />}
+                    {job.status === "running" && <Loader2 className="w-3 h-3 animate-spin shrink-0" style={{ color: GOLD }} />}
+                    {job.status === "done" && <CheckCircle className="w-3 h-3 shrink-0" style={{ color: "#4ade80" }} />}
+                    {job.status === "error" && <XCircle className="w-3 h-3 shrink-0" style={{ color: "#f87171" }} />}
+                    <span style={{ color: job.status === "done" ? TEXT : MUTED }}>
+                      Batch {job.batchNum}
+                      {job.status === "done" && job.filename && ` → ${job.filename}`}
+                      {job.status === "error" && ` — ${job.error}`}
                     </span>
-                    <span className="font-mono" style={{ color: MUTED }}>offset:{job.offset}</span>
-                    {job.status === "done" && job.filename && (
-                      <span className="ml-auto truncate" style={{ color: GREEN }}>↓ {job.filename}</span>
-                    )}
-                    {job.status === "error" && (
-                      <span className="ml-auto" style={{ color: RED }}>{job.error}</span>
-                    )}
                   </div>
                 ))}
               </div>
             </div>
           )}
+
+          {/* Action buttons */}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={startArchiveExport}
+              disabled={running || selectedIds.size === 0}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-opacity disabled:opacity-50"
+              style={{ background: GOLD, color: "#000" }}
+            >
+              {running
+                ? <><Loader2 className="w-4 h-4 animate-spin" /> Packaging…</>
+                : <><Download className="w-4 h-4" /> Start Sovereign Archive</>
+              }
+            </button>
+            {running && (
+              <button
+                onClick={() => setRunning(false)}
+                className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs transition-opacity"
+                style={{ background: BORDER, color: TEXT }}
+              >
+                Stop
+              </button>
+            )}
+            <button
+              onClick={loadManifest}
+              disabled={loadingManifest}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs transition-opacity"
+              style={{ background: BORDER, color: TEXT }}
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${loadingManifest ? "animate-spin" : ""}`} />
+              Refresh
+            </button>
+          </div>
+
+          {/* Legend */}
+          <div className="flex items-center gap-4 mt-3 flex-wrap">
+            {[
+              { icon: "🎵", label: "Audio" },
+              { icon: "🖼", label: "Artwork" },
+              { icon: "🎬", label: "Video" },
+              { icon: "📝", label: "Lyrics" },
+              { icon: "〰", label: "Tone" },
+              { icon: "🔐", label: "WID" },
+            ].map(({ icon, label }) => (
+              <span key={label} className="flex items-center gap-1 text-xs" style={{ color: MUTED }}>
+                {icon} {label}
+              </span>
+            ))}
+          </div>
         </>
       )}
     </div>
