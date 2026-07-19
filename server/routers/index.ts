@@ -50,6 +50,7 @@ import { domainRouter }              from "./domain";
 import { collectionsRouter }         from "./collections";
 
 // ── Payment domain ────────────────────────────────────────────────────────────
+import { paymentsRouter }         from "./payments";
 import { tipsRouter }             from "./tips";
 import { licensesRouter }         from "./licenses";
 import { supportersRouter }       from "./supporters";
@@ -131,6 +132,7 @@ export const appRouter = router({
   collections:         collectionsRouter,
 
   // Payment domain
+  payments:         paymentsRouter,
   tips:             tipsRouter,
   licenses:         licensesRouter,
   supporters:       supportersRouter,

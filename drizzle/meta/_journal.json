@@ -855,6 +855,13 @@
       "when": 1784328139826,
       "tag": "0122_late_silver_sable",
       "breakpoints": true
+    },
+    {
+      "idx": 123,
+      "version": "5",
+      "when": 1784467520847,
+      "tag": "0123_stale_mercury",
+      "breakpoints": true
     }
   ]
 }

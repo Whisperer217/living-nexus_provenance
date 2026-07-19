@@ -8,7 +8,7 @@ import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { toast } from "sonner";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Zap, Package, Star, ChevronRight, Info, CheckCircle2, Shield, Music2 } from "lucide-react";
+import { Zap, Package, Star, ChevronRight, Info, CheckCircle2, Shield, Music2, CreditCard } from "lucide-react";
 import { Link, useLocation } from "wouter";
 
 // ── Design tokens ──────────────────────────────────────────────────────────────
@@ -160,6 +160,7 @@ function SettingsSubNav() {
   const TABS = [
     { path: "/settings/billing", label: "Billing", icon: <Zap size={13} /> },
     { path: "/settings/playback", label: "Playback", icon: <Music2 size={13} /> },
+    { path: "/settings/payment-methods", label: "Payment Methods", icon: <CreditCard size={13} /> },
   ];
   return (
     <div className="flex gap-1">

@@ -1,6 +1,6 @@
 import {
   int, mysqlEnum, mysqlTable, text, timestamp,
-  varchar, float, boolean, json, uniqueIndex, index, bigint
+  varchar, float, boolean, json, uniqueIndex, index, bigint, tinyint
 } from "drizzle-orm/mysql-core";
 
 // ─── Users ────────────────────────────────────────────────────────────────────
@@ -2169,3 +2169,56 @@ export const collectionVersions = mysqlTable("collection_versions", {
 }));
 export type CollectionVersion = typeof collectionVersions.$inferSelect;
 export type InsertCollectionVersion = typeof collectionVersions.$inferInsert;
+
+// ─── Payment Abstraction Layer ────────────────────────────────────────────────
+// Unified transaction log across all payment providers.
+// Every payment — Stripe, Bitcoin, Lightning, USDC — is recorded here.
+// Provider-specific tables (tips, licenses) retain their stripePaymentIntentId
+// columns for backward compatibility; this table is the canonical record.
+
+export const paymentTransactions = mysqlTable("payment_transactions", {
+  id: int("id").autoincrement().primaryKey(),
+  providerId: varchar("providerId", { length: 32 }).notNull(),
+  providerPaymentId: varchar("providerPaymentId", { length: 256 }).notNull(),
+  intentType: varchar("intentType", { length: 64 }).notNull(),
+  status: mysqlEnum("status", ["pending", "confirmed", "failed", "expired", "refunded"]).notNull().default("pending"),
+  amountSmallestUnit: int("amountSmallestUnit").notNull(),
+  currency: varchar("currency", { length: 16 }).notNull(),
+  amountUsdCents: int("amountUsdCents"),
+  payerUserId: int("payerUserId"),
+  creatorUserId: int("creatorUserId"),
+  metadata: text("metadata"),
+  txHash: varchar("txHash", { length: 128 }),
+  confirmations: int("confirmations"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  confirmedAt: timestamp("confirmedAt"),
+  updatedAt: timestamp("updatedAt").defaultNow().notNull(),
+  raw: text("raw"),
+}, (t) => ({
+  ptProviderIdx: index("pt_provider_idx").on(t.providerId, t.providerPaymentId),
+  ptPayerIdx:    index("pt_payer_idx").on(t.payerUserId),
+  ptCreatorIdx:  index("pt_creator_idx").on(t.creatorUserId),
+  ptStatusIdx:   index("pt_status_idx").on(t.status),
+  ptIntentIdx:   index("pt_intent_idx").on(t.intentType),
+}));
+export type PaymentTransaction = typeof paymentTransactions.$inferSelect;
+export type InsertPaymentTransaction = typeof paymentTransactions.$inferInsert;
+
+// ─── Creator Payment Settings ─────────────────────────────────────────────────
+export const creatorPaymentSettings = mysqlTable("creator_payment_settings", {
+  id: int("id").autoincrement().primaryKey(),
+  creatorUserId: int("creatorUserId").notNull(),
+  providerId: varchar("providerId", { length: 32 }).notNull(),
+  enabled: tinyint("enabled").notNull().default(0),
+  config: text("config").notNull().default("{}"),
+  verified: tinyint("verified").notNull().default(0),
+  verifiedAt: timestamp("verifiedAt"),
+  displayOrder: int("displayOrder").default(0),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().notNull(),
+}, (t) => ({
+  cpsCreatorIdx: index("cps_creator_idx").on(t.creatorUserId),
+  cpsUniqueIdx:  index("cps_unique_idx").on(t.creatorUserId, t.providerId),
+}));
+export type CreatorPaymentSetting = typeof creatorPaymentSettings.$inferSelect;
+export type InsertCreatorPaymentSetting = typeof creatorPaymentSettings.$inferInsert;
