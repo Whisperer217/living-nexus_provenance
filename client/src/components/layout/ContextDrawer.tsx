@@ -79,6 +79,7 @@ const PANELS: Record<NavMode, ModePanel> = {
           { icon: <Shield size={14} />, label: "Privacy Policy", path: "/privacy", description: "How we protect your data" },
           { icon: <Heart size={14} />, label: "Attribution", path: "/attribution", description: "Contributors & builders" },
           { icon: <Library size={14} />, label: "Lexicon", path: "/lexicon", description: "Terminology & definitions" },
+          { icon: <BookOpen size={14} />, label: "Platform Glossary", path: "/glossary", description: "Plain-language guide for newcomers" },
           { icon: <Users size={14} />, label: "Founding Creators", path: "/founders", description: "The first witnesses" },
         ],
       },

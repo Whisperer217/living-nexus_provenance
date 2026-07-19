@@ -6334,3 +6334,12 @@
 - [x] Add musicVideoUrl/Script/Status to Track interface in PlayerContext
 - [x] Map musicVideoUrl/Script/Status in SongDetailPage track builder
 - [x] Create Dockerfile with ffmpeg for production deployment
+
+## Phase N+20: Platform Glossary
+
+- [x] Write full platform glossary — 60+ terms across 9 sections (Platform, Identity, WID, HA AI, Community, Discovery, Economy, Features, Doctrine)
+- [x] Build GlossaryPage.tsx — searchable, section-filtered, expandable term cards, newcomer-friendly design
+- [x] Register /glossary route in App.tsx with lazy import
+- [x] Add Platform Glossary link to ContextDrawer PLATFORM section
+- [x] Add Platform Glossary link to SiteFooter doctrine links
+- [x] 0 TypeScript errors | 340/340 tests passing

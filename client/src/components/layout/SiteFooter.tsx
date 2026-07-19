@@ -13,6 +13,7 @@ const PLATFORM_LINKS = [
   { icon: Shield,     label: "Privacy Policy", path: "/privacy" },
   { icon: Heart,      label: "Attribution", path: "/attribution" },
   { icon: Library,    label: "Lexicon", path: "/lexicon" },
+  { icon: BookOpen,   label: "Platform Glossary", path: "/glossary" },
   { icon: Users,      label: "Founding Creators", path: "/founders" },
   { icon: BookOpen,   label: "WID Specification", path: "/doctrine/wid-spec" },
 ];
