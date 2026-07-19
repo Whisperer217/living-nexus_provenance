@@ -6343,3 +6343,14 @@
 - [x] Add Platform Glossary link to ContextDrawer PLATFORM section
 - [x] Add Platform Glossary link to SiteFooter doctrine links
 - [x] 0 TypeScript errors | 340/340 tests passing
+
+## Phase N+21: Platform Lexicon Full Rebuild
+- [x] Rebuilt LexiconPage at /lexicon — 9 sections, 100+ terms, immersive dark-gold design
+- [x] Sections: Identity & Authorship, WID System, Works & Archive, HA AI, The Keeper, Spaces & Community, Actions & Gestures, Economy & Reciprocity, Doctrine & Covenant
+- [x] AI-generated cinematic section imagery (9 images, dark-gold palette) uploaded to CDN
+- [x] Full-text search across all terms, meanings, and "elsewhere" labels
+- [x] Sticky section TOC with scroll-tracking (desktop), expandable term cards, CORE badges
+- [x] /glossary route redirects to /lexicon (merged)
+- [x] ContextDrawer and SiteFooter updated — single "Platform Lexicon" entry
+- [x] Footer CTA links to /upload, /doctrine/wid-spec, /manifesto, /doctrine/haai, /founders
+- [x] 0 TypeScript errors

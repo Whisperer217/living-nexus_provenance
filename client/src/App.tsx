@@ -70,7 +70,7 @@ const PricingCovenantPage = lazy(() => import("./pages/PricingCovenantPage"));
 const FieldNotesPage = lazy(() => import("./pages/FieldNotesPage"));
 const WIDSpecPage = lazy(() => import("./pages/WIDSpecPage"));
 const LexiconPage = lazy(() => import("./pages/LexiconPage"));
-const GlossaryPage = lazy(() => import("./pages/GlossaryPage"));
+// GlossaryPage merged into LexiconPage — /glossary redirects to /lexicon
 const PlaylistsPage = lazy(() => import("./pages/PlaylistsPage"));
 const NotificationsPage = lazy(() => import("./pages/NotificationsPage"));
 const WitnessRegistryPage = lazy(() => import("./pages/WitnessRegistryPage"));
@@ -244,7 +244,7 @@ function Router() {
                 <Route path="/field-notes" component={FieldNotesPage} />
                 <Route path="/doctrine/wid-spec" component={WIDSpecPage} />
                 <Route path="/lexicon" component={LexiconPage} />
-                <Route path="/glossary" component={GlossaryPage} />
+                <Route path="/glossary"><Redirect to="/lexicon" /></Route>
                 <Route path="/learn" component={LearnPage} />
                 <Route path="/playlists" component={PlaylistsPage} />
                 <Route path="/notifications" component={NotificationsPage} />
