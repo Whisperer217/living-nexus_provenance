@@ -6354,3 +6354,16 @@
 - [x] ContextDrawer and SiteFooter updated — single "Platform Lexicon" entry
 - [x] Footer CTA links to /upload, /doctrine/wid-spec, /manifesto, /doctrine/haai, /founders
 - [x] 0 TypeScript errors
+
+## Phase N+22: Complete Living Nexus Design System
+
+- [x] Audit existing tokens and sovereign-cathedral skill
+- [x] tokens.ts — all color, typography, spacing, radius, shadow, glow, border, motion, z-index, layout tokens
+- [x] primitives.tsx — LnButton (5 variants, 4 sizes, loading/disabled/icon), LnBadge, LnDivider, LnAvatar, LnTag, LnOverline, LnText, LnIcon, LnSpinner, LnLiveWave, LnPulseDot
+- [x] surfaces.tsx — LnCard (museum/flat/ghost/panel), LnCardInfo, LnSurface, LnFormField, LnInput, LnTextarea, LnSelect, LnCheckbox, LnRadio, LnHeroFrame
+- [x] navigation.tsx — LnNavItem, LnTabs, LnModal, LnSheet, LnTooltip, LnBreadcrumb, LnEmptyState, LnPageHeader, LnContextMenu
+- [x] platform.tsx — WIDBadge, ProvenancePill, HarmonicBar, KeeperChip, SanctuarySlot, NexusPointBadge, WitnessCount, OriginStamp, MediumPill, CreatorCard, TrackRow
+- [x] index.ts — barrel export (single import point for all design system)
+- [x] DesignSystemPage.tsx — living storybook at /design-system with all tokens, components, and usage rules
+- [x] design-system.test.ts — 21 Vitest tests covering all token shapes and canonical values
+- [x] 366 tests passing, 0 TypeScript errors

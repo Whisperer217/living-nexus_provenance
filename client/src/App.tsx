@@ -118,6 +118,7 @@ const VisualWorksDetailPage = lazy(() => import("./pages/VisualWorksDetailPage")
 const CreatorCollectionPage = lazy(() => import("./pages/CreatorCollectionPage"));
 const CollectionStudioPage = lazy(() => import("./pages/CollectionStudioPage"));
 const AlbumDetailPage = lazy(() => import("./pages/AlbumDetailPage"));
+const DesignSystemPage = lazy(() => import("./pages/DesignSystemPage"));
 
 // Minimal fallback shown while a page chunk loads (typically <200ms on CDN)
 function PageLoader() {
@@ -285,6 +286,7 @@ function Router() {
                 <Route path="/visual-works/new" component={VisualWorksNewPage} />
                 <Route path="/visual-works/:id" component={VisualWorksDetailPage} />
                 <Route path="/developer" component={DeveloperDashboardPage} />
+                <Route path="/design-system" component={DesignSystemPage} />
                 <Route path="/developers" component={DevelopersPage} />
                 {/* ── Stability redirects — dead routes → canonical destinations ── */}
                 <Route path="/prompt-studio"><Redirect to="/keeper-compose" /></Route>
