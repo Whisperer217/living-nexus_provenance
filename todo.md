@@ -6367,3 +6367,9 @@
 - [x] DesignSystemPage.tsx — living storybook at /design-system with all tokens, components, and usage rules
 - [x] design-system.test.ts — 21 Vitest tests covering all token shapes and canonical values
 - [x] 366 tests passing, 0 TypeScript errors
+
+## Phase N+23: Architectural Laws — Dual Identity Principle
+- [x] Write ARCHITECTURAL_LAWS.md — 5 laws, dual-root ontology, annotation standard, decision framework
+- [x] Apply @domain/@impl annotations to 19 representative files across all domain branches
+- [x] Add Architectural Laws section to /design-system documentation page (Laws I–V + decision table)
+- [x] 366 tests passing, 0 TypeScript errors

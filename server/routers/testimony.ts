@@ -1,3 +1,7 @@
+/**
+ * @domain   The Witness → Testimony → Witness Statement
+ * @impl     Server Router — Testimony creation, retrieval, and completion procedures
+ */
 import Stripe from "stripe";
 import { z } from "zod";
 import { generateShareArtifact } from "../services/shareArtifactService";

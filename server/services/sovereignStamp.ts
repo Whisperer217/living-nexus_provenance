@@ -1,4 +1,8 @@
 /**
+ * @domain   The Chain of Record → Provenance → Sovereign Stamp
+ * @impl     Server Service — Cryptographic stamp generation and tone injection for registered works
+ */
+/**
  * Sovereign Stamp — Tone Injection Engine
  * Phase 2 — server/sovereignStamp.ts
  *

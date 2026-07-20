@@ -1,4 +1,8 @@
 /**
+ * @domain   The Doctrine → Data Contracts → Core Types
+ * @impl     Shared Type — Canonical data type definitions shared between client and server
+ */
+/**
  * @file shared/coreDataTypes.ts
  * @version 1.0.0
  *

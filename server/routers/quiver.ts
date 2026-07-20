@@ -1,3 +1,7 @@
+/**
+ * @domain   The Living Graph → Constellation → Work Relationships
+ * @impl     Server Router — Relational graph procedures connecting works, creators, and witnesses
+ */
 import Stripe from "stripe";
 import { z } from "zod";
 import { generateShareArtifact } from "../services/shareArtifactService";

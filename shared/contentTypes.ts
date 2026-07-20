@@ -1,4 +1,8 @@
 /**
+ * @domain   The Work → Work Taxonomy → Content Classification
+ * @impl     Shared Type — Work type and medium taxonomy used across the platform
+ */
+/**
  * shared/contentTypes.ts
  * Single source of truth for all content-type constants used across
  * UploadPage, EditTrackPanel, and any future format-aware UI.

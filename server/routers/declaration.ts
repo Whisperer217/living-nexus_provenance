@@ -1,3 +1,7 @@
+/**
+ * @domain   The Work → Human Agency → HAAI Declaration
+ * @impl     Server Router — Human Agency AI Declaration registration and verification
+ */
 import Stripe from "stripe";
 import { z } from "zod";
 import { generateShareArtifact } from "../services/shareArtifactService";

@@ -1,3 +1,7 @@
+/**
+ * @domain   The Registry → Chain of Record → WID Issuance
+ * @impl     Server Router — Witness ID generation, assignment, and verification procedures
+ */
 import Stripe from "stripe";
 import { z } from "zod";
 import { generateShareArtifact } from "../services/shareArtifactService";

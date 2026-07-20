@@ -1,4 +1,8 @@
 /**
+ * @domain   The Doctrine → Design Language → Platform Components
+ * @impl     React Component Library — Specialized platform components: WIDBadge, ProvenancePill, KeeperChip, CreatorCard
+ */
+/**
  * Living Nexus Design System — Platform Components
  * ════════════════════════════════════════════════════════════════════
  * Specialized components unique to the Living Nexus platform.

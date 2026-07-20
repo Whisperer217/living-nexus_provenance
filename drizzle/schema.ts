@@ -1,3 +1,7 @@
+/**
+ * @domain   The Archive → Vault → Canonical Data Model
+ * @impl     Database Schema — Drizzle ORM schema defining all platform tables and relationships
+ */
 import {
   int, mysqlEnum, mysqlTable, text, timestamp,
   varchar, float, boolean, json, uniqueIndex, index, bigint, tinyint

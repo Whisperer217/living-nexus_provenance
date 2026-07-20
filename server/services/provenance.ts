@@ -1,4 +1,8 @@
 /**
+ * @domain   The Chain of Record → Provenance → Service Layer
+ * @impl     Server Service — Core provenance chain business logic and event orchestration
+ */
+/**
  * Provenance utilities for ln-provenance
  * Anchor pipeline: canonicalize → hash → sign → create Event + WID
  * Events are APPEND-ONLY — never mutate.

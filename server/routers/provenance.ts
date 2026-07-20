@@ -1,4 +1,8 @@
 /**
+ * @domain   The Chain of Record → Provenance → Event Ledger
+ * @impl     Server Router — Provenance chain event recording and retrieval procedures
+ */
+/**
  * server/routers/provenance.ts
  *
  * Work provenance — timeline events, lineage relationships, and witness invitations

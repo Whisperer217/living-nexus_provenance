@@ -1,4 +1,8 @@
 /**
+ * @domain   The Covenant → Economy → Reciprocity
+ * @impl     Server Service — Payment provider registry abstracting Stripe, Bitcoin, Lightning, and USDC
+ */
+/**
  * server/payments/registry.ts
  *
  * Payment Provider Registry — the central factory for Living Nexus payments.

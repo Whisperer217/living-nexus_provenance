@@ -1,4 +1,8 @@
 /**
+ * @domain   The Doctrine → Design Language → Token Layer
+ * @impl     Design Token — Single source of truth for all visual decisions on the platform
+ */
+/**
  * Living Nexus Design System — Tokens
  * ════════════════════════════════════════════════════════════════════
  * Single source of truth for every design decision on the platform.

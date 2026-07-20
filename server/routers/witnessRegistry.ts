@@ -1,3 +1,7 @@
+/**
+ * @domain   The Registry → Public Ledger → Witness Registry
+ * @impl     Server Router — Public WID registry query and verification procedures
+ */
 import Stripe from "stripe";
 import { z } from "zod";
 import { generateShareArtifact } from "../services/shareArtifactService";

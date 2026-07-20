@@ -1,3 +1,7 @@
+/**
+ * @domain   The Witness → Witness Surface → Audio Consumption
+ * @impl     React Component — Persistent global audio player with cinematic mode and snap zones
+ */
 /* ═══════════════════════════════════════════════════════════════════
    LIVING NEXUS — GlobalPlayer
    v3.0 — Draggable floating overlay · 3 snap zones · Glass backdrop

@@ -1,3 +1,7 @@
+/**
+ * @domain   The Creator → Identity → Keeper Archetype
+ * @impl     Server Router — Keeper archetype assignment, ◈ balance, and Celestial Codex procedures
+ */
 import Stripe from "stripe";
 import { z } from "zod";
 import { generateShareArtifact } from "../services/shareArtifactService";

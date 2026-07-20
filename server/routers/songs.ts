@@ -1,3 +1,7 @@
+/**
+ * @domain   The Work → Creative Works → Music
+ * @impl     Server Router — tRPC procedures for audio work registration, CRUD, discovery, and playback
+ */
 import Stripe from "stripe";
 import { z } from "zod";
 import { generateShareArtifact } from "../services/shareArtifactService";

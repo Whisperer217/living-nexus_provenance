@@ -114,6 +114,7 @@ const SECTIONS = [
   { id: "overlays",    label: "Overlays" },
   { id: "platform",    label: "Platform Components" },
   { id: "accessibility","label": "Accessibility" },
+  { id: "laws",          label: "Architectural Laws" },
 ];
 
 // ── Main Page ─────────────────────────────────────────────────────────────────
@@ -972,6 +973,106 @@ export default function DesignSystemPage() {
                   ))}
                 </div>
               </LnCard>
+            </div>
+          </Section>
+
+          {/* ── ARCHITECTURAL LAWS ────────────────────────────────────── */}
+          <Section id="laws" title="Architectural Laws">
+            <div className="mb-6 p-5 rounded-xl border" style={{ borderColor: "rgba(212,175,55,0.25)", background: "rgba(212,175,55,0.04)" }}>
+              <p className="text-sm leading-relaxed mb-2" style={{ fontFamily: "'DM Sans', sans-serif", color: "#D8C9A8" }}>
+                Living Nexus has two ontological roots. The <strong style={{ color: "#D4AF37" }}>Domain Ontology</strong> describes reality — what things <em>are</em>.
+                The <strong style={{ color: "#D4AF37" }}>Software Ontology</strong> describes implementation — how things <em>fulfill their purpose</em>.
+                The implementation is always subordinate to the domain.
+              </p>
+              <p className="text-xs mt-2" style={{ fontFamily: "'DM Sans', sans-serif", color: "#6B6555" }}>
+                Full text: <code className="text-xs px-1 py-0.5 rounded" style={{ background: "rgba(212,175,55,0.1)", color: "#D4AF37" }}>ARCHITECTURAL_LAWS.md</code> in the project root.
+              </p>
+            </div>
+
+            {([
+              {
+                num: "I",
+                title: "The Dual Identity Principle",
+                law: "Every artifact in Living Nexus shall declare both its domain identity and its implementation identity. Domain answers what it is. Implementation answers how it fulfills its purpose. Neither may be inferred solely from filesystem location, filename, or technical structure. Both must be explicit.",
+                annotation: `/**\n * @domain   The Work → Creative Works → Music\n * @impl     Server Router — tRPC procedures for audio work registration\n */`,
+              },
+              {
+                num: "II",
+                title: "Domain Supremacy",
+                law: "When a technical decision conflicts with a domain truth, the domain truth prevails. A button that 'likes' a work is wrong in this domain — not because of a style preference, but because the domain truth is witnessing, not liking.",
+                annotation: null,
+              },
+              {
+                num: "III",
+                title: "The Covenant of Subordination",
+                law: "The Software Ontology exists to serve the Domain Ontology. It has no independent authority. Technical quality is evaluated in terms of how well it serves the domain, not as an end in itself.",
+                annotation: null,
+              },
+              {
+                num: "IV",
+                title: "Explicit Over Implicit",
+                law: "In Living Nexus, nothing that matters shall be inferred. It shall be declared. Work authorship is declared via WID. Provenance is declared via Chain of Record. Human agency is declared via HAAI Declaration. Domain identity is declared via @domain annotation.",
+                annotation: null,
+              },
+              {
+                num: "V",
+                title: "The Immutability of the Chain",
+                law: "Once a domain truth is recorded in the Chain of Record, it cannot be erased. It can only be superseded. Supersession is the mechanism of change. Deletion is not permitted in the domain of authorship.",
+                annotation: null,
+              },
+            ] as { num: string; title: string; law: string; annotation: string | null }[]).map(({ num, title, law, annotation }) => (
+              <div key={num} className="mb-5 p-5 rounded-xl border" style={{ borderColor: "rgba(212,175,55,0.15)", background: "rgba(10,8,6,0.6)" }}>
+                <div className="flex items-start gap-4">
+                  <div className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold" style={{ background: "rgba(212,175,55,0.15)", color: "#D4AF37", fontFamily: "'Cinzel', serif" }}>
+                    {num}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-semibold mb-2" style={{ fontFamily: "'Cinzel', serif", color: "#D4AF37", fontSize: "14px" }}>
+                      Law {num} — {title}
+                    </h4>
+                    <p className="text-sm leading-relaxed mb-3" style={{ fontFamily: "'DM Sans', sans-serif", color: "#A89880" }}>
+                      {law}
+                    </p>
+                    {annotation && (
+                      <pre className="text-xs p-3 rounded-lg overflow-x-auto" style={{ background: "rgba(212,175,55,0.06)", color: "#8B7D5A", fontFamily: "'JetBrains Mono', monospace", border: "1px solid rgba(212,175,55,0.1)" }}>
+                        {annotation}
+                      </pre>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+
+            <div className="mt-8">
+              <h4 className="font-semibold mb-4" style={{ fontFamily: "'Cinzel', serif", color: "#D4AF37", fontSize: "13px", letterSpacing: "0.1em", textTransform: "uppercase" }}>
+                Decision Framework
+              </h4>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm" style={{ borderCollapse: "collapse" }}>
+                  <thead>
+                    <tr style={{ borderBottom: "1px solid rgba(212,175,55,0.2)" }}>
+                      <th className="text-left py-2 pr-4" style={{ color: "#D4AF37", fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: "12px" }}>Step</th>
+                      <th className="text-left py-2 pr-4" style={{ color: "#D4AF37", fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: "12px" }}>Question</th>
+                      <th className="text-left py-2" style={{ color: "#D4AF37", fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: "12px" }}>Governed By</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {([
+                      ["1", "What is this in the domain?", "Law I — Dual Identity"],
+                      ["2", "Does this technical decision serve that domain truth?", "Law II — Domain Supremacy"],
+                      ["3", "Is this decision made in service of the domain, or for its own sake?", "Law III — Covenant of Subordination"],
+                      ["4", "Is this identity explicit, or am I relying on inference?", "Law IV — Explicit Over Implicit"],
+                      ["5", "If this touches the Chain of Record, is immutability preserved?", "Law V — Immutability"],
+                    ] as [string, string, string][]).map(([step, question, gov]) => (
+                      <tr key={step} style={{ borderBottom: "1px solid rgba(212,175,55,0.08)" }}>
+                        <td className="py-2 pr-4 font-mono text-xs" style={{ color: "#D4AF37" }}>{step}</td>
+                        <td className="py-2 pr-4 text-xs" style={{ color: "#A89880", fontFamily: "'DM Sans', sans-serif" }}>{question}</td>
+                        <td className="py-2 text-xs" style={{ color: "#6B6555", fontFamily: "'DM Sans', sans-serif" }}>{gov}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </Section>
 

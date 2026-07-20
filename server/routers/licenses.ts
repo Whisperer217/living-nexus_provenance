@@ -1,3 +1,7 @@
+/**
+ * @domain   The Covenant → Intellectual Property → Licensing
+ * @impl     Server Router — Work licensing terms, grants, and download gating procedures
+ */
 import Stripe from "stripe";
 import { z } from "zod";
 import { generateShareArtifact } from "../services/shareArtifactService";

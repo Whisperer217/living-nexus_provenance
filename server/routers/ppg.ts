@@ -1,3 +1,7 @@
+/**
+ * @domain   The Keeper → Provenance Prompt Generator → AI Composition
+ * @impl     Server Router — PPG procedures for provenance-anchored AI prompt generation
+ */
 import Stripe from "stripe";
 import { z } from "zod";
 import { generateShareArtifact } from "../services/shareArtifactService";
