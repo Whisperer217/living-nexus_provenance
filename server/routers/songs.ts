@@ -1303,13 +1303,16 @@ export const songsRouter = router({
         return { count: Math.max(raw, floor) };
       }),
     /**
-     * Bulk fetch like statuses + counts for up to 100 songs in 2 DB queries.
-     * Use this instead of batching individual getLikeStatus/getLikeCount calls
-     * to avoid HTTP 414 URI Too Long errors on large track lists.
+     * Bulk fetch like statuses + counts for up to 500 songs in 2 DB queries.
+     * IMPORTANT: This is a .mutation() (POST) not a .query() (GET).
+     * tRPC sends queries as GET requests with input JSON-encoded in the URL.
+     * With 500 song IDs the URL exceeds server header limits (HTTP 431).
+     * Using mutation forces POST with body, eliminating the 431 error.
+     * Callers must use .useMutation() on the client side.
      */
     getBulkLikeStatuses: publicProcedure
       .input(z.object({ songIds: z.array(z.number()).max(500) }))
-      .query(async ({ ctx, input }) => {
+      .mutation(async ({ ctx, input }) => {
         const userId = ctx.user?.id ?? null;
         return getBulkLikeStatuses(userId, input.songIds);
       }),

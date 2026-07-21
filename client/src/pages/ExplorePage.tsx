@@ -654,11 +654,18 @@ export default function ExplorePage() {
   // and would cause an infinite setState → re-render loop.
   useEffect(() => { setVisibleSongIds(new Set()); }, [mode, activeGenre, query, contentType, seed]);
   const visibleIdArray = useMemo(() => Array.from(visibleSongIds).slice(0, 500), [visibleSongIds]);
-  const { data: bulkLikeData } = trpc.songs.getBulkLikeStatuses.useQuery(
-    { songIds: visibleIdArray },
-    { enabled: visibleIdArray.length > 0, staleTime: 30_000 }
-  );
-  const likeMap = bulkLikeData ?? {};
+  // NOTE: getBulkLikeStatuses is a .mutation() (POST) not a .query() (GET).
+  // This avoids HTTP 431 "Request Header Fields Too Large" when songIds is large.
+  const [likeMap, setLikeMap] = useState<Record<number, { liked: boolean; count: number }>>({});
+  const bulkLikeMutation = trpc.songs.getBulkLikeStatuses.useMutation({
+    onSuccess: (data) => setLikeMap(data as Record<number, { liked: boolean; count: number }>),
+  });
+  useEffect(() => {
+    if (visibleIdArray.length > 0) {
+      bulkLikeMutation.mutate({ songIds: visibleIdArray });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visibleIdArray.join(",")]);
 
   // ── Track context menu state ──────────────────────────────────────
   const [menuSong, setMenuSong] = useState<any | null>(null);

@@ -50,10 +50,15 @@ export default function DiscoverPage() {
   });
 
   // Sync activeContentType when the URL ?type= param changes (e.g. browser back/forward)
+  // Use wouter's location string (stable primitive) instead of window.location.search
+  // to avoid the infinite render loop (React Error #185) caused by evaluating
+  // window.location.search in the dependency array.
+  const [wLocation] = useLocation();
   useEffect(() => {
     const param = new URLSearchParams(window.location.search).get("type");
     setActiveContentType(param ? (TYPE_PARAM_MAP[param.toLowerCase()] ?? undefined) : undefined);
-  }, [typeof window !== "undefined" ? window.location.search : ""]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [wLocation]);
   const { addAndPlay, playQueueAt, playNext, togglePlay, openNowPlayingPanel, currentTrackId, state: playerState } = usePlayer();
   const [menuSong, setMenuSong] = useState<any | null>(null);
   const [menuPos, setMenuPos] = useState({ x: 0, y: 0 });
