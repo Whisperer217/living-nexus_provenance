@@ -234,6 +234,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           `}</style>
 
           <div
+            id="main-scroll"
             className={`flex-1 overflow-y-auto overflow-x-hidden player-scroll-area ${rightRailOpen && !isCreatorFocus ? "lg:pr-[300px]" : ""}`}
             style={{ overscrollBehaviorX: "none", overscrollBehaviorY: "none", touchAction: "pan-y" }}
           >

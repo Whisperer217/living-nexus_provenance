@@ -6400,3 +6400,10 @@
 - [x] Confirmed player sessionStorage persistence already survives OAuth redirect (no additional work needed)
 - [x] Added 12 Vitest tests for OAuth returnPath extraction, open redirect prevention, and redirect priority
 - [x] 378 tests passing, 0 TypeScript errors
+
+## Bug Fix: Scroll Position Persists Between Pages (Slimdoggy report, 2026-07-21)
+- [x] Create useScrollRestoration hook — global scroll manager, no per-page logic
+- [x] Add id="main-scroll" to the .player-scroll-area div in MainLayout
+- [x] Mount useScrollRestoration in App.tsx (single mount point)
+- [x] New page → scroll to top; Back/Forward → restore previous position
+- [x] Write Vitest tests for scroll restoration logic

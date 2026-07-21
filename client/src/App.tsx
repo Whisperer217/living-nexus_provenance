@@ -16,6 +16,7 @@ import { HarmonicProvider } from "./contexts/HarmonicContext";
 import AmbientWidget from "./components/AmbientWidget";
 import KeeperAvatarWidget from "./components/KeeperAvatarWidget";
 import { useQrScanLogger } from "./hooks/useQrScanLogger";
+import { useScrollRestoration } from "./hooks/useScrollRestoration";
 import { overlayCloseAll } from "@/lib/overlayController";
 import { PWAInstallBanner } from "./components/PWAInstallBanner";
 
@@ -136,6 +137,17 @@ function PageLoader() {
  * Closes all overlays on every route change.
  * Prevents stale scroll locks surviving navigation — critical on mobile.
  */
+/**
+ * Global Scroll Restoration Manager — mounted once, governs all pages.
+ * New forward navigation → scroll to top.
+ * Back/Forward (browser history) → restore saved position.
+ * No per-page scroll logic needed anywhere else.
+ */
+function ScrollRestorationManager() {
+  useScrollRestoration();
+  return null;
+}
+
 function OverlayRouteGuard() {
   const [location] = useLocation();
   // useLayoutEffect fires before paint — ensures scroll lock is cleared
@@ -342,6 +354,7 @@ export default function App() {
             />
             <OEmbedUpdater />
             <OverlayRouteGuard />
+            <ScrollRestorationManager />
             <QrScanLogger />
             <AmbientWidget />
             <KeeperAvatarWidget />
