@@ -6,16 +6,21 @@
  * Authenticated owners see their full management workspace.
  * Visitors see the creator's public domain.
  *
- * Sections (owner view):
- *   Overview    — stats, quick actions, public link
+ * Sections (spec: Authentication Flow v2):
+ *   Home        — domain overview, stats, public link
  *   Artifacts   — full artifact library across all mediums
+ *   Drafts      — unpublished works (owner only)
  *   Collections — curated groupings
- *   Drafts      — unpublished works
- *   Provenance  — Chain of Record for all works
- *   Analytics   — witness counts, discovery metrics
- *   Settings    — domain configuration
+ *   Videos      — video works
+ *   Images      — visual works and photography
+ *   Provenance  — Chain of Record (owner only)
+ *   Analytics   — witness & discovery metrics (owner only)
+ *   Followers   — domain audience
+ *   Publishing  — publish to Registry (owner only)
+ *   Settings    — domain configuration (owner only)
  *
  * Public view: creator profile with artifact grid
+ * Authentication always resolves here. No dashboard concept.
  */
 
 import { useState, useEffect } from "react";
@@ -39,7 +44,7 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 
 // ─── Section definitions ────────────────────────────────────────────────────
 
-type SectionId = "overview" | "artifacts" | "collections" | "drafts" | "provenance" | "analytics" | "settings";
+type SectionId = "home" | "artifacts" | "drafts" | "collections" | "videos" | "images" | "provenance" | "analytics" | "followers" | "publishing" | "settings";
 
 interface NavSection {
   id: SectionId;
@@ -50,13 +55,17 @@ interface NavSection {
 }
 
 const SECTIONS: NavSection[] = [
-  { id: "overview",     icon: Layers,       label: "Overview",     description: "Stats, quick actions, public link" },
-  { id: "artifacts",    icon: Archive,       label: "Artifacts",    description: "All registered works" },
-  { id: "collections",  icon: LayoutGrid,    label: "Collections",  description: "Curated groupings" },
-  { id: "drafts",       icon: PenLine,       label: "Drafts",       description: "Unpublished works", ownerOnly: true },
-  { id: "provenance",   icon: GitBranch,     label: "Provenance",   description: "Chain of Record", ownerOnly: true },
-  { id: "analytics",    icon: BarChart2,     label: "Analytics",    description: "Witness & discovery metrics", ownerOnly: true },
-  { id: "settings",     icon: Settings,      label: "Settings",     description: "Domain configuration", ownerOnly: true },
+  { id: "home",        icon: Layers,       label: "Home",        description: "Domain overview and public link" },
+  { id: "artifacts",  icon: Archive,      label: "Artifacts",   description: "All registered works" },
+  { id: "drafts",     icon: PenLine,      label: "Drafts",      description: "Unpublished works", ownerOnly: true },
+  { id: "collections",icon: LayoutGrid,   label: "Collections", description: "Curated groupings" },
+  { id: "videos",     icon: Video,        label: "Videos",      description: "Video works" },
+  { id: "images",     icon: Image,        label: "Images",      description: "Visual works and photography" },
+  { id: "provenance", icon: GitBranch,    label: "Provenance",  description: "Chain of Record", ownerOnly: true },
+  { id: "analytics",  icon: BarChart2,    label: "Analytics",   description: "Witness & discovery metrics", ownerOnly: true },
+  { id: "followers",  icon: Users,        label: "Followers",   description: "Domain audience" },
+  { id: "publishing", icon: ArrowUpRight, label: "Publishing",  description: "Publish to Registry", ownerOnly: true },
+  { id: "settings",   icon: Settings,     label: "Settings",    description: "Domain configuration", ownerOnly: true },
 ];
 
 // ─── Medium icons ────────────────────────────────────────────────────────────
@@ -146,7 +155,7 @@ export default function CreatorDomainShell() {
   const { handle } = useParams<{ handle: string }>();
   const [, navigate] = useLocation();
   const { user, loading: authLoading } = useAuth();
-  const [activeSection, setActiveSection] = useState<SectionId>("overview");
+  const [activeSection, setActiveSection] = useState<SectionId>("home");
 
   // Resolve the creator by handle
   const creatorQuery = trpc.profile.getByHandle.useQuery(
@@ -299,7 +308,7 @@ export default function CreatorDomainShell() {
             <div className="pb-24">
 
               {/* OVERVIEW */}
-              {activeSection === "overview" && (
+              {activeSection === "home" && (
                 <div className="space-y-6">
                   {/* Stats */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -485,6 +494,154 @@ export default function CreatorDomainShell() {
                       <p style={{ color: "var(--ln-text-muted)" }}>Analytics loading…</p>
                     </div>
                   )}
+                </div>
+              )}
+
+              {/* VIDEOS */}
+              {activeSection === "videos" && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-lg font-bold" style={{ fontFamily: "var(--ln-font-display)", color: "var(--ln-text-primary)" }}>Videos</h2>
+                    {isOwner && (
+                      <Link href="/upload?type=video">
+                        <Button size="sm" style={{ background: "var(--ln-gold)", color: "var(--ln-surface-void)" }}>
+                          <Upload className="w-4 h-4 mr-2" /> Upload Video
+                        </Button>
+                      </Link>
+                    )}
+                  </div>
+                  {(() => {
+                    const videoWorks = songs.filter((s: any) => s.contentType === "video" || s.medium === "video");
+                    if (videoWorks.length === 0) return (
+                      <div className="text-center py-16 rounded-xl" style={{ background: "var(--ln-surface-panel)", border: "1px solid var(--ln-border-subtle)" }}>
+                        <Video className="w-10 h-10 mx-auto mb-4" style={{ color: "var(--ln-text-muted)" }} />
+                        <div className="text-sm" style={{ color: "var(--ln-text-muted)" }}>No videos registered yet</div>
+                        {isOwner && <Link href="/upload?type=video"><div className="mt-4 text-xs" style={{ color: "var(--ln-gold)" }}>Upload your first video →</div></Link>}
+                      </div>
+                    );
+                    return (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                        {videoWorks.map((s: any) => (
+                          <Link key={s.id} href={`/song/${s.id}`}>
+                            <div className="rounded-xl overflow-hidden cursor-pointer group" style={{ background: "var(--ln-surface-card)", border: "1px solid var(--ln-border-subtle)" }}>
+                              <div className="aspect-video bg-black flex items-center justify-center relative">
+                                {s.coverArtUrl ? <img src={s.coverArtUrl} alt={s.title} className="w-full h-full object-cover" /> : <Video className="w-10 h-10" style={{ color: "var(--ln-text-muted)" }} />}
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                  <Play className="w-8 h-8" style={{ color: "var(--ln-gold)" }} />
+                                </div>
+                              </div>
+                              <div className="p-3">
+                                <div className="font-medium truncate" style={{ color: "var(--ln-text-primary)" }}>{s.title}</div>
+                                <div className="text-xs mt-1" style={{ color: "var(--ln-text-muted)" }}>{s.genre || "Video"}</div>
+                              </div>
+                            </div>
+                          </Link>
+                        ))}
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
+
+              {/* IMAGES */}
+              {activeSection === "images" && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-lg font-bold" style={{ fontFamily: "var(--ln-font-display)", color: "var(--ln-text-primary)" }}>Images</h2>
+                    {isOwner && (
+                      <Link href="/visual-works">
+                        <Button size="sm" style={{ background: "var(--ln-gold)", color: "var(--ln-surface-void)" }}>
+                          <Image className="w-4 h-4 mr-2" /> Manage Images
+                        </Button>
+                      </Link>
+                    )}
+                  </div>
+                  {(() => {
+                    const imageWorks = songs.filter((s: any) => s.contentType === "visual" || s.medium === "visual" || s.contentType === "comic");
+                    if (imageWorks.length === 0) return (
+                      <div className="text-center py-16 rounded-xl" style={{ background: "var(--ln-surface-panel)", border: "1px solid var(--ln-border-subtle)" }}>
+                        <Image className="w-10 h-10 mx-auto mb-4" style={{ color: "var(--ln-text-muted)" }} />
+                        <div className="text-sm" style={{ color: "var(--ln-text-muted)" }}>No images registered yet</div>
+                        {isOwner && <Link href="/visual-works"><div className="mt-4 text-xs" style={{ color: "var(--ln-gold)" }}>Register visual works →</div></Link>}
+                      </div>
+                    );
+                    return (
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                        {imageWorks.map((s: any) => (
+                          <Link key={s.id} href={`/song/${s.id}`}>
+                            <div className="rounded-xl overflow-hidden cursor-pointer group aspect-square" style={{ background: "var(--ln-surface-card)", border: "1px solid var(--ln-border-subtle)" }}>
+                              {s.coverArtUrl ? <img src={s.coverArtUrl} alt={s.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" /> : <div className="w-full h-full flex items-center justify-center"><Image className="w-8 h-8" style={{ color: "var(--ln-text-muted)" }} /></div>}
+                            </div>
+                          </Link>
+                        ))}
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
+
+              {/* FOLLOWERS */}
+              {activeSection === "followers" && (
+                <div className="space-y-4">
+                  <h2 className="text-lg font-bold" style={{ fontFamily: "var(--ln-font-display)", color: "var(--ln-text-primary)" }}>Followers</h2>
+                  <div className="text-center py-16 rounded-xl" style={{ background: "var(--ln-surface-panel)", border: "1px solid var(--ln-border-subtle)" }}>
+                    <Users className="w-10 h-10 mx-auto mb-4" style={{ color: "var(--ln-text-muted)" }} />
+                    <div className="text-sm font-medium mb-1" style={{ color: "var(--ln-text-primary)" }}>Follower system coming soon</div>
+                    <div className="text-xs" style={{ color: "var(--ln-text-muted)" }}>Creators who follow this domain will appear here</div>
+                  </div>
+                </div>
+              )}
+
+              {/* PUBLISHING (owner only) */}
+              {activeSection === "publishing" && isOwner && (
+                <div className="space-y-4">
+                  <h2 className="text-lg font-bold" style={{ fontFamily: "var(--ln-font-display)", color: "var(--ln-text-primary)" }}>Publishing</h2>
+                  <p className="text-sm" style={{ color: "var(--ln-text-muted)" }}>Artifacts published from this domain are indexed by the Registry and surfaced in Discovery.</p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {[
+                      { label: "Upload New Work", description: "Register a new artifact with WID provenance", href: "/upload", icon: Upload },
+                      { label: "Batch Upload", description: "Register multiple works at once", href: "/batch-upload", icon: Layers },
+                      { label: "Manage Drafts", description: "Review and publish pending works", href: undefined, action: () => setActiveSection("drafts"), icon: PenLine },
+                      { label: "Distribute", description: "Send works to DSPs and external registries", href: "/distribute", icon: Globe },
+                      { label: "Licensing", description: "Set licensing terms for your works", href: "/licensing", icon: Shield },
+                      { label: "Registry", description: "View your indexed works in the Registry", href: "/registry", icon: GitBranch },
+                    ].map(item => {
+                      const Icon = item.icon;
+                      const inner = (
+                        <div className="flex items-center gap-4 p-4 rounded-xl cursor-pointer group transition-all duration-150"
+                          style={{ background: "var(--ln-surface-panel)", border: "1px solid var(--ln-border-subtle)" }}
+                          onMouseEnter={(e) => (e.currentTarget.style.borderColor = "var(--ln-border-gold)")}
+                          onMouseLeave={(e) => (e.currentTarget.style.borderColor = "var(--ln-border-subtle)")}>
+                          <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "var(--ln-surface-card)" }}>
+                            <Icon className="w-5 h-5" style={{ color: "var(--ln-gold)" }} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="font-medium" style={{ color: "var(--ln-text-primary)" }}>{item.label}</div>
+                            <div className="text-xs" style={{ color: "var(--ln-text-muted)" }}>{item.description}</div>
+                          </div>
+                          <ArrowUpRight className="w-4 h-4 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: "var(--ln-gold)" }} />
+                        </div>
+                      );
+                      return item.href
+                        ? <Link key={item.label} href={item.href}>{inner}</Link>
+                        : <div key={item.label} onClick={item.action}>{inner}</div>;
+                    })}
+                  </div>
+                  {/* Publishing flow diagram */}
+                  <div className="rounded-xl p-6 mt-4" style={{ background: "var(--ln-surface-panel)", border: "1px solid var(--ln-border-subtle)" }}>
+                    <div className="text-xs font-semibold uppercase tracking-wider mb-4" style={{ color: "var(--ln-text-muted)" }}>Publishing Flow</div>
+                    <div className="flex flex-col gap-2 text-sm" style={{ color: "var(--ln-text-secondary)" }}>
+                      {["Artifact", "Draft", "Edit", "Attach Provenance", "Publish", "Registry Index", "Search", "Discovery", "Public Domain Page"].map((step, i, arr) => (
+                        <div key={step}>
+                          <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: i === 4 ? "var(--ln-gold)" : "var(--ln-border-gold)" }} />
+                            <span style={{ color: i === 4 ? "var(--ln-gold)" : "inherit", fontWeight: i === 4 ? 600 : 400 }}>{step}</span>
+                          </div>
+                          {i < arr.length - 1 && <div className="ml-1 w-px h-3" style={{ background: "var(--ln-border-subtle)", marginLeft: "3px" }} />}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               )}
 

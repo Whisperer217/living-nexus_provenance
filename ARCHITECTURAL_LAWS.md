@@ -353,3 +353,88 @@ The ten domain nodes and their children:
 ---
 
 *These laws were enacted July 2026 by the Living Nexus platform doctrine. They are not subject to revision by technical convenience. Any proposed amendment must demonstrate that the amendment serves the domain more faithfully than the current law.*
+
+---
+
+## Law VI — Implementation Specification (Authentication Flow v2)
+
+*Enacted July 20, 2026. Source: Jake, Living Nexus Architecture Shift document.*
+
+### Authentication States and Transitions
+
+```
+State 1: Unauthenticated
+  └── Action: Visit livingnexus.org
+  └── Destination: Discovery Surface (public)
+  └── Primary content: Featured Domains, Trending Artifacts
+
+State 2: Authentication Initiated
+  └── Action: Click "Sign In"
+  └── Destination: Manus OAuth
+  └── Returns to: State 3 or State 4
+
+State 3: First-Time Creator (no handle set)
+  └── Destination: /setup-domain
+  └── Action: Claim handle
+  └── On complete: Transition to State 4
+
+State 4: Returning Creator (handle set)
+  └── Destination: /@{handle}
+  └── This is the Creator Domain — the persistent workspace
+  └── No intermediate dashboard. No platform homepage.
+```
+
+### Creator Domain Workspace — Required Sections
+
+The Creator Domain at `/@:handle` MUST contain all eleven sections:
+
+| Section | Visibility | Purpose |
+|---|---|---|
+| Home | Public + Owner | Domain overview, stats, public link |
+| Artifacts | Public + Owner | Full artifact library across all mediums |
+| Drafts | Owner only | Unpublished works |
+| Collections | Public + Owner | Curated groupings |
+| Videos | Public + Owner | Video works |
+| Images | Public + Owner | Visual works and photography |
+| Provenance | Owner only | Chain of Record for all works |
+| Analytics | Owner only | Witness & discovery metrics |
+| Followers | Public + Owner | Domain audience |
+| Publishing | Owner only | Publish to Registry |
+| Settings | Owner only | Domain configuration |
+
+### Discovery Surface Principle
+
+The public Discovery surface (`/discover`) MUST:
+- Lead with **Featured Domains** — not individual tracks
+- Show creator domains as the primary entry point
+- Present artifacts as entry points INTO creator domains
+- Never present itself as a platform dashboard
+
+### Publishing Flow (from the spec)
+
+```
+Artifact
+  ↓
+Draft
+  ↓
+Edit
+  ↓
+Attach Provenance
+  ↓
+Publish          ← The moment of Registry entry
+  ↓
+Registry Indexes Artifact
+  ↓
+Discovery Updates
+  ↓
+Public Domain Page
+```
+
+The Registry never owns the artifact. The creator's domain owns the artifact. The Registry indexes it.
+
+### Prohibited Patterns
+
+- Redirecting authenticated users to the Living Nexus homepage
+- Presenting a "dashboard" as the post-login destination
+- Any navigation structure that makes the platform feel like the home
+- Discovery surfaces that lead with platform content rather than creator domains

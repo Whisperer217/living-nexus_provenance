@@ -196,6 +196,62 @@ export default function DiscoverPage() {
           </div>
         </div>
       </div>
+      {/* ── Featured Domains (Law VI) ───────────────────────────────────────── */}
+      {/* Discovery showcases domains. Artifacts are entry points into creator domains. */}
+      <div className="container pt-10 pb-4">
+        <div className="flex items-center justify-between mb-5">
+          <div>
+            <p className="text-[10px] font-mono tracking-[0.25em] uppercase mb-1" style={{ color: "rgba(196,154,40,0.5)" }}>Featured Domains</p>
+            <h2 className="text-xl font-bold" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>Creator Domains</h2>
+          </div>
+          <Link href="/explore?filter=creators">
+            <span className="text-xs font-mono tracking-wider" style={{ color: "var(--ln-gold)" }}>All Domains →</span>
+          </Link>
+        </div>
+        {creatorsLoading ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="rounded-xl animate-pulse" style={{ height: 140, background: "rgba(196,154,40,0.05)" }} />
+            ))}
+          </div>
+        ) : creators && creators.length > 0 ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+            {creators
+              .filter((c: any) => c.name && c.name.trim().length > 0)
+              .slice(0, 10)
+              .map((creator: any) => {
+                const handle = creator.artistHandle || String(creator.id);
+                const displayName = creator.artistHandle ? `@${creator.artistHandle}` : (creator.name || "Creator");
+                const artifactCount = (creator as any).publishedCount ?? 0;
+                return (
+                  <Link key={creator.id} href={`/@${handle}`}>
+                    <div
+                      className="rounded-xl p-4 cursor-pointer transition-all hover:scale-[1.02]"
+                      style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.12)" }}
+                      onMouseEnter={(e) => (e.currentTarget.style.borderColor = "rgba(196,154,40,0.4)")}
+                      onMouseLeave={(e) => (e.currentTarget.style.borderColor = "rgba(196,154,40,0.12)")}
+                    >
+                      <div className="w-12 h-12 rounded-full mx-auto mb-3 overflow-hidden flex items-center justify-center" style={{ background: "#1C1A14", border: "2px solid rgba(196,154,40,0.3)" }}>
+                        {creator.profilePhotoUrl ? (
+                          <img src={creator.profilePhotoUrl} alt={displayName} className="w-full h-full object-cover" />
+                        ) : (
+                          <span className="text-lg font-bold" style={{ color: "var(--ln-gold)", fontFamily: "'Cinzel', serif" }}>
+                            {displayName.replace("@", "").charAt(0).toUpperCase()}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs font-semibold truncate text-center" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>{displayName}</p>
+                      <p className="text-xs mt-1 text-center" style={{ color: "rgba(196,154,40,0.6)" }}>
+                        {artifactCount} artifact{artifactCount !== 1 ? "s" : ""}
+                      </p>
+                    </div>
+                  </Link>
+                );
+              })}
+          </div>
+        ) : null}
+      </div>
+
       {/* ── Founder's Era Banner ─────────────────────────────────────────────── */}
       <div className="container pt-8 pb-2">
         <Link href="/founders">

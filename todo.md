@@ -6383,3 +6383,12 @@
 - [x] Build CreatorDomainShell at /@:handle — persistent creator domain workspace (7 sections)
 - [x] Register /@:handle and /setup-domain routes in App.tsx
 - [x] 366 tests passing, 0 TypeScript errors
+
+## Phase N+25: Authentication Flow v2 — Law VI Implementation
+- [x] Creator Domain Shell: added Videos, Images, Followers, Publishing sections (11 total)
+- [x] SectionId type updated to include all 11 sections
+- [x] "overview" renamed to "home" — no dashboard concept
+- [x] Discovery surface: Featured Domains section added above Founder's Era banner
+- [x] Domains link to /@handle (not /creator/:id)
+- [x] ARCHITECTURAL_LAWS.md: Law VI implementation spec appended (states, transitions, prohibited patterns, publishing flow)
+- [x] 366 tests passing, 0 TypeScript errors
