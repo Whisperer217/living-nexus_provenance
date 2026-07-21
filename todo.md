@@ -6373,3 +6373,13 @@
 - [x] Apply @domain/@impl annotations to 19 representative files across all domain branches
 - [x] Add Architectural Laws section to /design-system documentation page (Laws I–V + decision table)
 - [x] 366 tests passing, 0 TypeScript errors
+
+## Phase N+24: Law VI — Domain-First Architecture
+- [x] Encode Law VI in ARCHITECTURAL_LAWS.md with full observation chain as provenance record
+- [x] Update Decision Framework table to include Law VI
+- [x] Update OAuth callback to redirect to /@handle after login (or / if no handle set)
+- [x] Add /api/check-handle endpoint for real-time handle availability checking
+- [x] Build SetupDomainPage at /setup-domain — handle claim flow for first-time users
+- [x] Build CreatorDomainShell at /@:handle — persistent creator domain workspace (7 sections)
+- [x] Register /@:handle and /setup-domain routes in App.tsx
+- [x] 366 tests passing, 0 TypeScript errors

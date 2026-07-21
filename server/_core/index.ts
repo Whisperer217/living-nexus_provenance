@@ -29,6 +29,7 @@ import { sitemapRouter } from "../routes/sitemapRoute";
 import { bulkDownloadRouter } from "../routes/bulkDownloadRoute";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
+import { getUserByHandle } from "../utils/db";
 import { startVisualWorker, backfillVisualQueue } from "../workers/visualQueue";
 import { startSelfImprovementWorker } from "../workers/selfImprovementWorker";
 import { startPaymentIntegrityWorker } from "../workers/paymentIntegrityWorker";
@@ -179,6 +180,19 @@ async function startServer() {
   // Cloud Worker Callbacks — HMAC-authenticated callbacks from the Layer 3 processing worker
   // Must be registered with raw body capture BEFORE express.json() processes the body
   app.use(workerCallbackRouter);
+  // Handle availability check — GET /api/check-handle?handle=:handle (Law VI: domain claim)
+  app.get("/api/check-handle", async (req, res) => {
+    const handle = String(req.query.handle || "").trim();
+    if (!handle || !/^[a-zA-Z0-9_]{3,32}$/.test(handle)) {
+      return res.json({ available: false, reason: "invalid" });
+    }
+    try {
+      const existing = await getUserByHandle(handle);
+      return res.json({ available: !existing });
+    } catch {
+      return res.json({ available: false, reason: "error" });
+    }
+  });
   // tRPC API
   app.use(
     "/api/trpc",

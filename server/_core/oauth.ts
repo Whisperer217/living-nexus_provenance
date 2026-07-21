@@ -57,7 +57,14 @@ export function registerOAuthRoutes(app: Express) {
       const cookieOptions = getSessionCookieOptions(req);
       res.cookie(COOKIE_NAME, sessionToken, { ...cookieOptions, maxAge: ONE_YEAR_MS });
 
-      res.redirect(302, "/");
+      // Law VI — The Creator Domain Principle:
+      // Authentication resolves to the creator's persistent domain, not the platform homepage.
+      // If the user has an artistHandle, redirect to their domain /@handle.
+      // If not yet set, redirect to /setup-domain to claim their handle.
+      const freshUser = await db.getUserByOpenId(userInfo.openId);
+      const handle = freshUser?.artistHandle;
+      const destination = handle ? `/@${handle}` : "/setup-domain";
+      res.redirect(302, destination);
     } catch (error) {
       console.error("[OAuth] Callback failed", error);
       res.status(500).json({ error: "OAuth callback failed" });
