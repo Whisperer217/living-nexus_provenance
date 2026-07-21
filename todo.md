@@ -6392,3 +6392,11 @@
 - [x] Domains link to /@handle (not /creator/:id)
 - [x] ARCHITECTURAL_LAWS.md: Law VI implementation spec appended (states, transitions, prohibited patterns, publishing flow)
 - [x] 366 tests passing, 0 TypeScript errors
+
+## Bug Fix: OAuth Redirect / 404 During Active Playback (2026-07-21)
+- [x] Traced OAuth state encoding — getLoginUrl, state parameter, server callback
+- [x] Fixed server oauth.ts: extractReturnPath() reads returnPath from state before defaulting to /@handle
+- [x] Fixed client const.ts: getLoginUrl() defaults returnPath to window.location.pathname+search (all 12 callsites fixed automatically)
+- [x] Confirmed player sessionStorage persistence already survives OAuth redirect (no additional work needed)
+- [x] Added 12 Vitest tests for OAuth returnPath extraction, open redirect prevention, and redirect priority
+- [x] 378 tests passing, 0 TypeScript errors
