@@ -17,9 +17,18 @@ const STORAGE_KEY = `living-nexus-whats-new-seen-${CURRENT_VERSION}`;
 
 const UPDATES = [
   {
+    version: "v2.51.0",
+    date: "Jul 21, 2026",
+    label: "Latest",
+    items: [
+      { icon: Shield, text: "Work page stability — Fixed a regression where the work detail page could get permanently stuck showing skeleton loaders after a failed API request. The page now falls through to a graceful not-found state immediately on any error, and the application remains fully interactive." },
+      { icon: Link2, text: "References & Citations — Work detail pages now include a collapsible References & Citations section. Creators can record that their work was influenced by or derived from another work, with an optional context note. All citations are permanently attached to the provenance record." },
+    ],
+  },
+  {
     version: "v2.50.0",
     date: "Jul 13, 2026",
-    label: "Latest",
+    label: "",
     items: [
       { icon: Download, text: "Album ZIP download — Download Album now bundles all free tracks into a single ZIP with full ID3 metadata: title, artist, album name, track number, year, genre, and embedded album artwork. Streaming ZIP generation means the download starts immediately regardless of album size. Works on both the Album Detail page and Creator Public Domain." },
       { icon: Shield, text: "Production stability — Fixed HTTP 500/503 errors on download endpoints caused by the CDN proxy not being trusted by Express. All download routes now work correctly on the live site." },

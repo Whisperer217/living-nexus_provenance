@@ -53,6 +53,7 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 import { SongDetailPageSkeleton } from "@/components/SongDetailPageSkeleton";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 import { SacredCanvas } from "@/components/SacredCanvas";
+import { ReferenceCitePanel } from "@/components/ReferenceCitePanel";
 
 // Slug keys stored in DB (safe ASCII, no charset issues); emoji shown in UI
 const REACTION_SLUGS = ["fire", "love", "wow", "clap", "thumbsup", "thumbsdown", "mindblown", "+"];
@@ -1916,6 +1917,8 @@ export default function SongDetailPage() {
         songTitle={song.title}
         ownerId={song.userId}
       />
+      {/* ── REFERENCES & CITATIONS ── */}
+      <ReferenceCitePanel songId={songId} songTitle={song.title} />
       </div>
 
       {/* Gift Modal */}

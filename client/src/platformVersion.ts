@@ -14,4 +14,4 @@
  *   3. That's it — the badge updates automatically.
  */
 
-export const PLATFORM_VERSION = "v2.50.0";
+export const PLATFORM_VERSION = "v2.51.0";

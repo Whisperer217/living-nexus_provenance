@@ -864,7 +864,7 @@
 - [x] Add db helpers: witnessCreator, unwatchCreator, isWitnessing, getWitnessCount, getWitnessedByCount, createReference, getReferencesForSong, getReferencesForUser
 - [x] Add tRPC procedures: witness.toggle, witness.status, witness.network, reference.create, reference.list
 - [x] Add Witness button to CreatorProfilePage (replaces generic follow)
-- [ ] Add Reference/Cite panel to SongDetailPage
+- [x] Add Reference/Cite panel to SongDetailPage (ReferenceCitePanel component, collapsible)
 - [x] Add Witness Network tab to ProfilePage showing who you witness + who witnesses you
 - [x] Meaningful notifications: "You were referenced in a witness record", "Your work was cited in a derivation"
 
@@ -1638,16 +1638,16 @@
 - [x] Add songs.getReactions tRPC procedure (counts per emoji + user's selected reactions)
 - [x] Add songs.toggleReaction tRPC procedure (upsert/delete, one per type per user per song)
 - [x] Update SongDetailPage: optimistic UI for reactions, highlight user-selected, persist across sessions
-- [ ] Fix Signals: remove any time-based auto-read or auto-archive logic
-- [ ] Fix Signals: markAsRead only on user click/expand interaction
-- [ ] Fix Signals: add "Mark all as read" button
+- [x] Fix Signals: remove any time-based auto-read or auto-archive logic (no auto-read logic exists — confirmed)
+- [x] Fix Signals: markAsRead only on user click/expand interaction (handleClick in NotifRow fires markRead)
+- [x] Fix Signals: add "Mark all as read" button (present in NotificationsPage header)
 - [ ] Safety audit: WID visible on every work, WIDPanel opens with metadata/provenance/verify
 - [ ] Safety audit: Upload (single) works, Batch Upload accessible inside UploadPage
 - [ ] Safety audit: Witness Records accessible via Profile → Works → View Records
 - [ ] Safety audit: AddToMyListModal works everywhere, no duplicate add systems
 - [ ] Safety audit: Admin Panel accessible via role-gated route only, not in UI
 - [ ] Safety audit: Redeem Code accessible via Profile → Settings
-- [ ] Safety audit: Search accessible via QuickAccessPanel
+- [x] Safety audit: Search accessible via QuickAccessPanel (confirmed — QuickRefSlider has search input navigating to /search)
 
 ## Task 18: Mobile Player Restructure (Cinematic Mode + Action Layer)
 - [x] Audit MobilePlayerPanel / NowPlayingPanel component structure
