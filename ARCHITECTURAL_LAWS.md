@@ -211,9 +211,163 @@ Until automated enforcement is in place, annotations are enforced by code review
 
 ## Law VI — The Creator Domain Principle
 
-> **Living Nexus is not the home. Creators' domains are the home. Living Nexus is the registry, discovery engine, and provenance network that connects those domains together.**
+> **Creators do not log into Living Nexus. Creators log into their own persistent domain.**
 >
-> **Authentication resolves to the creator's persistent domain, not to the platform homepage. The platform indexes — it does not own — the creator experience.**
+> **Living Nexus is the registry, discovery engine, and provenance network — not the creator's workspace.**
+
+---
+
+### Core Principle
+
+```text
+Visitor
+   │
+   ▼
+Sign In
+   │
+   ▼
+Authenticate Identity
+   │
+   ▼
+Resolve Creator Domain
+   │
+   ▼
+Redirect Automatically
+   │
+   ▼
+livingnexus.org/@username
+```
+
+**Never**
+
+```text
+Login → Living Nexus Homepage
+```
+
+**Always**
+
+```text
+Login → Creator Domain
+```
+
+---
+
+### Creator Domain
+
+The Creator Domain at `livingnexus.org/@handle` is the creator's permanent digital workspace:
+
+```text
+Creator Domain
+│
+├── Home
+├── Artifact Library
+├── Drafts
+├── Collections
+├── Videos
+├── Images
+├── Provenance
+├── Analytics
+├── Publishing
+└── Settings
+```
+
+---
+
+### Publishing Flow
+
+```text
+Creator Domain
+      │
+      ▼
+Create Artifact
+      │
+      ▼
+Edit
+      │
+      ▼
+Version
+      │
+      ▼
+Attach Provenance
+      │
+      ▼
+Publish
+      │
+      ▼
+Living Nexus Registry Index
+      │
+      ▼
+Discovery
+      │
+      ▼
+Public Artifact
+```
+
+Artifacts originate inside creator domains. The Registry never owns artifacts — it only indexes them.
+
+---
+
+### Public Architecture
+
+```text
+                     Living Nexus
+
+             Discovery • Search • Registry
+                    Featured Domains
+                   Featured Artifacts
+                      Collections
+
+             ▲            ▲            ▲
+
+──────────────────────────────────────────────────
+
+      Domain A     Domain B     Domain C
+
+      Artifacts    Artifacts    Artifacts
+      Videos       Research     Images
+      Collections  Papers       Projects
+```
+
+Living Nexus connects domains. Domains create artifacts. Artifacts power discovery.
+
+---
+
+### User Journey
+
+```text
+Visitor → Discover Artifact → Visit Creator Domain → Explore Creator
+    → Follow Creator → Create Account → Own Domain Created → Publish Artifacts
+```
+
+---
+
+### Architecture Rules
+
+1. Authentication always redirects to the creator's domain.
+2. Every creator owns one persistent domain.
+3. Every artifact originates from a creator domain.
+4. Living Nexus indexes published artifacts.
+5. Discovery promotes both artifacts and creator domains.
+6. The creator's domain is the primary workspace.
+7. Living Nexus is infrastructure — not the creator's home.
+
+---
+
+### Design Philosophy
+
+**Platform-first (prohibited)**
+
+```
+Website → Dashboard → Content
+```
+
+**Domain-first (required)**
+
+```
+Registry → Creator Domain → Artifacts → Discovery
+```
+
+---
 
 ### Observation Chain
 
@@ -244,84 +398,11 @@ Observation
 │      └── Living Nexus indexes, connects, and enables discovery.
 │
 └── Resulting Principle
-       Creator Domain
-            ↓
-       Artifact Creation
-            ↓
-     Provenance Attached
-            ↓
-      Registry Indexed
-            ↓
-      Public Discovery
+       Creator Domain → Artifact Creation → Provenance Attached
+            → Registry Indexed → Public Discovery
 ```
 
-### The Domain Structure
-
-Every creator owns a persistent domain at `livingnexus.org/@handle`. That domain is their digital home — not a profile page, not a dashboard, but a sovereign workspace containing:
-
-| Section | Purpose |
-|---|---|
-| Identity | WID Handle, Keeper Archetype, bio, avatar, banner |
-| Artifact Library | All registered works across all mediums |
-| Video Library | Video works and cinematic content |
-| Collections | Curated groupings of works |
-| Drafts | Unpublished works in progress |
-| Publishing | Artifact creation, versioning, provenance attachment |
-| Analytics | Witness counts, discovery metrics, provenance events |
-| Settings | Domain configuration, privacy, licensing defaults |
-| Media | Raw media assets, uploads, storage |
-| Provenance | Chain of Record for all works |
-| Version History | Full version lineage for every artifact |
-
-### The Login Flow
-
-```
-Login
-   │
-   ▼
-Creator Domain (/@handle)
-```
-
-Not:
-
-```
-Login
-   │
-   ▼
-Living Nexus Dashboard
-```
-
-### The Registry's Role
-
-Living Nexus as a platform operates as:
-
-```
-                Living Nexus
-
-          Registry
-          Discovery
-          Search
-          Collections
-          Trending
-
-                 ▲
-                 │
-────────────────────────────────────
-      Creator Domain
-
-Identity · Artifact Library · Video Library
-Collections · Drafts · Publishing
-Analytics · Settings · Media
-Provenance · Version History
-```
-
-Creator Domains create artifacts. Artifacts feed the Registry. Registry powers discovery. Living Nexus connects domains — it does not own them.
-
-### The Mental Model
-
-> Steam does not feel like Valve. Steam feels like YOUR library.
->
-> Living Nexus should not feel like visiting a website. It should feel like entering your own digital domain.
+---
 
 ### Rationale
 
@@ -330,6 +411,21 @@ When a platform positions itself as the home, it implicitly claims ownership of 
 When the creator's domain is the home, the relationship inverts. The creator is sovereign. The platform is infrastructure. This is not a UX preference — it is a statement about the nature of the relationship between Living Nexus and the people who use it.
 
 This law governs every routing decision, every post-authentication redirect, every navigation structure, and every feature placement decision. If a feature would make the platform feel like the home rather than the creator's domain, that feature is misplaced.
+
+---
+
+### Final Principle
+
+> Creators own domains. Domains own artifacts. Living Nexus connects the world to both.
+
+---
+
+### Implementation Notes
+
+- **Post-login redirect:** `/@{handle}` (returning user) or `/setup-domain` (first-time user)
+- **returnPath preservation:** If the user authenticated from a deep route, they return there first — then to their domain on next login
+- **Discovery surface:** Leads with Featured Domains, not platform content
+- **Prohibited:** Any redirect to the Living Nexus homepage after authentication
 
 ---
 
