@@ -192,7 +192,7 @@ export default function SongDetailPage() {
 
 
 
-  const { data: songData, isLoading } = trpc.songs.getById.useQuery(
+  const { data: songData, isLoading, isError: isSongError } = trpc.songs.getById.useQuery(
     { id: songId },
     { enabled: songId > 0, refetchOnWindowFocus: false }
   );
@@ -395,7 +395,8 @@ export default function SongDetailPage() {
     setShareOpen(false);
   };
 
-  if (isLoading) return <SongDetailPageSkeleton />;
+  // Never show skeleton indefinitely — if the query errored or songId is invalid, fall through to not-found.
+  if (isLoading && !isSongError) return <SongDetailPageSkeleton />;
 
   if (!song || !songData) return (
     <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--ln-coal)" }}>

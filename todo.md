@@ -6407,3 +6407,7 @@
 - [x] Mount useScrollRestoration in App.tsx (single mount point)
 - [x] New page → scroll to top; Back/Forward → restore previous position
 - [x] Write Vitest tests for scroll restoration logic
+
+## Session: July 2026 — Bug Fixes
+- [x] Fix SongDetailPage infinite skeleton: add isError guard so query failure falls through to not-found state instead of staying in skeleton indefinitely
+- [x] Silence verbose PlayerContext visibilitychange console.log spam — downgraded to debug-only (enable via localStorage.debug = 'ln:player')

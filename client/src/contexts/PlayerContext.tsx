@@ -635,28 +635,36 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       });
     };
 
-    // ── Page lifecycle instrumentation ───────────────────────────────────────────
+    // ── Page lifecycle instrumentation (debug-only — no-op in production) ─────────
+    // These handlers are intentionally silent in production to avoid console spam.
+    // Re-enable by setting localStorage.debug = 'ln:player' in DevTools.
+    const _dbg = typeof localStorage !== 'undefined' && localStorage.getItem('debug')?.includes('ln:player');
     const onVisibilityChange = () => {
+      if (!_dbg) return;
       const a = audioRef.current;
       const s = stateRef.current;
       console.log(`[LN-PLAYER] visibilitychange → ${document.visibilityState} | isPlaying=${s.isPlaying} | paused=${a?.paused} | src=${(a?.src ?? '').slice(-40)} | readyState=${a?.readyState}`);
     };
     const onPageShow = (e: PageTransitionEvent) => {
+      if (!_dbg) return;
       const a = audioRef.current;
       const s = stateRef.current;
       console.log(`[LN-PLAYER] pageshow | persisted=${e.persisted} | isPlaying=${s.isPlaying} | paused=${a?.paused} | readyState=${a?.readyState}`);
     };
     const onPageHide = (e: PageTransitionEvent) => {
+      if (!_dbg) return;
       const a = audioRef.current;
       const s = stateRef.current;
       console.log(`[LN-PLAYER] pagehide | persisted=${e.persisted} | isPlaying=${s.isPlaying} | paused=${a?.paused}`);
     };
     const onFreeze = () => {
+      if (!_dbg) return;
       const a = audioRef.current;
       const s = stateRef.current;
       console.log(`[LN-PLAYER] freeze (Page Lifecycle) | isPlaying=${s.isPlaying} | paused=${a?.paused}`);
     };
     const onResume = () => {
+      if (!_dbg) return;
       const a = audioRef.current;
       const s = stateRef.current;
       console.log(`[LN-PLAYER] resume (Page Lifecycle) | isPlaying=${s.isPlaying} | paused=${a?.paused} | readyState=${a?.readyState}`);
