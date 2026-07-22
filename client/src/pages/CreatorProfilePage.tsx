@@ -914,7 +914,7 @@ export default function CreatorProfilePage() {
   const profileTitle = `${creator.artistHandle || creator.name || "Artist"} — Living Nexus`;
   const profileDesc = creator.bio
     ? creator.bio.slice(0, 160)
-    : `${songs.length} track${songs.length !== 1 ? "s" : ""} on Living Nexus`;
+    : `${songs.length} published work${songs.length !== 1 ? "s" : ""} on Living Nexus`;
   const profileImage = creator.profilePhotoUrl || "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/HMNMkWUWAfVdTbRj3YmPCF/ln-navbar-icon-180_b914f927.png";
   const profileUrl = typeof window !== "undefined" ? window.location.href : "";
 
