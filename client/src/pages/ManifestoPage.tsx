@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "wouter";
-import { Shield, Music, Lock, Users, ChevronLeft, ExternalLink, ScrollText } from "lucide-react";
+import { Shield, Music, Lock, Users, ChevronLeft, ExternalLink, ScrollText, RefreshCw } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { DeclarationModal } from "@/components/DeclarationModal";
 
@@ -363,6 +363,18 @@ export default function ManifestoPage() {
           >
             <ExternalLink size={14} /> Read the Doctrine
           </a>
+          <Link href="/doctrine">
+            <a
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold text-sm"
+              style={{
+                background: "transparent",
+                border: "1px solid rgba(196,154,40,0.25)",
+                color: "var(--ln-gold-dim)",
+              }}
+            >
+              <RefreshCw size={14} /> Sovereignty Stack
+            </a>
+          </Link>
           <Link href="/attribution">
             <a
               className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold text-sm"

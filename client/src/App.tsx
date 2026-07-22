@@ -70,6 +70,7 @@ const RedeemPage = lazy(() => import("./pages/RedeemPage"));
 const PricingCovenantPage = lazy(() => import("./pages/PricingCovenantPage"));
 const FieldNotesPage = lazy(() => import("./pages/FieldNotesPage"));
 const WIDSpecPage = lazy(() => import("./pages/WIDSpecPage"));
+const DoctrineStackPage = lazy(() => import("./pages/DoctrineStackPage"));
 const LexiconPage = lazy(() => import("./pages/LexiconPage"));
 // GlossaryPage merged into LexiconPage — /glossary redirects to /lexicon
 const PlaylistsPage = lazy(() => import("./pages/PlaylistsPage"));
@@ -257,6 +258,7 @@ function Router() {
                 <Route path="/redeem" component={RedeemPage} />
                 <Route path="/pricing" component={PricingCovenantPage} />
                 <Route path="/field-notes" component={FieldNotesPage} />
+                <Route path="/doctrine" component={DoctrineStackPage} />
                 <Route path="/doctrine/wid-spec" component={WIDSpecPage} />
                 <Route path="/lexicon" component={LexiconPage} />
                 <Route path="/glossary"><Redirect to="/lexicon" /></Route>

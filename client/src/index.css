@@ -3229,3 +3229,64 @@ h1, h2, h3, h4, h5, h6,
   pointer-events: none;
   z-index: 1;
 }
+
+/* ── Doctrine Stack Page ───────────────────────────────────────────── */
+
+@keyframes doctrine-enter {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes doctrine-connector-grow {
+  from { transform: scaleY(0); }
+  to   { transform: scaleY(1); }
+}
+
+@keyframes doctrine-pulse-arrow {
+  0%, 100% { opacity: 0.5; transform: translateY(0); }
+  50%       { opacity: 1;   transform: translateY(3px); }
+}
+
+@keyframes doctrine-spin-slow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes doctrine-creator-breathe {
+  0%, 100% { box-shadow: 0 0 60px rgba(196,154,40,0.18), 0 8px 32px rgba(0,0,0,0.5); }
+  50%       { box-shadow: 0 0 80px rgba(196,154,40,0.28), 0 8px 40px rgba(0,0,0,0.6); }
+}
+
+.doctrine-layer {
+  animation: doctrine-enter 0.5s ease both;
+}
+
+.doctrine-connector {
+  transform-origin: top;
+  animation: doctrine-connector-grow 0.4s ease both;
+}
+
+.doctrine-pulse-arrow {
+  animation: doctrine-pulse-arrow 1.8s ease-in-out infinite;
+}
+
+.doctrine-spin-slow {
+  animation: doctrine-spin-slow 8s linear infinite;
+}
+
+.doctrine-creator-node {
+  animation: doctrine-creator-breathe 3s ease-in-out infinite;
+}
+
+.doctrine-return-node {
+  animation: doctrine-creator-breathe 4s ease-in-out infinite 1s;
+}
+
+.doctrine-society-node {
+  animation: doctrine-creator-breathe 5s ease-in-out infinite 2s;
+}
+
+.doctrine-card:hover .doctrine-arrow-down {
+  transform: translateY(2px);
+  transition: transform 0.2s ease;
+}
