@@ -6411,3 +6411,15 @@
 ## Session: July 2026 — Bug Fixes
 - [x] Fix SongDetailPage infinite skeleton: add isError guard so query failure falls through to not-found state instead of staying in skeleton indefinitely
 - [x] Silence verbose PlayerContext visibilitychange console.log spam — downgraded to debug-only (enable via localStorage.debug = 'ln:player')
+
+## Living Identity Engine — Multi-Medium Rebuild (Session: July 2026)
+- [ ] Rebuild generateTagline server procedure to analyze ALL content types (music, books, comics, testimony, visual, games, lyrics, manuscripts, playlists, albums)
+- [ ] Include creator-written bio, origin statement, witness philosophy, active mediums, and recurring themes in identity corpus
+- [ ] Count works accurately per medium type in the identity snapshot
+- [ ] Remove audio-only signals (key, BPM, harmonic data) as the primary identity axis — demote to one signal among many
+- [ ] Generate a multi-paragraph Living Identity Snapshot that reflects the full creative corpus
+- [ ] Add corpus_fingerprint to cache invalidation — regenerate when published works count changes by ≥5 or a new medium type appears
+- [ ] Rename "Nexus Witness Tagline" label to "Living Identity Snapshot" in the UI (desktop + mobile)
+- [ ] Add visual separator between Creator Bio (creator-written) and Living Identity Snapshot (platform-observed)
+- [ ] Add "Refresh Identity" button visible to owner that triggers forceRegenerate
+- [ ] Ensure Living Identity Snapshot does not duplicate the creator bio — it should complement, not restate

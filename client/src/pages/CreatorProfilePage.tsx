@@ -688,8 +688,11 @@ export default function CreatorProfilePage() {
   const galleryImages = galleryData?.items ?? [];
 
   // ─── AI-generated Nexus witness tagline ───────────────────────────────────
+  // Prefer identitySnapshot (new multi-paragraph engine) over legacy generatedTagline
   const [nexusTagline, setNexusTagline] = useState<string | null>(
-    (data?.creator as any)?.generatedTagline ?? null
+    (data?.creator as any)?.identitySnapshot ??
+    (data?.creator as any)?.generatedTagline ??
+    null
   );
   const [taglineLoading, setTaglineLoading] = useState(false);
   const generateTaglineMutation = trpc.profile.generateTagline.useMutation({
@@ -700,18 +703,24 @@ export default function CreatorProfilePage() {
     onError: () => setTaglineLoading(false),
   });
 
-  // Auto-generate tagline on first load if not cached
+  // Auto-generate Living Identity Snapshot on first load if not cached
   useEffect(() => {
     if (!data?.creator) return;
-    const cached = (data.creator as any).generatedTagline;
-    if (cached) {
-      setNexusTagline(cached);
-      return;
+    const cachedSnapshot = (data.creator as any).identitySnapshot;
+    const cachedTagline = (data.creator as any).generatedTagline;
+    // Use whatever is cached for immediate display
+    if (cachedSnapshot) {
+      setNexusTagline(cachedSnapshot);
+    } else if (cachedTagline) {
+      setNexusTagline(cachedTagline);
     }
-    // Only auto-generate if creator has at least 1 song
+    // Only auto-generate if creator has at least 1 published work
     if ((data.songs?.length ?? 0) === 0) return;
-    setTaglineLoading(true);
-    generateTaglineMutation.mutate({ creatorId: data.creator.id, forceRegenerate: false });
+    // If no snapshot exists at all, trigger generation
+    if (!cachedSnapshot && !cachedTagline) {
+      setTaglineLoading(true);
+      generateTaglineMutation.mutate({ creatorId: data.creator.id, forceRegenerate: false });
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data?.creator?.id]);
 
@@ -1186,14 +1195,51 @@ export default function CreatorProfilePage() {
                   </button>
                 )}
 
-                {/* Nexus Witness Tagline — AI-generated one-liner above the bio */}
+                {/* Living Identity Snapshot — platform-observed portrait, multi-paragraph */}
                 {(nexusTagline || taglineLoading) && (
-                  <p
-                    className="text-xs mt-2 italic w-full"
-                    style={{ color: "var(--ln-gold)", opacity: taglineLoading ? 0.4 : 0.75, letterSpacing: "0.01em" }}
-                  >
-                    {taglineLoading ? "Witnessing identity…" : nexusTagline}
-                  </p>
+                  <div className="mt-3 w-full">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <span
+                        className="text-[10px] font-semibold tracking-widest uppercase"
+                        style={{ color: "var(--ln-gold)", opacity: 0.55 }}
+                      >
+                        Living Identity
+                      </span>
+                      {isOwner && !taglineLoading && (
+                        <button
+                          type="button"
+                          title="Refresh Identity Snapshot"
+                          onClick={() => {
+                            setTaglineLoading(true);
+                            generateTaglineMutation.mutate({ creatorId: creator.id, forceRegenerate: true });
+                          }}
+                          className="opacity-30 hover:opacity-70 transition-opacity"
+                          style={{ color: "var(--ln-gold)" }}
+                        >
+                          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/>
+                          </svg>
+                        </button>
+                      )}
+                    </div>
+                    {taglineLoading ? (
+                      <p className="text-xs italic" style={{ color: "var(--ln-gold)", opacity: 0.4 }}>
+                        Witnessing identity across all works…
+                      </p>
+                    ) : (
+                      <div className="space-y-2">
+                        {nexusTagline!.split("\n\n").map((para, i) => para.trim() ? (
+                          <p
+                            key={i}
+                            className="text-xs italic leading-relaxed w-full"
+                            style={{ color: "var(--ln-gold)", opacity: 0.75, letterSpacing: "0.01em" }}
+                          >
+                            {para.trim()}
+                          </p>
+                        ) : null)}
+                      </div>
+                    )}
+                  </div>
                 )}
 
                 {/* Bio — full text, sacred typography, preserves creator's line breaks */}
@@ -1572,14 +1618,51 @@ export default function CreatorProfilePage() {
                 </div>
               </div>{/* end pl-[96px] identity block */}
 
-              {/* Nexus Witness Tagline — mobile, full width */}
+              {/* Living Identity Snapshot — mobile, full width */}
               {(nexusTagline || taglineLoading) && (
-                <p
-                  className="text-xs italic w-full"
-                  style={{ color: "var(--ln-gold)", opacity: taglineLoading ? 0.4 : 0.75, letterSpacing: "0.01em" }}
-                >
-                  {taglineLoading ? "Witnessing identity…" : nexusTagline}
-                </p>
+                <div className="w-full">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span
+                      className="text-[10px] font-semibold tracking-widest uppercase"
+                      style={{ color: "var(--ln-gold)", opacity: 0.55 }}
+                    >
+                      Living Identity
+                    </span>
+                    {isOwner && !taglineLoading && (
+                      <button
+                        type="button"
+                        title="Refresh Identity Snapshot"
+                        onClick={() => {
+                          setTaglineLoading(true);
+                          generateTaglineMutation.mutate({ creatorId: creator.id, forceRegenerate: true });
+                        }}
+                        className="opacity-30 hover:opacity-70 transition-opacity"
+                        style={{ color: "var(--ln-gold)" }}
+                      >
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/>
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                  {taglineLoading ? (
+                    <p className="text-xs italic" style={{ color: "var(--ln-gold)", opacity: 0.4 }}>
+                      Witnessing identity across all works…
+                    </p>
+                  ) : (
+                    <div className="space-y-2">
+                      {nexusTagline!.split("\n\n").map((para, i) => para.trim() ? (
+                        <p
+                          key={i}
+                          className="text-xs italic leading-relaxed w-full"
+                          style={{ color: "var(--ln-gold)", opacity: 0.75, letterSpacing: "0.01em" }}
+                        >
+                          {para.trim()}
+                        </p>
+                      ) : null)}
+                    </div>
+                  )}
+                </div>
               )}
 
               {/* Bio — full-width below the avatar, sacred typography, preserves creator's line breaks */}
