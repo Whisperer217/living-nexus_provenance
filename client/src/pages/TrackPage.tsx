@@ -149,15 +149,41 @@ export default function TrackPage() {
 
       {/* ── Track Hero ── */}
       <div className="rounded-2xl overflow-hidden border border-white/[0.08] mb-5">
-        {/* Art */}
-        <div className="relative h-[220px] flex items-center justify-center"
+        {/* Art — aspect-ratio preserving */}
+        <div className="relative"
           style={{ background: track.bg || "linear-gradient(135deg, var(--ln-coal), #000000)" }}>
           {track.artUrl ? (
-            <img src={track.artUrl} alt={track.title} className="w-full h-full object-cover absolute inset-0" />
+            <>
+              {/* Blurred backdrop halo */}
+              <img
+                src={track.artUrl}
+                alt=""
+                aria-hidden="true"
+                className="absolute inset-0 w-full h-full pointer-events-none select-none"
+                style={{
+                  objectFit: "cover",
+                  filter: "blur(24px) saturate(0.5) brightness(0.3)",
+                  transform: "scale(1.1)",
+                }}
+              />
+              {/* Primary artwork — object-contain preserves full composition */}
+              <img
+                src={track.artUrl}
+                alt={track.title}
+                className="relative w-full block"
+                style={{
+                  objectFit: "contain",
+                  maxHeight: "clamp(220px, 50vw, 480px)",
+                  filter: "drop-shadow(0 2px 20px rgba(0,0,0,0.6))",
+                }}
+              />
+            </>
           ) : (
-            <span className="text-7xl select-none">{track.emoji || "🎵"}</span>
+            <div className="flex items-center justify-center" style={{ height: 220 }}>
+              <span className="text-7xl select-none">{track.emoji || "🎵"}</span>
+            </div>
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
 
           {/* Play button overlay */}
           <button

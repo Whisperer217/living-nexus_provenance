@@ -273,13 +273,37 @@ export default function BookDetailPage() {
         {/* ── Hero row: cover + metadata ── */}
         <div className="flex flex-col md:flex-row gap-6">
 
-          {/* Cover art — portrait 3:4 */}
+          {/* Cover art — aspect-ratio preserving */}
           <div className="flex-shrink-0 w-full md:w-56">
-            <div className="relative rounded-2xl overflow-hidden shadow-2xl" style={{ aspectRatio: "3/4", background: "var(--ln-coal)" }}>
+            <div className="relative rounded-2xl overflow-hidden shadow-2xl" style={{ background: "var(--ln-coal)" }}>
               {song.coverArtUrl ? (
-                <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover" />
+                <div className="relative w-full">
+                  {/* Blurred backdrop halo */}
+                  <img
+                    src={song.coverArtUrl}
+                    alt=""
+                    aria-hidden="true"
+                    className="absolute inset-0 w-full h-full pointer-events-none select-none"
+                    style={{
+                      objectFit: "cover",
+                      filter: "blur(20px) saturate(0.5) brightness(0.3)",
+                      transform: "scale(1.1)",
+                    }}
+                  />
+                  {/* Primary artwork — object-contain preserves full composition */}
+                  <img
+                    src={song.coverArtUrl}
+                    alt={song.title}
+                    className="relative w-full block"
+                    style={{
+                      objectFit: "contain",
+                      maxHeight: "clamp(280px, 50vw, 480px)",
+                      filter: "drop-shadow(0 2px 16px rgba(0,0,0,0.5))",
+                    }}
+                  />
+                </div>
               ) : (
-                <div className="w-full h-full flex items-center justify-center">
+                <div className="w-full flex items-center justify-center" style={{ height: 280 }}>
                   <BookOpen className="w-16 h-16 opacity-20" style={{ color: "var(--ln-gold)" }} />
                 </div>
               )}

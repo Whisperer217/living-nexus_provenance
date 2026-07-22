@@ -139,15 +139,39 @@ export default function VisualWorksDetailPage() {
         style={{ background: "linear-gradient(180deg, rgba(253,164,175,0.06) 0%, transparent 100%)", borderBottom: `1px solid ${ACCENT_BORDER}` }}
       >
         <div className="max-w-5xl mx-auto px-4 py-10 flex flex-col md:flex-row gap-8">
-          {/* Cover */}
+          {/* Cover — aspect-ratio preserving */}
           <div
-            className="w-full md:w-56 h-56 rounded-2xl overflow-hidden flex-shrink-0"
+            className="w-full md:w-56 rounded-2xl overflow-hidden flex-shrink-0 relative"
             style={{ background: ACCENT_BG, border: `1px solid ${ACCENT_BORDER}` }}
           >
             {collection.coverUrl ? (
-              <img src={collection.coverUrl} alt={collection.title} className="w-full h-full object-cover" />
+              <div className="relative w-full">
+                {/* Blurred backdrop halo */}
+                <img
+                  src={collection.coverUrl}
+                  alt=""
+                  aria-hidden="true"
+                  className="absolute inset-0 w-full h-full pointer-events-none select-none"
+                  style={{
+                    objectFit: "cover",
+                    filter: "blur(20px) saturate(0.5) brightness(0.3)",
+                    transform: "scale(1.1)",
+                  }}
+                />
+                {/* Primary artwork — object-contain preserves full composition */}
+                <img
+                  src={collection.coverUrl}
+                  alt={collection.title}
+                  className="relative w-full block"
+                  style={{
+                    objectFit: "contain",
+                    maxHeight: "clamp(200px, 40vw, 400px)",
+                    filter: "drop-shadow(0 2px 16px rgba(0,0,0,0.5))",
+                  }}
+                />
+              </div>
             ) : (
-              <div className="w-full h-full flex items-center justify-center">
+              <div className="w-full flex items-center justify-center" style={{ height: 224 }}>
                 <svg width="56" height="56" viewBox="0 0 48 48" fill="none">
                   <circle cx="24" cy="24" r="14" stroke={ACCENT} strokeWidth="1.2" opacity="0.6" />
                   <circle cx="24" cy="24" r="3" fill={ACCENT} opacity="0.9" />

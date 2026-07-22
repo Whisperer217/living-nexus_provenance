@@ -343,20 +343,41 @@ export default function AlbumDetailPage() {
       {/* ── Album hero ────────────────────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row items-start sm:items-end gap-6 px-4 sm:px-8 pt-8 pb-6"
         style={{ background: "linear-gradient(to bottom, rgba(196,154,40,0.06), transparent)" }}>
-        {/* Cover art */}
-        <div className="w-40 h-40 sm:w-48 sm:h-48 flex-shrink-0 rounded-xl overflow-hidden shadow-2xl"
-          style={{ background: "rgba(196,154,40,0.08)", border: "1px solid rgba(196,154,40,0.2)" }}>
+        {/* Cover art — aspect-ratio preserving */}
+        <div className="flex-shrink-0 rounded-xl overflow-hidden shadow-2xl relative"
+          style={{
+            width: "clamp(140px, 20vw, 192px)",
+            background: "rgba(196,154,40,0.08)",
+            border: "1px solid rgba(196,154,40,0.2)",
+          }}>
           {collection.coverArtUrl ? (
-            <img
-              src={collection.coverArtUrl}
-              alt={collection.name}
-              className="w-full h-full object-cover"
-              style={{
-                objectPosition: `${collection.coverPositionX ?? 50}% ${collection.coverPositionY ?? 50}%`,
-              }}
-            />
+            <div className="relative w-full">
+              {/* Blurred backdrop halo */}
+              <img
+                src={collection.coverArtUrl}
+                alt=""
+                aria-hidden="true"
+                className="absolute inset-0 w-full h-full pointer-events-none select-none"
+                style={{
+                  objectFit: "cover",
+                  filter: "blur(20px) saturate(0.5) brightness(0.3)",
+                  transform: "scale(1.1)",
+                }}
+              />
+              {/* Primary artwork — object-contain preserves full composition */}
+              <img
+                src={collection.coverArtUrl}
+                alt={collection.name}
+                className="relative w-full block"
+                style={{
+                  objectFit: "contain",
+                  maxHeight: "clamp(140px, 20vw, 192px)",
+                  filter: "drop-shadow(0 2px 16px rgba(0,0,0,0.5))",
+                }}
+              />
+            </div>
           ) : (
-            <div className="w-full h-full flex items-center justify-center">
+            <div className="flex items-center justify-center" style={{ height: "clamp(140px, 20vw, 192px)" }}>
               <Disc3 className="w-12 h-12 opacity-20" style={{ color: "var(--ln-gold, #C49A28)" }} />
             </div>
           )}

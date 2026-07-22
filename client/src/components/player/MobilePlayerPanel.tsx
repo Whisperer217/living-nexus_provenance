@@ -467,12 +467,28 @@ export default function MobilePlayerPanel() {
 
           {/* Cover art — ALWAYS rendered, fallback to placeholder */}
           {currentTrack?.artUrl ? (
-            <img src={currentTrack.artUrl} alt={currentTrack.title || "Track artwork"}
-              className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500"
-              style={{
-                opacity: showVideo ? 0 : 1,
-                objectPosition: `${currentTrack.coverPositionX ?? 50}% ${currentTrack.coverPositionY ?? 50}%`,
-              }} />
+            <>
+              {/* Blurred backdrop halo — fills the fixed container */}
+              <img src={currentTrack.artUrl} alt=""
+                aria-hidden="true"
+                className="absolute inset-0 w-full h-full pointer-events-none select-none transition-opacity duration-500"
+                style={{
+                  objectFit: "cover",
+                  objectPosition: `${currentTrack.coverPositionX ?? 50}% ${currentTrack.coverPositionY ?? 50}%`,
+                  filter: "blur(24px) saturate(0.55) brightness(0.3)",
+                  transform: "scale(1.1)",
+                  opacity: showVideo ? 0 : 1,
+                }} />
+              {/* Primary artwork — object-contain preserves full composition */}
+              <img src={currentTrack.artUrl} alt={currentTrack.title || "Track artwork"}
+                className="absolute inset-0 w-full h-full transition-opacity duration-500"
+                style={{
+                  objectFit: "contain",
+                  objectPosition: `${currentTrack.coverPositionX ?? 50}% ${currentTrack.coverPositionY ?? 50}%`,
+                  opacity: showVideo ? 0 : 1,
+                  filter: "drop-shadow(0 4px 24px rgba(0,0,0,0.6))",
+                }} />
+            </>
           ) : (
             /* Placeholder — always show something, never blank */
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-3"

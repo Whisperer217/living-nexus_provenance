@@ -127,16 +127,36 @@ export default function CollectionPage() {
       {/* ── Hero ── */}
       <div className="max-w-5xl mx-auto px-4">
         <div className="flex flex-col md:flex-row gap-8 items-start mb-8">
-          {/* Cover art */}
-          <div className="w-full md:w-56 h-56 flex-shrink-0 rounded-xl overflow-hidden bg-card border border-border">
+          {/* Cover art — aspect-ratio preserving */}
+          <div className="w-full md:w-56 flex-shrink-0 rounded-xl overflow-hidden relative" style={{ background: "var(--ln-coal, #0d0b08)", border: "1px solid rgba(255,255,255,0.08)" }}>
             {collection.coverArtUrl ? (
-              <img
-                src={collection.coverArtUrl}
-                alt={collection.name}
-                className="w-full h-full object-cover"
-              />
+              <div className="relative w-full">
+                {/* Blurred backdrop halo */}
+                <img
+                  src={collection.coverArtUrl}
+                  alt=""
+                  aria-hidden="true"
+                  className="absolute inset-0 w-full h-full pointer-events-none select-none"
+                  style={{
+                    objectFit: "cover",
+                    filter: "blur(20px) saturate(0.5) brightness(0.3)",
+                    transform: "scale(1.1)",
+                  }}
+                />
+                {/* Primary artwork — object-contain preserves full composition */}
+                <img
+                  src={collection.coverArtUrl}
+                  alt={collection.name}
+                  className="relative w-full block"
+                  style={{
+                    objectFit: "contain",
+                    maxHeight: "clamp(200px, 40vw, 400px)",
+                    filter: "drop-shadow(0 2px 16px rgba(0,0,0,0.5))",
+                  }}
+                />
+              </div>
             ) : (
-              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-amber-900/30 to-amber-600/10">
+              <div className="w-full flex items-center justify-center bg-gradient-to-br from-amber-900/30 to-amber-600/10" style={{ height: 224 }}>
                 <Music2 className="w-16 h-16 text-amber-600/50" />
               </div>
             )}

@@ -113,13 +113,37 @@ export default function GameDetailPage() {
       <div className="max-w-5xl mx-auto px-4 py-8 space-y-8">
         {/* Hero: cover + metadata */}
         <div className="flex flex-col md:flex-row gap-8">
-          {/* Cover art */}
+          {/* Cover art — aspect-ratio preserving */}
           <div className="flex-shrink-0">
-            <div className="w-48 h-48 rounded-xl overflow-hidden border border-white/10 shadow-2xl">
+            <div className="rounded-xl overflow-hidden border border-white/10 shadow-2xl relative" style={{ width: 192, background: "var(--ln-obsidian)" }}>
               {song.coverArtUrl ? (
-                <MediaAsset src={song.coverArtUrl} alt={song.title} mode="card" className="w-full h-full object-cover" />
+                <div className="relative w-full">
+                  {/* Blurred backdrop halo */}
+                  <img
+                    src={song.coverArtUrl}
+                    alt=""
+                    aria-hidden="true"
+                    className="absolute inset-0 w-full h-full pointer-events-none select-none"
+                    style={{
+                      objectFit: "cover",
+                      filter: "blur(20px) saturate(0.5) brightness(0.3)",
+                      transform: "scale(1.1)",
+                    }}
+                  />
+                  {/* Primary artwork — object-contain preserves full composition */}
+                  <img
+                    src={song.coverArtUrl}
+                    alt={song.title}
+                    className="relative w-full block"
+                    style={{
+                      objectFit: "contain",
+                      maxHeight: 320,
+                      filter: "drop-shadow(0 2px 16px rgba(0,0,0,0.5))",
+                    }}
+                  />
+                </div>
               ) : (
-                <div className="w-full h-full flex items-center justify-center" style={{ background: "var(--ln-obsidian)" }}>
+                <div className="w-full flex items-center justify-center" style={{ height: 192, background: "var(--ln-obsidian)" }}>
                   <Gamepad2 className="w-16 h-16 text-[var(--ln-gold)] opacity-40" />
                 </div>
               )}

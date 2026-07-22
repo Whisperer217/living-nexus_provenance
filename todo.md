@@ -6411,3 +6411,17 @@
 ## Session: July 2026 — Bug Fixes
 - [x] Fix SongDetailPage infinite skeleton: add isError guard so query failure falls through to not-found state instead of staying in skeleton indefinitely
 - [x] Silence verbose PlayerContext visibilitychange console.log spam — downgraded to debug-only (enable via localStorage.debug = 'ln:player')
+
+## Phase N+XX: Aspect-Ratio-Preserving Artwork Across All Mediums
+- [x] Audit all hero/banner artwork display components across the platform
+- [x] Fix AlbumDetailPage hero cover — object-contain + blurred backdrop halo
+- [x] Fix BookDetailPage hero cover — object-contain + blurred backdrop halo
+- [x] Fix VisualWorksDetailPage hero cover — object-contain + blurred backdrop halo
+- [x] Fix CollectionPage hero cover — object-contain + blurred backdrop halo
+- [x] Fix GameDetailPage hero cover — object-contain + blurred backdrop halo
+- [x] Fix TrackPage hero banner — object-contain + blurred backdrop halo
+- [x] Fix MobilePlayerPanel full-screen artwork — object-contain + blurred backdrop halo
+- [x] Confirmed: PlayerBar uses MediaAsset (PlayerMedia mode) — already uses object-contain with blurred bg
+- [x] Confirmed: SongDetailPage uses CinematicSongHeader — already fixed in prior session
+- [x] Confirmed: card thumbnails (TrackCard, RelatedCard, playlist rows) intentionally use object-cover (correct for small fixed-size thumbnails)
+- [x] TypeScript: 0 errors | Vitest: 398/398 passing
