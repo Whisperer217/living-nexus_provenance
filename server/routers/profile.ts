@@ -368,10 +368,15 @@ export const profileRouter = router({
     }),
 
     /**
-     * Generate (or return cached) AI-powered one-liner tagline for a creator.
-     * The tagline is the Nexus's witness statement about the creator — derived
-     * from their portfolio signals (genre, WID count, play count, harmonic data,
-     * bio keywords). Cached in generatedTagline column; regenerates on demand.
+     * Living Identity Engine — generates a multi-paragraph Living Identity Snapshot
+     * from the creator's ENTIRE witnessed body of work across ALL content types.
+     * Analyzes: music, books, comics, manuscripts, lyrics, games, visual works,
+     * creator-written bio/origin/mission/philosophy, recurring themes, medium mix,
+     * and artistic progression signals.
+     *
+     * Cache invalidation: regenerates when corpusFingerprint changes
+     * (new medium type appears OR published count changes by ≥5).
+     * forceRegenerate bypasses the fingerprint check entirely.
      */
     generateTagline: publicProcedure
       .input(z.object({
@@ -387,69 +392,159 @@ export const profileRouter = router({
         const creator = await getUserById(input.creatorId);
         if (!creator) throw new TRPCError({ code: 'NOT_FOUND', message: 'Creator not found' });
 
-        // Return cached tagline unless forceRegenerate
-        if (!input.forceRegenerate && creator.generatedTagline) {
-          return { tagline: creator.generatedTagline, cached: true };
-        }
-
-        // Gather portfolio signals
-        const songs = await getSongsByUser(creator.id);
-        const publicSongs = songs.filter((s: any) => s.status !== 'Deleted');
-        const songCount = publicSongs.length;
+        // ── Corpus analysis: gather ALL published works across ALL content types ──
+        const allWorks = await getSongsByUser(creator.id);
+        const publishedWorks = allWorks.filter((s: any) => s.status === 'Published' && s.isPublic);
+        const publishedCount = publishedWorks.length;
         const totalPlays = await getCreatorTotalPlays(creator.id);
 
-        // Build a compact context string for the LLM
+        // Medium breakdown — count works per content type
+        const mediumMap: Record<string, number> = {};
+        for (const w of publishedWorks) {
+          const ct = (w as any).contentType ?? 'audio';
+          mediumMap[ct] = (mediumMap[ct] ?? 0) + 1;
+        }
+        const mediumSet = Object.keys(mediumMap).sort().join(',');
+
+        // ── Corpus fingerprint: "{count}:{mediumSet}" ──
+        // Round count down to nearest 5 so small changes don't thrash regeneration
+        const countBucket = Math.floor(publishedCount / 5) * 5;
+        const newFingerprint = `${countBucket}:${mediumSet}`;
+
+        // Return cached snapshot if fingerprint unchanged and not force-regenerating
+        const cachedSnapshot = (creator as any).identitySnapshot;
+        const cachedFingerprint = (creator as any).corpusFingerprint;
+        if (!input.forceRegenerate && cachedSnapshot && cachedFingerprint === newFingerprint) {
+          return { tagline: cachedSnapshot, cached: true, isSnapshot: true };
+        }
+
+        // ── Genre signals ──
         const genreMap: Record<string, number> = {};
-        for (const s of publicSongs) {
-          if ((s as any).genre) {
-            const g = String((s as any).genre);
+        for (const w of publishedWorks) {
+          if ((w as any).genre) {
+            const g = String((w as any).genre);
             genreMap[g] = (genreMap[g] ?? 0) + 1;
           }
         }
         const topGenres = Object.entries(genreMap)
           .sort((a, b) => b[1] - a[1])
-          .slice(0, 3)
-          .map(([g]) => g)
+          .slice(0, 5)
+          .map(([g, count]) => `${g} (${count})`)
           .join(', ');
 
+        // ── HAAI origin stories — sample up to 8 most recent ──
+        const haaiSamples = publishedWorks
+          .filter((w: any) => w.haaiOriginStory)
+          .slice(-8)
+          .map((w: any) => `- "${String(w.haaiOriginStory).slice(0, 120)}"`)
+          .join('\n');
+
+        // ── Work descriptions — sample up to 6 most recent ──
+        const descSamples = publishedWorks
+          .filter((w: any) => w.description)
+          .slice(-6)
+          .map((w: any) => `- "${String(w.description).slice(0, 100)}"`)
+          .join('\n');
+
+        // ── Medium summary for the prompt ──
+        const mediumSummary = Object.entries(mediumMap)
+          .sort((a, b) => b[1] - a[1])
+          .map(([type, count]) => {
+            const labels: Record<string, string> = {
+              audio: 'Music Tracks',
+              lyrics: 'Lyric Sheets',
+              manuscript: 'Books / Manuscripts',
+              comic: 'Comics / Graphic Works',
+              game: 'Games',
+              image: 'Visual Works',
+            };
+            return `${labels[type] ?? type}: ${count}`;
+          })
+          .join('\n');
+
+        // ── Build the full corpus context ──
         const contextLines = [
-          creator.name ? `Artist: ${creator.name}` : '',
+          `Creator: ${creator.name ?? 'Unknown'}`,
           creator.artistHandle ? `Handle: @${creator.artistHandle}` : '',
-          creator.primaryGenre ? `Primary Genre: ${creator.primaryGenre}` : '',
-          topGenres ? `Top Genres Across Works: ${topGenres}` : '',
-          creator.bio ? `Bio: ${creator.bio.slice(0, 300)}` : '',
+          creator.officialArtistName ? `Official Artist Name: ${creator.officialArtistName}` : '',
+          `Total Published Works: ${publishedCount}`,
+          `Total Plays: ${totalPlays}`,
+          '',
+          '── CREATIVE CORPUS BY MEDIUM ──',
+          mediumSummary,
+          '',
+          topGenres ? `── GENRE SIGNALS (top 5 by frequency) ──\n${topGenres}` : '',
+          '',
+          '── CREATOR\'S OWN WORDS ──',
+          creator.bio ? `Bio: ${creator.bio.slice(0, 400)}` : '',
+          creator.originStatement ? `Origin Statement: ${creator.originStatement.slice(0, 300)}` : '',
+          creator.creativeMission ? `Creative Mission: ${creator.creativeMission.slice(0, 300)}` : '',
+          creator.creativePhilosophy ? `Creative Philosophy: ${creator.creativePhilosophy.slice(0, 300)}` : '',
+          creator.creativeDoctrine ? `Creative Doctrine: ${creator.creativeDoctrine.slice(0, 300)}` : '',
+          creator.archiveContinuity ? `Archive Legacy Statement: ${creator.archiveContinuity.slice(0, 200)}` : '',
+          '',
+          creator.activeMediums && Array.isArray(creator.activeMediums) && creator.activeMediums.length > 0
+            ? `Active Mediums (self-declared): ${(creator.activeMediums as string[]).join(', ')}` : '',
+          '',
+          '── SONIC / TONAL IDENTITY (audio works) ──',
           creator.energyProfile ? `Energy Profile: ${creator.energyProfile}` : '',
           creator.toneFrequencyNote ? `Tone/Frequency: ${creator.toneFrequencyNote}` : '',
           creator.dominantKey ? `Dominant Key: ${creator.dominantKey}` : '',
-          creator.creativeMission ? `Creative Mission: ${creator.creativeMission.slice(0, 200)}` : '',
-          `Registered Works: ${songCount}`,
-          `Total Plays: ${totalPlays}`,
+          creator.tempoRange ? `Tempo Range: ${creator.tempoRange}` : '',
+          creator.primaryGenre ? `Primary Genre: ${creator.primaryGenre}` : '',
+          '',
+          haaiSamples ? `── HAAI ORIGIN STORIES (sample of creator intent statements) ──\n${haaiSamples}` : '',
+          '',
+          descSamples ? `── WORK DESCRIPTIONS (sample) ──\n${descSamples}` : '',
         ].filter(Boolean).join('\n');
 
+        // ── Living Identity Snapshot prompt ──
         const response = await invokeLLM({
           messages: [
             {
               role: 'system',
-              content: `You are the Living Nexus — an audio provenance platform that witnesses and anchors creator identity. Your task is to write a single, powerful one-liner that serves as the Nexus's witness statement about a creator. This is NOT a marketing tagline. It is the platform speaking on behalf of what it has observed in the creator's portfolio. Rules: (1) One sentence only — no more than 25 words. (2) Ground it in real portfolio signals (genre, work count, plays, energy, key, frequency). (3) Write in third person, present tense. (4) Do not use generic phrases like "talented artist" or "unique sound". (5) Make it feel earned — like a provenance seal.`,
+              content: `You are Living Nexus — a multi-medium provenance platform that witnesses and permanently anchors creator identity. Your task is to write a Living Identity Snapshot: a 2-3 paragraph portrait of this creator that emerges from the totality of their witnessed body of work.
+
+This is NOT a biography. It is the platform's observation — what the provenance record reveals about this creator.
+
+Rules:
+1. Base every claim on the corpus data provided. Do not invent genres, mediums, or themes not present in the data.
+2. If the creator works across multiple mediums, acknowledge ALL of them — do not reduce a multi-medium creator to a single medium.
+3. Use the creator's own words (bio, origin statement, mission, philosophy) as signals — do not quote them directly, but let them inform the portrait.
+4. Write in third person, present tense. The platform is speaking.
+5. Paragraph 1: What does the totality of their published works reveal about their creative identity? (medium mix, scale, themes)
+6. Paragraph 2: What distinguishes their approach — their voice, their doctrine, their artistic intent?
+7. Paragraph 3 (optional, only if enough signal): How is their identity evolving — new mediums, shifts in focus, emerging themes?
+8. Do NOT use generic phrases like "talented creator", "unique voice", or "passionate artist".
+9. Do NOT mention the platform name (Living Nexus) within the text.
+10. Each paragraph should be 2-4 sentences. Total length: 80-180 words.
+11. Make it feel earned — like a provenance seal, not a press release.`,
             },
             {
               role: 'user',
-              content: `Based on the following creator portfolio data, write the Nexus witness statement one-liner:\n\n${contextLines}\n\nRespond with ONLY the one-liner sentence. No quotes, no labels, no explanation.`,
+              content: `Based on the following creator corpus data, write the Living Identity Snapshot:\n\n${contextLines}\n\nRespond with ONLY the snapshot paragraphs. No headers, no labels, no quotes around the text.`,
             },
           ],
         });
 
         const raw = response.choices?.[0]?.message?.content;
         if (!raw) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'No response from AI' });
-        const tagline = typeof raw === 'string' ? raw.trim().replace(/^"|"$/g, '') : '';
-        if (!tagline) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Empty tagline from AI' });
+        const snapshot = typeof raw === 'string' ? raw.trim().replace(/^"|"$/g, '') : '';
+        if (!snapshot) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Empty snapshot from AI' });
 
-        // Cache in DB
+        // Cache in DB — update both legacy tagline (first line) and new identitySnapshot
+        const firstLine = snapshot.split('\n')[0].trim();
         await db.update(usersTable)
-          .set({ generatedTagline: tagline, generatedTaglineAt: new Date() })
+          .set({
+            generatedTagline: firstLine.slice(0, 500),
+            generatedTaglineAt: new Date(),
+            identitySnapshot: snapshot,
+            identitySnapshotAt: new Date(),
+            corpusFingerprint: newFingerprint,
+          } as any)
           .where(eqFn(usersTable.id, creator.id));
 
-        return { tagline, cached: false };
+        return { tagline: snapshot, cached: false, isSnapshot: true };
       }),
     myStats: protectedProcedure.query(async ({ ctx }) => {
       const [stats, songs, user] = await Promise.all([

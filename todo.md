@@ -6425,3 +6425,15 @@
 - [x] Confirmed: SongDetailPage uses CinematicSongHeader — already fixed in prior session
 - [x] Confirmed: card thumbnails (TrackCard, RelatedCard, playlist rows) intentionally use object-cover (correct for small fixed-size thumbnails)
 - [x] TypeScript: 0 errors | Vitest: 398/398 passing
+
+## Living Identity Engine — Multi-Medium Rebuild (Session: July 2026)
+- [ ] Rebuild generateTagline server procedure to analyze ALL content types (music, books, comics, testimony, visual, games, lyrics, manuscripts, playlists, albums)
+- [ ] Include creator-written bio, origin statement, witness philosophy, active mediums, and recurring themes in identity corpus
+- [ ] Count works accurately per medium type in the identity snapshot
+- [ ] Remove audio-only signals (key, BPM, harmonic data) as the primary identity axis — demote to one signal among many
+- [ ] Generate a multi-paragraph Living Identity Snapshot that reflects the full creative corpus
+- [ ] Add corpus_fingerprint to cache invalidation — regenerate when published works count changes by ≥5 or a new medium type appears
+- [ ] Rename "Nexus Witness Tagline" label to "Living Identity Snapshot" in the UI (desktop + mobile)
+- [ ] Add visual separator between Creator Bio (creator-written) and Living Identity Snapshot (platform-observed)
+- [ ] Add "Refresh Identity" button visible to owner that triggers forceRegenerate
+- [ ] Ensure Living Identity Snapshot does not duplicate the creator bio — it should complement, not restate
