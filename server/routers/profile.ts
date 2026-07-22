@@ -360,7 +360,10 @@ export const profileRouter = router({
       const creator = await getUserById(input.creatorId);
       if (!creator) return null;
       const songs = await getSongsByUser(input.creatorId);
-      const publicSongs = songs.filter((s: any) => s.isPublic);
+      // Only expose currently Published works in the public domain snapshot.
+      // Deleted, Draft, and Unlisted works are excluded from public statistics.
+      // The provenance record (WID) is never erased — only the public visibility changes.
+      const publicSongs = songs.filter((s: any) => s.isPublic && s.status === 'Published');
       return { creator, songs: publicSongs };
     }),
 

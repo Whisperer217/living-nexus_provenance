@@ -1313,7 +1313,7 @@ export default function CreatorProfilePage() {
                   )}
                   <span className="text-sm" style={{ color: "var(--ln-smoke)" }}>
                     <span style={{ color: "var(--ln-parchment)", fontVariantNumeric: "tabular-nums" }}>{songs.length}</span>
-                    {" "}tracks
+                    {" "}published works
                   </span>
                   {witnessCount > 0 && (
                     <button
@@ -1473,101 +1473,106 @@ export default function CreatorProfilePage() {
 
             {/* Mobile-only: full-width stacked layout */}
             <div className="sm:hidden flex flex-col gap-3">
-              {/* Name — wraps gracefully on narrow screens */}
-              <h1
-                className="text-2xl font-bold leading-tight select-text break-words"
-                style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}
-              >
-                {creator.name || creator.artistHandle}
-              </h1>
-              {/* Badges row — always below the name */}
-              {((creator as any).role === "founder" || creator.licenseStatus === "licensed") && (
-                <div className="flex items-center gap-1.5 -mt-1 flex-wrap">
-                  {(creator as any).role === "founder" && (
+              {/*
+                Top identity block — offset right by pl-[96px] to clear the absolute avatar.
+                Avatar is clamp(80px,12vw,128px) wide, positioned at left-4 (16px).
+                At 360px viewport: 80px wide. Content px-4 = 16px. Avatar right edge = 96px from content left.
+                pl-[96px] ensures name/stats never render behind the avatar.
+              */}
+              <div className="pl-[96px] flex flex-col gap-2">
+                {/* Name */}
+                <h1
+                  className="text-xl font-bold leading-tight select-text break-words"
+                  style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}
+                >
+                  {creator.name || creator.artistHandle}
+                </h1>
+                {/* Badges row */}
+                {((creator as any).role === "founder" || creator.licenseStatus === "licensed") && (
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    {(creator as any).role === "founder" && (
+                      <span
+                        title="Founding Creator"
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold tracking-widest"
+                        style={{ background: "rgba(196,154,40,0.08)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.3)" }}
+                      >
+                        <Crown className="w-3 h-3" />
+                        FOUNDER
+                      </span>
+                    )}
+                    {creator.licenseStatus === "licensed" && (
+                      <span
+                        className="text-[10px] px-2 py-0.5 rounded tracking-widest font-mono"
+                        style={{ background: "rgba(196,154,40,0.08)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.2)" }}
+                      >
+                        LICENSED
+                      </span>
+                    )}
+                  </div>
+                )}
+                {/* @handle */}
+                {creator.artistHandle && (
+                  <button
+                    className="text-xs font-mono transition-colors hover:text-[#C49A28] focus:outline-none text-left"
+                    style={{ color: "var(--ln-iron)", letterSpacing: "0.01em" }}
+                    title="Copy profile link"
+                    onClick={() => {
+                      const url = `${window.location.origin}/creator/${creator.id}`;
+                      navigator.clipboard.writeText(url).then(() =>
+                        toast.success("Profile link copied")
+                      ).catch(() => toast.error("Could not copy"));
+                    }}
+                  >
+                    @{creator.artistHandle}
+                  </button>
+                )}
+                {/* Stats row */}
+                <div className="flex items-center gap-3 flex-wrap">
+                  {creator.supporterTier && (
+                    <SupporterBadge tier={creator.supporterTier as "covenant" | "patron" | "supporter"} linkToFounders />
+                  )}
+                  {witnessedWorksCount > 0 && (
                     <span
-                      title="Founding Creator"
-                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold tracking-widest"
-                      style={{ background: "rgba(196,154,40,0.08)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.3)" }}
+                      className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-mono tracking-widest"
+                      style={{ background: "rgba(245,196,81,0.1)", color: "#F5C451", border: "1px solid rgba(245,196,81,0.3)" }}
+                      title={`${witnessedWorksCount} works on the Living Nexus provenance registry`}
                     >
-                      <Crown className="w-3 h-3" />
-                      FOUNDER
+                      <Shield className="w-2.5 h-2.5" />
+                      WITNESSED &middot; {witnessedWorksCount}
                     </span>
                   )}
-                  {creator.licenseStatus === "licensed" && (
-                    <span
-                      className="text-[10px] px-2 py-0.5 rounded tracking-widest font-mono"
-                      style={{ background: "rgba(196,154,40,0.08)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.2)" }}
+                  <span className="text-sm" style={{ color: "var(--ln-smoke)" }}>
+                    <span style={{ color: "var(--ln-parchment)", fontVariantNumeric: "tabular-nums" }}>{songs.length}</span>{" "}published works
+                  </span>
+                  {totalPlays > 0 && (
+                    <span className="text-sm" style={{ color: "var(--ln-smoke)" }}>
+                      <span style={{ color: "var(--ln-gold)", fontVariantNumeric: "tabular-nums" }}>{totalPlays.toLocaleString()}</span>{" "}plays
+                    </span>
+                  )}
+                  {witnessCount > 0 && (
+                    <button
+                      className="text-sm transition-colors hover:text-[#C49A28] focus:outline-none"
+                      style={{ color: "var(--ln-smoke)" }}
+                      onClick={() => { setWitnessNetworkTab("witnesses"); setWitnessNetworkOpen(true); }}
+                      title="View witnesses"
                     >
-                      LICENSED
+                      <span style={{ color: "var(--ln-parchment)", fontVariantNumeric: "tabular-nums" }}>{witnessCount}</span>{" "}witnesses
+                    </button>
+                  )}
+                  {showBugKillPill && buildStatsQuery.data && (
+                    <span
+                      className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-mono tracking-widest select-none cursor-default"
+                      style={{ background: "rgba(239,68,68,0.10)", color: "#f87171", border: "1px solid rgba(239,68,68,0.30)" }}
+                      title={`${buildStatsQuery.data.bugsFixed} bugs squashed across ${buildStatsQuery.data.totalCommits} commits`}
+                    >
+                      <span style={{ fontSize: "10px" }}>🐛</span>
+                      BUGS KILLED &middot; {buildStatsQuery.data.bugsFixed}
                     </span>
                   )}
                 </div>
-              )}
+              </div>{/* end pl-[96px] identity block */}
 
-              {/* @handle sub-header — clickable hyperlink like Twitter, copies profile URL */}
-              {creator.artistHandle && (
-                <button
-                  className="-mt-1 text-sm font-mono transition-colors hover:text-[#C49A28] focus:outline-none text-left"
-                  style={{ color: "var(--ln-iron)", letterSpacing: "0.01em" }}
-                  title="Copy profile link"
-                  onClick={() => {
-                    const url = `${window.location.origin}/creator/${creator.id}`;
-                    navigator.clipboard.writeText(url).then(() =>
-                      toast.success("Profile link copied")
-                    ).catch(() => toast.error("Could not copy"));
-                  }}
-                >
-                  @{creator.artistHandle}
-                </button>
-              )}
-
-              {/* Stats row */}
-              <div className="flex items-center gap-3 flex-wrap">
-                {creator.supporterTier && (
-                  <SupporterBadge tier={creator.supporterTier as "covenant" | "patron" | "supporter"} linkToFounders />
-                )}
-                {/* WITNESSED testimony pill */}
-                {witnessedWorksCount > 0 && (
-                  <span
-                    className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-mono tracking-widest"
-                    style={{ background: "rgba(245,196,81,0.1)", color: "#F5C451", border: "1px solid rgba(245,196,81,0.3)" }}
-                    title={`${witnessedWorksCount} works on the Living Nexus provenance registry`}
-                  >
-                    <Shield className="w-2.5 h-2.5" />
-                    WITNESSED &middot; {witnessedWorksCount}
-                  </span>
-                )}
-                <span className="text-sm" style={{ color: "var(--ln-smoke)" }}>
-                  <span style={{ color: "var(--ln-parchment)", fontVariantNumeric: "tabular-nums" }}>{songs.length}</span>{" "}tracks
-                </span>
-                {totalPlays > 0 && (
-                  <span className="text-sm" style={{ color: "var(--ln-smoke)" }}>
-                    <span style={{ color: "var(--ln-gold)", fontVariantNumeric: "tabular-nums" }}>{totalPlays.toLocaleString()}</span>{" "}plays
-                  </span>
-                )}
-                {witnessCount > 0 && (
-                  <button
-                    className="text-sm transition-colors hover:text-[#C49A28] focus:outline-none"
-                    style={{ color: "var(--ln-smoke)" }}
-                    onClick={() => { setWitnessNetworkTab("witnesses"); setWitnessNetworkOpen(true); }}
-                    title="View witnesses"
-                  >
-                    <span style={{ color: "var(--ln-parchment)", fontVariantNumeric: "tabular-nums" }}>{witnessCount}</span>{" "}witnesses
-                  </button>
-                )}
-                {/* Bug-kill tracker — admin + honored contributors */}
-                {showBugKillPill && buildStatsQuery.data && (
-                  <span
-                    className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-mono tracking-widest select-none cursor-default"
-                    style={{ background: "rgba(239,68,68,0.10)", color: "#f87171", border: "1px solid rgba(239,68,68,0.30)" }}
-                    title={`${buildStatsQuery.data.bugsFixed} bugs squashed across ${buildStatsQuery.data.totalCommits} commits`}
-                  >
-                    <span style={{ fontSize: "10px" }}>🐛</span>
-                    BUGS KILLED &middot; {buildStatsQuery.data.bugsFixed}
-                  </span>
-                )}
-              </div>
-              {/* Nexus Witness Tagline — mobile */}
+              {/* Nexus Witness Tagline — mobile, full width */}
               {(nexusTagline || taglineLoading) && (
                 <p
                   className="text-xs italic w-full"
@@ -1577,7 +1582,7 @@ export default function CreatorProfilePage() {
                 </p>
               )}
 
-              {/* Bio — full-width, sacred typography, preserves creator's line breaks */}
+              {/* Bio — full-width below the avatar, sacred typography, preserves creator's line breaks */}
               {creator.bio && (
                 <div className="w-full">
                   {creator.bio.split(/\n+/).map((paragraph: string, i: number) =>
