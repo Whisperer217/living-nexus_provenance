@@ -96,9 +96,11 @@ function PhaseCard({ phase, onRefresh }: { phase: Phase; onRefresh: () => void }
     onError: (e) => toast.error("Error", { description: e.message }),
   });
 
+  const [promptModal, setPromptModal] = useState<{ title: string; prompt: string } | null>(null);
+
   const dispatch = trpc.missionControl.dispatch.useMutation({
     onSuccess: (data) => {
-      toast.success("Phase dispatched", { description: `Task ID: ${data.taskId}` });
+      setPromptModal({ title: data.title, prompt: data.prompt });
       onRefresh();
     },
     onError: (e) => toast.error("Dispatch failed", { description: e.message }),
@@ -137,6 +139,7 @@ function PhaseCard({ phase, onRefresh }: { phase: Phase; onRefresh: () => void }
   const isError = phase.status === "error";
 
   return (
+    <>
     <div className={`
       relative rounded-xl border transition-all duration-200
       ${isDone ? "border-emerald-900/40 bg-emerald-950/10" :
@@ -373,6 +376,52 @@ function PhaseCard({ phase, onRefresh }: { phase: Phase; onRefresh: () => void }
         )}
       </div>
     </div>
+
+    {/* Prompt copy modal — shown after Fire is clicked */}
+    {promptModal && (
+      <Dialog open={!!promptModal} onOpenChange={() => setPromptModal(null)}>
+        <DialogContent className="max-w-2xl bg-zinc-900 border-zinc-800 text-zinc-100">
+          <DialogHeader>
+            <DialogTitle className="text-amber-400" style={{ fontFamily: "Cinzel, serif" }}>
+              ⚡ Phase Ready — Copy &amp; Paste
+            </DialogTitle>
+            <DialogDescription className="text-zinc-500">
+              Paste this prompt into the Manus chat to execute <strong className="text-zinc-300">{promptModal.title}</strong>.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="mt-3">
+            <pre className="text-xs text-zinc-300 bg-zinc-950 rounded-xl p-4 overflow-auto max-h-80 whitespace-pre-wrap font-mono leading-relaxed border border-zinc-800 select-all">
+              {promptModal.prompt}
+            </pre>
+          </div>
+
+          <DialogFooter className="mt-4 gap-2">
+            <Button
+              variant="ghost"
+              onClick={() => setPromptModal(null)}
+              className="text-zinc-500"
+            >
+              Close
+            </Button>
+            <Button
+              className="bg-amber-600 hover:bg-amber-500 text-black font-bold gap-2"
+              onClick={() => {
+                navigator.clipboard.writeText(promptModal.prompt);
+                toast.success("Prompt copied!", { description: "Paste it into the Manus chat now." });
+              }}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                  d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+              Copy Prompt
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    )}
+    </>
   );
 }
 

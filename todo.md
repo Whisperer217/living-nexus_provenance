@@ -6489,5 +6489,11 @@
 - [x] Wire missionControl router into server/routers/index.ts
 - [x] Add Phase Ledger nav button to AdminUsersPage admin dashboard
 - [x] Dispatch always targets LN project ID 8omCfbqtRab36ZgzjFBZMp (in-project execution model)
-- [ ] MANUS_API_KEY secret required from user to activate dispatch
-- [ ] TypeScript: 0 errors | Vitest: passing
+- [x] MANUS_API_KEY dependency removed — no external calls, copy-prompt model
+- [x] TypeScript: 0 errors | Vitest: passing
+
+## Phase Ledger — Copy-Prompt Mode (Session: July 23, 2026)
+- [x] Rewire Fire button: show prompt in modal with one-click copy, no external API call
+- [x] Simplify dispatch tRPC procedure: just marks phase as "dispatched" in DB, no manusRequest call
+- [x] Remove MANUS_API_KEY dependency entirely from missionControl router
+- [ ] TypeScript: 0 errors

@@ -1,10 +1,10 @@
 /**
  * @domain   Mission Control — Actionable Phase Ledger
- * @impl     tRPC router: list, lock/unlock, dispatch, poll status
+ * @impl     tRPC router: list, lock/unlock, dispatch (copy-prompt model), mark complete
  *
  * Each phase is a pre-authored development task with an embedded prompt.
- * Dispatching fires POST /v2/task.create on the Manus API and stores the
- * returned task_id. Status polling calls task.listMessages to track progress.
+ * Dispatching returns the prompt text for the user to copy and paste into
+ * the Manus chat — no external API calls, no credentials required.
  * The ledger is append-only — history is never deleted.
  */
 import { z } from "zod";
@@ -13,36 +13,6 @@ import { adminProcedure, router } from "../_core/trpc";
 import { getDb } from "../utils/db";
 import { missionPhases } from "../../drizzle/schema";
 import { eq, asc, desc } from "drizzle-orm";
-import { ENV } from "../_core/env";
-
-// ─── Manus API helpers ────────────────────────────────────────────────────────
-
-const MANUS_API_BASE = "https://api.manus.ai";
-
-// This project's Manus project ID — all dispatched phases land here so the
-// agent already has full Living Nexus context when it picks up the task.
-const LN_PROJECT_ID = "8omCfbqtRab36ZgzjFBZMp";
-
-async function manusRequest(path: string, options: RequestInit = {}) {
-  const apiKey = ENV.manusApiKey;
-  if (!apiKey) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "MANUS_API_KEY not configured" });
-  const res = await fetch(`${MANUS_API_BASE}${path}`, {
-    ...options,
-    headers: {
-      "x-manus-api-key": apiKey,
-      "Content-Type": "application/json",
-      ...(options.headers ?? {}),
-    },
-  });
-  const data = await res.json();
-  if (!data.ok) {
-    throw new TRPCError({
-      code: "INTERNAL_SERVER_ERROR",
-      message: data.error?.message ?? `Manus API error: ${res.status}`,
-    });
-  }
-  return data;
-}
 
 // ─── Seed data — pre-authored phases from the Living Nexus backlog ────────────
 
@@ -323,7 +293,12 @@ export const missionControlRouter = router({
       return { success: true };
     }),
 
-  /** Dispatch a phase — calls Manus API task.create with the embedded prompt */
+  /**
+   * Dispatch a phase — copy-prompt model.
+   * Returns the embedded prompt text for the user to paste into the Manus chat.
+   * Marks the phase as "dispatched" in the DB so history is preserved.
+   * No external API calls, no credentials required.
+   */
   dispatch: adminProcedure
     .input(z.object({
       id: z.number().int().positive(),
@@ -334,81 +309,34 @@ export const missionControlRouter = router({
       if (!phase) throw new TRPCError({ code: "NOT_FOUND", message: "Phase not found" });
       if (phase.status === "locked") throw new TRPCError({ code: "FORBIDDEN", message: "Phase is locked — unlock it first" });
       if (phase.status === "dispatched" || phase.status === "running") {
-        throw new TRPCError({ code: "CONFLICT", message: "Phase is already running" });
+        throw new TRPCError({ code: "CONFLICT", message: "Phase is already dispatched" });
       }
 
-      // Call Manus API — always target this Living Nexus project so the agent
-      // has full codebase context. Per-phase manusProjectId can override if needed.
-      const body: Record<string, unknown> = {
-        message: {
-          role: "user",
-          content: phase.prompt,
-        },
-        project_id: phase.manusProjectId ?? LN_PROJECT_ID,
-      };
-
-      const result = await manusRequest("/v2/task.create", {
-        method: "POST",
-        body: JSON.stringify(body),
-      });
-
-      const taskId = result.data?.task_id ?? result.task_id;
-      if (!taskId) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Manus API did not return a task_id" });
-
+      // Mark as dispatched in the ledger — no external call
       await db.update(missionPhases)
         .set({
           status: "dispatched",
-          manusTaskId: taskId,
           dispatchedAt: new Date(),
           updatedAt: new Date(),
-          lastStatusMsg: "Task dispatched — waiting for agent to start",
+          lastStatusMsg: "Prompt copied — paste into Manus chat to execute",
         })
         .where(eq(missionPhases.id, input.id));
 
-      return { taskId, success: true };
+      // Return the prompt so the UI can display it for copying
+      return { prompt: phase.prompt, title: phase.title, success: true };
     }),
 
-  /** Poll a dispatched phase for status updates from the Manus API */
+  /**
+   * Poll stub — kept for API compatibility but does nothing externally.
+   * Status updates are done manually via markComplete / markNotes.
+   */
   pollStatus: adminProcedure
     .input(z.object({ id: z.number().int().positive() }))
     .mutation(async ({ input }) => {
       const db = await getDb();
       const [phase] = await db.select().from(missionPhases).where(eq(missionPhases.id, input.id));
       if (!phase) throw new TRPCError({ code: "NOT_FOUND", message: "Phase not found" });
-      if (!phase.manusTaskId) throw new TRPCError({ code: "BAD_REQUEST", message: "Phase has not been dispatched yet" });
-
-      const result = await manusRequest(
-        `/v2/task.listMessages?task_id=${encodeURIComponent(phase.manusTaskId)}&order=desc&limit=10`
-      );
-
-      // Find the latest status_update event
-      const events: any[] = result.data?.items ?? result.items ?? [];
-      const statusEvent = events.find((e: any) => e.type === "status_update");
-      const agentStatus: string = statusEvent?.status_update?.agent_status ?? "running";
-
-      // Find the latest assistant message for display
-      const lastMsg = events.find((e: any) => e.type === "assistant_message");
-      const msgText: string = lastMsg?.assistant_message?.content
-        ? (typeof lastMsg.assistant_message.content === "string"
-            ? lastMsg.assistant_message.content
-            : lastMsg.assistant_message.content?.[0]?.text ?? "")
-        : "";
-
-      let newStatus: "dispatched" | "running" | "complete" | "error" = "running";
-      if (agentStatus === "stopped") newStatus = "complete";
-      else if (agentStatus === "error") newStatus = "error";
-      else if (agentStatus === "running" || agentStatus === "waiting") newStatus = "running";
-
-      await db.update(missionPhases)
-        .set({
-          status: newStatus,
-          lastStatusMsg: msgText.slice(0, 1000) || `Agent status: ${agentStatus}`,
-          completedAt: newStatus === "complete" ? new Date() : phase.completedAt,
-          updatedAt: new Date(),
-        })
-        .where(eq(missionPhases.id, input.id));
-
-      return { agentStatus, newStatus, lastMessage: msgText.slice(0, 500) };
+      return { agentStatus: phase.status, newStatus: phase.status, lastMessage: phase.lastStatusMsg ?? "" };
     }),
 
   /** Mark a phase as complete manually (e.g. after reviewing results) */
