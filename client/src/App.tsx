@@ -222,7 +222,7 @@ function Router() {
                 <Route path="/discover"><Redirect to="/" /></Route>
                 <Route path="/explore" component={ExplorePage} />
                 <Route path="/search" component={SearchResultsPage} />
-                <Route path="/upload" component={UploadPage} />
+                <Route path="/upload"><Redirect to="/manifest" /></Route>
                 <Route path="/manifest" component={ManifestationStudio} />
                 <Route path="/batch-upload" component={BatchUploadPage} />
                 <Route path="/liked" component={LikedPage} />

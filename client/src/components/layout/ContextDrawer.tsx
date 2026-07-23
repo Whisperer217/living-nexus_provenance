@@ -169,7 +169,7 @@ const PANELS: Record<NavMode, ModePanel> = {
     sections: [
       {
         links: [
-          { icon: <Shield size={14} />, label: "Register Work", path: "/upload", description: "Issue a Witness ID", authOnly: true, gold: true },
+          { icon: <Shield size={14} />, label: "Register Work", path: "/manifest", description: "Issue a Witness ID", authOnly: true, gold: true },
           { icon: <Palette size={14} />, label: "Register Visual Works", path: "/visual-works/new", description: "Photography, art & imagery", authOnly: true },
           { icon: <Sparkles size={14} />, label: "Prompt Studio", path: "/keeper-compose", description: "Lyrics → AI music prompt" },
           { icon: <Users size={14} />, label: "Guide Directory", path: "/guides", description: "Browse guide characters" },

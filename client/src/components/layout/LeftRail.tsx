@@ -33,7 +33,7 @@ const RAIL_ITEMS: Array<{
   { id: "home",    icon: Home,    label: "Home",     path: "/"        },
   { id: "explore", icon: Compass, label: "Explore",  path: "/explore" },
   { id: "profile", icon: User,    label: "Profile",  path: "/profile", authRequired: true },
-  { id: "upload",  icon: Upload,  label: "Register", path: "/upload",  authRequired: true },
+  { id: "upload",  icon: Upload,  label: "Register", path: "/manifest",  authRequired: true },
   { id: "archive", icon: Archive, label: "LNA",  path: "/archive", authRequired: true },
 ];
 
