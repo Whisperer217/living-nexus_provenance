@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { Sparkles, Loader2, Upload } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -128,6 +129,27 @@ function Step1Upload({
   const [artFile, setArtFile] = useState<{ name: string; size: string } | null>(null);
   const sheetRef = useRef<HTMLInputElement>(null);
   const artRef = useRef<HTMLInputElement>(null);
+  // AI image generation
+  const [artMode, setArtMode] = useState<"upload" | "generate">("upload");
+  const [aiPrompt, setAiPrompt] = useState("");
+  const [aiGenerating, setAiGenerating] = useState(false);
+  const generateImageMutation = trpc.guides.generateImage.useMutation();
+  const handleGenerateArt = async () => {
+    if (!aiPrompt.trim()) { toast.error("Enter a description to generate artwork"); return; }
+    setAiGenerating(true);
+    try {
+      const result = await generateImageMutation.mutateAsync({ prompt: aiPrompt });
+      if (result.url) {
+        setForm({ ...form, artworkUrl: result.url });
+        setArtFile({ name: "AI Generated Artwork", size: "" });
+        toast.success("Artwork generated and set as cover art");
+      }
+    } catch {
+      toast.error("Image generation failed — try a different description");
+    } finally {
+      setAiGenerating(false);
+    }
+  };
 
   const uploadFile = async (file: File): Promise<string> => {
     const fd = new FormData();
@@ -225,26 +247,78 @@ function Step1Upload({
         )}
       </div>
 
-      {/* Artwork upload */}
+      {/* Artwork — Upload or AI Generate */}
       <div className="mt-4">
         <Label className="text-[#C9A84C]/80 text-xs font-semibold tracking-wider uppercase mb-2 block">Character Artwork</Label>
-        <div
-          className="border border-[#3a3020] rounded-lg p-4 text-center cursor-pointer hover:border-[#C9A84C]/40 transition-colors bg-[#1a1508]/20"
-          onClick={() => artRef.current?.click()}
-        >
-          {form.artworkUrl ? (
-            <img src={form.artworkUrl} alt="Artwork preview" className="max-h-48 mx-auto rounded object-contain" />
-          ) : (
-            <div className="text-[#6b5f3e] text-sm py-4">Click to upload artwork image</div>
-          )}
-          <input ref={artRef} type="file" accept=".png,.jpg,.jpeg,.webp" className="hidden" onChange={handleArtChange} />
+        {/* Mode toggle */}
+        <div className="flex gap-2 mb-3">
+          <button
+            onClick={() => setArtMode("upload")}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              artMode === "upload"
+                ? "bg-[#C9A84C]/20 border border-[#C9A84C]/60 text-[#C9A84C]"
+                : "bg-transparent border border-[#3a3020] text-[#6b5f3e] hover:border-[#C9A84C]/30"
+            }`}
+          >
+            <Upload size={12} /> Upload Image
+          </button>
+          <button
+            onClick={() => setArtMode("generate")}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              artMode === "generate"
+                ? "bg-[#C9A84C]/20 border border-[#C9A84C]/60 text-[#C9A84C]"
+                : "bg-transparent border border-[#3a3020] text-[#6b5f3e] hover:border-[#C9A84C]/30"
+            }`}
+          >
+            <Sparkles size={12} /> Generate with AI
+          </button>
         </div>
+
+        {artMode === "upload" ? (
+          <div
+            className="border border-[#3a3020] rounded-lg p-4 text-center cursor-pointer hover:border-[#C9A84C]/40 transition-colors bg-[#1a1508]/20"
+            onClick={() => artRef.current?.click()}
+          >
+            {form.artworkUrl ? (
+              <img src={form.artworkUrl} alt="Artwork preview" className="max-h-48 mx-auto rounded object-contain" />
+            ) : (
+              <div className="text-[#6b5f3e] text-sm py-4">Click to upload artwork image</div>
+            )}
+            <input ref={artRef} type="file" accept=".png,.jpg,.jpeg,.webp" className="hidden" onChange={handleArtChange} />
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <Textarea
+              value={aiPrompt}
+              onChange={e => setAiPrompt(e.target.value)}
+              placeholder="Describe your guide character's appearance, style, and essence... e.g. 'A cloaked archivist with glowing amber eyes, surrounded by floating ancient scrolls, dark fantasy oil painting style'"
+              className="min-h-[100px] bg-[#1a1508]/40 border-[#3a3020] text-[#e8d5a0] placeholder:text-[#4a3f20] text-sm resize-none focus:border-[#C9A84C]/50"
+            />
+            <Button
+              onClick={handleGenerateArt}
+              disabled={aiGenerating || !aiPrompt.trim()}
+              className="w-full bg-[#C9A84C]/20 hover:bg-[#C9A84C]/30 border border-[#C9A84C]/50 text-[#C9A84C] font-semibold"
+            >
+              {aiGenerating ? (
+                <span className="flex items-center gap-2"><Loader2 size={14} className="animate-spin" /> Generating Artwork…</span>
+              ) : (
+                <span className="flex items-center gap-2"><Sparkles size={14} /> Generate Character Artwork</span>
+              )}
+            </Button>
+            {form.artworkUrl && artMode === "generate" && (
+              <div className="mt-2">
+                <div className="text-xs text-[#C9A84C]/60 uppercase tracking-wider mb-2">Generated Artwork</div>
+                <img src={form.artworkUrl} alt="Generated" className="w-full max-h-64 object-contain rounded-lg border border-[#C9A84C]/20" />
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
-      <div className="mt-2 text-xs text-[#6b5f3e]">Supported files: PDF, PNG, JPG &nbsp;·&nbsp; Max file size: 50MB</div>
+      <div className="mt-2 text-xs text-[#6b5f3e]">Upload: PNG, JPG, WEBP &nbsp;·&nbsp; Max 50MB &nbsp;·&nbsp; Or generate with AI</div>
 
-      {/* Uploaded preview */}
-      {form.artworkUrl && (
+      {/* Uploaded preview (upload mode only) */}
+      {artMode === "upload" && form.artworkUrl && (
         <div className="mt-4">
           <div className="text-xs text-[#C9A84C]/60 uppercase tracking-wider mb-2">Uploaded Preview</div>
           <img src={form.artworkUrl} alt="Preview" className="w-full max-h-64 object-contain rounded-lg border border-[#3a3020]" />

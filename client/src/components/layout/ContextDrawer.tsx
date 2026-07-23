@@ -171,9 +171,21 @@ const PANELS: Record<NavMode, ModePanel> = {
         links: [
           { icon: <Shield size={14} />, label: "Register Work", path: "/manifest", description: "Issue a Witness ID", authOnly: true, gold: true },
           { icon: <Palette size={14} />, label: "Register Visual Works", path: "/visual-works/new", description: "Photography, art & imagery", authOnly: true },
-          { icon: <Sparkles size={14} />, label: "Prompt Studio", path: "/keeper-compose", description: "Lyrics → AI music prompt" },
-          { icon: <Users size={14} />, label: "Guide Directory", path: "/guides", description: "Browse guide characters" },
+          { icon: <Sparkles size={14} />, label: "Prompt Studio", path: "/keeper-compose", description: "Lyrics \u2192 AI music prompt" },
+        ],
+      },
+      {
+        heading: "Guides",
+        links: [
+          { icon: <Users size={14} />, label: "Guide Directory", path: "/guides", description: "Browse all guide characters" },
           { icon: <Shield size={14} />, label: "Register Guide Character", path: "/guides/upload", description: "Register a guide entity", authOnly: true, gold: true },
+        ],
+      },
+      {
+        heading: "Platform Store",
+        links: [
+          { icon: <Star size={14} />, label: "Platform Store", path: "/store", description: "Creator tools, upgrades & resources", gold: true },
+          { icon: <BookOpen size={14} />, label: "Platform Guides & Tutorials", path: "/platform-guides", description: "Learn how Living Nexus works" },
         ],
       },
       {

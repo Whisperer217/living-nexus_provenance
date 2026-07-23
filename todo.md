@@ -6457,3 +6457,19 @@
 - [ ] Build Witnessed Objects gallery page (/witnessed-objects): card grid of all 3D print works
 - [ ] Add Witnessed Objects nav link to sidebar
 - [x] TypeScript: 0 errors | Vitest: 398/398 passing (confirmed)
+
+## Guides Upload Flow & Left Drawer Fixes
+- [ ] Add AI image generation panel to GuideUploadWizard artwork step (uses guides.generateImage procedure)
+- [ ] Verify 3D Print / G-code tile is visible in ManifestationStudio TypeGateway
+- [ ] Add Platform Store to ContextDrawer left drawer navigation
+- [ ] Ensure Guides section is prominent in left drawer (not buried under Register)
+- [ ] TypeScript: 0 errors | Vitest: 398/398 passing
+
+## Guides Upload Flow & Left Drawer Fixes (Session: July 2026)
+- [x] Audit full Guides registration flow — GuideUploadWizard, ManifestationStudio, ContextDrawer
+- [x] Add AI image generation to GuideUploadWizard Step 1 — Upload/Generate toggle with prompt input, calls guides.generateImage procedure
+- [x] ContextDrawer upload panel — separate Guides into its own labeled section (Guide Directory + Register Guide Character)
+- [x] ContextDrawer upload panel — add Platform Store section (Platform Store + Platform Guides & Tutorials)
+- [x] Confirmed: /upload redirects to /manifest — all Register links use Manifestation Studio
+- [x] Confirmed: G-code tile visible in Manifestation Studio TypeGateway
+- [x] TypeScript: 0 errors | Vitest: 398/398 passing
