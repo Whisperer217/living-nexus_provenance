@@ -6473,3 +6473,8 @@
 - [x] Confirmed: /upload redirects to /manifest — all Register links use Manifestation Studio
 - [x] Confirmed: G-code tile visible in Manifestation Studio TypeGateway
 - [x] TypeScript: 0 errors | Vitest: 398/398 passing
+
+## Edit Work Freeze Fix (Session: July 23, 2026)
+- [x] Root cause: body[data-scroll-locked] CSS rule had touch-action:none — Radix Select inside CreativeDrawer sets data-scroll-locked on mount, killing ALL pointer/touch events platform-wide
+- [x] Fix: removed touch-action:none from both body[data-scroll-locked] rules in index.css; touch-action:none now scoped only to [data-slot="dialog-overlay"] (correct — prevents background scroll through modal backdrop only)
+- [x] TypeScript: 0 errors | Vitest: 398/398 passing

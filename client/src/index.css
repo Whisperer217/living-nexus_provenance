@@ -570,10 +570,12 @@ html body[data-scroll-locked] {
   margin-right: 0 !important;
   padding-right: 0 !important;
   /* Prevent background body scroll when any Radix Dialog/Sheet is open.
-     overflow:hidden stops desktop scroll; touch-action:none stops iOS Safari
-     rubber-band scroll through the modal overlay. */
+     overflow:hidden stops desktop scroll.
+     CRITICAL: touch-action must NOT be set here — it kills ALL pointer/touch
+     events on Android Chrome and touch-capable browsers, making every button,
+     menu, and overlay completely unresponsive. The dialog-overlay handles its
+     own touch-action:none scoped to the overlay element only. */
   overflow: hidden !important;
-  touch-action: none !important;
   overscroll-behavior: none !important;
 }
 
@@ -581,7 +583,9 @@ html body[data-scroll-locked] {
 body[data-scroll-locked] {
   position: static !important;
   overflow: hidden !important;
-  touch-action: none !important;
+  /* CRITICAL: touch-action must NOT be set on body — it kills ALL pointer/touch
+     events on Android Chrome and touch-capable browsers. Scoped touch-action:none
+     is applied only to the dialog-overlay element below. */
   overscroll-behavior: none !important;
 }
 
