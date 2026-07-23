@@ -138,6 +138,13 @@ const PANELS: Record<NavMode, ModePanel> = {
         ],
       },
       {
+        heading: "Nexus Avatar",
+        links: [
+          { icon: <Sparkles size={14} />, label: "My Keeper Avatar", path: "/keeper", description: "Equip & customise your Nexus identity", authOnly: true, gold: true },
+          { icon: <Sparkles size={14} />, label: "Keeper Compose", path: "/keeper-compose", description: "AI prompt studio for your Keeper", authOnly: true },
+        ],
+      },
+      {
         heading: "Account",
         links: [
           { icon: <Settings size={14} />, label: "Settings", path: "/settings/billing", authOnly: true },

@@ -74,6 +74,9 @@ import { promptStudioRouter } from "./promptStudio";
 // ── Collection Studio domain ────────────────────────────────────────────────
 import { collectionStudioRouter } from "./collectionStudio";
 
+// ── Platform Guides domain ──────────────────────────────────────────────────
+import { platformGuidesRouter }    from "./platformGuides";
+
 // ── Platform domain ───────────────────────────────────────────────────────────
 import { platformRouter }          from "./platform";
 import { testimonyRouter }         from "./testimony";
@@ -169,6 +172,9 @@ export const appRouter = router({
 
   // Collection Studio
   collectionStudio: collectionStudioRouter,
+
+  // Platform Guides
+  platformGuides: platformGuidesRouter,
 });
 
 export type AppRouter = typeof appRouter;

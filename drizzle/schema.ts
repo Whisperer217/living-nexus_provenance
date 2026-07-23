@@ -1488,6 +1488,34 @@ export const keeperSkins = mysqlTable("keeper_skins", {
 export type KeeperSkin = typeof keeperSkins.$inferSelect;
 export type InsertKeeperSkin = typeof keeperSkins.$inferInsert;
 
+// ─── Platform Guides (self-publishable how-to articles by the owner) ────────
+export const platformGuides = mysqlTable("platform_guides", {
+  id: int("id").autoincrement().primaryKey(),
+  slug: varchar("slug", { length: 128 }).notNull().unique(),
+  title: varchar("title", { length: 256 }).notNull(),
+  summary: text("summary"),
+  body: text("body"),
+  coverImageUrl: text("cover_image_url"),
+  category: mysqlEnum("category", [
+    "getting-started",
+    "registration",
+    "keeper-avatar",
+    "store",
+    "provenance",
+    "3d-print",
+    "music",
+    "general",
+  ]).notNull().default("general"),
+  published: boolean("published").notNull().default(false),
+  featured: boolean("featured").notNull().default(false),
+  authorId: int("author_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  readingTimeMinutes: int("reading_time_minutes").default(3),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
+});
+export type PlatformGuide = typeof platformGuides.$inferSelect;
+export type InsertPlatformGuide = typeof platformGuides.$inferInsert;
+
 // ─── Marketplace ──────────────────────────────────────────────────────────────
 // Items listed in the Living Nexus Marketplace.
 // type: "album" | "skin" | "physical" | "creator_good"

@@ -96,6 +96,7 @@ const ProjectsDiscoveryPage = lazy(() => import("./pages/ProjectsDiscoveryPage")
 const BookDetailPage = lazy(() => import("./pages/BookDetailPage"));
 const GameDetailPage = lazy(() => import("./pages/GameDetailPage"));
 const GcodeDetailPage = lazy(() => import("./pages/GcodeDetailPage"));
+const PlatformGuidesPage = lazy(() => import("./pages/PlatformGuidesPage"));
 const CreatorStudioPage = lazy(() => import("./pages/CreatorStudioPage"));
 const KeeperPage = lazy(() => import("./pages/KeeperPage"));
 const KeeperComposePage = lazy(() => import("./pages/KeeperComposePage"));
@@ -234,6 +235,7 @@ function Router() {
                 <Route path="/book/:id" component={BookDetailPage} />
                 <Route path="/game/:id" component={GameDetailPage} />
                 <Route path="/gcode/:id" component={GcodeDetailPage} />
+                <Route path="/platform-guides" component={PlatformGuidesPage} />
                 <Route path="/book/:id/studio" component={CreatorStudioPage} />
                 <Route path="/songs/:id" component={SongDetailPage} />
                 {/* /track/:id → canonical /song/:id redirect (TrackPage deprecated) */}
@@ -287,6 +289,7 @@ function Router() {
                 <Route path="/keeper" component={KeeperPage} />
                 <Route path="/keeper-compose" component={KeeperComposePage} />
                 <Route path="/first-witness" component={FirstWitnessPage} />
+                <Route path="/store"><Redirect to="/marketplace" /></Route>
                 <Route path="/marketplace" component={MarketplacePage} />
                 <Route path="/distribute" component={DistributionPage} />
                 <Route path="/identity/:id" component={CreatorIdentityPage} />
