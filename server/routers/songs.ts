@@ -1561,6 +1561,34 @@ ${workType === "manuscript" || workType === "comic" ? "Category" : "Genre"}: ${i
     getWorkerStats: protectedProcedure.query(async () => {
       return { stats: { pending: 0, claimed: 0, completed: 0, failed: 0 }, recent: [] as any[] };
     }),
+
+    // ── Presigned PUT URL for large G-code / 3D model file uploads (bypasses proxy size limit) ────
+    // The client uploads directly to S3 using the presigned URL, then passes the publicUrl to the
+    // upload mutation. This avoids the ~30 MB reverse-proxy body limit for large .gcode files.
+    getGcodePresignedUploadUrl: protectedProcedure
+      .input(z.object({
+        filename: z.string().min(1).max(255),
+        contentType: z.string().default("text/x-gcode"),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const safeFileName = input.filename.replace(/[^a-zA-Z0-9._-]/g, "_");
+        const key = `gcode/${ctx.user.id}/${Date.now()}-${safeFileName}`;
+        const forgeApiUrl = process.env.BUILT_IN_FORGE_API_URL;
+        const forgeApiKey = process.env.BUILT_IN_FORGE_API_KEY;
+        if (!forgeApiUrl || !forgeApiKey) {
+          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Storage not configured" });
+        }
+        const presignUrl = new URL("v1/storage/presign/put", forgeApiUrl.replace(/\/+$/, "") + "/");
+        presignUrl.searchParams.set("path", key);
+        const r = await fetch(presignUrl, { headers: { Authorization: `Bearer ${forgeApiKey}` } });
+        if (!r.ok) {
+          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to generate upload URL" });
+        }
+        const { url } = await r.json() as { url: string };
+        // Derive the public URL by stripping query params from the presigned URL
+        const publicUrl = url.split("?")[0];
+        return { presignedUrl: url, publicUrl, key };
+      }),
     // ── Public Album Detail — fetch WID-ALB collection + tracks by collectionWid ──────────────────
     getPublicAlbum: publicProcedure
       .input(z.object({ collectionWid: z.string().min(1) }))
