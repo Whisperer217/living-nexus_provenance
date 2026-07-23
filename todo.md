@@ -6451,6 +6451,9 @@
 - [x] Add gcode tab to ExplorePage and gcode/3dmodel card click routing in ExploreCard
 - [x] Update server contentType filter in getPublicSongs/getNewThisWeek/getTrendingWorks for gcode virtual type
 - [x] Update songs router zod enums to include gcode/3dmodel
+- [x] Build GcodeEnvironment — 4-step guided upload flow with licensing tier selector (Free/Paid/Commission/Witnessed Only)
+- [x] Wire GcodeEnvironment into ManifestationStudio switch and TypeGateway
+- [x] Add gcode to ManifestationType and ATMOSPHERES in types.ts
 - [ ] Build Witnessed Objects gallery page (/witnessed-objects): card grid of all 3D print works
 - [ ] Add Witnessed Objects nav link to sidebar
-- [ ] TypeScript: 0 errors | Vitest: 398/398 passing (confirmed)
+- [x] TypeScript: 0 errors | Vitest: 398/398 passing (confirmed)

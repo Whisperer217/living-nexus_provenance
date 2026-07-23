@@ -298,6 +298,17 @@ export const songs = mysqlTable("songs", {
   // printStatsJson: extracted slicer metadata — JSON object:
   // { layerCount?, estimatedPrintTime?, filamentUsedMm?, filamentUsedG?, slicer?, slicerVersion?, bedSizeX?, bedSizeY?, bedSizeZ? }
   printStatsJson: text("printStatsJson"),
+  // objectLicenseType: creator-controlled licensing tier for 3D print works
+  //   "open"       = Free to Print — G-code freely downloadable, WID proves authorship
+  //   "paid"       = Pay to Print — Stripe-gated download, creator sets price
+  //   "commission" = Commission a Print — creator fulfills physical prints, buyer pays
+  //   "witnessed"  = Witnessed Only — G-code not public, WID is proof-of-creation record only
+  objectLicenseType: mysqlEnum("objectLicenseType", ["open", "paid", "commission", "witnessed"]).default("open"),
+  // objectPriceCents: price in cents for "paid" license tier (e.g. 499 = $4.99)
+  objectPriceCents: int("objectPriceCents"),
+  // objectPhysicalSpecJson: physical dimensions extracted from G-code or entered by creator
+  // { widthMm?, depthMm?, heightMm?, volumeCm3?, weightG?, material? }
+  objectPhysicalSpecJson: text("objectPhysicalSpecJson"),
 
   // ─── Game Manifestation (contentType = "game") ────────────────────────────────
   // gameEngine: the engine/format used to build the game

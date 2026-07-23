@@ -55,9 +55,16 @@ export async function createSong(data: {
   witnessId?: string; harmonicSignature?: number[];
   ecdsaPublicKey?: string; ecdsaSignature?: string; certificateUrl?: string; certificateKey?: string;
   isLyricsOnly?: boolean;
-  contentType?: "audio" | "lyrics" | "manuscript" | "comic" | "game";
+  contentType?: "audio" | "lyrics" | "manuscript" | "comic" | "game" | "gcode" | "3dmodel";
   caption?: string | null;
   displayOrder?: number;
+  // G-code / 3D model fields
+  gcodeUrl?: string;
+  gcodeKey?: string;
+  printStatsJson?: string;
+  objectLicenseType?: "open" | "paid" | "commission" | "witnessed";
+  objectPriceCents?: number;
+  objectPhysicalSpecJson?: string;
 }) {
   const db = await getDb();
   if (!db) throw new Error("Database unavailable");

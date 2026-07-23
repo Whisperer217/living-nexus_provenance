@@ -3,7 +3,7 @@
    Each manifestation type has its own atmosphere, language, and flow.
 ═══════════════════════════════════════════════════════════════════ */
 
-export type ManifestationType = "music" | "lyrics" | "comic" | "manuscript" | "video";
+export type ManifestationType = "music" | "lyrics" | "comic" | "manuscript" | "video" | "gcode";
 
 export interface ManifestationAtmosphere {
   type: ManifestationType;
@@ -29,6 +29,27 @@ export interface ManifestationAtmosphere {
 }
 
 export const ATMOSPHERES: Record<ManifestationType, ManifestationAtmosphere> = {
+  gcode: {
+    type: "gcode",
+    label: "3D Print / G-code",
+    tagline: "Objects into provenance",
+    description: "Register your 3D print file with a Witness ID. The toolpath is the testimony — every layer, witnessed.",
+    icon: "🖨️",
+    colorPrimary: "#FB923C",
+    colorGlow: "rgba(251,146,60,0.30)",
+    colorBg: "rgba(234,88,12,0.06)",
+    colorBorder: "rgba(251,146,60,0.25)",
+    gradient: "linear-gradient(135deg, rgba(234,88,12,0.10) 0%, rgba(251,146,60,0.04) 50%, rgba(212,175,55,0.06) 100%)",
+    language: {
+      welcome: "Your physical creation is about to be witnessed. The toolpath is the testimony.",
+      filePrompt: "Upload your G-code file — the toolpath will render in 3D.",
+      metadataPrompt: "Name your object. Who designed and printed this into existence?",
+      provenancePrompt: "Sealing your manufactured object into the provenance chain.",
+      publishPrompt: "Your 3D print is ready to be witnessed.",
+      progressVerb: "Manifesting",
+      completeMessage: "Your object has been witnessed. The toolpath is now permanent.",
+    },
+  },
   music: {
     type: "music",
     label: "Music",

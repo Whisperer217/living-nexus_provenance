@@ -15,6 +15,7 @@ import { LyricsEnvironment } from "./environments/LyricsEnvironment";
 import { ComicEnvironment } from "./environments/ComicEnvironment";
 import { ManuscriptEnvironment } from "./environments/ManuscriptEnvironment";
 import { VideoEnvironment } from "./environments/VideoEnvironment";
+import { GcodeEnvironment } from "./environments/GcodeEnvironment";
 
 export default function ManifestationStudio() {
   const [, navigate] = useLocation();
@@ -25,7 +26,7 @@ export default function ManifestationStudio() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const typeParam = params.get("type") as ManifestationType | null;
-    if (typeParam && ["music", "lyrics", "comic", "manuscript", "video"].includes(typeParam)) {
+    if (typeParam && ["music", "lyrics", "comic", "manuscript", "video", "gcode"].includes(typeParam)) {
       setSelectedType(typeParam);
       window.history.replaceState({}, "", window.location.pathname);
     }
@@ -77,6 +78,8 @@ export default function ManifestationStudio() {
       return <ManuscriptEnvironment onBack={handleBack} />;
     case "video":
       return <VideoEnvironment onBack={handleBack} />;
+    case "gcode":
+      return <GcodeEnvironment onBack={handleBack} />;
     default:
       return <TypeGateway onSelect={setSelectedType} />;
   }

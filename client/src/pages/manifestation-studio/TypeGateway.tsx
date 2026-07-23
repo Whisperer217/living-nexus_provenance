@@ -5,7 +5,7 @@
 ═══════════════════════════════════════════════════════════════════ */
 
 import { useState } from "react";
-import { Music, PenTool, BookOpen, Film, Palette } from "lucide-react";
+import { Music, PenTool, BookOpen, Film, Palette, Printer } from "lucide-react";
 import { type ManifestationType, ATMOSPHERES } from "./types";
 
 const TYPE_ICONS: Record<ManifestationType, typeof Music> = {
@@ -14,6 +14,7 @@ const TYPE_ICONS: Record<ManifestationType, typeof Music> = {
   comic: Palette,
   manuscript: BookOpen,
   video: Film,
+  gcode: Printer,
 };
 
 interface TypeGatewayProps {

@@ -520,7 +520,7 @@ export const songsRouter = router({
       lyricsText: z.string().max(20000).optional(),
       lyricsHash: z.string().optional(),
       isLyricsOnly: z.boolean().optional(),
-      contentType: z.enum(["audio", "lyrics", "manuscript", "comic"]).optional(),
+      contentType: z.enum(["audio", "lyrics", "manuscript", "comic", "gcode", "3dmodel"]).optional(),
       fileHash: z.string().optional(), witnessId: z.string().optional(),
       harmonicSignature: z.array(z.number()).optional(), ecdsaPublicKey: z.string().optional(), ecdsaSignature: z.string().optional(),
       caption: z.string().max(2000).nullable().optional(),
@@ -550,6 +550,13 @@ export const songsRouter = router({
       haaiOriginStory: z.string().max(5000).optional(),
       // Storyboard / Comic Book Reader
       pagesJson: z.string().max(500000).optional(),
+      // G-code / 3D Model fields
+      gcodeUrl: z.string().url().optional(),
+      gcodeKey: z.string().optional(),
+      printStatsJson: z.string().max(4096).optional(),
+      objectLicenseType: z.enum(["open", "paid", "commission", "witnessed"]).optional(),
+      objectPriceCents: z.number().int().min(0).max(99999).optional(),
+      objectPhysicalSpecJson: z.string().max(2048).optional(),
     })).mutation(async ({ ctx, input }) => {
       const user = await getUserById(ctx.user.id);
       if (!user) throw new Error("User not found");
@@ -579,7 +586,7 @@ export const songsRouter = router({
       const haaiDeclaredAt = (input.aiDisclosure === "human_authored_ai_instrument" && haaiFields.every(f => f && f.trim().length > 0)) ? new Date() : undefined;
       // Assign displayOrder so new songs append to the end of the creator's list
       const nextOrder = await getNextDisplayOrder(ctx.user.id);
-      const insertResult = await createSong({ userId: ctx.user.id, title: input.title, genre: input.genre, bpm: input.bpm, keySignature: input.keySignature, moodTags: input.moodTags, coWriters: input.coWriters, albumName: input.albumName, creditsJson: input.creditsJson, releaseDate: input.releaseDate, isrc: input.isrc, aiConsent: input.aiConsent, ownershipStatus: input.ownershipStatus, lyricsText: input.lyricsText, lyricsHash: input.lyricsHash, isLyricsOnly: input.isLyricsOnly ?? false, contentType: input.contentType ?? (input.isLyricsOnly ? "lyrics" : "audio"), fileUrl, fileKey: audioKey, coverArtUrl, fileHash: input.fileHash, witnessId: input.witnessId, harmonicSignature: input.harmonicSignature, ecdsaPublicKey: input.ecdsaPublicKey, ecdsaSignature: input.ecdsaSignature, caption: input.caption, headlineCaption: input.headlineCaption, description: input.description, galleryImagesJson: input.galleryImagesJson, playerAssetType: input.playerAssetType ?? 'cover', aiToolSuno: input.aiToolSuno ?? false, aiToolUdio: input.aiToolUdio ?? false, aiToolSonato: input.aiToolSonato ?? false, aiToolOther: input.aiToolOther ?? false, aiToolOtherName: input.aiToolOtherName, durationSeconds: input.durationSeconds, sampleRate: input.sampleRate, bitDepth: input.bitDepth, aiDisclosure: input.aiDisclosure, haaiVisualConcept: input.haaiVisualConcept, haaiStyleLanguage: input.haaiStyleLanguage, haaiInstrumentation: input.haaiInstrumentation, haaiVocalConveyance: input.haaiVocalConveyance, haaiLyricalInspiration: input.haaiLyricalInspiration, haaiEmotionalTone: input.haaiEmotionalTone, haaiOriginStory: input.haaiOriginStory, haaiDeclaredAt, pagesJson: input.pagesJson, displayOrder: nextOrder } as any);
+      const insertResult = await createSong({ userId: ctx.user.id, title: input.title, genre: input.genre, bpm: input.bpm, keySignature: input.keySignature, moodTags: input.moodTags, coWriters: input.coWriters, albumName: input.albumName, creditsJson: input.creditsJson, releaseDate: input.releaseDate, isrc: input.isrc, aiConsent: input.aiConsent, ownershipStatus: input.ownershipStatus, lyricsText: input.lyricsText, lyricsHash: input.lyricsHash, isLyricsOnly: input.isLyricsOnly ?? false, contentType: input.contentType ?? (input.isLyricsOnly ? "lyrics" : "audio"), fileUrl, fileKey: audioKey, coverArtUrl, fileHash: input.fileHash, witnessId: input.witnessId, harmonicSignature: input.harmonicSignature, ecdsaPublicKey: input.ecdsaPublicKey, ecdsaSignature: input.ecdsaSignature, caption: input.caption, headlineCaption: input.headlineCaption, description: input.description, galleryImagesJson: input.galleryImagesJson, playerAssetType: input.playerAssetType ?? 'cover', aiToolSuno: input.aiToolSuno ?? false, aiToolUdio: input.aiToolUdio ?? false, aiToolSonato: input.aiToolSonato ?? false, aiToolOther: input.aiToolOther ?? false, aiToolOtherName: input.aiToolOtherName, durationSeconds: input.durationSeconds, sampleRate: input.sampleRate, bitDepth: input.bitDepth, aiDisclosure: input.aiDisclosure, haaiVisualConcept: input.haaiVisualConcept, haaiStyleLanguage: input.haaiStyleLanguage, haaiInstrumentation: input.haaiInstrumentation, haaiVocalConveyance: input.haaiVocalConveyance, haaiLyricalInspiration: input.haaiLyricalInspiration, haaiEmotionalTone: input.haaiEmotionalTone, haaiOriginStory: input.haaiOriginStory, haaiDeclaredAt, pagesJson: input.pagesJson, displayOrder: nextOrder, gcodeUrl: input.gcodeUrl, gcodeKey: input.gcodeKey, printStatsJson: input.printStatsJson, objectLicenseType: input.objectLicenseType, objectPriceCents: input.objectPriceCents, objectPhysicalSpecJson: input.objectPhysicalSpecJson } as any);
        const songId = (insertResult as any)[0]?.insertId as number;
       // Trigger visual generation pipeline (non-blocking)
       enqueueVisualJob(songId, isFounder).catch(err => console.error("[VisualQueue] Enqueue error:", err));
