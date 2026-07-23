@@ -2282,3 +2282,42 @@ export const creatorPaymentSettings = mysqlTable("creator_payment_settings", {
 }));
 export type CreatorPaymentSetting = typeof creatorPaymentSettings.$inferSelect;
 export type InsertCreatorPaymentSetting = typeof creatorPaymentSettings.$inferInsert;
+
+// ─── Mission Control — Actionable Phase Ledger ───────────────────────────────
+// Each row is a development phase with an embedded prompt that can be dispatched
+// directly to the Manus API to create a new agent task. The ledger is append-only;
+// completed phases are never deleted — they form the permanent build history.
+export const missionPhases = mysqlTable("mission_phases", {
+  id:             int("id").autoincrement().primaryKey(),
+  // Display ordering within the ledger (lower = higher priority)
+  sortOrder:      int("sortOrder").default(0).notNull(),
+  // Human-readable title shown on the phase card
+  title:          varchar("title", { length: 255 }).notNull(),
+  // Short description of what this phase accomplishes
+  description:    text("description"),
+  // Category tag for grouping (e.g. "backend", "frontend", "infra", "design")
+  category:       varchar("category", { length: 64 }).default("general").notNull(),
+  // The full prompt text that will be sent to the Manus API when fired
+  prompt:         text("prompt").notNull(),
+  // Phase lifecycle status
+  status:         mysqlEnum("status", ["locked", "ready", "dispatched", "running", "complete", "error"])
+                    .default("locked").notNull(),
+  // When locked: optional human-readable reason explaining the dependency
+  lockedReason:   text("lockedReason"),
+  // Manus API task ID returned after dispatch
+  manusTaskId:    varchar("manusTaskId", { length: 128 }),
+  // Manus project ID to attach the task to (optional)
+  manusProjectId: varchar("manusProjectId", { length: 128 }),
+  // Last status message polled from Manus API
+  lastStatusMsg:  text("lastStatusMsg"),
+  // Timestamps
+  createdAt:      timestamp("createdAt").defaultNow().notNull(),
+  updatedAt:      timestamp("updatedAt").defaultNow().notNull(),
+  dispatchedAt:   timestamp("dispatchedAt"),
+  completedAt:    timestamp("completedAt"),
+}, (t) => ({
+  mpStatusIdx: index("mp_status_idx").on(t.status),
+  mpOrderIdx:  index("mp_order_idx").on(t.sortOrder),
+}));
+export type MissionPhase = typeof missionPhases.$inferSelect;
+export type InsertMissionPhase = typeof missionPhases.$inferInsert;

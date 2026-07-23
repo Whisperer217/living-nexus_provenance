@@ -63,6 +63,7 @@ const CommentModerationPage = lazy(() => import("./pages/admin/CommentModeration
 const AuditLogPage = lazy(() => import("./pages/admin/AuditLogPage"));
 const MissionControlPage = lazy(() => import("./pages/admin/MissionControlPage"));
 const PhysicalDistributionPage = lazy(() => import("./pages/admin/PhysicalDistributionPage"));
+const PhaseLedgerPage = lazy(() => import("./pages/admin/MissionControl"));
 const SelfImprovementPage = lazy(() => import("./pages/SelfImprovementPage"));
 const PaymentIntegrityPage = lazy(() => import("./pages/PaymentIntegrityPage"));
 const TrustPage = lazy(() => import("./pages/TrustPage"));
@@ -257,6 +258,7 @@ function Router() {
                 <Route path="/admin/payment-integrity" component={PaymentIntegrityPage} />
                 <Route path="/admin/mission-control" component={MissionControlPage} />
                 <Route path="/admin/physical" component={PhysicalDistributionPage} />
+                <Route path="/admin/phase-ledger" component={PhaseLedgerPage} />
                 <Route path="/admin" component={AdminUsersPage} />
                 <Route path="/trust" component={TrustPage} />
                 <Route path="/redeem" component={RedeemPage} />

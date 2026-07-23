@@ -766,6 +766,10 @@ export default function AdminUsersPage() {
               style={{ borderColor: "var(--ln-smoke)", color: "#22C55E" }}>
               🛰 Mission Control
             </Button>
+            <Button variant="outline" size="sm" onClick={() => navigate("/admin/phase-ledger")}
+              style={{ borderColor: "var(--ln-gold)", color: "var(--ln-gold)", fontWeight: 700 }}>
+              ⚡ Phase Ledger
+            </Button>
             <Button variant="outline" size="sm" onClick={() => navigate("/")}
               style={{ borderColor: BORDER, color: SUBTEXT }}>
               ← Back

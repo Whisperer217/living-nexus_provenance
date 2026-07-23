@@ -10,4 +10,5 @@ export const ENV = {
   workerSecret: process.env.LN_WORKER_SECRET ?? "",
   cloudWorkerUrl: process.env.CLOUD_WORKER_URL ?? "",
   mcpReadToken: process.env.MCP_READ_TOKEN ?? "",
+  manusApiKey: process.env.MANUS_API_KEY ?? "",
 };

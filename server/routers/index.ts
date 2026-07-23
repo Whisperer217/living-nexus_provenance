@@ -77,6 +77,9 @@ import { collectionStudioRouter } from "./collectionStudio";
 // ── Platform Guides domain ──────────────────────────────────────────────────
 import { platformGuidesRouter }    from "./platformGuides";
 
+// ── Mission Control domain ───────────────────────────────────────────────────
+import { missionControlRouter }    from "./missionControl";
+
 // ── Platform domain ───────────────────────────────────────────────────────────
 import { platformRouter }          from "./platform";
 import { testimonyRouter }         from "./testimony";
@@ -175,6 +178,9 @@ export const appRouter = router({
 
   // Platform Guides
   platformGuides: platformGuidesRouter,
+
+  // Mission Control — Actionable Phase Ledger
+  missionControl: missionControlRouter,
 });
 
 export type AppRouter = typeof appRouter;

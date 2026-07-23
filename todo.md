@@ -6478,3 +6478,16 @@
 - [x] Root cause: body[data-scroll-locked] CSS rule had touch-action:none — Radix Select inside CreativeDrawer sets data-scroll-locked on mount, killing ALL pointer/touch events platform-wide
 - [x] Fix: removed touch-action:none from both body[data-scroll-locked] rules in index.css; touch-action:none now scoped only to [data-slot="dialog-overlay"] (correct — prevents background scroll through modal backdrop only)
 - [x] TypeScript: 0 errors | Vitest: 398/398 passing
+
+## Mission Control — Actionable Phase Ledger (Session: July 23, 2026)
+- [x] Add missionPhases table to drizzle schema (id, title, description, prompt, status, manusTaskId, manusProjectId, order, lockedReason, createdAt, updatedAt, dispatchedAt, completedAt)
+- [x] Seed missionPhases table with pre-built phases from todo.md backlog
+- [x] Add server/routers/missionControl.ts — tRPC procedures: listPhases, setLock, dispatch, pollStatus
+- [x] Integrate Manus API task.create call in dispatch procedure (uses MANUS_API_KEY secret)
+- [x] Add polling procedure that calls task.listMessages and updates phase status
+- [x] Build /admin/phase-ledger page — phase ledger with lock toggles, fire buttons, live status
+- [x] Wire missionControl router into server/routers/index.ts
+- [x] Add Phase Ledger nav button to AdminUsersPage admin dashboard
+- [x] Dispatch always targets LN project ID 8omCfbqtRab36ZgzjFBZMp (in-project execution model)
+- [ ] MANUS_API_KEY secret required from user to activate dispatch
+- [ ] TypeScript: 0 errors | Vitest: passing
