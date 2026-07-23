@@ -27,6 +27,7 @@ import { generateRef, safeErrorResponse } from "../_core/errorHandler";
 import { micronize, type ImagePreset } from "../services/imageProcessing";
 import { storagePut } from "../utils/storage";
 import { stripAudioMetadata } from "../services/audioMetadataStrip";
+import { parseGcode } from "../services/gcodeParser";
 
 const router = Router();
 
@@ -87,11 +88,11 @@ router.post("/api/upload-file", async (req: Request, res: Response) => {
     if (info.mimeType) mimeType = info.mimeType;
 
     const safeFileName = originalName.replace(/[^a-zA-Z0-9._-]/g, "_");
-    const prefix =
+        const prefix =
       fileType === "cover" ? "covers" :
       fileType === "video" ? "videos" :
+      fileType === "gcode" ? "gcode" :
       "audio";
-
     // Determine if this file type should be micronized
     const imagePreset: ImagePreset | null =
       fileType === "cover" ? "coverArt" : null;
@@ -115,23 +116,49 @@ router.post("/api/upload-file", async (req: Request, res: Response) => {
         });
         fileStream.on("error", reject);
       });
+        } else if (fileType === "gcode") {
+      // GCODE PATH: buffer, parse for thumbnail + stats, upload file, return extra metadata
+      const key = `${prefix}/${user!.id}/${Date.now()}-${safeFileName}`;
+      const chunks: Buffer[] = [];
+      fileStream.on("data", (chunk: Buffer) => chunks.push(chunk));
+      uploadPromise = new Promise<{ url: string; key: string; thumbnailUrl?: string; thumbnailKey?: string; printStats?: object }>((resolve, reject) => {
+        fileStream.on("end", async () => {
+          try {
+            const buffer = Buffer.concat(chunks);
+            // Parse G-code for embedded thumbnail and print stats
+            const { thumbnailBuffer, printStats } = parseGcode(buffer);
+            // Upload the G-code file
+            const { url } = await storagePut(key, buffer, "text/x-gcode");
+            let thumbnailUrl: string | undefined;
+            let thumbnailKey: string | undefined;
+            // If a thumbnail was found, upload it as a cover image
+            if (thumbnailBuffer && thumbnailBuffer.length > 100) {
+              const thumbKey = `covers/${user!.id}/${Date.now()}-gcode-thumb.png`;
+              const thumbResult = await storagePut(thumbKey, thumbnailBuffer, "image/png");
+              thumbnailUrl = thumbResult.url;
+              thumbnailKey = thumbKey;
+            }
+            resolve({ url, key, thumbnailUrl, thumbnailKey, printStats });
+          } catch (err) {
+            reject(err);
+          }
+        });
+        fileStream.on("error", reject);
+      });
     } else {
       // AUDIO/VIDEO PATH: buffer the stream, strip metadata for audio, then upload to S3
       const isAudio = fileType === "audio" || mimeType.startsWith("audio/");
       const key = `${prefix}/${user!.id}/${Date.now()}-${safeFileName}`;
-
       const chunks: Buffer[] = [];
       fileStream.on("data", (chunk: Buffer) => chunks.push(chunk));
       uploadPromise = new Promise<{ url: string; key: string }>((resolve, reject) => {
         fileStream.on("end", async () => {
           try {
             let buffer = Buffer.concat(chunks);
-
             // Strip all ID3/EXIF metadata from audio files before storage
             if (isAudio) {
               buffer = Buffer.from(await stripAudioMetadata(buffer, mimeType));
             }
-
             const { url } = await storagePut(key, buffer, mimeType);
             resolve({ url, key });
           } catch (err) {

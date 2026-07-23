@@ -83,12 +83,13 @@ function exploreMapToSongData(row: any) {
 const PAGE_SIZE = 24;
 
 type ExploreMode = "infinite" | "randomize" | "trending" | "new";
-type ContentType = "audio" | "lyrics" | "manuscript" | "comic" | "novel";
+type ContentType = "audio" | "lyrics" | "manuscript" | "comic" | "novel" | "gcode" | "3dmodel";
 // "novel" is a UI alias — the server maps it to contentType=manuscript
 const CONTENT_TABS: { id: ContentType; label: string; icon: string; color: string }[] = [
   { id: "audio",  label: "Music",           icon: "🎵", color: "var(--ln-gold)" },
   { id: "lyrics", label: "Lyrics",          icon: "✍️", color: "var(--ln-gold)" },
   { id: "novel",  label: "Comics & Novels", icon: "📚", color: "#A78BFA" },
+  { id: "gcode",  label: "3D Prints",       icon: "🖨️", color: "#4ade80" },
 ];
 
 // AiDisclosureBadge replaced by shared AiDisclosurePill component
@@ -118,8 +119,9 @@ function ExploreCard({
   const likeCount = prefetchedLikeCount ?? 0;
   const artistName = creator?.artistHandle ? `@${creator.artistHandle}` : (creator?.name || "Unknown");
   // Non-audio types navigate to song detail page instead of playing audio
-  const isNonAudio = song.contentType === "manuscript" || song.contentType === "comic";
+  const isNonAudio = song.contentType === "manuscript" || song.contentType === "comic" || song.contentType === "gcode" || song.contentType === "3dmodel";
   const isComic = song.contentType === "comic";
+  const isGcode = song.contentType === "gcode" || song.contentType === "3dmodel";
   const isHot = (song.playCount ?? 0) >= 50;
   const ctColors = getContentTypeColors(song.contentType ?? "audio");
   const hasAudio = !!song.fileUrl && !isNonAudio;
@@ -127,6 +129,7 @@ function ExploreCard({
 
   const handleCardClick = () => {
     if (isComic && onOpenReader) { onOpenReader(song); return; }
+    if (isGcode) { navigate(`/gcode/${song.id}`); return; }
     if (isNonAudio) { navigate(`/book/${song.id}`); } else { onPlay(item); }
   };
 

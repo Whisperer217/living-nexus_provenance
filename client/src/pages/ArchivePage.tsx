@@ -1512,8 +1512,9 @@ export default function ArchivePage() {
                         const ct = song.contentType ?? "audio";
                         const isBook = ct === "manuscript" || ct === "comic";
                         const isGame = ct === "game";
-                        const viewHref = isBook ? `/book/${song.id}` : isGame ? `/game/${song.id}` : `/song/${song.id}`;
-                        const viewTitle = isBook ? "View book page" : isGame ? "View game page" : "View song page";
+                        const isGcode = ct === "gcode" || ct === "3dmodel";
+                        const viewHref = isBook ? `/book/${song.id}` : isGame ? `/game/${song.id}` : isGcode ? `/gcode/${song.id}` : `/song/${song.id}`;
+                        const viewTitle = isBook ? "View book page" : isGame ? "View game page" : isGcode ? "View 3D work" : "View song page";
                         return (
                           <Link href={viewHref}>
                             <button

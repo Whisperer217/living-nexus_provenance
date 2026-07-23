@@ -6437,3 +6437,20 @@
 - [ ] Add visual separator between Creator Bio (creator-written) and Living Identity Snapshot (platform-observed)
 - [ ] Add "Refresh Identity" button visible to owner that triggers forceRegenerate
 - [ ] Ensure Living Identity Snapshot does not duplicate the creator bio — it should complement, not restate
+
+## G-code / 3D Model Support (BuildCores-Inspired)
+- [x] Add 'gcode' and '3dmodel' to medium type enum in drizzle schema and upload logic
+- [x] Server: parse G-code file on upload to extract embedded slicer thumbnail (Base64 PNG in comment block) and auto-set as cover art
+- [x] Server: store G-code file URL in song record (gcodeUrl field)
+- [x] Add Three.js + gcode-preview to client dependencies
+- [x] Build GCodeViewer component: WebGL toolpath renderer with orbit controls, gold-on-dark palette, layer scrubber + replay animation
+- [x] Wire GCodeViewer into GcodeDetailPage: shown when work type is gcode/3dmodel
+- [x] Add print statistics panel alongside viewer: layer count, estimated print time, filament used, slicer detected
+- [x] Create GcodeDetailPage with provenance section, version history, WID identity card
+- [x] Add /gcode/:id route in App.tsx and gcode routing in ArchivePage
+- [x] Add gcode tab to ExplorePage and gcode/3dmodel card click routing in ExploreCard
+- [x] Update server contentType filter in getPublicSongs/getNewThisWeek/getTrendingWorks for gcode virtual type
+- [x] Update songs router zod enums to include gcode/3dmodel
+- [ ] Build Witnessed Objects gallery page (/witnessed-objects): card grid of all 3D print works
+- [ ] Add Witnessed Objects nav link to sidebar
+- [ ] TypeScript: 0 errors | Vitest: 398/398 passing (confirmed)

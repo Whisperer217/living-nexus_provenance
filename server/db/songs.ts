@@ -117,7 +117,7 @@ export async function reorderSongs(userId: number, orderedIds: number[]) {
   );
 }
 
-export async function getPublicSongs(opts?: { genre?: string; search?: string; limit?: number; offset?: number; randomize?: boolean; seed?: number; contentType?: "audio" | "lyrics" | "manuscript" | "comic" | "written" | "game" }) {
+export async function getPublicSongs(opts?: { genre?: string; search?: string; limit?: number; offset?: number; randomize?: boolean; seed?: number; contentType?: "audio" | "lyrics" | "manuscript" | "comic" | "written" | "game" | "gcode" | "3dmodel" }) {
   const db = await getDb();
   if (!db) return [];
   const limit = opts?.limit ?? 50;
@@ -126,6 +126,9 @@ export async function getPublicSongs(opts?: { genre?: string; search?: string; l
   if (opts?.contentType === "written") {
     // "written" is a virtual type that matches both manuscript and comic
     conditions.push(or(eq(songs.contentType, "manuscript"), eq(songs.contentType, "comic")) as unknown as ReturnType<typeof eq>);
+  } else if (opts?.contentType === "gcode") {
+    // "gcode" tab shows both gcode and 3dmodel works
+    conditions.push(or(eq(songs.contentType, "gcode"), eq(songs.contentType, "3dmodel")) as unknown as ReturnType<typeof eq>);
   } else if (opts?.contentType) {
     conditions.push(eq(songs.contentType, opts.contentType) as ReturnType<typeof eq>);
   }
@@ -1166,7 +1169,7 @@ export async function getSongVersionById(versionId: number) {
 }
 
 
-export async function getNewThisWeek(opts?: { genre?: string; contentType?: "audio" | "lyrics" | "manuscript" | "comic" | "written" | "game"; limit?: number }) {
+export async function getNewThisWeek(opts?: { genre?: string; contentType?: "audio" | "lyrics" | "manuscript" | "comic" | "written" | "game" | "gcode" | "3dmodel"; limit?: number }) {
   const db = await getDb();
   if (!db) return [];
   const limit = opts?.limit ?? 24;
@@ -1187,6 +1190,8 @@ export async function getNewThisWeek(opts?: { genre?: string; contentType?: "aud
   if (opts?.genre) baseConditions.push(eq(songs.genre, opts.genre) as ReturnType<typeof eq>);
   if (opts?.contentType === "written") {
     baseConditions.push(or(eq(songs.contentType, "manuscript"), eq(songs.contentType, "comic")) as unknown as ReturnType<typeof eq>);
+  } else if (opts?.contentType === "gcode") {
+    baseConditions.push(or(eq(songs.contentType, "gcode"), eq(songs.contentType, "3dmodel")) as unknown as ReturnType<typeof eq>);
   } else if (opts?.contentType) {
     baseConditions.push(eq(songs.contentType, opts.contentType) as ReturnType<typeof eq>);
   }

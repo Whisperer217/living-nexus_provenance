@@ -287,7 +287,17 @@ export const songs = mysqlTable("songs", {
   // "lyrics"     = standalone lyric sheet (WID-LYR only, no audio)
   // "manuscript" = novel, short story, essay, academic paper
   // "comic"      = comic book, graphic novel, illustrated story
-  contentType: mysqlEnum("contentType", ["audio", "lyrics", "manuscript", "comic", "game", "image"]).default("audio").notNull(),
+  // "gcode"      = 3D printer / CNC G-code file (toolpath provenance)
+  // "3dmodel"    = 3D mesh file (STL, OBJ, GLB) — rendered in Three.js viewer
+  contentType: mysqlEnum("contentType", ["audio", "lyrics", "manuscript", "comic", "game", "image", "gcode", "3dmodel"]).default("audio").notNull(),
+
+  // ─── G-code / 3D Model Manifestation (contentType = "gcode" | "3dmodel") ───────
+  // gcodeUrl: S3 URL of the uploaded .gcode / .stl / .obj / .glb / .3mf file
+  gcodeUrl: text("gcodeUrl"),
+  gcodeKey: text("gcodeKey"),
+  // printStatsJson: extracted slicer metadata — JSON object:
+  // { layerCount?, estimatedPrintTime?, filamentUsedMm?, filamentUsedG?, slicer?, slicerVersion?, bedSizeX?, bedSizeY?, bedSizeZ? }
+  printStatsJson: text("printStatsJson"),
 
   // ─── Game Manifestation (contentType = "game") ────────────────────────────────
   // gameEngine: the engine/format used to build the game
