@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Shield, ArrowLeft, ExternalLink, Copy, Check,
-  Gift, BookOpen
+  Gift, BookOpen, KeyRound, Clock, XCircle
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -22,11 +22,30 @@ export default function GuideDetailPage() {
   const [tipAmount, setTipAmount] = useState(500);
   const [tipLoading, setTipLoading] = useState(false);
   const [useGuideLoading, setUseGuideLoading] = useState(false);
+  const [requestNote, setRequestNote] = useState("");
+  const [showRequestForm, setShowRequestForm] = useState(false);
 
   const { data: guide, isLoading } = trpc.guides.getById.useQuery(
     { id: Number(id) },
     { enabled: !!id }
   );
+
+  const { data: accessStatus, refetch: refetchAccess } = trpc.guides.myAccessStatus.useQuery(
+    { guideId: Number(id) },
+    { enabled: !!user && !!id }
+  );
+
+  const requestAccess = trpc.guides.requestAccess.useMutation({
+    onSuccess: (result) => {
+      refetchAccess();
+      setShowRequestForm(false);
+      setRequestNote("");
+      if (result.status === 'requested') toast.success("Access request submitted. The creator will review it.");
+      else if (result.status === 'already_pending') toast.info("Your request is already pending review.");
+      else if (result.status === 'already_approved') toast.success("You already have access to this guide.");
+    },
+    onError: (err) => toast.error(err.message ?? "Failed to submit request."),
+  });
 
   const createTip = trpc.guides.createTip.useMutation();
 
@@ -157,16 +176,87 @@ export default function GuideDetailPage() {
 
             {/* Action buttons — tip + use guide */}
             <div className="mt-4 space-y-2">
-              {/* Use This Guide — for non-owners who are logged in */}
-              {isLoggedIn && !isOwner && (
-                <Button
-                  className="w-full bg-[#C9A84C] hover:bg-[#b8973b] text-black font-bold gap-2"
-                  onClick={handleUseGuide}
-                  disabled={useGuideLoading}
-                >
-                  <BookOpen className="w-4 h-4" />
-                  Use This Guide in Keeper
-                </Button>
+              {/* Access-gated CTA — for non-owners who are logged in */}
+              {isLoggedIn && !isOwner && (() => {
+                const status = accessStatus?.status ?? 'none';
+                if (status === 'approved') {
+                  return (
+                    <Button
+                      className="w-full bg-[#C9A84C] hover:bg-[#b8973b] text-black font-bold gap-2"
+                      onClick={handleUseGuide}
+                      disabled={useGuideLoading}
+                    >
+                      <BookOpen className="w-4 h-4" />
+                      Use This Guide in Keeper
+                    </Button>
+                  );
+                }
+                if (status === 'pending') {
+                  return (
+                    <div className="w-full flex items-center gap-2 rounded-lg border border-[#3a3020] bg-[#0d0b06] px-4 py-3 text-sm text-[#a89060]">
+                      <Clock className="w-4 h-4 shrink-0 text-[#C9A84C]" />
+                      Access request pending review
+                    </div>
+                  );
+                }
+                if (status === 'denied') {
+                  return (
+                    <div className="space-y-2">
+                      <div className="w-full flex items-center gap-2 rounded-lg border border-red-900/40 bg-[#0d0b06] px-4 py-3 text-sm text-red-400">
+                        <XCircle className="w-4 h-4 shrink-0" />
+                        Access request was denied
+                      </div>
+                      <Button
+                        variant="outline"
+                        className="w-full border-[#2a2010] text-[#a89060] hover:bg-[#1a1508] gap-2"
+                        onClick={() => setShowRequestForm(v => !v)}
+                      >
+                        <KeyRound className="w-4 h-4" />
+                        Re-request Access
+                      </Button>
+                    </div>
+                  );
+                }
+                // status === 'none'
+                return (
+                  <Button
+                    className="w-full bg-[#C9A84C]/10 hover:bg-[#C9A84C]/20 border border-[#C9A84C]/40 text-[#C9A84C] font-bold gap-2"
+                    onClick={() => setShowRequestForm(v => !v)}
+                  >
+                    <KeyRound className="w-4 h-4" />
+                    Request Access
+                  </Button>
+                );
+              })()}
+
+              {/* Request Access form */}
+              {isLoggedIn && !isOwner && showRequestForm && (
+                <div className="bg-[#0d0b06] border border-[#2a2010] rounded-xl p-4 space-y-3">
+                  <div className="text-[#C9A84C] text-xs font-bold tracking-wider">ACCESS REQUEST</div>
+                  <textarea
+                    value={requestNote}
+                    onChange={e => setRequestNote(e.target.value)}
+                    placeholder="Optional: tell the creator why you'd like access…"
+                    rows={3}
+                    maxLength={500}
+                    className="w-full bg-[#111008] border border-[#2a2010] rounded-lg px-3 py-2 text-sm text-[#e8d5a3] placeholder:text-[#4a4030] resize-none focus:outline-none focus:border-[#C9A84C]/60"
+                  />
+                  <Button
+                    className="w-full bg-[#C9A84C] hover:bg-[#b8973b] text-black font-bold"
+                    onClick={() => requestAccess.mutate({ guideId: Number(id), requestNote: requestNote || undefined })}
+                    disabled={requestAccess.isPending}
+                  >
+                    {requestAccess.isPending ? "Submitting…" : "Submit Request"}
+                  </Button>
+                </div>
+              )}
+
+              {/* Not logged in — prompt to sign in */}
+              {!isLoggedIn && (
+                <div className="w-full flex items-center gap-2 rounded-lg border border-[#2a2010] bg-[#0d0b06] px-4 py-3 text-sm text-[#6b5f3e]">
+                  <KeyRound className="w-4 h-4 shrink-0 text-[#C9A84C]" />
+                  Sign in to request access to this guide
+                </div>
               )}
 
               {/* Tip / Gift button — for non-owners */}

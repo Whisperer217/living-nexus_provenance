@@ -2321,3 +2321,26 @@ export const missionPhases = mysqlTable("mission_phases", {
 }));
 export type MissionPhase = typeof missionPhases.$inferSelect;
 export type InsertMissionPhase = typeof missionPhases.$inferInsert;
+
+// ─── Guide Access Requests ────────────────────────────────────────────────────
+// Tracks user requests to access a published guide. Admin/creator approves or denies.
+// No guide is accessible without explicit approval (airtight gating).
+export const guideAccessRequests = mysqlTable("guideAccessRequests", {
+  id: int("id").autoincrement().primaryKey(),
+  guideId: int("guideId").notNull(),                  // FK → guides.id
+  userId: int("userId").notNull(),                    // FK → users.id (requester)
+  status: mysqlEnum("status", ["pending", "approved", "denied"]).default("pending").notNull(),
+  requestNote: text("requestNote"),                   // optional note from requester
+  reviewNote: text("reviewNote"),                     // optional note from reviewer
+  reviewedBy: int("reviewedBy"),                      // FK → users.id (admin/creator who reviewed)
+  reviewedAt: timestamp("reviewedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (t) => ({
+  guideIdx: index("guideAccessReq_guideId_idx").on(t.guideId),
+  userIdx: index("guideAccessReq_userId_idx").on(t.userId),
+  statusIdx: index("guideAccessReq_status_idx").on(t.status),
+  uniqueReq: uniqueIndex("guideAccessReq_unique_idx").on(t.guideId, t.userId),
+}));
+export type GuideAccessRequest = typeof guideAccessRequests.$inferSelect;
+export type InsertGuideAccessRequest = typeof guideAccessRequests.$inferInsert;

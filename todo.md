@@ -6507,3 +6507,17 @@
 - [ ] Build guide access request flow — solid gating before a guide is published
 - [ ] Ensure all Register nav links resolve to real pages (no 404s)
 - [ ] Phase Ledger: mark this phase as queued and ready to fire
+
+## Phase: Guide Directory & Nexus Personas — COMPLETED (Session Jul 23 2026)
+
+- [x] Audit all Register nav links — /keeper, /keeper-compose, /guides, /guides/upload all resolve (no 404s)
+- [x] guideAccessRequests table created in DB (id, guideId, userId, status, requestNote, reviewNote, reviewedAt, createdAt)
+- [x] guides.requestAccess tRPC procedure — submit access request with optional note, idempotent
+- [x] guides.myAccessStatus tRPC procedure — check current user's access status for a guide
+- [x] guides.listAccessRequests tRPC procedure — admin/owner view with status filter, non-admins see own guides only
+- [x] guides.reviewAccessRequest tRPC procedure — approve or deny with optional review note
+- [x] GuideDetailPage — access-gated CTA: none/pending/denied/approved states, inline request form
+- [x] Admin: GuideAccessRequestsPage (/admin/guide-access) — review queue with approve/deny, filter tabs
+- [x] Admin nav: Guide Access button added to AdminUsersPage
+- [x] App.tsx: /admin/guide-access route registered
+- [x] TypeScript: 0 errors

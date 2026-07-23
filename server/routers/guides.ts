@@ -1,5 +1,6 @@
 import Stripe from "stripe";
 import { z } from "zod";
+import { and, eq, inArray } from "drizzle-orm";
 import { generateShareArtifact } from "../services/shareArtifactService";
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "../_core/cookies";
@@ -565,7 +566,126 @@ If a field cannot be determined from the document, use an empty string. For symb
          const key = `references/${ctx.user.id}/${Date.now()}-ref.${ext}`;
          const { url } = await storagePut(key, buffer, input.mimeType);
          return { url, key };
-              }),
+       }),
+
+    // ── Guide Access Request Procedures ──────────────────────────────────────
+
+    /** Request access to a published guide. One request per user per guide (unique constraint). */
+    requestAccess: protectedProcedure
+      .input(z.object({
+        guideId: z.number().int().positive(),
+        requestNote: z.string().max(500).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const db = await getDb();
+        const { guideAccessRequests } = await import('../../drizzle/schema');
+        // Verify guide exists and is published
+        const guide = await getGuideById(input.guideId);
+        if (!guide || guide.canonicalStatus !== 'published') {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Guide not found' });
+        }
+        // Upsert — if already requested, update the note
+        const existing = await db.select().from(guideAccessRequests)
+          .where(and(eq(guideAccessRequests.guideId, input.guideId), eq(guideAccessRequests.userId, ctx.user.id)))
+          .limit(1);
+        if (existing.length > 0) {
+          if (existing[0].status === 'approved') return { status: 'already_approved' as const };
+          if (existing[0].status === 'pending') return { status: 'already_pending' as const };
+          // denied — allow re-request
+          await db.update(guideAccessRequests)
+            .set({ status: 'pending', requestNote: input.requestNote ?? null, reviewNote: null, reviewedBy: null, reviewedAt: null })
+            .where(eq(guideAccessRequests.id, existing[0].id));
+          return { status: 'requested' as const };
+        }
+        await db.insert(guideAccessRequests).values({
+          guideId: input.guideId,
+          userId: ctx.user.id,
+          requestNote: input.requestNote ?? null,
+          status: 'pending',
+        });
+        return { status: 'requested' as const };
+      }),
+
+    /** Get the current user's access status for a specific guide. */
+    myAccessStatus: protectedProcedure
+      .input(z.object({ guideId: z.number().int().positive() }))
+      .query(async ({ ctx, input }) => {
+        const db = await getDb();
+        const { guideAccessRequests } = await import('../../drizzle/schema');
+        const rows = await db.select().from(guideAccessRequests)
+          .where(and(eq(guideAccessRequests.guideId, input.guideId), eq(guideAccessRequests.userId, ctx.user.id)))
+          .limit(1);
+        if (rows.length === 0) return { status: 'none' as const };
+        return { status: rows[0].status, requestId: rows[0].id };
+      }),
+
+    /** List all access requests for guides owned by the current user (or all if admin). */
+    listAccessRequests: protectedProcedure
+      .input(z.object({
+        guideId: z.number().int().positive().optional(),
+        status: z.enum(['pending', 'approved', 'denied']).optional(),
+      }))
+      .query(async ({ ctx, input }) => {
+        const db = await getDb();
+        const { guideAccessRequests, guides, users } = await import('../../drizzle/schema');
+        const conditions: any[] = [];
+        if (input.guideId) conditions.push(eq(guideAccessRequests.guideId, input.guideId));
+        if (input.status) conditions.push(eq(guideAccessRequests.status, input.status));
+        // Non-admins can only see requests for their own guides
+        if (ctx.user.role !== 'admin') {
+          const myGuides = await db.select({ id: guides.id }).from(guides).where(eq(guides.creatorId, ctx.user.id));
+          const myGuideIds = myGuides.map((g: { id: number }) => g.id);
+          if (myGuideIds.length === 0) return [];
+          conditions.push(inArray(guideAccessRequests.guideId, myGuideIds));
+        }
+        const rows = await db.select({
+          id: guideAccessRequests.id,
+          guideId: guideAccessRequests.guideId,
+          userId: guideAccessRequests.userId,
+          status: guideAccessRequests.status,
+          requestNote: guideAccessRequests.requestNote,
+          reviewNote: guideAccessRequests.reviewNote,
+          reviewedAt: guideAccessRequests.reviewedAt,
+          createdAt: guideAccessRequests.createdAt,
+          guideName: guides.canonicalName,
+          requesterName: users.name,
+          requesterHandle: users.artistHandle,
+        }).from(guideAccessRequests)
+          .leftJoin(guides, eq(guideAccessRequests.guideId, guides.id))
+          .leftJoin(users, eq(guideAccessRequests.userId, users.id))
+          .where(conditions.length > 0 ? and(...conditions) : undefined)
+          .orderBy(guideAccessRequests.createdAt);
+        return rows;
+      }),
+
+    /** Approve or deny an access request (guide owner or admin only). */
+    reviewAccessRequest: protectedProcedure
+      .input(z.object({
+        requestId: z.number().int().positive(),
+        decision: z.enum(['approved', 'denied']),
+        reviewNote: z.string().max(500).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const db = await getDb();
+        const { guideAccessRequests, guides } = await import('../../drizzle/schema');
+        const rows = await db.select().from(guideAccessRequests).where(eq(guideAccessRequests.id, input.requestId)).limit(1);
+        if (rows.length === 0) throw new TRPCError({ code: 'NOT_FOUND', message: 'Access request not found' });
+        const req = rows[0];
+        // Verify reviewer is the guide owner or admin
+        if (ctx.user.role !== 'admin') {
+          const guide = await getGuideById(req.guideId);
+          if (!guide || guide.creatorId !== ctx.user.id) {
+            throw new TRPCError({ code: 'FORBIDDEN', message: 'You do not own this guide' });
+          }
+        }
+        await db.update(guideAccessRequests).set({
+          status: input.decision,
+          reviewNote: input.reviewNote ?? null,
+          reviewedBy: ctx.user.id,
+          reviewedAt: new Date(),
+        }).where(eq(guideAccessRequests.id, input.requestId));
+        return { success: true, decision: input.decision };
+      }),
     });
 
 
