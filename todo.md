@@ -6521,3 +6521,29 @@
 - [x] Admin nav: Guide Access button added to AdminUsersPage
 - [x] App.tsx: /admin/guide-access route registered
 - [x] TypeScript: 0 errors
+
+## Guide Upload Wizard Rebuild — Match Manifestation Studio Flow
+
+- [ ] Audit ManifestationStudio step structure, visual design, and tRPC calls
+- [ ] Rebuild GuideUploadWizard as 6-step provenance flow matching Manifestation Studio aesthetic
+- [ ] Step 1: Submit Provenance Sheet + Character Artwork (file drop zone, AI generate option)
+- [ ] Step 2: Extract & Preview (AI extraction of guide metadata from sheet)
+- [ ] Step 3: Review & Confirm (editable extracted fields)
+- [ ] Step 4: Rights & Permissions (usage rights, derivative permissions)
+- [ ] Step 5: Connect Creator (Stripe connect for payouts)
+- [ ] Step 6: Publish Guide (final confirmation, goes live)
+- [ ] Match cathedral design: dark bg, Cinzel headings, amber/gold step indicators, zinc panels
+- [ ] TypeScript: 0 errors
+
+## Guide Upload Wizard Rebuild (Session Jul 23 2026)
+- [x] Rebuilt GuideUploadWizard to match Manifestation Studio 6-step single-step split layout
+- [x] Removed multi-column grid layout — now uses StudioShell-style single active step
+- [x] Cathedral design: dark bg (#000), Cinzel headings, amber/gold accents, Cormorant Garamond body
+- [x] Split layout: left (guided form) / right (live preview / how-it-works)
+- [x] Step 1: Provenance sheet drop zone + artwork upload/AI generate
+- [x] Step 2: AI extraction from provenance sheet
+- [x] Step 3: Review & confirm all extracted fields (editable)
+- [x] Step 4: Rights & permissions toggles + revenue split slider (rightsJson shape)
+- [x] Step 5: Connect Creator (Stripe connect placeholder)
+- [x] Step 6: Publish guide with live preview card
+- [x] TypeScript: 0 errors
