@@ -138,7 +138,7 @@ function GuideShell({
           <span className="text-lg" style={{ color: ATM.gold }}>✦</span>
           <div>
             <p className="text-xs font-semibold tracking-widest uppercase" style={{ fontFamily: "'Cinzel', serif", color: ATM.gold }}>
-              Upload Guide Character
+              Upload Personal Nexus Avatar
             </p>
             <p className="text-[9px] italic" style={{ fontFamily: "'Cormorant Garamond', serif", color: ATM.textDim }}>
               From Provenance Sheet to Living Nexus Canon
@@ -393,7 +393,7 @@ function Step1Upload({ form, setForm, onNext }: { form: GuideFormData; setForm: 
         ) : (
           <div className="space-y-3">
             <Textarea value={aiPrompt} onChange={e => setAiPrompt(e.target.value)}
-              placeholder="Describe your guide character's appearance, style, and essence… e.g. 'A cloaked archivist with glowing amber eyes, surrounded by floating ancient scrolls, dark fantasy oil painting style'"
+              placeholder="Describe your Personal Nexus Avatar's appearance, style, and essence… e.g. 'A cloaked archivist with glowing amber eyes, surrounded by floating ancient scrolls, dark fantasy oil painting style'"
               className="min-h-[100px] text-sm resize-none"
               style={{ background: "rgba(10,8,0,0.6)", borderColor: "rgba(201,168,76,0.2)", color: ATM.text }} />
             <Button onClick={handleGenerateArt} disabled={aiGenerating || !aiPrompt.trim()} className="w-full font-semibold"
@@ -596,7 +596,7 @@ function Step3Review({ form, setForm, guideId, onNext, onBack }: { form: GuideFo
         {field("Testimony of Origin", "testimony", true)}
         {field("Lore Description", "loreDescription", true)}
       </div>
-      <Reassurance text="These details form the canonical record of your guide character. They will be sealed into the provenance chain and cannot be changed after publishing." />
+      <Reassurance text="These details form the canonical record of your Personal Nexus Avatar. They will be sealed into the provenance chain and cannot be changed after publishing." />
       <div className="flex gap-3 mt-8">
         <Button variant="outline" className="flex-1" onClick={onBack}>← Back</Button>
         <Button className="flex-1 py-3 font-bold" style={{ background: ATM.gold, color: "#000" }} onClick={handleSave} disabled={saving}>
@@ -647,7 +647,7 @@ function Step4Rights({ form, setForm, guideId, onNext, onBack }: { form: GuideFo
 
   return (
     <div>
-      <StepHeader num={4} title="Rights & Permissions" sub="Define how your guide character can be used, adapted, and monetised." />
+      <StepHeader num={4} title="Rights & Permissions" sub="Define how your Personal Nexus Avatar can be used, adapted, and monetised." />
       <div className="space-y-0 mb-6">
         <RightsRow label="Original Ownership"             desc="I confirm I am the original creator of this character"              field="rightsOriginalOwnership" />
         <RightsRow label="Platform Usage"                 desc="Allow Living Nexus to display and promote this guide"               field="rightsPlatformUsage" />
@@ -703,14 +703,14 @@ function Step5Connect({ form, setForm, user, onNext, onBack }: { form: GuideForm
         <div className="rounded-xl p-6 text-center space-y-3" style={{ background: "rgba(74,222,128,0.06)", border: "1px solid rgba(74,222,128,0.25)" }}>
           <Check size={32} className="mx-auto text-green-400" />
           <p className="text-base font-semibold text-green-400">Stripe Connected</p>
-          <p className="text-sm" style={{ color: ATM.textDim }}>You're ready to receive revenue from your guide character.</p>
+          <p className="text-sm" style={{ color: ATM.textDim }}>You're ready to receive revenue from your Personal Nexus Avatar.</p>
         </div>
       ) : (
         <div className="space-y-6">
           <div className="rounded-xl p-6" style={{ background: "rgba(201,168,76,0.04)", border: "1px solid rgba(201,168,76,0.15)" }}>
             <Zap size={28} className="mb-3" style={{ color: ATM.gold }} />
             <p className="text-sm font-medium mb-2" style={{ color: ATM.text }}>Connect Stripe for Payouts</p>
-            <p className="text-xs leading-relaxed" style={{ color: ATM.textDim }}>Connect your Stripe account to receive your share of revenue when creators use your guide character in their projects, derivatives, and appearances.</p>
+            <p className="text-xs leading-relaxed" style={{ color: ATM.textDim }}>Connect your Stripe account to receive your share of revenue when creators use your Personal Nexus Avatar in their projects, derivatives, and appearances.</p>
           </div>
           <Button className="w-full py-3 text-base font-bold" style={{ background: ATM.gold, color: "#000" }} onClick={handleConnect} disabled={connecting}>
             {connecting ? <span className="flex items-center gap-2"><Loader2 size={16} className="animate-spin" /> Connecting…</span> : "Connect Stripe Account"}
@@ -732,7 +732,7 @@ function Step5Connect({ form, setForm, user, onNext, onBack }: { form: GuideForm
   );
 }
 
-// ─── Step 6: Publish Guide ────────────────────────────────────────────────────
+// ─── Step 6: Publish Personal Nexus Avatar ────────────────────────────────────────────────────
 function Step6Publish({ form, guideId, onBack }: { form: GuideFormData; guideId: number; onBack: () => void }) {
   const [, navigate] = useLocation();
   const publish = trpc.guides.publish.useMutation();
@@ -750,7 +750,7 @@ function Step6Publish({ form, guideId, onBack }: { form: GuideFormData; guideId:
 
   return (
     <div>
-      <StepHeader num={6} title="Publish Guide" sub="Your guide character is ready to go live on Living Nexus." />
+      <StepHeader num={6} title="Publish Personal Nexus Avatar" sub="Your Personal Nexus Avatar is ready to go live on Living Nexus." />
       {published ? (
         <div className="space-y-6">
           <div className="rounded-xl p-8 text-center" style={{ background: "rgba(74,222,128,0.06)", border: "1px solid rgba(74,222,128,0.25)" }}>
@@ -777,15 +777,15 @@ function Step6Publish({ form, guideId, onBack }: { form: GuideFormData; guideId:
               <h3 className="font-bold text-base" style={{ fontFamily: "'Cinzel', serif", color: ATM.gold }}>{form.canonicalName || "Untitled Guide"}</h3>
               <p className="text-sm mt-1" style={{ color: ATM.textDim }}>{form.tagline || form.role}</p>
               <div className="flex gap-2 mt-3">
-                <Badge style={{ background: "rgba(201,168,76,0.15)", color: ATM.gold, border: "1px solid rgba(201,168,76,0.3)" }}>Guide Character</Badge>
+                <Badge style={{ background: "rgba(201,168,76,0.15)", color: ATM.gold, border: "1px solid rgba(201,168,76,0.3)" }}>Personal Nexus Avatar</Badge>
               </div>
             </div>
           </div>
-          <Reassurance text="Once published, your guide character enters the Living Nexus canon. The provenance record is sealed and permanent." />
+          <Reassurance text="Once published, your Personal Nexus Avatar enters the Living Nexus canon. The provenance record is sealed and permanent." />
           <div className="flex gap-3">
             <Button variant="outline" className="flex-1" onClick={onBack}>← Back</Button>
             <Button className="flex-1 py-3 text-base font-bold" style={{ background: "#16a34a", color: "#fff" }} onClick={handlePublish} disabled={publishing}>
-              {publishing ? <span className="flex items-center gap-2"><Loader2 size={16} className="animate-spin" /> Publishing…</span> : "Publish Guide"}
+              {publishing ? <span className="flex items-center gap-2"><Loader2 size={16} className="animate-spin" /> Publishing…</span> : "Publish Personal Nexus Avatar"}
             </Button>
           </div>
         </div>
@@ -880,7 +880,7 @@ export default function GuideUploadWizard() {
       <div className="min-h-screen flex items-center justify-center" style={{ background: ATM.bg }}>
         <div className="text-center">
           <p className="text-lg font-bold mb-2" style={{ fontFamily: "'Cinzel', serif", color: ATM.gold }}>Sign In Required</p>
-          <p className="text-sm" style={{ color: ATM.textDim }}>You must be signed in to upload a guide character.</p>
+          <p className="text-sm" style={{ color: ATM.textDim }}>You must be signed in to upload a Personal Nexus Avatar.</p>
         </div>
       </div>
     );

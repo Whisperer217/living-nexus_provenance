@@ -656,7 +656,7 @@ export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCoun
                 (e.currentTarget as HTMLElement).style.color = "var(--ln-gold)";
                 (e.currentTarget as HTMLElement).style.borderColor = "rgba(196,154,40,0.2)";
               }}
-              title="Keeper Compose — Image & Music Generation"
+              title="Nexus Compose — Image & Music Generation"
             >
               <Sparkles size={12} style={{ color: "var(--ln-gold-dim)" }} />
               <span className="hidden xl:inline">Compose</span>

@@ -772,7 +772,7 @@ export default function AdminUsersPage() {
             </Button>
             <Button variant="outline" size="sm" onClick={() => navigate("/admin/guide-access")}
               style={{ borderColor: "#C9A84C", color: "#C9A84C" }}>
-              🔑 Guide Access
+              🔑 Nexus Avatar Access
             </Button>
             <Button variant="outline" size="sm" onClick={() => navigate("/")}
               style={{ borderColor: BORDER, color: SUBTEXT }}>

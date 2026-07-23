@@ -214,7 +214,7 @@ function ThinkingDots({ color }: { color: string }) {
         ))}
       </div>
       <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.6rem", color: "var(--ln-smoke)" }}>
-        Keeper is thinking...
+        Nexus Avatar is thinking...
       </div>
     </div>
   );

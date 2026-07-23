@@ -368,7 +368,7 @@ export default function SearchResultsPage() {
             {/* ── Guides ── */}
             {data.guides.length > 0 && (
               <section>
-                <SectionHeader icon={<Zap size={14} />} label="Guide Characters" count={data.guides.length} />
+                <SectionHeader icon={<Zap size={14} />} label="Personal Nexus Avatars" count={data.guides.length} />
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {data.guides.map((g: SearchResults["guides"][number]) => (
                     <Link key={g.id} href={`/guides/${g.id}`}>

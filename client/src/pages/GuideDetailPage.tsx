@@ -361,7 +361,7 @@ export default function GuideDetailPage() {
               <table className="w-full">
                 <tbody>
                   {[
-                    ["TYPE", guide.archetypeType ?? "Guide Character / Archetype"],
+                    ["TYPE", guide.archetypeType ?? "Personal Nexus Avatar / Archetype"],
                     ["ROLE", guide.role],
                     ["ALIGNMENT", guide.alignment],
                     ["DOMAIN", guide.domain],

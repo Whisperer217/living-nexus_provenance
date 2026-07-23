@@ -138,10 +138,10 @@ const PANELS: Record<NavMode, ModePanel> = {
         ],
       },
       {
-        heading: "Nexus Avatar",
+        heading: "Personal Nexus Avatar",
         links: [
-          { icon: <Sparkles size={14} />, label: "My Keeper Avatar", path: "/keeper", description: "Equip & customise your Nexus identity", authOnly: true, gold: true },
-          { icon: <Sparkles size={14} />, label: "Keeper Compose", path: "/keeper-compose", description: "AI prompt studio for your Keeper", authOnly: true },
+          { icon: <Sparkles size={14} />, label: "My Personal Nexus Avatar", path: "/keeper", description: "Equip & customise your Personal Nexus Avatar", authOnly: true, gold: true },
+          { icon: <Sparkles size={14} />, label: "Nexus Compose", path: "/keeper-compose", description: "AI prompt studio for your Personal Nexus Avatar", authOnly: true },
         ],
       },
       {
@@ -162,7 +162,7 @@ const PANELS: Record<NavMode, ModePanel> = {
       {
         links: [
           { icon: <Sparkles size={14} />, label: "AI Compose", path: "/compose", description: "Generate images, music & more", authOnly: true, gold: true },
-          { icon: <Sparkles size={14} />, label: "Prompt Studio", path: "/keeper-compose", description: "Lyrics \u2192 AI music prompt" },
+          { icon: <Sparkles size={14} />, label: "Nexus Compose", path: "/keeper-compose", description: "Lyrics \u2192 AI music prompt" },
           { icon: <BookOpen size={14} />, label: "Book Studio", path: "/book-studio", description: "Write & illustrate your book", authOnly: true },
         ],
       },
@@ -178,14 +178,14 @@ const PANELS: Record<NavMode, ModePanel> = {
         links: [
           { icon: <Shield size={14} />, label: "Register Work", path: "/manifest", description: "Issue a Witness ID", authOnly: true, gold: true },
           { icon: <Palette size={14} />, label: "Register Visual Works", path: "/visual-works/new", description: "Photography, art & imagery", authOnly: true },
-          { icon: <Sparkles size={14} />, label: "Prompt Studio", path: "/keeper-compose", description: "Lyrics \u2192 AI music prompt" },
+          { icon: <Sparkles size={14} />, label: "Nexus Compose", path: "/keeper-compose", description: "Lyrics \u2192 AI music prompt" },
         ],
       },
       {
-        heading: "Guides",
+        heading: "Personal Nexus Avatars",
         links: [
-          { icon: <Users size={14} />, label: "Guide Directory", path: "/guides", description: "Browse all guide characters" },
-          { icon: <Shield size={14} />, label: "Register Guide Character", path: "/guides/upload", description: "Register a guide entity", authOnly: true, gold: true },
+          { icon: <Users size={14} />, label: "Nexus Avatar Directory", path: "/guides", description: "Browse all Personal Nexus Avatars" },
+          { icon: <Shield size={14} />, label: "Register Personal Nexus Avatar", path: "/guides/upload", description: "Register your Personal Nexus Avatar", authOnly: true, gold: true },
         ],
       },
       {

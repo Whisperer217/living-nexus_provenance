@@ -113,7 +113,7 @@ export default function GuideDirectoryPage() {
               </div>
               <h1 className="text-4xl font-bold text-white mb-2">Guide Directory</h1>
               <p className="text-[#6b5f3e] text-sm max-w-xl">
-                Every guide character is provenance-verified and cryptographically linked to its creator.
+                Every Personal Nexus Avatar is provenance-verified and cryptographically linked to its creator.
                 Derivatives, appearances, and lineage are tracked from origin.
               </p>
             </div>
@@ -192,7 +192,7 @@ export default function GuideDirectoryPage() {
             </div>
             <div>
               <h2 className="text-white font-bold text-lg">Creator Guides</h2>
-              <p className="text-[#6b5f3e] text-xs">Provenance-verified guide characters uploaded by creators</p>
+              <p className="text-[#6b5f3e] text-xs">Provenance-verified Personal Nexus Avatars uploaded by creators</p>
             </div>
           </div>
 
@@ -213,7 +213,7 @@ export default function GuideDirectoryPage() {
               <p className="text-[#6b5f3e] text-sm mb-6">
                 {search
                   ? "Try a different search term."
-                  : "Be the first to upload a provenance-verified guide character."}
+                  : "Be the first to upload a provenance-verified Personal Nexus Avatar."}
               </p>
               {user && !search && (
                 <Link href="/guides/upload">

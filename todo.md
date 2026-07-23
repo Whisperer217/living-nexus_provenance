@@ -6547,3 +6547,27 @@
 - [x] Step 5: Connect Creator (Stripe connect placeholder)
 - [x] Step 6: Publish guide with live preview card
 - [x] TypeScript: 0 errors
+
+## Terminology: Personal Nexus Avatar (Session Jul 23 2026)
+- [ ] Replace "Guide Character" / "Guide" / "Keeper" / "Character" with "Personal Nexus Avatar" in GuideUploadWizard.tsx
+- [ ] Update GuideDirectoryPage — page title, card labels, CTA copy
+- [ ] Update GuideDetailPage — all copy, access request CTA, badges
+- [ ] Update ContextDrawer nav labels (Keeper Avatar → Personal Nexus Avatar, Keeper Compose → Nexus Compose, etc.)
+- [ ] Update GuideAccessRequestsPage — admin panel copy
+- [ ] Update AdminUsersPage nav button label for guide access
+- [ ] Update provenance ledger display strings (WID badge, provenance section copy)
+- [ ] Update Phase Ledger DB phase title/description for this phase
+- [ ] TypeScript: 0 errors
+
+## Terminology: Personal Nexus Avatar — COMPLETED (Session Jul 23 2026)
+- [x] ContextDrawer: "My Keeper Avatar" → "My Personal Nexus Avatar", section heading → "Personal Nexus Avatar", "Keeper Compose" → "Nexus Compose", "Guide Directory" → "Nexus Avatar Directory", "Register Guide Character" → "Register Personal Nexus Avatar", "Guides" section → "Personal Nexus Avatars"
+- [x] GuideUploadWizard: all "Guide Character" → "Personal Nexus Avatar", wizard title, step labels, reassurance copy
+- [x] GuideDirectoryPage: page copy, card descriptions, empty state
+- [x] GuideDetailPage: archetype badge, type field label
+- [x] SearchResultsPage: section header "Guide Characters" → "Personal Nexus Avatars"
+- [x] KeeperComposePage: "Keeper Compose" → "Nexus Compose", "Keeper is thinking" → "Nexus Avatar is thinking"
+- [x] WhatsNewModal: all Keeper Compose and Guide Character references updated
+- [x] TopBar: "Keeper Compose" → "Nexus Compose"
+- [x] AdminUsersPage: "Guide Access" → "Nexus Avatar Access"
+- [x] FirstWitnessPage + MainLayout: "Keeper Compose" → "Nexus Compose"
+- [x] TypeScript: 0 errors — clean compile

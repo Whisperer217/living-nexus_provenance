@@ -78,7 +78,7 @@ const TIMELINE = [
   {
     date: "May 1, 2026",
     phase: "System Shaping",
-    title: "Keeper Compose — Mobile-First Mandate",
+    title: "Nexus Compose — Mobile-First Mandate",
     description:
       "Identified the Keeper composition surface as a mobile-first problem before the desktop version was even complete. The single-column layout, cinematic trigger placement, and live arc preview all emerged from this session.",
     tag: "Product",

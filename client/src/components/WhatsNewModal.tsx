@@ -88,10 +88,10 @@ const UPDATES = [
     items: [
       { icon: Music, text: "Global player now lives in the top navbar — artwork, seek bar, timestamps, shuffle/prev/pause/next/repeat controls, and expand arrow are all inline. The separate player strip below the navbar is gone on desktop." },
       { icon: Shield, text: "Register WID fixed — after publishing a work, you are now taken directly to the song page where your WID badge is immediately visible. The success toast shows your full WID." },
-      { icon: Sparkles, text: "Keeper Compose auto-saves every generated composition silently. A Recent Drafts strip appears above the input bar — tap any draft to reload it and re-enter cinematic mode." },
+      { icon: Sparkles, text: "Nexus Compose auto-saves every generated composition silently. A Recent Drafts strip appears above the input bar — tap any draft to reload it and re-enter cinematic mode." },
       { icon: Film, text: "Cinematic mode now activates automatically after generation on desktop — no need to tap the film icon separately." },
       { icon: Zap, text: "Conductor mode is now visually elevated in the mode selector with a persistent border, STRUCTURE badge, and hover tooltip explaining its purpose." },
-      { icon: Users, text: "Guide Upload — A dedicated registration flow for canonical guide entities is now live at /guides/upload. Register a guide character with provenance sheet, derivative lineage, and full creator attribution. Guides are first-class manifestations on the registry." },
+      { icon: Users, text: "Personal Nexus Avatar Upload — A dedicated registration flow for canonical guide entities is now live at /guides/upload. Register a Personal Nexus Avatar with provenance sheet, derivative lineage, and full creator attribution. Guides are first-class manifestations on the registry." },
       { icon: BookOpen, text: "Creator Studio — The manifestation editing environment at /book/:id/studio is now a full Creator Focus workspace. Comic management, guided reading configuration, chapter ordering, and immersive publishing workflows all live here. The resonance rail is suppressed so nothing competes with your work." },
       { icon: Shield, text: "Creator Focus Mode — The resonance rail, witness feed, and activity layer now automatically collapse when you enter any editing, upload, or transactional route (/upload, /dashboard, /settings, /profile, /pricing, /redeem, /studio). The interface steps back so the manifestation becomes the center of reality." },
     ],
@@ -101,7 +101,7 @@ const UPDATES = [
     date: "May 3, 2026",
     label: "",
     items: [
-      { icon: Film, text: "Keeper Compose — A dedicated composition surface at /keeper-compose. Single-column mobile layout, mode selector (Guide / Conductor / Witness / Custodian / Archivist), and structured Suno-ready output with labeled section cards." },
+      { icon: Film, text: "Nexus Compose — A dedicated composition surface at /keeper-compose. Single-column mobile layout, mode selector (Guide / Conductor / Witness / Custodian / Archivist), and structured Suno-ready output with labeled section cards." },
       { icon: Sparkles, text: "Cinematic writing mode — tap the film icon in the input bar to enter full-screen screenplay-style composition. Blurred artwork fills the background, lyrics scroll in Georgia serif. Swipe down or press Escape to exit." },
       { icon: Zap, text: "Live emotional arc preview — the arc panel builds in real time as you type, before generation. Your tension curve is visible from the first word." },
       { icon: Music, text: "Player adapts while you write — the player collapses to mini when the Keeper input is focused, and restores your previous zone when you stop writing." },
