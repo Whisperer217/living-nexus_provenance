@@ -7,6 +7,7 @@ import { ArrowLeft, Lock, Upload, Check, Loader2, Zap, BookOpen, Trash2, RotateC
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import { SKIN_IMAGES } from "@/components/FloatingAvatar";
+import NexusAvatarViewer from "@/components/NexusAvatarViewer";
 
 // ─── Skin catalogue ───────────────────────────────────────────────────────────
 
@@ -414,12 +415,14 @@ export default function Keeper() {
                 className="absolute bottom-0 right-0 w-4 h-4"
                 style={{ borderBottom: `2px solid ${activeSkin.color}`, borderRight: `2px solid ${activeSkin.color}` }}
               />
-              <img
-                src={activeSkinImg}
-                alt={activeSkin.name}
-                className="w-48 h-64 object-cover object-top"
-                style={{ display: "block" }}
-              />
+              {/* 3D Personal Nexus Avatar — procedural sacred geometry seeded from user ID */}
+              <div className="w-48 h-64 overflow-hidden" style={{ background: "transparent" }}>
+                <NexusAvatarViewer
+                  seed={user?.id ?? "default"}
+                  height={256}
+                  accentColor={activeSkin.color}
+                />
+              </div>
             </div>
 
             {/* Name plate */}

@@ -6571,3 +6571,19 @@
 - [x] AdminUsersPage: "Guide Access" → "Nexus Avatar Access"
 - [x] FirstWitnessPage + MainLayout: "Keeper Compose" → "Nexus Compose"
 - [x] TypeScript: 0 errors — clean compile
+
+## Three.js Personal Nexus Avatar Viewer
+- [ ] Install three + @types/three + drei (orbit controls)
+- [ ] Build NexusAvatarViewer component — procedural sacred geometry seeded from user ID
+- [ ] Idle spin on Y axis, orbit controls (drag to rotate, scroll to zoom), ambient + point lighting
+- [ ] Cathedral aesthetic: dark void background, amber/gold emissive glow, wireframe accent layer
+- [ ] Integrate into KeeperPage (/keeper) as the hero element
+- [ ] TypeScript: 0 errors
+
+## Three.js Nexus Avatar — Completion (Session Jul 23 2026)
+- [x] Installed three + @types/three
+- [x] Built NexusAvatarViewer component — procedural sacred geometry seeded from user ID
+- [x] Idle spin on Y axis, orbit controls (drag to rotate, scroll to zoom), ambient + point lighting
+- [x] Cathedral aesthetic: dark void background, amber/gold emissive glow, wireframe accent layer
+- [x] Integrated into KeeperPage (/keeper) as the portrait hero element
+- [x] TypeScript: 0 errors
