@@ -6497,3 +6497,13 @@
 - [x] Simplify dispatch tRPC procedure: just marks phase as "dispatched" in DB, no manusRequest call
 - [x] Remove MANUS_API_KEY dependency entirely from missionControl router
 - [ ] TypeScript: 0 errors
+
+## Phase: Guide Directory & Nexus Personas (Queued — from Slimdoggy feedback, July 23 2026)
+- [ ] Fix 404s on Guide Directory links under Register nav
+- [ ] Build Guide Directory page — browsable list of pre-configured guides/keepers
+- [ ] Build Keeper Avatar page (/keeper-avatar) — equip and customise Nexus identity
+- [ ] Build Keeper Compose page (/keeper-compose) — AI prompt studio for the Keeper
+- [ ] Build guide upload flow — creator can submit a guide for review/access request
+- [ ] Build guide access request flow — solid gating before a guide is published
+- [ ] Ensure all Register nav links resolve to real pages (no 404s)
+- [ ] Phase Ledger: mark this phase as queued and ready to fire
