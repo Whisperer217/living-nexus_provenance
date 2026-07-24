@@ -194,10 +194,18 @@ function buildWitnessBodyBlock(opts: {
   artistName: string;
   artistId?: number | null;
   genre?: string | null;
-  witnessId: string;
+  witnessId: string | null;
   witnessDate?: Date | string | null;
   verifyUrl: string;
   lyrics?: string | null;
+  playCount?: number;
+  moodTags?: string | null;
+  bpm?: number | null;
+  keySignature?: string | null;
+  releaseDate?: Date | string | null;
+  isrc?: string | null;
+  coverArtUrl?: string | null;
+  songUrl?: string | null;
 }): string {
   const { title, artistName, artistId, genre, witnessId, witnessDate, verifyUrl, lyrics } = opts;
   const artistHref = artistId
@@ -210,17 +218,94 @@ function buildWitnessBodyBlock(opts: {
     lyrics && lyrics.trim().length > 0
       ? `\n  <pre id="ln-witness-lyrics">${escAttr(lyrics.trim())}</pre>`
       : "";
+  const { playCount, moodTags, bpm, keySignature, isrc } = opts;
   return (
     `<div id="ln-witness-record">` +
     `<h1>${escAttr(title)}</h1>` +
     `<p>Creator: <a href="${escAttr(artistHref)}">${escAttr(artistName)}</a></p>` +
     (genre ? `<p>Genre: ${escAttr(genre)}</p>` : "") +
-    `<p>Witness ID: ${escAttr(witnessId)}</p>` +
+    (witnessId ? `<p>Witness ID: ${escAttr(witnessId)}</p>` : "") +
     (dateStr ? `<p>Witnessed: ${escAttr(dateStr)}</p>` : "") +
+    (bpm ? `<p>BPM: ${bpm}</p>` : "") +
+    (keySignature ? `<p>Key: ${escAttr(keySignature)}</p>` : "") +
+    (moodTags ? `<p>Mood: ${escAttr(moodTags)}</p>` : "") +
+    (isrc ? `<p>ISRC: ${escAttr(isrc)}</p>` : "") +
+    ((playCount ?? 0) > 0 ? `<p>Plays: ${playCount}</p>` : "") +
     `<p><a href="${escAttr(verifyUrl)}">Verify this work on Living Nexus</a></p>` +
     lyricsBlock +
     `</div>`
   );
+}
+
+/**
+ * Build a schema.org/MusicRecording JSON-LD block for Google rich results.
+ * Injected into <head> as <script type="application/ld+json">.
+ */
+function buildSongJsonLd(opts: {
+  title: string;
+  artistName: string;
+  artistId?: number | null;
+  genre?: string | null;
+  witnessId?: string | null;
+  witnessDate?: Date | string | null;
+  songUrl: string;
+  coverArtUrl?: string | null;
+  audioUrl?: string | null;
+  duration?: number | null; // seconds
+  bpm?: number | null;
+  keySignature?: string | null;
+  isrc?: string | null;
+  playCount?: number;
+}): string {
+  const { title, artistName, artistId, genre, witnessId, witnessDate, songUrl, coverArtUrl, audioUrl, duration, bpm, keySignature, isrc, playCount } = opts;
+  const artistUrl = artistId
+    ? `${CANONICAL_ORIGIN}/creator/${artistId}`
+    : `${CANONICAL_ORIGIN}/explore`;
+  const datePublished = witnessDate
+    ? new Date(witnessDate).toISOString().split("T")[0]
+    : undefined;
+
+  // ISO 8601 duration from seconds (e.g. PT3M45S)
+  const isoDuration = duration && duration > 0
+    ? `PT${Math.floor(duration / 60)}M${Math.floor(duration % 60)}S`
+    : undefined;
+
+  const ld: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "MusicRecording",
+    name: title,
+    byArtist: {
+      "@type": "MusicGroup",
+      name: artistName,
+      url: artistUrl,
+    },
+    url: songUrl,
+    ...(genre ? { genre } : {}),
+    ...(datePublished ? { datePublished } : {}),
+    ...(coverArtUrl ? { image: coverArtUrl } : {}),
+    ...(audioUrl ? { contentUrl: audioUrl } : {}),
+    ...(isoDuration ? { duration: isoDuration } : {}),
+    ...(bpm ? { "schema:tempo": bpm } : {}),
+    ...(keySignature ? { "schema:musicalKey": keySignature } : {}),
+    ...(isrc ? { isrcCode: isrc } : {}),
+    ...(witnessId ? {
+      identifier: [
+        { "@type": "PropertyValue", name: "Witness ID", value: witnessId },
+      ],
+    } : {}),
+    ...(playCount && playCount > 0 ? { interactionStatistic: {
+      "@type": "InteractionCounter",
+      interactionType: "https://schema.org/ListenAction",
+      userInteractionCount: playCount,
+    }} : {}),
+    publisher: {
+      "@type": "Organization",
+      name: "Living Nexus",
+      url: CANONICAL_ORIGIN,
+    },
+  };
+
+  return `<script type="application/ld+json">${JSON.stringify(ld)}</script>`;
 }
 
 /**
@@ -256,6 +341,8 @@ function injectOg(
     bodyBlock?: string;
     /** Per-page meta description — replaces generic homepage boilerplate */
     metaDescription?: string;
+    /** JSON-LD structured data block (schema.org) injected into <head> */
+    jsonLd?: string;
   }
 ): string {
   // Replace <title>
@@ -289,6 +376,11 @@ function injectOg(
       // Insert before </head> if not present
       out = out.replace("</head>", `    <meta name="description" content="${escaped}" />\n  </head>`);
     }
+  }
+
+  // Inject JSON-LD structured data into <head> (schema.org rich results)
+  if (opts?.jsonLd) {
+    out = out.replace("</head>", `    ${opts.jsonLd}\n  </head>`);
   }
 
   // Inject visible body block before <div id="root"> (removed by React on mount)
@@ -444,22 +536,51 @@ export function registerOgRoutes(app: Express) {
       const downloadPermission = (song as any).downloadPermission as boolean | null;
       const creatorUserId = (creator as any)?.id as number | null;
 
-      const bodyBlock = witnessId
-        ? buildWitnessBodyBlock({
-            title: song.title,
-            artistName,
-            artistId: creatorUserId,
-            genre: (song as any).genre ?? null,
-            witnessId,
-            witnessDate,
-            verifyUrl: `${CANONICAL_ORIGIN}/verify/${encodeURIComponent(witnessId)}`,
-            lyrics: isPublic && downloadPermission ? lyricsText : null,
-          })
-        : undefined;
+      // Always build a visible body block — even for songs without a WID.
+      // Songs without a WID still get a minimal block so Google can index title/artist/genre.
+      const bodyBlock = buildWitnessBodyBlock({
+        title: song.title,
+        artistName,
+        artistId: creatorUserId,
+        genre: (song as any).genre ?? null,
+        witnessId: witnessId ?? null,
+        witnessDate,
+        verifyUrl: witnessId
+          ? `${CANONICAL_ORIGIN}/verify/${encodeURIComponent(witnessId)}`
+          : `${CANONICAL_ORIGIN}/explore`,
+        lyrics: isPublic && downloadPermission ? lyricsText : null,
+        playCount: (song as any).playCount ?? 0,
+        moodTags: (song as any).moodTags ?? null,
+        bpm: (song as any).bpm ?? null,
+        keySignature: (song as any).keySignature ?? null,
+        releaseDate: (song as any).releaseDate ?? null,
+        isrc: (song as any).isrc ?? null,
+        coverArtUrl: (song as any).coverArtUrl?.trim() || null,
+        songUrl: ogUrl,
+      });
+
+      // JSON-LD: schema.org/MusicRecording — Google rich results for music
+      const jsonLd = buildSongJsonLd({
+        title: song.title,
+        artistName,
+        artistId: creatorUserId,
+        genre: (song as any).genre ?? null,
+        witnessId: witnessId ?? null,
+        witnessDate,
+        songUrl: ogUrl,
+        coverArtUrl: (song as any).coverArtUrl?.trim() || null,
+        audioUrl: audioUrl ?? null,
+        duration: (song as any).durationSeconds ?? null,
+        bpm: (song as any).bpm ?? null,
+        keySignature: (song as any).keySignature ?? null,
+        isrc: (song as any).isrc ?? null,
+        playCount: (song as any).playCount ?? 0,
+      });
 
       const page = injectOg(html, ogBlock, ogTitle, ogUrl, {
         bodyBlock,
         metaDescription: ogDescription,
+        jsonLd,
       });
       res.status(200).set({ "Content-Type": "text/html" }).end(page);
     } catch (err) {
@@ -761,7 +882,40 @@ export function registerOgRoutes(app: Express) {
       const html = await getHtmlTemplate(isDev);
       if (!html) return next();
 
-      const page = injectOg(html, ogBlock, ogTitle, ogUrl);
+      // JSON-LD: schema.org/MusicGroup for creator profiles
+      const creatorJsonLd = JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "MusicGroup",
+        name: displayName,
+        url: ogUrl,
+        ...(creator.bio?.trim() ? { description: creator.bio.trim().slice(0, 500) } : {}),
+        ...(ogImage !== FALLBACK_IMAGE ? { image: ogImage } : {}),
+        ...(creator.primaryGenre ? { genre: creator.primaryGenre } : {}),
+        ...(creator.location ? { foundingLocation: creator.location } : {}),
+        ...(publishedCount > 0 ? { numberOfTracks: publishedCount } : {}),
+        sameAs: [
+          ogUrl,
+          ...(creator.twitterHandle ? [`https://twitter.com/${creator.twitterHandle.replace(/^@/, "")}`] : []),
+        ],
+        publisher: { "@type": "Organization", name: "Living Nexus", url: CANONICAL_ORIGIN },
+      });
+      const creatorJsonLdBlock = `<script type="application/ld+json">${creatorJsonLd}</script>`;
+
+      // Visible body block for crawlers
+      const creatorBodyBlock =
+        `<div id="ln-witness-record">` +
+        `<h1>${escAttr(displayName)}</h1>` +
+        (bioSnippet ? `<p>${escAttr(bioSnippet)}</p>` : "") +
+        `<p>${publishedCount} track${publishedCount !== 1 ? "s" : ""} · ${widCount} WID Protected</p>` +
+        (creator.primaryGenre ? `<p>Genre: ${escAttr(creator.primaryGenre)}</p>` : "") +
+        `<p><a href="${escAttr(ogUrl)}">View ${escAttr(displayName)} on Living Nexus</a></p>` +
+        `</div>`;
+
+      const page = injectOg(html, ogBlock, ogTitle, ogUrl, {
+        bodyBlock: creatorBodyBlock,
+        metaDescription: ogDescription,
+        jsonLd: creatorJsonLdBlock,
+      });
       res.status(200).set({ "Content-Type": "text/html" }).end(page);
     } catch (err) {
       console.error("[OG] Error generating meta tags for creator", creatorId, err);
