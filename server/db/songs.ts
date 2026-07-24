@@ -48,6 +48,8 @@ export async function createSong(data: {
   moodTags?: string[]; lyricsText?: string; lyricsHash?: string; coWriters?: string[]; albumName?: string;
   creditsJson?: string;
   releaseDate?: string; isrc?: string;
+  /** Artist/band name extracted from ID3 tags or manually entered — stored separately from the platform handle */
+  officialArtistName?: string;
   aiConsent: "prohibited" | "permitted_attribution" | "permitted";
   ownershipStatus?: "full" | "partial";
   fileUrl?: string; fileKey?: string; coverArtUrl?: string; fileHash?: string;

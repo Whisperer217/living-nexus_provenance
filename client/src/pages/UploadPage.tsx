@@ -176,6 +176,8 @@ export default function UploadPage() {
   const [bpm, setBpm] = useState("");
   const [keySignature, setKeySignature] = useState("");
   const [albumName, setAlbumName] = useState("");
+  /** Artist/band name extracted from ID3 tags or entered manually */
+  const [officialArtistName, setOfficialArtistName] = useState("");
   const [releaseDate, setReleaseDate] = useState("");
   const [isrc, setIsrc] = useState("");
   const [bmiNumber, setBmiNumber] = useState("");
@@ -445,14 +447,18 @@ export default function UploadPage() {
         if (meta.album && !albumName) setAlbumName(meta.album);
         if (meta.genre && !genre) setGenre(meta.genre);
         if (meta.lyrics && !lyrics) setLyrics(meta.lyrics);
+        // Wire artist name from ID3 — previously discarded
+        if (meta.artist && !officialArtistName) setOfficialArtistName(meta.artist);
         if (meta.coverArtBlob && !coverFile) {
           const ext = meta.coverArtBlob.type.includes("png") ? "png" : "jpg";
           const artFile = new File([meta.coverArtBlob], `cover.${ext}`, { type: meta.coverArtBlob.type });
           setCoverFile(artFile);
           toast.success("Cover art extracted from audio file");
         }
-        if (meta.title || meta.album || meta.genre || meta.lyrics) {
-          toast.success("Metadata loaded from audio file");
+        const fieldsLoaded = [meta.title, meta.album, meta.genre, meta.lyrics, meta.artist].filter(Boolean);
+        if (fieldsLoaded.length > 0) {
+          const stripped = ["title", meta.title && "title", meta.artist && "artist", meta.album && "album", meta.genre && "genre", meta.lyrics && "lyrics"].filter(Boolean).join(", ");
+          toast.success(`Metadata extracted: ${stripped.replace(/^title, /, "")}`);
         }
       });
     } else {
@@ -744,6 +750,7 @@ export default function UploadPage() {
         }
         uploadMutation.mutate({
           coverArtUrl, title, genre: genre || undefined,
+          officialArtistName: officialArtistName || undefined,
           albumName: albumName || undefined, releaseDate: releaseDate || undefined,
           isrc: isrc || undefined, aiConsent, ownershipStatus, moodTags: selectedMoods, coWriters: [],
           creditsJson: credits.filter(c => c.role && c.name).length > 0 ? JSON.stringify(credits.filter(c => c.role && c.name)) : undefined,
@@ -777,6 +784,7 @@ export default function UploadPage() {
         uploadMutation.mutate({
           coverArtUrl, title, genre: genre || undefined,
           bpm: bpm ? parseInt(bpm) : undefined, keySignature: keySignature || undefined,
+          officialArtistName: officialArtistName || undefined,
           albumName: albumName || undefined, releaseDate: releaseDate || undefined,
           isrc: isrc || undefined, aiConsent, ownershipStatus, moodTags: selectedMoods, coWriters: [],
           creditsJson: credits.filter(c => c.role && c.name).length > 0 ? JSON.stringify(credits.filter(c => c.role && c.name)) : undefined,
@@ -819,6 +827,7 @@ export default function UploadPage() {
         fileUrl, fileKey, coverArtUrl,
         title, genre: genre || undefined,
         bpm: bpm ? parseInt(bpm) : undefined, keySignature: keySignature || undefined,
+        officialArtistName: officialArtistName || undefined,
         albumName: albumName || undefined, releaseDate: releaseDate || undefined,
         isrc: isrc || undefined, aiConsent, ownershipStatus, moodTags: selectedMoods, coWriters: [],
         creditsJson: credits.filter(c => c.role && c.name).length > 0 ? JSON.stringify(credits.filter(c => c.role && c.name)) : undefined,
@@ -1171,7 +1180,7 @@ export default function UploadPage() {
                   className="rounded-xl p-8 text-center cursor-pointer transition-all"
                   style={{ border: `2px dashed ${audioFile ? "var(--ln-seal-bright)" : audioDragging ? "var(--ln-gold)" : "rgba(196,154,40,0.2)"}`, background: audioFile ? "rgba(74,222,128,0.05)" : audioDragging ? "rgba(196,154,40,0.04)" : "var(--ln-coal)" }}>
                   <input ref={audioInputRef} type="file" accept="audio/*,audio/mpeg,audio/mp3,audio/wav,audio/x-wav,audio/flac,audio/x-flac,audio/aac,audio/ogg,audio/x-m4a,audio/mp4,.mp3,.wav,.flac,.aac,.ogg,.m4a,.aiff,.aif" className="hidden"
-                    onChange={e => { const f = e.target.files?.[0]; if (f) { if (f.size > 800 * 1024 * 1024) { toast.error(`File too large (${(f.size/1024/1024).toFixed(0)} MB). Maximum size is 800 MB. For faster uploads, consider converting WAV to MP3.`); e.target.value = ""; return; } setAudioFile(f); if (!title) setTitle(f.name.replace(/\.[^/.]+$/, "")); extractMetadata(f).then(meta => { if (meta.title) setTitle(meta.title); if (meta.album && !albumName) setAlbumName(meta.album); if (meta.genre && !genre) setGenre(meta.genre); if (meta.lyrics && !lyrics) setLyrics(meta.lyrics); if (meta.coverArtBlob && !coverFile) { const ext = meta.coverArtBlob.type.includes("png") ? "png" : "jpg"; setCoverFile(new File([meta.coverArtBlob], `cover.${ext}`, { type: meta.coverArtBlob.type })); toast.success("Cover art extracted from audio file"); } if (meta.title || meta.album || meta.genre || meta.lyrics) toast.success("Metadata loaded from audio file"); }); } }} />
+                    onChange={e => { const f = e.target.files?.[0]; if (f) { if (f.size > 800 * 1024 * 1024) { toast.error(`File too large (${(f.size/1024/1024).toFixed(0)} MB). Maximum size is 800 MB. For faster uploads, consider converting WAV to MP3.`); e.target.value = ""; return; } setAudioFile(f); if (!title) setTitle(f.name.replace(/\.[^/.]+$/, "")); extractMetadata(f).then(meta => { if (meta.title) setTitle(meta.title); if (meta.album && !albumName) setAlbumName(meta.album); if (meta.genre && !genre) setGenre(meta.genre); if (meta.lyrics && !lyrics) setLyrics(meta.lyrics); if (meta.artist && !officialArtistName) setOfficialArtistName(meta.artist); if (meta.coverArtBlob && !coverFile) { const ext = meta.coverArtBlob.type.includes("png") ? "png" : "jpg"; setCoverFile(new File([meta.coverArtBlob], `cover.${ext}`, { type: meta.coverArtBlob.type })); toast.success("Cover art extracted from audio file"); } if (meta.title || meta.album || meta.genre || meta.lyrics || meta.artist) toast.success("Metadata loaded from audio file"); }); } }} />
                   {audioFile ? (
                     <div className="flex flex-col items-center gap-2">
                       <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: "rgba(74,222,128,0.18)" }}>
@@ -1681,6 +1690,21 @@ export default function UploadPage() {
                 </div>
               )}
 
+              {/* ── Official Artist Name ── */}
+              <div>
+                <label className="text-xs mb-1.5 block font-medium" style={{ color: "#B8A88A" }}>
+                  Artist / Band Name <span style={{ color: "rgba(196,154,40,0.5)" }}>(auto-filled from file)</span>
+                </label>
+                <Input
+                  value={officialArtistName}
+                  onChange={e => setOfficialArtistName(e.target.value)}
+                  placeholder="e.g. Slimdoggy, The Collective, Doc Seraph Mercer"
+                  style={{ background: "#1E1B12", border: "1px solid rgba(196,154,40,0.40)", color: "var(--ln-parchment)" }}
+                />
+                <p className="text-xs mt-1" style={{ color: "rgba(184,168,138,0.55)" }}>
+                  Stored separately from your platform handle. Displayed on the song page and in provenance records.
+                </p>
+              </div>
               {/* ── Album / Series + Date ── */}
               <div className="grid grid-cols-2 gap-3">
                 <div>

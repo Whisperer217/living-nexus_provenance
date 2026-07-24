@@ -6629,3 +6629,18 @@
 - [x] Backward-compatible: legacy plain-base64 state still works
 - [x] TypeScript: 0 errors
 - [x] Unit tests: 4/4 passed (new JSON format, legacy format, broken behavior proof, malformed state)
+
+## Upload Pipeline Metadata Fix — 2026-07-24
+- [x] Audit: meta.artist from useAudioMetadata was silently discarded (never wired to state)
+- [x] Audit: officialArtistName missing from createSong DB helper interface
+- [x] Audit: officialArtistName missing from tRPC songs.upload input schema
+- [x] Audit: officialArtistName missing from all 4 uploadMutation.mutate call sites
+- [x] Fix: Add officialArtistName to createSong DB helper (server/db/songs.ts)
+- [x] Fix: Add officialArtistName to tRPC upload procedure input schema (server/routers/songs.ts)
+- [x] Fix: Wire meta.artist → officialArtistName in UploadPage drag-drop pre-fill block
+- [x] Fix: Wire meta.artist → officialArtistName in UploadPage file input onChange handler
+- [x] Fix: Add officialArtistName to all 4 uploadMutation.mutate calls in UploadPage
+- [x] Fix: Add Official Artist Name input field to upload form Step 2 (Track Metadata)
+- [x] Fix: SongDetailPage hero artist display now prefers officialArtistName over creator handle
+- [x] Fix: CinematicSongHeader artistName prop now prefers officialArtistName over creator handle
+- [x] TypeScript: 0 errors confirmed

@@ -605,7 +605,7 @@ export default function SongDetailPage() {
                 className="text-sm"
                 style={{ color: "rgba(196,154,40,0.80)", fontFamily: "'Cinzel', serif", letterSpacing: "0.06em" }}
               >
-                {creator?.artistHandle || creator?.name || ""}
+                {(song as any).officialArtistName || creator?.artistHandle || creator?.name || ""}
               </p>
             </div>
             {/* Play button — bottom right */}
@@ -638,7 +638,7 @@ export default function SongDetailPage() {
         ══════════════════════════════════════════════════════════════ */}
         <CinematicSongHeader
           title={song.title}
-          artistName={creator?.artistHandle ?? creator?.name ?? "Unknown Creator"}
+          artistName={(song as any).officialArtistName || creator?.artistHandle || creator?.name || "Unknown Creator"}
           genre={song.genre}
           witnessId={song.witnessId}
           coverArtUrl={song.coverArtUrl}
