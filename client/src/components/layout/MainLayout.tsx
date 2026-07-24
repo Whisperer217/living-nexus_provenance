@@ -15,6 +15,8 @@
    Mobile:  LeftRail (off-canvas) + mobile header (hamburger + logo + bell)
 =================================================================== */
 import { useState, useCallback, useEffect } from "react";
+import { usePullToRefresh } from "@/hooks/usePullToRefresh";
+import { PullToRefreshIndicator } from "@/components/PullToRefreshIndicator";
 import LeftRail from "@/components/layout/LeftRail";
 import type { NavMode } from "@/components/layout/LeftRail";
 import RightRail from "@/components/layout/RightRail";
@@ -115,6 +117,22 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     refetchOnWindowFocus: false,
   });
   const archiveSongCount = mySongs ? mySongs.filter((s: any) => s.status !== "Deleted").length : 0;
+
+  // ── Global pull-to-refresh ─────────────────────────────────────────
+  // Mounted once in MainLayout so every page gets PTR for free.
+  // Uses window.location.reload() as the generic refresh action so it works
+  // on any page without needing to know which tRPC queries are active.
+  const { pullProgress, isRefreshing, indicatorY } = usePullToRefresh({
+    onRefresh: async () => {
+      await new Promise<void>((resolve) => {
+        // Brief pause so the spinner is visible before reload
+        setTimeout(() => {
+          window.location.reload();
+          resolve();
+        }, 300);
+      });
+    },
+  });
 
   // ── Warm theme tokens ──────────────────────────────────────────────
   const { mode: lightsMode } = useLightsMode();
@@ -232,6 +250,13 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
             @media (min-width: 768px) and (max-width: 1023px) { .player-scroll-area { padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important; } }
             @media (max-width: 767px) { .player-scroll-area { padding-bottom: var(--bottom-stack) !important; } }
           `}</style>
+
+          {/* ── Global pull-to-refresh indicator — covers every page ── */}
+          <PullToRefreshIndicator
+            pullProgress={pullProgress}
+            isRefreshing={isRefreshing}
+            indicatorY={indicatorY}
+          />
 
           <div
             id="main-scroll"

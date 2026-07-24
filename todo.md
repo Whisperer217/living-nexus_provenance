@@ -6653,3 +6653,4 @@
   - [x] Clot 2: getSongWithCreator filtered isPublic=true so owners couldn't see Draft/Unlisted songs on detail page
   - [x] Clot 3: getById procedure now falls back to getSongWithCreatorForOwner for authenticated owners
   - [x] Clot 4: EditTrackPanel.tsx zombie file (called overlayOpen for edit-track but was never imported) - deleted
+- [x] Bug: Pull-to-refresh was page-scoped (4 pages only) — moved to MainLayout for global coverage across all pages

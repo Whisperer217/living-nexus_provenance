@@ -26,8 +26,6 @@ import { StoreTrackCard } from "@/components/StoreTrackCard";
 import { StoreCreatorCard } from "@/components/StoreCreatorCard";
 
 import { ConstellationReveal } from "@/components/ConstellationReveal";
-import { usePullToRefresh } from "@/hooks/usePullToRefresh";
-import { PullToRefreshIndicator } from "@/components/PullToRefreshIndicator";
 
 /** Animated counter that counts up from 0 to `target` over ~1.2 s */
 function AnimatedCounter({ target }: { target: number }) {
@@ -833,21 +831,6 @@ export default function HomePage() {
   const [tipRect, setTipRect] = useState<DOMRect | null>(null);
   const tipTrack = tipTarget ?? null;
 
-  // Pull-to-refresh — invalidates all home feed queries
-  const utils = trpc.useUtils();
-  const { pullProgress, isRefreshing, indicatorY } = usePullToRefresh({
-    onRefresh: async () => {
-      await Promise.all([
-        utils.songs.trending.invalidate(),
-        utils.songs.discover.invalidate(),
-        utils.songs.newThisWeek.invalidate(),
-        utils.songs.getWitnessedCount.invalidate(),
-        utils.songs.getWitnessedVoices.invalidate(),
-        utils.profile.featuredCreators.invalidate(),
-      ]);
-    },
-  });
-
   return (
     <>
       <Helmet>
@@ -856,11 +839,6 @@ export default function HomePage() {
         <meta name="keywords" content="creative provenance registry, witness ID, WID, music attribution, creator rights, digital provenance, independent creator platform, creative registry, AI-era attribution, Living Nexus" />
       </Helmet>
 
-      <PullToRefreshIndicator
-        pullProgress={pullProgress}
-        isRefreshing={isRefreshing}
-        indicatorY={indicatorY}
-      />
 
       <div className="cosmic-bg min-h-screen" style={{ position: "relative" }}>
 

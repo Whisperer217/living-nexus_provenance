@@ -8,8 +8,6 @@
 import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
-import { usePullToRefresh } from "@/hooks/usePullToRefresh";
-import { PullToRefreshIndicator } from "@/components/PullToRefreshIndicator";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -546,16 +544,6 @@ export default function ArchivePage() {
     },
   });
 
-  // Pull-to-refresh — MUST be declared here (before any early returns) to satisfy Rules of Hooks
-  const { pullProgress, isRefreshing, indicatorY } = usePullToRefresh({
-    onRefresh: async () => {
-      await Promise.all([
-        utils.songs.mySongs.invalidate(),
-        utils.userCollections.list.invalidate(),
-        utils.witnessSubscription.getMyArchive.invalidate(),
-      ]);
-    },
-  });
 
   const handleToggle = (e: React.MouseEvent, song: any) => {
     e.preventDefault();
@@ -681,14 +669,8 @@ export default function ArchivePage() {
     }
     return list;
   })();
-
   return (
     <>
-    <PullToRefreshIndicator
-      pullProgress={pullProgress}
-      isRefreshing={isRefreshing}
-      indicatorY={indicatorY}
-    />
     <div className="min-h-screen" style={{ background: "#000000" }}>
       {/* ── Hero Banner ─────────────────────────────────────────────────── */}
       <div className="relative w-full overflow-hidden" style={{ height: "200px" }}>
