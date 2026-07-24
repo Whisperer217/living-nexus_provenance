@@ -6587,3 +6587,10 @@
 - [x] Cathedral aesthetic: dark void background, amber/gold emissive glow, wireframe accent layer
 - [x] Integrated into KeeperPage (/keeper) as the portrait hero element
 - [x] TypeScript: 0 errors
+
+## Edit Work Freeze Fix v4 — Definitive (Session Jul 23, 2026)
+- [x] Root cause (v4): overlayOpen("edit-track","light") was called inside CreativeDrawer's own useEffect. If CreativeDrawer crashed during mount (e.g., Radix SelectContent receiving container=null), the overlay lock leaked — overlayClose never ran, leaving an invisible fixed backdrop blocking all pointer events (perceived freeze).
+- [x] Fix 1: Moved overlayOpen/overlayClose to SongDetailPage parent-level useEffect tied to editingOpen state — parent cleanup always runs regardless of child render errors.
+- [x] Fix 2: Removed duplicate overlayOpen/overlayClose useEffect from CreativeDrawer entirely; removed now-unused import.
+- [x] Fix 3: Guarded Radix SelectContent container prop — only passes container={drawerContainerEl} when non-null (spread conditional); prevents Radix mount crash when drawerContainerEl is null on first render.
+- [x] TypeScript: 0 errors

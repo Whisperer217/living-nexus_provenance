@@ -16,7 +16,6 @@
 */
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { overlayOpen, overlayClose } from "@/lib/overlayController";
 import { createPortal } from "react-dom";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
@@ -233,16 +232,9 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
     if (drawerRootRef.current) setDrawerContainerEl(drawerRootRef.current);
   }, []);
 
-  /* ── Scroll-lock via overlayController so OverlayRouteGuard can clean up ── */
-  // IMPORTANT: Use "light" mode (overflow:hidden only, NO position:fixed).
-  // The "full" mode sets position:fixed on body, which changes the containing
-  // block for every fixed child (PlayerBar, GlobalPlayer, mobile header) and
-  // triggers a massive layout-recalculation cascade that freezes the browser.
-  // "light" mode is sufficient — the backdrop already blocks background interaction.
-  useEffect(() => {
-    overlayOpen("edit-track", "light");
-    return () => { overlayClose("edit-track"); };
-  }, []);
+  /* ── NOTE: overlayOpen/overlayClose are managed by the PARENT (SongDetailPage) ── */
+  // Moved to parent so the lock always cleans up even if this component
+  // crashes during mount (leaked overlay = invisible fixed backdrop = freeze).
 
   /* ── Stable onClose (prevents stale closure in backdrop handler) ── */
   const stableOnClose = useCallback(() => onClose(), [onClose]);
@@ -709,7 +701,7 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
                     <SelectValue placeholder="Select genre" />
                   </SelectTrigger>
                   <SelectContent
-                    container={drawerContainerEl}
+                    {...(drawerContainerEl ? { container: drawerContainerEl } : {})}
                     style={{ background: "#0c0a1c", border: `1px solid ${GOLD_BORDER}` }}
                   >
                     {GENRES.map((g) => (
@@ -731,7 +723,7 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent
-                    container={drawerContainerEl}
+                    {...(drawerContainerEl ? { container: drawerContainerEl } : {})}
                     style={{ background: "#0c0a1c", border: `1px solid ${GOLD_BORDER}` }}
                   >
                     {STATUS_OPTIONS.map((s) => (

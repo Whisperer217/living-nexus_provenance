@@ -49,6 +49,7 @@ import { CinematicComicReader, type BookPage } from "@/components/reader/Cinemat
 import { CinematicSongHeader } from "@/components/CinematicSongHeader";
 import { CreatorHandle } from "@/components/CreatorHandle";
 import { CreativeDrawer } from "@/components/CreativeDrawer";
+import { overlayOpen, overlayClose } from "@/lib/overlayController";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { SongDetailPageSkeleton } from "@/components/SongDetailPageSkeleton";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
@@ -145,6 +146,16 @@ export default function SongDetailPage() {
     setEditingOpen(false);
     utils.songs.getById.invalidate({ id: songId });
   }, [utils.songs.getById, songId]);
+  // Manage overlay lock at the PARENT level so it always cleans up
+  // even if CreativeDrawer crashes during mount. Previously the lock
+  // was inside CreativeDrawer's useEffect — if the component threw
+  // before cleanup ran, the overlay lock leaked and an invisible
+  // fixed backdrop blocked all pointer events (perceived freeze).
+  useEffect(() => {
+    if (!editingOpen) return;
+    overlayOpen("edit-track", "light");
+    return () => { overlayClose("edit-track"); };
+  }, [editingOpen]);
   // Derive play state from global player — this page is a remote control only
   const isThisTrackActive = currentTrackId === String(songId);
   const isPlaying = isThisTrackActive && playerState.isPlaying;
