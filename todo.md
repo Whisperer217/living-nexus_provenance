@@ -6622,3 +6622,10 @@
 - [x] GlobalPlayer mini bar — paddingBottom: env(safe-area-inset-bottom) on mobile (clears iOS home indicator)
 - [x] LargeManifestationCard — removed minHeight: 280px override that distorted 16:9 aspect ratio on mobile
 - [x] TypeScript: 0 errors
+
+## OAuth Callback 500 Fix — 2026-07-24
+- [x] Root cause: sdk.ts decodeState() did raw atob() and returned the entire JSON string as redirectUri
+- [x] Fix: decodeState() now JSON-parses the state when it starts with '{' and returns only parsed.redirectUri
+- [x] Backward-compatible: legacy plain-base64 state still works
+- [x] TypeScript: 0 errors
+- [x] Unit tests: 4/4 passed (new JSON format, legacy format, broken behavior proof, malformed state)

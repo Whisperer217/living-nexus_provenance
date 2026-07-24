@@ -38,9 +38,32 @@ class OAuthService {
     }
   }
 
+  /**
+   * Decode the OAuth state parameter and extract the redirectUri.
+   *
+   * The state may be encoded in two formats:
+   *   - Legacy (plain base64): the raw redirectUri string
+   *   - New format (base64-encoded JSON): { redirectUri, returnPath }
+   *
+   * The token exchange endpoint requires only the plain redirectUri string.
+   * Previously this method returned the full decoded string verbatim, which
+   * caused a 500 when the state was JSON — the OAuth server received a JSON
+   * object as the redirectUri field instead of a URL.
+   */
   private decodeState(state: string): string {
-    const redirectUri = atob(state);
-    return redirectUri;
+    try {
+      const decoded = atob(state);
+      if (decoded.startsWith("{")) {
+        const parsed = JSON.parse(decoded);
+        if (typeof parsed.redirectUri === "string" && parsed.redirectUri.length > 0) {
+          return parsed.redirectUri;
+        }
+      }
+      return decoded;
+    } catch {
+      // Malformed state — return raw value as fallback
+      return state;
+    }
   }
 
   async getTokenByCode(
