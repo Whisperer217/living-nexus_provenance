@@ -3,7 +3,6 @@ import { getWIDSnapshots, clearWIDSnapshots, type WIDSnapshot } from "@/lib/lnxC
 import { DashboardErrorCard } from "@/components/DashboardErrorCard";
 import { WIDPanel } from "@/components/WIDPanel";
 import { ImagePositioner } from "@/components/ImagePositioner";
-import { EditChapel } from "@/components/EditChapel";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { Link } from "wouter";
@@ -19,6 +18,7 @@ import {
   TrendingUp, Heart, LineChart, Pencil, Fingerprint, BookOpen, FileText, Image, Bell, LayoutGrid
 } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell } from "recharts";
+import { useWorkEditor } from "@/contexts/WorkEditorContext";
 
 type Tab = "songs" | "activity" | "collections" | "archive" | "analytics" | "widcache" | "discord";
 
@@ -56,9 +56,9 @@ const ONBOARDING_CHECKLIST = [
 
 export default function DashboardPage() {
   const { user, isAuthenticated } = useAuth();
+  const { openEditor } = useWorkEditor();
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<Tab>("songs");
-  const [editingSong, setEditingSong] = useState<any | null>(null);
   const [showChecklist, setShowChecklist] = useState(false);
 
   const { data: songs, refetch: refetchSongs, error: songsError } = trpc.songs.mySongs.useQuery(undefined, { enabled: isAuthenticated, retry: 1 });
@@ -705,7 +705,7 @@ export default function DashboardPage() {
                         <button
                           className="w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-[#1C1A14]/10"
                           title="Edit track (cover art, metadata, position)"
-                          onClick={() => setEditingSong(song)}
+                          onClick={() => openEditor({ id: song.id, title: song.title, genre: song.genre ?? null, caption: (song as any).caption ?? null, coverArtUrl: song.coverArtUrl ?? null, aiConsent: (song as any).aiConsent ?? null, status: (song as any).status ?? "Published", lyricsText: (song as any).lyricsText ?? null, haaiOriginStory: (song as any).haaiOriginStory ?? null, aiDisclosure: (song as any).aiDisclosure ?? null, contentType: (song as any).contentType ?? "audio", releaseDate: (song as any).releaseDate ?? null, description: (song as any).description ?? null, witnessId: song.witnessId ?? null, videoUrl: (song as any).videoUrl ?? null, videoWitnessId: (song as any).videoWitnessId ?? null, externalLinksJson: (song as any).externalLinksJson ?? null, downloadPermission: (song as any).downloadPermission ?? null, downloadTipThresholdCents: (song as any).downloadTipThresholdCents ?? null })}
                         >
                           <Pencil className="w-3 h-3" style={{ color: "var(--ln-gold)" }} />
                         </button>
