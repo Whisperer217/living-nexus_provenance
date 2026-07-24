@@ -18,6 +18,7 @@ import KeeperAvatarWidget from "./components/KeeperAvatarWidget";
 import { useQrScanLogger } from "./hooks/useQrScanLogger";
 import { useScrollRestoration } from "./hooks/useScrollRestoration";
 import { overlayCloseAll } from "@/lib/overlayController";
+import { useWorkEditor } from "./contexts/WorkEditorContext";
 import { PWAInstallBanner } from "./components/PWAInstallBanner";
 
 /** Logs QR scan events when ?qr= param is present in the URL. */
@@ -155,10 +156,20 @@ function ScrollRestorationManager() {
 
 function OverlayRouteGuard() {
   const [location] = useLocation();
+  const { closeEditor } = useWorkEditor();
   // useLayoutEffect fires before paint — ensures scroll lock is cleared
-  // before the new page renders, preventing a single-frame frozen-scroll flash on mobile
+  // before the new page renders, preventing a single-frame frozen-scroll flash on mobile.
+  //
+  // CRITICAL FIX (Edit Work freeze pathology):
+  // overlayCloseAll() clears the overlay lock but does NOT unmount the CreativeDrawer.
+  // The drawer's fixed inset-0 backdrop remains in the DOM (editingSong is still set
+  // in WorkEditorContext) and intercepts ALL pointer events on the new page — perceived
+  // as a complete platform freeze requiring a refresh.
+  // Fix: call closeEditor() here so editingSong is cleared and the drawer unmounts.
   useLayoutEffect(() => {
     overlayCloseAll();
+    closeEditor();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location]);
   return null;
 }

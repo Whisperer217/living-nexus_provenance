@@ -6644,3 +6644,7 @@
 - [x] Fix: SongDetailPage hero artist display now prefers officialArtistName over creator handle
 - [x] Fix: CinematicSongHeader artistName prop now prefers officialArtistName over creator handle
 - [x] TypeScript: 0 errors confirmed
+- [x] Bug: Edit Work freeze pathology (inherited) — OverlayRouteGuard called overlayCloseAll() but not closeEditor(), leaving CreativeDrawer's fixed inset-0 backdrop in DOM after navigation, blocking all pointer events
+- [x] Fix: OverlayRouteGuard now calls closeEditor() alongside overlayCloseAll() on every route change
+- [x] Fix: WorkEditorContext adds global Escape key handler (capture phase) as last-resort safety valve when drawer is open
+- [x] TypeScript: 0 errors confirmed, 398/398 tests passing

@@ -56,6 +56,20 @@ export function WorkEditorProvider({ children }: { children: ReactNode }) {
     return () => { overlayClose("edit-track"); };
   }, [editingSong]);
 
+  // ── Global Escape safety valve ──
+  // Last-resort escape hatch: if the drawer is open and Escape is pressed
+  // (capture phase, so it fires even if a child stopPropagation()s), close it.
+  // This handles the edge case where the drawer's own Escape handler fails
+  // (e.g., focus trapped outside, event listener not attached after a crash).
+  useEffect(() => {
+    if (!editingSong) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setEditingSong(null);
+    };
+    document.addEventListener("keydown", handler, true); // capture phase
+    return () => document.removeEventListener("keydown", handler, true);
+  }, [editingSong]);
+
   const openEditor = useCallback((song: CreativeDrawerSong) => {
     setEditingSong(song);
   }, []);
