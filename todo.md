@@ -6594,3 +6594,18 @@
 - [x] Fix 2: Removed duplicate overlayOpen/overlayClose useEffect from CreativeDrawer entirely; removed now-unused import.
 - [x] Fix 3: Guarded Radix SelectContent container prop — only passes container={drawerContainerEl} when non-null (spread conditional); prevents Radix mount crash when drawerContainerEl is null on first render.
 - [x] TypeScript: 0 errors
+
+## Platform-Wide Edit Work Freeze Fix — WorkEditorContext (v5)
+
+- [x] Audit all edit entry points: SongDetailPage, ArchivePage, DashboardPage, CreatorDomainPage, ProfilePage, CreatorProfilePage
+- [x] Build WorkEditorContext — single app-level provider with overlay-safe openEditor(song) service
+- [x] Wire WorkEditorProvider into main.tsx provider tree (inside LightsModeProvider)
+- [x] Refactor SongDetailPage to call openEditor() — removed local editingOpen state + per-page overlay useEffect
+- [x] Refactor ArchivePage to call openEditor() — removed local editingSong state + CreativeDrawer render block
+- [x] Refactor CreatorDomainPage to call openEditor() — removed local editingSong state + CreativeDrawer render block
+- [x] Refactor ProfilePage to call openEditor() — removed local editingSong state + CreativeDrawer render block
+- [x] Refactor DashboardPage to call openEditor() — removed EditChapel import + local editingSong state + EditChapel render block
+- [x] Refactor CreatorProfilePage to call openEditor() — removed EditChapel import + local editingChapelSong state + EditChapel render block
+- [x] Remove overlayOpen/overlayClose from EditChapel (now managed by WorkEditorContext)
+- [x] Verify overlayOpen/overlayClose already removed from CreativeDrawer (confirmed)
+- [x] TypeScript: 0 errors

@@ -1192,17 +1192,7 @@ export default function DashboardPage() {
       {/* Discord Integration Tab */}
       {activeTab === "discord" && <DiscordIntegrationTab />}
       </div>
-      {/* ── Edit Track Panel ───────────────────────────────────────── */}
-      {editingSong && (
-        <EditChapel
-          song={editingSong}
-          onClose={() => setEditingSong(null)}
-          onSaved={() => {
-            setEditingSong(null);
-            refetchSongs();
-          }}
-        />
-      )}
+      {/* Edit Track — managed by WorkEditorContext at app root */}
     </div>
    );
 }

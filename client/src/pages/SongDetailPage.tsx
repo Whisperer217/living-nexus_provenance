@@ -48,9 +48,8 @@ import { QRShareModal } from "@/components/QRIdentityCard";
 import { CinematicComicReader, type BookPage } from "@/components/reader/CinematicComicReader";
 import { CinematicSongHeader } from "@/components/CinematicSongHeader";
 import { CreatorHandle } from "@/components/CreatorHandle";
-import { CreativeDrawer } from "@/components/CreativeDrawer";
-import { overlayOpen, overlayClose } from "@/lib/overlayController";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import { useWorkEditor } from "@/contexts/WorkEditorContext";
 import { SongDetailPageSkeleton } from "@/components/SongDetailPageSkeleton";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 import { SacredCanvas } from "@/components/SacredCanvas";
@@ -138,24 +137,7 @@ export default function SongDetailPage() {
   });
   const [shareOpen, setShareOpen] = useState(false);
   const [versionHistoryOpen, setVersionHistoryOpen] = useState(false);
-  const [editingOpen, setEditingOpen] = useState(false);
-  // Stable callbacks for EditTrackPanel — inline arrow functions would cause
-  // the Escape-key useEffect to re-register on every parent re-render.
-  const handleEditClose = useCallback(() => setEditingOpen(false), []);
-  const handleEditSaved = useCallback(() => {
-    setEditingOpen(false);
-    utils.songs.getById.invalidate({ id: songId });
-  }, [utils.songs.getById, songId]);
-  // Manage overlay lock at the PARENT level so it always cleans up
-  // even if CreativeDrawer crashes during mount. Previously the lock
-  // was inside CreativeDrawer's useEffect — if the component threw
-  // before cleanup ran, the overlay lock leaked and an invisible
-  // fixed backdrop blocked all pointer events (perceived freeze).
-  useEffect(() => {
-    if (!editingOpen) return;
-    overlayOpen("edit-track", "light");
-    return () => { overlayClose("edit-track"); };
-  }, [editingOpen]);
+  const { openEditor } = useWorkEditor();
   // Derive play state from global player — this page is a remote control only
   const isThisTrackActive = currentTrackId === String(songId);
   const isPlaying = isThisTrackActive && playerState.isPlaying;
@@ -777,7 +759,7 @@ export default function SongDetailPage() {
                       {isOwner && (
                         <button
                           type="button"
-                          onClick={e => { e.stopPropagation(); setEditingOpen(true); }}
+                          onClick={e => { e.stopPropagation(); if (song) openEditor({ id: song.id, title: song.title, genre: song.genre ?? null, caption: (song as any).caption ?? null, coverArtUrl: song.coverArtUrl ?? null, aiConsent: (song as any).aiConsent ?? null, status: (song as any).status ?? "Published", lyricsText: song.lyricsText ?? null, haaiOriginStory: (song as any).haaiOriginStory ?? null, aiDisclosure: (song as any).aiDisclosure ?? null, contentType: (song as any).contentType ?? "audio", releaseDate: (song as any).releaseDate ?? null, description: (song as any).description ?? null, witnessId: song.witnessId ?? null, videoUrl: (song as any).videoUrl ?? null, videoWitnessId: (song as any).videoWitnessId ?? null, externalLinksJson: (song as any).externalLinksJson ?? null, downloadPermission: (song as any).downloadPermission ?? null, downloadTipThresholdCents: (song as any).downloadTipThresholdCents ?? null }); }}
                           className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all hover:scale-105 active:scale-95 btn-gold-glow"
                           style={{
                             background: "rgba(196,154,40,0.10)",
@@ -1158,8 +1140,8 @@ export default function SongDetailPage() {
               {isOwner && (
                 <Button
                   size="sm"
-                  onClick={() => setEditingOpen(true)}
-                  className="gap-1.5 btn-gold-glow transition-all hover:scale-105 active:scale-95"
+                   onClick={() => { if (song) openEditor({ id: song.id, title: song.title, genre: song.genre ?? null, caption: (song as any).caption ?? null, coverArtUrl: song.coverArtUrl ?? null, aiConsent: (song as any).aiConsent ?? null, status: (song as any).status ?? "Published", lyricsText: song.lyricsText ?? null, haaiOriginStory: (song as any).haaiOriginStory ?? null, aiDisclosure: (song as any).aiDisclosure ?? null, contentType: (song as any).contentType ?? "audio", releaseDate: (song as any).releaseDate ?? null, description: (song as any).description ?? null, witnessId: song.witnessId ?? null, videoUrl: (song as any).videoUrl ?? null, videoWitnessId: (song as any).videoWitnessId ?? null, externalLinksJson: (song as any).externalLinksJson ?? null, downloadPermission: (song as any).downloadPermission ?? null, downloadTipThresholdCents: (song as any).downloadTipThresholdCents ?? null }); }}
+                   className="gap-1.5 btn-gold-glow transition-all hover:scale-105 active:scale-95"
                   style={{
                     background: "rgba(196,154,40,0.12)",
                     border: "1px solid rgba(196,154,40,0.5)",
@@ -1184,7 +1166,7 @@ export default function SongDetailPage() {
                   <p className="text-sm font-semibold" style={{ color: "#eab308", fontFamily: "'Cinzel', serif" }}>Missing Cover Art</p>
                   <p className="text-xs mt-0.5" style={{ color: "rgba(234,179,8,0.7)" }}>This work has no cover art. Add one so it displays correctly across the platform.</p>
                 </div>
-                <Button size="sm" variant="outline" onClick={() => setEditingOpen(true)}
+                <Button size="sm" variant="outline" onClick={() => { if (song) openEditor({ id: song.id, title: song.title, genre: song.genre ?? null, caption: (song as any).caption ?? null, coverArtUrl: song.coverArtUrl ?? null, aiConsent: (song as any).aiConsent ?? null, status: (song as any).status ?? "Published", lyricsText: song.lyricsText ?? null, haaiOriginStory: (song as any).haaiOriginStory ?? null, aiDisclosure: (song as any).aiDisclosure ?? null, contentType: (song as any).contentType ?? "audio", releaseDate: (song as any).releaseDate ?? null, description: (song as any).description ?? null, witnessId: song.witnessId ?? null, videoUrl: (song as any).videoUrl ?? null, videoWitnessId: (song as any).videoWitnessId ?? null, externalLinksJson: (song as any).externalLinksJson ?? null, downloadPermission: (song as any).downloadPermission ?? null, downloadTipThresholdCents: (song as any).downloadTipThresholdCents ?? null }); }}
                   style={{ borderColor: "rgba(234,179,8,0.4)", color: "#eab308", flexShrink: 0, fontSize: "11px" }}>
                   Add Art
                 </Button>
@@ -2070,36 +2052,7 @@ export default function SongDetailPage() {
         </DialogContent>
       </Dialog>
 
-      {/* ── Owner: Creative Drawer ── */}
-      {editingOpen && song && (
-        <ErrorBoundary inline>
-          <CreativeDrawer
-            song={{
-              id: song.id,
-              title: song.title,
-              genre: song.genre ?? null,
-              caption: (song as any).caption ?? null,
-              coverArtUrl: song.coverArtUrl ?? null,
-              aiConsent: (song as any).aiConsent ?? null,
-              status: (song as any).status ?? "Published",
-              lyricsText: song.lyricsText ?? null,
-              haaiOriginStory: (song as any).haaiOriginStory ?? null,
-              aiDisclosure: (song as any).aiDisclosure ?? null,
-              contentType: (song as any).contentType ?? "audio",
-              releaseDate: (song as any).releaseDate ?? null,
-              description: (song as any).description ?? null,
-              witnessId: song.witnessId ?? null,
-              videoUrl: (song as any).videoUrl ?? null,
-              videoWitnessId: (song as any).videoWitnessId ?? null,
-              externalLinksJson: (song as any).externalLinksJson ?? null,
-              downloadPermission: (song as any).downloadPermission ?? null,
-              downloadTipThresholdCents: (song as any).downloadTipThresholdCents ?? null,
-            }}
-            onClose={handleEditClose}
-            onSaved={handleEditSaved}
-          />
-        </ErrorBoundary>
-      )}
+      {/* ── Owner: Creative Drawer — managed by WorkEditorContext at app root ── */}
 
     </div>
   );

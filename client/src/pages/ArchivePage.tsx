@@ -21,7 +21,7 @@ import {
   Image, BookOpen, Gamepad2, FileText, ScrollText,
 } from "lucide-react";
 import ErrorBoundary from "@/components/ErrorBoundary";
-import { CreativeDrawer } from "@/components/CreativeDrawer";
+import { useWorkEditor } from "@/contexts/WorkEditorContext";
 import { getLoginUrl } from "@/const";
 import { usePlayer } from "@/contexts/PlayerContext";
 import MyListsTab from "@/components/MyListsTab";
@@ -320,17 +320,8 @@ function ConfirmDeleteModal({
 export default function ArchivePage() {
   const { isAuthenticated, loading } = useAuth();
   const utils = trpc.useUtils();
-  const [editingSong, setEditingSong] = useState<any | null>(null);
+  const { openEditor } = useWorkEditor();
   const [deletingSong, setDeletingSong] = useState<any | null>(null);
-  // Stable callbacks for CreativeDrawer — MUST be at top level, never inside JSX
-  const handleDrawerClose = useCallback(() => setEditingSong(null), []);
-  const handleDrawerSaved = useCallback(() => {
-    setEditingSong((prev: any) => {
-      if (prev?.id) utils.songs.getById.invalidate({ id: prev.id });
-      return null;
-    });
-    utils.songs.mySongs.invalidate();
-  }, [utils]);
 
   // ── Deep-link: read URL params once on mount (stable via useMemo) ─────────────────────────────────────
   // Supported params:
@@ -456,7 +447,7 @@ export default function ArchivePage() {
     const target = songs.find((s: any) => s.id === deepLinkSongId);
     if (target) {
       deepLinkEditorOpened.current = true;
-      setEditingSong(target);
+      openEditor({ id: target.id, title: target.title, genre: target.genre ?? null, caption: target.caption ?? null, coverArtUrl: target.coverArtUrl ?? null, aiConsent: target.aiConsent ?? null, status: target.status ?? "Published", lyricsText: target.lyricsText ?? null, haaiOriginStory: target.haaiOriginStory ?? null, aiDisclosure: target.aiDisclosure ?? null, contentType: target.contentType ?? "audio", releaseDate: target.releaseDate ?? null, description: target.description ?? null, witnessId: target.witnessId ?? null, videoUrl: target.videoUrl ?? null, videoWitnessId: target.videoWitnessId ?? null, externalLinksJson: target.externalLinksJson ?? null, downloadPermission: (target as any).downloadPermission ?? null, downloadTipThresholdCents: (target as any).downloadTipThresholdCents ?? null });
     }
   }, [songs, deepLinkSongId]);
 
@@ -1530,7 +1521,7 @@ export default function ArchivePage() {
                       {/* Edit */}
                       {!isDeleted && (
                         <button
-                          onClick={(e) => { e.stopPropagation(); setEditingSong(song); }}
+                          onClick={(e) => { e.stopPropagation(); openEditor({ id: song.id, title: song.title, genre: song.genre ?? null, caption: song.caption ?? null, coverArtUrl: song.coverArtUrl ?? null, aiConsent: song.aiConsent ?? null, status: song.status ?? "Published", lyricsText: song.lyricsText ?? null, haaiOriginStory: song.haaiOriginStory ?? null, aiDisclosure: song.aiDisclosure ?? null, contentType: song.contentType ?? "audio", releaseDate: song.releaseDate ?? null, description: song.description ?? null, witnessId: song.witnessId ?? null, videoUrl: song.videoUrl ?? null, videoWitnessId: song.videoWitnessId ?? null, externalLinksJson: song.externalLinksJson ?? null, downloadPermission: (song as any).downloadPermission ?? null, downloadTipThresholdCents: (song as any).downloadTipThresholdCents ?? null }); }}
                           title="Edit track metadata"
                           className="flex-shrink-0 flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-semibold transition-all"
                           style={{
@@ -1638,36 +1629,7 @@ export default function ArchivePage() {
       </div>
     </div>
 
-    {/* Creative Drawer (ErrorBoundary prevents page freeze on crash) */}
-    {editingSong && (
-      <ErrorBoundary inline>
-      <CreativeDrawer
-        song={{
-          id: editingSong.id,
-          title: editingSong.title,
-          genre: editingSong.genre ?? null,
-          caption: editingSong.caption ?? null,
-          coverArtUrl: editingSong.coverArtUrl ?? null,
-          aiConsent: editingSong.aiConsent ?? null,
-          status: editingSong.status ?? "Published",
-          lyricsText: editingSong.lyricsText ?? null,
-          haaiOriginStory: editingSong.haaiOriginStory ?? null,
-          aiDisclosure: editingSong.aiDisclosure ?? null,
-          contentType: editingSong.contentType ?? "audio",
-          releaseDate: editingSong.releaseDate ?? null,
-          description: editingSong.description ?? null,
-          witnessId: editingSong.witnessId ?? null,
-          videoUrl: editingSong.videoUrl ?? null,
-          videoWitnessId: editingSong.videoWitnessId ?? null,
-          externalLinksJson: editingSong.externalLinksJson ?? null,
-          downloadPermission: (editingSong as any).downloadPermission ?? null,
-          downloadTipThresholdCents: (editingSong as any).downloadTipThresholdCents ?? null,
-        }}
-        onClose={handleDrawerClose}
-        onSaved={handleDrawerSaved}
-      />
-      </ErrorBoundary>
-    )}
+    {/* Creative Drawer — managed by WorkEditorContext at app root */}
 
     {/* Confirm Delete Modal */}
     {deletingSong && (

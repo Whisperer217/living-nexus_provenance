@@ -9,7 +9,6 @@
 
 import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
-import { overlayOpen, overlayClose } from "@/lib/overlayController";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -272,10 +271,9 @@ export function EditChapel({ song, onClose, onSaved }: EditChapelProps) {
     return () => window.removeEventListener("keydown", handler);
   }, [onClose]);
 
-  useEffect(() => {
-    overlayOpen("edit-track", "light");
-    return () => overlayClose("edit-track");
-  }, []);
+  /* NOTE: overlayOpen/overlayClose are managed by WorkEditorContext (app root).
+   * Removed from here so the lock always cleans up even if this component
+   * crashes during mount (leaked overlay = invisible fixed backdrop = freeze). */
 
   /* ── Entrance animation ── */
   const [visible, setVisible] = useState(false);

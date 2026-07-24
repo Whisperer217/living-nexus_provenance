@@ -31,7 +31,7 @@ import { usePlayer, Track } from "@/contexts/PlayerContext";
 import { EDIT_GENRES } from "@shared/contentTypes";
 import { CreatorIdentityStrip } from "@/components/CreatorIdentityStrip";
 import ErrorBoundary from "@/components/ErrorBoundary";
-import { CreativeDrawer } from "@/components/CreativeDrawer";
+import { useWorkEditor } from "@/contexts/WorkEditorContext";
 import { SacredCanvas } from "@/components/SacredCanvas";
 const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/HMNMkWUWAfVdTbRj3YmPCF/ln-navbar-icon-180_b914f927.png";
 
@@ -205,7 +205,7 @@ export default function ProfilePage() {
   }, [search]);
   const [showAddTestimony, setShowAddTestimony] = useState(false);
   const [testimonyContent, setTestimonyContent] = useState("");
-  const [editingSong, setEditingSong] = useState<any | null>(null);
+  const { openEditor } = useWorkEditor();
   const [testimonyLinkedWorks, setTestimonyLinkedWorks] = useState<string[]>([]);
 
   // ── Identity data ────────────────────────────────────────────────
@@ -1376,7 +1376,7 @@ export default function ProfilePage() {
                   <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
                       type="button"
-                      onClick={() => setEditingSong(song)}
+                      onClick={() => openEditor({ id: song.id, title: song.title, genre: song.genre ?? null, caption: song.caption ?? null, coverArtUrl: song.coverArtUrl ?? null, aiConsent: song.aiConsent ?? null, status: song.status ?? "Published", lyricsText: song.lyricsText ?? null, haaiOriginStory: song.haaiOriginStory ?? null, aiDisclosure: song.aiDisclosure ?? null, contentType: song.contentType ?? "audio", releaseDate: song.releaseDate ?? null, description: song.description ?? null, witnessId: song.witnessId ?? null, videoUrl: song.videoUrl ?? null, videoWitnessId: song.videoWitnessId ?? null, externalLinksJson: song.externalLinksJson ?? null, downloadPermission: (song as any).downloadPermission ?? null, downloadTipThresholdCents: (song as any).downloadTipThresholdCents ?? null })}
                       className="p-2 rounded-lg text-[#C49A28] hover:bg-white/[0.1] transition-all"
                       style={{ background: "rgba(196,154,40,0.08)", border: "1px solid rgba(196,154,40,0.22)" }}
                       title="Edit Work"
@@ -2329,40 +2329,7 @@ export default function ProfilePage() {
             </button>
           </div>
         </div>
-      {/* ── Creative Drawer (ErrorBoundary prevents page freeze on crash) ── */}
-      {editingSong && (
-        <ErrorBoundary inline>
-        <CreativeDrawer
-          song={{
-            id: editingSong.id,
-            title: editingSong.title,
-            genre: editingSong.genre ?? null,
-            caption: editingSong.caption ?? null,
-            coverArtUrl: editingSong.coverArtUrl ?? null,
-            aiConsent: editingSong.aiConsent ?? null,
-            status: editingSong.status ?? "Published",
-            lyricsText: editingSong.lyricsText ?? null,
-            haaiOriginStory: editingSong.haaiOriginStory ?? null,
-            aiDisclosure: editingSong.aiDisclosure ?? null,
-            contentType: editingSong.contentType ?? "audio",
-            releaseDate: editingSong.releaseDate ?? null,
-            description: editingSong.description ?? null,
-            witnessId: editingSong.witnessId ?? null,
-            videoUrl: editingSong.videoUrl ?? null,
-            videoWitnessId: editingSong.videoWitnessId ?? null,
-            externalLinksJson: editingSong.externalLinksJson ?? null,
-            downloadPermission: (editingSong as any).downloadPermission ?? null,
-            downloadTipThresholdCents: (editingSong as any).downloadTipThresholdCents ?? null,
-          }}
-          onClose={() => setEditingSong(null)}
-          onSaved={() => {
-            setEditingSong(null);
-            utils.songs.mySongs.invalidate();
-            utils.songs.getById.invalidate({ id: editingSong.id });
-          }}
-        />
-        </ErrorBoundary>
-      )}
+      {/* Creative Drawer — managed by WorkEditorContext at app root */}
       </div>
     </div>
   );

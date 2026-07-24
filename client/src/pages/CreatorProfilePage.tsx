@@ -41,7 +41,7 @@ import { CreatorIdentitySection } from "@/components/CreatorIdentitySection";
 import { ManifestationShelf, StandaloneShelf, type ShelfTrack } from "@/components/ManifestationShelf";
 import { LayoutGrid } from "lucide-react";
 import { CreatorIdentityStrip } from "@/components/CreatorIdentityStrip";
-import { EditChapel } from "@/components/EditChapel";
+import { useWorkEditor } from "@/contexts/WorkEditorContext";
 import { SacredCanvas } from "@/components/SacredCanvas";
 import { CreatorDomainHub } from "@/components/CreatorDomainHub";
 
@@ -496,18 +496,12 @@ export default function CreatorProfilePage() {
     onError: (e) => toast.error(e.message),
   });
   const playMutation = trpc.songs.play.useMutation();
-  const [editingChapelSong, setEditingChapelSong] = useState<any | null>(null);
-
-  // ── Stable callbacks for EditChapel — MUST be at top level, before any early returns ──
-  // Using useCallback prevents ManifestationShelf from re-rendering on every parent render,
-  // which was causing the scroll-lock interaction to freeze the page.
-  const handleChapelClose = useCallback(() => setEditingChapelSong(null), []);
-  const handleChapelSaved = useCallback(() => { setEditingChapelSong(null); refetch(); }, [refetch]);
+  const { openEditor } = useWorkEditor();
   const handleEditTrack = useCallback((track: any) => {
-    // data may be undefined before the early-return guard; guard here too
     const songList: any[] = (data as any)?.songs ?? [];
-    setEditingChapelSong(songList.find((s: any) => s.id === track.id) ?? track);
-  }, [data]);
+    const song = songList.find((s: any) => s.id === track.id) ?? track;
+    openEditor({ id: song.id, title: song.title, genre: song.genre ?? null, caption: song.caption ?? null, coverArtUrl: song.coverArtUrl ?? null, aiConsent: song.aiConsent ?? null, status: song.status ?? "Published", lyricsText: song.lyricsText ?? null, haaiOriginStory: song.haaiOriginStory ?? null, aiDisclosure: song.aiDisclosure ?? null, contentType: song.contentType ?? "audio", releaseDate: song.releaseDate ?? null, description: song.description ?? null, witnessId: song.witnessId ?? null, videoUrl: song.videoUrl ?? null, videoWitnessId: song.videoWitnessId ?? null, externalLinksJson: song.externalLinksJson ?? null, downloadPermission: (song as any).downloadPermission ?? null, downloadTipThresholdCents: (song as any).downloadTipThresholdCents ?? null });
+  }, [data, openEditor]);
 
   // ── Build stats — admin profile + honored contributors ────────────────────
   // Honored handles receive the 🐛 BUGS KILLED pill as a gift from the platform.
@@ -2995,14 +2989,7 @@ export default function CreatorProfilePage() {
         />
       )}
 
-      {/* ── Edit Chapel — sacred edit drawer for owner ── */}
-      {editingChapelSong && (
-        <EditChapel
-          song={editingChapelSong}
-          onClose={handleChapelClose}
-          onSaved={handleChapelSaved}
-        />
-      )}
+      {/* Edit Chapel — managed by WorkEditorContext at app root */}
     </div>
   );
 }

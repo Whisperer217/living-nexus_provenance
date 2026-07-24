@@ -36,7 +36,7 @@ import { DomainEditor } from "@/components/domain/DomainEditor";
 import { DomainRenderer } from "@/components/domain/DomainRenderer";
 import { Helmet } from "react-helmet-async";
 import ErrorBoundary from "@/components/ErrorBoundary";
-import { CreativeDrawer } from "@/components/CreativeDrawer";
+import { useWorkEditor } from "@/contexts/WorkEditorContext";
 
 // ─── Section IDs ──────────────────────────────────────────────────
 type SectionId =
@@ -118,17 +118,7 @@ export default function CreatorDomainPage() {
 
   const [testimonyContent, setTestimonyContent] = useState("");
   const [showAddTestimony, setShowAddTestimony] = useState(false);
-  const [editingSong, setEditingSong] = useState<any | null>(null);
-
-  // Stable callbacks for CreativeDrawer — must be at top level (hooks rules)
-  const handleDrawerClose = useCallback(() => setEditingSong(null), []);
-  const handleDrawerSaved = useCallback(() => {
-    const id = editingSong?.id;
-    setEditingSong(null);
-    utils.songs.mySongs.invalidate();
-    if (id) utils.songs.getById.invalidate({ id });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [editingSong?.id, utils]);
+  const { openEditor } = useWorkEditor();
 
   // Auth guard
   if (authLoading || profileLoading) {
@@ -589,7 +579,7 @@ export default function CreatorDomainPage() {
                         </div>
                         <div className="flex items-center gap-1.5">
                           <button
-                            onClick={() => setEditingSong(song)}
+                            onClick={() => openEditor({ id: song.id, title: song.title, genre: song.genre ?? null, caption: song.caption ?? null, coverArtUrl: song.coverArtUrl ?? null, aiConsent: song.aiConsent ?? null, status: song.status ?? "Published", lyricsText: song.lyricsText ?? null, haaiOriginStory: song.haaiOriginStory ?? null, aiDisclosure: song.aiDisclosure ?? null, contentType: song.contentType ?? "audio", releaseDate: song.releaseDate ?? null, description: song.description ?? null, witnessId: song.witnessId ?? null, videoUrl: song.videoUrl ?? null, videoWitnessId: song.videoWitnessId ?? null, externalLinksJson: song.externalLinksJson ?? null, downloadPermission: (song as any).downloadPermission ?? null, downloadTipThresholdCents: (song as any).downloadTipThresholdCents ?? null })}
                             className="w-8 h-8 rounded-lg flex items-center justify-center transition-all hover:bg-white/[0.06]"
                             style={{ border: "1px solid rgba(196,154,40,0.22)", color: "var(--ln-gold)" }}
                             title="Edit Work"
@@ -781,36 +771,7 @@ export default function CreatorDomainPage() {
           </main>
         </div>
       )}
-    {/* ── Creative Drawer (ErrorBoundary prevents page freeze on crash) ── */}
-    {editingSong && (
-      <ErrorBoundary inline>
-      <CreativeDrawer
-        song={{
-          id: editingSong.id,
-          title: editingSong.title,
-          genre: editingSong.genre ?? null,
-          caption: editingSong.caption ?? null,
-          coverArtUrl: editingSong.coverArtUrl ?? null,
-          aiConsent: editingSong.aiConsent ?? null,
-          status: editingSong.status ?? "Published",
-          lyricsText: editingSong.lyricsText ?? null,
-          haaiOriginStory: editingSong.haaiOriginStory ?? null,
-          aiDisclosure: editingSong.aiDisclosure ?? null,
-          contentType: editingSong.contentType ?? "audio",
-          releaseDate: editingSong.releaseDate ?? null,
-          description: editingSong.description ?? null,
-          witnessId: editingSong.witnessId ?? null,
-          videoUrl: editingSong.videoUrl ?? null,
-          videoWitnessId: editingSong.videoWitnessId ?? null,
-          externalLinksJson: editingSong.externalLinksJson ?? null,
-          downloadPermission: (editingSong as any).downloadPermission ?? null,
-          downloadTipThresholdCents: (editingSong as any).downloadTipThresholdCents ?? null,
-        }}
-        onClose={handleDrawerClose}
-        onSaved={handleDrawerSaved}
-      />
-      </ErrorBoundary>
-    )}
+    {/* Creative Drawer — managed by WorkEditorContext at app root */}
     </div>
   );
 }

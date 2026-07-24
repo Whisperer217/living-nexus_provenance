@@ -10,6 +10,7 @@ import { LightsModeProvider } from "./contexts/LightsModeContext";
 import { KeeperAttrsProvider } from "./contexts/KeeperAttrsContext";
 import { WSPProvider } from "./contexts/WSPContext";
 import { RightRailProvider } from "./contexts/RightRailContext";
+import { WorkEditorProvider } from "./contexts/WorkEditorContext";
 import { getLoginUrl } from "./const";
 import { hadSession } from "./lib/sessionFlags";
 import "./index.css";
@@ -199,7 +200,9 @@ createRoot(document.getElementById("root")!).render(
           <WSPProvider>
             <RightRailProvider>
               <LightsModeProvider>
-                <App />
+                <WorkEditorProvider>
+                  <App />
+                </WorkEditorProvider>
               </LightsModeProvider>
             </RightRailProvider>
           </WSPProvider>
