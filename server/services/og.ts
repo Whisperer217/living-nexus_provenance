@@ -15,7 +15,7 @@
 import { type Express } from "express";
 import fs from "fs";
 import path from "path";
-import { getSongWithCreator, getCreatorForOg, getCollectionByWid, getUserById, getProjectBySlug, getSongByWitnessId } from "../utils/db";
+import { getSongWithCreator, getCreatorForOg, getCollectionByWid, getUserById, getProjectBySlug, getSongByWitnessId, getManifestedCollectionBySlug } from "../utils/db";
 import { getOrGenerateEmbedVideo } from "../services/embedVideo";
 
 /** Canonical production origin — always use this for og:url */
@@ -560,7 +560,7 @@ export function registerOgRoutes(app: Express) {
       });
 
       // JSON-LD: schema.org/MusicRecording — Google rich results for music
-      const jsonLd = buildSongJsonLd({
+      const musicRecordingLd = buildSongJsonLd({
         title: song.title,
         artistName,
         artistId: creatorUserId,
@@ -576,6 +576,19 @@ export function registerOgRoutes(app: Express) {
         isrc: (song as any).isrc ?? null,
         playCount: (song as any).playCount ?? 0,
       });
+
+      // BreadcrumbList: Home > Creator > Song — teaches Google the site hierarchy
+      const creatorUrl = creatorUserId ? `${CANONICAL_ORIGIN}/creator/${creatorUserId}` : `${CANONICAL_ORIGIN}/explore`;
+      const breadcrumbLd = JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Living Nexus", item: CANONICAL_ORIGIN },
+          { "@type": "ListItem", position: 2, name: artistName, item: creatorUrl },
+          { "@type": "ListItem", position: 3, name: song.title, item: ogUrl },
+        ],
+      });
+      const jsonLd = musicRecordingLd + `\n    <script type="application/ld+json">${breadcrumbLd}</script>`;
 
       const page = injectOg(html, ogBlock, ogTitle, ogUrl, {
         bodyBlock,
@@ -635,8 +648,8 @@ export function registerOgRoutes(app: Express) {
     },
     {
       path: "/",
-      title: "Living Nexus — Audio Provenance Platform for Creators",
-      description: "Register your music, lyrics, and creative works with cryptographic Witness IDs. Living Nexus anchors provenance so every work is witnessed, attributed, and protected. Music provenance, WID registration, creator rights.",
+      title: "Living Nexus — The Creative Provenance Registry",
+      description: "Living Nexus is the sovereign creative registry for independent creators. Register music, lyrics, manuscripts, and visual works with cryptographic Witness IDs — timestamped, attributed, and protected before your work touches any other platform.",
     },
     {
       path: "/profile",
@@ -705,14 +718,77 @@ export function registerOgRoutes(app: Express) {
               description: route.description,
               canonicalUrl: finalCanonical,
               subheading: route.path === "/"
-                ? "Discover and Register WID-Protected Creative Works on Living Nexus"
+                ? "The sovereign creative registry — timestamp, attribute, and protect your works before they touch any other platform"
                 : undefined,
             })
           : undefined;
 
+        // Homepage gets Organization + Founder + WebSite JSON-LD for Google entity recognition
+        let jsonLd: string | undefined;
+        if (route.path === "/") {
+          const orgLd = {
+            "@context": "https://schema.org",
+            "@graph": [
+              {
+                "@type": "Organization",
+                "@id": `${CANONICAL_ORIGIN}/#organization`,
+                name: "Living Nexus",
+                alternateName: ["LN", "Living Nexus Registry", "Living Nexus Creative Provenance Registry"],
+                url: CANONICAL_ORIGIN,
+                logo: {
+                  "@type": "ImageObject",
+                  url: FALLBACK_IMAGE,
+                  width: 512,
+                  height: 512,
+                },
+                description: "Living Nexus is the sovereign creative registry for independent creators — providing cryptographic Witness ID (WID) provenance infrastructure for music, lyrics, manuscripts, visual works, and all creative output.",
+                foundingDate: "2024",
+                founder: {
+                  "@type": "Person",
+                  "@id": `${CANONICAL_ORIGIN}/#founder`,
+                  name: "Doc",
+                  jobTitle: "Founder & Keeper",
+                  url: `${CANONICAL_ORIGIN}/founder`,
+                  sameAs: [`${CANONICAL_ORIGIN}/founder`],
+                },
+                sameAs: [
+                  CANONICAL_ORIGIN,
+                  "https://livingnexus.manus.space",
+                ],
+                knowsAbout: [
+                  "Creative Provenance",
+                  "Witness ID",
+                  "Music Attribution",
+                  "Digital Rights",
+                  "Independent Creator Infrastructure",
+                  "AI-era Creative Registry",
+                ],
+              },
+              {
+                "@type": "WebSite",
+                "@id": `${CANONICAL_ORIGIN}/#website`,
+                url: CANONICAL_ORIGIN,
+                name: "Living Nexus",
+                description: "The sovereign creative provenance registry for independent creators.",
+                publisher: { "@id": `${CANONICAL_ORIGIN}/#organization` },
+                potentialAction: {
+                  "@type": "SearchAction",
+                  target: {
+                    "@type": "EntryPoint",
+                    urlTemplate: `${CANONICAL_ORIGIN}/explore?q={search_term_string}`,
+                  },
+                  "query-input": "required name=search_term_string",
+                },
+              },
+            ],
+          };
+          jsonLd = `<script type="application/ld+json">${JSON.stringify(orgLd)}</script>`;
+        }
+
         const page = injectOg(html, ogBlock, route.title, finalCanonical, {
           bodyBlock,
           metaDescription: route.description,
+          jsonLd,
         });
         res.status(200).set({ "Content-Type": "text/html" }).end(page);
       } catch (err) {
@@ -899,7 +975,18 @@ export function registerOgRoutes(app: Express) {
         ],
         publisher: { "@type": "Organization", name: "Living Nexus", url: CANONICAL_ORIGIN },
       });
-      const creatorJsonLdBlock = `<script type="application/ld+json">${creatorJsonLd}</script>`;
+      // BreadcrumbList: Home > Creator — teaches Google the site hierarchy
+      const creatorBreadcrumbLd = JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Living Nexus", item: CANONICAL_ORIGIN },
+          { "@type": "ListItem", position: 2, name: displayName, item: ogUrl },
+        ],
+      });
+      const creatorJsonLdBlock =
+        `<script type="application/ld+json">${creatorJsonLd}</script>` +
+        `\n    <script type="application/ld+json">${creatorBreadcrumbLd}</script>`;
 
       // Visible body block for crawlers
       const creatorBodyBlock =
@@ -966,10 +1053,133 @@ export function registerOgRoutes(app: Express) {
       const html = await getHtmlTemplate(isDev);
       if (!html) return next();
 
-      const page = injectOg(html, ogBlock, ogTitle, ogUrl);
+      // JSON-LD: schema.org/CreativeWork + FundingScheme for project pages
+      const projectJsonLd = JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "CreativeWork",
+        name: project.title,
+        description: project.tagline?.trim() || ogDescription,
+        url: ogUrl,
+        ...(bannerUrl ? { image: bannerUrl } : {}),
+        ...(project.linkedWitnessId ? {
+          identifier: [{ "@type": "PropertyValue", name: "Witness ID", value: project.linkedWitnessId }],
+        } : {}),
+        author: {
+          "@type": "Person",
+          name: creatorName,
+          url: (project as any).creatorId ? `${CANONICAL_ORIGIN}/creator/${(project as any).creatorId}` : CANONICAL_ORIGIN,
+        },
+        publisher: { "@type": "Organization", name: "Living Nexus", url: CANONICAL_ORIGIN },
+        datePublished: project.createdAt ? new Date(project.createdAt).toISOString().split("T")[0] : undefined,
+      });
+      const projectJsonLdBlock = `<script type="application/ld+json">${projectJsonLd}</script>`;
+
+      const projectBodyBlock =
+        `<div id="ln-witness-record">` +
+        `<h1>${escAttr(project.title)}</h1>` +
+        (project.tagline?.trim() ? `<p>${escAttr(project.tagline.trim())}</p>` : "") +
+        `<p>${fundingLine}</p>` +
+        (project.linkedWitnessId ? `<p>Witness ID: ${escAttr(project.linkedWitnessId)}</p>` : "") +
+        `<p>Creator: ${escAttr(creatorName)}</p>` +
+        `<p><a href="${escAttr(ogUrl)}">View project on Living Nexus</a></p>` +
+        `</div>`;
+
+      const page = injectOg(html, ogBlock, ogTitle, ogUrl, {
+        bodyBlock: projectBodyBlock,
+        metaDescription: ogDescription,
+        jsonLd: projectJsonLdBlock,
+      });
       res.status(200).set({ "Content-Type": "text/html" }).end(page);
     } catch (err) {
       console.error("[OG] Error generating meta tags for project", slug, err);
+      next();
+    }
+  });
+
+  // ── /collection/:slug ─────────────────────────────────────────────────────
+  // Manifested Collection pages — curated sets of works with a WID-COL provenance ID.
+  // Exposes MusicAlbum JSON-LD so Google can index collections as album entities.
+  app.get("/collection/:slug", async (req, res, next) => {
+    const slug = req.params.slug?.trim();
+    if (!slug) return next();
+
+    try {
+      const row = await getManifestedCollectionBySlug(slug);
+      if (!row || !row.collection.isPublic) return next();
+
+      const { collection, owner } = row;
+      const creatorName =
+        (owner as any)?.artistHandle?.trim() ||
+        (owner as any)?.name?.trim() ||
+        "Unknown Curator";
+      const creatorId = (owner as any)?.id;
+
+      const ogTitle = `${collection.name} — ${creatorName} | Living Nexus Collection`;
+      const descParts: string[] = [];
+      if (collection.description?.trim()) descParts.push(collection.description.trim().slice(0, 120));
+      descParts.push(`${collection.trackCount} work${collection.trackCount !== 1 ? "s" : ""} · ${collection.followerCount} follower${collection.followerCount !== 1 ? "s" : ""}`);
+      if (collection.wid) descParts.push(`WID: ${collection.wid}`);
+      const ogDescription = descParts.join(" — ");
+
+      const coverArt = collection.coverArtUrl?.trim();
+      const ogImage = (coverArt && coverArt.length > 0 ? coverArt : null) ?? FALLBACK_IMAGE;
+      const ogUrl = `${CANONICAL_ORIGIN}/collection/${slug}`;
+      const creatorUrl = creatorId ? `${CANONICAL_ORIGIN}/creator/${creatorId}` : CANONICAL_ORIGIN;
+
+      const ogBlock = buildCreatorOgTags({
+        title: ogTitle,
+        description: ogDescription,
+        image: ogImage,
+        url: ogUrl,
+        siteName: "Living Nexus",
+      });
+
+      const html = await getHtmlTemplate(isDev);
+      if (!html) return next();
+
+      // JSON-LD: schema.org/MusicAlbum for collection pages
+      const collectionJsonLd = JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "MusicAlbum",
+        name: collection.name,
+        url: ogUrl,
+        ...(collection.description?.trim() ? { description: collection.description.trim().slice(0, 500) } : {}),
+        ...(ogImage !== FALLBACK_IMAGE ? { image: ogImage } : {}),
+        numTracks: collection.trackCount,
+        byArtist: {
+          "@type": "MusicGroup",
+          name: creatorName,
+          url: creatorUrl,
+        },
+        ...(collection.wid ? {
+          identifier: [{ "@type": "PropertyValue", name: "Collection Witness ID", value: collection.wid }],
+        } : {}),
+        ...(collection.forkedFromWid ? {
+          isBasedOn: { "@type": "MusicAlbum", identifier: collection.forkedFromWid },
+        } : {}),
+        datePublished: new Date(collection.createdAt).toISOString().split("T")[0],
+        publisher: { "@type": "Organization", name: "Living Nexus", url: CANONICAL_ORIGIN },
+      });
+      const collectionJsonLdBlock = `<script type="application/ld+json">${collectionJsonLd}</script>`;
+
+      const collectionBodyBlock =
+        `<div id="ln-witness-record">` +
+        `<h1>${escAttr(collection.name)}</h1>` +
+        (collection.description?.trim() ? `<p>${escAttr(collection.description.trim().slice(0, 300))}</p>` : "") +
+        `<p>${collection.trackCount} work${collection.trackCount !== 1 ? "s" : ""} · curated by ${escAttr(creatorName)}</p>` +
+        (collection.wid ? `<p>Collection Witness ID: ${escAttr(collection.wid)}</p>` : "") +
+        `<p><a href="${escAttr(creatorUrl)}">View curator on Living Nexus</a></p>` +
+        `<p><a href="${escAttr(ogUrl)}">View collection on Living Nexus</a></p>` +
+        `</div>`;
+
+      const page = injectOg(html, ogBlock, ogTitle, ogUrl, {
+        bodyBlock: collectionBodyBlock,
+        metaDescription: ogDescription,
+        jsonLd: collectionJsonLdBlock,
+      });
+      res.status(200).set({ "Content-Type": "text/html" }).end(page);
+    } catch (err) {
+      console.error("[OG] Error generating meta tags for collection", slug, err);
       next();
     }
   });

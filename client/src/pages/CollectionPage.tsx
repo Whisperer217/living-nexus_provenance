@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Helmet } from "react-helmet-async";
 import { useRoute, useLocation, Link } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -112,8 +113,20 @@ export default function CollectionPage() {
   const isOwner = user?.id === collection.ownerId;
   const ownerHandle = owner?.artistHandle ?? owner?.name ?? "Unknown";
 
+  const pageTitle = `${collection.name} — ${ownerHandle} | Living Nexus Collection`;
+  const pageDescription = [
+    collection.description?.trim() ? collection.description.trim().slice(0, 120) : null,
+    `${collection.trackCount} work${collection.trackCount !== 1 ? "s" : ""} · ${collection.followerCount} follower${collection.followerCount !== 1 ? "s" : ""}`,
+    collection.wid ? `WID: ${collection.wid}` : null,
+  ].filter(Boolean).join(" — ");
+
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <Helmet>
+        <title>{pageTitle}</title>
+        <meta name="description" content={pageDescription} />
+        <link rel="canonical" href={`https://www.livingnexus.org/collection/${slug}`} />
+      </Helmet>
       {/* ── Back nav ── */}
       <div className="max-w-5xl mx-auto px-4 pt-6">
         <button

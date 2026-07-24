@@ -826,7 +826,7 @@ export default function HomePage() {
   // Belt-and-suspenders: set document.title via JS so SEO tools that check
   // the JS-rendered title see the correct 30-60 char value
   useEffect(() => {
-    document.title = "Living Nexus — Audio Provenance Platform for Creators";
+    document.title = "Living Nexus — The Creative Provenance Registry";
   }, []);
 
   const [tipTarget, setTipTarget] = useState<any | null>(null);
@@ -851,9 +851,9 @@ export default function HomePage() {
   return (
     <>
       <Helmet>
-        <title>Living Nexus — Audio Provenance Platform for Creators</title>
-        <meta name="description" content="Register your music, lyrics, manuscripts, and comics with cryptographic Witness IDs. Living Nexus anchors creative provenance so every work is witnessed, attributed, and protected." />
-        <meta name="keywords" content="music provenance, witness ID, audio registration, creator platform, cryptographic provenance, music attribution, digital rights, creative ownership, WID, Living Nexus" />
+        <title>Living Nexus — The Creative Provenance Registry</title>
+        <meta name="description" content="Living Nexus is the sovereign creative registry for independent creators. Register music, lyrics, manuscripts, and visual works with cryptographic Witness IDs — timestamped, attributed, and protected before your work touches any other platform." />
+        <meta name="keywords" content="creative provenance registry, witness ID, WID, music attribution, creator rights, digital provenance, independent creator platform, creative registry, AI-era attribution, Living Nexus" />
       </Helmet>
 
       <PullToRefreshIndicator
@@ -871,7 +871,7 @@ export default function HomePage() {
         <CinematicHero isAuthenticated={isAuthenticated} getLoginUrl={getLoginUrl} />
 
         {/* SEO: visible H2 for crawlers */}
-        <h2 className="sr-only">Discover and Register Creative Works on Living Nexus</h2>
+        <h2 className="sr-only">Living Nexus — The Sovereign Creative Provenance Registry for Independent Creators</h2>
 
         {/* ══════════════════════════════════════════════════════════════
             §2 — DISCOVERY SHOWCASE (Steam-style rows)
@@ -932,17 +932,17 @@ function WIDExplainer() {
             {
               icon: <Fingerprint className="w-5 h-5" style={{ color: "#C49A28" }} />,
               title: "Witness ID",
-              body: "Every registered work receives a cryptographic timestamp — a permanent, tamper-evident record of origin issued the moment you upload.",
+              body: "Every registered work receives a cryptographic timestamp — a permanent, tamper-evident record of origin issued the moment you upload. Music, lyrics, manuscripts, visual works, and research all qualify.",
             },
             {
               icon: <ShieldCheck className="w-5 h-5" style={{ color: "#C49A28" }} />,
-              title: "Creator Owned",
-              body: "Your work stays yours. Living Nexus records provenance without claiming rights. The registry is a witness, not a gatekeeper.",
+              title: "Sovereign Registry",
+              body: "Your work stays yours. Living Nexus records provenance without claiming rights. The registry is a witness, not a gatekeeper — foundational infrastructure for the AI era.",
             },
             {
               icon: <Compass className="w-5 h-5" style={{ color: "#C49A28" }} />,
               title: "Open Discovery",
-              body: "Browse music, lyrics, manuscripts, and comics from independent creators. Every play is a direct acknowledgment of the work.",
+              body: "Browse music, lyrics, manuscripts, and creative works from independent creators. Every work carries a provenance chain that travels with it across platforms.",
             },
           ] as const).map(({ icon, title, body }) => (
             <div key={title} className="flex flex-col gap-3">
