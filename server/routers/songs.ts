@@ -18,7 +18,7 @@ import { invokeLLM } from "../_core/llm";
 import {
   addComment, createSong, deleteSong, getAllCreators,
   getCommentsBySong, getPublicSongs, getSongById,
-  getSongsByUser, getSongWithCreator, getTipsBySong, reorderSongs, getNextDisplayOrder,
+  getSongsByUser, getSongWithCreator, getSongWithCreatorForOwner, getTipsBySong, reorderSongs, getNextDisplayOrder,
   getUserById, incrementPlayCount, recordDownload,
   recordLicense, recordSlotPurchase, recordTip,
   updateSongLyrics, updateSongLyricsWithWid, updateSongStatus, getRelatedSongs, updateSongVideo,
@@ -275,13 +275,21 @@ export const songsRouter = router({
       return { total };
     }),
     /**
-     * @version 1.0.0
+     * @version 1.1.0
      * Returns a single work with creator in canonical { song: SongRecord, creator: CreatorSummary } shape.
      * Used for work detail pages and OG meta tag generation.
+     * Owner fallback: if the song is not publicly visible (Draft/Unlisted) and the requesting
+     * user is the owner, the song is still returned so the owner can view and edit it.
      */
-    getById: publicProcedure.input(z.object({ id: z.number().int().positive() })).query(async ({ input }) => {
-      const result = await getSongWithCreator(input.id);
-      return result ?? null;
+    getById: publicProcedure.input(z.object({ id: z.number().int().positive() })).query(async ({ ctx, input }) => {
+      // First try the public query (isPublic=true)
+      const publicResult = await getSongWithCreator(input.id);
+      if (publicResult) return publicResult;
+      // Not publicly visible — check if the requesting user is the owner
+      const userId = (ctx as any)?.user?.id;
+      if (!userId) return null;
+      const ownerResult = await getSongWithCreatorForOwner(input.id, userId);
+      return ownerResult ?? null;
     }),
     /**
      * @version 1.0.0

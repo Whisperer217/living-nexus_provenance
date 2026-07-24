@@ -6648,3 +6648,8 @@
 - [x] Fix: OverlayRouteGuard now calls closeEditor() alongside overlayCloseAll() on every route change
 - [x] Fix: WorkEditorContext adds global Escape key handler (capture phase) as last-resort safety valve when drawer is open
 - [x] TypeScript: 0 errors confirmed, 398/398 tests passing
+- [x] Bug: Edit Work freeze - deep architecture sweep (v7)
+  - [x] Clot 1: CreativeDrawer backdrop div had no onClick handler - clicks outside panel did nothing
+  - [x] Clot 2: getSongWithCreator filtered isPublic=true so owners couldn't see Draft/Unlisted songs on detail page
+  - [x] Clot 3: getById procedure now falls back to getSongWithCreatorForOwner for authenticated owners
+  - [x] Clot 4: EditTrackPanel.tsx zombie file (called overlayOpen for edit-track but was never imported) - deleted

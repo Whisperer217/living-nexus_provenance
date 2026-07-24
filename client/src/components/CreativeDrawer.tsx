@@ -426,6 +426,11 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
       }}
     >
       {/* ── Backdrop ── */}
+      {/* onClick here closes the drawer when clicking outside the panel.
+          The 120ms backdropActive guard prevents same-click-close on open.
+          This is the primary close pathway — the parent div's onPointerDown
+          guard (e.target === e.currentTarget) never fires for backdrop clicks
+          because the backdrop is a child element, not the parent itself. */}
       <div
         className="absolute inset-0"
         style={{
@@ -433,6 +438,7 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
           backdropFilter: "blur(6px)",
           WebkitBackdropFilter: "blur(6px)",
         }}
+        onClick={() => { if (backdropActive) stableOnClose(); }}
       />
 
       {/* ── Drawer Panel ── */}

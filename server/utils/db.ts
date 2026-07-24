@@ -411,6 +411,27 @@ export async function getSongWithCreator(id: number) {
   return result.length > 0 ? result[0] : undefined;
 }
 
+/**
+ * Like getSongWithCreator but bypasses the isPublic filter.
+ * Used by the owner-aware getById procedure so creators can view and edit
+ * their own Draft / Unlisted songs on the detail page.
+ */
+export async function getSongWithCreatorForOwner(id: number, ownerId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select({
+    song: songs,
+    creator: {
+      id: users.id, name: users.name, artistHandle: users.artistHandle,
+      profilePhotoUrl: users.profilePhotoUrl, stripeAccountStatus: users.stripeAccountStatus,
+      stripeAccountId: users.stripeAccountId, aiDisclosure: users.aiDisclosure, primaryGenre: users.primaryGenre,
+      role: users.role,
+    },
+  }).from(songs).leftJoin(users, eq(songs.userId, users.id))
+    .where(and(eq(songs.id, id), eq(songs.userId, ownerId))).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
 export async function getSongsByUser(userId: number) {
   const db = await getDb();
   if (!db) return [];
