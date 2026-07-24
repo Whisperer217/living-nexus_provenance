@@ -161,8 +161,8 @@ export default function CreatorDomainPage() {
 
       {/* ── Top Bar ── */}
       <div
-        className="sticky top-0 z-30 flex items-center justify-between px-4 py-3 gap-3"
-        style={{ background: "rgba(0,0,0,0.85)", backdropFilter: "blur(12px)", borderBottom: "1px solid rgba(196,154,40,0.12)" }}
+        className="sticky top-14 lg:top-0 z-30 flex items-center justify-between px-4 py-3 gap-3"
+        style={{ background: "rgba(0,0,0,0.92)", backdropFilter: "blur(12px)", borderBottom: "1px solid rgba(196,154,40,0.12)" }}
       >
         {/* Left: back + title */}
         <div className="flex items-center gap-3 min-w-0">
@@ -271,7 +271,7 @@ export default function CreatorDomainPage() {
         </div>
       ) : (
         /* ── Management Mode: sidebar + content ── */
-        <div className="flex flex-col md:flex-row" style={{ minHeight: 'calc(100vh - 57px)' }}>
+        <div className="flex flex-col md:flex-row" style={{ minHeight: 'calc(100dvh - 57px - var(--bottom-stack, 80px))' }}>
 
           {/* ── Sidebar ── */}
           <aside
@@ -323,7 +323,7 @@ export default function CreatorDomainPage() {
                   <button
                     key={item.id}
                     onClick={() => setActiveSection(item.id)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium flex-shrink-0 transition-all"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-heading flex-shrink-0 transition-all"
                     style={isActive
                       ? { background: "rgba(196,154,40,0.12)", border: "1px solid rgba(196,154,40,0.3)", color: "var(--ln-gold)" }
                       : { border: "1px solid rgba(196,154,40,0.08)", color: "var(--ln-smoke)" }}

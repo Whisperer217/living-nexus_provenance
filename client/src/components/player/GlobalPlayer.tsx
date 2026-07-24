@@ -778,6 +778,8 @@ function GlobalPlayerInner() {
         className="flex items-center gap-3 flex-shrink-0 px-3"
         style={{
           height: "52px",
+          /* Safe-area padding on mobile so mini bar content clears the iOS home indicator */
+          paddingBottom: isDesktop ? 0 : "env(safe-area-inset-bottom, 0px)",
           opacity: isExpanded ? 0 : 1,
           transition: "opacity 0.2s ease",
           pointerEvents: isExpanded ? "none" : "auto",

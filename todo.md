@@ -6609,3 +6609,16 @@
 - [x] Remove overlayOpen/overlayClose from EditChapel (now managed by WorkEditorContext)
 - [x] Verify overlayOpen/overlayClose already removed from CreativeDrawer (confirmed)
 - [x] TypeScript: 0 errors
+
+## Mobile Architecture Overhaul — Suno-Level Standards (Session Jul 24 2026)
+- [x] Full page-by-page audit: web vs mobile for Home, Explore, Song Detail, Creator Domain, Archive, Dashboard, Profile, Creator Profile
+- [x] Bottom stack CSS tokens corrected — --player-height: 72px matches SNAP.MINI, no ghost bottom nav bar
+- [x] --bottom-stack token = 72px + safe-area-inset-bottom (correct for all pages)
+- [x] Mobile typography system — fluid clamp() scale for h1-h4, overline, body, caption on mobile (< 640px)
+- [x] Cinzel/Cormorant word-spacing and letter-spacing tuned for mobile readability
+- [x] Creator Domain sticky top bar — top-14 on mobile to clear MainLayout header (was top-0, hidden behind header)
+- [x] Creator Domain mobile section tabs — font-heading (Cinzel) instead of font-medium (DM Sans)
+- [x] Creator Domain content panel min-height uses 100dvh and --bottom-stack token
+- [x] GlobalPlayer mini bar — paddingBottom: env(safe-area-inset-bottom) on mobile (clears iOS home indicator)
+- [x] LargeManifestationCard — removed minHeight: 280px override that distorted 16:9 aspect ratio on mobile
+- [x] TypeScript: 0 errors

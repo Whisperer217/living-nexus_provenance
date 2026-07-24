@@ -62,8 +62,8 @@ export function LargeManifestationCard({ data, allData, dataIndex, onPlay, onTip
       ref={cardRef}
       className="relative group rounded-xl overflow-hidden cursor-pointer transition-all duration-500"
       style={{
+        /* 16:9 aspect ratio — no minHeight override so mobile respects the ratio */
         aspectRatio: "16/9",
-        minHeight: "280px",
         boxShadow: hovered
           ? "0 16px 64px rgba(0,0,0,0.6), 0 0 40px rgba(196,154,40,0.08)"
           : "0 4px 24px rgba(0,0,0,0.4)",

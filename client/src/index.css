@@ -381,14 +381,16 @@
   }
   /* ── Bottom Stack Layout Tokens ─────────────────────────────────────
      Single source of truth for all bottom-anchored heights.
-     Player sits ABOVE nav. Content padding accounts for both.
+     ARCHITECTURE: No bottom tab bar. Navigation is off-canvas hamburger.
+     Only fixed bottom element = GlobalPlayer (68px) + safe-area-inset.
      ─────────────────────────────────────────────────────────────────── */
   :root {
-    --nav-height: 56px;                    /* BottomNavBar visual height */
-    --nav-safe: max(env(safe-area-inset-bottom, 0px), 8px);
-    --nav-total: calc(var(--nav-height) + var(--nav-safe)); /* full nav footprint */
-    --player-height: 64px;                 /* MiniBar height */
-    --bottom-stack: calc(var(--nav-total) + var(--player-height)); /* total reserved bottom */
+    --nav-height: 0px;                     /* No bottom nav bar — hamburger/off-canvas only */
+    --nav-safe: max(env(safe-area-inset-bottom, 0px), 8px); /* iOS home indicator clearance */
+    --nav-total: var(--nav-safe);          /* = safe area only (no nav bar) */
+    --player-height: 72px;                 /* GlobalPlayer SNAP.MINI = 72px (see GlobalPlayer.tsx) */
+    --player-safe: calc(var(--player-height) + var(--nav-safe)); /* player + safe area */
+    --bottom-stack: var(--player-safe);    /* total reserved bottom on mobile */
     --card-pan-w: clamp(140px, 11vw, 200px);  /* Pan-row card width — fluid across zoom levels */
     --card-img-h: clamp(175px, 14vw, 240px);  /* Pan-row card image height — fluid across zoom levels */
   }
@@ -817,6 +819,89 @@ body.overlay-active-full:has([data-slot="dialog-content"]) {
     letter-spacing: 0.01em;
     color: #D8C9A8;
     line-height: var(--leading-body);
+  }
+
+  /* ══════════════════════════════════════════════════════════════════
+     MOBILE TYPOGRAPHY SYSTEM — Suno-level visual refinement
+     Targets: word separation, Cinzel/Cormorant breathing room,
+     hero title scale, overline legibility, card title clarity.
+     All overrides scoped to max-width: 639px (mobile only).
+  ══════════════════════════════════════════════════════════════════ */
+  @media (max-width: 639px) {
+    /* Hero title — tighter clamp on mobile, prevent overflow */
+    .type-h1 {
+      font-size: clamp(1.625rem, 7.5vw, 2.25rem);  /* 26–36px on mobile */
+      letter-spacing: 0.05em;  /* Slightly less wide — Cinzel needs room but not as much on small screens */
+      line-height: 1.1;        /* Tighter for impact */
+      word-spacing: 0.04em;    /* Explicit word separation for Cinzel on mobile */
+      hyphens: none;           /* Never hyphenate display type */
+      overflow-wrap: break-word;
+    }
+    /* Section headings — reduce tracking on mobile */
+    .type-h2 {
+      font-size: clamp(1.25rem, 5.5vw, 1.75rem);   /* 20–28px on mobile */
+      letter-spacing: 0.04em;  /* Cinzel at smaller sizes needs less tracking */
+      word-spacing: 0.03em;
+    }
+    /* Panel headings — Cormorant breathes well on mobile */
+    .type-h3 {
+      font-size: clamp(1.125rem, 4.5vw, 1.5rem);   /* 18–24px on mobile */
+      letter-spacing: 0.025em;
+    }
+    /* Card titles — Cormorant at mobile size */
+    .type-h4 {
+      font-size: clamp(1rem, 4vw, 1.25rem);         /* 16–20px on mobile */
+      letter-spacing: 0.02em;
+      line-height: 1.4;
+    }
+    /* Overlines — reduce tracking slightly for narrow screens */
+    .type-overline {
+      font-size: clamp(0.625rem, 2.2vw, 0.6875rem); /* 10–11px on mobile */
+      letter-spacing: 0.16em;  /* Still wide but not cramped on 375px */
+      word-spacing: 0.08em;    /* Prevent overline words from merging */
+    }
+    /* Museum section title — reduce ornament lines on mobile */
+    .museum-section-title {
+      font-size: clamp(0.625rem, 2.2vw, 0.6875rem);
+      letter-spacing: 0.16em;
+      gap: 0.375rem;
+    }
+    .museum-section-title::before,
+    .museum-section-title::after {
+      width: 1rem;  /* Shorter flanking lines on mobile */
+    }
+    /* Museum section header — slightly smaller on mobile */
+    .museum-section-header {
+      font-size: clamp(0.875rem, 3.5vw, 1rem);
+      letter-spacing: 0.06em;
+    }
+    /* Body copy — ensure minimum 15px on mobile for readability */
+    .type-body {
+      font-size: clamp(0.9375rem, 3.8vw, 1rem);
+      line-height: 1.7;  /* Slightly tighter than desktop 1.75 */
+    }
+    /* Caption — ensure legibility at mobile size */
+    .type-caption {
+      font-size: clamp(0.75rem, 3vw, 0.875rem);
+    }
+    /* font-heading (Cinzel) — word spacing fix for mobile */
+    .font-heading {
+      word-spacing: 0.04em;
+      letter-spacing: 0.05em;  /* Reduce from 0.06em on desktop */
+    }
+    /* font-display (Cinzel Decorative) — word spacing fix for mobile */
+    .font-display {
+      word-spacing: 0.04em;
+      letter-spacing: 0.03em;  /* Reduce from 0.04em on desktop */
+    }
+    /* font-editorial (Cormorant) — comfortable on mobile */
+    .font-editorial {
+      letter-spacing: 0.005em; /* Near-zero on mobile — Cormorant is naturally spaced */
+    }
+    /* font-subheading (Cormorant) — comfortable on mobile */
+    .font-subheading {
+      letter-spacing: 0.01em;
+    }
   }
 
   /* ── Gold gradient text — candlelight amber ── */
