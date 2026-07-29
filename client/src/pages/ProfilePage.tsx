@@ -33,7 +33,7 @@ import { CreatorIdentityStrip } from "@/components/CreatorIdentityStrip";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { useWorkEditor } from "@/contexts/WorkEditorContext";
 import { SacredCanvas } from "@/components/SacredCanvas";
-const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/HMNMkWUWAfVdTbRj3YmPCF/ln-navbar-icon-180_b914f927.png";
+const LOGO_URL = "/manus-storage/living-nexus-logo-2025_19c2d497.png";
 
 /* ── Editable inline field ─────────────────────────────────────── */
 function EditableField({

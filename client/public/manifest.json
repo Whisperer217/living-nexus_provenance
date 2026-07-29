@@ -12,13 +12,13 @@
   "categories": ["music", "entertainment"],
   "icons": [
     {
-      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/icon-192x192_ec4bd177.png",
+      "src": "/manus-storage/living-nexus-logo-2025_19c2d497.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/icon-512x512_bccd8953.png",
+      "src": "/manus-storage/living-nexus-logo-2025_19c2d497.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"

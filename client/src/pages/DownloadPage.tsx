@@ -11,7 +11,7 @@ export default function DownloadPage() {
     >
       {/* App Icon */}
       <img
-        src="https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/icon-512_603a59b9.png"
+        src="/manus-storage/living-nexus-logo-2025_19c2d497.png"
         alt="Living Nexus"
         className="w-24 h-24 mb-6 rounded-2xl shadow-2xl"
         style={{ boxShadow: "0 0 40px rgba(196,154,40,0.25)" }}

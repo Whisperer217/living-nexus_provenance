@@ -6654,3 +6654,10 @@
   - [x] Clot 3: getById procedure now falls back to getSongWithCreatorForOwner for authenticated owners
   - [x] Clot 4: EditTrackPanel.tsx zombie file (called overlayOpen for edit-track but was never imported) - deleted
 - [x] Bug: Pull-to-refresh was page-scoped (4 pages only) — moved to MainLayout for global coverage across all pages
+
+## Logo Update
+- [x] Update site logo to new gold triskelion design (living-nexus-logo-2025)
+- [x] Replace all LOGO_URL references (LeftRail, MainLayout, TopBar, ProfilePage, VerifyPage, CreatorProfilePage, SongDetailPage)
+- [x] Update DownloadPage app icon
+- [x] Update manifest.json PWA icons
+- [x] Set VITE_APP_LOGO env var to new logo

@@ -22,7 +22,7 @@ import {
 import { trpc } from "@/lib/trpc";
 
 const LOGO_URL =
-  "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/HMNMkWUWAfVdTbRj3YmPCF/ln-navbar-icon-180_b914f927.png";
+  "/manus-storage/living-nexus-logo-2025_19c2d497.png";
 
 interface TopBarProps {
   archiveSongCount: number;
