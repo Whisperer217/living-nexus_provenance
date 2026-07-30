@@ -419,7 +419,7 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
   return createPortal(
     <div
       className="fixed inset-0 flex justify-end"
-      style={{ zIndex: 9000 }}
+      style={{ zIndex: 99990 }}
       onPointerDown={(e) => {
         if (!backdropActive) return;
         if (e.target === e.currentTarget) stableOnClose();

@@ -6661,3 +6661,6 @@
 - [x] Update DownloadPage app icon
 - [x] Update manifest.json PWA icons
 - [x] Set VITE_APP_LOGO env var to new logo
+
+## Bug: Edit Work Button Freezes Platform
+- [x] Fix: Clicking "Edit Work" button on song detail page causes entire platform freeze — z-index was 9000 (below PlayerBar at 9001), raised to 99990. Also fixed OG crash (escAttr null guard)

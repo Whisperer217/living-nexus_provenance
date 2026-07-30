@@ -26,8 +26,10 @@ const FALLBACK_IMAGE =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/living-nexus-icon_d108b3b1.png";
 
 /** Escape a string for safe use inside an HTML attribute value. */
-function escAttr(s: string): string {
-  return s
+function escAttr(s: string | null | undefined | number): string {
+  if (s == null) return "";
+  const str = typeof s === "string" ? s : String(s);
+  return str
     .replace(/&/g, "&amp;")
     .replace(/"/g, "&quot;")
     .replace(/</g, "&lt;")
