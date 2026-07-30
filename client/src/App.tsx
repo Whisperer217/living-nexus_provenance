@@ -18,7 +18,7 @@ import KeeperAvatarWidget from "./components/KeeperAvatarWidget";
 import { useQrScanLogger } from "./hooks/useQrScanLogger";
 import { useScrollRestoration } from "./hooks/useScrollRestoration";
 import { overlayCloseAll } from "@/lib/overlayController";
-import { useWorkEditor } from "./contexts/WorkEditorContext";
+import { useWorkEditorActions } from "./contexts/WorkEditorContext";
 import { PWAInstallBanner } from "./components/PWAInstallBanner";
 
 /** Logs QR scan events when ?qr= param is present in the URL. */
@@ -156,7 +156,7 @@ function ScrollRestorationManager() {
 
 function OverlayRouteGuard() {
   const [location] = useLocation();
-  const { closeEditor } = useWorkEditor();
+  const { closeEditor } = useWorkEditorActions();
   // useLayoutEffect fires before paint — ensures scroll lock is cleared
   // before the new page renders, preventing a single-frame frozen-scroll flash on mobile.
   //

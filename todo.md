@@ -6663,4 +6663,6 @@
 - [x] Set VITE_APP_LOGO env var to new logo
 
 ## Bug: Edit Work Button Freezes Platform
-- [x] Fix: Clicking "Edit Work" button on song detail page causes entire platform freeze — z-index was 9000 (below PlayerBar at 9001), raised to 99990. Also fixed OG crash (escAttr null guard)
+- [x] Fix: Clicking "Edit Work" button causes Page Unresponsive (main thread hang 5+ seconds)
+  - ROOT CAUSE: WorkEditorContext value was a new object every render. When editingSong changed, ALL consumers re-rendered — including 2995-line CreatorProfilePage with 48 unmemoized array ops + 1408-line CreativeDrawer mounting simultaneously
+  - FIX: Split WorkEditorContext into stable ActionsContext (openEditor/closeEditor — never triggers re-renders) + StateContext (isOpen). Migrated all 6 pages to useWorkEditorActions(). Also raised drawer z-index 9000→99990 and fixed OG crash (escAttr null guard)

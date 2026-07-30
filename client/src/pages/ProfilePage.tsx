@@ -31,7 +31,7 @@ import { usePlayer, Track } from "@/contexts/PlayerContext";
 import { EDIT_GENRES } from "@shared/contentTypes";
 import { CreatorIdentityStrip } from "@/components/CreatorIdentityStrip";
 import ErrorBoundary from "@/components/ErrorBoundary";
-import { useWorkEditor } from "@/contexts/WorkEditorContext";
+import { useWorkEditorActions } from "@/contexts/WorkEditorContext";
 import { SacredCanvas } from "@/components/SacredCanvas";
 const LOGO_URL = "/manus-storage/living-nexus-logo-2025_19c2d497.png";
 
@@ -205,7 +205,7 @@ export default function ProfilePage() {
   }, [search]);
   const [showAddTestimony, setShowAddTestimony] = useState(false);
   const [testimonyContent, setTestimonyContent] = useState("");
-  const { openEditor } = useWorkEditor();
+  const { openEditor } = useWorkEditorActions();
   const [testimonyLinkedWorks, setTestimonyLinkedWorks] = useState<string[]>([]);
 
   // ── Identity data ────────────────────────────────────────────────

@@ -41,7 +41,7 @@ import { CreatorIdentitySection } from "@/components/CreatorIdentitySection";
 import { ManifestationShelf, StandaloneShelf, type ShelfTrack } from "@/components/ManifestationShelf";
 import { LayoutGrid } from "lucide-react";
 import { CreatorIdentityStrip } from "@/components/CreatorIdentityStrip";
-import { useWorkEditor } from "@/contexts/WorkEditorContext";
+import { useWorkEditorActions } from "@/contexts/WorkEditorContext";
 import { SacredCanvas } from "@/components/SacredCanvas";
 import { CreatorDomainHub } from "@/components/CreatorDomainHub";
 
@@ -496,7 +496,7 @@ export default function CreatorProfilePage() {
     onError: (e) => toast.error(e.message),
   });
   const playMutation = trpc.songs.play.useMutation();
-  const { openEditor } = useWorkEditor();
+  const { openEditor } = useWorkEditorActions();
   const handleEditTrack = useCallback((track: any) => {
     const songList: any[] = (data as any)?.songs ?? [];
     const song = songList.find((s: any) => s.id === track.id) ?? track;

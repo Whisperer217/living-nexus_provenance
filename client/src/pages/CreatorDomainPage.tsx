@@ -36,7 +36,7 @@ import { DomainEditor } from "@/components/domain/DomainEditor";
 import { DomainRenderer } from "@/components/domain/DomainRenderer";
 import { Helmet } from "react-helmet-async";
 import ErrorBoundary from "@/components/ErrorBoundary";
-import { useWorkEditor } from "@/contexts/WorkEditorContext";
+import { useWorkEditorActions } from "@/contexts/WorkEditorContext";
 
 // ─── Section IDs ──────────────────────────────────────────────────
 type SectionId =
@@ -118,7 +118,7 @@ export default function CreatorDomainPage() {
 
   const [testimonyContent, setTestimonyContent] = useState("");
   const [showAddTestimony, setShowAddTestimony] = useState(false);
-  const { openEditor } = useWorkEditor();
+  const { openEditor } = useWorkEditorActions();
 
   // Auth guard
   if (authLoading || profileLoading) {

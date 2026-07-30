@@ -18,7 +18,7 @@ import {
   TrendingUp, Heart, LineChart, Pencil, Fingerprint, BookOpen, FileText, Image, Bell, LayoutGrid
 } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell } from "recharts";
-import { useWorkEditor } from "@/contexts/WorkEditorContext";
+import { useWorkEditorActions } from "@/contexts/WorkEditorContext";
 
 type Tab = "songs" | "activity" | "collections" | "archive" | "analytics" | "widcache" | "discord";
 
@@ -56,7 +56,7 @@ const ONBOARDING_CHECKLIST = [
 
 export default function DashboardPage() {
   const { user, isAuthenticated } = useAuth();
-  const { openEditor } = useWorkEditor();
+  const { openEditor } = useWorkEditorActions();
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<Tab>("songs");
   const [showChecklist, setShowChecklist] = useState(false);

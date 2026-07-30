@@ -49,7 +49,7 @@ import { CinematicComicReader, type BookPage } from "@/components/reader/Cinemat
 import { CinematicSongHeader } from "@/components/CinematicSongHeader";
 import { CreatorHandle } from "@/components/CreatorHandle";
 import ErrorBoundary from "@/components/ErrorBoundary";
-import { useWorkEditor } from "@/contexts/WorkEditorContext";
+import { useWorkEditorActions } from "@/contexts/WorkEditorContext";
 import { SongDetailPageSkeleton } from "@/components/SongDetailPageSkeleton";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 import { SacredCanvas } from "@/components/SacredCanvas";
@@ -137,7 +137,7 @@ export default function SongDetailPage() {
   });
   const [shareOpen, setShareOpen] = useState(false);
   const [versionHistoryOpen, setVersionHistoryOpen] = useState(false);
-  const { openEditor } = useWorkEditor();
+  const { openEditor } = useWorkEditorActions();
   // Derive play state from global player — this page is a remote control only
   const isThisTrackActive = currentTrackId === String(songId);
   const isPlaying = isThisTrackActive && playerState.isPlaying;

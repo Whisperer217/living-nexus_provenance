@@ -19,7 +19,7 @@ import {
   Image, BookOpen, Gamepad2, FileText, ScrollText,
 } from "lucide-react";
 import ErrorBoundary from "@/components/ErrorBoundary";
-import { useWorkEditor } from "@/contexts/WorkEditorContext";
+import { useWorkEditorActions } from "@/contexts/WorkEditorContext";
 import { getLoginUrl } from "@/const";
 import { usePlayer } from "@/contexts/PlayerContext";
 import MyListsTab from "@/components/MyListsTab";
@@ -318,7 +318,7 @@ function ConfirmDeleteModal({
 export default function ArchivePage() {
   const { isAuthenticated, loading } = useAuth();
   const utils = trpc.useUtils();
-  const { openEditor } = useWorkEditor();
+  const { openEditor } = useWorkEditorActions();
   const [deletingSong, setDeletingSong] = useState<any | null>(null);
 
   // ── Deep-link: read URL params once on mount (stable via useMemo) ─────────────────────────────────────
