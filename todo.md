@@ -6666,3 +6666,13 @@
 - [x] Fix: Clicking "Edit Work" button causes Page Unresponsive (main thread hang 5+ seconds)
   - ROOT CAUSE: WorkEditorContext value was a new object every render. When editingSong changed, ALL consumers re-rendered — including 2995-line CreatorProfilePage with 48 unmemoized array ops + 1408-line CreativeDrawer mounting simultaneously
   - FIX: Split WorkEditorContext into stable ActionsContext (openEditor/closeEditor — never triggers re-renders) + StateContext (isOpen). Migrated all 6 pages to useWorkEditorActions(). Also raised drawer z-index 9000→99990 and fixed OG crash (escAttr null guard)
+
+## Edit Work Freeze Fix v7 — Lazy Load + startTransition (SongDetailPage)
+
+- [x] Diagnose remaining freeze on SongDetailPage after context split: CreativeDrawer (1408 lines) mounts synchronously on a page with waveform rAF loop + SacredCanvas SVG (2058 lines total), blocking main thread
+- [x] Fix: React.lazy() code-splits CreativeDrawer into separate chunk (only downloaded on first open)
+- [x] Fix: startTransition() wraps setEditingSong so React yields to browser during drawer mount
+- [x] Fix: Suspense fallback shows lightweight loading indicator while chunk loads
+- [x] Verified: Edit drawer content (fields/data) is identical between ArchivePage and SongDetailPage — same 19 fields passed to openEditor()
+- [x] Verified: "Mirror" request already satisfied — single CreativeDrawer component renders same form regardless of entry point
+- [x] TypeScript: 0 errors

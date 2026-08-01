@@ -2,26 +2,53 @@
   ╔══════════════════════════════════════════════════════════════════════════╗
   ║  WorkEditorContext — Living Nexus                                        ║
   ║                                                                          ║
-  ║  FREEZE FIX v5 (root cause — main thread hang):                          ║
-  ║  The context value was a new object on every render. When isOpen          ║
-  ║  changed (null→song), ALL consumers re-rendered — including the           ║
-  ║  2995-line CreatorProfilePage with 48 unmemoized array operations.        ║
-  ║  Combined with the 1408-line CreativeDrawer mounting simultaneously,     ║
-  ║  this blocked the main thread for 5+ seconds → "Page Unresponsive".      ║
+  ║  FREEZE FIX v7 (final — lazy + transition):                              ║
   ║                                                                          ║
-  ║  Fix: Split into two contexts — one stable (openEditor/closeEditor)      ║
-  ║  and one reactive (isOpen). Pages that only need openEditor never         ║
-  ║  re-render when the drawer opens/closes. The combined useWorkEditor()    ║
-  ║  hook is kept for backwards compat but pages should migrate to           ║
-  ║  useWorkEditorActions() to avoid the re-render.                          ║
+  ║  v5 fixed the re-render cascade (context split).                         ║
+  ║  v6 fixed the OverlayRouteGuard leak.                                    ║
+  ║  v7 fixes the remaining freeze on heavy pages (SongDetailPage):          ║
+  ║                                                                          ║
+  ║  Problem: The 1408-line CreativeDrawer was statically imported and       ║
+  ║  mounted synchronously when editingSong changed. On SongDetailPage       ║
+  ║  (2058 lines + waveform rAF + SacredCanvas SVG), this synchronous        ║
+  ║  mount overwhelms the main thread → "Page Unresponsive".                 ║
+  ║                                                                          ║
+  ║  Fix:                                                                     ║
+  ║  1. React.lazy() — code-splits the drawer into a separate chunk.         ║
+  ║     It's only downloaded when first opened (not on page load).           ║
+  ║  2. startTransition() — wraps the setEditingSong call so React can       ║
+  ║     yield to the browser between frames during the drawer mount.         ║
+  ║  3. Suspense fallback — shows a lightweight loading indicator while      ║
+  ║     the drawer chunk loads (first open only, ~50ms subsequent).          ║
   ╚══════════════════════════════════════════════════════════════════════════╝
 */
 
-import { createContext, useContext, useState, useEffect, useCallback, useMemo, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  startTransition,
+  Suspense,
+  lazy,
+  type ReactNode,
+} from "react";
 import { overlayOpen, overlayClose } from "@/lib/overlayController";
-import { CreativeDrawer, type CreativeDrawerSong } from "@/components/CreativeDrawer";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { trpc } from "@/lib/trpc";
+
+/* ─── Lazy-loaded CreativeDrawer (code-split) ──────────────────────────── */
+const LazyCreativeDrawer = lazy(() =>
+  import("@/components/CreativeDrawer").then((mod) => ({
+    default: mod.CreativeDrawer,
+  }))
+);
+
+// Re-export the type so consumers can still import it from this module
+export type { CreativeDrawerSong } from "@/components/CreativeDrawer";
+import type { CreativeDrawerSong } from "@/components/CreativeDrawer";
 
 /* ─── Types ─────────────────────────────────────────────────────────────── */
 
@@ -48,6 +75,24 @@ const WorkEditorActionsContext = createContext<WorkEditorActions | null>(null);
 // State context — only consumed by components that NEED to react to open/close
 const WorkEditorStateContext = createContext<WorkEditorState>({ isOpen: false });
 
+/* ─── Drawer Loading Fallback ────────────────────────────────────────────── */
+function DrawerLoadingFallback() {
+  return (
+    <div
+      className="fixed inset-0 flex items-center justify-center"
+      style={{ zIndex: 99990 }}
+    >
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+      <div className="relative z-10 flex flex-col items-center gap-3">
+        <div className="w-8 h-8 border-2 border-amber-400/40 border-t-amber-400 rounded-full animate-spin" />
+        <span className="text-amber-200/80 text-sm font-medium tracking-wide">
+          Opening editor…
+        </span>
+      </div>
+    </div>
+  );
+}
+
 /* ─── Provider ───────────────────────────────────────────────────────────── */
 
 export function WorkEditorProvider({ children }: { children: ReactNode }) {
@@ -72,8 +117,12 @@ export function WorkEditorProvider({ children }: { children: ReactNode }) {
   }, [editingSong]);
 
   // ── Stable action callbacks — never change reference ──
+  // startTransition wraps the state update so React can yield to the browser
+  // during the lazy drawer mount — prevents "Page Unresponsive" on heavy pages
   const openEditor = useCallback((song: CreativeDrawerSong) => {
-    setEditingSong(song);
+    startTransition(() => {
+      setEditingSong(song);
+    });
   }, []);
 
   const closeEditor = useCallback(() => {
@@ -117,11 +166,13 @@ export function WorkEditorProvider({ children }: { children: ReactNode }) {
               setEditingSong(null);
             }}
           >
-            <CreativeDrawer
-              song={editingSong}
-              onClose={closeEditor}
-              onSaved={handleSaved}
-            />
+            <Suspense fallback={<DrawerLoadingFallback />}>
+              <LazyCreativeDrawer
+                song={editingSong}
+                onClose={closeEditor}
+                onSaved={handleSaved}
+              />
+            </Suspense>
           </ErrorBoundary>
         )}
       </WorkEditorStateContext.Provider>
