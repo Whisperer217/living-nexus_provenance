@@ -1619,19 +1619,26 @@ export default function SongDetailPage() {
             {(() => {
               const disc = (song as any).aiDisclosure || creator?.aiDisclosure;
               const hasHaai = disc === "human_authored_ai_instrument";
-              const hasAiDisc = disc && disc !== "original";
-              const discMap: Record<string, { label: string; desc: string }> = {
-                ai_generated: {
-                  label: "AI-Assisted Manifestation",
-                  desc: "This work was created with significant AI generation. The creator shaped the vision, direction, and curation.",
+              const discMap: Record<string, { label: string; color: string; desc: string }> = {
+                original: {
+                  label: "Original Human Authored",
+                  color: "rgba(134,239,172,0.9)",
+                  desc: "This work is original content authored entirely by the human creator. No AI generation was used.",
                 },
                 ai_assisted: {
                   label: "AI-Assisted",
+                  color: "rgba(196,154,40,0.9)",
                   desc: "AI tools were used in the creation of this work. The creator remains the primary author.",
                 },
                 human_authored_ai_instrument: {
                   label: "HAAI — Human-Authored, AI-Informed",
+                  color: "rgba(196,154,40,0.9)",
                   desc: "The human is the author. AI served as an instrument — a tool in service of the creator's sovereign vision. The testimony, the intent, and the meaning are entirely human.",
+                },
+                ai_generated: {
+                  label: "AI-Assisted Manifestation",
+                  color: "rgba(167,139,250,0.9)",
+                  desc: "This work was created with significant AI generation. The creator shaped the vision, direction, and curation.",
                 },
               };
               const haaiFields = [
@@ -1642,10 +1649,9 @@ export default function SongDetailPage() {
                 { key: "haaiLyricalInspiration", label: "Lyrical Inspiration" },
                 { key: "haaiEmotionalTone", label: "Emotional Tone" },
               ].filter(f => (song as any)[f.key]);
+              const originStory = (song as any).haaiOriginStory;
 
-              if (!hasAiDisc && haaiFields.length === 0) return null;
-              const discInfo = discMap[disc] ?? { label: disc, desc: "" };
-
+              if (!disc && haaiFields.length === 0 && !originStory) return null;
               return (
                 <section
                   className="scroll-reveal scroll-reveal-delay-2"
@@ -1666,45 +1672,83 @@ export default function SongDetailPage() {
                     <div style={{ flex: 1, height: 1, background: "rgba(212,175,55,0.12)" }} />
                   </div>
 
-                  {/* HAAI banner */}
-                  <div
-                    className="rounded-2xl p-6 mb-6"
-                    style={{
-                      background: hasHaai
-                        ? "linear-gradient(135deg, rgba(196,154,40,0.07) 0%, rgba(8,6,16,0.97) 100%)"
-                        : "rgba(196,154,40,0.03)",
-                      border: hasHaai
-                        ? "1px solid rgba(196,154,40,0.30)"
-                        : "1px solid rgba(196,154,40,0.12)",
-                    }}
-                  >
-                    <div className="flex items-start gap-4">
+                  {/* Authorship Category Badge — locked, always visible */}
+                  {disc && (() => {
+                    const discInfo = discMap[disc] ?? { label: disc, color: "rgba(196,154,40,0.9)", desc: "" };
+                    return (
                       <div
-                        className="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center"
-                        style={{ background: "rgba(196,154,40,0.10)", border: "1px solid rgba(196,154,40,0.25)" }}
+                        className="rounded-2xl p-6 mb-6"
+                        style={{
+                          background: hasHaai
+                            ? "linear-gradient(135deg, rgba(196,154,40,0.07) 0%, rgba(8,6,16,0.97) 100%)"
+                            : "rgba(196,154,40,0.03)",
+                          border: hasHaai
+                            ? "1px solid rgba(196,154,40,0.30)"
+                            : "1px solid rgba(196,154,40,0.12)",
+                        }}
                       >
-                        <ShieldCheck className="w-5 h-5" style={{ color: "var(--ln-gold)" }} />
+                        <div className="flex items-start gap-4">
+                          <div
+                            className="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center"
+                            style={{ background: "rgba(196,154,40,0.10)", border: "1px solid rgba(196,154,40,0.25)" }}
+                          >
+                            <ShieldCheck className="w-5 h-5" style={{ color: "var(--ln-gold)" }} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-3 mb-2">
+                              <p
+                                className="text-base font-semibold"
+                                style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)", letterSpacing: "0.03em" }}
+                              >
+                                {discInfo.label}
+                              </p>
+                              {/* Locked category pill */}
+                              <span
+                                className="text-[9px] px-2 py-0.5 rounded-full tracking-widest uppercase"
+                                style={{ background: "rgba(196,154,40,0.08)", color: discInfo.color, border: "1px solid rgba(196,154,40,0.20)", fontFamily: "'Space Mono', monospace" }}
+                              >
+                                LOCKED
+                              </span>
+                            </div>
+                            {discInfo.desc && (
+                              <p className="text-sm leading-relaxed" style={{ color: "var(--ln-smoke)", fontFamily: "'Cormorant Garamond', serif", fontSize: "1rem" }}>
+                                {discInfo.desc}
+                              </p>
+                            )}
+                            {(song as any).haaiDeclaredAt && (
+                              <p className="text-[11px] mt-3" style={{ color: "rgba(196,154,40,0.45)", fontFamily: "'Space Mono', monospace" }}>
+                                Declared {new Date((song as any).haaiDeclaredAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
+                              </p>
+                            )}
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p
-                          className="text-base font-semibold mb-2"
-                          style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)", letterSpacing: "0.03em" }}
-                        >
-                          {discInfo.label}
-                        </p>
-                        {discInfo.desc && (
-                          <p className="text-sm leading-relaxed" style={{ color: "var(--ln-smoke)", fontFamily: "'Cormorant Garamond', serif", fontSize: "1rem" }}>
-                            {discInfo.desc}
-                          </p>
-                        )}
-                        {(song as any).haaiDeclaredAt && (
-                          <p className="text-[11px] mt-3" style={{ color: "rgba(196,154,40,0.45)", fontFamily: "'Space Mono', monospace" }}>
-                            Declared {new Date((song as any).haaiDeclaredAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
-                          </p>
-                        )}
-                      </div>
+                    );
+                  })()}
+
+                  {/* Origin Story — shown for ALL disclosure types when present */}
+                  {originStory && (
+                    <div
+                      className="rounded-xl p-5 mb-6"
+                      style={{
+                        background: "rgba(196,154,40,0.03)",
+                        border: "1px solid rgba(196,154,40,0.12)",
+                      }}
+                    >
+                      <p
+                        className="text-[10px] tracking-[0.18em] uppercase mb-3"
+                        style={{ fontFamily: "'Cinzel', serif", color: "rgba(196,154,40,0.50)" }}
+                      >
+                        Origin Story
+                      </p>
+                      <p
+                        className="text-sm leading-relaxed"
+                        style={{ color: "var(--ln-bone)", fontFamily: "'Cormorant Garamond', serif", fontSize: "1rem" }}
+                      >
+                        {originStory}
+                      </p>
                     </div>
-                  </div>
+                  )}
 
                   {/* HAAI structured fields — only for HAAI works */}
                   {hasHaai && haaiFields.length > 0 && (

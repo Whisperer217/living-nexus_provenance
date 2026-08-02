@@ -589,6 +589,34 @@ function TrackVerifyView({
                 )}
               </div>
               <p className="text-[11px] text-center" style={{ color: "var(--ln-smoke)" }}>{m.desc}</p>
+              {/* Authorship category badge — locked */}
+              {data.aiDisclosure && (() => {
+                const DISC_MAP: Record<string, { label: string; color: string; bg: string; border: string }> = {
+                  original: { label: "Original Human Authored", color: "rgba(134,239,172,0.9)", bg: "rgba(134,239,172,0.06)", border: "rgba(134,239,172,0.25)" },
+                  ai_assisted: { label: "AI-Assisted", color: "rgba(196,154,40,0.9)", bg: "rgba(196,154,40,0.06)", border: "rgba(196,154,40,0.25)" },
+                  human_authored_ai_instrument: { label: "HAAI — Human-Authored, AI-Informed", color: "rgba(196,154,40,0.9)", bg: "rgba(196,154,40,0.06)", border: "rgba(196,154,40,0.25)" },
+                  ai_generated: { label: "AI-Assisted Manifestation", color: "rgba(167,139,250,0.9)", bg: "rgba(167,139,250,0.06)", border: "rgba(167,139,250,0.25)" },
+                };
+                const disc = DISC_MAP[data.aiDisclosure];
+                if (!disc) return null;
+                return (
+                  <div className="flex items-center justify-center gap-2 mt-2">
+                    <span
+                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold"
+                      style={{ background: disc.bg, color: disc.color, border: `1px solid ${disc.border}` }}
+                    >
+                      <ShieldCheck className="w-3.5 h-3.5" />
+                      {disc.label}
+                    </span>
+                    <span
+                      className="text-[9px] px-2 py-0.5 rounded-full tracking-widest uppercase"
+                      style={{ background: "rgba(0,0,0,0.4)", color: disc.color, border: `1px solid ${disc.border}`, fontFamily: "'Space Mono', monospace" }}
+                    >
+                      LOCKED
+                    </span>
+                  </div>
+                );
+              })()}
             </div>
           );
         })()}

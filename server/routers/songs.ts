@@ -727,6 +727,9 @@ export const songsRouter = router({
         aiToolOther: z.boolean().optional(),
         aiToolOtherName: z.string().max(128).optional(),
         lyricsText: z.string().max(50000).optional(),
+        haaiOriginStory: z.string().max(5000).optional(),
+        description: z.string().max(10000).optional(),
+        headlineCaption: z.string().max(120).optional(),
       })).min(1).max(50),
     })).mutation(async ({ ctx, input }) => {
       const user = await getUserById(ctx.user.id);
@@ -783,6 +786,10 @@ export const songsRouter = router({
           aiToolOther: track.aiToolOther ?? false,
           aiToolOtherName: track.aiToolOtherName,
           lyricsText: track.lyricsText,
+          haaiOriginStory: track.haaiOriginStory,
+          description: track.description,
+          headlineCaption: track.headlineCaption,
+          caption: track.headlineCaption,
           displayOrder: batchDisplayOrder++,
         } as any);
         // Capture the auto-increment ID directly from the insert result to preserve upload order

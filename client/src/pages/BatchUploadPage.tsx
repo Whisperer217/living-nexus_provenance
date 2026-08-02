@@ -101,6 +101,8 @@ interface TrackCard {
   lyricsText: string;
   lyricsExpanded: boolean;
   haaiOriginStory: string;
+  description: string;
+  headlineCaption: string;
 }
 
 /** Strip leading track-number prefix from a filename-derived title.
@@ -127,6 +129,8 @@ function makeEmptyCard(overrides?: Partial<TrackCard>): TrackCard {
     lyricsText: "",
     lyricsExpanded: false,
     haaiOriginStory: "",
+    description: "",
+    headlineCaption: "",
     audioFile: null,
     audioStatus: "empty",
     coverFile: null,
@@ -560,11 +564,11 @@ function TrackDetailPanel({
 
           {/* Origin Story */}
           <div>
-            <label className="text-[10px] font-heading tracking-widest uppercase mb-2 block" style={{ color: "rgba(232,223,200,0.6)" }}>Origin Story</label>
+            <label className="text-[10px] font-heading tracking-widest uppercase mb-2 block" style={{ color: "rgba(232,223,200,0.6)" }}>Origin Story <span style={{ color: "rgba(196,154,40,0.5)", textTransform: "none", letterSpacing: 0 }}>(why this work exists — the initial inspiration)</span></label>
             <textarea
               value={card.haaiOriginStory}
               onChange={e => onChange(card.id, { haaiOriginStory: e.target.value })}
-              placeholder="Where did this come from? What was the spark, the moment, the train of thought that brought this work into being?"
+              placeholder="Where did this come from? What was the spark, the moment, the train of thought that brought this work into being? e.g. HA-AI or original authored content from human."
               rows={4}
               className="w-full text-xs rounded-lg px-3 py-2 resize-y leading-relaxed"
               style={{
@@ -573,6 +577,46 @@ function TrackDetailPanel({
                 color: "#FFFFFF",
                 outline: "none",
                 minHeight: 88,
+                fontFamily: "Inter, sans-serif",
+              }}
+            />
+          </div>
+
+          {/* Headline Caption */}
+          <div>
+            <label className="text-[10px] font-heading tracking-widest uppercase mb-2 block" style={{ color: "rgba(232,223,200,0.6)" }}>Headline Caption <span style={{ color: "rgba(196,154,40,0.5)", textTransform: "none", letterSpacing: 0 }}>(short punchy subtitle)</span></label>
+            <input
+              type="text"
+              value={card.headlineCaption}
+              onChange={e => onChange(card.id, { headlineCaption: e.target.value })}
+              placeholder="e.g. A midnight confession in three chords"
+              maxLength={120}
+              className="w-full text-xs rounded-lg px-3 py-2"
+              style={{
+                background: "rgba(22,22,22,0.8)",
+                border: "1px solid rgba(196,154,40,0.3)",
+                color: "#FFFFFF",
+                outline: "none",
+                fontFamily: "Inter, sans-serif",
+              }}
+            />
+          </div>
+
+          {/* Description */}
+          <div>
+            <label className="text-[10px] font-heading tracking-widest uppercase mb-2 block" style={{ color: "rgba(232,223,200,0.6)" }}>Description <span style={{ color: "rgba(196,154,40,0.5)", textTransform: "none", letterSpacing: 0 }}>(the story behind the work)</span></label>
+            <textarea
+              value={card.description}
+              onChange={e => onChange(card.id, { description: e.target.value })}
+              placeholder="Tell the story behind this work — the process, the intent, the moment it came from..."
+              rows={3}
+              className="w-full text-xs rounded-lg px-3 py-2 resize-y leading-relaxed"
+              style={{
+                background: "rgba(22,22,22,0.8)",
+                border: "1px solid rgba(196,154,40,0.3)",
+                color: "#FFFFFF",
+                outline: "none",
+                minHeight: 72,
                 fontFamily: "Inter, sans-serif",
               }}
             />
@@ -1093,6 +1137,8 @@ export default function BatchUploadPage() {
         fileType?: string;
         lyricsText?: string;
         haaiOriginStory?: string;
+        description?: string;
+        headlineCaption?: string;
       }[] = [];
 
       for (const card of readyCards) {
@@ -1130,6 +1176,8 @@ export default function BatchUploadPage() {
           fileType: card.fileType,
           lyricsText: card.lyricsText.trim() || undefined,
           haaiOriginStory: card.haaiOriginStory?.trim() || undefined,
+          description: card.description?.trim() || undefined,
+          headlineCaption: card.headlineCaption?.trim() || undefined,
         });
         setWitnessedCount(prev => prev + 1);
       }

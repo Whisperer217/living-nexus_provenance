@@ -732,6 +732,7 @@ export default function UploadPage() {
           harmonicSignature: witnessData?.frequencies, ecdsaPublicKey: witnessData?.publicKeyJWK,
           ecdsaSignature: witnessData?.signature,
           aiDisclosure,
+          haaiOriginStory: haaiDeclaration.haaiOriginStory || undefined,
           ...(aiDisclosure === "human_authored_ai_instrument" ? haaiDeclaration : {}),
           pagesJson: storyboardPagesJson || undefined,
           narrativeFormat: narrativeFormat ?? (uploadMode === "manuscript" ? "manuscript" : "comic"),
@@ -766,6 +767,7 @@ export default function UploadPage() {
           aiToolSuno, aiToolUdio, aiToolSonato, aiToolOther,
           aiToolOtherName: aiToolOtherName || undefined,
           aiDisclosure,
+          haaiOriginStory: haaiDeclaration.haaiOriginStory || undefined,
           ...(aiDisclosure === "human_authored_ai_instrument" ? haaiDeclaration : {}),
         } as any);
       } catch (err: any) { toast.error(err.message || "Failed to prepare upload"); }
@@ -803,6 +805,7 @@ export default function UploadPage() {
           aiToolSuno, aiToolUdio, aiToolSonato, aiToolOther,
           aiToolOtherName: aiToolOtherName || undefined,
           aiDisclosure,
+          haaiOriginStory: haaiDeclaration.haaiOriginStory || undefined,
           ...(aiDisclosure === "human_authored_ai_instrument" ? haaiDeclaration : {}),
         } as any);
       } catch (err: any) { toast.error(err.message || "Failed to prepare upload"); }
@@ -847,6 +850,7 @@ export default function UploadPage() {
         sampleRate: pipelineMeta?.sampleRate,
         bitDepth: pipelineMeta?.bitDepth,
         aiDisclosure,
+        haaiOriginStory: haaiDeclaration.haaiOriginStory || undefined,
         ...(aiDisclosure === "human_authored_ai_instrument" ? haaiDeclaration : {}),
       } as any);
     } catch (err: any) {

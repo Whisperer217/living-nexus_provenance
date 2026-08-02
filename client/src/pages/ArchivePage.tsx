@@ -1447,6 +1447,32 @@ export default function ArchivePage() {
                         {song.witnessId}
                       </p>
                     )}
+                    {/* Authorship category badge */}
+                    {song.aiDisclosure && (() => {
+                      const DISC_COLORS: Record<string, string> = {
+                        original: "rgba(134,239,172,0.75)",
+                        ai_assisted: "rgba(196,154,40,0.75)",
+                        human_authored_ai_instrument: "rgba(196,154,40,0.75)",
+                        ai_generated: "rgba(167,139,250,0.75)",
+                      };
+                      const DISC_LABELS: Record<string, string> = {
+                        original: "ORIGINAL",
+                        ai_assisted: "AI-ASSISTED",
+                        human_authored_ai_instrument: "HAAI",
+                        ai_generated: "AI-GEN",
+                      };
+                      const color = DISC_COLORS[song.aiDisclosure];
+                      const label = DISC_LABELS[song.aiDisclosure];
+                      if (!color || !label) return null;
+                      return (
+                        <span
+                          className="inline-flex items-center text-[9px] px-1.5 py-0.5 rounded-full tracking-widest mt-0.5"
+                          style={{ background: "rgba(0,0,0,0.3)", color, border: `1px solid ${color.replace("0.75", "0.20")}`, fontFamily: "'Space Mono', monospace" }}
+                        >
+                          {label}
+                        </span>
+                      );
+                    })()}
                     {/* Genre — only if no WID shown */}
                     {!song.witnessId && song.genre && (
                       <p className="text-xs mt-0.5 truncate" style={{ color: "#E2E8F0" }}>

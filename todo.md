@@ -6721,3 +6721,27 @@
 - [ ] Replace 46 hardcoded font sizes with ln-* tokens (Typography Pass — 15 potential score)
 - [ ] Fix 5 Creator Experience Pass findings (25 potential score)
 - [ ] Resolve 117 Animation Pass warnings (framer-motion + canvas RAF guards)
+
+## Upload Provenance Overhaul — Aug 2
+
+- [ ] UploadPage: make haaiOriginStory a standalone field sent for ALL disclosure types (not HAAI-gated)
+- [ ] UploadPage: send haaiOriginStory in all 4 upload paths (audio, lyrics, manuscript, comic/game)
+- [ ] BatchUploadPage: add description + caption/headlineCaption fields per track card
+- [ ] BatchUploadPage: add haaiOriginStory to batch-fill panel and per-track payload
+- [ ] BatchUploadPage: make authorship selector show full descriptions like UploadPage
+- [ ] BatchUploadPage: require cover image per track (warn if missing)
+- [ ] Server batchUpload: add haaiOriginStory, description, caption, headlineCaption to track schema
+- [ ] Server batchUpload: pass haaiOriginStory, description, caption, headlineCaption to createSong
+- [ ] SongDetailPage: authorship badge already shown — verify it shows for all 4 types including "original"
+- [ ] VerifyPage: add authorship type badge (locked category display)
+- [ ] ArchivePage: add authorship type badge to song row
+- [ ] WorkListRow: add authorship type badge
+
+## Upload Provenance Overhaul (Aug 2)
+- [x] Make haaiOriginStory universal in UploadPage (all 4 upload paths, not HAAI-gated)
+- [x] Add description + headlineCaption fields to BatchUploadPage TrackDetailPanel
+- [x] Add haaiOriginStory, description, headlineCaption to batchUpload server schema + createSong call
+- [x] SongDetailPage: show authorship badge for ALL disclosure types (including "original"), add LOCKED pill, show Origin Story for all types
+- [x] VerifyPage: add authorship category badge with LOCKED pill after medium/WID badge row
+- [x] ArchivePage: add authorship category badge in song row title area
+- [x] WorkListRow: add aiDisclosure prop + authorship category badge on xl screens

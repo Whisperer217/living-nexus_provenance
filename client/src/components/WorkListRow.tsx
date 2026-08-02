@@ -57,6 +57,7 @@ export interface WorkListRowItem {
     fileUrl?: string | null;
     stripeAccountStatus?: string | null;
     status?: string;
+    aiDisclosure?: string | null;
   };
   creator?: {
     id: number;
@@ -233,6 +234,26 @@ export function WorkListRow({ item, index, prefetchedLiked, prefetchedLikeCount 
         ) : (
           <div className="hidden sm:block w-4 flex-shrink-0" />
         )}
+
+        {/* Authorship category badge */}
+        {song.aiDisclosure && (() => {
+          const DISC_LABELS: Record<string, { short: string; color: string }> = {
+            original: { short: "ORIGINAL", color: "rgba(134,239,172,0.8)" },
+            ai_assisted: { short: "AI-ASSISTED", color: "rgba(196,154,40,0.8)" },
+            human_authored_ai_instrument: { short: "HAAI", color: "rgba(196,154,40,0.8)" },
+            ai_generated: { short: "AI-GEN", color: "rgba(167,139,250,0.8)" },
+          };
+          const info = DISC_LABELS[song.aiDisclosure];
+          if (!info) return null;
+          return (
+            <span
+              className="hidden xl:inline-flex items-center text-[9px] px-2 py-0.5 rounded-full tracking-widest flex-shrink-0"
+              style={{ background: "rgba(0,0,0,0.4)", color: info.color, border: `1px solid ${info.color.replace("0.8", "0.25")}`, fontFamily: "'Space Mono', monospace" }}
+            >
+              {info.short}
+            </span>
+          );
+        })()}
 
         {/* Actions */}
         <div className="flex items-center gap-1 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
