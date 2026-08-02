@@ -3,6 +3,7 @@
    Controls: All Tracks slider · Randomize switch · Creator filter · View toggle
 ═══════════════════════════════════════════════════════════════════ */
 import React, { useState, useCallback, useMemo, useRef, useEffect } from "react";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { trpc } from "@/lib/trpc";
 import { Link } from "wouter";
 import {
@@ -73,10 +74,24 @@ function RandomizeSwitch({ value, onChange }: { value: boolean; onChange: (v: bo
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animRef = useRef<number>(0);
   const activeRef = useRef(value);
+  const reducedMotion = useReducedMotion();
   useEffect(() => { activeRef.current = value; }, [value]);
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+    // Respect prefers-reduced-motion — draw static state, skip rAF loop
+    if (reducedMotion) {
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+      const W = 56, H = 28;
+      canvas.width = W; canvas.height = H;
+      ctx.fillStyle = value ? "rgba(212,175,55,0.18)" : "rgba(255,255,255,0.06)";
+      ctx.beginPath(); ctx.roundRect(0, 0, W, H, H / 2); ctx.fill();
+      const thumbX = value ? W - H / 2 - 2 : H / 2 + 2;
+      ctx.fillStyle = value ? "#D4AF37" : "rgba(255,255,255,0.4)";
+      ctx.beginPath(); ctx.arc(thumbX, H / 2, H / 2 - 3, 0, Math.PI * 2); ctx.fill();
+      return;
+    }
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
     const W = 56, H = 28;
@@ -123,7 +138,7 @@ function RandomizeSwitch({ value, onChange }: { value: boolean; onChange: (v: bo
     }
     draw();
     return () => cancelAnimationFrame(animRef.current);
-  }, []);
+  }, [reducedMotion, value]);
   return (
     <button onClick={() => onChange(!value)} title={value ? "Randomized — click for newest" : "Newest first — click to randomize"} className="flex-shrink-0 focus:outline-none">
       <canvas ref={canvasRef} width={56} height={28} className="rounded-full cursor-pointer block" />

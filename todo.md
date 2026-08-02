@@ -6686,3 +6686,14 @@
 - [x] Rebuild `ExplorePage.tsx` — cathedral architecture with 11 sections, list-first default view, randomized blended feed
 - [ ] Add `WidBadge` component — compact WID display with verification link
 - [ ] Write vitest for `exploreIndex` procedure
+
+## Platform Polish — Aug 2 2026
+- [x] Fix analytics script URIError — guard %VITE_ANALYTICS_ENDPOINT% placeholder in dev
+- [x] Add global prefers-reduced-motion CSS rule — all animations respect OS accessibility setting
+- [x] Add global focus-visible ring — gold outline for keyboard navigation across all interactive elements
+- [x] Create useReducedMotion hook — JS-driven animations (canvas, rAF) respect OS setting
+- [x] Wire useReducedMotion into constellation RandomizeSwitch — static render when reduced motion enabled
+- [x] Wire useReducedMotion into harmonic-resonance animation on SongDetailPage
+- [x] Fix WorkListRow action buttons — visible on mobile touch (sm:opacity-0 not opacity-0)
+- [x] Add aria-label to all WorkListRow action buttons (Like, Add to collection, Support)
+- [x] Add staleTime + refetchOnWindowFocus:false to exploreIndex query (already present)

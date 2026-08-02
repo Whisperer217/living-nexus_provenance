@@ -233,7 +233,8 @@ export function WorkListRow({ item, index, prefetchedLiked, prefetchedLikeCount 
           {/* Like */}
           <button
             onClick={(e) => { e.stopPropagation(); toggleLike(); }}
-            className={`p-1.5 rounded-lg transition-all ${liked ? "text-rose-400" : "text-[var(--stone-shadow)] hover:text-rose-400 opacity-0 group-hover:opacity-100"}`}
+            aria-label={liked ? "Unlike this work" : "Like this work"}
+            className={`p-1.5 rounded-lg transition-all ${liked ? "text-rose-400" : "text-[var(--stone-shadow)] hover:text-rose-400 sm:opacity-0 sm:group-hover:opacity-100"}`}
           >
             <Heart className={`w-3.5 h-3.5 ${liked ? "fill-current" : ""}`} />
           </button>
@@ -241,7 +242,8 @@ export function WorkListRow({ item, index, prefetchedLiked, prefetchedLikeCount 
           {/* Add to list */}
           <button
             onClick={handleAddToListClick}
-            className="p-1.5 rounded-lg text-[var(--stone-shadow)] hover:text-[var(--stone-light)] transition-all opacity-0 group-hover:opacity-100"
+            aria-label="Add to collection"
+            className="p-1.5 rounded-lg text-[var(--stone-shadow)] hover:text-[var(--stone-light)] transition-all sm:opacity-0 sm:group-hover:opacity-100"
           >
             <ListPlus className="w-3.5 h-3.5" />
           </button>
@@ -249,7 +251,8 @@ export function WorkListRow({ item, index, prefetchedLiked, prefetchedLikeCount 
           {/* Support */}
           <button
             onClick={handleSupportClick}
-            className="hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[var(--gold)]/10 border border-[var(--gold)]/20 text-[var(--gold)] text-[10px] font-medium hover:bg-[var(--gold)]/20 transition-all opacity-0 group-hover:opacity-100"
+            aria-label="Support this creator"
+            className="hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[var(--gold)]/10 border border-[var(--gold)]/20 text-[var(--gold)] text-[10px] font-medium hover:bg-[var(--gold)]/20 transition-all sm:opacity-0 sm:group-hover:opacity-100"
           >
             <Headphones className="w-3 h-3" />
             Support

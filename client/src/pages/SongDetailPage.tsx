@@ -8,6 +8,7 @@
 ═══════════════════════════════════════════════════════════════════ */
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { triggerTaggedDownload } from "@/lib/downloadTrack";
 import { Helmet } from "react-helmet-async";
 import { useParams, Link } from "wouter";
@@ -141,6 +142,7 @@ export default function SongDetailPage() {
   // Derive play state from global player — this page is a remote control only
   const isThisTrackActive = currentTrackId === String(songId);
   const isPlaying = isThisTrackActive && playerState.isPlaying;
+  const reducedMotion = useReducedMotion();
 
   // Live waveform visualizer — driven by the global audio element
   // Wire harmonic hue so the waveform reflects the song's unique soul color
@@ -414,7 +416,7 @@ export default function SongDetailPage() {
 
   return (
     <div
-      className={`min-h-screen pb-8 transition-all duration-700 cathedral-enter ${isThisTrackActive ? "harmonic-resonance" : ""}`}
+      className={`min-h-screen pb-8 transition-all duration-700 cathedral-enter ${isThisTrackActive && !reducedMotion ? "harmonic-resonance" : ""}`}
     >
       {/* ══ STICKY MOBILE MANIFESTATION HEADER (slides in after hero scrolls past) ══ */}
       <div

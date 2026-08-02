@@ -3379,3 +3379,32 @@ h1, h2, h3, h4, h5, h6,
   transform: translateY(2px);
   transition: transform 0.2s ease;
 }
+
+/* ── Accessibility: Respect prefers-reduced-motion ──────────────────────────
+   Users who have enabled "Reduce Motion" in their OS settings should never
+   see animations. This rule overrides ALL transitions and animations globally.
+   The only exception is opacity transitions which communicate state without
+   spatial movement. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ── Global focus-visible ring ───────────────────────────────────────────────
+   Ensures every interactive element has a visible keyboard focus indicator.
+   Uses the gold brand color to stay consistent with the cathedral design. */
+:focus-visible {
+  outline: 2px solid var(--ln-gold, #C49A28);
+  outline-offset: 2px;
+}
+
+/* Suppress focus ring for mouse/touch — only show for keyboard navigation */
+:focus:not(:focus-visible) {
+  outline: none;
+}
