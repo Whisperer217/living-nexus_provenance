@@ -704,6 +704,159 @@ function MarketplaceItemCard({
   );
 }
 
+// ─── Creator Guides Section ──────────────────────────────────────────────────
+function MarketplaceGuidesSection() {
+  const [selected, setSelected] = useState<any | null>(null);
+  const [tipping, setTipping] = useState(false);
+  const [tipAmount, setTipAmount] = useState(500);
+  const { user } = useAuth();
+  const { data: guides = [], isLoading } = trpc.guides.listPublished.useQuery(
+    { limit: 20 },
+    { staleTime: 5 * 60 * 1000, refetchOnWindowFocus: false }
+  );
+  const createTip = trpc.guides.createTip.useMutation({
+    onSuccess: (data: any) => {
+      if (data?.url) window.open(data.url, "_blank");
+      setTipping(false);
+      setSelected(null);
+    },
+    onError: (err: any) => toast.error(err.message ?? "Gift failed."),
+  });
+
+  if (isLoading || (guides as any[]).length === 0) return null;
+
+  return (
+    <div style={{ marginTop: 48, borderTop: "1px solid var(--ln-panel-border)", paddingTop: 32 }}>
+      <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: 20 }}>
+        <div>
+          <div style={{ fontFamily: "var(--font-display)", fontSize: 11, fontWeight: 700, letterSpacing: "0.2em", color: "var(--ln-gold)", textTransform: "uppercase", marginBottom: 6 }}>
+            ✦ Creator Guides
+          </div>
+          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.45)", maxWidth: 480, lineHeight: 1.5, margin: 0 }}>
+            Sovereign creative companions — each anchored to a WID and authored by a registered creator.
+          </p>
+        </div>
+        <a href="/guides" style={{ fontFamily: "var(--font-display)", fontSize: 11, color: "var(--ln-gold)", letterSpacing: "0.1em", textDecoration: "none", whiteSpace: "nowrap", marginLeft: 16 }}>
+          View all →
+        </a>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 16 }}>
+        {(guides as any[]).map((guide: any) => (
+          <button
+            key={guide.id}
+            onClick={() => setSelected(guide)}
+            style={{ textAlign: "left", background: "var(--ln-panel)", border: "1px solid var(--ln-panel-border)", borderRadius: 8, overflow: "hidden", cursor: "pointer", padding: 0, transition: "transform 0.15s, border-color 0.15s" }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(196,154,40,0.4)"; (e.currentTarget as HTMLElement).style.transform = "scale(1.02)"; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "var(--ln-panel-border)"; (e.currentTarget as HTMLElement).style.transform = "scale(1)"; }}
+          >
+            <div style={{ aspectRatio: "3/4", overflow: "hidden", background: "var(--ln-void)" }}>
+              {guide.artworkUrl ? (
+                <img src={guide.artworkUrl} alt={guide.canonicalName} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top", display: "block" }} />
+              ) : (
+                <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <span style={{ fontSize: 32, opacity: 0.3 }}>◈</span>
+                </div>
+              )}
+            </div>
+            <div style={{ padding: "10px 12px" }}>
+              <div style={{ fontFamily: "var(--font-display)", fontSize: 11, fontWeight: 700, color: "var(--ln-parchment)", marginBottom: 3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {guide.canonicalName}
+              </div>
+              {guide.archetypeType && (
+                <div style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", marginBottom: 4, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{guide.archetypeType}</div>
+              )}
+              {guide.widCode && (
+                <div style={{ display: "inline-block", padding: "2px 6px", borderRadius: 3, background: "rgba(196,154,40,0.1)", border: "1px solid rgba(196,154,40,0.25)", fontSize: 9, color: "var(--ln-gold)", fontFamily: "var(--font-display)" }}>
+                  {guide.widCode}
+                </div>
+              )}
+            </div>
+          </button>
+        ))}
+      </div>
+
+      {selected && (
+        <div
+          style={{ position: "fixed", inset: 0, zIndex: 9999, background: "rgba(0,0,0,0.9)", display: "flex", alignItems: "flex-start", justifyContent: "center", padding: 20, overflowY: "auto" }}
+          onClick={() => { setSelected(null); setTipping(false); }}
+        >
+          <div
+            style={{ background: "var(--ln-panel)", border: "1px solid rgba(196,154,40,0.35)", borderRadius: 10, width: "100%", maxWidth: 560, padding: 28, position: "relative", marginTop: 20 }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button onClick={() => { setSelected(null); setTipping(false); }} style={{ position: "absolute", top: 12, right: 14, background: "none", border: "none", color: "rgba(255,255,255,0.4)", cursor: "pointer", fontSize: 22, lineHeight: "1" }}>×</button>
+            <div style={{ display: "flex", gap: 16, marginBottom: 16 }}>
+              {selected.artworkUrl && (
+                <div style={{ width: 110, flexShrink: 0, borderRadius: 6, overflow: "hidden", border: "1px solid var(--ln-panel-border)" }}>
+                  <img src={selected.artworkUrl} alt={selected.canonicalName} style={{ width: "100%", aspectRatio: "3/4", objectFit: "cover", objectPosition: "top", display: "block" }} />
+                </div>
+              )}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontFamily: "var(--font-display)", fontSize: 10, fontWeight: 700, letterSpacing: "0.15em", color: "var(--ln-gold)", textTransform: "uppercase", marginBottom: 6 }}>
+                  {selected.archetypeType ?? "Guide"}
+                </div>
+                <h2 style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "1.5rem", fontWeight: 700, color: "var(--ln-parchment)", margin: "0 0 8px", lineHeight: 1.2 }}>
+                  {selected.canonicalName}
+                </h2>
+                {selected.widCode && (
+                  <div style={{ display: "inline-block", padding: "3px 8px", borderRadius: 4, background: "rgba(196,154,40,0.1)", border: "1px solid rgba(196,154,40,0.3)", fontSize: 10, color: "var(--ln-gold)", fontFamily: "var(--font-display)", marginBottom: 10 }}>
+                    {selected.widCode}
+                  </div>
+                )}
+                {selected.role && <p style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", marginBottom: 4, margin: "0 0 4px" }}>{selected.role}</p>}
+                {selected.alignment && <p style={{ fontSize: 11, color: "rgba(196,154,40,0.7)", margin: 0 }}>{selected.alignment}</p>}
+              </div>
+            </div>
+            {selected.loreDescription && (
+              <div style={{ padding: 14, borderRadius: 6, background: "var(--ln-void)", border: "1px solid var(--ln-panel-border)", marginBottom: 12 }}>
+                <p style={{ fontSize: 12, color: "rgba(255,255,255,0.55)", lineHeight: 1.7, margin: 0 }}>{selected.loreDescription}</p>
+              </div>
+            )}
+            {selected.testimony && (
+              <div style={{ padding: 14, borderRadius: 6, background: "rgba(196,154,40,0.06)", border: "1px solid rgba(196,154,40,0.2)", marginBottom: 16 }}>
+                <div style={{ fontFamily: "var(--font-display)", fontSize: 9, color: "var(--ln-gold)", textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: 6 }}>Origin Testimony</div>
+                <p style={{ fontSize: 12, color: "var(--ln-parchment)", lineHeight: 1.7, fontStyle: "italic", margin: 0 }}>"{selected.testimony}"</p>
+              </div>
+            )}
+            {tipping ? (
+              <div>
+                <div style={{ fontFamily: "var(--font-display)", fontSize: 10, color: "var(--ln-gold)", textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: 10 }}>Choose a Gift Amount</div>
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 14 }}>
+                  {[100, 300, 500, 1000, 2500].map((amt) => (
+                    <button key={amt} onClick={() => setTipAmount(amt)} style={{ padding: "6px 14px", borderRadius: 4, background: tipAmount === amt ? "var(--ln-gold)" : "rgba(255,255,255,0.06)", color: tipAmount === amt ? "#000" : "rgba(255,255,255,0.7)", border: tipAmount === amt ? "none" : "1px solid rgba(255,255,255,0.15)", fontFamily: "var(--font-display)", fontSize: 11, cursor: "pointer", fontWeight: 600 }}>
+                      ${(amt / 100).toFixed(2)}
+                    </button>
+                  ))}
+                </div>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <button
+                    onClick={() => { if (!user) { window.location.href = getLoginUrl("/marketplace"); return; } createTip.mutate({ guideId: selected.id, amountCents: tipAmount, origin: window.location.origin }); }}
+                    disabled={createTip.isPending}
+                    style={{ flex: 1, padding: "10px 16px", background: "var(--ln-gold)", color: "#000", border: "none", borderRadius: 4, fontFamily: "var(--font-display)", fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", cursor: createTip.isPending ? "wait" : "pointer", opacity: createTip.isPending ? 0.7 : 1 }}
+                  >
+                    {createTip.isPending ? "Processing…" : `✨ Gift $${(tipAmount / 100).toFixed(2)}`}
+                  </button>
+                  <button onClick={() => setTipping(false)} style={{ padding: "10px 16px", background: "transparent", border: "1px solid rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.5)", borderRadius: 4, cursor: "pointer", fontSize: 11 }}>Cancel</button>
+                </div>
+              </div>
+            ) : (
+              <div style={{ display: "flex", gap: 10 }}>
+                <a href={`/guide/${selected.id}`} style={{ flex: 1, textAlign: "center", padding: "10px 16px", background: "var(--ln-gold)", color: "#000", borderRadius: 4, fontFamily: "var(--font-display)", fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textDecoration: "none", textTransform: "uppercase" }}>
+                  View Guide
+                </a>
+                <button onClick={() => setTipping(true)} style={{ flex: 1, padding: "10px 16px", background: "transparent", border: "1px solid rgba(196,154,40,0.4)", color: "var(--ln-gold)", borderRadius: 4, fontFamily: "var(--font-display)", fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", cursor: "pointer", textTransform: "uppercase" }}>
+                  ✨ Gift Creator
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function MarketplacePage() {
   const [activeType, setActiveType] = useState<ItemType>("all");
@@ -1027,6 +1180,9 @@ export default function MarketplacePage() {
             </div>
           </div>
         )}
+
+        {/* ── Creator Guides Section ── */}
+        <MarketplaceGuidesSection />
 
         {/* ── Coming Soon placeholder when empty ── */}
         {!isLoading && items.length === 0 && (

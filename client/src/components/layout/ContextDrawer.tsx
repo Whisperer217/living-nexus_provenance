@@ -17,7 +17,7 @@ import { getLoginUrl } from "@/const";
 import {
   Home, Compass, User, Upload, Archive,
   Music, FileText, BookOpen, Image, Users,
-  Star, TrendingUp, Sparkles,
+  Star, TrendingUp, Sparkles, ShoppingBag,
   FolderOpen, Settings, LogOut, LogIn,
   Shield, BookMarked,
   LayoutGrid, LayoutDashboard, X, ExternalLink,
@@ -118,6 +118,13 @@ const PANELS: Record<NavMode, ModePanel> = {
         links: [
           { icon: <Users size={14} />, label: "All Creators", path: "/explore?filter=creators" },
           { icon: <Star size={14} />, label: "Founding Creators", path: "/founders", description: "View the founding registry" },
+        ],
+      },
+      {
+        heading: "Creator Guides",
+        links: [
+          { icon: <BookOpen size={14} />, label: "Nexus Avatar Directory", path: "/guides", description: "Browse all creator-uploaded Personal Nexus Avatars", gold: true },
+          { icon: <ShoppingBag size={14} />, label: "Marketplace", path: "/marketplace", description: "Keeper skins, albums & creator goods" },
         ],
       },
     ],

@@ -612,6 +612,167 @@ function KeeperSkinsSection() {
   );
 }
 
+// ── Guides Section ───────────────────────────────────────────────
+function GuidesSection() {
+  const [selected, setSelected] = useState<any | null>(null);
+  const { data: guides = [], isLoading } = trpc.guides.listPublished.useQuery(
+    { limit: 20 },
+    { staleTime: 5 * 60 * 1000, refetchOnWindowFocus: false }
+  );
+
+  if (isLoading || guides.length === 0) return null;
+
+  return (
+    <div className="mt-10">
+      {/* Section header */}
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <div
+            className="text-xs uppercase tracking-widest mb-1"
+            style={{ color: "var(--ln-gold)", fontFamily: "'Space Mono', monospace", fontSize: "0.65rem" }}
+          >
+            Creator Guides
+          </div>
+          <p className="text-xs" style={{ color: "var(--ln-smoke)" }}>
+            Sovereign creative companions uploaded by creators — each anchored to a WID
+          </p>
+        </div>
+        <a
+          href="/guides"
+          className="text-xs flex items-center gap-1 hover:underline"
+          style={{ color: "var(--ln-gold)", fontFamily: "'Space Mono', monospace" }}
+        >
+          View all <ChevronRight className="w-3 h-3" />
+        </a>
+      </div>
+
+      {/* Guide cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+        {(guides as any[]).map((guide: any) => (
+          <button
+            key={guide.id}
+            onClick={() => setSelected(guide)}
+            className="text-left flex flex-col transition-all duration-200 hover:scale-[1.02]"
+            style={{
+              border: "1px solid var(--ln-panel-border)",
+              borderRadius: 6,
+              background: "var(--ln-panel)",
+              overflow: "hidden",
+            }}
+          >
+            {/* Artwork */}
+            <div style={{ aspectRatio: "3/4", overflow: "hidden", background: "var(--ln-void)" }}>
+              {guide.artworkUrl ? (
+                <img
+                  src={guide.artworkUrl}
+                  alt={guide.canonicalName}
+                  className="w-full h-full object-cover object-top"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <Shield className="w-8 h-8" style={{ color: "var(--ln-gold)", opacity: 0.4 }} />
+                </div>
+              )}
+            </div>
+            {/* Info */}
+            <div className="p-2">
+              <div
+                className="truncate font-semibold"
+                style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.6rem", color: "var(--ln-parchment)" }}
+              >
+                {guide.canonicalName}
+              </div>
+              {guide.archetypeType && (
+                <div
+                  className="truncate mt-0.5"
+                  style={{ fontSize: "0.55rem", color: "var(--ln-smoke)" }}
+                >
+                  {guide.archetypeType}
+                </div>
+              )}
+              {guide.widCode && (
+                <div
+                  className="mt-1 inline-block px-1 py-0.5 rounded"
+                  style={{ background: "var(--ln-gold)15", border: "1px solid var(--ln-gold)30", fontSize: "0.5rem", color: "var(--ln-gold)", fontFamily: "'Space Mono', monospace" }}
+                >
+                  {guide.widCode}
+                </div>
+              )}
+            </div>
+          </button>
+        ))}
+      </div>
+
+      {/* Detail modal */}
+      {selected && (
+        <div
+          style={{ position: "fixed", inset: 0, zIndex: 9999, background: "rgba(0,0,0,0.88)", display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "20px", overflowY: "auto" }}
+          onClick={() => setSelected(null)}
+        >
+          <div
+            style={{ background: "var(--ln-panel)", border: "1px solid var(--ln-gold)40", borderRadius: 8, width: "100%", maxWidth: 560, padding: 24, position: "relative" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setSelected(null)}
+              style={{ position: "absolute", top: 12, right: 12, color: "var(--ln-smoke)", background: "none", border: "none", cursor: "pointer", fontSize: 20 }}
+            >×</button>
+
+            <div className="flex gap-4">
+              {selected.artworkUrl && (
+                <div style={{ width: 120, flexShrink: 0, borderRadius: 6, overflow: "hidden", border: "1px solid var(--ln-panel-border)" }}>
+                  <img src={selected.artworkUrl} alt={selected.canonicalName} className="w-full h-full object-cover" style={{ aspectRatio: "3/4" }} />
+                </div>
+              )}
+              <div className="flex-1 min-w-0">
+                <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.6rem", color: "var(--ln-gold)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4 }}>
+                  {selected.archetypeType ?? "Guide"}
+                </div>
+                <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.4rem", color: "var(--ln-parchment)", fontWeight: 700, lineHeight: 1.2, marginBottom: 8 }}>
+                  {selected.canonicalName}
+                </h2>
+                {selected.widCode && (
+                  <div style={{ display: "inline-block", padding: "2px 8px", borderRadius: 4, background: "var(--ln-gold)15", border: "1px solid var(--ln-gold)30", fontSize: "0.6rem", color: "var(--ln-gold)", fontFamily: "'Space Mono', monospace", marginBottom: 12 }}>
+                    {selected.widCode}
+                  </div>
+                )}
+                {selected.role && (
+                  <p style={{ fontSize: "0.75rem", color: "var(--ln-smoke)", marginBottom: 4 }}>{selected.role}</p>
+                )}
+                {selected.alignment && (
+                  <p style={{ fontSize: "0.7rem", color: "var(--ln-gold)80" }}>{selected.alignment}</p>
+                )}
+              </div>
+            </div>
+
+            {selected.loreDescription && (
+              <div style={{ marginTop: 16, padding: 12, borderRadius: 6, background: "var(--ln-void)", border: "1px solid var(--ln-panel-border)" }}>
+                <p style={{ fontSize: "0.8rem", color: "var(--ln-smoke)", lineHeight: 1.6 }}>{selected.loreDescription}</p>
+              </div>
+            )}
+
+            {selected.testimony && (
+              <div style={{ marginTop: 12, padding: 12, borderRadius: 6, background: "var(--ln-gold)08", border: "1px solid var(--ln-gold)20" }}>
+                <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.55rem", color: "var(--ln-gold)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 6 }}>Origin Testimony</div>
+                <p style={{ fontSize: "0.78rem", color: "var(--ln-parchment)", lineHeight: 1.6, fontStyle: "italic" }}>"{selected.testimony}"</p>
+              </div>
+            )}
+
+            <div className="flex gap-2 mt-4">
+              <a
+                href={`/guide/${selected.id}`}
+                style={{ flex: 1, textAlign: "center", padding: "8px 12px", borderRadius: 4, background: "var(--ln-gold)", color: "#0a0a0a", fontFamily: "'Space Mono', monospace", fontSize: "0.65rem", fontWeight: 700, textDecoration: "none", textTransform: "uppercase", letterSpacing: "0.08em" }}
+              >
+                View Guide
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 const FILTER_CHIPS_DEF = [
   { label: "All", icon: <LayoutList className="w-3 h-3" /> },
   { label: "Music", icon: <Headphones className="w-3 h-3" /> },
@@ -704,6 +865,9 @@ export default function ExplorePage() {
             )}
             {activeFilter === "All" && !search && !selectedCreatorId && viewMode !== "creator" && (
               <KeeperSkinsSection />
+            )}
+            {activeFilter === "All" && !search && !selectedCreatorId && viewMode !== "creator" && (
+              <GuidesSection />
             )}
             {visibleSections.map((section) => (
               <CathedralSection key={section.key} section={section} rows={data[section.key]} search={search} viewMode={viewMode} />
