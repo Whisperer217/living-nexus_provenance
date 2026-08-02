@@ -269,21 +269,36 @@ export const songsRouter = router({
      * Each section is independently randomized/scored so every page load reveals new works.
      */
     exploreIndex: publicProcedure
-      .input(z.object({ seed: z.number().optional() }).optional())
+      .input(z.object({
+        seed: z.number().optional(),
+        limit: z.number().int().min(8).max(200).optional(),
+        randomize: z.boolean().optional(),
+        creatorId: z.number().int().positive().optional(),
+      }).optional())
       .query(async ({ input }) => {
         const seed = input?.seed ?? Math.floor(Math.random() * 999999);
+        const sectionLimit = input?.limit ?? 20;
+        const randomize = input?.randomize !== false; // default true
+        const creatorId = input?.creatorId;
+        const base = (contentType?: string) => ({
+          ...(contentType ? { contentType: contentType as any } : {}),
+          ...(creatorId ? { creatorId } : {}),
+          randomize,
+          seed: randomize ? seed : undefined,
+          limit: sectionLimit,
+        });
         const [featured, newManifestations, music, books, research, visualWorks, film, doctrine, recentlyWitnessed, hiddenGems, trendingWorks] = await Promise.all([
-          getPublicSongs({ randomize: true, seed, limit: 8 }),
-          getNewThisWeek({ limit: 12 }),
-          getPublicSongs({ contentType: 'audio', randomize: true, seed: seed + 1, limit: 20 }),
-          getPublicSongs({ contentType: 'manuscript', randomize: true, seed: seed + 2, limit: 12 }),
-          getPublicSongs({ contentType: 'lyrics', randomize: true, seed: seed + 3, limit: 12 }),
-          getPublicSongs({ contentType: 'image' as any, randomize: true, seed: seed + 4, limit: 12 }),
-          getPublicSongs({ contentType: 'game' as any, randomize: true, seed: seed + 5, limit: 12 }),
-          getPublicSongs({ contentType: 'comic', randomize: true, seed: seed + 6, limit: 12 }),
-          getPublicSongs({ randomize: false, limit: 12 }),
-          getPublicSongs({ randomize: true, seed: seed + 7, limit: 12 }),
-          getTrendingWorks({ limit: 12 }),
+          getPublicSongs({ ...base(), limit: Math.min(sectionLimit, 8) }),
+          getNewThisWeek({ limit: Math.min(sectionLimit, 20) }),
+          getPublicSongs({ ...base('audio'), seed: seed + 1 }),
+          getPublicSongs({ ...base('manuscript'), seed: seed + 2 }),
+          getPublicSongs({ ...base('lyrics'), seed: seed + 3 }),
+          getPublicSongs({ ...base('image' as any), seed: seed + 4 }),
+          getPublicSongs({ ...base('game' as any), seed: seed + 5 }),
+          getPublicSongs({ ...base('comic'), seed: seed + 6 }),
+          getPublicSongs({ ...base(), randomize: false, seed: undefined }),
+          getPublicSongs({ ...base(), seed: seed + 7 }),
+          getTrendingWorks({ limit: Math.min(sectionLimit, 20) }),
         ]);
         return { seed, featured, newManifestations, music, books, research, visualWorks, film, doctrine, recentlyWitnessed, hiddenGems, trending: trendingWorks };
       }),
