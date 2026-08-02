@@ -379,6 +379,9 @@ export async function getSongByWitnessId(witnessId: string) {
         name: users.name,
         artistHandle: users.artistHandle,
         profilePhotoUrl: users.profilePhotoUrl,
+        bio: users.bio,
+        originStatement: users.originStatement,
+        stripeAccountStatus: users.stripeAccountStatus,
       },
     })
     .from(songs)

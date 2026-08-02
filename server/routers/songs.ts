@@ -439,6 +439,15 @@ export const songsRouter = router({
         lyricsAddedAt: song.lyricsAddedAt ?? null,
         contentType: (song.contentType ?? "audio") as "audio" | "lyrics" | "manuscript" | "comic",
         aiDisclosure: (song as any).aiDisclosure ?? null,
+        // Creator story fields — power the VerifyPage creator panel
+        creatorBio: (creator as any)?.bio ?? null,
+        creatorOriginStatement: (creator as any)?.originStatement ?? null,
+        creatorStripeStatus: (creator as any)?.stripeAccountStatus ?? null,
+        // Work story fields
+        haaiOriginStory: (song as any).haaiOriginStory ?? null,
+        caption: song.caption ?? null,
+        description: (song as any).description ?? null,
+        fileUrl: song.fileUrl ?? null,
       };
     }),
     // Public counters for homepage trust layer

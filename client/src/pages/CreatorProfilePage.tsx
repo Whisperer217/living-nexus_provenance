@@ -44,6 +44,7 @@ import { CreatorIdentityStrip } from "@/components/CreatorIdentityStrip";
 import { useWorkEditorActions } from "@/contexts/WorkEditorContext";
 import { SacredCanvas } from "@/components/SacredCanvas";
 import { CreatorDomainHub } from "@/components/CreatorDomainHub";
+import { SupportCreatorDrawer } from "@/components/SupportCreatorDrawer";
 
 // ─── Context Menu ─────────────────────────────────────────────────────────────
 interface ContextMenuProps {
@@ -429,6 +430,7 @@ export default function CreatorProfilePage() {
   const creatorId = isNumeric ? numericId : (handleQuery.data?.id ?? 0);
   const [tipOpen, setTipOpen] = useState(false);
   const [tipSuccess, setTipSuccess] = useState(false);
+  const [profileSupportOpen, setProfileSupportOpen] = useState(false);
   const [showDomainEditor, setShowDomainEditor] = useState(false);
   const [tipAmount, setTipAmount] = useState("5");
   const [avatarImgError, setAvatarImgError] = useState(false);
@@ -1414,11 +1416,11 @@ export default function CreatorProfilePage() {
                     </>
                   ) : tipsEnabled ? (
                     <button
-                      onClick={() => setTipOpen(true)}
-                      className="px-4 py-2 rounded-lg text-xs font-semibold transition-all"
-                      style={{ background: "linear-gradient(135deg, #c9a84c, #e8c96a)", color: "var(--ln-parchment)" }}
+                      onClick={() => setProfileSupportOpen(true)}
+                      className="px-4 py-2 rounded-lg text-xs font-bold transition-all hover:opacity-90 active:scale-95"
+                      style={{ background: "var(--ln-gold)", color: "var(--ln-ink)", fontFamily: "'Cinzel', serif" }}
                     >
-                      <DollarSign className="w-3 h-3 inline mr-1" />Send a Gift
+                      <Heart className="w-3 h-3 inline mr-1" />Support Creator
                     </button>
                   ) : null}
                   {user && !isOwner && (
@@ -1743,11 +1745,11 @@ export default function CreatorProfilePage() {
                   </>
                 ) : tipsEnabled ? (
                   <button
-                    onClick={() => setTipOpen(true)}
-                    className="px-4 py-2 rounded-lg text-xs font-semibold transition-all"
-                    style={{ background: "linear-gradient(135deg, #c9a84c, #e8c96a)", color: "var(--ln-parchment)" }}
+                    onClick={() => setProfileSupportOpen(true)}
+                    className="px-4 py-2 rounded-lg text-xs font-bold transition-all hover:opacity-90 active:scale-95"
+                    style={{ background: "var(--ln-gold)", color: "var(--ln-ink)", fontFamily: "'Cinzel', serif" }}
                   >
-                    <DollarSign className="w-3 h-3 inline mr-1" />Send a Gift
+                    <Heart className="w-3 h-3 inline mr-1" />Support Creator
                   </button>
                 ) : null}
                 {user && !isOwner && (
@@ -2323,6 +2325,21 @@ export default function CreatorProfilePage() {
           </div>
         </DialogContent>
       </Dialog>
+      {/* ─── Profile-level Support Creator Drawer ─────────────────────────── */}
+      <SupportCreatorDrawer
+        target={profileSupportOpen && creator ? {
+          songId: 0,
+          songTitle: creator.name || creator.artistHandle || "",
+          songWid: "",
+          creatorId: creator.id,
+          creatorName: creator.name || creator.artistHandle || "",
+          creatorHandle: creator.artistHandle || undefined,
+          coverArtUrl: creator.profilePhotoUrl || undefined,
+          contentType: "audio",
+          stripeAccountStatus: creator.stripeAccountStatus,
+        } : null}
+        onClose={() => setProfileSupportOpen(false)}
+      />
 
       {/* ─── Witness Network Modal ───────────────────────────────── */}
       <Dialog open={witnessNetworkOpen} onOpenChange={setWitnessNetworkOpen}>

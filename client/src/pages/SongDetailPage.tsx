@@ -910,6 +910,24 @@ export default function SongDetailPage() {
                 </p>
               )}
 
+              {/* Origin story — above-the-fold preview when no caption */}
+              {!(song as any).caption && (song as any).haaiOriginStory && (
+                <div
+                  className="text-sm leading-relaxed"
+                  style={{
+                    color: "var(--ln-smoke)",
+                    fontFamily: "'Cormorant Garamond', serif",
+                    fontStyle: "italic",
+                    fontSize: "1rem",
+                    borderLeft: "2px solid rgba(196,154,40,0.35)",
+                    paddingLeft: "14px",
+                  }}
+                >
+                  {((song as any).haaiOriginStory as string).slice(0, 200)}
+                  {((song as any).haaiOriginStory as string).length > 200 ? "…" : ""}
+                </div>
+              )}
+
               {/* Sacred geometry divider */}
               <div className="sg-divider"><div className="sg-divider-pip" /></div>
             </div>

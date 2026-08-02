@@ -216,14 +216,19 @@ export function WorkListRow({ item, index, prefetchedLiked, prefetchedLikeCount 
           <span className="text-xs text-[var(--stone-shadow)]">{formatDate(displayDate)}</span>
         </div>
 
-        {/* WID badge */}
+        {/* WID badge — clickable to verify page */}
         {song.witnessId ? (
-          <div className="hidden sm:flex items-center gap-1 flex-shrink-0">
+          <a
+            href={`/verify/${encodeURIComponent(song.witnessId)}`}
+            onClick={(e) => e.stopPropagation()}
+            className="hidden sm:flex items-center gap-1 flex-shrink-0 hover:opacity-80 transition-opacity"
+            title={`Verify: ${song.witnessId}`}
+          >
             <Shield className="w-3 h-3 text-[var(--gold)]" />
             <span className="text-[10px] font-mono text-[var(--gold)] hidden lg:inline">
               {song.witnessId.slice(0, 12)}…
             </span>
-          </div>
+          </a>
         ) : (
           <div className="hidden sm:block w-4 flex-shrink-0" />
         )}
