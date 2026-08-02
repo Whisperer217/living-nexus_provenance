@@ -650,4 +650,53 @@ Never collapse multiple sections into a single block. Always label clearly.
         }
       }),
 
+    /**
+     * Publish the user's uploaded custom portrait to the platform store as a Keeper skin.
+     * Any authenticated user can publish their own portrait.
+     * Founders/admins can set a price; regular users publish free only.
+     */
+    publishPortraitToStore: protectedProcedure
+      .input(z.object({
+        title: z.string().min(1).max(256),
+        description: z.string().max(1000).optional(),
+        priceCents: z.number().min(0).default(0),
+        aiPrompt: z.string().max(4000).optional(),
+        artistCredit: z.string().max(256).optional(),
+        artStyle: z.string().max(128).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'DB unavailable' });
+        const { keeperSkins, marketplaceItems, users } = await import('../../drizzle/schema');
+        const { eq, and } = await import('drizzle-orm');
+        // Get the user's custom portrait URL
+        const [skin] = await db.select({ portraitUrl: keeperSkins.portraitUrl })
+          .from(keeperSkins)
+          .where(and(eq(keeperSkins.userId, ctx.user.id), eq(keeperSkins.skinId, 'custom')))
+          .limit(1);
+        if (!skin?.portraitUrl) {
+          throw new TRPCError({ code: 'BAD_REQUEST', message: 'Upload a custom portrait first before publishing to the store.' });
+        }
+        // Founders/admins can set a price; regular users publish free only
+        const [me] = await db.select({ role: users.role }).from(users).where(eq(users.id, ctx.user.id)).limit(1);
+        const isFounder = me?.role === 'founder' || me?.role === 'admin';
+        const finalPrice = isFounder ? input.priceCents : 0;
+        const result = await db.insert(marketplaceItems).values({
+          type: 'skin',
+          title: input.title,
+          description: input.description,
+          artworkUrl: skin.portraitUrl,
+          priceCents: finalPrice,
+          royaltyPct: 80,
+          creatorId: ctx.user.id,
+          aiPrompt: input.aiPrompt,
+          artistCredit: input.artistCredit,
+          artStyle: input.artStyle,
+          active: true,
+          featured: false,
+          model3dStatus: 'none',
+        });
+        return { id: (result as any)[0]?.insertId, artworkUrl: skin.portraitUrl };
+      }),
+
   });

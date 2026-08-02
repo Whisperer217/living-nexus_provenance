@@ -9,10 +9,13 @@ import { Link } from "wouter";
 import {
   Search, RefreshCw, Shield, Music, BookOpen, Eye, Flame,
   Sparkles, Film, Feather, Star, ChevronRight, LayoutList, LayoutGrid,
-  Headphones, FileText, Image as ImageIcon, Users, X,
+  Headphones, FileText, Image as ImageIcon, Users, X, Lock, ShoppingBag, Check,
 } from "lucide-react";
 import { WorkListRow, type WorkListRowItem } from "@/components/WorkListRow";
 import type { FeedRow } from "@shared/coreDataTypes";
+import { useAuth } from "@/_core/hooks/useAuth";
+import { toast } from "sonner";
+import { getLoginUrl } from "@/const";
 
 // ── Section definitions ────────────────────────────────────────────
 const SECTIONS = [
@@ -340,6 +343,252 @@ function CathedralSkeleton() {
   return <div className="space-y-3 animate-pulse">{Array.from({ length: 8 }).map((_, i) => <div key={i} className="h-16 rounded-xl bg-[var(--void-3)]" />)}</div>;
 }
 
+// ── Keeper Skins Section ───────────────────────────────────────────
+function KeeperSkinsSection() {
+  const { user } = useAuth();
+  const utils = trpc.useUtils();
+  const [selectedItem, setSelectedItem] = useState<any | null>(null);
+  const [equippingId, setEquippingId] = useState<number | null>(null);
+  const [purchasingId, setPurchasingId] = useState<number | null>(null);
+
+  const equippedAvatarItemId = (user as any)?.equippedAvatarItemId ?? null;
+
+  const { data: items = [], isLoading } = trpc.marketplace.listItems.useQuery(
+    { type: "skin", limit: 20 },
+    { staleTime: 3 * 60 * 1000, refetchOnWindowFocus: false }
+  );
+
+  const equipAvatar = trpc.marketplace.equipAvatar.useMutation({
+    onSuccess: () => {
+      toast.success("Avatar equipped! Your Keeper portrait has been updated.");
+      utils.marketplace.listItems.invalidate();
+      utils.auth.me.invalidate();
+      setEquippingId(null);
+      setSelectedItem(null);
+    },
+    onError: (err) => { toast.error(err.message ?? "Equip failed."); setEquippingId(null); },
+  });
+
+  const createCheckout = trpc.marketplace.createCheckout.useMutation({
+    onSuccess: (data) => {
+      if (data.url) window.open(data.url, "_blank");
+      setPurchasingId(null);
+    },
+    onError: (err) => { toast.error(err.message ?? "Purchase failed."); setPurchasingId(null); },
+  });
+
+  const handleEquip = (item: any) => {
+    if (!user) { window.location.href = getLoginUrl("/explore"); return; }
+    setEquippingId(item.id);
+    equipAvatar.mutate({ itemId: item.id });
+  };
+
+  const handleBuy = (item: any) => {
+    if (!user) { window.location.href = getLoginUrl("/explore"); return; }
+    if (item.priceCents === 0) {
+      // Free item — equip directly
+      handleEquip(item);
+      return;
+    }
+    setPurchasingId(item.id);
+    createCheckout.mutate({ itemId: item.id, origin: window.location.origin });
+  };
+
+  if (isLoading || items.length === 0) return null;
+
+  return (
+    <div className="pt-8">
+      {/* Section header */}
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <ShoppingBag className="w-5 h-5 text-[var(--gold)]" />
+            <h2 className="font-heading font-bold tracking-wide text-lg text-[var(--ln-parchment)]">Keeper Skins</h2>
+          </div>
+          <p className="text-xs text-[var(--stone-shadow)] mt-0.5">Equip a portrait to your Keeper — each skin is a provenance-anchored identity</p>
+        </div>
+        <Link href="/marketplace" className="text-xs text-[var(--gold)] hover:underline flex items-center gap-1">
+          View all <ChevronRight className="w-3 h-3" />
+        </Link>
+      </div>
+
+      {/* Skin grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+        {(items as any[]).map((item) => {
+          const isEquipped = equippedAvatarItemId === item.id;
+          const isFree = item.priceCents === 0;
+          return (
+            <div
+              key={item.id}
+              className="relative flex flex-col cursor-pointer group"
+              style={{
+                border: `1px solid ${isEquipped ? "var(--ln-gold)" : "rgba(255,255,255,0.08)"}`,
+                borderRadius: 8,
+                background: isEquipped ? "rgba(196,154,40,0.06)" : "var(--ln-panel)",
+                boxShadow: isEquipped ? "0 0 16px rgba(196,154,40,0.2)" : "none",
+                transition: "all 0.2s",
+              }}
+              onClick={() => setSelectedItem(item)}
+            >
+              {/* Portrait */}
+              <div className="relative overflow-hidden" style={{ aspectRatio: "3/4", borderRadius: "7px 7px 0 0" }}>
+                <img
+                  src={item.artworkUrl}
+                  alt={item.title}
+                  className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300"
+                />
+                {/* Equipped badge */}
+                {isEquipped && (
+                  <div className="absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center" style={{ background: "var(--ln-gold)" }}>
+                    <Check style={{ width: 10, height: 10, color: "#000" }} />
+                  </div>
+                )}
+                {/* Price badge */}
+                <div
+                  className="absolute bottom-2 left-2 px-1.5 py-0.5 rounded text-xs font-mono"
+                  style={{
+                    background: isFree ? "rgba(34,197,94,0.2)" : "rgba(0,0,0,0.7)",
+                    border: `1px solid ${isFree ? "rgba(34,197,94,0.4)" : "rgba(255,255,255,0.15)"}`,
+                    color: isFree ? "#4ade80" : "var(--ln-parchment)",
+                    fontSize: "0.6rem",
+                  }}
+                >
+                  {isFree ? "FREE" : `$${(item.priceCents / 100).toFixed(2)}`}
+                </div>
+              </div>
+              {/* Name */}
+              <div className="p-2">
+                <div className="text-xs font-semibold truncate" style={{ color: "var(--ln-parchment)", fontSize: "0.65rem" }}>
+                  {item.title.replace("Keeper Skin Pack — ", "")}
+                </div>
+                {item.artistCredit && (
+                  <div className="text-xs mt-0.5 truncate" style={{ color: "var(--stone-shadow)", fontSize: "0.55rem" }}>
+                    {item.artistCredit}
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Detail / Purchase modal */}
+      {selectedItem && (
+        <div
+          style={{ position: "fixed", inset: 0, zIndex: 9999, background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "20px", overflowY: "auto" }}
+          onClick={() => setSelectedItem(null)}
+        >
+          <div
+            style={{ background: "var(--ln-panel)", border: "1px solid var(--ln-panel-border)", borderRadius: "12px", padding: "0", maxWidth: "480px", width: "100%", marginTop: "40px", overflow: "hidden" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Portrait hero */}
+            <div className="relative" style={{ aspectRatio: "16/9" }}>
+              <img src={selectedItem.artworkUrl} alt={selectedItem.title} className="w-full h-full object-cover object-top" />
+              <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.9) 100%)" }} />
+              <button
+                onClick={() => setSelectedItem(null)}
+                style={{ position: "absolute", top: 12, right: 12, width: 28, height: 28, borderRadius: "50%", background: "rgba(0,0,0,0.6)", border: "1px solid rgba(255,255,255,0.2)", color: "white", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
+              >
+                <X style={{ width: 14, height: 14 }} />
+              </button>
+              <div style={{ position: "absolute", bottom: 16, left: 16, right: 16 }}>
+                <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "10px", letterSpacing: "0.15em", color: "var(--ln-gold)", marginBottom: "4px", textTransform: "uppercase" }}>
+                  Keeper Skin
+                </div>
+                <div style={{ fontFamily: "var(--font-display)", fontSize: "20px", fontWeight: 700, color: "white", lineHeight: 1.2 }}>
+                  {selectedItem.title.replace("Keeper Skin Pack — ", "")}
+                </div>
+              </div>
+            </div>
+
+            {/* Details */}
+            <div style={{ padding: "20px" }}>
+              {selectedItem.description && (
+                <p style={{ fontSize: "13px", color: "rgba(255,255,255,0.6)", lineHeight: 1.6, marginBottom: "16px" }}>
+                  {selectedItem.description}
+                </p>
+              )}
+              <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "16px" }}>
+                {selectedItem.artStyle && (
+                  <span style={{ fontSize: "10px", fontFamily: "monospace", padding: "3px 8px", borderRadius: 4, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.5)" }}>
+                    {selectedItem.artStyle}
+                  </span>
+                )}
+                {selectedItem.artistCredit && (
+                  <span style={{ fontSize: "10px", fontFamily: "monospace", padding: "3px 8px", borderRadius: 4, background: "rgba(196,154,40,0.1)", border: "1px solid rgba(196,154,40,0.3)", color: "var(--ln-gold)" }}>
+                    {selectedItem.artistCredit}
+                  </span>
+                )}
+              </div>
+
+              {/* Lock/Unlock state */}
+              {equippedAvatarItemId === selectedItem.id ? (
+                <div style={{ padding: "12px 16px", borderRadius: 8, background: "rgba(196,154,40,0.1)", border: "1px solid rgba(196,154,40,0.3)", display: "flex", alignItems: "center", gap: 8 }}>
+                  <Check style={{ width: 16, height: 16, color: "var(--ln-gold)", flexShrink: 0 }} />
+                  <span style={{ fontSize: "13px", color: "var(--ln-gold)", fontFamily: "'Space Mono', monospace" }}>Currently Equipped</span>
+                </div>
+              ) : (
+                <div style={{ display: "flex", gap: "10px" }}>
+                  {selectedItem.priceCents === 0 ? (
+                    <button
+                      onClick={() => handleEquip(selectedItem)}
+                      disabled={equippingId === selectedItem.id}
+                      style={{
+                        flex: 1, padding: "12px",
+                        background: "var(--ln-gold)", color: "#000",
+                        border: "none", borderRadius: 8,
+                        fontFamily: "'Space Mono', monospace", fontWeight: 700, fontSize: "12px",
+                        letterSpacing: "0.08em", cursor: equippingId === selectedItem.id ? "wait" : "pointer",
+                        opacity: equippingId === selectedItem.id ? 0.7 : 1,
+                      }}
+                    >
+                      {equippingId === selectedItem.id ? "Equipping…" : "EQUIP FREE SKIN"}
+                    </button>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => handleBuy(selectedItem)}
+                        disabled={purchasingId === selectedItem.id}
+                        style={{
+                          flex: 1, padding: "12px",
+                          background: "var(--ln-gold)", color: "#000",
+                          border: "none", borderRadius: 8,
+                          fontFamily: "'Space Mono', monospace", fontWeight: 700, fontSize: "12px",
+                          letterSpacing: "0.08em", cursor: purchasingId === selectedItem.id ? "wait" : "pointer",
+                          opacity: purchasingId === selectedItem.id ? 0.7 : 1,
+                        }}
+                      >
+                        {purchasingId === selectedItem.id ? "Opening…" : `PURCHASE · $${(selectedItem.priceCents / 100).toFixed(2)}`}
+                      </button>
+                      <button
+                        onClick={() => handleEquip(selectedItem)}
+                        disabled={equippingId === selectedItem.id}
+                        style={{
+                          padding: "12px 16px",
+                          background: "rgba(255,255,255,0.06)",
+                          border: "1px solid rgba(255,255,255,0.12)",
+                          color: "rgba(255,255,255,0.6)",
+                          borderRadius: 8,
+                          fontFamily: "'Space Mono', monospace", fontSize: "11px",
+                          cursor: equippingId === selectedItem.id ? "wait" : "pointer",
+                        }}
+                        title="Try equipping without purchase (free preview)"
+                      >
+                        {equippingId === selectedItem.id ? "…" : "Try"}
+                      </button>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 const FILTER_CHIPS_DEF = [
   { label: "All", icon: <LayoutList className="w-3 h-3" /> },
   { label: "Music", icon: <Headphones className="w-3 h-3" /> },
@@ -429,6 +678,9 @@ export default function ExplorePage() {
           <>
             {activeFilter === "All" && !search && !selectedCreatorId && viewMode !== "creator" && (
               <div className="pt-8"><FeaturedStrip rows={data.featured} /></div>
+            )}
+            {activeFilter === "All" && !search && !selectedCreatorId && viewMode !== "creator" && (
+              <KeeperSkinsSection />
             )}
             {visibleSections.map((section) => (
               <CathedralSection key={section.key} section={section} rows={data[section.key]} search={search} viewMode={viewMode} />

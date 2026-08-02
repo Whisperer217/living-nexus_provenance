@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { toast } from "sonner";
-import { ArrowLeft, Lock, Upload, Check, Loader2, Zap, BookOpen, Trash2, RotateCcw, X, Tag } from "lucide-react";
+import { ArrowLeft, Lock, Upload, Check, Loader2, Zap, BookOpen, Trash2, RotateCcw, X, Tag, Store, ShieldCheck } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import { SKIN_IMAGES } from "@/components/FloatingAvatar";
@@ -129,7 +129,16 @@ export default function Keeper() {
   const unlockMutation = trpc.keeper.unlockSkin.useMutation();
   const setActiveMutation = trpc.keeper.setActiveSkin.useMutation();
   const uploadMutation = trpc.keeper.uploadCustomPortrait.useMutation();
+  const publishMutation = trpc.keeper.publishPortraitToStore.useMutation({
+    onSuccess: () => {
+      toast.success("Portrait published to the store!");
+      setPublishModal(false);
+    },
+    onError: (err) => toast.error(err.message ?? "Publish failed."),
+  });
   const utils = trpc.useUtils();
+  const [publishModal, setPublishModal] = useState(false);
+  const [publishForm, setPublishForm] = useState({ title: "", description: "", priceCents: 0, artStyle: "photograph", artistCredit: "" });
 
   /** Reload a saved note into the Keeper chat by navigating to the Keeper chat page with the note pre-filled */
   const handleReloadNote = (content: string, noteId: number) => {
@@ -149,6 +158,8 @@ export default function Keeper() {
   const ownedSkins = new Set(profile?.ownedSkins ?? []);
   const activeSkinId = profile?.activeSkinId ?? "hooded-scholar";
   const stats = profile?.stats;
+  const isFounder = (user as any)?.role === "founder" || (user as any)?.role === "admin";
+  const hasCustomPortrait = !!(profile?.customImageUrl || uploadPreview);
 
   const activeSkin = SKINS.find(s => s.id === activeSkinId) ?? SKINS[0];
   const activeSkinImg = activeSkinId === "custom" && profile?.customImageUrl
@@ -415,13 +426,29 @@ export default function Keeper() {
                 className="absolute bottom-0 right-0 w-4 h-4"
                 style={{ borderBottom: `2px solid ${activeSkin.color}`, borderRight: `2px solid ${activeSkin.color}` }}
               />
-              {/* 3D Personal Nexus Avatar — procedural sacred geometry seeded from user ID */}
-              <div className="w-48 h-64 overflow-hidden" style={{ background: "transparent" }}>
-                <NexusAvatarViewer
-                  seed={user?.id ?? "default"}
-                  height={256}
-                  accentColor={activeSkin.color}
-                />
+              {/* Active portrait — shows uploaded image when custom skin is active, else 3D geometry */}
+              <div className="w-48 h-64 overflow-hidden relative" style={{ background: "transparent" }}>
+                {activeSkinId === "custom" && (uploadPreview || profile?.customImageUrl) ? (
+                  <img
+                    src={uploadPreview ?? profile?.customImageUrl ?? ""}
+                    alt="Your Keeper portrait"
+                    className="w-full h-full object-cover"
+                    style={{ borderRadius: 2 }}
+                  />
+                ) : activeSkin.id !== "custom" && SKIN_IMAGES[activeSkin.id] ? (
+                  <img
+                    src={SKIN_IMAGES[activeSkin.id]}
+                    alt={activeSkin.name}
+                    className="w-full h-full object-cover"
+                    style={{ borderRadius: 2 }}
+                  />
+                ) : (
+                  <NexusAvatarViewer
+                    seed={user?.id ?? "default"}
+                    height={256}
+                    accentColor={activeSkin.color}
+                  />
+                )}
               </div>
             </div>
 
@@ -660,7 +687,7 @@ export default function Keeper() {
                       ))}
 
                       {/* Action button */}
-                      <div className="mt-2">
+                      <div className="mt-2 flex flex-col gap-1.5">
                         {skin.isUpload ? (
                           <>
                             <input
@@ -687,6 +714,23 @@ export default function Keeper() {
                                 : <Upload className="w-3 h-3 inline mr-1" />}
                               {owned ? "Change Image" : "Upload & Unlock"}
                             </button>
+                            {/* Add to Store — available to ALL users with a portrait uploaded */}
+                            {hasCustomPortrait && (
+                              <button
+                                className="w-full py-1.5 rounded text-xs transition-all hover:opacity-80"
+                                style={{
+                                  background: "rgba(196,154,40,0.12)",
+                                  border: "1px solid rgba(196,154,40,0.4)",
+                                  color: "var(--ln-gold)",
+                                  fontFamily: "'Space Mono', monospace",
+                                  fontSize: "0.6rem",
+                                }}
+                                onClick={(e) => { e.stopPropagation(); setPublishModal(true); }}
+                              >
+                                <Store className="w-3 h-3 inline mr-1" />
+                                Add to Store
+                              </button>
+                            )}
                           </>
                         ) : isActive ? (
                           <div
@@ -776,6 +820,148 @@ export default function Keeper() {
           </div>
         </div>
       </div>
+
+      {/* ── Publish Portrait to Store Modal ───────────────────────────────── */}
+      {publishModal && (
+        <div
+          style={{ position: "fixed", inset: 0, zIndex: 9999, background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "20px", overflowY: "auto" }}
+          onClick={() => setPublishModal(false)}
+        >
+          <div
+            style={{ background: "var(--ln-panel)", border: "1px solid var(--ln-panel-border)", borderRadius: "12px", padding: "28px", maxWidth: "520px", width: "100%", marginTop: "40px" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "20px" }}>
+              {(uploadPreview || profile?.customImageUrl) && (
+                <img
+                  src={uploadPreview ?? profile?.customImageUrl ?? ""}
+                  alt="Your portrait"
+                  style={{ width: "56px", height: "56px", objectFit: "cover", borderRadius: "6px", border: "1px solid var(--ln-gold)", flexShrink: 0 }}
+                />
+              )}
+              <div>
+                <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "10px", letterSpacing: "0.15em", color: "var(--ln-gold)", marginBottom: "4px", textTransform: "uppercase" }}>
+                  Platform Store
+                </div>
+                <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "16px", fontWeight: 700, color: "var(--ln-parchment)" }}>
+                  Publish Your Portrait
+                </div>
+                <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.45)", marginTop: "2px" }}>
+                  {isFounder ? "Founders can set a price. Others publish free." : "Your portrait will be listed free in the store."}
+                </div>
+              </div>
+            </div>
+
+            {/* Form */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+              <div>
+                <label style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.1em", color: "rgba(255,255,255,0.5)", textTransform: "uppercase", display: "block", marginBottom: "6px" }}>
+                  Title *
+                </label>
+                <input
+                  value={publishForm.title}
+                  onChange={(e) => setPublishForm(f => ({ ...f, title: e.target.value }))}
+                  placeholder="e.g. The Keeper — Portrait of a Witness"
+                  style={{ width: "100%", padding: "10px 12px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: "8px", color: "var(--ln-parchment)", fontSize: "14px", fontFamily: "var(--font-body)", boxSizing: "border-box" }}
+                />
+              </div>
+              <div>
+                <label style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.1em", color: "rgba(255,255,255,0.5)", textTransform: "uppercase", display: "block", marginBottom: "6px" }}>
+                  Description
+                </label>
+                <textarea
+                  value={publishForm.description}
+                  onChange={(e) => setPublishForm(f => ({ ...f, description: e.target.value }))}
+                  placeholder="Describe this portrait, its lore, and what it represents…"
+                  rows={3}
+                  style={{ width: "100%", padding: "10px 12px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: "8px", color: "var(--ln-parchment)", fontSize: "13px", fontFamily: "var(--font-body)", resize: "vertical", boxSizing: "border-box" }}
+                />
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: isFounder ? "1fr 1fr" : "1fr", gap: "12px" }}>
+                <div>
+                  <label style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.1em", color: "rgba(255,255,255,0.5)", textTransform: "uppercase", display: "block", marginBottom: "6px" }}>
+                    Art Style
+                  </label>
+                  <select
+                    value={publishForm.artStyle}
+                    onChange={(e) => setPublishForm(f => ({ ...f, artStyle: e.target.value }))}
+                    style={{ width: "100%", padding: "10px 12px", background: "var(--ln-panel)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: "8px", color: "var(--ln-parchment)", fontSize: "13px", fontFamily: "var(--font-body)" }}
+                  >
+                    {["photograph", "digital concept art", "AI-generated", "hand-drawn", "3D render", "pixel art", "watercolor"].map(s => (
+                      <option key={s} value={s}>{s}</option>
+                    ))}
+                  </select>
+                </div>
+                {isFounder && (
+                  <div>
+                    <label style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.1em", color: "rgba(255,255,255,0.5)", textTransform: "uppercase", display: "block", marginBottom: "6px" }}>
+                      Price (USD)
+                    </label>
+                    <input
+                      type="number"
+                      min={0}
+                      step={0.01}
+                      value={publishForm.priceCents / 100}
+                      onChange={(e) => setPublishForm(f => ({ ...f, priceCents: Math.round(parseFloat(e.target.value || "0") * 100) }))}
+                      placeholder="0.00 = Free"
+                      style={{ width: "100%", padding: "10px 12px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: "8px", color: "var(--ln-parchment)", fontSize: "14px", fontFamily: "var(--font-body)", boxSizing: "border-box" }}
+                    />
+                  </div>
+                )}
+              </div>
+              <div>
+                <label style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.1em", color: "rgba(255,255,255,0.5)", textTransform: "uppercase", display: "block", marginBottom: "6px" }}>
+                  Artist Credit
+                </label>
+                <input
+                  value={publishForm.artistCredit}
+                  onChange={(e) => setPublishForm(f => ({ ...f, artistCredit: e.target.value }))}
+                  placeholder="Your name or handle"
+                  style={{ width: "100%", padding: "10px 12px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: "8px", color: "var(--ln-parchment)", fontSize: "14px", fontFamily: "var(--font-body)", boxSizing: "border-box" }}
+                />
+              </div>
+            </div>
+
+            {/* Submit */}
+            <div style={{ display: "flex", gap: "10px", marginTop: "24px" }}>
+              <button
+                onClick={() => {
+                  if (!publishForm.title.trim()) { toast.error("Title is required."); return; }
+                  publishMutation.mutate({
+                    title: publishForm.title,
+                    description: publishForm.description || undefined,
+                    priceCents: publishForm.priceCents,
+                    artStyle: publishForm.artStyle,
+                    artistCredit: publishForm.artistCredit || undefined,
+                  });
+                }}
+                disabled={publishMutation.isPending}
+                style={{
+                  flex: 1, padding: "12px",
+                  background: "var(--ln-gold)", color: "#000",
+                  border: "none", borderRadius: "8px",
+                  fontFamily: "'Space Mono', monospace", fontWeight: 700, fontSize: "12px",
+                  letterSpacing: "0.08em", cursor: publishMutation.isPending ? "wait" : "pointer",
+                  opacity: publishMutation.isPending ? 0.7 : 1,
+                }}
+              >
+                {publishMutation.isPending ? "Publishing…" : "PUBLISH TO STORE"}
+              </button>
+              <button
+                onClick={() => setPublishModal(false)}
+                style={{
+                  padding: "12px 20px", background: "transparent",
+                  color: "rgba(255,255,255,0.4)", border: "1px solid rgba(255,255,255,0.1)",
+                  borderRadius: "8px", fontFamily: "'Space Mono', monospace", fontSize: "12px", cursor: "pointer",
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

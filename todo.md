@@ -6745,3 +6745,10 @@
 - [x] VerifyPage: add authorship category badge with LOCKED pill after medium/WID badge row
 - [x] ArchivePage: add authorship category badge in song row title area
 - [x] WorkListRow: add aiDisclosure prop + authorship category badge on xl screens
+
+## Avatar Store Integration
+- [x] KeeperPage: Add to Store button on custom portrait card (all users with portrait)
+- [x] KeeperPage: Publish Portrait modal with title, description, art style, price (founders), artist credit
+- [x] KeeperPage: publishPortraitToStore server procedure (founders can set price, others free)
+- [x] ExplorePage: Keeper Skins section with 3/4/5-col grid, lock/unlock/equip modal
+- [x] ExplorePage: Purchase modal with equip + buy actions, equipped badge, free/price badge
