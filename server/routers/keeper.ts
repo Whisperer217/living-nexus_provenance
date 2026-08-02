@@ -699,4 +699,44 @@ Never collapse multiple sections into a single block. Always label clearly.
         return { id: (result as any)[0]?.insertId, artworkUrl: skin.portraitUrl };
       }),
 
+    /**
+     * Public: list all creator-uploaded portraits so they appear in the Keeper skin grid
+     * and on the Explore page. Returns one entry per creator who has a custom portrait.
+     */
+    listCreatorPortraits: publicProcedure
+      .input(z.object({ limit: z.number().min(1).max(200).default(100) }).optional())
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) return [];
+        const { keeperSkins, users } = await import('../../drizzle/schema');
+        const { eq, and, isNotNull, ne } = await import('drizzle-orm');
+        const limit = input?.limit ?? 100;
+        const rows = await db
+          .select({
+            userId: keeperSkins.userId,
+            portraitUrl: keeperSkins.portraitUrl,
+            unlockedAt: keeperSkins.unlockedAt,
+            creatorName: users.name,
+            artistHandle: users.artistHandle,
+          })
+          .from(keeperSkins)
+          .innerJoin(users, eq(keeperSkins.userId, users.id))
+          .where(
+            and(
+              eq(keeperSkins.isCustom, true),
+              isNotNull(keeperSkins.portraitUrl),
+              ne(keeperSkins.portraitUrl, ''),
+            )
+          )
+          .orderBy(keeperSkins.unlockedAt)
+          .limit(limit);
+        return rows.map((r: typeof rows[number]) => ({
+          userId: r.userId,
+          portraitUrl: r.portraitUrl,
+          creatorName: r.creatorName ?? 'Creator',
+          artistHandle: r.artistHandle ?? null,
+          unlockedAt: r.unlockedAt,
+        }));
+      }),
+
   });

@@ -105,6 +105,56 @@ const STAT_LABELS: Array<{ key: AttrKey; label: string; isCount: boolean }> = [
   { key: "corpusSize",       label: "Corpus Size",        isCount: true },
 ];
 
+// ─── Community Portraits (all creator-uploaded avatars) ─────────────────────
+
+function CommunityPortraitsSection() {
+  const { data: portraits = [], isLoading } = trpc.keeper.listCreatorPortraits.useQuery(
+    { limit: 100 },
+    { staleTime: 5 * 60 * 1000, refetchOnWindowFocus: false }
+  );
+
+  if (isLoading || portraits.length === 0) return null;
+
+  return (
+    <div className="mt-8">
+      <div
+        className="text-xs uppercase tracking-widest mb-3"
+        style={{ color: "var(--ln-gold)", fontFamily: "'Space Mono', monospace", fontSize: "0.65rem" }}
+      >
+        Community Portraits
+      </div>
+      <p className="text-xs mb-4" style={{ color: "var(--ln-smoke)", lineHeight: 1.5 }}>
+        Portraits uploaded by creators on Living Nexus. Each is a sovereign identity anchored to their registry.
+      </p>
+      <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+        {(portraits as any[]).map((p) => (
+          <div
+            key={p.userId}
+            className="relative flex flex-col"
+            style={{ border: "1px solid var(--ln-panel-border)", borderRadius: 6, background: "var(--ln-panel)", overflow: "hidden" }}
+          >
+            <div style={{ aspectRatio: "3/4", overflow: "hidden" }}>
+              <img
+                src={p.portraitUrl}
+                alt={p.creatorName ?? "Creator"}
+                className="w-full h-full object-cover object-top"
+              />
+            </div>
+            <div className="p-1.5">
+              <div
+                className="truncate"
+                style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.55rem", color: "var(--ln-parchment)", fontWeight: 600 }}
+              >
+                {p.artistHandle ? `@${p.artistHandle}` : (p.creatorName ?? "Creator")}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function Keeper() {
@@ -786,6 +836,9 @@ export default function Keeper() {
               );
             })}
           </div>
+
+          {/* ── Community Creator Portraits ─────────────────────────── */}
+          <CommunityPortraitsSection />
 
           {/* Loadout slots */}
           <div className="mt-8">

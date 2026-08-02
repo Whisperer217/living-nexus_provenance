@@ -353,10 +353,33 @@ function KeeperSkinsSection() {
 
   const equippedAvatarItemId = (user as any)?.equippedAvatarItemId ?? null;
 
-  const { data: items = [], isLoading } = trpc.marketplace.listItems.useQuery(
+  const { data: marketplaceItems = [], isLoading: mktLoading } = trpc.marketplace.listItems.useQuery(
     { type: "skin", limit: 20 },
     { staleTime: 3 * 60 * 1000, refetchOnWindowFocus: false }
   );
+
+  // Also fetch all creator-uploaded portraits
+  const { data: creatorPortraits = [], isLoading: portraitsLoading } = trpc.keeper.listCreatorPortraits.useQuery(
+    { limit: 100 },
+    { staleTime: 5 * 60 * 1000, refetchOnWindowFocus: false }
+  );
+
+  // Merge: marketplace items first, then creator portraits not already in marketplace
+  const marketplaceArtworkUrls = new Set((marketplaceItems as any[]).map((i: any) => i.artworkUrl));
+  const creatorCards = (creatorPortraits as any[])
+    .filter((p: any) => !marketplaceArtworkUrls.has(p.portraitUrl))
+    .map((p: any) => ({
+      id: `creator-${p.userId}`,
+      title: p.artistHandle ? `@${p.artistHandle}` : (p.creatorName ?? "Creator"),
+      artworkUrl: p.portraitUrl,
+      priceCents: 0,
+      description: `Portrait uploaded by ${p.creatorName ?? "a creator"} on Living Nexus.`,
+      artistCredit: p.artistHandle ? `@${p.artistHandle}` : null,
+      artStyle: null,
+      isCreatorPortrait: true,
+    }));
+  const items = [...(marketplaceItems as any[]), ...creatorCards];
+  const isLoading = mktLoading || portraitsLoading;
 
   const equipAvatar = trpc.marketplace.equipAvatar.useMutation({
     onSuccess: () => {
