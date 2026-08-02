@@ -6676,3 +6676,13 @@
 - [x] Verified: Edit drawer content (fields/data) is identical between ArchivePage and SongDetailPage — same 19 fields passed to openEditor()
 - [x] Verified: "Mirror" request already satisfied — single CreativeDrawer component renders same form regardless of entry point
 - [x] TypeScript: 0 errors
+
+## Explore Page Cathedral Redesign
+
+- [x] Add `songs.exploreIndex` tRPC procedure — blended randomized discovery feed with section buckets
+- [x] Build `SupportCreatorDrawer` component — one-time tip, patronage, purchase, license, follow, share, provenance
+- [x] Build `WorkListRow` component — premium information-dense list row with WID badge, type chip, quick-play
+- [x] Build `CathedralSectionDivider` component — large architectural section headers with gold rule
+- [x] Rebuild `ExplorePage.tsx` — cathedral architecture with 11 sections, list-first default view, randomized blended feed
+- [ ] Add `WidBadge` component — compact WID display with verification link
+- [ ] Write vitest for `exploreIndex` procedure

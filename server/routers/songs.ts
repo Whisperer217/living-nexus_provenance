@@ -263,6 +263,30 @@ export const songsRouter = router({
      * Falls back to all-time newest if no works exist within the window.
      */
     newThisWeek: publicProcedure.input(z.object({ genre: z.string().optional(), contentType: z.enum(["audio", "lyrics", "manuscript", "comic", "written", "game", "gcode", "3dmodel"]).optional(), limit: z.number().max(2000).optional() }).optional()).query(async ({ input }) => getNewThisWeek(input as any ?? {})),
+    /**
+     * @version 1.0.0
+     * Cathedral Explore index — returns blended section buckets for the Explore page.
+     * Each section is independently randomized/scored so every page load reveals new works.
+     */
+    exploreIndex: publicProcedure
+      .input(z.object({ seed: z.number().optional() }).optional())
+      .query(async ({ input }) => {
+        const seed = input?.seed ?? Math.floor(Math.random() * 999999);
+        const [featured, newManifestations, music, books, research, visualWorks, film, doctrine, recentlyWitnessed, hiddenGems, trendingWorks] = await Promise.all([
+          getPublicSongs({ randomize: true, seed, limit: 8 }),
+          getNewThisWeek({ limit: 12 }),
+          getPublicSongs({ contentType: 'audio', randomize: true, seed: seed + 1, limit: 20 }),
+          getPublicSongs({ contentType: 'manuscript', randomize: true, seed: seed + 2, limit: 12 }),
+          getPublicSongs({ contentType: 'lyrics', randomize: true, seed: seed + 3, limit: 12 }),
+          getPublicSongs({ contentType: 'image' as any, randomize: true, seed: seed + 4, limit: 12 }),
+          getPublicSongs({ contentType: 'game' as any, randomize: true, seed: seed + 5, limit: 12 }),
+          getPublicSongs({ contentType: 'comic', randomize: true, seed: seed + 6, limit: 12 }),
+          getPublicSongs({ randomize: false, limit: 12 }),
+          getPublicSongs({ randomize: true, seed: seed + 7, limit: 12 }),
+          getTrendingWorks({ limit: 12 }),
+        ]);
+        return { seed, featured, newManifestations, music, books, research, visualWorks, film, doctrine, recentlyWitnessed, hiddenGems, trending: trendingWorks };
+      }),
     updateCredits: protectedProcedure.input(z.object({ songId: z.number().int(), creditsJson: z.string().max(4096) })).mutation(async ({ ctx, input }) => {
       const song = await getSongById(input.songId);
       if (!song) throw new TRPCError({ code: "NOT_FOUND", message: "Song not found" });
