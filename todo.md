@@ -6697,3 +6697,27 @@
 - [x] Fix WorkListRow action buttons — visible on mobile touch (sm:opacity-0 not opacity-0)
 - [x] Add aria-label to all WorkListRow action buttons (Like, Add to collection, Support)
 - [x] Add staleTime + refetchOnWindowFocus:false to exploreIndex query (already present)
+
+## Refinement Engine — Aug 2 2026
+- [x] Write refinement/types.ts — all shared interfaces (DoctrineResult, DriftReport, DebtLedger, PageScore, PassResult, StewardReport)
+- [x] Write refinement/doctrine.ts — DoctrineValidator (7 questions, 9 components)
+- [x] Write refinement/drift.ts — DesignDriftScanner (typography, color, language, animation drift)
+- [x] Write refinement/debt.ts — ArchitecturalDebtLedger (10 open items)
+- [x] Write refinement/scorer.ts — PageScorer (10 pages, 7 dimensions)
+- [x] Write refinement/lessons.ts — LessonsLog (institutional memory, 12 lessons)
+- [x] Write refinement/steward.ts — PlatformSteward orchestrator (14-step pipeline)
+- [x] Write refinement/pipeline.ts — 14-step pipeline definition
+- [x] Write all 7 pass classes (Typography, CreatorExperience, ApiConsistency, Performance, Explore, Accessibility, Animation)
+- [x] Add pnpm refine script to package.json
+- [x] Add refinement/ to tsconfig.json include
+- [x] Run first steward pass — Platform Score: 69/100 Grade: C (2/9 doctrine components pass)
+- [ ] Fix SongDetailPage doctrine violations: attribution, discoverability
+- [ ] Fix ExplorePage doctrine violations: discoverability, support
+- [ ] Fix ArchivePage doctrine violations: attribution, support
+- [ ] Fix HomePage doctrine violations: attribution, discoverability
+- [ ] Fix DashboardPage doctrine violation: support
+- [ ] Fix WorkListRow doctrine violation: discoverability
+- [ ] Fix SupportCreatorDrawer doctrine violations: provenance, discoverability
+- [ ] Replace 46 hardcoded font sizes with ln-* tokens (Typography Pass — 15 potential score)
+- [ ] Fix 5 Creator Experience Pass findings (25 potential score)
+- [ ] Resolve 117 Animation Pass warnings (framer-motion + canvas RAF guards)
