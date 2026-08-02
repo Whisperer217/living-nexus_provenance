@@ -241,10 +241,10 @@ function CathedralDivider({ title, subtitle, icon, accentColor, count }: { title
         <div className={`flex-shrink-0 w-10 h-10 rounded-xl bg-[var(--void-3)] border border-[var(--gold)]/20 flex items-center justify-center ${accentColor}`}>{icon}</div>
         <div className="flex-1 min-w-0">
           <div className="flex items-baseline gap-3 flex-wrap">
-            <h2 className="text-2xl font-serif text-[var(--stone-light)] tracking-tight leading-none">{title}</h2>
-            {count > 0 && <span className="text-xs font-mono text-[var(--stone-shadow)] bg-[var(--void-3)] border border-white/8 px-2 py-0.5 rounded-full">{count} works</span>}
+            <h2 className="font-heading font-semibold tracking-[0.06em] leading-none" style={{ fontSize: 'clamp(1.25rem,1.1rem+0.75vw,1.75rem)', color: 'var(--ln-parchment)' }}>{title}</h2>
+            {count > 0 && <span className="text-[11px] font-mono px-2 py-0.5 rounded-full border" style={{ color: 'var(--ln-smoke)', background: 'var(--void-3)', borderColor: 'rgba(255,255,255,0.08)' }}>{count} works</span>}
           </div>
-          <p className="text-sm text-[var(--stone-shadow)] mt-1.5 leading-relaxed">{subtitle}</p>
+          <p className="font-editorial italic leading-relaxed mt-1.5" style={{ fontSize: 'clamp(0.875rem,0.82rem+0.3vw,1rem)', color: 'var(--ln-smoke)' }}>{subtitle}</p>
         </div>
       </div>
     </div>
@@ -383,8 +383,8 @@ export default function ExplorePage() {
           {/* Row 1: Title + controls */}
           <div className="flex items-center justify-between pt-5 pb-2 gap-3 flex-wrap">
             <div className="flex-shrink-0">
-              <h1 className="text-3xl sm:text-4xl font-serif text-[var(--stone-light)] tracking-tight leading-none">Explore</h1>
-              <p className="text-[10px] text-[var(--stone-shadow)] mt-0.5 font-mono uppercase tracking-widest hidden sm:block">The Grand Hall of Human Creative Contribution</p>
+              <h1 className="font-heading font-bold tracking-[0.08em] leading-none" style={{ fontSize: 'clamp(1.75rem,1.5rem+1.5vw,2.75rem)', color: 'var(--ln-parchment)' }}>Explore</h1>
+              <p className="font-editorial italic mt-1 hidden sm:block" style={{ fontSize: 'clamp(0.75rem,0.7rem+0.25vw,0.875rem)', color: 'var(--ln-smoke)', letterSpacing: '0.02em' }}>The Grand Hall of Human Creative Contribution</p>
             </div>
             <div className="flex items-center gap-2 sm:gap-3 flex-wrap justify-end">
               <div className="flex items-center gap-1.5">

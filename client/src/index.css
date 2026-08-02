@@ -3408,3 +3408,108 @@ h1, h2, h3, h4, h5, h6,
 :focus:not(:focus-visible) {
   outline: none;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LIVING NEXUS — Global Semantic Typography System
+   These utility classes encode the cathedral type hierarchy.
+   Use them on any page to ensure consistent rhythm and permanence.
+   ─────────────────────────────────────────────────────────────────────────
+   Font roles:
+     font-heading   → Cinzel (display, titles, section headers)
+     font-editorial → Cormorant Garamond (pull quotes, subtitles, captions)
+     font-sans      → DM Sans (body copy, UI labels, metadata)
+     font-mono      → JetBrains Mono (WIDs, timestamps, codes)
+═══════════════════════════════════════════════════════════════════════════ */
+
+/* Page-level title — used once per page, the largest text on screen */
+.ln-page-title {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(2rem, 1.6rem + 2vw, 3.5rem);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1.05;
+  color: var(--ln-parchment);
+}
+
+/* Section header — used for major content divisions */
+.ln-section-header {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(1.25rem, 1.1rem + 0.75vw, 1.875rem);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  line-height: 1.1;
+  color: var(--ln-parchment);
+}
+
+/* Sub-section header — used for card titles, work titles in detail views */
+.ln-subsection-header {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(1rem, 0.95rem + 0.25vw, 1.25rem);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+  color: var(--ln-parchment);
+}
+
+/* Editorial subtitle — used under section headers, pull quotes, origin stories */
+.ln-editorial {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(1rem, 0.95rem + 0.3vw, 1.25rem);
+  font-style: italic;
+  line-height: 1.65;
+  letter-spacing: 0.01em;
+  color: var(--ln-smoke);
+}
+
+/* Body copy — primary reading text */
+.ln-body {
+  font-family: 'DM Sans', sans-serif;
+  font-size: clamp(0.9375rem, 0.9rem + 0.2vw, 1.0625rem);
+  line-height: 1.7;
+  letter-spacing: 0.005em;
+  color: var(--ln-smoke);
+}
+
+/* Caption / metadata — secondary information, dates, genres, handles */
+.ln-caption {
+  font-family: 'DM Sans', sans-serif;
+  font-size: clamp(0.75rem, 0.72rem + 0.15vw, 0.875rem);
+  line-height: 1.5;
+  letter-spacing: 0.01em;
+  color: var(--ln-ash);
+}
+
+/* Overline — category labels, section identifiers above titles */
+.ln-overline {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(0.625rem, 0.6rem + 0.1vw, 0.75rem);
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  line-height: 1;
+  color: var(--ln-gold);
+}
+
+/* Mono — WIDs, timestamps, version numbers, technical identifiers */
+.ln-mono {
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-size: clamp(0.6875rem, 0.66rem + 0.1vw, 0.8125rem);
+  letter-spacing: 0.04em;
+  color: var(--ln-gold);
+}
+
+/* Pull quote — large editorial quote, creator testimony */
+.ln-pull-quote {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(1.25rem, 1.1rem + 0.75vw, 1.875rem);
+  font-style: italic;
+  font-weight: 300;
+  line-height: 1.55;
+  letter-spacing: 0.01em;
+  color: var(--ln-parchment);
+}
+
+/* Prose container — max-width for comfortable reading */
+.ln-prose {
+  max-width: 68ch;
+}

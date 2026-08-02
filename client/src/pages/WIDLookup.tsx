@@ -50,7 +50,7 @@ export default function WIDLookup() {
         {error && (
           <div className="ln-panel p-6 border-red-900/40">
             <p className="text-sm" style={{ color: "#e57373" }}>
-              Error querying ledger: {error.message}
+              Unable to query the provenance ledger. Please check the WID and try again.
             </p>
           </div>
         )}

@@ -775,18 +775,18 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* Activity Feed Tab */}
+        {/* Witness Activity Tab */}
         {activeTab === "activity" && (
           <div>
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h2 className="text-lg font-bold" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>Activity Feed</h2>
+                <h2 className="text-lg font-bold" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>Witness Activity</h2>
                 <p className="text-xs mt-0.5" style={{ color: "#E2E8F0" }}>All interactions on your songs — gifts, comments, and witnesses. Auto-refreshes every 30s.</p>
               </div>
             </div>
             {activityError ? (
               <DashboardErrorCard
-                section="your activity feed"
+                section="your witness activity"
                 error={activityError}
                 onRetry={() => refetchActivity()}
                 route="/dashboard#activity"

@@ -597,7 +597,7 @@ export default function CreatorProfilePage() {
     onSuccess: () => {
       refetchSubscription();
       utils.witnessSubscription.getCreatorSubscriberCount.invalidate({ creatorId: creatorIdForWitness });
-      toast.success("Unsubscribed from creator feed");
+      toast.success("Witness subscription removed.");
     },
     onError: (e: any) => toast.error(e.message),
   });

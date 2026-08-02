@@ -183,13 +183,14 @@ export function WorkListRow({ item, index, prefetchedLiked, prefetchedLikeCount 
 
         {/* Title + creator */}
         <div className="flex-1 min-w-0">
-          <p className={`text-sm font-medium truncate leading-tight ${isActive ? "text-[var(--gold)]" : "text-[var(--stone-light)] group-hover:text-white"}`}>
+          <p className={`truncate leading-tight font-medium ${isActive ? "text-[var(--gold)]" : "text-[var(--stone-light)] group-hover:text-white"}`} style={{ fontSize: 'clamp(0.875rem,0.85rem+0.1vw,0.9375rem)', fontFamily: "'DM Sans', sans-serif", letterSpacing: '0.005em' }}>
             {song.title}
           </p>
           <Link
             to={`/creator/${creator?.id}`}
             onClick={(e) => e.stopPropagation()}
-            className="text-xs text-[var(--stone-shadow)] hover:text-[var(--gold)] transition-colors truncate block"
+            className="hover:text-[var(--gold)] transition-colors truncate block"
+            style={{ fontSize: 'clamp(0.75rem,0.72rem+0.1vw,0.8125rem)', color: 'var(--ln-smoke)', fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', letterSpacing: '0.01em' }}
           >
             {artistName}
           </Link>
