@@ -641,8 +641,106 @@ export default function Keeper() {
           </div>
         </div>
 
-        {/* ── Center: Skin selection grid ───────────────────────────────────── */}
+        {/* ── Center: AI Command Center + Skin Armory ─────────────────────── */}
         <div className="flex-1 overflow-y-auto p-4 md:p-6">
+
+          {/* ── AI MODEL COMMAND CENTER ─────────────────────────────────────── */}
+          <div className="mb-8">
+            <div className="flex items-center gap-3 mb-1">
+              <div
+                className="text-sm uppercase tracking-widest"
+                style={{ color: "var(--ln-gold)", fontFamily: "'Space Mono', monospace", fontSize: "0.65rem" }}
+              >
+                AI Model Command Center
+              </div>
+              <div
+                className="flex-1 h-px"
+                style={{ background: "linear-gradient(90deg, rgba(201,168,76,0.4) 0%, transparent 100%)" }}
+              />
+            </div>
+            <p className="text-xs mb-4" style={{ color: "var(--ln-smoke)", fontFamily: "'EB Garamond', serif", fontSize: "0.8rem", lineHeight: 1.6 }}>
+              The Keeper is the power infrastructure behind your registry. Each mode is a specialized intelligence that orchestrates a different layer of the provenance chain.
+            </p>
+
+            {/* Mode capability map */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-4">
+              {([
+                { mode: "Guide",     color: "#C9A84C", role: "Pre-Creation Declaration",  desc: "Declares creative intent before generation. Issues Guide WIDs that anchor the provenance chain.",  cta: "Start a Guide",    path: "/guides/upload" },
+                { mode: "Conductor", color: "#7B9EA6", role: "Composition Architecture",  desc: "Structures arrangements, maps beats, and scaffolds the instrumentation layer of a registration.",  cta: "Compose",          path: "/keeper-compose" },
+                { mode: "Witness",   color: "#D4956A", role: "Testimonial Depth",          desc: "Extracts emotional tonality, lyrical truth, and the origin story that powers the HAAI declaration.",  cta: "Compose",          path: "/keeper-compose" },
+                { mode: "Custodian", color: "#7BA67B", role: "Registry & Provenance",      desc: "Archives works, maps fork lineages, and carries completed registrations into the permanent record.",  cta: "View Registry",    path: "/registry" },
+                { mode: "Archivist", color: "#9B7B55", role: "Semantic Pattern Analysis",  desc: "Reads the corpus, cross-references WIDs, and surfaces provenance gaps before registration.",  cta: "Verify a WID",     path: "/verify" },
+                { mode: "Image",     color: "#8B5CF6", role: "Visual Manifestation",       desc: "Generates cover art, visual concepts, and HAAI visual declarations for registered works.",  cta: "Generate Vision",  path: "/keeper-compose?mode=Image" },
+              ] as const).map(({ mode, color, role, desc, cta, path }) => (
+                <div
+                  key={mode}
+                  className="rounded p-3 flex flex-col gap-1.5 transition-all hover:opacity-90 cursor-pointer"
+                  style={{
+                    background: activeMode === mode ? `${color}12` : "rgba(255,255,255,0.02)",
+                    border: `1px solid ${activeMode === mode ? color + '55' : 'var(--ln-panel-border)'}`,
+                  }}
+                  onClick={() => handleModeChange(mode as any)}
+                >
+                  <div className="flex items-center justify-between">
+                    <span style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.6rem", color, letterSpacing: "0.08em", fontWeight: 600 }}>
+                      {mode.toUpperCase()}
+                    </span>
+                    <span style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.48rem", color: `${color}99`, letterSpacing: "0.06em" }}>
+                      {role}
+                    </span>
+                  </div>
+                  <p style={{ fontFamily: "'EB Garamond', serif", fontSize: "0.75rem", color: "var(--ln-smoke)", lineHeight: 1.5 }}>
+                    {desc}
+                  </p>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); navigate(path); }}
+                    className="self-start mt-0.5 px-2 py-0.5 rounded text-[10px] font-mono transition-all hover:opacity-80"
+                    style={{ background: `${color}18`, border: `1px solid ${color}44`, color }}
+                  >
+                    {cta} →
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            {/* Registration flow diagram */}
+            <div
+              className="rounded p-3"
+              style={{ background: "rgba(201,168,76,0.04)", border: "1px solid rgba(201,168,76,0.15)" }}
+            >
+              <div className="text-xs mb-2" style={{ color: "rgba(201,168,76,0.7)", fontFamily: "'Space Mono', monospace", fontSize: "0.5rem", letterSpacing: "0.08em" }}>
+                AI-ORCHESTRATED REGISTRATION FLOW
+              </div>
+              <div className="flex items-center gap-1 flex-wrap">
+                {[
+                  { label: "Guide WID",      color: "#C9A84C", path: "/guides/upload" },
+                  { label: "→",              color: "rgba(245,237,216,0.3)", path: null },
+                  { label: "Compose",        color: "#7B9EA6", path: "/keeper-compose" },
+                  { label: "→",              color: "rgba(245,237,216,0.3)", path: null },
+                  { label: "Scaffold",       color: "#D4956A", path: "/keeper-compose" },
+                  { label: "→",              color: "rgba(245,237,216,0.3)", path: null },
+                  { label: "Studio",         color: "#7BA67B", path: "/manifest" },
+                  { label: "→",              color: "rgba(245,237,216,0.3)", path: null },
+                  { label: "Work WID",       color: "#9B7B55", path: "/registry" },
+                ].map(({ label, color, path }, i) => (
+                  path ? (
+                    <button
+                      key={i}
+                      onClick={() => navigate(path)}
+                      className="px-2 py-0.5 rounded text-[10px] font-mono transition-all hover:opacity-80"
+                      style={{ background: `${color}18`, border: `1px solid ${color}44`, color }}
+                    >
+                      {label}
+                    </button>
+                  ) : (
+                    <span key={i} style={{ color, fontFamily: "'Space Mono', monospace", fontSize: "0.65rem" }}>{label}</span>
+                  )
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* ── Skin Armory ─────────────────────────────────────────────────── */}
           <div
             className="text-sm uppercase tracking-widest mb-6"
             style={{ color: "var(--ln-gold)", fontFamily: "'Space Mono', monospace", fontSize: "0.65rem" }}

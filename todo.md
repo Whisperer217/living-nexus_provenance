@@ -6766,3 +6766,17 @@
 - [x] Guide provenance selector added to UploadPage (shown when creator has guides, before Training Consent)
 - [x] parentGuideWid passed in all four uploadMutation.mutate calls (audio, game, lyrics, manuscript/comic)
 - [x] TypeScript: 0 errors
+
+## Phase AI-Infra: Keeper as Registration Infrastructure
+
+- [x] Add keeper.scaffoldRegistration tRPC procedure — takes composed work (title, lyrics, instrumentation, tonality, mode) and returns a structured registration payload ready for Manifestation Studio
+- [x] Add keeper.extractWorkMetadata procedure — LLM extracts title, genre, mood, BPM feel, key, AI disclosure status from raw composition text
+- [x] Transform KeeperComposePage REGISTER button — AI-driven Registration Panel that shows extracted metadata, links to Guide WID, and carries the full payload into Manifestation Studio
+- [x] Add "Registration Scaffold" panel to KeeperComposePage — shows AI-extracted fields (title, genre, mood, instrumentation, tonality), Guide WID selector, AI disclosure, then launches Manifestation Studio with all fields pre-populated
+- [x] Wire keeperPrefill URL params into ManifestationStudio and MusicEnvironment — shows Keeper Prefill banner on metadata step
+- [x] Upgrade FloatingAvatar — route detection (useLocation) + platform-aware context strip with quick actions
+- [x] FloatingAvatar: on /manifest or /upload pages — shows "STUDIO MODE — Complete your registration" + Guide My Registration button
+- [x] FloatingAvatar: on /guides/upload — shows "GUIDE MODE — Declare your creative intent" + Draft Declaration button
+- [x] FloatingAvatar: on /keeper-compose — shows "COMPOSE MODE — Register your work from here" + Register Work + New Guide buttons
+- [x] FloatingAvatar: on any creator context page — shows Verify WID quick action
+- [x] Transform KeeperPage — AI Model Command Center section added above Skin Armory: 6-mode capability map with roles + descriptions + direct CTAs, plus AI-Orchestrated Registration Flow diagram

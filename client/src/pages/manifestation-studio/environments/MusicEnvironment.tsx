@@ -147,9 +147,25 @@ function AudioPreview({ file }: { file: File }) {
 
 interface MusicEnvironmentProps {
   onBack: () => void;
+  keeperPrefill?: {
+    title?: string;
+    genre?: string;
+    lyrics?: string;
+    description?: string;
+    caption?: string;
+    aiDisclosure?: string;
+    moodTags?: string[];
+    haaiInstrumentation?: string;
+    haaiEmotionalTone?: string;
+    haaiOriginStory?: string;
+    haaiVisualConcept?: string;
+    haaiStyleLanguage?: string;
+    haaiVocalConveyance?: string;
+    parentGuideWid?: string;
+  };
 }
 
-export function MusicEnvironment({ onBack }: MusicEnvironmentProps) {
+export function MusicEnvironment({ onBack, keeperPrefill }: MusicEnvironmentProps) {
   const [, navigate] = useLocation();
   const { user } = useAuth();
   const [step, setStep] = useState<StudioStep>("upload");
@@ -164,20 +180,32 @@ export function MusicEnvironment({ onBack }: MusicEnvironmentProps) {
   const videoInputRef = useRef<HTMLInputElement>(null);
   const [audioDragging, setAudioDragging] = useState(false);
 
-  // Metadata state
-  const [title, setTitle] = useState("");
-  const [genre, setGenre] = useState("");
+  // Metadata state — seeded from Keeper prefill when available
+  const [title, setTitle] = useState(keeperPrefill?.title ?? "");
+  const [genre, setGenre] = useState(keeperPrefill?.genre ?? "");
   const [bpm, setBpm] = useState("");
   const [keySignature, setKeySignature] = useState("");
   const [albumName, setAlbumName] = useState("");
   const [releaseDate, setReleaseDate] = useState("");
   const [isrc, setIsrc] = useState("");
-  const [lyrics, setLyrics] = useState("");
-  const [selectedMoods, setSelectedMoods] = useState<string[]>([]);
+  const [lyrics, setLyrics] = useState(keeperPrefill?.lyrics ?? "");
+  const [selectedMoods, setSelectedMoods] = useState<string[]>(keeperPrefill?.moodTags ?? []);
   const [credits, setCredits] = useState<{ role: string; name: string }[]>([]);
   const [aiConsent, setAiConsent] = useState<"prohibited" | "permitted_attribution" | "permitted">("prohibited");
-  const [aiDisclosure, setAiDisclosure] = useState<"original" | "ai_assisted" | "ai_generated" | "human_authored_ai_instrument">("original");
-  const [caption, setCaption] = useState("");
+  const [aiDisclosure, setAiDisclosure] = useState<"original" | "ai_assisted" | "ai_generated" | "human_authored_ai_instrument">(
+    (keeperPrefill?.aiDisclosure as any) ?? "original"
+  );
+  const [caption, setCaption] = useState(keeperPrefill?.caption ?? "");
+  // HAAI fields from Keeper prefill
+  const [haaiInstrumentation, setHaaiInstrumentation] = useState(keeperPrefill?.haaiInstrumentation ?? "");
+  const [haaiEmotionalTone, setHaaiEmotionalTone] = useState(keeperPrefill?.haaiEmotionalTone ?? "");
+  const [haaiOriginStory, setHaaiOriginStory] = useState(keeperPrefill?.haaiOriginStory ?? "");
+  const [haaiVisualConcept, setHaaiVisualConcept] = useState(keeperPrefill?.haaiVisualConcept ?? "");
+  const [haaiStyleLanguage, setHaaiStyleLanguage] = useState(keeperPrefill?.haaiStyleLanguage ?? "");
+  const [haaiVocalConveyance, setHaaiVocalConveyance] = useState(keeperPrefill?.haaiVocalConveyance ?? "");
+  const [parentGuideWid, setParentGuideWid] = useState(keeperPrefill?.parentGuideWid ?? "");
+  // Show a banner when Keeper prefill is active
+  const [prefillBannerVisible, setPrefillBannerVisible] = useState(!!keeperPrefill && Object.keys(keeperPrefill).length > 0);
   const [playerAssetType, setPlayerAssetType] = useState<"cover" | "video">("cover");
 
   // Provenance state
@@ -418,6 +446,24 @@ export function MusicEnvironment({ onBack }: MusicEnvironmentProps) {
       case "metadata":
         return (
           <div className="space-y-5">
+            {/* Keeper Registrar prefill banner */}
+            {prefillBannerVisible && (
+              <div
+                className="flex items-start gap-3 rounded-xl p-3"
+                style={{ background: "rgba(212,175,55,0.08)", border: "1px solid rgba(212,175,55,0.3)" }}
+              >
+                <div className="flex-shrink-0 mt-0.5">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-semibold mb-0.5" style={{ color: "#C9A84C", fontFamily: "'Space Mono', monospace" }}>KEEPER REGISTRAR — PREFILLED</p>
+                  <p className="text-[11px]" style={{ color: "rgba(245,237,216,0.6)" }}>The AI Registrar has extracted metadata from your composition. Review and adjust before registering.</p>
+                </div>
+                <button onClick={() => setPrefillBannerVisible(false)} className="flex-shrink-0 opacity-50 hover:opacity-100">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+              </div>
+            )}
             <div>
               <h2 className="text-xl font-bold mb-2" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>
                 Name the Frequencies

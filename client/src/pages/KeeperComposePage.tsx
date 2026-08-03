@@ -9,7 +9,7 @@ import {
   ArrowLeft, Copy, Edit3, Send, FileText, Loader2,
   Maximize2, Minimize2, Music, BookOpen, ChevronRight,
   Zap, BarChart2, Layers, Archive, Eye, Film, ChevronDown,
-  Sparkles, Download, ImageIcon,
+  Sparkles, Download, ImageIcon, ShieldCheck, X,
 } from "lucide-react";
 import { VisionChamberRitual, WitnessedImageReveal } from "@/components/VisionChamberRitual";
 import PinchZoomImage from "@/components/PinchZoomImage";
@@ -406,6 +406,24 @@ export default function KeeperComposePage() {
   const previewArc = derivePreviewArc(prompt);
   const modeColor = MODE_COLORS[activeMode as AgentMode] ?? "#C9A84C";
 
+  // ── AI Registration Panel ────────────────────────────────────────────────
+  const [regPanelOpen, setRegPanelOpen] = useState(false);
+  type RegPayload = {
+    title: string; genre: string; bpm?: number | null; keySignature?: string | null;
+    moodTags: string[]; aiDisclosure: string;
+    haaiVisualConcept: string; haaiStyleLanguage: string; haaiInstrumentation: string;
+    haaiVocalConveyance: string; haaiEmotionalTone: string; haaiOriginStory: string;
+    description: string; headlineCaption: string;
+    contentType: string; parentGuideWid: string | null; lyricsText: string;
+  };
+  const [regPayload, setRegPayload] = useState<RegPayload | null>(null);
+  const [regGuideWid, setRegGuideWid] = useState<string>("");
+  const scaffoldMutation = trpc.keeper.scaffoldRegistration.useMutation({
+    onSuccess: (data) => { setRegPayload(data as RegPayload); },
+    onError: () => toast.error("The Registrar could not scaffold this composition. Try again."),
+  });
+  const myGuidesForRegQuery = trpc.guides.listMine.useQuery(undefined, { enabled: isAuthenticated && regPanelOpen });
+
   // Detect mobile
   const [isMobile, setIsMobile] = useState(() => typeof window !== "undefined" && window.innerWidth < 768);
   useEffect(() => {
@@ -552,8 +570,32 @@ Please respond in Suno-ready format:
 
   const handleRegister = () => {
     const text = isEditing ? editableOutput : (composedWork ? buildSunoCopy(composedWork) : "");
-    if (!text) return;
-    navigate(`/upload?prefill=${encodeURIComponent(text.slice(0, 500))}`);
+    if (!text) { toast.error("Nothing to register yet — compose something first."); return; }
+    setRegPanelOpen(true);
+    setRegPayload(null);
+    scaffoldMutation.mutate({
+      compositionText: text.slice(0, 8000),
+      guideWid: regGuideWid || undefined,
+      contentType: 'audio',
+    });
+  };
+
+  const handleLaunchToStudio = () => {
+    if (!regPayload) return;
+    const params = new URLSearchParams();
+    params.set('type', 'music');
+    if (regPayload.title) params.set('title', regPayload.title);
+    if (regPayload.genre) params.set('genre', regPayload.genre);
+    if (regPayload.lyricsText) params.set('lyrics', regPayload.lyricsText.slice(0, 2000));
+    if (regPayload.description) params.set('description', regPayload.description);
+    if (regPayload.headlineCaption) params.set('caption', regPayload.headlineCaption);
+    if (regPayload.aiDisclosure) params.set('aiDisclosure', regPayload.aiDisclosure);
+    if (regPayload.moodTags?.length) params.set('moodTags', regPayload.moodTags.join(','));
+    if (regPayload.haaiInstrumentation) params.set('haaiInstrumentation', regPayload.haaiInstrumentation);
+    if (regPayload.haaiEmotionalTone) params.set('haaiEmotionalTone', regPayload.haaiEmotionalTone);
+    if (regPayload.haaiOriginStory) params.set('haaiOriginStory', regPayload.haaiOriginStory);
+    if (regPayload.parentGuideWid) params.set('parentGuideWid', regPayload.parentGuideWid);
+    navigate(`/upload?${params.toString()}`);
   };
 
   const handleSaveNote = () => {

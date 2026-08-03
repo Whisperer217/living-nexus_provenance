@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useLocation } from "wouter";
-import { X, Minimize2, ChevronUp, Music2, Sword, PenLine, Bold, Italic, Highlighter, ImagePlus, Trash2, Wand2, ClipboardCopy, Loader2, Mic, MicOff, Palette, Eye } from "lucide-react";
+import { X, Minimize2, ChevronUp, Music2, Sword, PenLine, Bold, Italic, Highlighter, ImagePlus, Trash2, Wand2, ClipboardCopy, Loader2, Mic, MicOff, Palette, Eye, ShieldCheck, BookOpen, Search } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 
@@ -120,8 +120,25 @@ export default function FloatingAvatar({
   isSavingNote = false,
 }: FloatingAvatarProps) {
   const [noteSaved, setNoteSaved] = useState(false);
-  const [, navigate] = useLocation();
+  const [location, navigate] = useLocation();
   const [expanded, setExpanded] = useState(false);
+
+  // ─── Platform-aware context detection ────────────────────────────────────────
+  const isOnComposePage = location.includes('/keeper-compose');
+  const isOnManifestPage = location.includes('/manifest') || location.includes('/upload');
+  const isOnGuidePage = location.includes('/guides');
+  const isOnVerifyPage = location.includes('/verify');
+  const isOnRegistryPage = location.includes('/registry') || location.includes('/explore');
+  const isCreatorContext = isOnComposePage || isOnManifestPage || isOnGuidePage;
+
+  // Context-aware quick action label
+  const contextLabel = isOnComposePage
+    ? 'COMPOSE MODE — Register your work from here'
+    : isOnManifestPage
+    ? 'STUDIO MODE — Complete your registration'
+    : isOnGuidePage
+    ? 'GUIDE MODE — Declare your creative intent'
+    : null;
   const [sandboxOpen, setSandboxOpen] = useState(false);
   const [sandboxTab, setSandboxTab] = useState<"write" | "ppg">("write");
   const [sandboxText, setSandboxText] = useState("");
@@ -1102,6 +1119,68 @@ export default function FloatingAvatar({
               </div>
             )}
           </div>
+
+          {/* Platform-aware context strip */}
+          {contextLabel && (
+            <div
+              className="px-3 py-2 flex-shrink-0"
+              style={{ background: "rgba(212,175,55,0.06)", borderBottom: "1px solid rgba(212,175,55,0.15)" }}
+            >
+              <p style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.45rem", color: "rgba(212,175,55,0.7)", letterSpacing: "0.06em" }}>
+                {contextLabel}
+              </p>
+              <div className="flex gap-1.5 mt-1.5">
+                {isOnComposePage && (
+                  <>
+                    <button
+                      onClick={() => { navigate('/keeper-compose'); setExpanded(false); onAskAgent?.("I want to register my composition. Help me scaffold the registration payload."); }}
+                      className="flex items-center gap-1 px-2 py-1 rounded text-[10px] font-mono transition-all hover:opacity-80"
+                      style={{ background: "rgba(212,175,55,0.15)", border: "1px solid rgba(212,175,55,0.3)", color: "#C9A84C" }}
+                    >
+                      <ShieldCheck style={{ width: 9, height: 9 }} />
+                      Register Work
+                    </button>
+                    <button
+                      onClick={() => { navigate('/guides/upload'); setExpanded(false); }}
+                      className="flex items-center gap-1 px-2 py-1 rounded text-[10px] font-mono transition-all hover:opacity-80"
+                      style={{ background: "rgba(201,168,76,0.1)", border: "1px solid rgba(201,168,76,0.2)", color: "rgba(201,168,76,0.8)" }}
+                    >
+                      <BookOpen style={{ width: 9, height: 9 }} />
+                      New Guide
+                    </button>
+                  </>
+                )}
+                {isOnManifestPage && (
+                  <button
+                    onClick={() => { onAskAgent?.("I need help completing my registration in the Manifestation Studio. What fields should I fill in?"); setExpanded(false); }}
+                    className="flex items-center gap-1 px-2 py-1 rounded text-[10px] font-mono transition-all hover:opacity-80"
+                    style={{ background: "rgba(212,175,55,0.15)", border: "1px solid rgba(212,175,55,0.3)", color: "#C9A84C" }}
+                  >
+                    <ShieldCheck style={{ width: 9, height: 9 }} />
+                    Guide My Registration
+                  </button>
+                )}
+                {isOnGuidePage && (
+                  <button
+                    onClick={() => { onAskAgent?.("Help me write a strong Pre-Creation Declaration for my Guide WID."); setExpanded(false); }}
+                    className="flex items-center gap-1 px-2 py-1 rounded text-[10px] font-mono transition-all hover:opacity-80"
+                    style={{ background: "rgba(212,175,55,0.15)", border: "1px solid rgba(212,175,55,0.3)", color: "#C9A84C" }}
+                  >
+                    <BookOpen style={{ width: 9, height: 9 }} />
+                    Draft Declaration
+                  </button>
+                )}
+                <button
+                  onClick={() => { navigate('/verify'); setExpanded(false); }}
+                  className="flex items-center gap-1 px-2 py-1 rounded text-[10px] font-mono transition-all hover:opacity-80"
+                  style={{ background: "rgba(255,255,255,0.04)", border: "1px solid var(--ln-panel-border)", color: "var(--ln-smoke)" }}
+                >
+                  <Search style={{ width: 9, height: 9 }} />
+                  Verify WID
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Message thread */}
           <div className="flex-1 overflow-y-auto p-3 space-y-2">

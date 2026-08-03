@@ -739,4 +739,139 @@ Never collapse multiple sections into a single block. Always label clearly.
         }));
       }),
 
+    /**
+     * AI-driven registration scaffold.
+     * Takes raw composition text (lyrics, instrumentation notes, style block)
+     * and returns a structured payload ready to pre-fill the Manifestation Studio.
+     * The Keeper acts as the power infrastructure — extracting every field the registry needs.
+     */
+    scaffoldRegistration: protectedProcedure
+      .input(z.object({
+        compositionText: z.string().min(1).max(8000),
+        guideWid: z.string().optional(),
+        contentType: z.enum(['audio', 'lyrics', 'manuscript', 'comic', 'image']).default('audio'),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const creatorProfile = await getUserById(ctx.user.id);
+        const profileBlock = creatorProfile ? [
+          creatorProfile.name && `Creator: ${creatorProfile.name}`,
+          creatorProfile.artistHandle && `Handle: @${creatorProfile.artistHandle}`,
+          creatorProfile.primaryGenre && `Primary Genre: ${creatorProfile.primaryGenre}`,
+          creatorProfile.expressionStyleTags && `Style Tags: ${creatorProfile.expressionStyleTags}`,
+        ].filter(Boolean).join('\n') : '';
+
+        const systemPrompt = `You are the REGISTRAR — the AI infrastructure layer of Living Nexus, the sovereign creative provenance platform.
+
+Your role is to extract and structure every field needed to register a creative work in the Living Nexus Registry. You are not a critic or advisor — you are the power behind the registration process. You transform raw creative material into a complete, structured provenance payload.
+
+The Living Nexus Registry issues WIDs (Witness Identity Documents) — cryptographic provenance anchors. Every registered work gets a WID that proves: who created it, when, what it contains, and what the creator's intent was.
+
+Extract these fields from the composition:
+- title: The canonical title of the work
+- genre: Primary genre (e.g. "Hip-Hop", "Gospel", "R&B", "Soul", "Electronic")
+- bpm: Estimated BPM as integer or null if not determinable
+- keySignature: Musical key (e.g. "C minor") or null
+- moodTags: Array of 3-5 emotional/tonal tags (e.g. ["introspective", "triumphant", "spiritual"])
+- aiDisclosure: One of: "original" | "ai_assisted" | "ai_generated" | "human_authored_ai_instrument"
+- haaiVisualConcept: The visual/cinematic image the creator was articulating (1-2 sentences)
+- haaiStyleLanguage: Plain-language description of the desired style (1-2 sentences)
+- haaiInstrumentation: Instrumentation choices and sonic palette (1-2 sentences)
+- haaiVocalConveyance: Voice, tone, and delivery the creator was conveying (1-2 sentences)
+- haaiEmotionalTone: The emotional tone and spiritual alignment the creator was pursuing (1-2 sentences)
+- haaiOriginStory: The spark and human experience that birthed this work (2-3 sentences)
+- description: A 2-3 sentence provenance-aware description of the work for the registry
+- headlineCaption: A single punchy line (max 280 chars) that captures the work's essence
+
+Respond ONLY with valid JSON matching this exact schema. No commentary, no markdown fences.${profileBlock ? `\n\n--- CREATOR PROFILE ---\n${profileBlock}\n--- END PROFILE ---` : ''}${input.guideWid ? `\n\nThis work is linked to Guide WID: ${input.guideWid} — the Pre-Creation Declaration that preceded it.` : ''}`;
+
+        const response = await invokeLLM({
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: `Extract the registration payload from this composition:\n\n${input.compositionText}` },
+          ],
+          response_format: {
+            type: 'json_schema',
+            json_schema: {
+              name: 'registration_payload',
+              strict: true,
+              schema: {
+                type: 'object',
+                properties: {
+                  title: { type: 'string' },
+                  genre: { type: 'string' },
+                  bpm: { type: ['integer', 'null'] },
+                  keySignature: { type: ['string', 'null'] },
+                  moodTags: { type: 'array', items: { type: 'string' } },
+                  aiDisclosure: { type: 'string', enum: ['original', 'ai_assisted', 'ai_generated', 'human_authored_ai_instrument'] },
+                  haaiVisualConcept: { type: 'string' },
+                  haaiStyleLanguage: { type: 'string' },
+                  haaiInstrumentation: { type: 'string' },
+                  haaiVocalConveyance: { type: 'string' },
+                  haaiEmotionalTone: { type: 'string' },
+                  haaiOriginStory: { type: 'string' },
+                  description: { type: 'string' },
+                  headlineCaption: { type: 'string' },
+                },
+                required: ['title', 'genre', 'moodTags', 'aiDisclosure', 'haaiVisualConcept', 'haaiStyleLanguage', 'haaiInstrumentation', 'haaiVocalConveyance', 'haaiEmotionalTone', 'haaiOriginStory', 'description', 'headlineCaption'],
+                additionalProperties: false,
+              },
+            },
+          } as any,
+        });
+
+        const rawContent = response?.choices?.[0]?.message?.content ?? '{}';
+        const raw = typeof rawContent === 'string' ? rawContent : '{}';
+        try {
+          const payload = JSON.parse(raw);
+          return {
+            ...payload,
+            contentType: input.contentType,
+            parentGuideWid: input.guideWid ?? null,
+            lyricsText: input.compositionText,
+          };
+        } catch {
+          throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'The Registrar could not parse the composition. Try again.' });
+        }
+      }),
+
+    /**
+     * Quick metadata extraction — lighter than scaffoldRegistration.
+     * Used by the FloatingAvatar when the creator asks "what is this work?".
+     * Returns title, genre, mood, and a one-line description.
+     */
+    extractWorkMetadata: protectedProcedure
+      .input(z.object({
+        text: z.string().min(1).max(4000),
+      }))
+      .mutation(async ({ input }) => {
+        const response = await invokeLLM({
+          messages: [
+            { role: 'system', content: 'You are a music metadata extractor. Given creative text (lyrics, composition notes, or a description), extract: title (string), genre (string), moodTags (array of 3 strings), oneLiner (string, max 120 chars). Respond only with valid JSON.' },
+            { role: 'user', content: input.text },
+          ],
+          response_format: {
+            type: 'json_schema',
+            json_schema: {
+              name: 'quick_metadata',
+              strict: true,
+              schema: {
+                type: 'object',
+                properties: {
+                  title: { type: 'string' },
+                  genre: { type: 'string' },
+                  moodTags: { type: 'array', items: { type: 'string' } },
+                  oneLiner: { type: 'string' },
+                },
+                required: ['title', 'genre', 'moodTags', 'oneLiner'],
+                additionalProperties: false,
+              },
+            },
+          } as any,
+        });
+        const rawContent2 = response?.choices?.[0]?.message?.content ?? '{}';
+        const raw2 = typeof rawContent2 === 'string' ? rawContent2 : '{}';
+        try { return JSON.parse(raw2); }
+        catch { return { title: 'Untitled', genre: 'Unknown', moodTags: [], oneLiner: '' }; }
+      }),
+
   });

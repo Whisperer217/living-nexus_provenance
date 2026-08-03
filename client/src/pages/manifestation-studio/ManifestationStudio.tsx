@@ -17,17 +17,53 @@ import { ManuscriptEnvironment } from "./environments/ManuscriptEnvironment";
 import { VideoEnvironment } from "./environments/VideoEnvironment";
 import { GcodeEnvironment } from "./environments/GcodeEnvironment";
 
+// Keeper registration prefill shape
+export interface KeeperPrefill {
+  title?: string;
+  genre?: string;
+  lyrics?: string;
+  description?: string;
+  caption?: string;
+  aiDisclosure?: string;
+  moodTags?: string[];
+  haaiInstrumentation?: string;
+  haaiEmotionalTone?: string;
+  haaiOriginStory?: string;
+  haaiVisualConcept?: string;
+  haaiStyleLanguage?: string;
+  haaiVocalConveyance?: string;
+  parentGuideWid?: string;
+}
+
 export default function ManifestationStudio() {
   const [, navigate] = useLocation();
   const { user, isAuthenticated } = useAuth();
   const [selectedType, setSelectedType] = useState<ManifestationType | null>(null);
+  const [keeperPrefill, setKeeperPrefill] = useState<KeeperPrefill | null>(null);
 
-  // Check for ?type= query param to pre-select type
+  // Check for ?type= query param and Keeper prefill fields
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const typeParam = params.get("type") as ManifestationType | null;
     if (typeParam && ["music", "lyrics", "comic", "manuscript", "video", "gcode"].includes(typeParam)) {
       setSelectedType(typeParam);
+      // Extract Keeper prefill fields
+      const prefill: KeeperPrefill = {};
+      const title = params.get('title'); if (title) prefill.title = title;
+      const genre = params.get('genre'); if (genre) prefill.genre = genre;
+      const lyrics = params.get('lyrics'); if (lyrics) prefill.lyrics = lyrics;
+      const description = params.get('description'); if (description) prefill.description = description;
+      const caption = params.get('caption'); if (caption) prefill.caption = caption;
+      const aiDisclosure = params.get('aiDisclosure'); if (aiDisclosure) prefill.aiDisclosure = aiDisclosure;
+      const moodTags = params.get('moodTags'); if (moodTags) prefill.moodTags = moodTags.split(',').filter(Boolean);
+      const haaiInstrumentation = params.get('haaiInstrumentation'); if (haaiInstrumentation) prefill.haaiInstrumentation = haaiInstrumentation;
+      const haaiEmotionalTone = params.get('haaiEmotionalTone'); if (haaiEmotionalTone) prefill.haaiEmotionalTone = haaiEmotionalTone;
+      const haaiOriginStory = params.get('haaiOriginStory'); if (haaiOriginStory) prefill.haaiOriginStory = haaiOriginStory;
+      const haaiVisualConcept = params.get('haaiVisualConcept'); if (haaiVisualConcept) prefill.haaiVisualConcept = haaiVisualConcept;
+      const haaiStyleLanguage = params.get('haaiStyleLanguage'); if (haaiStyleLanguage) prefill.haaiStyleLanguage = haaiStyleLanguage;
+      const haaiVocalConveyance = params.get('haaiVocalConveyance'); if (haaiVocalConveyance) prefill.haaiVocalConveyance = haaiVocalConveyance;
+      const parentGuideWid = params.get('parentGuideWid'); if (parentGuideWid) prefill.parentGuideWid = parentGuideWid;
+      if (Object.keys(prefill).length > 0) setKeeperPrefill(prefill);
       window.history.replaceState({}, "", window.location.pathname);
     }
   }, []);
@@ -69,7 +105,7 @@ export default function ManifestationStudio() {
 
   switch (selectedType) {
     case "music":
-      return <MusicEnvironment onBack={handleBack} />;
+      return <MusicEnvironment onBack={handleBack} keeperPrefill={keeperPrefill ?? undefined} />;
     case "lyrics":
       return <LyricsEnvironment onBack={handleBack} />;
     case "comic":
