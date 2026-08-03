@@ -186,7 +186,14 @@ export function WorkListRow({ item, index, prefetchedLiked, prefetchedLikeCount,
         {/* Cover art */}
         <div className="w-10 h-10 flex-shrink-0 rounded-lg overflow-hidden border border-white/8">
           {song.coverArtUrl ? (
-            <img src={song.coverArtUrl} alt={song.title} className="w-full h-full object-cover" />
+            <img
+              src={song.coverArtUrl}
+              alt={song.title}
+              loading="lazy"
+              decoding="async"
+              className="w-full h-full object-cover"
+              onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+            />
           ) : (
             <div className="w-full h-full bg-[var(--void-4)] flex items-center justify-center">
               <Music className="w-4 h-4 text-[var(--stone-shadow)]" />

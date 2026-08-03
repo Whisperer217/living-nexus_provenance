@@ -429,14 +429,35 @@ function scheduleDailyDigest(): void {
 }
 
 /**
+ * Reset any jobs stuck in 'processing' state back to 'pending'.
+ * This happens when the server restarts mid-job — those jobs would be
+ * orphaned forever without this reset.
+ */
+async function resetStuckJobs(): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  const result = await db
+    .update(visualQueue)
+    .set({ status: "pending", startedAt: null })
+    .where(eq(visualQueue.status, "processing"));
+  const affected = (result as unknown as [{ affectedRows?: number }])[0]?.affectedRows ?? 0;
+  if (affected > 0) {
+    console.log(`[VisualQueue] Reset ${affected} stuck 'processing' jobs back to 'pending'`);
+  }
+}
+
+/**
  * Start the background visual generation worker.
  * Call once at server startup.
  */
 export function startVisualWorker(): void {
   console.log(`[VisualQueue] Worker started (interval=${WORKER_INTERVAL_MS}ms, batch=${BATCH_SIZE})`);
 
-  // Run immediately on start (catches any pending jobs from previous runs)
-  processNextBatch().catch(err => console.error("[VisualQueue] Worker tick error:", err));
+  // Reset any jobs stuck in 'processing' from a previous server run,
+  // then immediately process the pending queue.
+  resetStuckJobs()
+    .then(() => processNextBatch())
+    .catch(err => console.error("[VisualQueue] Startup error:", err));
 
   // Then run on interval
   setInterval(() => {

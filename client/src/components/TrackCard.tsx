@@ -178,6 +178,8 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
               src={track.artUrl}
               alt=""
               aria-hidden="true"
+              loading="lazy"
+              decoding="async"
               className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
               style={{
                 filter: "brightness(0.88)",
@@ -202,6 +204,8 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
             style={{ filter: "brightness(0.88)", objectPosition: coverPos }}
             muted
             loop
+            playsInline
+            autoPlay
           />
         ) : (
           /* Sacred void — relic rings placeholder */

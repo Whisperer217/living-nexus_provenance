@@ -188,7 +188,7 @@ function CreatorFilter({ creators, selected, onSelect }: { creators: CreatorSumm
     <div ref={ref} className="relative flex-shrink-0">
       <button onClick={() => setOpen(!open)}
         className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${selected ? "bg-[var(--gold)]/15 border-[var(--gold)]/40 text-[var(--gold)]" : "bg-transparent border-white/10 text-[var(--stone-shadow)] hover:border-[var(--gold)]/30 hover:text-[var(--stone-mid)]"}`}>
-        {sel?.profilePhotoUrl ? <img src={sel.profilePhotoUrl} className="w-4 h-4 rounded-full object-cover" alt="" /> : <Users className="w-3 h-3" />}
+        {sel?.profilePhotoUrl ? <img src={sel.profilePhotoUrl} className="w-4 h-4 rounded-full object-cover" alt="" loading="lazy" decoding="async" /> : <Users className="w-3 h-3" />}
         <span className="hidden sm:inline max-w-[80px] truncate">{sel ? (sel.artistHandle ?? sel.name ?? "Creator") : "Creator"}</span>
         {selected && <X className="w-3 h-3 ml-0.5 hover:text-white" onClick={(e) => { e.stopPropagation(); onSelect(null); setOpen(false); }} />}
       </button>
@@ -206,7 +206,7 @@ function CreatorFilter({ creators, selected, onSelect }: { creators: CreatorSumm
             {filtered.map((c) => (
               <button key={c.id} onClick={() => { onSelect(c.id); setOpen(false); setQuery(""); }}
                 className={`w-full flex items-center gap-2 px-3 py-2 text-xs hover:bg-white/5 transition-colors ${selected === c.id ? "text-[var(--gold)]" : "text-[var(--stone-light)]"}`}>
-                {c.profilePhotoUrl ? <img src={c.profilePhotoUrl} className="w-5 h-5 rounded-full object-cover flex-shrink-0" alt="" /> : <div className="w-5 h-5 rounded-full bg-[var(--void-3)] flex items-center justify-center flex-shrink-0"><Users className="w-2.5 h-2.5 text-[var(--stone-shadow)]" /></div>}
+                {c.profilePhotoUrl ? <img src={c.profilePhotoUrl} className="w-5 h-5 rounded-full object-cover flex-shrink-0" alt="" loading="lazy" decoding="async" /> : <div className="w-5 h-5 rounded-full bg-[var(--void-3)] flex items-center justify-center flex-shrink-0"><Users className="w-2.5 h-2.5 text-[var(--stone-shadow)]" /></div>}
                 <span className="truncate">{c.artistHandle ?? c.name ?? "Unknown"}</span>
                 <span className="ml-auto text-[var(--stone-shadow)] font-mono">{c.publishedCount}</span>
               </button>
@@ -286,9 +286,26 @@ function GridCard({ row, queueTracks, queueIndex }: { row: FeedRow; queueTracks?
         title={hasFile ? `Play ${row.song.title}` : "View work"}
       >
         {row.song.coverArtUrl
-          ? <img src={row.song.coverArtUrl} alt={row.song.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-          : <div className="w-full h-full bg-[var(--void-2)] flex items-center justify-center"><Music className="w-8 h-8 text-[var(--stone-shadow)]" /></div>
+          ? <img
+              src={row.song.coverArtUrl}
+              alt={row.song.title}
+              loading="lazy"
+              decoding="async"
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              onError={(e) => {
+                (e.currentTarget as HTMLImageElement).style.display = "none";
+                const fallback = e.currentTarget.nextElementSibling as HTMLElement | null;
+                if (fallback) fallback.style.display = "flex";
+              }}
+            />
+          : null
         }
+        {!row.song.coverArtUrl && (
+          <div className="w-full h-full bg-[var(--void-2)] flex items-center justify-center"><Music className="w-8 h-8 text-[var(--stone-shadow)]" /></div>
+        )}
+        {row.song.coverArtUrl && (
+          <div className="w-full h-full bg-[var(--void-2)] items-center justify-center hidden absolute inset-0"><Music className="w-8 h-8 text-[var(--stone-shadow)]" /></div>
+        )}
         {/* Hover overlay with play button */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
           <button
@@ -376,7 +393,7 @@ function CreatorCard({ creator, works }: { creator: NonNullable<FeedRow["creator
   return (
     <div className="bg-[var(--void-3)] border border-white/8 rounded-2xl overflow-hidden hover:border-[var(--gold)]/20 transition-all">
       <div className="p-4 flex items-center gap-3 border-b border-white/5">
-        {creator.profilePhotoUrl ? <img src={creator.profilePhotoUrl} alt={creator.name ?? ""} className="w-10 h-10 rounded-full object-cover border border-[var(--gold)]/30" /> : <div className="w-10 h-10 rounded-full bg-[var(--void-2)] border border-white/10 flex items-center justify-center"><Users className="w-5 h-5 text-[var(--stone-shadow)]" /></div>}
+        {creator.profilePhotoUrl ? <img src={creator.profilePhotoUrl} alt={creator.name ?? ""} className="w-10 h-10 rounded-full object-cover border border-[var(--gold)]/30" loading="lazy" decoding="async" /> : <div className="w-10 h-10 rounded-full bg-[var(--void-2)] border border-white/10 flex items-center justify-center"><Users className="w-5 h-5 text-[var(--stone-shadow)]" /></div>}
         <div className="flex-1 min-w-0">
           <Link href={`/creator/${creator.id}`}><p className="text-sm font-semibold text-[var(--stone-light)] truncate hover:text-[var(--gold)] transition-colors cursor-pointer">{creator.artistHandle ?? creator.name ?? "Unknown"}</p></Link>
           <p className="text-xs text-[var(--stone-shadow)]">{works.length} work{works.length !== 1 ? "s" : ""} shown</p>
