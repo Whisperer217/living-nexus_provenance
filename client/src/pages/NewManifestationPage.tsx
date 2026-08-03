@@ -22,6 +22,7 @@ import { getLoginUrl } from "@/const";
 import {
   Music, BookOpen, FlaskConical, Film, Palette, Code2, Layers,
   ArrowRight, Sparkles, Shield, Clock, ChevronDown, ChevronUp,
+  CheckSquare, Square, User, Cpu,
 } from "lucide-react";
 
 // ─── Medium definitions ───────────────────────────────────────────────────────
@@ -105,6 +106,13 @@ export default function NewManifestationPage() {
   const [declaration, setDeclaration] = useState("");
   const [collaborators, setCollaborators] = useState("");
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [humanContribs, setHumanContribs] = useState<string[]>([]);
+  const [aiContribs, setAiContribs] = useState<string[]>([]);
+
+  const toggleHuman = (key: string) =>
+    setHumanContribs(prev => prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]);
+  const toggleAI = (key: string) =>
+    setAiContribs(prev => prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]);
 
   // Session creation
   const createSession = trpc.sessions.create.useMutation({
@@ -154,6 +162,8 @@ export default function NewManifestationPage() {
       medium: medium as typeof MEDIUMS[number]["key"],
       declaration: declaration.trim() || undefined,
       collaborators: collaborators.trim() || undefined,
+      humanContributions: humanContribs.length > 0 ? humanContribs : undefined,
+      aiContributions: aiContribs.length > 0 ? aiContribs : undefined,
     });
   };
 
@@ -278,6 +288,84 @@ export default function NewManifestationPage() {
 
             {showAdvanced && (
               <div className="mt-4 space-y-5 pl-4 border-l border-white/5">
+
+                {/* Human Contributions */}
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <User className="w-4 h-4 text-sky-400" />
+                    <label className="text-sm font-medium text-slate-300">Human Contributions</label>
+                  </div>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {[
+                      { key: "vision",      label: "Vision" },
+                      { key: "story",       label: "Story" },
+                      { key: "lyrics",      label: "Lyrics" },
+                      { key: "editing",     label: "Editing" },
+                      { key: "arrangement", label: "Arrangement" },
+                      { key: "direction",   label: "Direction" },
+                      { key: "performance", label: "Performance" },
+                      { key: "research",    label: "Research" },
+                    ].map(({ key, label }) => {
+                      const checked = humanContribs.includes(key);
+                      return (
+                        <button
+                          key={key}
+                          type="button"
+                          onClick={() => toggleHuman(key)}
+                          className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-left text-xs transition-colors ${
+                            checked
+                              ? "border-sky-600/50 bg-sky-900/20 text-sky-300"
+                              : "border-white/8 bg-white/3 text-slate-400 hover:border-white/15"
+                          }`}
+                        >
+                          {checked
+                            ? <CheckSquare className="w-3.5 h-3.5 text-sky-400 shrink-0" />
+                            : <Square className="w-3.5 h-3.5 text-slate-600 shrink-0" />
+                          }
+                          {label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* AI Contributions */}
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <Cpu className="w-4 h-4 text-rose-400" />
+                    <label className="text-sm font-medium text-slate-300">AI Contributions</label>
+                  </div>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {[
+                      { key: "text_generation",  label: "Text Generation" },
+                      { key: "image_generation", label: "Image Generation" },
+                      { key: "music_assistance", label: "Music Assistance" },
+                      { key: "voice",            label: "Voice" },
+                      { key: "coding",           label: "Coding" },
+                      { key: "research_assist",  label: "Research Assist" },
+                    ].map(({ key, label }) => {
+                      const checked = aiContribs.includes(key);
+                      return (
+                        <button
+                          key={key}
+                          type="button"
+                          onClick={() => toggleAI(key)}
+                          className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-left text-xs transition-colors ${
+                            checked
+                              ? "border-rose-600/50 bg-rose-900/20 text-rose-300"
+                              : "border-white/8 bg-white/3 text-slate-400 hover:border-white/15"
+                          }`}
+                        >
+                          {checked
+                            ? <CheckSquare className="w-3.5 h-3.5 text-rose-400 shrink-0" />
+                            : <Square className="w-3.5 h-3.5 text-slate-600 shrink-0" />
+                          }
+                          {label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
 
                 {/* Declaration */}
                 <div>

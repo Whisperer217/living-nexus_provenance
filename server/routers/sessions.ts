@@ -39,27 +39,31 @@ export const sessionsRouter = router({
    */
   create: protectedProcedure
     .input(z.object({
-      name:          z.string().min(1).max(256),
-      intent:        z.string().min(1).max(2000),
-      medium:        z.enum(["music", "book", "research", "film", "visual_art", "software", "other"]),
-      collaborators: z.string().optional(),   // JSON array string
-      declaration:   z.string().optional(),
-      guideWid:      z.string().optional(),
+      name:                 z.string().min(1).max(256),
+      intent:               z.string().min(1).max(2000),
+      medium:               z.enum(["music", "book", "research", "film", "visual_art", "software", "other"]),
+      collaborators:        z.string().optional(),   // JSON array string
+      declaration:          z.string().optional(),
+      guideWid:             z.string().optional(),
+      humanContributions:   z.array(z.string()).optional(),
+      aiContributions:      z.array(z.string()).optional(),
     }))
     .mutation(async ({ ctx, input }) => {
       // Insert the session first to get the auto-increment ID
       const db = await getDb();
 
       const [result] = await db.insert(manifestationSessions).values({
-        userId:        ctx.user.id,
-        sessionWid:    `LN-SESSION-PENDING-${Date.now()}`, // temp, updated below
-        name:          input.name,
-        intent:        input.intent,
-        medium:        input.medium,
-        collaborators: input.collaborators ?? null,
-        declaration:   input.declaration ?? null,
-        guideWid:      input.guideWid ?? null,
-        status:        "active",
+        userId:              ctx.user.id,
+        sessionWid:          `LN-SESSION-PENDING-${Date.now()}`, // temp, updated below
+        name:                input.name,
+        intent:              input.intent,
+        medium:              input.medium,
+        collaborators:       input.collaborators ?? null,
+        declaration:         input.declaration ?? null,
+        guideWid:            input.guideWid ?? null,
+        humanContributions:  input.humanContributions ?? null,
+        aiContributions:     input.aiContributions ?? null,
+        status:              "active",
       });
 
       const sessionId = (result as { insertId: number }).insertId;
@@ -276,8 +280,51 @@ export const sessionsRouter = router({
     }),
 
   /**
-   * Get a session by its Session WID (public — for verification).
+   * Update the Manifestation Record fields — contributions, transformation summary, declaration.
+   * Called from the ManifestationRecord panel when the creator saves their record.
    */
+  updateRecord: protectedProcedure
+    .input(z.object({
+      sessionId:            z.number(),
+      humanContributions:   z.array(z.string()).optional(),
+      aiContributions:      z.array(z.string()).optional(),
+      transformationSummary: z.string().optional(),
+      declaration:          z.string().optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const db = await getDb();
+
+      const sessions = await db.select({ userId: manifestationSessions.userId })
+        .from(manifestationSessions)
+        .where(eq(manifestationSessions.id, input.sessionId))
+        .limit(1);
+
+      if (!sessions.length) throw new TRPCError({ code: "NOT_FOUND" });
+      if (sessions[0].userId !== ctx.user.id) throw new TRPCError({ code: "FORBIDDEN" });
+
+      const updatePayload: Record<string, unknown> = {};
+      if (input.humanContributions !== undefined) updatePayload.humanContributions = input.humanContributions;
+      if (input.aiContributions !== undefined) updatePayload.aiContributions = input.aiContributions;
+      if (input.transformationSummary !== undefined) updatePayload.transformationSummary = input.transformationSummary;
+      if (input.declaration !== undefined) updatePayload.declaration = input.declaration;
+
+      await db.update(manifestationSessions)
+        .set(updatePayload)
+        .where(eq(manifestationSessions.id, input.sessionId));
+
+      // Append record update event
+      await db.insert(sessionEvents).values({
+        sessionId: input.sessionId,
+        eventType: "RECORD_UPDATED",
+        actorType: "creator",
+        actorId:   String(ctx.user.id),
+        payload:   { fields: Object.keys(updatePayload) },
+        summary:   `Manifestation Record updated: ${Object.keys(updatePayload).join(", ")}`,
+      });
+
+      return { success: true };
+    }),
+
   getByWid: publicProcedure
     .input(z.object({ sessionWid: z.string() }))
     .query(async ({ input }) => {

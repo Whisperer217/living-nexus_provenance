@@ -2366,6 +2366,10 @@ export const manifestationSessions = mysqlTable("manifestationSessions", {
   declaration:   text("declaration"),                          // formal declaration text at session start
   guideWid:      varchar("guideWid", { length: 64 }),          // optional link to a Guide WID (pre-creation declaration)
   workWid:       varchar("workWid", { length: 64 }),           // populated when final Work WID is issued
+  humanContributions: json("humanContributions"),              // string[] — vision, story, lyrics, editing, arrangement, direction
+  aiContributions:    json("aiContributions"),                 // string[] — text_generation, image_generation, music_assistance, voice, coding
+  transformationSummary: text("transformationSummary"),        // creator-written summary of how the work evolved
+  parentSessionId: int("parentSessionId"),                     // self-referential FK for relationship graph (derivative sessions)
   status:        mysqlEnum("status", ["active", "paused", "completed", "archived"]).default("active").notNull(),
   createdAt:     timestamp("createdAt").defaultNow().notNull(),
   updatedAt:     timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),

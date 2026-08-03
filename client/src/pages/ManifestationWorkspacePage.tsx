@@ -20,6 +20,7 @@ import {
   Sparkles, ChevronRight, ExternalLink, Lock,
   BookOpen, Zap, AlertCircle,
 } from "lucide-react";
+import { ManifestationRecord } from "@/components/ManifestationRecord";
 // Explicit ManifestationSession type matching the database schema
 type ManifestationSession = {
   id: number;
@@ -32,6 +33,10 @@ type ManifestationSession = {
   declaration: string | null;
   guideWid: string | null;
   workWid: string | null;
+  humanContributions: string[] | null;
+  aiContributions: string[] | null;
+  transformationSummary: string | null;
+  parentSessionId: number | null;
   status: "active" | "paused" | "completed" | "archived";
   createdAt: Date;
   updatedAt: Date;
@@ -51,6 +56,7 @@ const PANELS = [
   { key: "versions",     label: "Versions",     icon: GitBranch,     description: "Version history" },
   { key: "collaborators",label: "Collaborators",icon: Users,         description: "Team and AI contributors" },
   { key: "publish",      label: "Publish",      icon: Upload,        description: "Distribution and release" },
+  { key: "record",       label: "Record",       icon: Shield,        description: "Manifestation Record — provenance document" },
 ] as const;
 
 type PanelKey = typeof PANELS[number]["key"];
@@ -409,6 +415,24 @@ function PanelContent({
               </div>
             </div>
           )}
+        </div>
+      );
+
+    case "record":
+      return (
+        <div className="p-6 max-w-3xl">
+          <div className="mb-6">
+            <h2 className="text-lg font-semibold text-white mb-1">Manifestation Record</h2>
+            <p className="text-sm text-slate-400">
+              The canonical provenance document for this creative journey.
+              Declare your contributions, summarize the transformation, and sign your declaration.
+            </p>
+          </div>
+          <ManifestationRecord
+            session={session}
+            mode="edit"
+            onSaved={() => {}}
+          />
         </div>
       );
 

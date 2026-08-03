@@ -6833,3 +6833,12 @@
 - [x] Add Sessions to LeftRail navigation (Layers icon, between Guide and Register)
 - [x] Add sessions panel to ContextDrawer with How It Works flow
 - [x] Add + New Manifestation CTA to homepage (WIDExplainer CTA row, violet accent)
+
+## Phase Manifestation-Record: Canonical Provenance Document
+- [ ] Extend manifestationSessions schema — add humanContributions (JSON array), aiContributions (JSON array), transformationSummary (text), declarationText (text), parentSessionId (self-referential for relationship graph)
+- [ ] Apply schema changes to database via SQL
+- [ ] Build ManifestationRecord component — seven sections: Origin (name/purpose/intent), Human Contributions (checkboxes), AI Contributions (checkboxes), Transformation Summary, Declaration, Witness ID, Relationship Graph
+- [ ] Add Record tab to ManifestationWorkspacePage
+- [ ] Add /manifestation/:id/record public route for sharing
+- [ ] Update NewManifestationPage — add contribution checkboxes and declaration field to session creation flow
+- [ ] Wire sessions.update tRPC procedure to save contributions + declaration + transformation summary
