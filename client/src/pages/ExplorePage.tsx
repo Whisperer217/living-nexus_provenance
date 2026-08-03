@@ -34,7 +34,7 @@ const SECTIONS = [
 ];
 type SectionKey = typeof SECTIONS[number]["key"];
 type ViewMode = "list" | "grid" | "creator";
-const LIMIT_STEPS = [12, 20, 40, 80, 120, 200];
+const LIMIT_STEPS = [12, 20, 40, 80, 120, 200, 300, 500, 700];
 
 // ── Data hook ──────────────────────────────────────────────────────
 function useExploreData(seed: number, limit: number, randomize: boolean, creatorId?: number) {
@@ -161,7 +161,7 @@ function TracksSlider({ value, onChange }: { value: number; onChange: (v: number
         onChange={(e) => onChange(LIMIT_STEPS[Number(e.target.value)])}
         className="w-20 sm:w-28 cursor-pointer" style={{ accentColor: "var(--gold)" }} />
       <span className="text-xs font-mono text-[var(--gold)] w-7 text-right flex-shrink-0">
-        {value === 200 ? "All" : value}
+        {value === 700 ? "All" : value}
       </span>
     </div>
   );

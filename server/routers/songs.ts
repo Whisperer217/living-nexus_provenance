@@ -271,7 +271,7 @@ export const songsRouter = router({
     exploreIndex: publicProcedure
       .input(z.object({
         seed: z.number().optional(),
-        limit: z.number().int().min(8).max(200).optional(),
+        limit: z.number().int().min(8).max(700).optional(),
         randomize: z.boolean().optional(),
         creatorId: z.number().int().positive().optional(),
       }).optional())
