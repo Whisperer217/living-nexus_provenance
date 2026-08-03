@@ -5,17 +5,19 @@
 import React, { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { trpc } from "@/lib/trpc";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import {
   Search, RefreshCw, Shield, Music, BookOpen, Eye, Flame,
   Sparkles, Film, Feather, Star, ChevronRight, LayoutList, LayoutGrid,
   Headphones, FileText, Image as ImageIcon, Users, X, Lock, ShoppingBag, Check,
+  Play, FileImage, FileVideo, FileAudio, File,
 } from "lucide-react";
 import { WorkListRow, type WorkListRowItem } from "@/components/WorkListRow";
 import type { FeedRow } from "@shared/coreDataTypes";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { toast } from "sonner";
 import { getLoginUrl } from "@/const";
+import { usePlayer, type Track } from "@/contexts/PlayerContext";
 
 // ── Section definitions ────────────────────────────────────────────
 const SECTIONS = [
@@ -256,22 +258,112 @@ function CathedralDivider({ title, subtitle, icon, accentColor, count }: { title
 
 // ── Grid Card ─────────────────────────────────────────────────────
 function GridCard({ row }: { row: FeedRow }) {
+  const { addAndPlay } = usePlayer();
+  const isAudio = row.song.contentType === "audio";
+  const hasFile = !!row.song.fileUrl;
+
+  function handlePlay(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!hasFile) {
+      toast.info("No playable file for this work");
+      return;
+    }
+    addAndPlay(feedRowToTrack(row));
+  }
+
   return (
-    <Link href={`/song/${row.song.id}`}>
-      <div className="group relative rounded-xl overflow-hidden bg-[var(--void-3)] border border-white/8 hover:border-[var(--gold)]/30 transition-all cursor-pointer">
-        <div className="aspect-square relative overflow-hidden">
-          {row.song.coverArtUrl ? <img src={row.song.coverArtUrl} alt={row.song.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" /> : <div className="w-full h-full bg-[var(--void-2)] flex items-center justify-center"><Music className="w-8 h-8 text-[var(--stone-shadow)]" /></div>}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-          {row.song.witnessId && <div className="absolute top-2 right-2 bg-[var(--gold)]/20 border border-[var(--gold)]/40 rounded-md px-1.5 py-0.5 flex items-center gap-1"><Shield className="w-2.5 h-2.5 text-[var(--gold)]" /><span className="text-[9px] font-mono text-[var(--gold)]">WID</span></div>}
+    <div className="group relative rounded-xl overflow-hidden bg-[var(--void-3)] border border-white/8 hover:border-[var(--gold)]/30 transition-all">
+      {/* Cover art — clicking plays */}
+      <div
+        className="aspect-square relative overflow-hidden cursor-pointer"
+        onClick={handlePlay}
+        title={hasFile ? `Play ${row.song.title}` : "View work"}
+      >
+        {row.song.coverArtUrl
+          ? <img src={row.song.coverArtUrl} alt={row.song.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+          : <div className="w-full h-full bg-[var(--void-2)] flex items-center justify-center"><Music className="w-8 h-8 text-[var(--stone-shadow)]" /></div>
+        }
+        {/* Hover overlay with play button */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+          <button
+            onClick={handlePlay}
+            className="w-12 h-12 rounded-full bg-[var(--gold)] text-black flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
+            aria-label={`Play ${row.song.title}`}
+          >
+            <Play className="w-5 h-5 ml-0.5" fill="currentColor" />
+          </button>
         </div>
-        <div className="p-3">
-          <p className="text-sm font-medium text-[var(--stone-light)] truncate leading-tight">{row.song.title}</p>
-          <p className="text-xs text-[var(--stone-shadow)] mt-0.5 truncate">{row.creator?.artistHandle ?? row.creator?.name ?? "Unknown"}</p>
-          {row.song.genre && <span className="inline-block mt-1.5 text-[10px] font-mono text-[var(--stone-shadow)] bg-[var(--void-2)] border border-white/5 px-1.5 py-0.5 rounded-full truncate max-w-full">{row.song.genre}</span>}
+        {/* WID badge */}
+        {row.song.witnessId && (
+          <div className="absolute top-2 right-2 bg-[var(--gold)]/20 border border-[var(--gold)]/40 rounded-md px-1.5 py-0.5 flex items-center gap-1">
+            <Shield className="w-2.5 h-2.5 text-[var(--gold)]" />
+            <span className="text-[9px] font-mono text-[var(--gold)]">WID</span>
+          </div>
+        )}
+        {/* Content type badge bottom-left */}
+        <div className="absolute bottom-2 left-2 bg-black/60 border border-white/10 rounded-md px-1.5 py-0.5 flex items-center gap-1 text-[var(--stone-shadow)]">
+          <ContentTypeIcon contentType={row.song.contentType} />
+          <span className="text-[9px] font-mono uppercase">{row.song.contentType}</span>
         </div>
       </div>
-    </Link>
+
+      {/* Info row */}
+      <div className="p-3">
+        {/* Title — navigates to song page */}
+        <Link href={`/song/${row.song.id}`}>
+          <p className="text-sm font-medium text-[var(--stone-light)] truncate leading-tight hover:text-[var(--gold)] transition-colors cursor-pointer">
+            {row.song.title}
+          </p>
+        </Link>
+        {/* Creator name — navigates to creator profile */}
+        {row.creator ? (
+          <Link href={`/creator/${row.creator.id}`}>
+            <p className="text-xs text-[var(--stone-shadow)] mt-0.5 truncate hover:text-[var(--gold)]/70 transition-colors cursor-pointer">
+              {row.creator.artistHandle ?? row.creator.name ?? "Unknown"}
+            </p>
+          </Link>
+        ) : (
+          <p className="text-xs text-[var(--stone-shadow)] mt-0.5 truncate">Unknown</p>
+        )}
+        {row.song.genre && (
+          <span className="inline-block mt-1.5 text-[10px] font-mono text-[var(--stone-shadow)] bg-[var(--void-2)] border border-white/5 px-1.5 py-0.5 rounded-full truncate max-w-full">
+            {row.song.genre}
+          </span>
+        )}
+      </div>
+    </div>
   );
+}
+
+// ── helpers ──────────────────────────────────────────────────────
+function feedRowToTrack(row: FeedRow): Track {
+  const s = row.song;
+  const c = row.creator;
+  return {
+    id: String(s.id),
+    title: s.title,
+    artist: c?.artistHandle ?? c?.name ?? "Unknown",
+    genre: s.genre ?? "",
+    audioUrl: s.fileUrl ?? undefined,
+    artUrl: s.coverArtUrl ?? undefined,
+    witnessId: s.witnessId ?? undefined,
+    aiDisclosure: (s.aiDisclosure as Track["aiDisclosure"]) ?? undefined,
+    creatorHandle: c?.artistHandle ?? c?.name ?? undefined,
+    creatorId: c?.id ?? undefined,
+    contentType: (s.contentType as Track["contentType"]) ?? "audio",
+  };
+}
+
+function ContentTypeIcon({ contentType }: { contentType: string }) {
+  switch (contentType) {
+    case "audio": return <FileAudio className="w-3.5 h-3.5" />;
+    case "video": return <FileVideo className="w-3.5 h-3.5" />;
+    case "lyrics": return <FileText className="w-3.5 h-3.5" />;
+    case "manuscript": return <BookOpen className="w-3.5 h-3.5" />;
+    case "comic": return <FileImage className="w-3.5 h-3.5" />;
+    default: return <File className="w-3.5 h-3.5" />;
+  }
 }
 
 // ── Creator Card ──────────────────────────────────────────────────
