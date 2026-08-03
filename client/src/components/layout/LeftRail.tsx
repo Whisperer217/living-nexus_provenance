@@ -14,11 +14,11 @@
    capture touch events globally, or manipulate the body in any way.
 ═══════════════════════════════════════════════════════════════════ */
 import { useLocation, useRouter } from "wouter";
-import { Home, Compass, User, Upload, Archive, ExternalLink } from "lucide-react";
+import { Home, Compass, BookOpen, Upload, Archive, ExternalLink, Shield } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 
-export type NavMode = "home" | "explore" | "profile" | "upload" | "archive";
+export type NavMode = "home" | "explore" | "guide" | "upload" | "archive";
 
 const LOGO_URL =
   "/manus-storage/living-nexus-logo-2025_19c2d497.png";
@@ -30,11 +30,11 @@ const RAIL_ITEMS: Array<{
   path: string;
   authRequired?: boolean;
 }> = [
-  { id: "home",    icon: Home,    label: "Home",     path: "/"        },
-  { id: "explore", icon: Compass, label: "Explore",  path: "/explore" },
-  { id: "profile", icon: User,    label: "Profile",  path: "/profile", authRequired: true },
-  { id: "upload",  icon: Upload,  label: "Register", path: "/manifest",  authRequired: true },
-  { id: "archive", icon: Archive, label: "LNA",  path: "/archive", authRequired: true },
+  { id: "home",    icon: Home,     label: "Home",    path: "/"               },
+  { id: "explore", icon: Compass,  label: "Explore", path: "/explore"        },
+  { id: "guide",   icon: BookOpen, label: "Guide",   path: "/guides",        },
+  { id: "upload",  icon: Upload,   label: "Register",path: "/manifest",  authRequired: true },
+  { id: "archive", icon: Archive,  label: "LNA",     path: "/archive", authRequired: true },
 ];
 
 interface LeftRailProps {

@@ -735,6 +735,8 @@ export async function updateSongMetadata(
     // Download Settings
     downloadPermission?: "none" | "free" | "tipped";
     downloadTipThresholdCents?: number;
+    // Guide provenance chain
+    parentGuideWid?: string | null;
   }
 ) {
   const db = await getDb();
@@ -779,6 +781,7 @@ export async function updateSongMetadata(
   if (fields.moodTags !== undefined) updateSet.moodTags = fields.moodTags;
   if (fields.downloadPermission !== undefined) updateSet.downloadPermission = fields.downloadPermission;
   if (fields.downloadTipThresholdCents !== undefined) updateSet.downloadTipThresholdCents = fields.downloadTipThresholdCents;
+  if (fields.parentGuideWid !== undefined) updateSet.parentGuideWid = fields.parentGuideWid;
   await db.update(songs).set(updateSet).where(and(eq(songs.id, songId), eq(songs.userId, userId)));
 }
 

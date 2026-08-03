@@ -904,6 +904,13 @@
       "when": 1784826473080,
       "tag": "0129_giant_human_torch",
       "breakpoints": true
+    },
+    {
+      "idx": 130,
+      "version": "5",
+      "when": 1785741163683,
+      "tag": "0130_majestic_human_torch",
+      "breakpoints": true
     }
   ]
 }

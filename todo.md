@@ -6752,3 +6752,17 @@
 - [x] KeeperPage: publishPortraitToStore server procedure (founders can set price, others free)
 - [x] ExplorePage: Keeper Skins section with 3/4/5-col grid, lock/unlock/equip modal
 - [x] ExplorePage: Purchase modal with equip + buy actions, equipped badge, free/price badge
+
+## Phase N+Guide: Homepage Clarity + Guide Provenance Chain
+
+- [x] Homepage (Home.tsx) confirmed as cathedral door — Guide + Registry as two primary CTAs
+- [x] LeftRail confirmed: Guide is third nav item (BookOpen icon, /guides path)
+- [x] ContextDrawer Guide panel confirmed: Pre-Creation Declaration, Registry, Creative Domain, Keeper sections
+- [x] parentGuideWid column added to songs table via direct SQL migration
+- [x] parentGuideWid field added to drizzle/schema.ts songs table
+- [x] parentGuideWid added to upload procedure input schema (songs.ts router)
+- [x] parentGuideWid added to updateMetadata procedure input schema
+- [x] parentGuideWid added to updateSongMetadata db helper (fields type + updateSet)
+- [x] Guide provenance selector added to UploadPage (shown when creator has guides, before Training Consent)
+- [x] parentGuideWid passed in all four uploadMutation.mutate calls (audio, game, lyrics, manuscript/comic)
+- [x] TypeScript: 0 errors

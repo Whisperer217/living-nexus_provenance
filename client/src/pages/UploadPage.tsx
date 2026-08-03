@@ -186,6 +186,7 @@ export default function UploadPage() {
   const [credits, setCredits] = useState<{ role: string; name: string }[]>([]);
   const [selectedMoods, setSelectedMoods] = useState<string[]>([]);
   const [aiConsent, setAiConsent] = useState<"prohibited" | "permitted_attribution" | "permitted">("prohibited");
+  const [parentGuideWid, setParentGuideWid] = useState<string | null>(null);
   const [aiDisclosure, setAiDisclosure] = useState<"original" | "ai_assisted" | "ai_generated" | "human_authored_ai_instrument">("original");
   const [ownershipStatus, setOwnershipStatus] = useState<"full" | "partial">("full");
   const [haaiDeclaration, setHaaiDeclaration] = useState({
@@ -241,6 +242,8 @@ export default function UploadPage() {
 
   // Load creator profile defaults (aiDisclosure, primaryGenre)
   const { data: creatorProfile } = trpc.profile.me.useQuery(undefined, { enabled: !!user });
+  // Load creator's own guides for the Guide provenance selector
+  const { data: myGuides } = trpc.guides.listMine.useQuery(undefined, { enabled: !!user, staleTime: 60_000 });
 
   // Auto-fill genre from profile default (only when genre is still empty)
   useEffect(() => {
@@ -736,6 +739,7 @@ export default function UploadPage() {
           ...(aiDisclosure === "human_authored_ai_instrument" ? haaiDeclaration : {}),
           pagesJson: storyboardPagesJson || undefined,
           narrativeFormat: narrativeFormat ?? (uploadMode === "manuscript" ? "manuscript" : "comic"),
+          parentGuideWid: parentGuideWid || undefined,
         } as any);
       } catch (err: any) { toast.error(err.message || "Failed to prepare upload"); }
       return;
@@ -769,6 +773,7 @@ export default function UploadPage() {
           aiDisclosure,
           haaiOriginStory: haaiDeclaration.haaiOriginStory || undefined,
           ...(aiDisclosure === "human_authored_ai_instrument" ? haaiDeclaration : {}),
+          parentGuideWid: parentGuideWid || undefined,
         } as any);
       } catch (err: any) { toast.error(err.message || "Failed to prepare upload"); }
       return;
@@ -807,6 +812,7 @@ export default function UploadPage() {
           aiDisclosure,
           haaiOriginStory: haaiDeclaration.haaiOriginStory || undefined,
           ...(aiDisclosure === "human_authored_ai_instrument" ? haaiDeclaration : {}),
+          parentGuideWid: parentGuideWid || undefined,
         } as any);
       } catch (err: any) { toast.error(err.message || "Failed to prepare upload"); }
       return;
@@ -852,6 +858,7 @@ export default function UploadPage() {
         aiDisclosure,
         haaiOriginStory: haaiDeclaration.haaiOriginStory || undefined,
         ...(aiDisclosure === "human_authored_ai_instrument" ? haaiDeclaration : {}),
+        parentGuideWid: parentGuideWid || undefined,
       } as any);
     } catch (err: any) {
       setUploadPhase("idle");
@@ -1808,6 +1815,29 @@ export default function UploadPage() {
                   ))}
                 </div>
               </div>
+              {/* ── Guide Provenance Chain ─────────────────────────── */}
+              {myGuides && myGuides.length > 0 && (
+                <div className="rounded-xl p-4" style={{ background: "rgba(196,154,40,0.04)", border: "1px solid rgba(196,154,40,0.18)" }}>
+                  <label className="text-xs font-semibold block mb-1" style={{ color: "#B8A88A", letterSpacing: "0.08em" }}>GUIDE PROVENANCE CHAIN</label>
+                  <p className="text-xs mb-3" style={{ color: "rgba(232,223,200,0.5)" }}>Link this work to a Pre-Creation Declaration Guide — establishes provenance before the work existed.</p>
+                  <Select value={parentGuideWid ?? "none"} onValueChange={v => setParentGuideWid(v === "none" ? null : v)}>
+                    <SelectTrigger className="w-full text-sm" style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.3)", color: "var(--ln-parchment)" }}>
+                      <SelectValue placeholder="No Guide linked" />
+                    </SelectTrigger>
+                    <SelectContent style={{ background: "var(--ln-obsidian)", border: "1px solid rgba(196,154,40,0.25)" }}>
+                      <SelectItem value="none" style={{ color: "rgba(232,223,200,0.5)" }}>No Guide linked</SelectItem>
+                      {myGuides.map(g => (
+                        <SelectItem key={g.widCode ?? g.id} value={g.widCode ?? String(g.id)} style={{ color: "var(--ln-parchment)" }}>
+                          {g.canonicalName} {g.widCode ? `· ${g.widCode}` : ""}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {parentGuideWid && (
+                    <p className="text-xs mt-2" style={{ color: "var(--ln-gold)" }}>✦ Linked to {myGuides.find(g => (g.widCode ?? String(g.id)) === parentGuideWid)?.canonicalName ?? parentGuideWid}</p>
+                  )}
+                </div>
+              )}
               <div>
                 <label className="text-xs mb-2 block font-medium" style={{ color: "#B8A88A" }}>TRAINING CONSENT</label>
                 <div className="space-y-2">

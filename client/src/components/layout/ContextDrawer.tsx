@@ -15,8 +15,8 @@ import { useLocation } from "wouter";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 import {
-  Home, Compass, User, Upload, Archive,
-  Music, FileText, BookOpen, Image, Users,
+  Home, Compass, BookOpen as BookOpenIcon, Upload, Archive,
+  Music, FileText, BookOpen, Image, Users, User,
   Star, TrendingUp, Sparkles, ShoppingBag,
   FolderOpen, Settings, LogOut, LogIn,
   Shield, BookMarked,
@@ -28,7 +28,7 @@ import { PLATFORM_VERSION } from "@/platformVersion";
 
 // ── Types ─────────────────────────────────────────────────────────
 
-export type NavMode = "home" | "explore" | "profile" | "compose" | "upload" | "archive";
+export type NavMode = "home" | "explore" | "guide" | "compose" | "upload" | "archive";
 
 // Re-export so callers that previously imported WHATS_NEW_VERSION still work.
 export const WHATS_NEW_VERSION = PLATFORM_VERSION;
@@ -130,30 +130,39 @@ const PANELS: Record<NavMode, ModePanel> = {
     ],
   },
 
-  profile: {
-    icon: <User size={17} />,
-    title: "Profile",
-    subtitle: "Your identity on the registry",
+  guide: {
+    icon: <BookOpenIcon size={17} />,
+    title: "Guide",
+    subtitle: "Pre-Creation Declaration & Creative Process",
     sections: [
       {
+        heading: "Pre-Creation Declaration",
         links: [
-          { icon: <LayoutGrid size={14} />, label: "My Domain", path: "/domain", description: "Creator Domain Command Center", authOnly: true, gold: true },
+          { icon: <BookOpenIcon size={14} />, label: "Create a Guide", path: "/guides/upload", description: "Establish your creative intent before generating", authOnly: true, gold: true },
+          { icon: <Users size={14} />, label: "Guide Directory", path: "/guides", description: "Browse all creator guides & Nexus Avatars" },
+        ],
+      },
+      {
+        heading: "The Registry",
+        links: [
+          { icon: <Shield size={14} />, label: "Verify a WID", path: "/verify", description: "Check any Witness ID — confirm authorship", gold: true },
+          { icon: <BookMarked size={14} />, label: "Witness Registry", path: "/witness-registry", description: "Public ledger of all registered works" },
+          { icon: <BookOpen size={14} />, label: "WID Specification", path: "/doctrine/wid-spec", description: "How Witness IDs work" },
+        ],
+      },
+      {
+        heading: "Your Creative Domain",
+        links: [
+          { icon: <LayoutGrid size={14} />, label: "My Domain", path: "/domain", description: "Creator Domain Command Center", authOnly: true },
           { icon: <User size={14} />, label: "My Profile", path: "__my_public_profile__", description: "Your public domain", authOnly: true },
           { icon: <Music size={14} />, label: "My Works", path: "/profile?tab=works", description: "Your registered works ledger", authOnly: true },
-          { icon: <FolderOpen size={14} />, label: "Collections", path: "/profile?tab=collections", description: "Curated playlists", authOnly: true },
           { icon: <LayoutDashboard size={14} />, label: "Dashboard", path: "/dashboard", description: "Creator analytics & slots", authOnly: true },
         ],
       },
       {
-        heading: "Personal Nexus Avatar",
+        heading: "Keeper & Identity",
         links: [
-          { icon: <Sparkles size={14} />, label: "My Personal Nexus Avatar", path: "/keeper", description: "Equip & customise your Personal Nexus Avatar", authOnly: true, gold: true },
-          { icon: <Sparkles size={14} />, label: "Nexus Compose", path: "/keeper-compose", description: "AI prompt studio for your Personal Nexus Avatar", authOnly: true },
-        ],
-      },
-      {
-        heading: "Account",
-        links: [
+          { icon: <Sparkles size={14} />, label: "My Nexus Avatar", path: "/keeper", description: "Equip & customise your Personal Nexus Avatar", authOnly: true },
           { icon: <Settings size={14} />, label: "Settings", path: "/settings/billing", authOnly: true },
           { icon: <LogOut size={14} />, label: "Log Out", path: "__logout__", authOnly: true, danger: true },
         ],

@@ -372,6 +372,11 @@ export const songs = mysqlTable("songs", {
   // null = root artifact (no parent); set = this work is a derivative/expression of parentSongId
   // This is the minimal bridge toward the Artifact Root (WID) architecture — no UI yet
   parentSongId: int("parentSongId"),
+  // Guide provenance chain — links this work back to the Pre-Creation Declaration Guide WID
+  // When set, the provenance chain reads: Guide WID (intent) → Work WID (manifestation)
+  // This is the primary mechanism for proving human creative intent preceded AI generation.
+  // Format: LN-GUIDE-* (e.g. LN-GUIDE-ARB-0001)
+  parentGuideWid: varchar("parentGuideWid", { length: 64 }),
 
   // Display order — creator-controlled sort position for their public tracklist
   // 0 = unset (falls back to createdAt ASC); positive integers = explicit position (1-indexed)
