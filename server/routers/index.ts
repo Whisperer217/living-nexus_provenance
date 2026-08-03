@@ -79,6 +79,7 @@ import { platformGuidesRouter }    from "./platformGuides";
 
 // ── Mission Control domain ───────────────────────────────────────────────────
 import { missionControlRouter }    from "./missionControl";
+import { sessionsRouter }          from "./sessions";
 
 // ── Platform domain ───────────────────────────────────────────────────────────
 import { platformRouter }          from "./platform";
@@ -181,6 +182,9 @@ export const appRouter = router({
 
   // Mission Control — Actionable Phase Ledger
   missionControl: missionControlRouter,
+
+  // Creative Operating System — Manifestation Sessions
+  sessions: sessionsRouter,
 });
 
 export type AppRouter = typeof appRouter;

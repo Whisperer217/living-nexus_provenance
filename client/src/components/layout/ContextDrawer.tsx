@@ -23,12 +23,13 @@ import {
   LayoutGrid, LayoutDashboard, X, ExternalLink,
   Download, PenTool, Palette,
   ScrollText, Scale, Heart, Library,
+  Layers, Plus, GitBranch,
 } from "lucide-react";
 import { PLATFORM_VERSION } from "@/platformVersion";
 
 // ── Types ─────────────────────────────────────────────────────────
 
-export type NavMode = "home" | "explore" | "guide" | "compose" | "upload" | "archive";
+export type NavMode = "home" | "explore" | "guide" | "sessions" | "compose" | "upload" | "archive";
 
 // Re-export so callers that previously imported WHATS_NEW_VERSION still work.
 export const WHATS_NEW_VERSION = PLATFORM_VERSION;
@@ -59,6 +60,35 @@ interface ModePanel {
 // ── Mode-specific panel definitions ───────────────────────────────
 
 const PANELS: Record<NavMode, ModePanel> = {
+  sessions: {
+    icon: <Layers size={17} />,
+    title: "Manifestation Sessions",
+    subtitle: "The creative journey begins here",
+    sections: [
+      {
+        links: [
+          { icon: <Plus size={14} />, label: "+ New Manifestation", path: "/new-manifestation", description: "Begin a new creative session", authOnly: true, gold: true },
+          { icon: <Layers size={14} />, label: "My Sessions", path: "/sessions", description: "All your active creative journeys", authOnly: true },
+        ],
+      },
+      {
+        heading: "How It Works",
+        links: [
+          { icon: <ScrollText size={14} />, label: "Declare Intent", path: "/new-manifestation", description: "Name your work and state why it exists" },
+          { icon: <Shield size={14} />, label: "Session WID Issued", path: "/new-manifestation", description: "Protected before the work exists" },
+          { icon: <GitBranch size={14} />, label: "Provenance Graph", path: "/sessions", description: "Every prompt, image, lyric — appended" },
+          { icon: <BookOpen size={14} />, label: "Work WID Issued", path: "/manifest", description: "Culminates in the canonical registry" },
+        ],
+      },
+      {
+        heading: "Related",
+        links: [
+          { icon: <BookOpen size={14} />, label: "Guides", path: "/guides", description: "Pre-creation declarations" },
+          { icon: <Upload size={14} />, label: "Register Work", path: "/manifest", description: "Manifestation Studio", authOnly: true },
+        ],
+      },
+    ],
+  },
   home: {
     icon: <Home size={17} />,
     title: "Home",

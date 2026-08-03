@@ -128,6 +128,9 @@ const AlbumDetailPage = lazy(() => import("./pages/AlbumDetailPage"));
 const DesignSystemPage = lazy(() => import("./pages/DesignSystemPage"));
 const SetupDomainPage = lazy(() => import("./pages/SetupDomainPage"));
 const CreatorDomainShell = lazy(() => import("./pages/CreatorDomainShell"));
+const NewManifestationPage = lazy(() => import("./pages/NewManifestationPage"));
+const ManifestationWorkspacePage = lazy(() => import("./pages/ManifestationWorkspacePage"));
+const SessionsListPage = lazy(() => import("./pages/SessionsListPage"));
 
 // Minimal fallback shown while a page chunk loads (typically <200ms on CDN)
 function PageLoader() {
@@ -301,6 +304,10 @@ function Router() {
                 <Route path="/project/:slug" component={ProjectPage} />
                 <Route path="/projects/:slug">{({ slug }: { slug: string }) => <Redirect to={`/project/${slug}`} />}</Route>
                 <Route path="/my-projects" component={MyProjectsPage} />
+                {/* ── Manifestation Sessions — Creative Operating System ── */}
+                <Route path="/new-manifestation" component={NewManifestationPage} />
+                <Route path="/sessions" component={SessionsListPage} />
+                <Route path="/manifestation/:id" component={ManifestationWorkspacePage} />
                 <Route path="/keeper" component={KeeperPage} />
                 <Route path="/keeper-compose" component={KeeperComposePage} />
                 <Route path="/first-witness" component={FirstWitnessPage} />

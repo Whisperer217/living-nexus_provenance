@@ -6780,3 +6780,56 @@
 - [x] FloatingAvatar: on /keeper-compose — shows "COMPOSE MODE — Register your work from here" + Register Work + New Guide buttons
 - [x] FloatingAvatar: on any creator context page — shows Verify WID quick action
 - [x] Transform KeeperPage — AI Model Command Center section added above Skin Armory: 6-mode capability map with roles + descriptions + direct CTAs, plus AI-Orchestrated Registration Flow diagram
+
+## Phase Manifestation-OS: Creative Operating System
+
+### Schema & Backend
+- [ ] Add manifestationSessions table (id, userId, sessionWid, name, intent, medium, collaborators, status, createdAt, updatedAt)
+- [ ] Add sessionEvents append-only table (id, sessionId, eventType, payload JSON, actorType, actorId, createdAt)
+- [ ] Run db:push migration for both tables
+- [ ] Add sessions.create tRPC procedure — issues Session WID, creates session record, appends INTENT_DECLARED event
+- [ ] Add sessions.addEvent tRPC procedure — append-only event log (prompt, image, lyric, version, ai_response, etc.)
+- [ ] Add sessions.getSession tRPC procedure — returns session with latest state
+- [ ] Add sessions.getTimeline tRPC procedure — returns full event log for a session
+- [ ] Add sessions.listMine tRPC procedure — returns all sessions for the authenticated creator
+- [ ] Add sessions.updateStatus tRPC procedure — active, paused, completed, archived
+
+### New Manifestation Entry Point
+- [ ] Build NewManifestationPage (/manifest/new) — Name, Intent, Medium selector, Collaborators, Declaration, Start Session button
+- [ ] Medium selector: Music, Book, Research, Film, Visual Art, Software (with icons)
+- [ ] On Start Session: call sessions.create, receive Session ID, navigate to /manifest/session/:sessionId
+- [ ] Register /manifest/new route in App.tsx
+- [ ] Add + New Manifestation button to LeftRail (primary CTA, gold, prominent)
+
+### Manifestation Workspace
+- [ ] Build ManifestationWorkspacePage (/manifest/session/:sessionId) — unified creative workspace
+- [ ] Workspace header: Manifestation name, Session WID badge, intent statement, status indicator
+- [ ] Tab system: Conversation, Music, Images, Storyboard, Lyrics, Timeline, Registry, Evidence, Versions, Collaborators, Publish
+- [ ] Conversation tab: Keeper chat with session context injected into every message
+- [ ] Timeline tab: append-only event log viewer showing the full provenance graph
+- [ ] Registry tab: shows current session WID + button to issue final Work WID when ready
+- [ ] Register /manifest/session/:sessionId route in App.tsx
+
+### Keeper Session Awareness
+- [ ] Pass active sessionId to Keeper chat procedures when a session is active
+- [ ] Keeper system prompt includes session name, intent, medium, and declaration when sessionId is provided
+- [ ] Every Keeper message in a session is appended to sessionEvents as AI_RESPONSE event
+- [ ] FloatingAvatar shows active Manifestation name + session WID when a session is active
+
+### Registry Integration
+- [ ] When creator issues Work WID from the Registry tab, link the Work WID to the Session WID as parentSessionWid
+- [ ] Session status updates to "completed" when Work WID is issued
+- [ ] VerifyPage shows session provenance chain when a Work WID has a parentSessionWid
+
+## Phase Manifestation-OS: Creative Operating System (Completed)
+- [x] Create manifestationSessions and sessionEvents tables in drizzle/schema.ts
+- [x] Apply schema to database via direct SQL (manifestationSessions + sessionEvents tables)
+- [x] Create sessions tRPC router with create, addEvent, getSession, getTimeline, listMine, updateStatus procedures
+- [x] Register sessions router in server/routers/index.ts
+- [x] Build NewManifestationPage — three human questions (Name, Intent, Medium) + Session WID preview + Start Session
+- [x] Build ManifestationWorkspacePage — unified workspace with 11 panels (Conversation, Music, Images, Storyboard, Lyrics, Timeline, Registry, Evidence, Versions, Collaborators, Publish) anchored to session
+- [x] Build SessionsListPage — lists all creator sessions with status, WID, and quick actions
+- [x] Register new routes in App.tsx (/new-manifestation, /sessions, /manifestation/:id)
+- [x] Add Sessions to LeftRail navigation (Layers icon, between Guide and Register)
+- [x] Add sessions panel to ContextDrawer with How It Works flow
+- [x] Add + New Manifestation CTA to homepage (WIDExplainer CTA row, violet accent)

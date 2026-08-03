@@ -16,7 +16,7 @@ import { usePlayer } from "@/contexts/PlayerContext";
 import { useAuth } from "@/_core/hooks/useAuth";
 import TipModal from "@/components/TipModal";
 // Card width is now responsive via CSS variable --card-pan-w (see index.css)
-import { Sparkles, ShieldCheck, Upload, Compass, Star, Lock, Fingerprint, Shield, Users, Play, Pause, Heart, DollarSign, Cpu, CheckCircle2, ChevronLeft, ChevronRight, Send, Flame } from "lucide-react";
+import { Sparkles, ShieldCheck, Upload, Compass, Star, Lock, Fingerprint, Shield, Users, Play, Pause, Heart, DollarSign, Cpu, CheckCircle2, ChevronLeft, ChevronRight, Send, Flame, Layers, Plus } from "lucide-react";
 import { Link } from "wouter";
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
@@ -952,7 +952,16 @@ function WIDExplainer() {
               )}
             </span>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
+            <Link href="/new-manifestation">
+              <button
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-heading tracking-wide transition-all hover:brightness-110"
+                style={{ background: "rgba(124,58,237,0.12)", border: "1px solid rgba(124,58,237,0.35)", color: "rgba(167,139,250,0.90)" }}
+              >
+                <Plus className="w-3 h-3" />
+                New Manifestation
+              </button>
+            </Link>
             <Link href="/verify">
               <button
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-heading tracking-wide transition-all hover:brightness-110"

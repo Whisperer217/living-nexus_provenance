@@ -2349,3 +2349,53 @@ export const guideAccessRequests = mysqlTable("guideAccessRequests", {
 }));
 export type GuideAccessRequest = typeof guideAccessRequests.$inferSelect;
 export type InsertGuideAccessRequest = typeof guideAccessRequests.$inferInsert;
+
+// ─── Manifestation Sessions ────────────────────────────────────────────────────
+// The Creative Operating System core primitive.
+// A session is created at the moment of intent declaration — before any work exists.
+// Every prompt, image, lyric, revision, and AI response is appended to the session's
+// event log, forming an append-only provenance graph anchored to the creator's original intent.
+export const manifestationSessions = mysqlTable("manifestationSessions", {
+  id:            int("id").autoincrement().primaryKey(),
+  userId:        int("userId").notNull(),                       // FK → users.id
+  sessionWid:    varchar("sessionWid", { length: 64 }).notNull().unique(), // LN-SESSION-* issued at creation
+  name:          varchar("name", { length: 256 }).notNull(),   // "Armor of Light"
+  intent:        text("intent").notNull(),                     // "This song exists to remind combat veterans..."
+  medium:        mysqlEnum("medium", ["music", "book", "research", "film", "visual_art", "software", "other"]).notNull(),
+  collaborators: text("collaborators"),                        // JSON array of collaborator names/handles
+  declaration:   text("declaration"),                          // formal declaration text at session start
+  guideWid:      varchar("guideWid", { length: 64 }),          // optional link to a Guide WID (pre-creation declaration)
+  workWid:       varchar("workWid", { length: 64 }),           // populated when final Work WID is issued
+  status:        mysqlEnum("status", ["active", "paused", "completed", "archived"]).default("active").notNull(),
+  createdAt:     timestamp("createdAt").defaultNow().notNull(),
+  updatedAt:     timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (t) => ({
+  userIdx:       index("ms_user_idx").on(t.userId),
+  statusIdx:     index("ms_status_idx").on(t.status),
+  mediumIdx:     index("ms_medium_idx").on(t.medium),
+}));
+export type ManifestationSession = typeof manifestationSessions.$inferSelect;
+export type InsertManifestationSession = typeof manifestationSessions.$inferInsert;
+
+// ─── Session Events (Append-Only Provenance Graph) ────────────────────────────
+// Every action in a Manifestation Session is appended here as an immutable event.
+// This is the living record — the testimony of the creative journey.
+// Event types: INTENT_DECLARED, PROMPT_SENT, AI_RESPONSE, IMAGE_GENERATED,
+//              LYRIC_SAVED, VERSION_SAVED, WORK_REGISTERED, COLLABORATOR_ADDED,
+//              NOTE_ADDED, STATUS_CHANGED
+export const sessionEvents = mysqlTable("sessionEvents", {
+  id:          int("id").autoincrement().primaryKey(),
+  sessionId:   int("sessionId").notNull(),                     // FK → manifestationSessions.id
+  eventType:   varchar("eventType", { length: 64 }).notNull(), // PROMPT_SENT, AI_RESPONSE, IMAGE_GENERATED, etc.
+  actorType:   mysqlEnum("actorType", ["creator", "ai", "system"]).default("creator").notNull(),
+  actorId:     varchar("actorId", { length: 64 }),             // userId or "keeper" or "system"
+  payload:     json("payload"),                                // event-specific data (prompt text, image URL, lyric text, etc.)
+  summary:     text("summary"),                                // human-readable summary of the event
+  createdAt:   timestamp("createdAt").defaultNow().notNull(),
+}, (t) => ({
+  sessionIdx:  index("se_session_idx").on(t.sessionId),
+  typeIdx:     index("se_type_idx").on(t.eventType),
+  actorIdx:    index("se_actor_idx").on(t.actorType),
+}));
+export type SessionEvent = typeof sessionEvents.$inferSelect;
+export type InsertSessionEvent = typeof sessionEvents.$inferInsert;
