@@ -6842,3 +6842,15 @@
 - [ ] Add /manifestation/:id/record public route for sharing
 - [ ] Update NewManifestationPage — add contribution checkboxes and declaration field to session creation flow
 - [ ] Wire sessions.update tRPC procedure to save contributions + declaration + transformation summary
+
+## Phase Player-Playlist: Playback Order + Playlist Redesign
+
+- [x] Fix Explore page playback order — WorkListRow and GridCard now call playQueueAt with full section queue instead of addAndPlay (single track)
+- [x] Fix CathedralSection to pass full section queue to each card/row for sequential playback
+- [x] Shuffle only activates when player shuffle toggle is on — nextTrack already handles this correctly with full queue
+- [x] Add shareSlug, moodTags, playCount columns to playlists table
+- [x] Add playlists.generateShareSlug procedure — generates slug, sets isPublic=true, returns slug
+- [x] Add playlists.getBySlug public procedure — fetches playlist by slug with tracks + owner info
+- [x] Build SharedPlaylistPage (/p/:slug) — public playlist view, no auth required, cathedral aesthetic, play all/per-track
+- [x] Register /p/:slug as public standalone route in App.tsx (no MainLayout)
+- [x] Add SharePlaylistButton to PlaylistDetail — generates slug on first share, copies link on subsequent shares

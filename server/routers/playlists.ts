@@ -452,6 +452,40 @@ export const playlistsRouter = router({
         for (const id of playlistIds) result[id] = containsSet.has(id);
         return result;
       }),
+    /** Generate or regenerate a public share slug for a playlist */
+    generateShareSlug: protectedProcedure
+      .input(z.object({ id: z.number().int().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        const playlist = await getPlaylistById(input.id);
+        if (!playlist || playlist.ownerId !== ctx.user.id) throw new TRPCError({ code: "FORBIDDEN" });
+        const { playlists: plTbl } = await import("../../drizzle/schema");
+        const { eq: eqOp } = await import("drizzle-orm");
+        const db = await getDb();
+        const base = playlist.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 32);
+        const suffix = Math.random().toString(36).slice(2, 8);
+        const slug = `${base}-${suffix}`;
+        await db.update(plTbl).set({ shareSlug: slug, isPublic: true }).where(eqOp(plTbl.id, input.id));
+        return { slug };
+      }),
+    /** Get a public playlist by its share slug (no auth required) */
+    getBySlug: publicProcedure
+      .input(z.object({ slug: z.string() }))
+      .query(async ({ input }) => {
+        const { playlists: plTbl, playlistTracks: ptTbl, songs: songsTbl, users: usersTbl } = await import("../../drizzle/schema");
+        const { eq: eqOp, and: andOp } = await import("drizzle-orm");
+        const db = await getDb();
+        const [playlist] = await db.select().from(plTbl).where(andOp(eqOp(plTbl.shareSlug, input.slug), eqOp(plTbl.isPublic, true))).limit(1);
+        if (!playlist) throw new TRPCError({ code: "NOT_FOUND" });
+        const tracks = await db
+          .select({ pt: ptTbl, song: songsTbl, creator: usersTbl })
+          .from(ptTbl)
+          .leftJoin(songsTbl, eqOp(ptTbl.songId, songsTbl.id))
+          .leftJoin(usersTbl, eqOp(songsTbl.userId, usersTbl.id))
+          .where(eqOp(ptTbl.playlistId, playlist.id))
+          .orderBy(ptTbl.position);
+        const owner = await getUserById(playlist.ownerId);
+        return { playlist, tracks, owner };
+      }),
   });
 
 

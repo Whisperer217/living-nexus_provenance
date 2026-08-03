@@ -6,7 +6,7 @@
 import { useState, useCallback } from "react";
 import { Play, Pause, Shield, BookOpen, ListPlus, Heart, Headphones, FileText, Image, Gamepad2, Code2, Music } from "lucide-react";
 import { Link, useLocation } from "wouter";
-import { usePlayer } from "@/contexts/PlayerContext";
+import { usePlayer, type Track, type QueueContext } from "@/contexts/PlayerContext";
 import { useLike } from "../hooks/useLike";
 import { SupportCreatorDrawer, type SupportTarget } from "@/components/SupportCreatorDrawer";
 import { AddToMyListModal } from "@/components/AddToMyListModal";
@@ -73,12 +73,18 @@ interface Props {
   index?: number;
   prefetchedLiked?: boolean;
   prefetchedLikeCount?: number;
+  /** Full ordered list of tracks in this section — enables sequential playback */
+  queueTracks?: Track[];
+  /** Index of this row within queueTracks */
+  queueIndex?: number;
+  /** Queue context label for the player */
+  queueContext?: string;
 }
 
 // ── Component ──────────────────────────────────────────────────────
-export function WorkListRow({ item, index, prefetchedLiked, prefetchedLikeCount }: Props) {
+export function WorkListRow({ item, index, prefetchedLiked, prefetchedLikeCount, queueTracks, queueIndex, queueContext }: Props) {
   const { song, creator } = item;
-  const { addAndPlay, currentTrackId, state: playerState } = usePlayer();
+  const { addAndPlay, playQueueAt, currentTrackId, state: playerState } = usePlayer();
   const [, navigate] = useLocation();
   const [showSupport, setShowSupport] = useState(false);
   const [showAddToList, setShowAddToList] = useState(false);
@@ -101,6 +107,12 @@ export function WorkListRow({ item, index, prefetchedLiked, prefetchedLikeCount 
   const handlePlay = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     if (!hasAudio) { navigate(`/song/${song.id}`); return; }
+    // If a full queue context is provided, use playQueueAt for sequential playback
+    if (queueTracks && queueTracks.length > 0 && queueIndex !== undefined) {
+      playQueueAt(queueTracks, queueIndex, (queueContext ?? "EXPLORE") as QueueContext);
+      return;
+    }
+    // Fallback: single-track play
     addAndPlay({
       id: String(song.id),
       title: song.title,
@@ -110,7 +122,7 @@ export function WorkListRow({ item, index, prefetchedLiked, prefetchedLikeCount 
       artUrl: song.coverArtUrl ?? undefined,
       witnessId: song.witnessId ?? undefined,
     });
-  }, [hasAudio, song, artistName, addAndPlay, navigate]);
+  }, [hasAudio, song, artistName, addAndPlay, playQueueAt, navigate, queueTracks, queueIndex, queueContext]);
 
   const handleRowClick = useCallback(() => {
     navigate(`/song/${song.id}`);

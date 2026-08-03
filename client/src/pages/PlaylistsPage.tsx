@@ -262,6 +262,47 @@ function PlaylistCard({
   );
 }
 
+/* ── Share Playlist Button ─────────────────────────────────────── */
+function SharePlaylistButton({ playlistId, playlist }: { playlistId: number; playlist: any }) {
+  const utils = trpc.useUtils();
+  const generateSlug = trpc.playlists.generateShareSlug.useMutation({
+    onSuccess: (data) => {
+      const url = `${window.location.origin}/p/${data.slug}`;
+      navigator.clipboard.writeText(url).then(() =>
+        toast.success("Share link copied!", { description: url })
+      );
+      utils.playlists.getById.invalidate({ id: playlistId });
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
+  const handleShare = () => {
+    if (playlist.shareSlug) {
+      const url = `${window.location.origin}/p/${playlist.shareSlug}`;
+      navigator.clipboard.writeText(url).then(() =>
+        toast.success("Share link copied!", { description: url })
+      );
+    } else {
+      generateSlug.mutate({ id: playlistId });
+    }
+  };
+
+  return (
+    <Button
+      onClick={handleShare}
+      disabled={generateSlug.isPending}
+      size="sm"
+      variant="outline"
+      className="border-[#C49A28]/30 text-[#C49A28] hover:bg-[#C49A28]/10 text-xs bg-transparent"
+    >
+      {generateSlug.isPending
+        ? <Loader2 size={12} className="mr-1 animate-spin" />
+        : <Share2 size={12} className="mr-1" />}
+      {playlist.shareSlug ? "Copy Link" : "Share"}
+    </Button>
+  );
+}
+
 /* ── Playlist Detail View ───────────────────────────────────────── */
 function PlaylistDetail({
   playlistId, onBack,
@@ -370,20 +411,10 @@ function PlaylistDetail({
         >
           <Play size={12} className="mr-1" fill="currentColor" /> Play All
         </Button>
-        {/* Share playlist */}
-        {playlist.isPublic && (
-          <Button
-            onClick={() => {
-              const url = `${window.location.origin}/playlists?id=${playlist.id}`;
-              navigator.clipboard.writeText(url).then(() => toast.success("Playlist link copied!"));
-            }}
-            size="sm"
-            variant="outline"
-            className="border-[#C49A28]/30 text-[#C49A28] hover:bg-[#C49A28]/10 text-xs bg-transparent"
-          >
-            <Share2 size={12} className="mr-1" /> Share
-          </Button>
-        )}
+        {/* Share playlist — generates a slug URL if needed */}
+        {isOwner && (
+          <SharePlaylistButton playlistId={playlistId} playlist={playlist} />)
+        }
         {isOwner && playlist.isCollaborative && (
           <Button
             onClick={() => setShowInvite(v => !v)}

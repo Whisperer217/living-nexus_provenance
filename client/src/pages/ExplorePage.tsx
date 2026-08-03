@@ -257,8 +257,8 @@ function CathedralDivider({ title, subtitle, icon, accentColor, count }: { title
 }
 
 // ── Grid Card ─────────────────────────────────────────────────────
-function GridCard({ row }: { row: FeedRow }) {
-  const { addAndPlay } = usePlayer();
+function GridCard({ row, queueTracks, queueIndex }: { row: FeedRow; queueTracks?: Track[]; queueIndex?: number }) {
+  const { addAndPlay, playQueueAt } = usePlayer();
   const isAudio = row.song.contentType === "audio";
   const hasFile = !!row.song.fileUrl;
 
@@ -267,6 +267,11 @@ function GridCard({ row }: { row: FeedRow }) {
     e.stopPropagation();
     if (!hasFile) {
       toast.info("No playable file for this work");
+      return;
+    }
+    // Use playQueueAt when a full section queue is available for sequential playback
+    if (queueTracks && queueTracks.length > 0 && queueIndex !== undefined) {
+      playQueueAt(queueTracks, queueIndex, "EXPLORE");
       return;
     }
     addAndPlay(feedRowToTrack(row));
@@ -402,7 +407,13 @@ function FeaturedStrip({ rows }: { rows: FeedRow[] }) {
         <div className="h-px flex-1 bg-gradient-to-l from-[var(--gold)]/30 to-transparent" />
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {rows.slice(0, 8).map((row) => <GridCard key={row.song.id} row={row} />)}
+        {(() => {
+          const audioTracks = rows.filter(r => !!r.song.fileUrl).map(feedRowToTrack);
+          return rows.slice(0, 8).map((row) => {
+            const qIdx = audioTracks.findIndex(t => t.id === String(row.song.id));
+            return <GridCard key={row.song.id} row={row} queueTracks={audioTracks} queueIndex={qIdx >= 0 ? qIdx : undefined} />;
+          });
+        })()}
       </div>
     </div>
   );
@@ -424,11 +435,14 @@ function CathedralSection({ section, rows, search, viewMode }: { section: typeof
     return (<><CathedralDivider {...section} count={filtered.length} />{groups.length === 0 ? <p className="text-sm text-[var(--stone-shadow)] pb-4">{section.emptyMessage}</p> : <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pb-4">{groups.map(({ creator, works }) => <CreatorCard key={creator.id} creator={creator} works={works} />)}</div>}</>);
   }
 
+  // Build ordered queue of all audio tracks in this section for sequential playback
+  const sectionAudioTracks = useMemo(() => filtered.filter(r => !!r.song.fileUrl).map(feedRowToTrack), [filtered]);
+
   if (viewMode === "grid") {
-    return (<><CathedralDivider {...section} count={filtered.length} />{filtered.length === 0 ? <p className="text-sm text-[var(--stone-shadow)] pb-4">{section.emptyMessage}</p> : <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 pb-4">{filtered.map((row) => <GridCard key={row.song.id} row={row} />)}</div>}</>);
+    return (<><CathedralDivider {...section} count={filtered.length} />{filtered.length === 0 ? <p className="text-sm text-[var(--stone-shadow)] pb-4">{section.emptyMessage}</p> : <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 pb-4">{filtered.map((row) => { const qIdx = sectionAudioTracks.findIndex(t => t.id === String(row.song.id)); return <GridCard key={row.song.id} row={row} queueTracks={sectionAudioTracks} queueIndex={qIdx >= 0 ? qIdx : undefined} />; })}</div>}</>);
   }
 
-  return (<><CathedralDivider {...section} count={filtered.length} />{filtered.length === 0 ? <p className="text-sm text-[var(--stone-shadow)] pb-4">{section.emptyMessage}</p> : <div className="divide-y divide-white/5 rounded-xl overflow-hidden border border-white/5 mb-4">{filtered.map((row) => <WorkListRow key={row.song.id} item={feedRowToListItem(row)} />)}</div>}</>);
+  return (<><CathedralDivider {...section} count={filtered.length} />{filtered.length === 0 ? <p className="text-sm text-[var(--stone-shadow)] pb-4">{section.emptyMessage}</p> : <div className="divide-y divide-white/5 rounded-xl overflow-hidden border border-white/5 mb-4">{filtered.map((row, i) => { const qIdx = sectionAudioTracks.findIndex(t => t.id === String(row.song.id)); return <WorkListRow key={row.song.id} item={feedRowToListItem(row)} index={i} queueTracks={sectionAudioTracks} queueIndex={qIdx >= 0 ? qIdx : undefined} queueContext="EXPLORE" />; })}</div>}</>);
 }
 
 function CathedralSkeleton() {

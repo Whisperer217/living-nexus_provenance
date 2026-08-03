@@ -131,6 +131,7 @@ const CreatorDomainShell = lazy(() => import("./pages/CreatorDomainShell"));
 const NewManifestationPage = lazy(() => import("./pages/NewManifestationPage"));
 const ManifestationWorkspacePage = lazy(() => import("./pages/ManifestationWorkspacePage"));
 const SessionsListPage = lazy(() => import("./pages/SessionsListPage"));
+const SharedPlaylistPage = lazy(() => import("./pages/SharedPlaylistPage"));
 
 // Minimal fallback shown while a page chunk loads (typically <200ms on CDN)
 function PageLoader() {
@@ -222,6 +223,7 @@ function Router() {
     <Suspense fallback={<PageLoader />}>
       <Switch>
         {/* Public standalone pages — no MainLayout/PlayerBar */}
+        <Route path="/p/:slug" component={SharedPlaylistPage} />
         <Route path="/verify" component={VerifyPage} />
         <Route path="/verify/:witnessId" component={VerifyPage} />
         <Route path="/download" component={DownloadPage} />

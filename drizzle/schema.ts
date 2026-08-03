@@ -710,6 +710,9 @@ export const playlists = mysqlTable("playlists", {
   coverArtUrl: text("coverArtUrl"),
   isPublic: boolean("isPublic").default(false).notNull(),
   isCollaborative: boolean("isCollaborative").default(false).notNull(),
+  shareSlug: varchar("shareSlug", { length: 64 }),
+  moodTags: json("moodTags").$type<string[]>(),
+  playCount: int("playCount").default(0).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
