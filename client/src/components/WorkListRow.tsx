@@ -124,9 +124,28 @@ export function WorkListRow({ item, index, prefetchedLiked, prefetchedLikeCount,
     });
   }, [hasAudio, song, artistName, addAndPlay, playQueueAt, navigate, queueTracks, queueIndex, queueContext]);
 
-  const handleRowClick = useCallback(() => {
+  const handleRowClick = useCallback((e: React.MouseEvent) => {
+    // On mobile (touch device), if the track has audio, tap the row to play — not navigate.
+    // On desktop, the hover play button handles play; row click navigates.
+    if (hasAudio) {
+      // Treat as play — reuse handlePlay logic inline
+      if (queueTracks && queueTracks.length > 0 && queueIndex !== undefined) {
+        playQueueAt(queueTracks, queueIndex, (queueContext ?? "EXPLORE") as QueueContext);
+      } else {
+        addAndPlay({
+          id: String(song.id),
+          title: song.title,
+          artist: artistName,
+          genre: song.genre ?? "",
+          audioUrl: song.fileUrl!,
+          artUrl: song.coverArtUrl ?? undefined,
+          witnessId: song.witnessId ?? undefined,
+        });
+      }
+      return;
+    }
     navigate(`/song/${song.id}`);
-  }, [song.id, navigate]);
+  }, [hasAudio, song, artistName, addAndPlay, playQueueAt, navigate, queueTracks, queueIndex, queueContext]);
 
   const handleSupportClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
@@ -163,15 +182,16 @@ export function WorkListRow({ item, index, prefetchedLiked, prefetchedLikeCount,
         onMouseLeave={() => setHovered(false)}
         onClick={handleRowClick}
       >
-        {/* Index / Play button */}
+        {/* Index / Play button — always visible on mobile for audio tracks */}
         <div className="w-8 flex-shrink-0 flex items-center justify-center">
-          {hovered || isActive ? (
+          {(hovered || isActive || hasAudio) ? (
             <button
               onClick={handlePlay}
+              aria-label={isPlaying ? "Pause" : "Play"}
               className={`w-7 h-7 rounded-full flex items-center justify-center transition-all ${
                 isActive
                   ? "bg-[var(--gold)] text-black"
-                  : "bg-white/10 text-[var(--stone-light)] hover:bg-[var(--gold)] hover:text-black"
+                  : "bg-white/10 text-[var(--stone-light)] hover:bg-[var(--gold)] hover:text-black sm:bg-transparent sm:hover:bg-[var(--gold)]"
               }`}
             >
               {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 ml-0.5" />}

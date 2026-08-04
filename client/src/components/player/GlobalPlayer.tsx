@@ -774,6 +774,23 @@ function GlobalPlayerInner() {
       </div>
 
       {/* ── MINI BAR (always rendered, fades out when expanded) ── */}
+      {/* Mobile: thin progress bar at the very top of the mini bar for at-a-glance progress */}
+      {!isDesktop && !isExpanded && (
+        <div
+          style={{ height: "2px", background: "rgba(138,43,226,0.12)", flexShrink: 0, cursor: "pointer" }}
+          data-seek
+          onClick={handleSeek}
+        >
+          <div
+            style={{
+              height: "100%",
+              width: `${progress}%`,
+              background: "linear-gradient(90deg, rgba(138,43,226,0.85) 0%, rgba(192,132,252,0.8) 60%, rgba(212,175,55,0.75) 100%)",
+              transition: "width 0.25s linear",
+            }}
+          />
+        </div>
+      )}
       <div
         className="flex items-center gap-3 flex-shrink-0 px-3"
         style={{
@@ -783,7 +800,15 @@ function GlobalPlayerInner() {
           opacity: isExpanded ? 0 : 1,
           transition: "opacity 0.2s ease",
           pointerEvents: isExpanded ? "none" : "auto",
+          cursor: !isDesktop ? "pointer" : undefined,
         }}
+        onClick={!isDesktop ? (e) => {
+          // Tap anywhere on the mini bar (except buttons) to expand the player
+          const target = e.target as HTMLElement;
+          if (target.closest("button") || target.closest("[data-seek]")) return;
+          setZone(z => z === "MINI" ? "EXPANDED" : "MINI");
+          setDragHeight(null);
+        } : undefined}
       >
         {/* Art thumbnail */}
         <button
