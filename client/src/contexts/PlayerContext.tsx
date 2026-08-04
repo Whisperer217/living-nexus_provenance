@@ -676,7 +676,100 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     document.addEventListener('resume', onResume);
 
     const onEnded = () => {
-      setState(s => advanceToNext(s, true));
+      // MOBILE AUTOPLAY FIX: The `ended` event fires in a trusted browser event context.
+      // We MUST perform audio side effects (src assignment, load, play) synchronously
+      // HERE — before any React setState batching — to preserve the browser's autoplay
+      // trust chain on iOS Safari and Android Chrome.
+      // Calling audio.play() inside a setState updater breaks the trust chain on mobile.
+      const s = stateRef.current;
+      const settings = playbackSettingsRef.current;
+      const allTracks = s.tracks;
+
+      if (s.isRepeat) {
+        audio.currentTime = 0;
+        audio.play().catch(() => {});
+        return;
+      }
+
+      let next: number;
+      if (s.isShuffle) {
+        const candidates = allTracks
+          .map((t, i) => ({ t, i }))
+          .filter(({ t, i }) => !!t.audioUrl && i !== s.currentIdx);
+        if (candidates.length === 0) {
+          audio.currentTime = 0;
+          audio.play().catch(() => {});
+          return;
+        }
+        const pick = candidates[Math.floor(Math.random() * candidates.length)];
+        next = pick.i;
+      } else {
+        next = s.currentIdx + 1;
+        while (next < allTracks.length && !allTracks[next]?.audioUrl) {
+          next++;
+        }
+      }
+
+      if (next >= allTracks.length) {
+        // End of queue — stop
+        audio.pause();
+        audio.currentTime = 0;
+        setState(prev => ({ ...prev, isPlaying: false, isReady: false, duration: 0, currentTime: 0 }));
+        return;
+      }
+
+      const nextTrackData = allTracks[next];
+      if (!nextTrackData?.audioUrl) {
+        setState(prev => ({ ...prev, currentIdx: next, isPlaying: false, isReady: false, duration: 0, currentTime: 0 }));
+        return;
+      }
+
+      const mode = settings.transitionMode;
+
+      if (mode === "crossfade") {
+        // Crossfade already handled by timeupdate; just update state
+        setState(prev => ({ ...prev, currentIdx: next, isPlaying: true, isReady: false, duration: 0, currentTime: 0 }));
+        return;
+      }
+
+      // ── Perform audio side effects synchronously in the trusted event context ──
+      if (mode === "gapless" || mode === "album_blend") {
+        if (nextAudioRef.current && nextAudioRef.current.src === safeAudioUrl(nextTrackData.audioUrl)) {
+          const preloaded = nextAudioRef.current;
+          audio.pause();
+          audio.src = safeAudioUrl(nextTrackData.audioUrl);
+          audio.currentTime = preloaded.currentTime;
+          audio.volume = clampVol(s.volume);
+          audio.play().catch(() => {});
+          nextAudioRef.current = null;
+        } else {
+          audio.src = safeAudioUrl(nextTrackData.audioUrl);
+          audio.load();
+          audio.play().catch(() => {});
+        }
+      } else {
+        // Standard transition
+        const fadeIn = settings.respectTrackFades && nextTrackData.fadeInSeconds
+          ? nextTrackData.fadeInSeconds
+          : settings.globalFadeIn;
+        audio.src = safeAudioUrl(nextTrackData.audioUrl);
+        audio.load();
+        if (fadeIn > 0) {
+          audio.volume = clampVol(0);
+          audio.play().catch(() => {});
+          const doFadeIn = () => {
+            cancelFade();
+            fadeVolume(audio, 0, s.volume, fadeIn * 1000);
+          };
+          audio.addEventListener("canplay", doFadeIn, { once: true });
+        } else {
+          audio.volume = clampVol(s.volume);
+          audio.play().catch(() => {});
+        }
+      }
+
+      // Update React state after audio side effects are already in flight
+      setState(prev => ({ ...prev, currentIdx: next, isPlaying: true, isReady: false, duration: 0, currentTime: 0 }));
     };
 
     const onError = () => {
