@@ -47,10 +47,14 @@ export function useLike(
 
   const [liked, setLiked] = useState(initialLiked);
 
-  // Sync local state when DB data arrives (only relevant when skipQuery=false)
+  // Sync local state when DB data arrives (only relevant when skipQuery=false).
+  // IMPORTANT: use data?.liked (boolean primitive) as the dependency, NOT the data
+  // object itself. tRPC may return a new object reference on every render even when
+  // the value is identical, which would cause an infinite re-render loop (React #185).
+  const serverLiked = data?.liked;
   useEffect(() => {
-    if (data !== undefined) setLiked(data.liked);
-  }, [data]);
+    if (serverLiked !== undefined) setLiked(serverLiked);
+  }, [serverLiked]);
 
   // When skipQuery=true, sync if the parent updates the initialLiked prop
   useEffect(() => {

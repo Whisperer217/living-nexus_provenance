@@ -440,7 +440,7 @@ function FeaturedStrip({ rows }: { rows: FeedRow[] }) {
 }
 
 // ── Section renderer ───────────────────────────────────────────────
-function CathedralSection({ section, rows, search, viewMode }: { section: typeof SECTIONS[number]; rows: FeedRow[]; search: string; viewMode: ViewMode }) {
+function CathedralSection({ section, rows, search, viewMode, likedMap }: { section: typeof SECTIONS[number]; rows: FeedRow[]; search: string; viewMode: ViewMode; likedMap: Record<number, boolean> }) {
   const filtered = useMemo(() => {
     if (!search) return rows;
     const q = search.toLowerCase();
@@ -462,7 +462,7 @@ function CathedralSection({ section, rows, search, viewMode }: { section: typeof
     return (<><CathedralDivider {...section} count={filtered.length} />{filtered.length === 0 ? <p className="text-sm text-[var(--stone-shadow)] pb-4">{section.emptyMessage}</p> : <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 pb-4">{filtered.map((row) => { const qIdx = sectionAudioTracks.findIndex(t => t.id === String(row.song.id)); return <GridCard key={row.song.id} row={row} queueTracks={sectionAudioTracks} queueIndex={qIdx >= 0 ? qIdx : undefined} />; })}</div>}</>);
   }
 
-  return (<><CathedralDivider {...section} count={filtered.length} />{filtered.length === 0 ? <p className="text-sm text-[var(--stone-shadow)] pb-4">{section.emptyMessage}</p> : <div className="divide-y divide-white/5 rounded-xl overflow-hidden border border-white/5 mb-4">{filtered.map((row, i) => { const qIdx = sectionAudioTracks.findIndex(t => t.id === String(row.song.id)); return <WorkListRow key={row.song.id} item={feedRowToListItem(row)} index={i} queueTracks={sectionAudioTracks} queueIndex={qIdx >= 0 ? qIdx : undefined} queueContext="EXPLORE" />; })}</div>}</>);
+  return (<><CathedralDivider {...section} count={filtered.length} />{filtered.length === 0 ? <p className="text-sm text-[var(--stone-shadow)] pb-4">{section.emptyMessage}</p> : <div className="divide-y divide-white/5 rounded-xl overflow-hidden border border-white/5 mb-4">{filtered.map((row, i) => { const qIdx = sectionAudioTracks.findIndex(t => t.id === String(row.song.id)); return <WorkListRow key={row.song.id} item={feedRowToListItem(row)} index={i} queueTracks={sectionAudioTracks} queueIndex={qIdx >= 0 ? qIdx : undefined} queueContext="EXPLORE" prefetchedLiked={likedMap[row.song.id]} />; })}</div>}</>);
 }
 
 function CathedralSkeleton() {
@@ -924,6 +924,31 @@ export default function ExplorePage() {
 
   const data = useExploreData(seed, limit, randomize, selectedCreatorId ?? undefined);
 
+  // ── Bulk like status fetch — one POST for all visible song IDs ──
+  // Replaces 600+ individual getLikeStatus queries with a single batched request.
+  const allSongIds = useMemo(() => {
+    const ids = new Set<number>();
+    SECTIONS.forEach(s => { (data[s.key as SectionKey] as FeedRow[]).forEach(r => ids.add(r.song.id)); });
+    return Array.from(ids).slice(0, 500); // server max is 500
+  }, [data]);
+  const getBulkLikes = trpc.songs.getBulkLikeStatuses.useMutation();
+  const [likedMap, setLikedMap] = useState<Record<number, boolean>>({});
+  useEffect(() => {
+    if (allSongIds.length === 0) return;
+    getBulkLikes.mutate({ songIds: allSongIds }, {
+      onSuccess: (result) => {
+        // result is Record<number, { liked: boolean; count: number }>
+        const boolMap: Record<number, boolean> = {};
+        Object.entries(result).forEach(([id, val]) => {
+          boolMap[Number(id)] = (val as { liked: boolean }).liked;
+        });
+        setLikedMap(boolMap);
+      },
+    });
+    // Only re-fetch when the set of song IDs changes (new explore data loaded)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allSongIds.join(",")]);
+
   const handleRefresh = useCallback(() => { setSeed(Math.floor(Math.random() * 999999)); setSearch(""); }, []);
   const handleRandomizeToggle = useCallback((v: boolean) => { setRandomize(v); setSeed(Math.floor(Math.random() * 999999)); }, []);
 
@@ -996,7 +1021,7 @@ export default function ExplorePage() {
               <GuidesSection />
             )}
             {visibleSections.map((section) => (
-              <CathedralSection key={section.key} section={section} rows={data[section.key]} search={search} viewMode={viewMode} />
+              <CathedralSection key={section.key} section={section} rows={data[section.key]} search={search} viewMode={viewMode} likedMap={likedMap} />
             ))}
             {search && visibleSections.every(s => { const q = search.toLowerCase(); return !data[s.key].some((r: FeedRow) => r.song.title.toLowerCase().includes(q) || (r.creator?.name ?? "").toLowerCase().includes(q) || (r.creator?.artistHandle ?? "").toLowerCase().includes(q)); }) && (
               <div className="pt-24 text-center">
