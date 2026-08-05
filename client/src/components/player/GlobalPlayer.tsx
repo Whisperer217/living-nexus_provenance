@@ -884,37 +884,60 @@ function GlobalPlayerInner() {
               <Heart size={15} fill={isLiked ? "currentColor" : "none"} />
             </button>
           )}
-          {/* Play/Pause */}
-          <button
-            onClick={e => { e.stopPropagation(); togglePlay(); }}
-            className="w-9 h-9 rounded-full flex items-center justify-center transition-transform hover:scale-105"
-            style={isDesktop
-              ? { background: GOLD, color: "#000" }
-              : {
-                  background: state.isPlaying
-                    ? "radial-gradient(circle at 35% 35%, rgba(192,132,252,0.9) 0%, rgba(138,43,226,0.85) 50%, rgba(88,28,135,0.95) 100%)"
-                    : "radial-gradient(circle at 35% 35%, rgba(245,230,179,0.9) 0%, rgba(212,175,55,0.85) 50%, rgba(160,120,20,0.95) 100%)",
-                  color: "#fff",
-                  boxShadow: state.isPlaying
-                    ? "0 0 12px rgba(138,43,226,0.6), 0 0 24px rgba(138,43,226,0.25)"
-                    : "0 0 12px rgba(212,175,55,0.55), 0 0 24px rgba(212,175,55,0.22)",
+          {/* Play/Pause + Next — only for audio tracks */}
+          {(!visTrack?.contentType || visTrack.contentType === "audio") ? (
+            <>
+              <button
+                onClick={e => { e.stopPropagation(); togglePlay(); }}
+                className="w-9 h-9 rounded-full flex items-center justify-center transition-transform hover:scale-105"
+                aria-label={state.isPlaying ? "Pause" : "Play"}
+                aria-pressed={state.isPlaying}
+                style={isDesktop
+                  ? { background: GOLD, color: "#000" }
+                  : {
+                      background: state.isPlaying
+                        ? "radial-gradient(circle at 35% 35%, rgba(192,132,252,0.9) 0%, rgba(138,43,226,0.85) 50%, rgba(88,28,135,0.95) 100%)"
+                        : "radial-gradient(circle at 35% 35%, rgba(245,230,179,0.9) 0%, rgba(212,175,55,0.85) 50%, rgba(160,120,20,0.95) 100%)",
+                      color: "#fff",
+                      boxShadow: state.isPlaying
+                        ? "0 0 12px rgba(138,43,226,0.6), 0 0 24px rgba(138,43,226,0.25)"
+                        : "0 0 12px rgba(212,175,55,0.55), 0 0 24px rgba(212,175,55,0.22)",
+                    }
                 }
-            }
-          >
-            {state.isPlaying
-              ? <Pause size={15} fill="currentColor" />
-              : <Play size={15} fill="currentColor" className="ml-0.5" />
-            }
-          </button>
-          {/* Next */}
-          <button
-            onClick={e => { e.stopPropagation(); nextTrack(); }}
-            className="p-1.5 transition-colors"
-            style={{ color: isDesktop ? "rgba(255,255,255,0.4)" : "rgba(192,132,252,0.5)" }}
-            aria-label="Next track"
-          >
-            <SkipForward size={15} />
-          </button>
+              >
+                {state.isPlaying
+                  ? <Pause size={15} fill="currentColor" />
+                  : <Play size={15} fill="currentColor" className="ml-0.5" />
+                }
+              </button>
+              <button
+                onClick={e => { e.stopPropagation(); nextTrack(); }}
+                className="p-1.5 transition-colors"
+                style={{ color: isDesktop ? "rgba(255,255,255,0.4)" : "rgba(192,132,252,0.5)" }}
+                aria-label="Next track"
+              >
+                <SkipForward size={15} />
+              </button>
+            </>
+          ) : (
+            /* Non-audio: show a Navigate button to go to the detail page */
+            <button
+              onClick={e => { e.stopPropagation(); if (visTrack?.id) navigate(`/song/${visTrack.id}`); }}
+              className="flex items-center gap-1 rounded-full font-semibold transition-all hover:scale-105 active:scale-95"
+              style={{
+                padding: "4px 12px",
+                fontSize: 10,
+                background: "rgba(212,175,55,0.18)",
+                border: "1px solid rgba(212,175,55,0.4)",
+                color: "rgba(212,175,55,0.95)",
+                letterSpacing: "0.04em",
+              }}
+              aria-label="Open work"
+            >
+              <BookOpen size={10} />
+              OPEN
+            </button>
+          )}
           {/* Expand chevron — click-first on desktop (decision #4) */}
           <button
             onClick={e => { e.stopPropagation(); setZone(z => z === "MINI" ? "EXPANDED" : "MINI"); setDragHeight(null); }}

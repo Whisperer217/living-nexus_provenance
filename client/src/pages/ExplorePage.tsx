@@ -260,19 +260,41 @@ function CathedralDivider({ title, subtitle, icon, accentColor, count }: { title
 }
 
 // ── Grid Card ─────────────────────────────────────────────────────
+// ── Content-type action metadata ──────────────────────────────────
+const CONTENT_ACTION: Record<string, { label: string; icon: React.ReactNode }> = {
+  audio:      { label: "Play",     icon: <Play className="w-5 h-5 ml-0.5" fill="currentColor" /> },
+  lyrics:     { label: "Read",     icon: <FileText className="w-5 h-5" /> },
+  manuscript: { label: "Read",     icon: <BookOpen className="w-5 h-5" /> },
+  comic:      { label: "Read",     icon: <BookOpen className="w-5 h-5" /> },
+  image:      { label: "View",     icon: <ImageIcon className="w-5 h-5" /> },
+  game:       { label: "Watch",    icon: <Film className="w-5 h-5" /> },
+  gcode:      { label: "View",     icon: <Eye className="w-5 h-5" /> },
+  "3dmodel":  { label: "View",     icon: <Eye className="w-5 h-5" /> },
+};
+function getContentAction(contentType?: string) {
+  return CONTENT_ACTION[contentType ?? "audio"] ?? CONTENT_ACTION["audio"];
+}
+
 function GridCard({ row, queueTracks, queueIndex }: { row: FeedRow; queueTracks?: Track[]; queueIndex?: number }) {
   const { addAndPlay, playQueueAt } = usePlayer();
+  const [, navigate] = useLocation();
   const isAudio = row.song.contentType === "audio";
   const hasFile = !!row.song.fileUrl;
+  const action = getContentAction(row.song.contentType);
 
-  function handlePlay(e: React.MouseEvent) {
+  function handleCardAction(e: React.MouseEvent) {
     e.preventDefault();
     e.stopPropagation();
+    if (!isAudio) {
+      // Non-audio content: navigate to detail page (reader/viewer)
+      navigate(`/song/${row.song.id}`);
+      return;
+    }
     if (!hasFile) {
       toast.info("No playable file for this work");
       return;
     }
-    // Use playQueueAt when a full section queue is available for sequential playback
+    // Audio: use playQueueAt when a full section queue is available for sequential playback
     if (queueTracks && queueTracks.length > 0 && queueIndex !== undefined) {
       playQueueAt(queueTracks, queueIndex, "EXPLORE");
       return;
@@ -282,11 +304,11 @@ function GridCard({ row, queueTracks, queueIndex }: { row: FeedRow; queueTracks?
 
   return (
     <div className="group relative rounded-xl overflow-hidden bg-[var(--void-3)] border border-white/8 hover:border-[var(--gold)]/30 transition-all">
-      {/* Cover art — clicking plays */}
+      {/* Cover art — clicking triggers content-type-aware action */}
       <div
         className="aspect-square relative overflow-hidden cursor-pointer"
-        onClick={handlePlay}
-        title={hasFile ? `Play ${row.song.title}` : "View work"}
+        onClick={handleCardAction}
+        title={`${action.label} ${row.song.title}`}
       >
         {row.song.coverArtUrl
           ? <img
@@ -309,14 +331,14 @@ function GridCard({ row, queueTracks, queueIndex }: { row: FeedRow; queueTracks?
         {row.song.coverArtUrl && (
           <div className="w-full h-full bg-[var(--void-2)] items-center justify-center hidden absolute inset-0" aria-hidden="true"><Music className="w-8 h-8 text-[var(--stone-shadow)]" /></div>
         )}
-        {/* Hover overlay with play button */}
+        {/* Hover overlay — shows content-type-appropriate action button */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
           <button
-            onClick={handlePlay}
+            onClick={handleCardAction}
             className="w-12 h-12 rounded-full bg-[var(--gold)] text-black flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
-            aria-label={`Play ${row.song.title}`}
+            aria-label={`${action.label} ${row.song.title}`}
           >
-            <Play className="w-5 h-5 ml-0.5" fill="currentColor" />
+            {action.icon}
           </button>
         </div>
         {/* WID badge */}
