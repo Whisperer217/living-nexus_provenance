@@ -20,6 +20,7 @@ import {
   ChevronDown, Music, ShieldCheck, Sparkles, Download, Volume2, VolumeX,
 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
+import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 
 const LOGO_URL =
   "/manus-storage/living-nexus-logo-2025_19c2d497.png";
@@ -681,6 +682,9 @@ export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCoun
             <Upload size={12} />
             <span>Register Work</span>
           </button>
+
+          {/* Theme Switcher */}
+          <ThemeSwitcher />
 
           {/* Notification bell */}
           {user && (

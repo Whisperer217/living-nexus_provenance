@@ -341,6 +341,165 @@
   background: rgba(74,92,58,0.55);
 }
 
+/* ═══════════════════════════════════════════════════════════════════
+   CATHEDRAL DARK THEME — canonical dark (also default)
+   Mirrors :root so data-theme="cathedral-dark" activates same palette.
+═══════════════════════════════════════════════════════════════════ */
+[data-theme="cathedral-dark"] {
+  --void:   #000000;
+  --void-2: #080808;
+  --void-3: #111111;
+  --void-4: #1A1A1A;
+  --void-5: #222222;
+  --gold:        #C49A28;
+  --gold-dim:    #6B6555;
+  --gold-glow:   #D4A84B;
+  --gold-bright: #EDE5D0;
+  --background:          #000000;
+  --foreground:          #EDE5D0;
+  --card:                #111111;
+  --card-foreground:     #EDE5D0;
+  --popover:             #1A1A1A;
+  --popover-foreground:  #EDE5D0;
+  --primary:             #C49A28;
+  --primary-foreground:  #000000;
+  --secondary:           #080808;
+  --secondary-foreground:#EDE5D0;
+  --muted:               #111111;
+  --muted-foreground:    #6B6555;
+  --accent:              #D4A84B;
+  --accent-foreground:   #000000;
+  --border:              rgba(196, 154, 40, 0.22);
+  --input:               rgba(196, 154, 40, 0.12);
+  --ring:                #C49A28;
+  --sidebar:                    #080808;
+  --sidebar-foreground:         #EDE5D0;
+  --sidebar-primary:            #C49A28;
+  --sidebar-primary-foreground: #000000;
+  --sidebar-accent:             #111111;
+  --sidebar-accent-foreground:  #EDE5D0;
+  --sidebar-border:             rgba(196, 154, 40, 0.16);
+  --sidebar-ring:               #C49A28;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   CRIMSON THEME — blood-red depths with crimson fire
+   Voids: deep red-black. Accent: crimson fire. Gold preserved for WID.
+═══════════════════════════════════════════════════════════════════ */
+[data-theme="crimson"] {
+  --void:   #060000;
+  --void-2: #0D0000;
+  --void-3: #160000;
+  --void-4: #1F0000;
+  --void-5: #2A0000;
+  --gold:        #C49A28;
+  --gold-dim:    #7A5C20;
+  --gold-glow:   #D4A84B;
+  --gold-bright: #EDE5D0;
+  --background:          #060000;
+  --foreground:          #F0D8D8;
+  --card:                #160000;
+  --card-foreground:     #F0D8D8;
+  --popover:             #1F0000;
+  --popover-foreground:  #F0D8D8;
+  --primary:             #C41E3A;
+  --primary-foreground:  #F0D8D8;
+  --secondary:           #0D0000;
+  --secondary-foreground:#F0D8D8;
+  --muted:               #160000;
+  --muted-foreground:    #7A5050;
+  --accent:              #E8294F;
+  --accent-foreground:   #F0D8D8;
+  --destructive:         #FF6B6B;
+  --destructive-foreground: #F0D8D8;
+  --border:              rgba(196, 30, 58, 0.28);
+  --input:               rgba(196, 30, 58, 0.14);
+  --ring:                #C41E3A;
+  --sidebar:                    #0D0000;
+  --sidebar-foreground:         #F0D8D8;
+  --sidebar-primary:            #C41E3A;
+  --sidebar-primary-foreground: #F0D8D8;
+  --sidebar-accent:             #160000;
+  --sidebar-accent-foreground:  #F0D8D8;
+  --sidebar-border:             rgba(196, 30, 58, 0.20);
+  --sidebar-ring:               #C41E3A;
+  --lnx-bg:         #060000;
+  --lnx-bg-2:       #0D0000;
+  --lnx-bg-3:       #160000;
+  --lnx-text:       #F0D8D8;
+  --lnx-text-muted: #7A5050;
+  --lnx-gold:       #C49A28;
+  --lnx-gold-glow:  #D4A84B;
+  --lnx-gold-muted: #7A5C20;
+}
+[data-theme="crimson"] body,
+[data-theme="crimson"] html {
+  background-color: #060000;
+}
+[data-theme="crimson"] ::-webkit-scrollbar-thumb {
+  background: rgba(196, 30, 58, 0.45);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   ILLUMINATED GOLD THEME — warm amber light on deep charcoal
+   Voids: warm charcoal. Gold: amplified to radiant amber.
+   Feel: candlelight in a cathedral — warm and sovereign.
+═══════════════════════════════════════════════════════════════════ */
+[data-theme="illuminated-gold"] {
+  --void:   #0A0800;
+  --void-2: #110E00;
+  --void-3: #1A1500;
+  --void-4: #231C00;
+  --void-5: #2E2500;
+  --gold:        #F5C842;
+  --gold-dim:    #8A7230;
+  --gold-glow:   #FFD966;
+  --gold-bright: #FFF8E1;
+  --background:          #0A0800;
+  --foreground:          #FFF8E1;
+  --card:                #1A1500;
+  --card-foreground:     #FFF8E1;
+  --popover:             #231C00;
+  --popover-foreground:  #FFF8E1;
+  --primary:             #F5C842;
+  --primary-foreground:  #0A0800;
+  --secondary:           #110E00;
+  --secondary-foreground:#FFF8E1;
+  --muted:               #1A1500;
+  --muted-foreground:    #8A7230;
+  --accent:              #FFD966;
+  --accent-foreground:   #0A0800;
+  --destructive:         #E2725B;
+  --destructive-foreground: #FFF8E1;
+  --border:              rgba(245, 200, 66, 0.28);
+  --input:               rgba(245, 200, 66, 0.14);
+  --ring:                #F5C842;
+  --sidebar:                    #110E00;
+  --sidebar-foreground:         #FFF8E1;
+  --sidebar-primary:            #F5C842;
+  --sidebar-primary-foreground: #0A0800;
+  --sidebar-accent:             #1A1500;
+  --sidebar-accent-foreground:  #FFF8E1;
+  --sidebar-border:             rgba(245, 200, 66, 0.22);
+  --sidebar-ring:               #F5C842;
+  --lnx-bg:         #0A0800;
+  --lnx-bg-2:       #110E00;
+  --lnx-bg-3:       #1A1500;
+  --lnx-text:       #FFF8E1;
+  --lnx-text-muted: #8A7230;
+  --lnx-gold:       #F5C842;
+  --lnx-gold-glow:  #FFD966;
+  --lnx-gold-muted: #8A7230;
+}
+[data-theme="illuminated-gold"] body,
+[data-theme="illuminated-gold"] html {
+  background-color: #0A0800;
+}
+[data-theme="illuminated-gold"] ::-webkit-scrollbar-thumb {
+  background: rgba(245, 200, 66, 0.40);
+}
+
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

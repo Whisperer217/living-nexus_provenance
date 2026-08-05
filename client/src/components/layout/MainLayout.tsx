@@ -36,6 +36,7 @@ import { WhatsNewModal } from "@/components/WhatsNewModal";
 import { trpc } from "@/lib/trpc";
 import { useLightsMode } from "@/contexts/LightsModeContext";
 import { Menu, X, Bell, Sparkles } from "lucide-react";
+import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { Z } from "@/lib/viewportLayers";
 
 const LOGO_URL = "/manus-storage/living-nexus-logo-2025_19c2d497.png";
@@ -209,6 +210,9 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
             <Sparkles size={18} />
           </button>
         )}
+
+        {/* Theme Switcher — mobile */}
+        <ThemeSwitcher compact />
 
         {/* Bell */}
         {!!user && (
