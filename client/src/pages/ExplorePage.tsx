@@ -145,7 +145,7 @@ function RandomizeSwitch({ value, onChange }: { value: boolean; onChange: (v: bo
     return () => cancelAnimationFrame(animRef.current);
   }, [reducedMotion, value]);
   return (
-    <button onClick={() => onChange(!value)} title={value ? "Randomized — click for newest" : "Newest first — click to randomize"} className="flex-shrink-0 focus:outline-none">
+    <button onClick={() => onChange(!value)} title={value ? "Randomized — click for newest" : "Newest first — click to randomize"} aria-label={value ? "Randomized order: on — click for newest first" : "Newest first — click to randomize"} aria-pressed={value} className="flex-shrink-0 focus:outline-none">
       <canvas ref={canvasRef} width={56} height={28} className="rounded-full cursor-pointer block" />
     </button>
   );
@@ -159,7 +159,8 @@ function TracksSlider({ value, onChange }: { value: number; onChange: (v: number
       <span className="text-[10px] text-[var(--stone-shadow)] font-mono hidden sm:inline">Works</span>
       <input type="range" min={0} max={LIMIT_STEPS.length - 1} step={1} value={idx === -1 ? 1 : idx}
         onChange={(e) => onChange(LIMIT_STEPS[Number(e.target.value)])}
-        className="w-20 sm:w-28 cursor-pointer" style={{ accentColor: "var(--gold)" }} />
+        className="w-20 sm:w-28 cursor-pointer" style={{ accentColor: "var(--gold)" }}
+        aria-label={`Number of works to show: ${value === 700 ? "All" : value}`} />
       <span className="text-xs font-mono text-[var(--gold)] w-7 text-right flex-shrink-0">
         {value === 700 ? "All" : value}
       </span>
@@ -229,6 +230,8 @@ function ViewToggle({ value, onChange }: { value: ViewMode; onChange: (v: ViewMo
     <div className="flex items-center gap-0.5 bg-[var(--void-3)] border border-white/8 rounded-xl p-0.5">
       {modes.map((m) => (
         <button key={m.key} onClick={() => onChange(m.key)} title={m.label}
+          aria-label={`${m.label} view`}
+          aria-pressed={value === m.key}
           className={`flex items-center justify-center w-7 h-7 rounded-lg transition-all ${value === m.key ? "bg-[var(--gold)] text-black" : "text-[var(--stone-shadow)] hover:text-[var(--stone-mid)]"}`}>
           {m.icon}
         </button>
@@ -301,10 +304,10 @@ function GridCard({ row, queueTracks, queueIndex }: { row: FeedRow; queueTracks?
           : null
         }
         {!row.song.coverArtUrl && (
-          <div className="w-full h-full bg-[var(--void-2)] flex items-center justify-center"><Music className="w-8 h-8 text-[var(--stone-shadow)]" /></div>
+          <div className="w-full h-full bg-[var(--void-2)] flex items-center justify-center" aria-hidden="true"><Music className="w-8 h-8 text-[var(--stone-shadow)]" /></div>
         )}
         {row.song.coverArtUrl && (
-          <div className="w-full h-full bg-[var(--void-2)] items-center justify-center hidden absolute inset-0"><Music className="w-8 h-8 text-[var(--stone-shadow)]" /></div>
+          <div className="w-full h-full bg-[var(--void-2)] items-center justify-center hidden absolute inset-0" aria-hidden="true"><Music className="w-8 h-8 text-[var(--stone-shadow)]" /></div>
         )}
         {/* Hover overlay with play button */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
@@ -318,15 +321,15 @@ function GridCard({ row, queueTracks, queueIndex }: { row: FeedRow; queueTracks?
         </div>
         {/* WID badge */}
         {row.song.witnessId && (
-          <div className="absolute top-2 right-2 bg-[var(--gold)]/20 border border-[var(--gold)]/40 rounded-md px-1.5 py-0.5 flex items-center gap-1">
-            <Shield className="w-2.5 h-2.5 text-[var(--gold)]" />
-            <span className="text-[9px] font-mono text-[var(--gold)]">WID</span>
+          <div className="absolute top-2 right-2 bg-[var(--gold)]/20 border border-[var(--gold)]/40 rounded-md px-1.5 py-0.5 flex items-center gap-1" role="status" aria-label="Witness ID verified">
+            <Shield className="w-2.5 h-2.5 text-[var(--gold)]" aria-hidden="true" />
+            <span className="text-[9px] font-mono text-[var(--gold)]" aria-hidden="true">WID</span>
           </div>
         )}
         {/* Content type badge bottom-left */}
-        <div className="absolute bottom-2 left-2 bg-black/60 border border-white/10 rounded-md px-1.5 py-0.5 flex items-center gap-1 text-[var(--stone-shadow)]">
-          <ContentTypeIcon contentType={row.song.contentType} />
-          <span className="text-[9px] font-mono uppercase">{row.song.contentType}</span>
+        <div className="absolute bottom-2 left-2 bg-black/60 border border-white/10 rounded-md px-1.5 py-0.5 flex items-center gap-1 text-[var(--stone-shadow)]" aria-label={`Content type: ${row.song.contentType ?? "unknown"}`}>
+          <ContentTypeIcon contentType={row.song.contentType} aria-hidden={true} />
+          <span className="text-[9px] font-mono uppercase" aria-hidden="true">{row.song.contentType}</span>
         </div>
       </div>
 

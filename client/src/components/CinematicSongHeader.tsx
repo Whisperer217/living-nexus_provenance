@@ -138,7 +138,7 @@ export function CinematicSongHeader({
         onClick={handleHeaderClick}
         role="button"
         tabIndex={0}
-        aria-label={isPlaying ? `Pause ${title}` : `Play ${title}`}
+              aria-label={isPlaying ? `Pause ${title}` : (isReadable && !hasAudio ? `Read ${title}` : `Play ${title}`)}
         onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleHeaderClick(); } }}
       >
 
@@ -242,8 +242,10 @@ export function CinematicSongHeader({
                   color: "rgba(196,154,40,0.75)",
                   fontFamily: "'Cinzel', serif",
                 }}
+                role="status"
+                aria-label="Witness ID verified — this work is registered on Living Nexus"
               >
-                <ShieldCheck className="w-3 h-3" /> WID
+                <ShieldCheck className="w-3 h-3" aria-hidden="true" /> WID
               </div>
             )}
 
@@ -263,8 +265,8 @@ export function CinematicSongHeader({
                   }}
                 >
                   {showVideoMode
-                    ? <><ImageIcon className="w-3 h-3" /> Cover Art</>
-                    : <><Video className="w-3 h-3" /> Music Video</>}
+                    ? <><ImageIcon className="w-3 h-3" aria-hidden="true" /> Cover Art</>
+                    : <><Video className="w-3 h-3" aria-hidden="true" /> Music Video</>}
                 </button>
               </div>
             )}
@@ -289,6 +291,7 @@ export function CinematicSongHeader({
               ref={waveCanvasRef}
               width={1200}
               height={64}
+              aria-hidden="true"
               className={`w-full block${isPlaying ? " playing" : ""}`}
               style={{
                 height: "64px",

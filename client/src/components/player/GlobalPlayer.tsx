@@ -99,8 +99,9 @@ function WidBadge({ onClick }: { onClick?: () => void }) {
         fontFamily: "'Cinzel', serif",
       }}
       title="Witnessed on Living Nexus — View provenance"
+      aria-label="Witness ID verified — view provenance record"
     >
-      <Shield size={8} />
+      <Shield size={8} aria-hidden="true" />
       WID
     </button>
   );
@@ -910,6 +911,7 @@ function GlobalPlayerInner() {
             onClick={e => { e.stopPropagation(); nextTrack(); }}
             className="p-1.5 transition-colors"
             style={{ color: isDesktop ? "rgba(255,255,255,0.4)" : "rgba(192,132,252,0.5)" }}
+            aria-label="Next track"
           >
             <SkipForward size={15} />
           </button>
@@ -919,6 +921,8 @@ function GlobalPlayerInner() {
             className="p-1.5 transition-colors"
             style={{ color: isDesktop ? GOLD : "rgba(192,132,252,0.7)" }}
             title={isMini ? "Expand player" : "Collapse player"}
+            aria-label={isMini ? "Expand player" : "Collapse player"}
+            aria-expanded={!isMini}
           >
             {isMini ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
           </button>
@@ -991,50 +995,51 @@ function GlobalPlayerInner() {
         <div className="flex items-center justify-between px-4 py-1 flex-shrink-0">
           {/* Playback controls — desktop only */}
           <div className="flex items-center gap-3">
-            <button onClick={e => { e.stopPropagation(); toggleShuffle(); }} className="transition-colors" style={{ padding: "6px", color: state.isShuffle ? GOLD : "rgba(212,175,55,0.65)" }}><Shuffle size={14} /></button>
-            <button onClick={e => { e.stopPropagation(); prevTrack(); }} className="transition-colors" style={{ padding: "6px", color: GOLD, opacity: 0.9 }}><SkipBack size={18} /></button>
+            <button onClick={e => { e.stopPropagation(); toggleShuffle(); }} className="transition-colors" style={{ padding: "6px", color: state.isShuffle ? GOLD : "rgba(212,175,55,0.65)" }} aria-label={state.isShuffle ? "Shuffle: on" : "Shuffle: off"} aria-pressed={state.isShuffle}><Shuffle size={14} /></button>
+            <button onClick={e => { e.stopPropagation(); prevTrack(); }} className="transition-colors" style={{ padding: "6px", color: GOLD, opacity: 0.9 }} aria-label="Previous track"><SkipBack size={18} /></button>
             {/* Desktop crystal orb play button */}
             <button
               onClick={e => { e.stopPropagation(); togglePlay(); }}
               className="flex items-center justify-center rounded-full transition-all active:scale-95 hover:scale-105"
               style={{ width: "56px", height: "56px", background: GOLD, color: "#000", boxShadow: `0 0 12px rgba(212,175,55,0.55), 0 0 24px rgba(212,175,55,0.22)`, filter: `drop-shadow(0 0 10px rgba(212,175,55,0.6))` }}
+              aria-label={state.isPlaying ? "Pause" : "Play"}
             >
               {state.isPlaying ? <Pause size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" style={{ marginLeft: "2px" }} />}
             </button>
-            <button onClick={e => { e.stopPropagation(); nextTrack(); }} className="transition-colors" style={{ padding: "6px", color: GOLD, opacity: 0.9 }}><SkipForward size={18} /></button>
-            <button onClick={e => { e.stopPropagation(); toggleRepeat(); }} className="transition-colors" style={{ padding: "6px", color: state.isRepeat ? GOLD : "rgba(212,175,55,0.65)" }}><Repeat size={14} /></button>
+            <button onClick={e => { e.stopPropagation(); nextTrack(); }} className="transition-colors" style={{ padding: "6px", color: GOLD, opacity: 0.9 }} aria-label="Next track"><SkipForward size={18} /></button>
+            <button onClick={e => { e.stopPropagation(); toggleRepeat(); }} className="transition-colors" style={{ padding: "6px", color: state.isRepeat ? GOLD : "rgba(212,175,55,0.65)" }} aria-label={state.isRepeat ? "Repeat: on" : "Repeat: off"} aria-pressed={state.isRepeat}><Repeat size={14} /></button>
           </div>
           {/* Right utility actions */}
           <div className="flex items-center gap-1">
             {user && currentSongId && (
-              <button onClick={e => { e.stopPropagation(); toggleLikeMutation.mutate({ songId: currentSongId }); }} className="p-1.5 transition-colors" style={{ color: isLiked ? "#EF4444" : "rgba(212,175,55,0.65)" }}>
+              <button onClick={e => { e.stopPropagation(); toggleLikeMutation.mutate({ songId: currentSongId }); }} className="p-1.5 transition-colors" style={{ color: isLiked ? "#EF4444" : "rgba(212,175,55,0.65)" }} aria-label={isLiked ? "Unlike this track" : "Like this track"} aria-pressed={isLiked}>
                 <Heart size={15} fill={isLiked ? "currentColor" : "none"} />
               </button>
             )}
             {currentSongId && (
-              <button onClick={e => { e.stopPropagation(); setCommentsOpen(true); }} className="p-1.5 transition-colors" style={{ color: isDesktop ? "rgba(212,175,55,0.65)" : "rgba(192,132,252,0.6)" }} title="Comments">
+              <button onClick={e => { e.stopPropagation(); setCommentsOpen(true); }} className="p-1.5 transition-colors" style={{ color: isDesktop ? "rgba(212,175,55,0.65)" : "rgba(192,132,252,0.6)" }} title="Comments" aria-label="Open comments">
                 <MessageCircle size={14} />
               </button>
             )}
             {currentSongId && (
-              <button onClick={e => { e.stopPropagation(); setAddToCollectionOpen(true); }} className="p-1.5 transition-colors" style={{ color: isDesktop ? "rgba(212,175,55,0.65)" : "rgba(192,132,252,0.6)" }} title="Add to My List">
+              <button onClick={e => { e.stopPropagation(); setAddToCollectionOpen(true); }} className="p-1.5 transition-colors" style={{ color: isDesktop ? "rgba(212,175,55,0.65)" : "rgba(192,132,252,0.6)" }} title="Add to My List" aria-label="Add to My List">
                 <ListPlus size={15} />
               </button>
             )}
             {tipsEnabled && currentSongId && (
-              <button onClick={e => { e.stopPropagation(); setTipOpen(true); }} className="p-1.5 transition-colors" style={{ color: isDesktop ? "rgba(212,175,55,0.65)" : "rgba(192,132,252,0.6)" }} title="Tip creator">
+              <button onClick={e => { e.stopPropagation(); setTipOpen(true); }} className="p-1.5 transition-colors" style={{ color: isDesktop ? "rgba(212,175,55,0.65)" : "rgba(192,132,252,0.6)" }} title="Tip creator" aria-label="Tip the creator">
                 <DollarSign size={14} />
               </button>
             )}
-            <button ref={volumeBtnRef} onClick={e => { e.stopPropagation(); openVolumePopup(); }} className="p-1.5 transition-colors" style={{ color: state.isMuted ? (isDesktop ? "rgba(212,175,55,0.3)" : "rgba(192,132,252,0.25)") : (isDesktop ? "rgba(212,175,55,0.65)" : "rgba(192,132,252,0.6)") }}>
+            <button ref={volumeBtnRef} onClick={e => { e.stopPropagation(); openVolumePopup(); }} className="p-1.5 transition-colors" style={{ color: state.isMuted ? (isDesktop ? "rgba(212,175,55,0.3)" : "rgba(192,132,252,0.25)") : (isDesktop ? "rgba(212,175,55,0.65)" : "rgba(192,132,252,0.6)") }} aria-label={state.isMuted ? "Volume: muted" : "Volume"} aria-pressed={state.isMuted}>
               {state.isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
             </button>
-            <button onClick={e => { e.stopPropagation(); toggleGlow(); }} className="p-1.5 transition-all rounded" style={{ color: glowEnabled ? "#C084FC" : (isDesktop ? "rgba(212,175,55,0.4)" : "rgba(192,132,252,0.4)"), background: glowEnabled ? "rgba(192,132,252,0.08)" : "transparent" }} title={glowEnabled ? "Glow: ON" : "Glow: OFF"}><Waves size={14} /></button>
+            <button onClick={e => { e.stopPropagation(); toggleGlow(); }} className="p-1.5 transition-all rounded" style={{ color: glowEnabled ? "#C084FC" : (isDesktop ? "rgba(212,175,55,0.4)" : "rgba(192,132,252,0.4)"), background: glowEnabled ? "rgba(192,132,252,0.08)" : "transparent" }} title={glowEnabled ? "Glow: ON" : "Glow: OFF"} aria-label={glowEnabled ? "Glow effect: on" : "Glow effect: off"} aria-pressed={glowEnabled}><Waves size={14} /></button>
             {/* Phase 164: Cinematic mode — deliberate button, not triggered by artwork tap */}
-            <button onClick={e => { e.stopPropagation(); setCinematic(true); }} className="p-1.5 transition-all rounded" style={{ color: cinematic ? (isDesktop ? GOLD : "rgba(192,132,252,0.9)") : (isDesktop ? "rgba(212,175,55,0.65)" : "rgba(192,132,252,0.5)"), background: cinematic ? (isDesktop ? "rgba(212,175,55,0.08)" : "rgba(138,43,226,0.08)") : "transparent" }} title="Cinematic View"><Maximize2 size={14} /></button>
-            <button ref={contextMenuBtnRef} onClick={e => { e.stopPropagation(); openContextMenu(); }} className="p-1.5 transition-colors" style={{ color: isDesktop ? "rgba(212,175,55,0.65)" : "rgba(192,132,252,0.6)" }}><MoreHorizontal size={16} /></button>
+            <button onClick={e => { e.stopPropagation(); setCinematic(true); }} className="p-1.5 transition-all rounded" style={{ color: cinematic ? (isDesktop ? GOLD : "rgba(192,132,252,0.9)") : (isDesktop ? "rgba(212,175,55,0.65)" : "rgba(192,132,252,0.5)"), background: cinematic ? (isDesktop ? "rgba(212,175,55,0.08)" : "rgba(138,43,226,0.08)") : "transparent" }} title="Cinematic View" aria-label="Cinematic view"><Maximize2 size={14} /></button>
+            <button ref={contextMenuBtnRef} onClick={e => { e.stopPropagation(); openContextMenu(); }} className="p-1.5 transition-colors" style={{ color: isDesktop ? "rgba(212,175,55,0.65)" : "rgba(192,132,252,0.6)" }} aria-label="More options" aria-haspopup="menu"><MoreHorizontal size={16} /></button>
             {/* Collapse button: EXPANDED → MINI (FLOAT zone removed) */}
-            <button onClick={e => { e.stopPropagation(); setZone(z => z === "EXPANDED" ? "MINI" : "EXPANDED"); setDragHeight(null); }} className="p-1.5 transition-colors" style={{ color: isDesktop ? GOLD : "rgba(192,132,252,0.8)", filter: isDesktop ? `drop-shadow(0 0 6px rgba(212,175,55,0.5))` : `drop-shadow(0 0 6px rgba(138,43,226,0.5))` }} title={isExpanded ? "Collapse" : "Expand player"}>
+            <button onClick={e => { e.stopPropagation(); setZone(z => z === "EXPANDED" ? "MINI" : "EXPANDED"); setDragHeight(null); }} className="p-1.5 transition-colors" style={{ color: isDesktop ? GOLD : "rgba(192,132,252,0.8)", filter: isDesktop ? `drop-shadow(0 0 6px rgba(212,175,55,0.5))` : `drop-shadow(0 0 6px rgba(138,43,226,0.5))` }} title={isExpanded ? "Collapse" : "Expand player"} aria-label={isExpanded ? "Collapse player" : "Expand player"} aria-expanded={isExpanded}>
               {isExpanded ? <ChevronDown size={15} /> : <ChevronUp size={15} />}
             </button>
           </div>
