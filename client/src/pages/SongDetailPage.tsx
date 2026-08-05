@@ -56,6 +56,7 @@ import { useScrollReveal } from "@/hooks/useScrollReveal";
 import { SacredCanvas } from "@/components/SacredCanvas";
 import { ReferenceCitePanel } from "@/components/ReferenceCitePanel";
 import { IdentityColumn } from "@/components/IdentityColumn";
+import { ExperienceColumn } from "@/components/ExperienceColumn";
 
 // Slug keys stored in DB (safe ASCII, no charset issues); emoji shown in UI
 const REACTION_SLUGS = ["fire", "love", "wow", "clap", "thumbsup", "thumbsdown", "mindblown", "+"];
@@ -1463,362 +1464,37 @@ export default function SongDetailPage() {
 
         {/* ══ BELOW FOLD: Two-column layout — left: content, right: identity ══ */}
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-6" ref={scrollRevealRef}>
-          {/* ── LEFT COLUMN ── */}
-          <div className="space-y-0">
-
-            {/* ══ RESONANCE ACTIVITY STRIP — near playback ══ */}
-            {eventThread && eventThread.length > 0 && (
-              <div
-                className="rounded-xl px-4 py-3 flex flex-wrap items-center gap-2 mb-8"
-                style={{ background: "rgba(196,154,40,0.04)", border: "1px solid rgba(196,154,40,0.12)" }}
-              >
-                <span className="text-[9px] font-heading tracking-widest uppercase flex-shrink-0" style={{ color: "rgba(196,154,40,0.45)" }}>Resonance</span>
-                <div className="flex flex-wrap gap-1.5 flex-1 min-w-0">
-                  {(eventThread as any[]).slice(0, 5).map((ev: any, i: number) => {
-                    const isComment = ev.type === "comment";
-                    const isTip = ev.type === "tip";
-                    const isReaction = ev.type === "reaction";
-                    return (
-                      <span key={i} className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full"
-                        style={{ background: "rgba(196,154,40,0.08)", color: "var(--ln-smoke)", border: "1px solid rgba(196,154,40,0.12)" }}>
-                        {isTip && <span style={{ color: "var(--ln-gold)" }}>$</span>}
-                        {isReaction && <span>{ev.emoji ?? "✨"}</span>}
-                        {isComment && <span style={{ color: "rgba(196,154,40,0.5)" }}>"</span>}
-                        <span className="truncate max-w-[120px]">{ev.authorName || ev.creatorName || "Witness"}</span>
-                        {isTip && ev.amountCents && (
-                          <span style={{ color: "var(--ln-gold)" }}>${(ev.amountCents / 100).toFixed(0)}</span>
-                        )}
-                      </span>
-                    );
-                  })}
-                  {eventThread.length > 5 && (
-                    <span className="text-[10px]" style={{ color: "rgba(196,154,40,0.4)" }}>+{eventThread.length - 5} more</span>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* ══════════════════════════════════════════════════════════════
-                 T1 — TESTIMONY SANCTUARY — Origin Story as the heavy piece
-                 Full-width, Cormorant Garamond, gold left pillar, breathing room
-            ══════════════════════════════════════════════════════════════ */}
-            {(song as any).haaiOriginStory && (
-              <section
-                className="phi-section-lg scroll-reveal scroll-reveal-delay-1"
-                style={{
-                  borderTop: "1px solid rgba(196,154,40,0.10)",
-                  paddingTop: "var(--phi-5)",
-                  paddingBottom: "var(--phi-5)",
-                }}
-              >
-                {/* Section overline */}
-                <div className="flex items-center gap-3 mb-8">
-                  <span
-                    className="text-xs tracking-[0.20em] uppercase"
-                    style={{ fontFamily: "'Cinzel', serif", color: "rgba(212,175,55,0.55)" }}
-                  >
-                    Testimony
-                  </span>
-                  <div style={{ flex: 1, height: 1, background: "rgba(212,175,55,0.12)" }} />
-                </div>
-
-                {/* Testimony card — gold left pillar, Cormorant Garamond, flame watermark */}
-                <div
-                  className="relative overflow-hidden rounded-2xl"
-                  style={{
-                    background: "linear-gradient(135deg, rgba(196,154,40,0.04) 0%, rgba(8,6,16,0.98) 60%)",
-                    border: "1px solid rgba(196,154,40,0.22)",
-                    boxShadow: "0 4px 40px rgba(0,0,0,0.5), inset 0 0 60px rgba(196,154,40,0.03)",
-                  }}
-                >
-                  {/* Flame watermark — faint sacred geometry behind the text */}
-                  <div
-                    className="pointer-events-none absolute inset-0"
-                    style={{
-                      background: "radial-gradient(ellipse 55% 65% at 85% 50%, rgba(196,154,40,0.06) 0%, transparent 70%)",
-                    }}
-                  />
-                  {/* Gold left pillar */}
-                  <div
-                    className="absolute left-0 top-0 bottom-0"
-                    style={{
-                      width: "3px",
-                      background: "linear-gradient(to bottom, transparent 0%, rgba(196,154,40,0.7) 20%, rgba(196,154,40,0.9) 50%, rgba(196,154,40,0.7) 80%, transparent 100%)",
-                    }}
-                  />
-                  <div className="relative px-8 py-8 pl-10">
-                    {/* Opening quote mark */}
-                    <div
-                      className="mb-4"
-                      style={{
-                        fontFamily: "'Cormorant Garamond', serif",
-                        fontSize: "4rem",
-                        lineHeight: 0.8,
-                        color: "rgba(196,154,40,0.20)",
-                        userSelect: "none",
-                      }}
-                    >
-                      &#8220;
-                    </div>
-                    <p
-                      className="leading-[1.85] whitespace-pre-wrap"
-                      style={{
-                        fontFamily: "'Cormorant Garamond', serif",
-                        fontSize: "clamp(1.05rem, 2vw, 1.22rem)",
-                        color: "var(--ln-bone)",
-                        fontWeight: 500,
-                        letterSpacing: "0.015em",
-                      }}
-                    >
-                      {(song as any).haaiOriginStory}
-                    </p>
-                    {/* Creator attribution */}
-                    <div className="mt-6 flex items-center gap-3">
-                      <div style={{ width: 28, height: 1, background: "rgba(196,154,40,0.4)" }} />
-                      <span
-                        className="text-sm"
-                        style={{
-                          fontFamily: "'Cinzel', serif",
-                          color: "rgba(196,154,40,0.65)",
-                          letterSpacing: "0.06em",
-                        }}
-                      >
-                        {creator?.artistHandle || creator?.name || "The Creator"}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </section>
-            )}
-
-            {/* ══ SACRED DIVIDER ══ */}
-            {(song as any).haaiOriginStory && (
-              <div className="sg-divider-wide" style={{ margin: "0 0 0 0" }}>
-                <div className="sg-divider-wide-center">
-                  <div className="sg-divider-wide-center-dot" />
-                </div>
-              </div>
-            )}
-
-            {/* ══════════════════════════════════════════════════════════════
-                 T2 — HAAI DISCLOSURE — Always visible, never collapsed
-                 Human-Authored, AI-Informed — act of integrity, not shame
-            ══════════════════════════════════════════════════════════════ */}
-            {(() => {
-              const disc = (song as any).aiDisclosure || creator?.aiDisclosure;
-              const hasHaai = disc === "human_authored_ai_instrument";
-              const discMap: Record<string, { label: string; color: string; desc: string }> = {
-                original: {
-                  label: "Original Human Authored",
-                  color: "rgba(134,239,172,0.9)",
-                  desc: "This work is original content authored entirely by the human creator. No AI generation was used.",
-                },
-                ai_assisted: {
-                  label: "AI-Assisted",
-                  color: "rgba(196,154,40,0.9)",
-                  desc: "AI tools were used in the creation of this work. The creator remains the primary author.",
-                },
-                human_authored_ai_instrument: {
-                  label: "HAAI — Human-Authored, AI-Informed",
-                  color: "rgba(196,154,40,0.9)",
-                  desc: "The human is the author. AI served as an instrument — a tool in service of the creator's sovereign vision. The testimony, the intent, and the meaning are entirely human.",
-                },
-                ai_generated: {
-                  label: "AI-Assisted Manifestation",
-                  color: "rgba(167,139,250,0.9)",
-                  desc: "This work was created with significant AI generation. The creator shaped the vision, direction, and curation.",
-                },
-              };
-              const haaiFields = [
-                { key: "haaiVisualConcept", label: "Visual Concept" },
-                { key: "haaiStyleLanguage", label: "Style Language" },
-                { key: "haaiInstrumentation", label: "Instrumentation" },
-                { key: "haaiVocalConveyance", label: "Vocal Conveyance" },
-                { key: "haaiLyricalInspiration", label: "Lyrical Inspiration" },
-                { key: "haaiEmotionalTone", label: "Emotional Tone" },
-              ].filter(f => (song as any)[f.key]);
-              const originStory = (song as any).haaiOriginStory;
-
-              if (!disc && haaiFields.length === 0 && !originStory) return null;
-              return (
-                <section
-                  className="scroll-reveal scroll-reveal-delay-2"
-                  style={{
-                    paddingTop: "var(--phi-5)",
-                    paddingBottom: "var(--phi-5)",
-                    borderTop: "1px solid rgba(196,154,40,0.08)",
-                  }}
-                >
-                  {/* Section overline */}
-                  <div className="flex items-center gap-3 mb-8">
-                    <span
-                      className="text-xs tracking-[0.20em] uppercase"
-                      style={{ fontFamily: "'Cinzel', serif", color: "rgba(212,175,55,0.55)" }}
-                    >
-                      Authorship Disclosure
-                    </span>
-                    <div style={{ flex: 1, height: 1, background: "rgba(212,175,55,0.12)" }} />
-                  </div>
-
-                  {/* Authorship Category Badge — locked, always visible */}
-                  {disc && (() => {
-                    const discInfo = discMap[disc] ?? { label: disc, color: "rgba(196,154,40,0.9)", desc: "" };
-                    return (
-                      <div
-                        className="rounded-2xl p-6 mb-6"
-                        style={{
-                          background: hasHaai
-                            ? "linear-gradient(135deg, rgba(196,154,40,0.07) 0%, rgba(8,6,16,0.97) 100%)"
-                            : "rgba(196,154,40,0.03)",
-                          border: hasHaai
-                            ? "1px solid rgba(196,154,40,0.30)"
-                            : "1px solid rgba(196,154,40,0.12)",
-                        }}
-                      >
-                        <div className="flex items-start gap-4">
-                          <div
-                            className="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center"
-                            style={{ background: "rgba(196,154,40,0.10)", border: "1px solid rgba(196,154,40,0.25)" }}
-                          >
-                            <ShieldCheck className="w-5 h-5" style={{ color: "var(--ln-gold)" }} />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-3 mb-2">
-                              <p
-                                className="text-base font-semibold"
-                                style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)", letterSpacing: "0.03em" }}
-                              >
-                                {discInfo.label}
-                              </p>
-                              {/* Locked category pill */}
-                              <span
-                                className="text-[9px] px-2 py-0.5 rounded-full tracking-widest uppercase"
-                                style={{ background: "rgba(196,154,40,0.08)", color: discInfo.color, border: "1px solid rgba(196,154,40,0.20)", fontFamily: "'Space Mono', monospace" }}
-                              >
-                                LOCKED
-                              </span>
-                            </div>
-                            {discInfo.desc && (
-                              <p className="text-sm leading-relaxed" style={{ color: "var(--ln-smoke)", fontFamily: "'Cormorant Garamond', serif", fontSize: "1rem" }}>
-                                {discInfo.desc}
-                              </p>
-                            )}
-                            {(song as any).haaiDeclaredAt && (
-                              <p className="text-[11px] mt-3" style={{ color: "rgba(196,154,40,0.45)", fontFamily: "'Space Mono', monospace" }}>
-                                Declared {new Date((song as any).haaiDeclaredAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })()}
-
-                  {/* Origin Story — shown for ALL disclosure types when present */}
-                  {originStory && (
-                    <div
-                      className="rounded-xl p-5 mb-6"
-                      style={{
-                        background: "rgba(196,154,40,0.03)",
-                        border: "1px solid rgba(196,154,40,0.12)",
-                      }}
-                    >
-                      <p
-                        className="text-[10px] tracking-[0.18em] uppercase mb-3"
-                        style={{ fontFamily: "'Cinzel', serif", color: "rgba(196,154,40,0.50)" }}
-                      >
-                        Origin Story
-                      </p>
-                      <p
-                        className="text-sm leading-relaxed"
-                        style={{ color: "var(--ln-bone)", fontFamily: "'Cormorant Garamond', serif", fontSize: "1rem" }}
-                      >
-                        {originStory}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* HAAI structured fields — only for HAAI works */}
-                  {hasHaai && haaiFields.length > 0 && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {haaiFields.map(f => (
-                        <div
-                          key={f.key}
-                          className="rounded-xl p-4"
-                          style={{
-                            background: "rgba(196,154,40,0.03)",
-                            border: "1px solid rgba(196,154,40,0.12)",
-                          }}
-                        >
-                          <p
-                            className="text-[10px] tracking-[0.18em] uppercase mb-2"
-                            style={{ fontFamily: "'Cinzel', serif", color: "rgba(196,154,40,0.50)" }}
-                          >
-                            {f.label}
-                          </p>
-                          <p
-                            className="text-sm leading-relaxed"
-                            style={{ color: "var(--ln-bone)", fontFamily: "'Cormorant Garamond', serif", fontSize: "0.97rem" }}
-                          >
-                            {(song as any)[f.key]}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* BPM / Key metadata — inline with HAAI, not a separate footnote */}
-                  {(song.bpm || song.keySignature) && (
-                    <div className="flex flex-wrap gap-2 mt-5">
-                      {song.bpm && (
-                        <span className="text-[11px] px-3 py-1 rounded-full" style={{ background: "rgba(196,154,40,0.06)", color: "rgba(196,154,40,0.6)", border: "1px solid rgba(196,154,40,0.15)" }}>
-                          {song.bpm} BPM
-                        </span>
-                      )}
-                      {song.keySignature && (
-                        <span className="text-[11px] px-3 py-1 rounded-full" style={{ background: "rgba(196,154,40,0.06)", color: "rgba(196,154,40,0.6)", border: "1px solid rgba(196,154,40,0.15)" }}>
-                          {song.keySignature}
-                        </span>
-                      )}
-                    </div>
-                  )}
-                </section>
-              );
-            })()}
-
-            {/* ── GALLERY ── */}
-            {(() => {
-              const rawGallery = (song as any).galleryImagesJson;
-              if (!rawGallery) return null;
-              let gallery: { url: string; caption?: string }[] = [];
-              try { gallery = typeof rawGallery === 'string' ? JSON.parse(rawGallery) : rawGallery; } catch { return null; }
-              if (!gallery.length) return null;
-              return (
-                <section style={{ paddingTop: "var(--phi-4)", paddingBottom: "var(--phi-4)", borderTop: "1px solid rgba(196,154,40,0.08)" }}>
-                  <div className="flex items-center gap-3 mb-6">
-                    <span className="text-xs tracking-[0.20em] uppercase" style={{ fontFamily: "'Cinzel', serif", color: "rgba(212,175,55,0.55)" }}>Gallery</span>
-                    <div style={{ flex: 1, height: 1, background: "rgba(212,175,55,0.12)" }} />
-                  </div>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                    {gallery.map((img, i) => (
-                      <div key={i} className="space-y-1">
-                        <div className="rounded-xl overflow-hidden aspect-square bg-black/30">
-                          <img
-                            src={img.url}
-                            alt={img.caption || `Gallery image ${i + 1}`}
-                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300 cursor-pointer"
-                            onClick={() => window.open(img.url, '_blank')}
-                          />
-                        </div>
-                        {img.caption && (
-                          <p className="text-[10px] leading-tight px-1" style={{ color: "var(--ln-iron)" }}>{img.caption}</p>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </section>
-              );
-                        })()}
+          {/* ── LEFT COLUMN — ACT III: Experience Column ── */}
+          <div className="space-y-4">
+            <ExperienceColumn
+              song={song}
+              creator={creator}
+              isOwner={isOwner}
+              songId={songId}
+              comments={comments ?? []}
+              commentText={commentText}
+              setCommentText={setCommentText}
+              commentMutation={commentMutation}
+              replyMutation={replyMutation}
+              replyingTo={replyingTo}
+              setReplyingTo={setReplyingTo}
+              replyText={replyText}
+              setReplyText={setReplyText}
+              reactionCounts={reactionCounts}
+              myReactionsSet={myReactionsSet}
+              handleReaction={handleReaction}
+              REACTION_SLUGS={REACTION_SLUGS}
+              REACTION_EMOJI={REACTION_EMOJI}
+              eventThread={eventThread ?? []}
+              relatedData={relatedData ?? []}
+              evidenceItems={evidenceItems}
+              isLiked={isLiked}
+              likeCount={likeCount}
+              toggleLike={toggleLike}
+              handleShare={copyLink}
+              versionHistoryOpen={versionHistoryOpen}
+              setVersionHistoryOpen={setVersionHistoryOpen}
+            />
           </div>
 
           {/* ── RIGHT COLUMN — ACT II: Identity Column ── */}
