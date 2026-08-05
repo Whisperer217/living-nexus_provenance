@@ -58,6 +58,7 @@ import { ReferenceCitePanel } from "@/components/ReferenceCitePanel";
 import { IdentityColumn } from "@/components/IdentityColumn";
 import { ExperienceColumn } from "@/components/ExperienceColumn";
 import { EvidenceColumn } from "@/components/EvidenceColumn";
+import { LivingContextRail } from "@/components/LivingContextRail";
 
 // Slug keys stored in DB (safe ASCII, no charset issues); emoji shown in UI
 const REACTION_SLUGS = ["fire", "love", "wow", "clap", "thumbsup", "thumbsdown", "mindblown", "+"];
@@ -1514,6 +1515,15 @@ export default function SongDetailPage() {
               creatorAvatarUrl={creator?.profilePhotoUrl ?? null}
               isOwner={isOwner}
               songId={songId}
+            />
+            {/* ACT V — Living Context Rail */}
+            <LivingContextRail
+              song={song}
+              creator={creator}
+              songId={songId}
+              eventThread={eventThread ?? []}
+              relatedData={relatedData ?? []}
+              onGiftOpen={() => setTipOpen(true)}
             />
           </div>
         </div>
