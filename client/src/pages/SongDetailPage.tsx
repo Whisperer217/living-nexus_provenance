@@ -447,15 +447,6 @@ export default function SongDetailPage() {
           <p className="text-sm font-semibold truncate" style={{ color: "rgba(255,255,255,0.92)", fontFamily: "'Cinzel', serif" }}>{song?.title}</p>
           <p className="text-xs truncate" style={{ color: "rgba(196,154,40,0.7)" }}>{creator?.artistHandle || creator?.name}</p>
         </div>
-        <button
-          type="button"
-          onClick={handlePlay}
-          className="shrink-0 flex items-center justify-center rounded-full transition-all"
-          style={{ width: 36, height: 36, background: "rgba(196,154,40,0.15)", border: "1px solid rgba(196,154,40,0.35)", color: "rgba(196,154,40,0.9)" }}
-          aria-label={isPlaying ? "Pause" : "Play"}
-        >
-          {isPlaying ? <Pause size={16} fill="currentColor" /> : <Play size={16} fill="currentColor" />}
-        </button>
       </div>
 
 
@@ -610,28 +601,7 @@ export default function SongDetailPage() {
                 {(song as any).officialArtistName || creator?.artistHandle || creator?.name || ""}
               </p>
             </div>
-            {/* Play button — bottom right */}
-            {song.fileUrl && (
-              <button
-                type="button"
-                onClick={handlePlay}
-                className="absolute bottom-5 right-5 flex items-center justify-center rounded-full transition-all hover:scale-105 active:scale-95"
-                style={{
-                  width: 52,
-                  height: 52,
-                  background: isThisTrackActive ? "rgba(196,154,40,0.25)" : "rgba(196,154,40,0.15)",
-                  border: "1px solid rgba(196,154,40,0.50)",
-                  color: "rgba(196,154,40,0.95)",
-                  backdropFilter: "blur(8px)",
-                  boxShadow: isThisTrackActive ? "0 0 24px rgba(196,154,40,0.35)" : "0 0 12px rgba(196,154,40,0.15)",
-                }}
-                aria-label={isPlaying ? "Pause" : "Play"}
-              >
-                {isPlaying
-                  ? <Pause size={22} fill="currentColor" />
-                  : <Play size={22} fill="currentColor" style={{ marginLeft: 2 }} />}
-              </button>
-            )}
+            {/* Play button removed — single play surface is on the CinematicSongHeader card image */}
           </div>
         )}
 
