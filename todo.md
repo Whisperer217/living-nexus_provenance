@@ -6854,3 +6854,12 @@
 - [x] Build SharedPlaylistPage (/p/:slug) — public playlist view, no auth required, cathedral aesthetic, play all/per-track
 - [x] Register /p/:slug as public standalone route in App.tsx (no MainLayout)
 - [x] Add SharePlaylistButton to PlaylistDetail — generates slug on first share, copies link on subsequent shares
+
+## Phase N: Explore Page Redesign + Cinematic Loading Screen
+- [x] Explore page: replace slider with max-content column-per-type layout (horizontal scroll rail per content type)
+- [x] Explore page: remove TracksSlider, default to loading all available works per section
+- [x] Explore page: add "Load more" per column instead of global slider
+- [x] Cinematic loading/splash screen: animated LN logo + frequency waveform animation
+- [x] Cinematic loading/splash screen: short looping process clips (register → witness → discover)
+- [x] Cinematic loading/splash screen: plays once per session, dissolves into app
+- [ ] Homepage: replace generic landing with two-path hero (Creator / Listener)

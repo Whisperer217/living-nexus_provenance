@@ -1,6 +1,6 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { lazy, Suspense, useEffect, useLayoutEffect } from "react";
+import React, { lazy, Suspense, useEffect, useLayoutEffect, useState } from "react";
 import { Route, Switch, Redirect, useLocation, useParams } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
@@ -20,6 +20,7 @@ import { useScrollRestoration } from "./hooks/useScrollRestoration";
 import { overlayCloseAll } from "@/lib/overlayController";
 import { useWorkEditorActions } from "./contexts/WorkEditorContext";
 import { PWAInstallBanner } from "./components/PWAInstallBanner";
+import CinematicSplash, { shouldShowSplash } from "./components/CinematicSplash";
 
 /** Logs QR scan events when ?qr= param is present in the URL. */
 function QrScanLogger() {
@@ -358,6 +359,18 @@ function Router() {
 }
 
 export default function App() {
+  const [splashDone, setSplashDone] = useState(() => !shouldShowSplash());
+
+  if (!splashDone) {
+    return (
+      <ErrorBoundary>
+        <ThemeProvider defaultTheme="dark">
+          <CinematicSplash onComplete={() => setSplashDone(true)} />
+        </ThemeProvider>
+      </ErrorBoundary>
+    );
+  }
+
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="dark">
