@@ -556,8 +556,8 @@ function KeeperSkinsSection() {
   const createCheckout = trpc.marketplace.createCheckout.useMutation({ onSuccess: (data) => { if (data.url) window.open(data.url, "_blank"); setPurchasingId(null); }, onError: (err) => { toast.error(err.message ?? "Purchase failed."); setPurchasingId(null); } });
   const handleEquip = (item: any) => { if (!user) { window.location.href = getLoginUrl("/explore"); return; } setEquippingId(item.id); equipAvatar.mutate({ itemId: item.id }); };
   const handleBuy = (item: any) => { if (!user) { window.location.href = getLoginUrl("/explore"); return; } if (item.priceCents === 0) { handleEquip(item); return; } setPurchasingId(item.id); createCheckout.mutate({ itemId: item.id, origin: window.location.origin }); };
-  if (isLoading || items.length === 0) return null;
   const scrollRef = useRef<HTMLDivElement>(null);
+  if (isLoading || items.length === 0) return null;
   return (
     <div className="mb-8">
       <div className="flex items-center justify-between mb-3">
@@ -624,8 +624,8 @@ function KeeperSkinsSection() {
 function GuidesSection() {
   const [selected, setSelected] = useState<any | null>(null);
   const { data: guides = [], isLoading } = trpc.guides.listPublished.useQuery({ limit: 20 }, { staleTime: 5 * 60 * 1000, refetchOnWindowFocus: false });
-  if (isLoading || guides.length === 0) return null;
   const scrollRef = useRef<HTMLDivElement>(null);
+  if (isLoading || guides.length === 0) return null;
   return (
     <div className="mb-8">
       <div className="flex items-center justify-between mb-3">
