@@ -449,8 +449,8 @@ export function CinematicComicReader({
             </button>
           </div>
         </div>
-        <div className="flex-1 overflow-y-auto p-4">
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3">
+        <div className="flex-1 overflow-y-auto p-3">
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2">
             {pages.map((p, i) => (
               <button
                 key={i}
@@ -467,13 +467,20 @@ export function CinematicComicReader({
                   border: i === pageIdx ? "2px solid rgba(196,154,40,0.8)" : "1px solid rgba(196,154,40,0.15)",
                   boxShadow: i === pageIdx ? "0 0 16px rgba(196,154,40,0.2)" : "none",
                   opacity: isPageGated(i) ? 0.4 : 1,
+                  background: "rgba(196,154,40,0.04)",
                 }}
               >
-                {shouldLoadPage(i) ? (
-                  <img src={p.imageUrl} alt={`Page ${p.pageNumber}`} className="w-full h-full object-cover" loading="lazy" />
-                ) : (
-                  <div className="w-full h-full" style={{ background: "rgba(196,154,40,0.05)" }} />
-                )}
+                {/* In Overview, load ALL thumbnails eagerly so the full grid is visible without scrolling */}
+                <img
+                  src={p.imageUrl}
+                  alt={`Page ${p.pageNumber}`}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                  onError={(e) => {
+                    const t = e.target as HTMLImageElement;
+                    t.style.display = "none";
+                  }}
+                />
                 <div className="absolute bottom-0 left-0 right-0 py-1 text-center text-[9px] font-heading font-bold"
                   style={{ background: "rgba(0,0,0,0.7)", color: i === pageIdx ? "#C9A84C" : "#888" }}>
                   {isPageGated(i) ? <Lock size={8} style={{ display: "inline" }} /> : p.pageNumber}
@@ -676,6 +683,18 @@ export function CinematicComicReader({
                     ...guidedStyle,
                   }}
                   onLoad={computeGuidedTransform}
+                  onError={(e) => {
+                    const t = e.target as HTMLImageElement;
+                    t.style.display = "none";
+                    const parent = t.parentElement;
+                    if (parent && !parent.querySelector(".page-error-msg")) {
+                      const msg = document.createElement("div");
+                      msg.className = "page-error-msg";
+                      msg.style.cssText = "color:rgba(196,154,40,0.6);font-size:13px;text-align:center;padding:2rem;font-family:serif;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)";
+                      msg.textContent = "Page image unavailable";
+                      parent.appendChild(msg);
+                    }
+                  }}
                   draggable={false}
                   loading="eager"
                 />
@@ -722,6 +741,18 @@ export function CinematicComicReader({
                   }}
                   draggable={false}
                   loading="eager"
+                  onError={(e) => {
+                    const t = e.target as HTMLImageElement;
+                    t.style.display = "none";
+                    const parent = t.parentElement;
+                    if (parent && !parent.querySelector(".page-error-msg")) {
+                      const msg = document.createElement("div");
+                      msg.className = "page-error-msg";
+                      msg.style.cssText = "color:rgba(196,154,40,0.6);font-size:14px;text-align:center;padding:3rem 2rem;font-family:serif;";
+                      msg.textContent = "Page image unavailable \u2014 the source file may have been moved or deleted.";
+                      parent.appendChild(msg);
+                    }
+                  }}
                 />
               )}
               {/* Spread: second page — hidden on mobile (too cramped) */}
@@ -739,6 +770,7 @@ export function CinematicComicReader({
                   }}
                   draggable={false}
                   loading="lazy"
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
                 />
               )}
             </>
