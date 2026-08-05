@@ -620,15 +620,32 @@ export default function SongDetailPage() {
           hasAudio={song.contentType !== "comic" && song.contentType !== "manuscript"}
           contentType={song.contentType}
           isOwner={isOwner}
+          creatorId={creator?.id ?? null}
+          creatorAvatarUrl={creator?.profilePhotoUrl ?? null}
+          creatorHandle={creator?.artistHandle ?? creator?.name ?? null}
           isThisTrackActive={isThisTrackActive}
           isPlaying={isPlaying}
           playCount={song.playCount ?? 0}
           commentCount={0}
           likeCount={likeCount}
+          isLiked={isLiked}
           waveCanvasRef={waveCanvasRef as React.RefObject<HTMLCanvasElement>}
           onPlay={handlePlay}
           onReadNow={handleReadNow}
           onEditArt={() => {}}
+          onLike={(e?: React.MouseEvent) => toggleLike(e as React.MouseEvent)}
+          onShare={() => {
+            const shareUrl = song.witnessId
+              ? `${window.location.origin}/share/${song.witnessId}`
+              : window.location.href;
+            if (navigator.share) {
+              navigator.share({ title: song.title, url: shareUrl }).catch(() => {});
+            } else {
+              navigator.clipboard.writeText(shareUrl).then(() =>
+                toast.success("Link copied to clipboard")
+              ).catch(() => {});
+            }
+          }}
         />
 
         {/* ── TESTIMONY CHAMBER — single-column layout below the header ── */}
