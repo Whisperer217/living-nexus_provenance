@@ -6863,3 +6863,10 @@
 - [x] Cinematic loading/splash screen: short looping process clips (register → witness → discover)
 - [x] Cinematic loading/splash screen: plays once per session, dissolves into app
 - [ ] Homepage: replace generic landing with two-path hero (Creator / Listener)
+
+## Splash + Auth Routing Fixes (Slimdoggy suggestions)
+- [ ] Fix auto-login bypass: unauthenticated visitors must see CinematicSplash before any auth redirect fires
+- [ ] Redesign CinematicSplash: swipeable/tappable cards, no auto-dismiss timer, manual advance arrows, Enter button
+- [ ] Splash cards must stay visible until user advances — readable pace, not 2-second auto-flip
+- [ ] Add touch/mouse swipe gesture support to splash card navigation
+- [ ] Log Slimdoggy as suggestion contributor in knowledge base
