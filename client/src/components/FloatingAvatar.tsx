@@ -183,10 +183,15 @@ export default function FloatingAvatar({
     },
     onError: () => setIsAnalyzingImage(false),
   });
+  // Max y clamp: orb base is bottom:140px. Prevent dragging above the mobile header (56px) + safe margin.
+  // On a 844px tall phone: maxY = 844 - 140 - 56 - 64 - 20 = 564. Orb stays in the lower 3/4 of the screen.
+  const MAX_DRAG_Y = typeof window !== "undefined" ? Math.max(0, window.innerHeight - 280) : 400;
   const [position, setPosition] = useState<{ x: number; y: number }>(() => {
     try {
       const saved = localStorage.getItem("ln_avatar_pos");
-      return saved ? JSON.parse(saved) : { x: 0, y: 0 };
+      const parsed = saved ? JSON.parse(saved) : { x: 0, y: 0 };
+      // Clamp saved position — reset if it would push the orb above the safe zone
+      return { x: Math.max(8, parsed.x ?? 0), y: Math.min(MAX_DRAG_Y, Math.max(0, parsed.y ?? 0)) };
     } catch { return { x: 0, y: 0 }; }
   });
   const [dragging, setDragging] = useState(false);
@@ -277,7 +282,7 @@ export default function FloatingAvatar({
       if (!dragStart.current) return;
       const dx = e.clientX - dragStart.current.mx;
       const dy = e.clientY - dragStart.current.my;
-      scheduleFlush({ x: Math.max(8, dragStart.current.ox - dx), y: Math.max(0, dragStart.current.oy - dy) });
+      scheduleFlush({ x: Math.max(8, dragStart.current.ox - dx), y: Math.min(MAX_DRAG_Y, Math.max(0, dragStart.current.oy - dy)) });
     };
     const onTouchMove = (e: TouchEvent) => {
       if (!dragStart.current) return;
@@ -285,7 +290,7 @@ export default function FloatingAvatar({
       const t = e.touches[0];
       const dx = t.clientX - dragStart.current.mx;
       const dy = t.clientY - dragStart.current.my;
-      scheduleFlush({ x: Math.max(8, dragStart.current.ox - dx), y: Math.max(0, dragStart.current.oy - dy) });
+      scheduleFlush({ x: Math.max(8, dragStart.current.ox - dx), y: Math.min(MAX_DRAG_Y, Math.max(0, dragStart.current.oy - dy)) });
     };
     const onUp = () => {
       if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = null; }

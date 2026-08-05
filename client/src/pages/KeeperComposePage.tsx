@@ -58,13 +58,22 @@ const MODE_ICONS: Record<AgentMode, React.FC<{ className?: string }>> = {
   Image:     ({ className }) => <Sparkles className={className} />,
 };
 
+// Display names per Keeper Architecture spec (backend persona IDs unchanged)
+const MODE_DISPLAY: Record<AgentMode, string> = {
+  Guide:     "Guide",
+  Conductor: "Compose",
+  Witness:   "Witness",
+  Custodian: "Registry",
+  Archivist: "Archive",
+  Image:     "Vision",
+};
 const MODE_DESC: Record<AgentMode, string> = {
-  Guide:     "Direction · Inspiration · Voice",
-  Conductor: "Structure · Arrangement · Flow",
-  Witness:   "Testimony · Emotional Truth · Depth",
-  Custodian: "Provenance · Archive · Legacy",
-  Archivist: "Semantics · Pattern · Corpus",
-  Image:     "Vision · Generate · Manifest",
+  Guide:     "Creative direction and intent.",
+  Conductor: "Structure, arrangement, and flow.",
+  Witness:   "Emotional truth and testimony.",
+  Custodian: "Provenance, registration, and lineage.",
+  Archivist: "Patterns across your full corpus.",
+  Image:     "Image and visual generation.",
 };
 
 // ─── Image generation types ───────────────────────────────────────────────────
@@ -1088,7 +1097,7 @@ Please respond in Suno-ready format:
                     border: `1px solid ${active ? MODE_COLORS[m] : "transparent"}`,
                     color: active ? MODE_COLORS[m] : "var(--ln-smoke)",
                   }}
-                  title={m}
+                  title={MODE_DISPLAY[m]}
                 >
                   <Icon className="w-3 h-3" />
                 </button>
@@ -1103,7 +1112,7 @@ Please respond in Suno-ready format:
           style={{ background: `${modeColor}08`, borderBottom: `1px solid ${modeColor}22` }}
         >
           <span style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.55rem", color: modeColor, opacity: 0.8 }}>
-            {activeMode.toUpperCase()} · {MODE_DESC[activeMode as AgentMode]}
+            {MODE_DISPLAY[activeMode as AgentMode].toUpperCase()} · {MODE_DESC[activeMode as AgentMode]}
           </span>
         </div>
 
@@ -1577,11 +1586,16 @@ Please respond in Suno-ready format:
           className="w-48 flex-shrink-0 flex flex-col border-r overflow-y-auto"
           style={{ borderColor: "var(--ln-panel-border)", background: "var(--ln-panel)" }}
         >
+          {/* Keeper Identity Header */}
+          <div className="px-4 pt-4 pb-3 border-b" style={{ borderColor: "var(--ln-panel-border)" }}>
+            <div style={{ fontFamily: "'Cinzel', serif", fontSize: "0.75rem", color: "var(--ln-gold)", letterSpacing: "0.12em", marginBottom: 2 }}>The Keeper</div>
+            <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.45rem", color: "var(--ln-smoke)", lineHeight: 1.5, opacity: 0.7 }}>One identity. Multiple stewardship modes.</div>
+          </div>
           <div
-            className="px-4 pt-4 pb-2 text-xs uppercase tracking-widest"
-            style={{ color: "var(--ln-gold)", fontFamily: "'Space Mono', monospace", fontSize: "0.55rem" }}
+            className="px-4 pt-3 pb-2 text-xs uppercase tracking-widest"
+            style={{ color: "var(--ln-smoke)", fontFamily: "'Space Mono', monospace", fontSize: "0.5rem", opacity: 0.6 }}
           >
-            Mode
+            Stewardship
           </div>
           <div className="flex flex-col gap-1 px-2 pb-4">
             {MODES.map(m => {
@@ -1603,7 +1617,7 @@ Please respond in Suno-ready format:
                     <div className="flex-1">
                       <div className="flex items-center gap-1.5">
                         <span style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.6rem", letterSpacing: "0.08em" }}>
-                          {m.toUpperCase()}
+                          {MODE_DISPLAY[m].toUpperCase()}
                         </span>
                         {isConductor && (
                           <span
@@ -1619,7 +1633,7 @@ Please respond in Suno-ready format:
                         )}
                       </div>
                       <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.45rem", opacity: 0.6, marginTop: 1 }}>
-                        {MODE_DESC[m].split(" · ")[0]}
+                        {MODE_DESC[m]}
                       </div>
                     </div>
                   </button>
@@ -1657,7 +1671,7 @@ Please respond in Suno-ready format:
                 letterSpacing: "0.06em",
               }}
             >
-              {MODE_DESC[activeMode as AgentMode]}
+              {MODE_DISPLAY[activeMode as AgentMode]} — {MODE_DESC[activeMode as AgentMode]}
             </div>
           </div>
         </div>
