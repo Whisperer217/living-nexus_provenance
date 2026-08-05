@@ -488,7 +488,7 @@ function CathedralSection({ section, rows, search, viewMode, likedMap }: { secti
 }
 
 function CathedralSkeleton() {
-  return <div className="space-y-3 animate-pulse">{Array.from({ length: 8 }).map((_, i) => <div key={i} className="h-16 rounded-xl bg-[var(--void-3)]" />)}</div>;
+  return <div className="space-y-3 animate-pulse">{Array.from({ length: 8 }).map((_, i) => <div key={i} className="h-16 rounded-xl" style={{ background: 'var(--skeleton-bg, var(--void-3))' }} />)}</div>;
 }
 
 // ── Keeper Skins Section ───────────────────────────────────────────

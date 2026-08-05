@@ -431,6 +431,10 @@
   --lnx-gold:       #C49A28;
   --lnx-gold-glow:  #D4A84B;
   --lnx-gold-muted: #7A5C20;
+  /* Text contrast overrides for Crimson theme */
+  --stone-light:  #F5D8D8;   /* Warm rose-white — primary text on crimson voids */
+  --stone-shadow: #8A5555;   /* Muted rose — secondary text */
+  --skeleton-bg:  #2A0808;   /* Skeleton loader base — visible on crimson void */
 }
 [data-theme="crimson"] body,
 [data-theme="crimson"] html {
@@ -490,6 +494,10 @@
   --lnx-gold:       #F5C842;
   --lnx-gold-glow:  #FFD966;
   --lnx-gold-muted: #8A7230;
+  /* Text contrast overrides for Illuminated Gold theme */
+  --stone-light:  #FFF8E1;   /* Warm cream — primary text on amber voids */
+  --stone-shadow: #A08840;   /* Muted amber — secondary text */
+  --skeleton-bg:  #2A2200;   /* Skeleton loader base — visible on amber void */
 }
 [data-theme="illuminated-gold"] body,
 [data-theme="illuminated-gold"] html {
