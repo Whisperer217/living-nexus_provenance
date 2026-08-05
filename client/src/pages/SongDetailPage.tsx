@@ -57,6 +57,7 @@ import { SacredCanvas } from "@/components/SacredCanvas";
 import { ReferenceCitePanel } from "@/components/ReferenceCitePanel";
 import { IdentityColumn } from "@/components/IdentityColumn";
 import { ExperienceColumn } from "@/components/ExperienceColumn";
+import { EvidenceColumn } from "@/components/EvidenceColumn";
 
 // Slug keys stored in DB (safe ASCII, no charset issues); emoji shown in UI
 const REACTION_SLUGS = ["fire", "love", "wow", "clap", "thumbsup", "thumbsdown", "mindblown", "+"];
@@ -1462,9 +1463,9 @@ export default function SongDetailPage() {
           </div>
         </div>
 
-        {/* ══ BELOW FOLD: Two-column layout — left: content, right: identity ══ */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-6" ref={scrollRevealRef}>
-          {/* ── LEFT COLUMN — ACT III: Experience Column ── */}
+                {/* ══ BELOW FOLD: Three-column layout — center: experience, right: evidence + identity ══ */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-6" ref={scrollRevealRef}>
+          {/* ── CENTER COLUMN — ACT III: Experience Column ── */}
           <div className="space-y-4">
             <ExperienceColumn
               song={song}
@@ -1496,16 +1497,25 @@ export default function SongDetailPage() {
               setVersionHistoryOpen={setVersionHistoryOpen}
             />
           </div>
-
-          {/* ── RIGHT COLUMN — ACT II: Identity Column ── */}
-          <IdentityColumn
-            creatorId={creator?.id ?? null}
-            creatorName={(song as any).officialArtistName || creator?.artistHandle || creator?.name || "Unknown Creator"}
-            creatorHandle={creator?.artistHandle ?? null}
-            creatorAvatarUrl={creator?.profilePhotoUrl ?? null}
-            isOwner={isOwner}
-            songId={songId}
-          />
+          {/* ── RIGHT RAIL — ACT IV: Evidence Column + ACT II: Identity Column ── */}
+          <div className="flex flex-col gap-4 lg:sticky lg:top-20 lg:self-start">
+            {/* ACT IV — Evidence Inspector */}
+            <EvidenceColumn
+              song={song}
+              creator={creator}
+              isOwner={isOwner}
+              songId={songId}
+            />
+            {/* ACT II — Identity Column */}
+            <IdentityColumn
+              creatorId={creator?.id ?? null}
+              creatorName={(song as any).officialArtistName || creator?.artistHandle || creator?.name || "Unknown Creator"}
+              creatorHandle={creator?.artistHandle ?? null}
+              creatorAvatarUrl={creator?.profilePhotoUrl ?? null}
+              isOwner={isOwner}
+              songId={songId}
+            />
+          </div>
         </div>
         {/* ── ACTIVATION — stage-based funding progress ── */}
         <ActivationPanel songId={songId} songTitle={song.title} />
