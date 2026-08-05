@@ -55,6 +55,7 @@ import { SongDetailPageSkeleton } from "@/components/SongDetailPageSkeleton";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 import { SacredCanvas } from "@/components/SacredCanvas";
 import { ReferenceCitePanel } from "@/components/ReferenceCitePanel";
+import { IdentityColumn } from "@/components/IdentityColumn";
 
 // Slug keys stored in DB (safe ASCII, no charset issues); emoji shown in UI
 const REACTION_SLUGS = ["fire", "love", "wow", "clap", "thumbsup", "thumbsdown", "mindblown", "+"];
@@ -1460,8 +1461,8 @@ export default function SongDetailPage() {
           </div>
         </div>
 
-        {/* ══ BELOW FOLD: Full-width sections ══ */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-6" ref={scrollRevealRef}>
+        {/* ══ BELOW FOLD: Two-column layout — left: content, right: identity ══ */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-6" ref={scrollRevealRef}>
           {/* ── LEFT COLUMN ── */}
           <div className="space-y-0">
 
@@ -1817,10 +1818,19 @@ export default function SongDetailPage() {
                   </div>
                 </section>
               );
-            })()}
+                        })()}
           </div>
-        </div>
 
+          {/* ── RIGHT COLUMN — ACT II: Identity Column ── */}
+          <IdentityColumn
+            creatorId={creator?.id ?? null}
+            creatorName={(song as any).officialArtistName || creator?.artistHandle || creator?.name || "Unknown Creator"}
+            creatorHandle={creator?.artistHandle ?? null}
+            creatorAvatarUrl={creator?.profilePhotoUrl ?? null}
+            isOwner={isOwner}
+            songId={songId}
+          />
+        </div>
         {/* ── ACTIVATION — stage-based funding progress ── */}
         <ActivationPanel songId={songId} songTitle={song.title} />
 
