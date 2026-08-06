@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
+import PNAWorkspacePanel from "@/components/PNAWorkspacePanel";
 
 const LOGO_URL =
   "/manus-storage/living-nexus-logo-2025_19c2d497.png";
@@ -363,6 +364,7 @@ export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCoun
   const { user, loading: authLoading, logout } = useAuth();
   const [avatarMenuOpen, setAvatarMenuOpen] = useState(false);
   const avatarMenuRef = useRef<HTMLDivElement>(null);
+  const [pnaOpen, setPnaOpen] = useState(false);
 
   // Close avatar dropdown when clicking outside
   useEffect(() => {
@@ -606,63 +608,34 @@ export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCoun
             height: "100%",
           }}
         >
-          {/* Prompt Generator */}
-          {user && userId && (
-            <button
-              onClick={() => goTo(`/creator/${userId}?openPromptStudio=1`)}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-all"
-              style={{
-                fontSize: "clamp(9px, 0.7vw, 11px)",
-                fontFamily: "'Cinzel', serif",
-                fontWeight: 500,
-                letterSpacing: "0.05em",
-                background: "transparent",
-                border: "1px solid rgba(196,154,40,0.2)",
-                color: "var(--ln-gold)",
-              }}
-              onMouseEnter={e => {
-                (e.currentTarget as HTMLElement).style.color = "var(--ln-parchment)";
-                (e.currentTarget as HTMLElement).style.borderColor = "rgba(196,154,40,0.4)";
-              }}
-              onMouseLeave={e => {
+          {/* ◉ Provenance — PNA persistent nav button */}
+          <button
+            onClick={() => setPnaOpen(v => !v)}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-all"
+            style={{
+              fontSize: "clamp(9px, 0.7vw, 11px)",
+              fontFamily: "'Cinzel', serif",
+              fontWeight: 500,
+              letterSpacing: "0.05em",
+              background: pnaOpen ? "rgba(196,154,40,0.12)" : "transparent",
+              border: pnaOpen ? "1px solid rgba(196,154,40,0.5)" : "1px solid rgba(196,154,40,0.2)",
+              color: pnaOpen ? "var(--ln-parchment)" : "var(--ln-gold)",
+            }}
+            onMouseEnter={e => {
+              (e.currentTarget as HTMLElement).style.color = "var(--ln-parchment)";
+              (e.currentTarget as HTMLElement).style.borderColor = "rgba(196,154,40,0.4)";
+            }}
+            onMouseLeave={e => {
+              if (!pnaOpen) {
                 (e.currentTarget as HTMLElement).style.color = "var(--ln-gold)";
                 (e.currentTarget as HTMLElement).style.borderColor = "rgba(196,154,40,0.2)";
-              }}
-              title="Prompt Generator"
-            >
-              <Zap size={12} style={{ color: "var(--ln-gold-dim)" }} />
-              <span className="hidden xl:inline">Prompt Gen</span>
-            </button>
-          )}
-
-          {/* Compose quick access */}
-          {user && (
-            <button
-              onClick={() => goTo("/keeper-compose")}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-all"
-              style={{
-                fontSize: "clamp(9px, 0.7vw, 11px)",
-                fontFamily: "'Cinzel', serif",
-                fontWeight: 500,
-                letterSpacing: "0.05em",
-                background: "transparent",
-                border: "1px solid rgba(196,154,40,0.2)",
-                color: "var(--ln-gold)",
-              }}
-              onMouseEnter={e => {
-                (e.currentTarget as HTMLElement).style.color = "var(--ln-parchment)";
-                (e.currentTarget as HTMLElement).style.borderColor = "rgba(196,154,40,0.4)";
-              }}
-              onMouseLeave={e => {
-                (e.currentTarget as HTMLElement).style.color = "var(--ln-gold)";
-                (e.currentTarget as HTMLElement).style.borderColor = "rgba(196,154,40,0.2)";
-              }}
-              title="Nexus Compose — Image & Music Generation"
-            >
-              <Sparkles size={12} style={{ color: "var(--ln-gold-dim)" }} />
-              <span className="hidden xl:inline">Compose</span>
-            </button>
-          )}
+              }
+            }}
+            title="Provenance Nexus Avatar — your persistent intelligence layer"
+          >
+            <span style={{ fontSize: "0.7rem", lineHeight: 1 }}>◉</span>
+            <span className="hidden xl:inline">Provenance</span>
+          </button>
 
           {/* Register Work */}
           <button
@@ -802,6 +775,8 @@ export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCoun
       {whatsNewOpen && (
         <WhatsNewModal forceOpen={true} onClose={() => setWhatsNewOpen(false)} />
       )}
+      {/* PNA Workspace Panel */}
+      <PNAWorkspacePanel open={pnaOpen} onClose={() => setPnaOpen(false)} />
     </div>
   );
 }

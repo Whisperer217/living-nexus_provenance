@@ -107,6 +107,7 @@ const KeeperComposePage = lazy(() => import("./pages/KeeperComposePage"));
 const FirstWitnessPage = lazy(() => import("./pages/FirstWitnessPage"));
 const MarketplacePage = lazy(() => import("./pages/MarketplacePage"));
 const AvatarMarketplacePage = lazy(() => import("./pages/AvatarMarketplacePage"));
+const PNAShellPage = lazy(() => import("./pages/PNAShellPage"));
 const CreatorSurface = lazy(() => import("./pages/CreatorSurface"));
 const GuideUploadWizard = lazy(() => import("./pages/GuideUploadWizard"));
 const GuideDirectoryPage = lazy(() => import("./pages/GuideDirectoryPage"));
@@ -221,6 +222,44 @@ function OEmbedUpdater() {
 
 function Router() {
   const [location] = useLocation();
+  // Subdomain detection — pna.livingnexus.org serves the PNA creator workspace
+  const hostname = typeof window !== "undefined" ? window.location.hostname : "";
+  const subdomain = hostname.split(".")[0]?.toLowerCase();
+  const isPNASubdomain = subdomain === "pna";
+  const isAPISubdomain = subdomain === "api";
+  const isDocsSubdomain = subdomain === "docs";
+
+  // PNA subdomain — render creator workspace directly, no MainLayout
+  if (isPNASubdomain) {
+    return (
+      <Suspense fallback={<PageLoader />}>
+        <PNAShellPage />
+      </Suspense>
+    );
+  }
+
+  // API subdomain — redirect to developer dashboard
+  if (isAPISubdomain) {
+    return (
+      <Suspense fallback={<PageLoader />}>
+        <Switch>
+          <Route><Redirect to="/developers" /></Route>
+        </Switch>
+      </Suspense>
+    );
+  }
+
+  // Docs subdomain — redirect to platform guides
+  if (isDocsSubdomain) {
+    return (
+      <Suspense fallback={<PageLoader />}>
+        <Switch>
+          <Route><Redirect to="/platform-guides" /></Route>
+        </Switch>
+      </Suspense>
+    );
+  }
+
   return (
     <Suspense fallback={<PageLoader />}>
       <Switch>
@@ -242,6 +281,7 @@ function Router() {
                 <Route path="/home" component={HomePage} />
                 <Route path="/discover"><Redirect to="/" /></Route>
                 <Route path="/explore" component={ExplorePage} />
+                <Route path="/explore/:medium" component={ExplorePage} />
                 <Route path="/search" component={SearchResultsPage} />
                 <Route path="/upload"><Redirect to="/manifest" /></Route>
                 <Route path="/manifest" component={ManifestationStudio} />

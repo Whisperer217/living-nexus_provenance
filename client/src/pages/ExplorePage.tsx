@@ -7,7 +7,7 @@
 import React, { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { trpc } from "@/lib/trpc";
-import { Link, useLocation } from "wouter";
+import { Link, useLocation, useParams } from "wouter";
 import {
   Search, RefreshCw, Shield, Music, BookOpen, Eye, Flame,
   Sparkles, Film, Feather, Star, ChevronRight, ChevronLeft, LayoutList, LayoutGrid,
@@ -788,6 +788,19 @@ function AllCreatorsView({ data, search }: { data: ReturnType<typeof useExploreD
 
 // ── Main ExplorePage ───────────────────────────────────────────────────────
 export default function ExplorePage() {
+  const params = useParams<{ medium?: string }>();
+  const mediumParam = params.medium?.toLowerCase();
+  // Map URL segment to column key
+  const MEDIUM_MAP: Record<string, ColumnKey> = {
+    music: "music", audio: "music", songs: "music",
+    books: "books", book: "books", manuscripts: "books",
+    research: "research", papers: "research", essays: "research",
+    visual: "visualWorks", visuals: "visualWorks", images: "visualWorks", art: "visualWorks",
+    film: "film", video: "film", videos: "film",
+    doctrine: "doctrine", comics: "doctrine",
+  };
+  const focusedColumn = mediumParam ? MEDIUM_MAP[mediumParam] ?? null : null;
+
   const [seed] = useState(() => Math.floor(Math.random() * 999999));
   const [search, setSearch] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>("columns");

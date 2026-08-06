@@ -66,6 +66,31 @@ async function startServer() {
   // Gzip compression — saves 60-80% on JSON/HTML payloads
   app.use(compression({ level: 6, threshold: 1024 }));
 
+  // ── Subdomain routing ─────────────────────────────────────────────────────
+  // pna.livingnexus.org  → creator workspace (PNA operating system)
+  // api.livingnexus.org  → developer platform
+  // docs.livingnexus.org → documentation
+  // All other subdomains fall through to the main app.
+  app.use((req, res, next) => {
+    if (req.path.startsWith("/api/")) return next();
+    const host = (req.headers["x-forwarded-host"] as string || req.headers.host || "").split(":")[0];
+    const subdomain = host.split(".")[0]?.toLowerCase();
+    if (subdomain === "pna" && !req.path.startsWith("/_pna")) {
+      // Serve the same SPA but inject a subdomain hint so the React app can render the PNA shell
+      req.url = `/_pna${req.url === "/" ? "" : req.url}`;
+      return next();
+    }
+    if (subdomain === "api" && !req.path.startsWith("/_api")) {
+      req.url = `/_api${req.url === "/" ? "" : req.url}`;
+      return next();
+    }
+    if (subdomain === "docs" && !req.path.startsWith("/_docs")) {
+      req.url = `/_docs${req.url === "/" ? "" : req.url}`;
+      return next();
+    }
+    next();
+  });
+
   // ── Canonical domain enforcement ──────────────────────────────────────────
   // Redirect all http:// and non-www requests to https://www.livingnexus.org
   // This fixes Google Search Console "Crawled - currently not indexed" for:
