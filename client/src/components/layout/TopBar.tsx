@@ -22,6 +22,7 @@ import {
 import { trpc } from "@/lib/trpc";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import PNAWorkspacePanel from "@/components/PNAWorkspacePanel";
+import NotificationBellDropdown from "@/components/NotificationBellDropdown";
 
 const LOGO_URL =
   "/manus-storage/living-nexus-logo-2025_19c2d497.png";
@@ -659,24 +660,9 @@ export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCoun
           {/* Theme Switcher */}
           <ThemeSwitcher />
 
-          {/* Notification bell */}
+          {/* Notification bell — dropdown */}
           {user && (
-            <button
-              onClick={() => goTo("/notifications")}
-              className="relative flex items-center justify-center rounded-lg transition-all"
-              style={{ color: "#6B6555", minWidth: 40, minHeight: 40, padding: "0 8px" }}
-              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "var(--ln-gold)"; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "#6B6555"; }}
-              title="Notifications"
-            >
-              <Bell size={17} />
-              {(unreadCount as number) > 0 && (
-                <span
-                  className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full animate-pulse"
-                  style={{ background: "var(--ln-ember)" }}
-                />
-              )}
-            </button>
+            <NotificationBellDropdown unreadCount={unreadCount as number} />
           )}
 
           {/* Avatar / Sign In */}

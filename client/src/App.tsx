@@ -67,6 +67,7 @@ const MissionControlPage = lazy(() => import("./pages/admin/MissionControlPage")
 const PhysicalDistributionPage = lazy(() => import("./pages/admin/PhysicalDistributionPage"));
 const PhaseLedgerPage = lazy(() => import("./pages/admin/MissionControl"));
 const GuideAccessRequestsPage = lazy(() => import("./pages/admin/GuideAccessRequestsPage"));
+const AdminNotificationsPage = lazy(() => import("./pages/AdminNotificationsPage"));
 const SelfImprovementPage = lazy(() => import("./pages/SelfImprovementPage"));
 const PaymentIntegrityPage = lazy(() => import("./pages/PaymentIntegrityPage"));
 const TrustPage = lazy(() => import("./pages/TrustPage"));
@@ -319,6 +320,7 @@ function Router() {
                 <Route path="/admin/physical" component={PhysicalDistributionPage} />
                 <Route path="/admin/phase-ledger" component={PhaseLedgerPage} />
                 <Route path="/admin/guide-access" component={GuideAccessRequestsPage} />
+                <Route path="/admin/notifications" component={AdminNotificationsPage} />
                 <Route path="/admin" component={AdminUsersPage} />
                 <Route path="/trust" component={TrustPage} />
                 <Route path="/redeem" component={RedeemPage} />

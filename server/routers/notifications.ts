@@ -11,6 +11,8 @@ import { adminProcedure, protectedProcedure, publicProcedure, router } from "../
 import { storagePut } from "../utils/storage";
 import { micronize } from "../services/imageProcessing";
 import { invokeLLM } from "../_core/llm";
+import { adminNotifications, notifications, users } from "../../drizzle/schema";
+import { eq } from "drizzle-orm";
 import {
   addComment, createSong, deleteSong, getAllCreators,
   getCommentsBySong, getPublicSongs, getSongById,
@@ -232,6 +234,77 @@ export const notificationsRouter = router({
     dashboardDeltas: protectedProcedure.query(async ({ ctx }) => {
       return getDashboardDeltas(ctx.user.id);
     }),
+    /** Admin: compose and send a custom notification to a segment or specific user */
+    adminSend: adminProcedure
+      .input(z.object({
+        title: z.string().min(1).max(256),
+        body: z.string().min(1),
+        ctaLabel: z.string().max(64).optional(),
+        ctaUrl: z.string().max(512).optional(),
+        iconType: z.enum(["announcement","feature","alert","milestone","provenance","community","maintenance","reward"]).default("announcement"),
+        targetSegment: z.enum(["all","creators","witnesses","specific"]).default("all"),
+        targetUserId: z.number().int().positive().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        // Insert the admin notification record
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database unavailable" });
+        const [result] = await db.insert(adminNotifications).values({
+          title: input.title,
+          body: input.body,
+          ctaLabel: input.ctaLabel ?? null,
+          ctaUrl: input.ctaUrl ?? null,
+          iconType: input.iconType,
+          targetSegment: input.targetSegment,
+          targetUserId: input.targetUserId ?? null,
+          authorId: ctx.user.id,
+        });
+        const adminNotifId = (result as any).insertId as number;
+
+        // Determine recipient user IDs
+        let recipientIds: number[] = [];
+        if (input.targetSegment === "specific" && input.targetUserId) {
+          recipientIds = [input.targetUserId];
+        } else {
+          // Fetch all users (for "all", "creators", "witnesses" we fan out to everyone for now)
+          // Future: add segment filtering by publishedCount / witnessCount
+          const allUsers = await db!.select({ id: users.id }).from(users);
+          recipientIds = allUsers.map((u: { id: number }) => u.id);
+        }
+
+        // Create inbox notifications for each recipient
+        let sentCount = 0;
+        const BATCH = 200;
+        for (let i = 0; i < recipientIds.length; i += BATCH) {
+          const batch = recipientIds.slice(i, i + BATCH);
+          await db.insert(notifications).values(
+            batch.map(uid => ({
+              userId: uid,
+              type: "system" as const,
+              title: input.title,
+              body: input.body,
+              refId: adminNotifId,
+              refType: "admin_notification",
+            }))
+          );
+          sentCount += batch.length;
+        }
+
+        // Update sentAt and sentCount
+        await db.update(adminNotifications)
+          .set({ sentAt: new Date(), sentCount })
+          .where(eq(adminNotifications.id, adminNotifId));
+
+        return { ok: true, sentCount, adminNotifId };
+      }),
+
+    /** Admin: list all custom notifications sent */
+    adminList: adminProcedure.query(async () => {
+      const db = await getDb();
+      if (!db) return [];
+      return db.select().from(adminNotifications).orderBy(adminNotifications.createdAt);
+    }),
+
     /** Reply to a comment signal — posts a comment on the referenced song and notifies the original commenter */
     reply: protectedProcedure
       .input(z.object({

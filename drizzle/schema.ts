@@ -2420,3 +2420,37 @@ export const sessionEvents = mysqlTable("sessionEvents", {
 }));
 export type SessionEvent = typeof sessionEvents.$inferSelect;
 export type InsertSessionEvent = typeof sessionEvents.$inferInsert;
+
+// ─── Admin / Custom Notifications ─────────────────────────────────────────────
+// Platform-owner-authored notifications sent to all users or targeted segments.
+// These are separate from system-generated notifications (comments, likes, etc.)
+// so the admin can compose rich announcements, feature releases, and alerts.
+export const adminNotifications = mysqlTable("adminNotifications", {
+  id: int("id").autoincrement().primaryKey(),
+  // Content
+  title: varchar("title", { length: 256 }).notNull(),
+  body: text("body").notNull(),
+  ctaLabel: varchar("ctaLabel", { length: 64 }),
+  ctaUrl: varchar("ctaUrl", { length: 512 }),
+  iconType: mysqlEnum("iconType", [
+    "announcement", "feature", "alert", "milestone",
+    "provenance", "community", "maintenance", "reward",
+  ]).default("announcement").notNull(),
+  // Targeting
+  targetSegment: mysqlEnum("targetSegment", [
+    "all", "creators", "witnesses", "specific",
+  ]).default("all").notNull(),
+  targetUserId: int("targetUserId"),
+  // Scheduling / delivery
+  scheduledAt: timestamp("scheduledAt"),
+  sentAt: timestamp("sentAt"),
+  sentCount: int("sentCount").default(0).notNull(),
+  // Meta
+  authorId: int("authorId").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (t) => ({
+  authorIdx: index("adminNotif_authorId_idx").on(t.authorId),
+  sentAtIdx: index("adminNotif_sentAt_idx").on(t.sentAt),
+}));
+export type AdminNotification = typeof adminNotifications.$inferSelect;
+export type InsertAdminNotification = typeof adminNotifications.$inferInsert;
