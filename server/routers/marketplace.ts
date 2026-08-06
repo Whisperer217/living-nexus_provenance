@@ -615,6 +615,250 @@ export const marketplaceRouter = router({
         return { ok: true };
       }),
 
+    // ── Avatar Attribution System ─────────────────────────────────────────────
+
+    // Creator: register a new avatar with AVT-WID, license, hash, and provenance
+    registerAvatar: protectedProcedure
+      .input(z.object({
+        title: z.string().min(1).max(256),
+        description: z.string().optional(),
+        artworkUrl: z.string().url(),
+        imageHash: z.string().optional(),
+        licenseType: z.enum(["free", "paid", "subscription", "private", "org_only", "invite_only", "platform_exclusive", "public_domain"]).default("free"),
+        priceCents: z.number().min(0).default(0),
+        royaltyPct: z.number().min(0).max(100).default(70),
+        tags: z.array(z.string()).default([]),
+        stewardshipMode: z.string().optional(),
+        aiPrompt: z.string().optional(),
+        artistCredit: z.string().optional(),
+        artStyle: z.string().optional(),
+        stock: z.number().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'DB unavailable' });
+        const { marketplaceItems } = await import('../../drizzle/schema');
+        // Generate AVT-WID: AVT- + timestamp hex + creator id hex + random
+        const ts = Date.now().toString(16).toUpperCase();
+        const cid = ctx.user.id.toString(16).toUpperCase().padStart(4, '0');
+        const rand = Math.floor(Math.random() * 0xFFFF).toString(16).toUpperCase().padStart(4, '0');
+        const avatarWid = `AVT-${ts}-${cid}-${rand}`;
+        const result = await db.insert(marketplaceItems).values({
+          type: 'skin',
+          title: input.title,
+          description: input.description,
+          artworkUrl: input.artworkUrl,
+          priceCents: input.priceCents,
+          royaltyPct: input.royaltyPct,
+          creatorId: ctx.user.id,
+          active: true,
+          featured: false,
+          avatarWid,
+          licenseType: input.licenseType,
+          imageHash: input.imageHash,
+          versionNumber: 1,
+          tags: input.tags,
+          stewardshipMode: input.stewardshipMode,
+          aiPrompt: input.aiPrompt,
+          artistCredit: input.artistCredit,
+          artStyle: input.artStyle,
+          stock: input.stock,
+          downloadCount: 0,
+          ratingSum: 0,
+          ratingCount: 0,
+        } as any);
+        const itemId = (result as any)[0]?.insertId;
+        return { id: itemId, avatarWid };
+      }),
+
+    // Public: browse the avatar marketplace with filters
+    listAvatarMarketplace: publicProcedure
+      .input(z.object({
+        search: z.string().optional(),
+        licenseType: z.enum(["free", "paid", "subscription", "private", "org_only", "invite_only", "platform_exclusive", "public_domain"]).optional(),
+        stewardshipMode: z.string().optional(),
+        creatorId: z.number().optional(),
+        sortBy: z.enum(["popular", "recent", "price_asc", "price_desc", "rating"]).default("recent"),
+        limit: z.number().min(1).max(100).default(40),
+        offset: z.number().min(0).default(0),
+      }))
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) return { items: [], total: 0 };
+        const { marketplaceItems, users } = await import('../../drizzle/schema');
+        const { eq, and, like, desc, asc, isNotNull } = await import('drizzle-orm');
+        const conditions: any[] = [
+          eq(marketplaceItems.type, 'skin'),
+          eq(marketplaceItems.active, true),
+          isNotNull(marketplaceItems.avatarWid as any),
+        ];
+        if (input.licenseType) conditions.push(eq(marketplaceItems.licenseType as any, input.licenseType));
+        if (input.stewardshipMode) conditions.push(eq(marketplaceItems.stewardshipMode as any, input.stewardshipMode));
+        if (input.creatorId) conditions.push(eq(marketplaceItems.creatorId, input.creatorId));
+        if (input.search) conditions.push(like(marketplaceItems.title, `%${input.search}%`));
+        const orderMap: Record<string, any> = {
+          popular: desc(marketplaceItems.downloadCount as any),
+          recent: desc(marketplaceItems.createdAt),
+          price_asc: asc(marketplaceItems.priceCents),
+          price_desc: desc(marketplaceItems.priceCents),
+          rating: desc(marketplaceItems.ratingSum as any),
+        };
+        const items = await db
+          .select({
+            id: marketplaceItems.id,
+            title: marketplaceItems.title,
+            description: marketplaceItems.description,
+            artworkUrl: marketplaceItems.artworkUrl,
+            priceCents: marketplaceItems.priceCents,
+            royaltyPct: marketplaceItems.royaltyPct,
+            creatorId: marketplaceItems.creatorId,
+            creatorName: users.name,
+            creatorHandle: users.artistHandle,
+            creatorPhoto: users.profilePhotoUrl,
+            avatarWid: marketplaceItems.avatarWid,
+            licenseType: marketplaceItems.licenseType,
+            versionNumber: marketplaceItems.versionNumber,
+            downloadCount: marketplaceItems.downloadCount,
+            ratingSum: marketplaceItems.ratingSum,
+            ratingCount: marketplaceItems.ratingCount,
+            tags: marketplaceItems.tags,
+            stewardshipMode: marketplaceItems.stewardshipMode,
+            artStyle: marketplaceItems.artStyle,
+            artistCredit: marketplaceItems.artistCredit,
+            featured: marketplaceItems.featured,
+            createdAt: marketplaceItems.createdAt,
+          })
+          .from(marketplaceItems)
+          .leftJoin(users, eq(marketplaceItems.creatorId, users.id))
+          .where(and(...conditions))
+          .orderBy(orderMap[input.sortBy] ?? desc(marketplaceItems.createdAt))
+          .limit(input.limit)
+          .offset(input.offset);
+        return { items, total: items.length };
+      }),
+
+    // Public: get full provenance record for a single avatar
+    getAvatarProvenance: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: 'NOT_FOUND', message: 'DB unavailable' });
+        const { marketplaceItems, users, marketplacePurchases } = await import('../../drizzle/schema');
+        const { eq, desc } = await import('drizzle-orm');
+        const [item] = await db
+          .select({
+            id: marketplaceItems.id,
+            title: marketplaceItems.title,
+            description: marketplaceItems.description,
+            artworkUrl: marketplaceItems.artworkUrl,
+            priceCents: marketplaceItems.priceCents,
+            royaltyPct: marketplaceItems.royaltyPct,
+            creatorId: marketplaceItems.creatorId,
+            creatorName: users.name,
+            creatorHandle: users.artistHandle,
+            creatorPhoto: users.profilePhotoUrl,
+            avatarWid: marketplaceItems.avatarWid,
+            licenseType: marketplaceItems.licenseType,
+            imageHash: marketplaceItems.imageHash,
+            versionNumber: marketplaceItems.versionNumber,
+            parentItemId: marketplaceItems.parentItemId,
+            downloadCount: marketplaceItems.downloadCount,
+            ratingSum: marketplaceItems.ratingSum,
+            ratingCount: marketplaceItems.ratingCount,
+            tags: marketplaceItems.tags,
+            stewardshipMode: marketplaceItems.stewardshipMode,
+            aiPrompt: marketplaceItems.aiPrompt,
+            artistCredit: marketplaceItems.artistCredit,
+            artStyle: marketplaceItems.artStyle,
+            featured: marketplaceItems.featured,
+            createdAt: marketplaceItems.createdAt,
+          })
+          .from(marketplaceItems)
+          .leftJoin(users, eq(marketplaceItems.creatorId, users.id))
+          .where(eq(marketplaceItems.id, input.id))
+          .limit(1);
+        if (!item) throw new TRPCError({ code: 'NOT_FOUND', message: 'Avatar not found' });
+        const recentLicenses = await db
+          .select({ id: marketplacePurchases.id, status: marketplacePurchases.status, provenanceWid: marketplacePurchases.provenanceWid, createdAt: marketplacePurchases.createdAt })
+          .from(marketplacePurchases)
+          .where(eq(marketplacePurchases.itemId, input.id))
+          .orderBy(desc(marketplacePurchases.createdAt))
+          .limit(10);
+        return { ...item, recentLicenses };
+      }),
+
+    // Creator: update avatar version
+    updateAvatarVersion: protectedProcedure
+      .input(z.object({
+        itemId: z.number(),
+        artworkUrl: z.string().url().optional(),
+        imageHash: z.string().optional(),
+        description: z.string().optional(),
+        tags: z.array(z.string()).optional(),
+        licenseType: z.enum(["free", "paid", "subscription", "private", "org_only", "invite_only", "platform_exclusive", "public_domain"]).optional(),
+        priceCents: z.number().min(0).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'DB unavailable' });
+        const { marketplaceItems } = await import('../../drizzle/schema');
+        const { eq, and } = await import('drizzle-orm');
+        const [item] = await db.select({ id: marketplaceItems.id, creatorId: marketplaceItems.creatorId, versionNumber: marketplaceItems.versionNumber })
+          .from(marketplaceItems).where(and(eq(marketplaceItems.id, input.itemId), eq(marketplaceItems.creatorId, ctx.user.id))).limit(1);
+        if (!item) throw new TRPCError({ code: 'FORBIDDEN', message: 'Not your avatar' });
+        const updates: Record<string, any> = { versionNumber: (item.versionNumber ?? 1) + 1 };
+        if (input.artworkUrl) updates.artworkUrl = input.artworkUrl;
+        if (input.imageHash) updates.imageHash = input.imageHash;
+        if (input.description !== undefined) updates.description = input.description;
+        if (input.tags) updates.tags = input.tags;
+        if (input.licenseType) updates.licenseType = input.licenseType;
+        if (input.priceCents !== undefined) updates.priceCents = input.priceCents;
+        await db.update(marketplaceItems).set(updates).where(eq(marketplaceItems.id, input.itemId));
+        return { ok: true, newVersion: updates.versionNumber };
+      }),
+
+    // Authenticated: rate an avatar (1-5 stars)
+    rateAvatar: protectedProcedure
+      .input(z.object({ itemId: z.number(), rating: z.number().min(1).max(5) }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'DB unavailable' });
+        const { marketplaceItems } = await import('../../drizzle/schema');
+        const { eq, sql } = await import('drizzle-orm');
+        await db.update(marketplaceItems)
+          .set({ ratingSum: sql`rating_sum + ${input.rating}`, ratingCount: sql`rating_count + 1` } as any)
+          .where(eq(marketplaceItems.id, input.itemId));
+        return { ok: true };
+      }),
+
+    // Creator: get analytics for their avatar listings
+    myAvatarAnalytics: protectedProcedure.query(async ({ ctx }) => {
+      const db = await getDb();
+      if (!db) return { avatars: [] };
+      const { marketplaceItems } = await import('../../drizzle/schema');
+      const { eq, and, isNotNull, desc } = await import('drizzle-orm');
+      const avatars = await db
+        .select({
+          id: marketplaceItems.id,
+          title: marketplaceItems.title,
+          artworkUrl: marketplaceItems.artworkUrl,
+          avatarWid: marketplaceItems.avatarWid,
+          licenseType: marketplaceItems.licenseType,
+          priceCents: marketplaceItems.priceCents,
+          royaltyPct: marketplaceItems.royaltyPct,
+          downloadCount: marketplaceItems.downloadCount,
+          ratingSum: marketplaceItems.ratingSum,
+          ratingCount: marketplaceItems.ratingCount,
+          versionNumber: marketplaceItems.versionNumber,
+          active: marketplaceItems.active,
+          createdAt: marketplaceItems.createdAt,
+        })
+        .from(marketplaceItems)
+        .where(and(eq(marketplaceItems.creatorId, ctx.user.id), isNotNull(marketplaceItems.avatarWid as any)))
+        .orderBy(desc(marketplaceItems.createdAt));
+      return { avatars };
+    }),
+
     // Public: tip the creator of a marketplace avatar item
     createAvatarTip: protectedProcedure
       .input(z.object({

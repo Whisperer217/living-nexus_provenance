@@ -1553,6 +1553,20 @@ export const marketplaceItems = mysqlTable("marketplace_items", {
   aiPrompt: text("ai_prompt"),           // For AI-generated avatars: the generation prompt
   artistCredit: varchar("artist_credit", { length: 256 }), // For hand-drawn: artist name/handle
   artStyle: varchar("art_style", { length: 128 }),         // e.g. "digital concept art", "hand-drawn"
+  // ── Avatar Attribution System (spec: every avatar is a first-class registry object) ──
+  avatarWid: varchar("avatar_wid", { length: 128 }),         // AVT-prefixed WID, unique per avatar
+  licenseType: mysqlEnum("license_type", [
+    "free", "paid", "subscription", "private",
+    "org_only", "invite_only", "platform_exclusive", "public_domain"
+  ]).default("free"),
+  imageHash: varchar("image_hash", { length: 64 }),           // SHA-256 hex of the image bytes
+  versionNumber: int("version_number").notNull().default(1),  // Increments on each update
+  parentItemId: int("parent_item_id"),                        // Points to original if this is a version
+  downloadCount: int("download_count").notNull().default(0),
+  ratingSum: int("rating_sum").notNull().default(0),          // Sum of all ratings
+  ratingCount: int("rating_count").notNull().default(0),      // Number of ratings
+  tags: json("tags").$type<string[]>().default([]),           // Style/theme tags for marketplace browse
+  stewardshipMode: varchar("stewardship_mode", { length: 64 }), // Guide/Compose/Witness/Registry/Archive/Vision
   // ── 3D Model Generation (future: API hook for 2D→3D avatar conversion) ──────
   // Workflow: artworkUrl → 3D generation API → stlUrl stored here
   // STL is downloadable by the equipping user; persistent per avatar asset

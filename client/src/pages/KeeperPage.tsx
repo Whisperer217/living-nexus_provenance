@@ -747,6 +747,7 @@ export default function Keeper() {
           >
             Choose Your Keeper — Skin Armory
           </div>
+          <div className="flex justify-end mb-4"><a href="/avatar-registry" style={{ background: "rgba(196,154,40,0.1)", border: "1px solid rgba(196,154,40,0.3)", color: "rgba(196,154,40,0.8)", fontFamily: "Space Mono, monospace", fontSize: "0.5rem", letterSpacing: "0.06em", textDecoration: "none", padding: "6px 12px", borderRadius: "6px" }}>AVATAR REGISTRY</a></div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 md:gap-4">
             {SKINS.map(skin => {

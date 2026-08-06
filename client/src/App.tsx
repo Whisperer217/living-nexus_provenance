@@ -106,6 +106,7 @@ const KeeperPage = lazy(() => import("./pages/KeeperPage"));
 const KeeperComposePage = lazy(() => import("./pages/KeeperComposePage"));
 const FirstWitnessPage = lazy(() => import("./pages/FirstWitnessPage"));
 const MarketplacePage = lazy(() => import("./pages/MarketplacePage"));
+const AvatarMarketplacePage = lazy(() => import("./pages/AvatarMarketplacePage"));
 const CreatorSurface = lazy(() => import("./pages/CreatorSurface"));
 const GuideUploadWizard = lazy(() => import("./pages/GuideUploadWizard"));
 const GuideDirectoryPage = lazy(() => import("./pages/GuideDirectoryPage"));
@@ -316,6 +317,7 @@ function Router() {
                 <Route path="/first-witness" component={FirstWitnessPage} />
                 <Route path="/store"><Redirect to="/marketplace" /></Route>
                 <Route path="/marketplace" component={MarketplacePage} />
+                <Route path="/avatar-registry" component={AvatarMarketplacePage} />
                 <Route path="/distribute" component={DistributionPage} />
                 <Route path="/identity/:id" component={CreatorIdentityPage} />
                 <Route path="/domain" component={CreatorDomainPage} />
