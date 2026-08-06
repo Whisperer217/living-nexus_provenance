@@ -58,8 +58,10 @@ function notifColor(type: string): string {
   }
 }
 
-function timeAgo(date: Date | string): string {
-  const d = typeof date === "string" ? new Date(date) : date;
+function timeAgo(date: Date | string | number | null | undefined): string {
+  if (!date) return "";
+  const d = new Date(date as any);
+  if (isNaN(d.getTime())) return "";
   const diff = Math.floor((Date.now() - d.getTime()) / 1000);
   if (diff < 60) return "just now";
   if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
