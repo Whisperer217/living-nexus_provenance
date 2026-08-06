@@ -7,8 +7,8 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1" />
     <title>Living Nexus — Audio Provenance Platform for Creators</title>
-    <meta name="description" content="Register your music, lyrics, manuscripts, and comics with cryptographic Witness IDs. Living Nexus anchors creative provenance so every work is witnessed, attributed, and protected." />
-    <meta name="keywords" content="music provenance, witness ID, audio registration, creator platform, cryptographic provenance, music attribution, digital rights, creative ownership, WID, Living Nexus" />
+    <meta name="description" content="Register music, lyrics, and manuscripts with cryptographic Witness IDs. Living Nexus anchors creative provenance — witnessed, attributed, and protected." />
+    <meta name="keywords" content="music provenance, witness ID, creative attribution, creator platform, digital rights, WID, Living Nexus" />
 
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json" />
@@ -39,6 +39,11 @@
 
   <body>
     <div id="root"></div>
+    <!-- SEO: static headings visible to crawlers (React renders the visual equivalents) -->
+    <noscript>
+      <h1>Creative Provenance Registry for Independent Creators</h1>
+      <h2>Register Your Work with a Cryptographic Witness ID</h2>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
     <!-- Analytics: only injected when env vars are resolved (production) -->
     <script>

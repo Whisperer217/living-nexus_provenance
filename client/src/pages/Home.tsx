@@ -252,6 +252,19 @@ export default function Home() {
             Every creator deserves attribution.<br />
             Every work deserves provenance.
           </h1>
+          <h2
+            style={{
+              fontFamily: "'Space Mono', monospace",
+              fontSize: "clamp(0.65rem, 1.2vw, 0.8rem)",
+              fontWeight: 400,
+              color: "rgba(196,154,40,0.65)",
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+              marginBottom: 12,
+            }}
+          >
+            Register Your Work with a Cryptographic Witness ID
+          </h2>
           <p
             style={{
               fontSize: 15,
