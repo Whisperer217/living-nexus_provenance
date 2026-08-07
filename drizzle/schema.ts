@@ -2454,3 +2454,28 @@ export const adminNotifications = mysqlTable("adminNotifications", {
 }));
 export type AdminNotification = typeof adminNotifications.$inferSelect;
 export type InsertAdminNotification = typeof adminNotifications.$inferInsert;
+
+// ─── Creator Platform Hub ─────────────────────────────────────────────────────
+// Each row is one external platform presence for a creator.
+// platformType is a well-known slug (youtube, substack, orcid, etc.) or "custom".
+export const creatorPlatforms = mysqlTable("creatorPlatforms", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  platformType: varchar("platformType", { length: 64 }).notNull(),
+  handle: varchar("handle", { length: 256 }),
+  url: text("url").notNull(),
+  displayName: varchar("displayName", { length: 128 }),
+  description: text("description"),
+  displayOrder: int("displayOrder").notNull().default(0),
+  isVisible: boolean("isVisible").notNull().default(true),
+  isVerified: boolean("isVerified").notNull().default(false),
+  cachedPreviewJson: text("cachedPreviewJson"),
+  cacheUpdatedAt: timestamp("cacheUpdatedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (t) => ({
+  userIdx: index("creatorPlatforms_userId_idx").on(t.userId),
+  typeIdx: index("creatorPlatforms_type_idx").on(t.platformType),
+}));
+export type CreatorPlatform = typeof creatorPlatforms.$inferSelect;
+export type InsertCreatorPlatform = typeof creatorPlatforms.$inferInsert;

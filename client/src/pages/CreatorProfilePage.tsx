@@ -45,6 +45,8 @@ import { useWorkEditorActions } from "@/contexts/WorkEditorContext";
 import { SacredCanvas } from "@/components/SacredCanvas";
 import { CreatorDomainHub } from "@/components/CreatorDomainHub";
 import { SupportCreatorDrawer } from "@/components/SupportCreatorDrawer";
+import { PlatformHubDisplay } from "@/components/PlatformHubDisplay";
+import { PlatformHubEditor } from "@/components/PlatformHubEditor";
 
 // ─── Context Menu ─────────────────────────────────────────────────────────────
 interface ContextMenuProps {
@@ -451,6 +453,7 @@ export default function CreatorProfilePage() {
     { label: "Lyrics / Inspiration", content: "" },
   ]);
   const [showLineage, setShowLineage] = useState(false);
+  const [platformHubOpen, setPlatformHubOpen] = useState(false);
 
   // Auto-open Prompt Studio when navigated via sidebar ?openPromptStudio=1
   useEffect(() => {
@@ -2277,6 +2280,22 @@ export default function CreatorProfilePage() {
         )}
       </div>
 
+      {/* ── Platform Hub ── */}
+      <div className="w-full px-4 md:px-8 pb-12">
+        <PlatformHubDisplay
+          userId={creator.id}
+          isOwner={isOwner}
+          onEditClick={() => setPlatformHubOpen(true)}
+        />
+      </div>
+      {/* ── Platform Hub Editor Modal ── */}
+      {platformHubOpen && (
+        <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.75)", backdropFilter: "blur(4px)" }}>
+          <div className="w-full max-w-lg max-h-[85vh] overflow-y-auto rounded-2xl p-5" style={{ background: "var(--ln-coal)", border: "1px solid rgba(212,175,55,0.25)" }}>
+            <PlatformHubEditor userId={creator.id} onClose={() => setPlatformHubOpen(false)} />
+          </div>
+        </div>
+      )}
       {/* ── Tip Modal ── */}
       <Dialog open={tipOpen} onOpenChange={setTipOpen}>
         <DialogContent style={{ background: "var(--ln-coal)", border: "1px solid #C3AB7D", maxHeight: "min(90dvh, 90vh)", overflowY: "auto", paddingBottom: "max(1.5rem, env(safe-area-inset-bottom, 1.5rem))" }}>

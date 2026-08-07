@@ -92,6 +92,7 @@ import { booksRouter }             from "./books";
 import { externalPlaylistsRouter } from "./externalPlaylists";
 import { projectsRouter }          from "./projects";
 import { visualWorksRouter }       from "./visualWorks";
+import { platformHubRouter }       from "./platformHub";
 
 // Re-export the Stripe webhook handler (lives in the payment domain)
 export { handleStripeWebhook } from "./stripeWebhook";
@@ -173,6 +174,9 @@ export const appRouter = router({
 
   // Visual Works domain
   visualWorks: visualWorksRouter,
+
+  // Creator Platform Hub
+  platformHub: platformHubRouter,
 
   // Collection Studio
   collectionStudio: collectionStudioRouter,
