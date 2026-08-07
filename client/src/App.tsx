@@ -136,6 +136,7 @@ const NewManifestationPage = lazy(() => import("./pages/NewManifestationPage"));
 const ManifestationWorkspacePage = lazy(() => import("./pages/ManifestationWorkspacePage"));
 const SessionsListPage = lazy(() => import("./pages/SessionsListPage"));
 const SharedPlaylistPage = lazy(() => import("./pages/SharedPlaylistPage"));
+const UploadVNextPage = lazy(() => import("./pages/UploadVNextPage"));
 
 // Minimal fallback shown while a page chunk loads (typically <200ms on CDN)
 function PageLoader() {
@@ -284,7 +285,8 @@ function Router() {
                 <Route path="/explore" component={ExplorePage} />
                 <Route path="/explore/:medium" component={ExplorePage} />
                 <Route path="/search" component={SearchResultsPage} />
-                <Route path="/upload"><Redirect to="/manifest" /></Route>
+               <Route path="/upload"><Redirect to="/manifest" /></Route>
+               <Route path="/upload-vnext" component={UploadVNextPage} />
                 <Route path="/manifest" component={ManifestationStudio} />
                 <Route path="/batch-upload" component={BatchUploadPage} />
                 <Route path="/liked" component={LikedPage} />
