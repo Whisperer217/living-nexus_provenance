@@ -97,7 +97,15 @@ export default function ManifestationStudio() {
 
   // Type gateway (initial selection)
   if (!selectedType) {
-    return <TypeGateway onSelect={setSelectedType} />;
+    return (
+      <TypeGateway
+        onSelect={setSelectedType}
+        onSelectWithPrefill={(type, prefill) => {
+          setKeeperPrefill(prefill);
+          setSelectedType(type);
+        }}
+      />
+    );
   }
 
   // Render the selected environment
