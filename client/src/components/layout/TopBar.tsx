@@ -22,6 +22,7 @@ import {
 import { trpc } from "@/lib/trpc";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import PNAWorkspacePanel from "@/components/PNAWorkspacePanel";
+import { useUploadEngine } from "@/contexts/UploadEngineContext";
 import NotificationBellDropdown from "@/components/NotificationBellDropdown";
 
 const LOGO_URL =
@@ -640,7 +641,7 @@ export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCoun
 
           {/* Register Work */}
           <button
-            onClick={() => goTo("/upload")}
+            onClick={() => { if (user) { openEngine(); } else { goTo(getLoginUrl()); } }}
             className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-all"
             style={{
               fontSize: "clamp(9px, 0.7vw, 11px)",
@@ -766,3 +767,4 @@ export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCoun
     </div>
   );
 }
+  const { openEngine } = useUploadEngine();

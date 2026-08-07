@@ -15,6 +15,7 @@ import { AmbientPlayerProvider } from "./contexts/AmbientPlayerContext";
 import { HarmonicProvider } from "./contexts/HarmonicContext";
 import AmbientWidget from "./components/AmbientWidget";
 import KeeperAvatarWidget from "./components/KeeperAvatarWidget";
+import ProvenanceUploadEngine from "./components/ProvenanceUploadEngine";
 import { useQrScanLogger } from "./hooks/useQrScanLogger";
 import { useScrollRestoration } from "./hooks/useScrollRestoration";
 import { overlayCloseAll } from "@/lib/overlayController";
@@ -136,7 +137,7 @@ const NewManifestationPage = lazy(() => import("./pages/NewManifestationPage"));
 const ManifestationWorkspacePage = lazy(() => import("./pages/ManifestationWorkspacePage"));
 const SessionsListPage = lazy(() => import("./pages/SessionsListPage"));
 const SharedPlaylistPage = lazy(() => import("./pages/SharedPlaylistPage"));
-const UploadVNextPage = lazy(() => import("./pages/UploadVNextPage"));
+// UploadVNextPage removed — replaced by ProvenanceUploadEngine (persistent panel)
 
 // Minimal fallback shown while a page chunk loads (typically <200ms on CDN)
 function PageLoader() {
@@ -286,7 +287,6 @@ function Router() {
                 <Route path="/explore/:medium" component={ExplorePage} />
                 <Route path="/search" component={SearchResultsPage} />
                <Route path="/upload"><Redirect to="/manifest" /></Route>
-               <Route path="/upload-vnext" component={UploadVNextPage} />
                 <Route path="/manifest" component={ManifestationStudio} />
                 <Route path="/batch-upload" component={BatchUploadPage} />
                 <Route path="/liked" component={LikedPage} />
@@ -448,6 +448,7 @@ export default function App() {
             <QrScanLogger />
             <AmbientWidget />
             <KeeperAvatarWidget />
+            <ProvenanceUploadEngine />
             <PWAInstallBanner />
             <Router />
             </AmbientPlayerProvider>

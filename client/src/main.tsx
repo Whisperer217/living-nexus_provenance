@@ -11,6 +11,7 @@ import { KeeperAttrsProvider } from "./contexts/KeeperAttrsContext";
 import { WSPProvider } from "./contexts/WSPContext";
 import { RightRailProvider } from "./contexts/RightRailContext";
 import { WorkEditorProvider } from "./contexts/WorkEditorContext";
+import { UploadEngineProvider } from "./contexts/UploadEngineContext";
 import { getLoginUrl } from "./const";
 import { hadSession } from "./lib/sessionFlags";
 import "./index.css";
@@ -201,7 +202,9 @@ createRoot(document.getElementById("root")!).render(
             <RightRailProvider>
               <LightsModeProvider>
                 <WorkEditorProvider>
-                  <App />
+                  <UploadEngineProvider>
+                    <App />
+                  </UploadEngineProvider>
                 </WorkEditorProvider>
               </LightsModeProvider>
             </RightRailProvider>

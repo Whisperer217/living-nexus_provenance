@@ -60,6 +60,7 @@ export default function LeftRail({
 }: LeftRailProps) {
   const [location, navigate] = useLocation();
   const { user } = useAuth();
+  const { openEngine } = useUploadEngine();
 
   const isRouteActive = (path: string) => {
     if (path === "/" && (location === "/" || location === "/home")) return true;
@@ -78,6 +79,8 @@ export default function LeftRail({
       window.location.href = getLoginUrl(path);
       return;
     }
+    // Upload item opens the engine instead of navigating
+    if (path === "/manifest") { openEngine(); onMobileClose?.(); return; }
     navigate(path);
     onMobileClose?.();
   };
@@ -286,3 +289,4 @@ export default function LeftRail({
     </>
   );
 }
+import { useUploadEngine } from "@/contexts/UploadEngineContext";
