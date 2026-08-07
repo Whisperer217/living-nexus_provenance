@@ -367,6 +367,7 @@ export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCoun
   const [avatarMenuOpen, setAvatarMenuOpen] = useState(false);
   const avatarMenuRef = useRef<HTMLDivElement>(null);
   const [pnaOpen, setPnaOpen] = useState(false);
+  const { openEngine } = useUploadEngine();
 
   // Close avatar dropdown when clicking outside
   useEffect(() => {
@@ -767,4 +768,3 @@ export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCoun
     </div>
   );
 }
-  const { openEngine } = useUploadEngine();

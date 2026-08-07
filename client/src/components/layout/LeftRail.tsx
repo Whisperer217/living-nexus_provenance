@@ -17,6 +17,7 @@ import { useLocation, useRouter } from "wouter";
 import { Home, Compass, BookOpen, Upload, Archive, ExternalLink, Shield, Layers } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
+import { useUploadEngine } from "@/contexts/UploadEngineContext";
 
 export type NavMode = "home" | "explore" | "guide" | "sessions" | "upload" | "archive";
 
@@ -289,4 +290,3 @@ export default function LeftRail({
     </>
   );
 }
-import { useUploadEngine } from "@/contexts/UploadEngineContext";
