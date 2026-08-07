@@ -53,7 +53,7 @@ const MODULES: ModuleDef[] = [
     icon: Music2,
     color: "#C49A28",
     href: (handle) => `/creator/${handle}/music`,
-    registerHref: "/upload",
+    registerHref: "/manifest?type=music",
     registerLabel: "Register your first track",
   },
   {
@@ -63,7 +63,7 @@ const MODULES: ModuleDef[] = [
     icon: Album,
     color: "#A78BFA",
     href: (handle) => `/creator/${handle}/albums`,
-    registerHref: "/upload",
+    registerHref: "/manifest",
     registerLabel: "Create your first album",
   },
   {
@@ -83,7 +83,7 @@ const MODULES: ModuleDef[] = [
     icon: BookOpen,
     color: "#F97316",
     href: (handle) => `/creator/${handle}/books`,
-    registerHref: "/upload?type=manuscript",
+    registerHref: "/manifest?type=manuscript",
     registerLabel: "Register your first book",
   },
   {
@@ -93,7 +93,7 @@ const MODULES: ModuleDef[] = [
     icon: Layers,
     color: "#EC4899",
     href: (handle) => `/creator/${handle}/books`,
-    registerHref: "/upload?type=comic",
+    registerHref: "/manifest?type=comic",
     registerLabel: "Register your first comic",
   },
   {
@@ -103,7 +103,7 @@ const MODULES: ModuleDef[] = [
     icon: FileText,
     color: "#60A5FA",
     href: (handle) => `/creator/${handle}/lyrics`,
-    registerHref: "/upload?type=lyrics",
+    registerHref: "/manifest?type=lyrics",
     registerLabel: "Register your first lyrics",
   },
   {
@@ -113,7 +113,7 @@ const MODULES: ModuleDef[] = [
     icon: Gamepad2,
     color: "#FBBF24",
     href: (handle) => `/creator/${handle}/games`,
-    registerHref: "/upload?type=game",
+    registerHref: "/manifest",
     registerLabel: "Register your first game",
   },
   {

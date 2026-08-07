@@ -21,6 +21,7 @@ import {
   type AIMetadata,
 } from "@/lib/uploadPipeline";
 import { useUploadEngine } from "@/contexts/UploadEngineContext";
+import { usePendingWork } from "@/contexts/PendingWorkContext";
 import { Button } from "@/components/ui/button";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -450,6 +451,7 @@ function GroupHeader({ group, onToggle }: { group: Group; onToggle: (id: string)
 export default function ProvenanceUploadEngine() {
   const { isOpen, closeEngine, pendingFiles, clearPending } = useUploadEngine();
   const [, navigate] = useLocation();
+  const { setPendingWork } = usePendingWork();
   const inputRef = useRef<HTMLInputElement>(null);
   const folderInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -597,19 +599,40 @@ export default function ProvenanceUploadEngine() {
     const { meta } = work;
     const cat = getCategory(work.file);
     const typeMap: Record<string, string> = {
-      music: "music", image: "manuscript", video: "video",
+      music: "music", image: "comic", video: "video",
       document: "manuscript", code: "manuscript", "3d": "manuscript", archive: "manuscript",
     };
+    const detectedType = (typeMap[cat.type] ?? "music") as "music" | "lyrics" | "comic" | "manuscript" | "video" | "gcode";
+    // Map free-form AI platform to the enum value
+    const aiDisclosureEnum = ((): "original" | "ai_assisted" | "ai_generated" | "human_authored_ai_instrument" => {
+      if (!meta.ai.detected) return "original";
+      const p = (meta.ai.platform ?? "").toLowerCase();
+      if (["suno","udio","elevenlabs","midjourney","stable_diffusion","flux","firefly","leonardo","runway"].includes(p)) return "ai_generated";
+      if (["chatgpt","claude","gemini"].includes(p)) return "ai_assisted";
+      return "human_authored_ai_instrument";
+    })();
+    // Store the File object in PendingWorkContext so ManifestationStudio can consume it
+    setPendingWork({
+      file: work.file,
+      type: detectedType,
+      meta: {
+        title: meta.music?.title ?? meta.image?.iptcTitle,
+        genre: meta.music?.genre,
+        lyrics: meta.music?.lyrics,
+        aiDisclosure: aiDisclosureEnum,
+        aiPlatform: meta.ai.platform ?? undefined,
+        aiModel: meta.ai.model ?? undefined,
+        aiPrompt: meta.ai.prompt ?? undefined,
+        haaiOriginStory: meta.ai.prompt ? `Generated with prompt: "${meta.ai.prompt}"` : undefined,
+        bpm: meta.music?.bpm,
+        keySignature: meta.music?.key,
+        isrc: meta.music?.isrc,
+        durationSeconds: meta.durationSeconds,
+        fileHash: meta.file.sha256,
+      },
+    });
     const params = new URLSearchParams();
-    params.set("type", typeMap[cat.type] ?? "music");
-    if (meta.music?.title) params.set("title", meta.music.title);
-    if (meta.music?.genre) params.set("genre", meta.music.genre);
-    if (meta.music?.lyrics) params.set("lyrics", meta.music.lyrics);
-    if (meta.ai.detected) {
-      const platform = AI_LABELS[meta.ai.platform ?? ""] ?? meta.ai.platform ?? "AI";
-      const model = meta.ai.model ? ` (${meta.ai.model})` : "";
-      params.set("aiDisclosure", `${platform}${model}`);
-    }
+    params.set("type", detectedType);
     closeEngine();
     navigate(`/manifest?${params.toString()}`);
   }, [closeEngine, navigate]);
@@ -619,8 +642,9 @@ export default function ProvenanceUploadEngine() {
     if (readyWorks.length === 1) {
       registerWork(readyWorks[0]);
     } else {
-      closeEngine();
-      navigate("/manifest");
+      // For multiple works, register the first one; user can register others after
+      if (readyWorks.length > 0) { registerWork(readyWorks[0]); }
+      else { closeEngine(); navigate("/manifest"); }
     }
   }, [works, registerWork, closeEngine, navigate]);
 

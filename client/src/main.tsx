@@ -203,7 +203,9 @@ createRoot(document.getElementById("root")!).render(
               <LightsModeProvider>
                 <WorkEditorProvider>
                   <UploadEngineProvider>
-                    <App />
+                    <PendingWorkProvider>
+                      <App />
+                    </PendingWorkProvider>
                   </UploadEngineProvider>
                 </WorkEditorProvider>
               </LightsModeProvider>
@@ -214,3 +216,4 @@ createRoot(document.getElementById("root")!).render(
     </trpc.Provider>
   </HelmetProvider>
 );
+import { PendingWorkProvider } from "./contexts/PendingWorkContext";

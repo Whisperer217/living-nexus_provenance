@@ -147,6 +147,8 @@ function AudioPreview({ file }: { file: File }) {
 
 interface MusicEnvironmentProps {
   onBack: () => void;
+  /** Pre-loaded File object from ProvenanceUploadEngine — skips manual upload step */
+  pendingFile?: File;
   keeperPrefill?: {
     title?: string;
     genre?: string;
@@ -165,7 +167,7 @@ interface MusicEnvironmentProps {
   };
 }
 
-export function MusicEnvironment({ onBack, keeperPrefill }: MusicEnvironmentProps) {
+export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEnvironmentProps) {
   const [, navigate] = useLocation();
   const { user } = useAuth();
   const [step, setStep] = useState<StudioStep>("upload");

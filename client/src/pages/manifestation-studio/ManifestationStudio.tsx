@@ -5,6 +5,7 @@
 ═══════════════════════════════════════════════════════════════════ */
 
 import { useState, useEffect } from "react";
+import { usePendingWork } from "@/contexts/PendingWorkContext";
 import { useLocation } from "wouter";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
@@ -40,6 +41,25 @@ export default function ManifestationStudio() {
   const { user, isAuthenticated } = useAuth();
   const [selectedType, setSelectedType] = useState<ManifestationType | null>(null);
   const [keeperPrefill, setKeeperPrefill] = useState<KeeperPrefill | null>(null);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const { consumePendingWork } = usePendingWork();
+
+  // Consume any pending work from the ProvenanceUploadEngine on mount
+  useEffect(() => {
+    const work = consumePendingWork();
+    if (work) {
+      setPendingFile(work.file);
+      setSelectedType(work.type);
+      const prefill: KeeperPrefill = {};
+      if (work.meta.title) prefill.title = work.meta.title;
+      if (work.meta.genre) prefill.genre = work.meta.genre;
+      if (work.meta.lyrics) prefill.lyrics = work.meta.lyrics;
+      if (work.meta.aiDisclosure) prefill.aiDisclosure = work.meta.aiDisclosure;
+      if (work.meta.haaiOriginStory) prefill.haaiOriginStory = work.meta.haaiOriginStory;
+      if (Object.keys(prefill).length > 0) setKeeperPrefill(prefill);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Check for ?type= query param and Keeper prefill fields
   useEffect(() => {
@@ -113,7 +133,7 @@ export default function ManifestationStudio() {
 
   switch (selectedType) {
     case "music":
-      return <MusicEnvironment onBack={handleBack} keeperPrefill={keeperPrefill ?? undefined} />;
+      return <MusicEnvironment onBack={handleBack} keeperPrefill={keeperPrefill ?? undefined} pendingFile={pendingFile ?? undefined} />;
     case "lyrics":
       return <LyricsEnvironment onBack={handleBack} />;
     case "comic":
