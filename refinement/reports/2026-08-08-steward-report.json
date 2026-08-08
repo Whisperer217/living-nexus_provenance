@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-08-08T14:52:15.965Z",
+  "timestamp": "2026-08-08T16:12:01.207Z",
   "doctrineResults": [
     {
       "component": "client/src/pages/SongDetailPage.tsx",
@@ -484,7 +484,7 @@
     }
   ],
   "driftReport": {
-    "timestamp": "2026-08-08T14:52:15.708Z",
+    "timestamp": "2026-08-08T16:12:00.953Z",
     "totalFindings": 5966,
     "byDomain": {
       "typography": [
@@ -11642,14 +11642,6 @@
         },
         {
           "domain": "typography",
-          "file": "client/src/components/ui/kbd.tsx",
-          "line": 8,
-          "expected": "Use font-heading (Cinzel), font-editorial (Cormorant), or font-body (EB Garamond)",
-          "found": "font-sans",
-          "severity": "low"
-        },
-        {
-          "domain": "typography",
           "file": "client/src/components/reader/StoryboardBuilder.tsx",
           "line": 168,
           "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
@@ -11903,6 +11895,14 @@
           "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
           "found": "text-[10px]",
           "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/ui/kbd.tsx",
+          "line": 8,
+          "expected": "Use font-heading (Cinzel), font-editorial (Cormorant), or font-body (EB Garamond)",
+          "found": "font-sans",
+          "severity": "low"
         },
         {
           "domain": "typography",
@@ -38230,7 +38230,7 @@
         {
           "domain": "colors",
           "file": "client/src/components/CinematicSplash.tsx",
-          "line": 384,
+          "line": 391,
           "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
           "found": "#050505",
           "severity": "medium"
@@ -38238,7 +38238,7 @@
         {
           "domain": "colors",
           "file": "client/src/components/CinematicSplash.tsx",
-          "line": 572,
+          "line": 588,
           "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
           "found": "#0a0a0a",
           "severity": "medium"
@@ -38246,7 +38246,7 @@
         {
           "domain": "colors",
           "file": "client/src/components/CinematicSplash.tsx",
-          "line": 574,
+          "line": 590,
           "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
           "found": "#B8962E",
           "severity": "medium"
@@ -38254,7 +38254,7 @@
         {
           "domain": "colors",
           "file": "client/src/components/CinematicSplash.tsx",
-          "line": 584,
+          "line": 600,
           "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
           "found": "#B8962E",
           "severity": "medium"
@@ -38262,7 +38262,7 @@
         {
           "domain": "colors",
           "file": "client/src/components/CinematicSplash.tsx",
-          "line": 585,
+          "line": 601,
           "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
           "found": "#0a0a0a",
           "severity": "medium"
@@ -38270,7 +38270,7 @@
         {
           "domain": "colors",
           "file": "client/src/components/CinematicSplash.tsx",
-          "line": 594,
+          "line": 610,
           "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
           "found": "#B8962E",
           "severity": "medium"
@@ -38278,7 +38278,7 @@
         {
           "domain": "colors",
           "file": "client/src/components/CinematicSplash.tsx",
-          "line": 595,
+          "line": 611,
           "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
           "found": "#0a0a0a",
           "severity": "medium"
@@ -48241,7 +48241,7 @@
   },
   "debtLedger": {
     "version": "1.0.0",
-    "lastUpdated": "2026-08-08T14:52:15.279Z",
+    "lastUpdated": "2026-08-08T16:12:00.499Z",
     "totalDebt": 13,
     "items": [
       {
@@ -48387,7 +48387,7 @@
       "overall": 74,
       "grade": "C",
       "topIssue": "Creator Honor needs improvement (66/100)",
-      "timestamp": "2026-08-08T14:52:15.711Z"
+      "timestamp": "2026-08-08T16:12:00.956Z"
     },
     {
       "page": "client/src/pages/ExplorePage.tsx",
@@ -48404,7 +48404,7 @@
       "overall": 72,
       "grade": "C",
       "topIssue": "Support needs improvement (60/100)",
-      "timestamp": "2026-08-08T14:52:15.713Z"
+      "timestamp": "2026-08-08T16:12:00.958Z"
     },
     {
       "page": "client/src/pages/SongDetailPage.tsx",
@@ -48421,7 +48421,7 @@
       "overall": 74,
       "grade": "C",
       "topIssue": "Creator Honor needs improvement (55/100)",
-      "timestamp": "2026-08-08T14:52:15.716Z"
+      "timestamp": "2026-08-08T16:12:00.961Z"
     },
     {
       "page": "client/src/pages/VerifyPage.tsx",
@@ -48438,7 +48438,7 @@
       "overall": 78,
       "grade": "B",
       "topIssue": "Typography needs improvement (47/100)",
-      "timestamp": "2026-08-08T14:52:15.717Z"
+      "timestamp": "2026-08-08T16:12:00.962Z"
     },
     {
       "page": "client/src/pages/CreatorProfilePage.tsx",
@@ -48455,7 +48455,7 @@
       "overall": 78,
       "grade": "B",
       "topIssue": "Typography needs improvement (63/100)",
-      "timestamp": "2026-08-08T14:52:15.722Z"
+      "timestamp": "2026-08-08T16:12:00.967Z"
     },
     {
       "page": "client/src/pages/ArchivePage.tsx",
@@ -48472,7 +48472,7 @@
       "overall": 70,
       "grade": "C",
       "topIssue": "Typography needs improvement (63/100)",
-      "timestamp": "2026-08-08T14:52:15.725Z"
+      "timestamp": "2026-08-08T16:12:00.970Z"
     },
     {
       "page": "client/src/pages/DashboardPage.tsx",
@@ -48489,7 +48489,7 @@
       "overall": 73,
       "grade": "C",
       "topIssue": "Typography needs improvement (47/100)",
-      "timestamp": "2026-08-08T14:52:15.727Z"
+      "timestamp": "2026-08-08T16:12:00.973Z"
     },
     {
       "page": "client/src/pages/UploadPage.tsx",
@@ -48506,7 +48506,7 @@
       "overall": 72,
       "grade": "C",
       "topIssue": "Support needs improvement (60/100)",
-      "timestamp": "2026-08-08T14:52:15.732Z"
+      "timestamp": "2026-08-08T16:12:00.978Z"
     },
     {
       "page": "client/src/components/WorkListRow.tsx",
@@ -48523,7 +48523,7 @@
       "overall": 74,
       "grade": "C",
       "topIssue": "Typography needs improvement (47/100)",
-      "timestamp": "2026-08-08T14:52:15.733Z"
+      "timestamp": "2026-08-08T16:12:00.978Z"
     },
     {
       "page": "client/src/components/SupportCreatorDrawer.tsx",
@@ -48540,7 +48540,7 @@
       "overall": 67,
       "grade": "C",
       "topIssue": "Typography needs improvement (39/100)",
-      "timestamp": "2026-08-08T14:52:15.733Z"
+      "timestamp": "2026-08-08T16:12:00.979Z"
     }
   ],
   "passResults": [
@@ -48718,12 +48718,6 @@
         "client/src/pages/manifestation-studio/TypeGateway.tsx",
         "client/src/pages/manifestation-studio/StudioShell.tsx",
         "client/src/components/ui/kbd.tsx",
-        "client/src/components/reader/StoryboardBuilder.tsx",
-        "client/src/components/reader/ManuscriptReader.tsx",
-        "client/src/components/reader/HorizontalBookReader.tsx",
-        "client/src/components/reader/FeaturedBookModel.tsx",
-        "client/src/components/reader/CinematicComicReader.tsx",
-        "client/src/components/reader/ChildrensBookReader.tsx",
         "client/src/components/player/TheaterPlayer.tsx",
         "client/src/components/player/SaveQueueAsPlaylistModal.tsx",
         "client/src/components/player/PlayerTipModal.tsx",
@@ -48736,6 +48730,12 @@
         "client/src/components/manifestation-reader/RightContextPanel.tsx",
         "client/src/components/manifestation-reader/ManifestationReader.tsx",
         "client/src/components/manifestation-reader/LeftNavPanel.tsx",
+        "client/src/components/reader/StoryboardBuilder.tsx",
+        "client/src/components/reader/ManuscriptReader.tsx",
+        "client/src/components/reader/HorizontalBookReader.tsx",
+        "client/src/components/reader/FeaturedBookModel.tsx",
+        "client/src/components/reader/CinematicComicReader.tsx",
+        "client/src/components/reader/ChildrensBookReader.tsx",
         "client/src/components/manifestation-cards/MicroManifestationCard.tsx",
         "client/src/components/manifestation-cards/MediumVariants.tsx",
         "client/src/components/manifestation-cards/MediumManifestationCard.tsx",
@@ -48979,8 +48979,6 @@
         "client/src/components/reader/FeaturedBookModel.tsx",
         "client/src/components/reader/CinematicComicReader.tsx",
         "client/src/components/reader/ChildrensBookReader.tsx",
-        "client/src/components/manifestation-cards/ManifestationBundle.tsx",
-        "client/src/components/manifestation-reader/ManifestationReader.tsx",
         "client/src/components/player/TheaterPlayer.tsx",
         "client/src/components/player/PlayerTipModal.tsx",
         "client/src/components/player/PlayerBar.tsx",
@@ -48988,6 +48986,8 @@
         "client/src/components/player/ManifestationGestureLayer.tsx",
         "client/src/components/player/GlobalPlayer.tsx",
         "client/src/components/player/CinematicModeEngine.tsx",
+        "client/src/components/manifestation-reader/ManifestationReader.tsx",
+        "client/src/components/manifestation-cards/ManifestationBundle.tsx",
         "client/src/components/layout/TopBar.tsx",
         "client/src/components/layout/QuickRefSlider.tsx",
         "client/src/components/domain/ShelfBlock.tsx",
@@ -49002,6 +49002,8 @@
       "status": "warning",
       "findings": [
         "client/src/App.tsx: Forbidden animation \"animate-spin\" — not cathedral",
+        "client/src/lib/viewportLayers.ts: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
+        "client/src/lib/uploadPipeline.ts: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
         "client/src/pages/WitnessFlowPage.tsx: Forbidden animation \"animate-spin\" — not cathedral",
         "client/src/pages/VisualWorksNewPage.tsx: Forbidden animation \"animate-spin\" — not cathedral",
         "client/src/pages/VisualWorksDetailPage.tsx: Forbidden animation \"animate-spin\" — not cathedral",
@@ -49056,8 +49058,6 @@
         "client/src/pages/AlbumDetailPage.tsx: Forbidden animation \"animate-spin\" — not cathedral",
         "client/src/pages/AdminUsersPage.tsx: Forbidden animation \"animate-spin\" — not cathedral",
         "client/src/pages/AdminNotificationsPage.tsx: Forbidden animation \"animate-spin\" — not cathedral",
-        "client/src/lib/viewportLayers.ts: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
-        "client/src/lib/uploadPipeline.ts: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
         "client/src/hooks/useWaveformVisualizer.ts: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
         "client/src/hooks/useScrollRestoration.ts: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
         "client/src/hooks/useMobileAudioGlow.ts: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
@@ -49133,6 +49133,8 @@
       ],
       "recommendations": [
         "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
+        "Add useReducedMotion() guard to canvas animation in lib/viewportLayers.ts",
+        "Add useReducedMotion() guard to canvas animation in lib/uploadPipeline.ts",
         "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
         "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
         "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
@@ -49187,8 +49189,6 @@
         "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
         "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
         "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
-        "Add useReducedMotion() guard to canvas animation in lib/viewportLayers.ts",
-        "Add useReducedMotion() guard to canvas animation in lib/uploadPipeline.ts",
         "Add useReducedMotion() guard to canvas animation in hooks/useWaveformVisualizer.ts",
         "Add useReducedMotion() guard to canvas animation in hooks/useScrollRestoration.ts",
         "Add useReducedMotion() guard to canvas animation in hooks/useMobileAudioGlow.ts",
@@ -49265,6 +49265,8 @@
       "scoreImpact": 387,
       "filesAffected": [
         "client/src/App.tsx",
+        "client/src/lib/viewportLayers.ts",
+        "client/src/lib/uploadPipeline.ts",
         "client/src/pages/WitnessFlowPage.tsx",
         "client/src/pages/VisualWorksNewPage.tsx",
         "client/src/pages/VisualWorksDetailPage.tsx",
@@ -49316,8 +49318,6 @@
         "client/src/pages/AlbumDetailPage.tsx",
         "client/src/pages/AdminUsersPage.tsx",
         "client/src/pages/AdminNotificationsPage.tsx",
-        "client/src/lib/viewportLayers.ts",
-        "client/src/lib/uploadPipeline.ts",
         "client/src/hooks/useWaveformVisualizer.ts",
         "client/src/hooks/useScrollRestoration.ts",
         "client/src/hooks/useMobileAudioGlow.ts",

@@ -320,6 +320,13 @@ export default function CinematicSplash({ onComplete }: CinematicSplashProps) {
     setTimeout(() => { markSplashSeen(); onComplete(); }, 900);
   }, [onComplete]);
 
+  // Returning visitors can bypass the ceremony immediately. Marking the session
+  // prevents the splash from reappearing during the rest of this visit.
+  const handleSkip = useCallback(() => {
+    markSplashSeen();
+    onComplete();
+  }, [onComplete]);
+
   const goTo = useCallback((nextStep: number, direction: "left" | "right") => {
     if (nextStep < 0 || nextStep >= PROCESS_STEPS.length) return;
     // Exit current card in the direction of travel
@@ -392,6 +399,15 @@ export default function CinematicSplash({ onComplete }: CinematicSplashProps) {
       }}
     >
       <ParticleField />
+
+      <button
+        type="button"
+        className="ln-cinematic-splash__skip"
+        onClick={handleSkip}
+        aria-label="Skip cinematic introduction and enter the archive"
+      >
+        Skip Intro
+      </button>
 
       {/* Radial glow */}
       <div style={{

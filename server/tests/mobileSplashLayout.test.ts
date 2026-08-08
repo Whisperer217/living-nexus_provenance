@@ -19,4 +19,15 @@ describe("mobile cinematic entry guardrails", () => {
     expect(styles).toContain("env(safe-area-inset-bottom, 0px)");
     expect(document).toContain("viewport-fit=cover");
   });
+
+  it("keeps an immediate, accessible bypass available throughout the cinematic sequence", () => {
+    const splash = projectFile("client", "src", "components", "CinematicSplash.tsx");
+    const styles = projectFile("client", "src", "index.css");
+
+    expect(splash).toContain("const handleSkip = useCallback");
+    expect(splash).toContain('className="ln-cinematic-splash__skip"');
+    expect(splash).toContain('aria-label="Skip cinematic introduction and enter the archive"');
+    expect(splash).toContain("onClick={handleSkip}");
+    expect(styles).toContain(".ln-cinematic-splash__skip");
+  });
 });

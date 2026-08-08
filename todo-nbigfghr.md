@@ -11,3 +11,6 @@
 - [x] Repair mobile viewport sizing, safe-area spacing, and overflow so page text and bottom actions remain reachable above browser chrome.
 - [x] Add regression coverage for the preview routing and mobile viewport guardrails, then publish the repair.
 - [x] Save a verified checkpoint that publishes the preview and mobile safe-area repair.
+- [x] Add a keyboard-accessible Skip Intro control that bypasses the cinematic splash for returning Living Nexus visitors.
+- [x] Add regression coverage for the Skip Intro behavior across the responsive splash layout and publish the update.
+- [x] Save a verified checkpoint that publishes the returning-user Skip Intro enhancement.

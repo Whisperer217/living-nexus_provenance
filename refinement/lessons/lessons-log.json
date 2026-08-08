@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-08-08T14:55:00.000Z",
-  "totalLessons": 11,
+  "lastUpdated": "2026-08-08T16:12:30.000Z",
+  "totalLessons": 12,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -228,6 +228,27 @@
         "mobile",
         "safe-area",
         "dynamic-viewport",
+        "cinematic-splash"
+      ]
+    },
+    {
+      "id": "LESSON-012",
+      "date": "2026-08-08",
+      "category": "accessibility",
+      "problem": "The cinematic entry delayed returning visitors because its only completion action appeared after the process phase began. Keyboard and mobile users needed a visible bypass that did not require waiting for the timed sequence.",
+      "solution": "Placed an immediate, safe-area-aware Skip Intro control on the splash. It uses the existing splash completion boundary, marks the session as seen, exposes a descriptive accessible name, and leaves the full cinematic experience available through the existing entry control.",
+      "files": [
+        "client/src/components/CinematicSplash.tsx",
+        "client/src/index.css",
+        "server/tests/mobileSplashLayout.test.ts"
+      ],
+      "score": 4,
+      "tags": [
+        "skip-intro",
+        "returning-visitors",
+        "keyboard",
+        "mobile",
+        "safe-area",
         "cinematic-splash"
       ]
     }
