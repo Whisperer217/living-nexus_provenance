@@ -378,13 +378,16 @@ export default function CinematicSplash({ onComplete }: CinematicSplashProps) {
 
   return (
     <div
+      className="ln-cinematic-splash"
       style={{
         position: "fixed", inset: 0, zIndex: 9999,
         background: "var(--void, #050505)",
         display: "flex", flexDirection: "column",
-        alignItems: "center", justifyContent: "center",
+        alignItems: "center", justifyContent: "var(--ln-splash-justify, center)",
+        boxSizing: "border-box", minHeight: "100dvh", height: "100dvh",
+        padding: "var(--ln-splash-padding, 24px)",
         animation: dissolving ? "ln-splash-dissolve 0.9s ease forwards" : undefined,
-        overflow: "hidden",
+        overflowX: "hidden", overflowY: "auto",
         userSelect: "none",
       }}
     >
@@ -403,12 +406,12 @@ export default function CinematicSplash({ onComplete }: CinematicSplashProps) {
 
       {/* ── Logo block ── */}
       <div style={{
-        display: "flex", flexDirection: "column", alignItems: "center", gap: 16,
+        display: "flex", flexDirection: "column", alignItems: "center", gap: "var(--ln-splash-logo-gap, 16px)",
         animation: "ln-logo-rise 1.2s cubic-bezier(0.16,1,0.3,1) forwards",
         opacity: 0,
       }}>
         <div style={{
-          width: 80, height: 80, borderRadius: 20,
+          width: "var(--ln-splash-seal-size, 80px)", height: "var(--ln-splash-seal-size, 80px)", borderRadius: 20,
           border: "1.5px solid rgba(212,175,55,0.5)",
           background: "rgba(212,175,55,0.06)",
           display: "flex", alignItems: "center", justifyContent: "center",
@@ -417,7 +420,7 @@ export default function CinematicSplash({ onComplete }: CinematicSplashProps) {
           <img
             src="/manus-storage/living-nexus-logo-2025_19c2d497.png"
             alt="Living Nexus"
-            style={{ width: 52, height: 52, objectFit: "contain" }}
+            style={{ width: "var(--ln-splash-mark-size, 52px)", height: "var(--ln-splash-mark-size, 52px)", objectFit: "contain" }}
             onError={(e) => {
               e.currentTarget.style.display = "none";
               const parent = e.currentTarget.parentElement;
@@ -446,7 +449,7 @@ export default function CinematicSplash({ onComplete }: CinematicSplashProps) {
 
       {/* ── Frequency waveform ── */}
       <div style={{
-        width: "min(480px, 80vw)", marginTop: 28,
+        width: "min(480px, 80vw)", marginTop: "var(--ln-splash-wave-gap, 28px)",
         opacity: phase === "awakening" ? 0 : 1,
         transition: "opacity 0.8s ease",
       }}>
@@ -455,7 +458,7 @@ export default function CinematicSplash({ onComplete }: CinematicSplashProps) {
 
       {/* ── Process cards section ── */}
       <div style={{
-        marginTop: 24, width: "min(520px, 90vw)",
+        marginTop: "var(--ln-splash-process-gap, 24px)", width: "min(520px, 90vw)",
         opacity: phase === "process" ? 1 : 0,
         transition: "opacity 0.6s ease",
         pointerEvents: phase === "process" ? "auto" : "none",
@@ -478,11 +481,11 @@ export default function CinematicSplash({ onComplete }: CinematicSplashProps) {
                 background: currentStep.bgColor,
                 border: `1px solid ${currentStep.accentColor}35`,
                 borderRadius: 18,
-                padding: "24px 22px",
+                padding: "var(--ln-splash-card-padding, 24px 22px)",
                 display: "flex",
                 flexDirection: "column",
                 gap: 14,
-                minHeight: 200,
+                minHeight: "var(--ln-splash-card-min-height, 200px)",
                 ...cardAnimStyle,
               }}
             >
@@ -554,7 +557,7 @@ export default function CinematicSplash({ onComplete }: CinematicSplashProps) {
 
       {/* ── Enter button — always visible once process phase starts ── */}
       <div style={{
-        marginTop: 28,
+        marginTop: "var(--ln-splash-enter-gap, 28px)",
         opacity: phase === "process" ? 1 : 0,
         transition: "opacity 0.6s 0.3s ease",
         pointerEvents: phase === "process" ? "auto" : "none",
@@ -598,8 +601,8 @@ export default function CinematicSplash({ onComplete }: CinematicSplashProps) {
       </div>
 
       {/* ── Bottom attribution ── */}
-      <div style={{
-        position: "absolute", bottom: 24, left: 28,
+      <div className="ln-cinematic-splash__attribution" style={{
+        position: "absolute", bottom: "var(--ln-splash-footer-bottom, 24px)", left: 28,
         fontFamily: "'Space Mono', monospace",
         fontSize: "0.5rem", color: "rgba(255,255,255,0.18)",
         letterSpacing: "0.08em", textTransform: "uppercase",

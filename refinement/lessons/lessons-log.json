@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-08-08T14:15:04.255Z",
-  "totalLessons": 10,
+  "lastUpdated": "2026-08-08T14:55:00.000Z",
+  "totalLessons": 11,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -205,6 +205,31 @@
         "tv"
       ],
       "id": "LESSON-010"
+    },
+    {
+      "id": "LESSON-011",
+      "date": "2026-08-08",
+      "category": "architecture",
+      "problem": "The managed development preview was intercepted by production Open Graph middleware and returned only the static SEO body. Separately, the cinematic entry used a fixed, clipped viewport that could hide controls behind mobile browser and device chrome.",
+      "solution": "Bypassed Open Graph/static-body middleware in development so preview requests reach Vite, added an idempotent React refresh bootstrap safeguard, and made the cinematic surface use dynamic viewport sizing, safe-area spacing, and internal overflow for short mobile screens.",
+      "files": [
+        "server/services/og.ts",
+        "server/_core/vite.ts",
+        "server/_core/vitePreamble.ts",
+        "client/index.html",
+        "client/src/components/CinematicSplash.tsx",
+        "client/src/index.css"
+      ],
+      "score": 18,
+      "tags": [
+        "preview",
+        "vite",
+        "react-refresh",
+        "mobile",
+        "safe-area",
+        "dynamic-viewport",
+        "cinematic-splash"
+      ]
     }
   ]
 }

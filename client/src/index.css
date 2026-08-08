@@ -3680,3 +3680,50 @@ h1, h2, h3, h4, h5, h6,
 .ln-prose {
   max-width: 68ch;
 }
+
+/* ── Cinematic entry: dynamic viewport + safe-area contract ─────────────────
+   The introductory sequence is a full-screen, fixed overlay. On short mobile
+   viewports it must scroll within its own surface rather than clip the creator
+   journey beneath browser or device chrome. */
+.ln-cinematic-splash {
+  --ln-splash-justify: center;
+  --ln-splash-padding: max(24px, env(safe-area-inset-top, 0px)) max(24px, env(safe-area-inset-right, 0px)) max(32px, env(safe-area-inset-bottom, 0px)) max(24px, env(safe-area-inset-left, 0px));
+  --ln-splash-logo-gap: 16px;
+  --ln-splash-seal-size: 80px;
+  --ln-splash-mark-size: 52px;
+  --ln-splash-wave-gap: 28px;
+  --ln-splash-process-gap: 24px;
+  --ln-splash-card-padding: 24px 22px;
+  --ln-splash-card-min-height: 200px;
+  --ln-splash-enter-gap: 28px;
+  --ln-splash-footer-bottom: max(24px, env(safe-area-inset-bottom, 0px));
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+
+.ln-cinematic-splash::-webkit-scrollbar {
+  display: none;
+}
+
+@media (max-width: 639px), (max-height: 760px) {
+  .ln-cinematic-splash {
+    --ln-splash-justify: flex-start;
+    --ln-splash-padding: max(18px, env(safe-area-inset-top, 0px)) max(12px, env(safe-area-inset-right, 0px)) max(28px, env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px));
+    --ln-splash-logo-gap: 10px;
+    --ln-splash-seal-size: 58px;
+    --ln-splash-mark-size: 38px;
+    --ln-splash-wave-gap: 12px;
+    --ln-splash-process-gap: 14px;
+    --ln-splash-card-padding: 18px 16px;
+    --ln-splash-card-min-height: 0px;
+    --ln-splash-enter-gap: 18px;
+    --ln-splash-footer-bottom: 0px;
+  }
+
+  .ln-cinematic-splash__attribution {
+    position: static !important;
+    align-self: flex-start;
+    margin-top: 12px;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+}

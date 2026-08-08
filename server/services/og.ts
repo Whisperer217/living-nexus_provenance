@@ -451,6 +451,11 @@ async function getHtmlTemplate(isDev: boolean): Promise<string> {
 export function registerOgRoutes(app: Express) {
   const isDev = process.env.NODE_ENV === "development";
 
+  // The managed preview must be served through Vite so its client transform and
+  // React bootstrap can mount the application. Production continues to receive
+  // the server-rendered OG and provenance body blocks used by crawlers.
+  if (isDev) return;
+
   // ── /track/:id → /song/:id permanent redirect ────────────────────────────
   // /track/:id is a legacy URL pattern. Google Search Console flagged it as
   // "Duplicate, Google chose different canonical than user" because the page

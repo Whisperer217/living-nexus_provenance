@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-08-08T14:14:08.324Z",
+  "timestamp": "2026-08-08T14:52:15.965Z",
   "doctrineResults": [
     {
       "component": "client/src/pages/SongDetailPage.tsx",
@@ -484,7 +484,7 @@
     }
   ],
   "driftReport": {
-    "timestamp": "2026-08-08T14:14:08.036Z",
+    "timestamp": "2026-08-08T14:52:15.708Z",
     "totalFindings": 5966,
     "byDomain": {
       "typography": [
@@ -11650,6 +11650,262 @@
         },
         {
           "domain": "typography",
+          "file": "client/src/components/reader/StoryboardBuilder.tsx",
+          "line": 168,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[10px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/reader/StoryboardBuilder.tsx",
+          "line": 174,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[10px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/reader/StoryboardBuilder.tsx",
+          "line": 215,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[10px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/reader/StoryboardBuilder.tsx",
+          "line": 255,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[9px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/reader/StoryboardBuilder.tsx",
+          "line": 264,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[9px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/reader/StoryboardBuilder.tsx",
+          "line": 289,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[10px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/reader/StoryboardBuilder.tsx",
+          "line": 309,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[9px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/reader/ManuscriptReader.tsx",
+          "line": 304,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[10px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/reader/ManuscriptReader.tsx",
+          "line": 318,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[10px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/reader/ManuscriptReader.tsx",
+          "line": 337,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[10px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/reader/ManuscriptReader.tsx",
+          "line": 407,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[10px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/reader/ManuscriptReader.tsx",
+          "line": 510,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[10px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/reader/ManuscriptReader.tsx",
+          "line": 515,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[10px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/reader/ManuscriptReader.tsx",
+          "line": 519,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[10px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/reader/HorizontalBookReader.tsx",
+          "line": 245,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[11px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/reader/FeaturedBookModel.tsx",
+          "line": 111,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[9px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/reader/FeaturedBookModel.tsx",
+          "line": 133,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[9px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/reader/FeaturedBookModel.tsx",
+          "line": 166,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[8px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/reader/FeaturedBookModel.tsx",
+          "line": 178,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[10px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/reader/FeaturedBookModel.tsx",
+          "line": 183,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[8px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/reader/CinematicComicReader.tsx",
+          "line": 484,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[9px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/reader/CinematicComicReader.tsx",
+          "line": 557,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[9px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/reader/CinematicComicReader.tsx",
+          "line": 588,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[10px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/reader/CinematicComicReader.tsx",
+          "line": 607,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[11px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/reader/CinematicComicReader.tsx",
+          "line": 705,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[9px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/reader/CinematicComicReader.tsx",
+          "line": 813,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[8px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/reader/CinematicComicReader.tsx",
+          "line": 838,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[10px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/reader/CinematicComicReader.tsx",
+          "line": 929,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[9px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/reader/ChildrensBookReader.tsx",
+          "line": 351,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[10px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/reader/ChildrensBookReader.tsx",
+          "line": 391,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[9px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/reader/ChildrensBookReader.tsx",
+          "line": 612,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[9px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/reader/ChildrensBookReader.tsx",
+          "line": 621,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[10px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
           "file": "client/src/components/player/TheaterPlayer.tsx",
           "line": 292,
           "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
@@ -13482,262 +13738,6 @@
         },
         {
           "domain": "typography",
-          "file": "client/src/components/reader/StoryboardBuilder.tsx",
-          "line": 168,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/reader/StoryboardBuilder.tsx",
-          "line": 174,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/reader/StoryboardBuilder.tsx",
-          "line": 215,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/reader/StoryboardBuilder.tsx",
-          "line": 255,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[9px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/reader/StoryboardBuilder.tsx",
-          "line": 264,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[9px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/reader/StoryboardBuilder.tsx",
-          "line": 289,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/reader/StoryboardBuilder.tsx",
-          "line": 309,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[9px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/reader/ManuscriptReader.tsx",
-          "line": 304,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/reader/ManuscriptReader.tsx",
-          "line": 318,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/reader/ManuscriptReader.tsx",
-          "line": 337,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/reader/ManuscriptReader.tsx",
-          "line": 407,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/reader/ManuscriptReader.tsx",
-          "line": 510,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/reader/ManuscriptReader.tsx",
-          "line": 515,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/reader/ManuscriptReader.tsx",
-          "line": 519,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/reader/HorizontalBookReader.tsx",
-          "line": 245,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[11px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/reader/FeaturedBookModel.tsx",
-          "line": 111,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[9px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/reader/FeaturedBookModel.tsx",
-          "line": 133,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[9px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/reader/FeaturedBookModel.tsx",
-          "line": 166,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[8px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/reader/FeaturedBookModel.tsx",
-          "line": 178,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/reader/FeaturedBookModel.tsx",
-          "line": 183,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[8px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/reader/CinematicComicReader.tsx",
-          "line": 484,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[9px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/reader/CinematicComicReader.tsx",
-          "line": 557,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[9px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/reader/CinematicComicReader.tsx",
-          "line": 588,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/reader/CinematicComicReader.tsx",
-          "line": 607,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[11px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/reader/CinematicComicReader.tsx",
-          "line": 705,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[9px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/reader/CinematicComicReader.tsx",
-          "line": 813,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[8px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/reader/CinematicComicReader.tsx",
-          "line": 838,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/reader/CinematicComicReader.tsx",
-          "line": 929,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[9px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/reader/ChildrensBookReader.tsx",
-          "line": 351,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/reader/ChildrensBookReader.tsx",
-          "line": 391,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[9px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/reader/ChildrensBookReader.tsx",
-          "line": 612,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[9px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/reader/ChildrensBookReader.tsx",
-          "line": 621,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
           "file": "client/src/components/manifestation-reader/RightContextPanel.tsx",
           "line": 41,
           "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
@@ -14338,150 +14338,6 @@
         },
         {
           "domain": "typography",
-          "file": "client/src/components/domain/ShelfBlock.tsx",
-          "line": 70,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[9px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/domain/ShelfBlock.tsx",
-          "line": 127,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/domain/DomainRenderer.tsx",
-          "line": 95,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/domain/DomainRenderer.tsx",
-          "line": 230,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/domain/DomainRenderer.tsx",
-          "line": 414,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/domain/DomainRenderer.tsx",
-          "line": 436,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/domain/DomainRenderer.tsx",
-          "line": 441,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/domain/DomainRenderer.tsx",
-          "line": 444,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/domain/DomainRenderer.tsx",
-          "line": 447,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[9px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/domain/DomainEditor.tsx",
-          "line": 109,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/domain/DomainEditor.tsx",
-          "line": 113,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[9px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/domain/DomainEditor.tsx",
-          "line": 121,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/domain/DomainEditor.tsx",
-          "line": 177,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[8px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/domain/DomainEditor.tsx",
-          "line": 184,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/domain/DomainEditor.tsx",
-          "line": 206,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/domain/DomainEditor.tsx",
-          "line": 229,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[9px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/domain/DomainEditor.tsx",
-          "line": 360,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/domain/DomainEditor.tsx",
-          "line": 364,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
           "file": "client/src/components/layout/TopBar.tsx",
           "line": 152,
           "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
@@ -14878,6 +14734,150 @@
           "line": 567,
           "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
           "found": "text-[12px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/domain/ShelfBlock.tsx",
+          "line": 70,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[9px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/domain/ShelfBlock.tsx",
+          "line": 127,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[10px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/domain/DomainRenderer.tsx",
+          "line": 95,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[10px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/domain/DomainRenderer.tsx",
+          "line": 230,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[10px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/domain/DomainRenderer.tsx",
+          "line": 414,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[10px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/domain/DomainRenderer.tsx",
+          "line": 436,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[10px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/domain/DomainRenderer.tsx",
+          "line": 441,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[10px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/domain/DomainRenderer.tsx",
+          "line": 444,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[10px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/domain/DomainRenderer.tsx",
+          "line": 447,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[9px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/domain/DomainEditor.tsx",
+          "line": 109,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[10px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/domain/DomainEditor.tsx",
+          "line": 113,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[9px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/domain/DomainEditor.tsx",
+          "line": 121,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[10px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/domain/DomainEditor.tsx",
+          "line": 177,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[8px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/domain/DomainEditor.tsx",
+          "line": 184,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[10px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/domain/DomainEditor.tsx",
+          "line": 206,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[10px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/domain/DomainEditor.tsx",
+          "line": 229,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[9px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/domain/DomainEditor.tsx",
+          "line": 360,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[10px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/domain/DomainEditor.tsx",
+          "line": 364,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[10px]",
           "severity": "medium"
         },
         {
@@ -38230,7 +38230,7 @@
         {
           "domain": "colors",
           "file": "client/src/components/CinematicSplash.tsx",
-          "line": 383,
+          "line": 384,
           "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
           "found": "#050505",
           "severity": "medium"
@@ -38238,7 +38238,7 @@
         {
           "domain": "colors",
           "file": "client/src/components/CinematicSplash.tsx",
-          "line": 569,
+          "line": 572,
           "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
           "found": "#0a0a0a",
           "severity": "medium"
@@ -38246,7 +38246,7 @@
         {
           "domain": "colors",
           "file": "client/src/components/CinematicSplash.tsx",
-          "line": 571,
+          "line": 574,
           "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
           "found": "#B8962E",
           "severity": "medium"
@@ -38254,7 +38254,7 @@
         {
           "domain": "colors",
           "file": "client/src/components/CinematicSplash.tsx",
-          "line": 581,
+          "line": 584,
           "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
           "found": "#B8962E",
           "severity": "medium"
@@ -38262,7 +38262,7 @@
         {
           "domain": "colors",
           "file": "client/src/components/CinematicSplash.tsx",
-          "line": 582,
+          "line": 585,
           "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
           "found": "#0a0a0a",
           "severity": "medium"
@@ -38270,7 +38270,7 @@
         {
           "domain": "colors",
           "file": "client/src/components/CinematicSplash.tsx",
-          "line": 591,
+          "line": 594,
           "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
           "found": "#B8962E",
           "severity": "medium"
@@ -38278,7 +38278,7 @@
         {
           "domain": "colors",
           "file": "client/src/components/CinematicSplash.tsx",
-          "line": 592,
+          "line": 595,
           "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
           "found": "#0a0a0a",
           "severity": "medium"
@@ -39661,6 +39661,518 @@
         },
         {
           "domain": "colors",
+          "file": "client/src/components/reader/StoryboardBuilder.tsx",
+          "line": 168,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#5A6A72",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/reader/StoryboardBuilder.tsx",
+          "line": 215,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#5A6A72",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/reader/StoryboardBuilder.tsx",
+          "line": 232,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#1A2530",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/reader/StoryboardBuilder.tsx",
+          "line": 305,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#5A6A72",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/reader/StoryboardBuilder.tsx",
+          "line": 309,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#5A6A72",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/reader/ManuscriptReader.tsx",
+          "line": 65,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#F4ECD8",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/reader/ManuscriptReader.tsx",
+          "line": 66,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#3D2B1F",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/reader/ManuscriptReader.tsx",
+          "line": 67,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#8B6B4A",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/reader/ManuscriptReader.tsx",
+          "line": 73,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#0E1117",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/reader/ManuscriptReader.tsx",
+          "line": 74,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#E8DFC8",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/reader/ManuscriptReader.tsx",
+          "line": 75,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#7A6E5F",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/reader/ManuscriptReader.tsx",
+          "line": 81,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#FAFAF8",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/reader/ManuscriptReader.tsx",
+          "line": 82,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#1A1A1A",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/reader/ManuscriptReader.tsx",
+          "line": 83,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#6B6B6B",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/reader/HorizontalBookReader.tsx",
+          "line": 200,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#0A0C0E",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/reader/HorizontalBookReader.tsx",
+          "line": 400,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#B8860B",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/reader/FeaturedBookModel.tsx",
+          "line": 41,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#7F1D1D",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/reader/FeaturedBookModel.tsx",
+          "line": 41,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#14532D",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/reader/CinematicComicReader.tsx",
+          "line": 398,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#080808",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/reader/CinematicComicReader.tsx",
+          "line": 403,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#C9A84C",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/reader/CinematicComicReader.tsx",
+          "line": 405,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#E8DFC8",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/reader/CinematicComicReader.tsx",
+          "line": 414,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#C9A84C",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/reader/CinematicComicReader.tsx",
+          "line": 429,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#080808",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/reader/CinematicComicReader.tsx",
+          "line": 435,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#E8DFC8",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/reader/CinematicComicReader.tsx",
+          "line": 443,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#C9A84C",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/reader/CinematicComicReader.tsx",
+          "line": 485,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#C9A84C",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/reader/CinematicComicReader.tsx",
+          "line": 501,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#080808",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/reader/CinematicComicReader.tsx",
+          "line": 546,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#C9A84C",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/reader/CinematicComicReader.tsx",
+          "line": 552,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#E8DFC8",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/reader/CinematicComicReader.tsx",
+          "line": 558,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#C9A84C",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/reader/CinematicComicReader.tsx",
+          "line": 591,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#C9A84C",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/reader/CinematicComicReader.tsx",
+          "line": 608,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#C9A84C",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/reader/CinematicComicReader.tsx",
+          "line": 630,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#C9A84C",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/reader/CinematicComicReader.tsx",
+          "line": 708,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#C9A84C",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/reader/CinematicComicReader.tsx",
+          "line": 721,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#F5F5F5",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/reader/CinematicComicReader.tsx",
+          "line": 812,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#C9A84C",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/reader/CinematicComicReader.tsx",
+          "line": 837,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#C9A84C",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/reader/CinematicComicReader.tsx",
+          "line": 838,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#C9A84C",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/reader/CinematicComicReader.tsx",
+          "line": 881,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#C9A84C",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/reader/CinematicComicReader.tsx",
+          "line": 891,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#C9A84C",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/reader/CinematicComicReader.tsx",
+          "line": 906,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#C9A84C",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/reader/CinematicComicReader.tsx",
+          "line": 935,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#C9A84C",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/reader/ChildrensBookReader.tsx",
+          "line": 72,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#FF6B35",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/reader/ChildrensBookReader.tsx",
+          "line": 72,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#FF9A3C",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/reader/ChildrensBookReader.tsx",
+          "line": 72,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#FFD166",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/reader/ChildrensBookReader.tsx",
+          "line": 72,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#FFEFBA",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/reader/ChildrensBookReader.tsx",
+          "line": 73,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#A8D8EA",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/reader/ChildrensBookReader.tsx",
+          "line": 73,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#B8E0F7",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/reader/ChildrensBookReader.tsx",
+          "line": 73,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#D4EDFF",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/reader/ChildrensBookReader.tsx",
+          "line": 74,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#E8DFC8",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/reader/ChildrensBookReader.tsx",
+          "line": 74,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#C9A84C",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/reader/ChildrensBookReader.tsx",
+          "line": 74,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#FFFFFF",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/reader/ChildrensBookReader.tsx",
+          "line": 75,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#90EE90",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/reader/ChildrensBookReader.tsx",
+          "line": 75,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#98FB98",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/reader/ChildrensBookReader.tsx",
+          "line": 75,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#7CFC00",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/reader/ChildrensBookReader.tsx",
+          "line": 75,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#ADFF2F",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/reader/ChildrensBookReader.tsx",
+          "line": 255,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#1A1008",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/reader/ChildrensBookReader.tsx",
+          "line": 256,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#1C0F06",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/reader/ChildrensBookReader.tsx",
+          "line": 257,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#0A1220",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/reader/ChildrensBookReader.tsx",
+          "line": 258,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#060A18",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/reader/ChildrensBookReader.tsx",
+          "line": 259,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#071510",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/reader/ChildrensBookReader.tsx",
+          "line": 348,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#F5F0E8",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/reader/ChildrensBookReader.tsx",
+          "line": 501,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#F5F0E8",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/reader/ChildrensBookReader.tsx",
+          "line": 549,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#F5F0E8",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
           "file": "client/src/components/player/TheaterPlayer.tsx",
           "line": 392,
           "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
@@ -40581,518 +41093,6 @@
         },
         {
           "domain": "colors",
-          "file": "client/src/components/reader/StoryboardBuilder.tsx",
-          "line": 168,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#5A6A72",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/reader/StoryboardBuilder.tsx",
-          "line": 215,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#5A6A72",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/reader/StoryboardBuilder.tsx",
-          "line": 232,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#1A2530",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/reader/StoryboardBuilder.tsx",
-          "line": 305,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#5A6A72",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/reader/StoryboardBuilder.tsx",
-          "line": 309,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#5A6A72",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/reader/ManuscriptReader.tsx",
-          "line": 65,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#F4ECD8",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/reader/ManuscriptReader.tsx",
-          "line": 66,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#3D2B1F",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/reader/ManuscriptReader.tsx",
-          "line": 67,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#8B6B4A",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/reader/ManuscriptReader.tsx",
-          "line": 73,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#0E1117",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/reader/ManuscriptReader.tsx",
-          "line": 74,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#E8DFC8",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/reader/ManuscriptReader.tsx",
-          "line": 75,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#7A6E5F",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/reader/ManuscriptReader.tsx",
-          "line": 81,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#FAFAF8",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/reader/ManuscriptReader.tsx",
-          "line": 82,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#1A1A1A",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/reader/ManuscriptReader.tsx",
-          "line": 83,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#6B6B6B",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/reader/HorizontalBookReader.tsx",
-          "line": 200,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#0A0C0E",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/reader/HorizontalBookReader.tsx",
-          "line": 400,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#B8860B",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/reader/FeaturedBookModel.tsx",
-          "line": 41,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#7F1D1D",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/reader/FeaturedBookModel.tsx",
-          "line": 41,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#14532D",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/reader/CinematicComicReader.tsx",
-          "line": 398,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#080808",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/reader/CinematicComicReader.tsx",
-          "line": 403,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#C9A84C",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/reader/CinematicComicReader.tsx",
-          "line": 405,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#E8DFC8",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/reader/CinematicComicReader.tsx",
-          "line": 414,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#C9A84C",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/reader/CinematicComicReader.tsx",
-          "line": 429,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#080808",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/reader/CinematicComicReader.tsx",
-          "line": 435,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#E8DFC8",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/reader/CinematicComicReader.tsx",
-          "line": 443,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#C9A84C",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/reader/CinematicComicReader.tsx",
-          "line": 485,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#C9A84C",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/reader/CinematicComicReader.tsx",
-          "line": 501,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#080808",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/reader/CinematicComicReader.tsx",
-          "line": 546,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#C9A84C",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/reader/CinematicComicReader.tsx",
-          "line": 552,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#E8DFC8",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/reader/CinematicComicReader.tsx",
-          "line": 558,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#C9A84C",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/reader/CinematicComicReader.tsx",
-          "line": 591,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#C9A84C",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/reader/CinematicComicReader.tsx",
-          "line": 608,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#C9A84C",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/reader/CinematicComicReader.tsx",
-          "line": 630,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#C9A84C",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/reader/CinematicComicReader.tsx",
-          "line": 708,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#C9A84C",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/reader/CinematicComicReader.tsx",
-          "line": 721,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#F5F5F5",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/reader/CinematicComicReader.tsx",
-          "line": 812,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#C9A84C",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/reader/CinematicComicReader.tsx",
-          "line": 837,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#C9A84C",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/reader/CinematicComicReader.tsx",
-          "line": 838,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#C9A84C",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/reader/CinematicComicReader.tsx",
-          "line": 881,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#C9A84C",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/reader/CinematicComicReader.tsx",
-          "line": 891,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#C9A84C",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/reader/CinematicComicReader.tsx",
-          "line": 906,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#C9A84C",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/reader/CinematicComicReader.tsx",
-          "line": 935,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#C9A84C",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/reader/ChildrensBookReader.tsx",
-          "line": 72,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#FF6B35",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/reader/ChildrensBookReader.tsx",
-          "line": 72,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#FF9A3C",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/reader/ChildrensBookReader.tsx",
-          "line": 72,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#FFD166",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/reader/ChildrensBookReader.tsx",
-          "line": 72,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#FFEFBA",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/reader/ChildrensBookReader.tsx",
-          "line": 73,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#A8D8EA",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/reader/ChildrensBookReader.tsx",
-          "line": 73,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#B8E0F7",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/reader/ChildrensBookReader.tsx",
-          "line": 73,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#D4EDFF",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/reader/ChildrensBookReader.tsx",
-          "line": 74,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#E8DFC8",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/reader/ChildrensBookReader.tsx",
-          "line": 74,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#C9A84C",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/reader/ChildrensBookReader.tsx",
-          "line": 74,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#FFFFFF",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/reader/ChildrensBookReader.tsx",
-          "line": 75,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#90EE90",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/reader/ChildrensBookReader.tsx",
-          "line": 75,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#98FB98",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/reader/ChildrensBookReader.tsx",
-          "line": 75,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#7CFC00",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/reader/ChildrensBookReader.tsx",
-          "line": 75,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#ADFF2F",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/reader/ChildrensBookReader.tsx",
-          "line": 255,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#1A1008",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/reader/ChildrensBookReader.tsx",
-          "line": 256,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#1C0F06",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/reader/ChildrensBookReader.tsx",
-          "line": 257,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#0A1220",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/reader/ChildrensBookReader.tsx",
-          "line": 258,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#060A18",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/reader/ChildrensBookReader.tsx",
-          "line": 259,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#071510",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/reader/ChildrensBookReader.tsx",
-          "line": 348,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#F5F0E8",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/reader/ChildrensBookReader.tsx",
-          "line": 501,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#F5F0E8",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/reader/ChildrensBookReader.tsx",
-          "line": 549,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#F5F0E8",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
           "file": "client/src/components/manifestation-reader/RightContextPanel.tsx",
           "line": 44,
           "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
@@ -41661,6 +41661,94 @@
         },
         {
           "domain": "colors",
+          "file": "client/src/components/layout/TopBar.tsx",
+          "line": 331,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#E8DFC8",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/layout/TopBar.tsx",
+          "line": 651,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#0A0806",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/layout/TopBar.tsx",
+          "line": 655,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#E8B840",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/layout/TopBar.tsx",
+          "line": 681,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#111111",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/layout/TopBar.tsx",
+          "line": 681,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#1A1A1A",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/layout/TopBar.tsx",
+          "line": 713,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#1A1710",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/layout/TopBar.tsx",
+          "line": 736,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#e05a2b",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/layout/TopBar.tsx",
+          "line": 752,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#C9C0A8",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/layout/TopBar.tsx",
+          "line": 735,
+          "expected": "Use cathedral color tokens via CSS variables",
+          "found": "bg-red-",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/layout/LiveActivityPanel.tsx",
+          "line": 269,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#ef4444",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/layout/LeftRail.tsx",
+          "line": 151,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#0A0806",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
           "file": "client/src/components/domain/ShelfBlock.tsx",
           "line": 47,
           "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
@@ -41817,94 +41905,6 @@
           "line": 413,
           "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
           "found": "#1a1a1a",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/layout/TopBar.tsx",
-          "line": 331,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#E8DFC8",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/layout/TopBar.tsx",
-          "line": 651,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#0A0806",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/layout/TopBar.tsx",
-          "line": 655,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#E8B840",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/layout/TopBar.tsx",
-          "line": 681,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#111111",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/layout/TopBar.tsx",
-          "line": 681,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#1A1A1A",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/layout/TopBar.tsx",
-          "line": 713,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#1A1710",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/layout/TopBar.tsx",
-          "line": 736,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#e05a2b",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/layout/TopBar.tsx",
-          "line": 752,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#C9C0A8",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/layout/TopBar.tsx",
-          "line": 735,
-          "expected": "Use cathedral color tokens via CSS variables",
-          "found": "bg-red-",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/layout/LiveActivityPanel.tsx",
-          "line": 269,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#ef4444",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/layout/LeftRail.tsx",
-          "line": 151,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#0A0806",
           "severity": "medium"
         },
         {
@@ -46791,6 +46791,14 @@
         },
         {
           "domain": "language",
+          "file": "client/src/components/reader/FeaturedBookModel.tsx",
+          "line": 9,
+          "expected": "Use 'Support', 'Witness', or 'Honor'",
+          "found": "like",
+          "severity": "high"
+        },
+        {
+          "domain": "language",
           "file": "client/src/components/player/WitnessSurfacePlayer.tsx",
           "line": 263,
           "expected": "Use 'Support', 'Witness', or 'Honor'",
@@ -48071,14 +48079,6 @@
         },
         {
           "domain": "language",
-          "file": "client/src/components/reader/FeaturedBookModel.tsx",
-          "line": 9,
-          "expected": "Use 'Support', 'Witness', or 'Honor'",
-          "found": "like",
-          "severity": "high"
-        },
-        {
-          "domain": "language",
           "file": "client/src/components/manifestation-cards/types.ts",
           "line": 20,
           "expected": "Use 'Support', 'Witness', or 'Honor'",
@@ -48132,14 +48132,6 @@
           "expected": "Use 'Support', 'Witness', or 'Honor'",
           "found": "like",
           "severity": "high"
-        },
-        {
-          "domain": "language",
-          "file": "client/src/components/domain/DomainEditor.tsx",
-          "line": 43,
-          "expected": "Use 'Witnesses' or 'Stewards'",
-          "found": "Followers",
-          "severity": "medium"
         },
         {
           "domain": "language",
@@ -48223,6 +48215,14 @@
         },
         {
           "domain": "language",
+          "file": "client/src/components/domain/DomainEditor.tsx",
+          "line": 43,
+          "expected": "Use 'Witnesses' or 'Stewards'",
+          "found": "Followers",
+          "severity": "medium"
+        },
+        {
+          "domain": "language",
           "file": "client/src/components/manifestation-reader/systems/useNavigationSystem.ts",
           "line": 39,
           "expected": "Use 'Support', 'Witness', or 'Honor'",
@@ -48241,7 +48241,7 @@
   },
   "debtLedger": {
     "version": "1.0.0",
-    "lastUpdated": "2026-08-08T14:14:07.433Z",
+    "lastUpdated": "2026-08-08T14:52:15.279Z",
     "totalDebt": 13,
     "items": [
       {
@@ -48387,7 +48387,7 @@
       "overall": 74,
       "grade": "C",
       "topIssue": "Creator Honor needs improvement (66/100)",
-      "timestamp": "2026-08-08T14:14:08.039Z"
+      "timestamp": "2026-08-08T14:52:15.711Z"
     },
     {
       "page": "client/src/pages/ExplorePage.tsx",
@@ -48404,7 +48404,7 @@
       "overall": 72,
       "grade": "C",
       "topIssue": "Support needs improvement (60/100)",
-      "timestamp": "2026-08-08T14:14:08.041Z"
+      "timestamp": "2026-08-08T14:52:15.713Z"
     },
     {
       "page": "client/src/pages/SongDetailPage.tsx",
@@ -48421,7 +48421,7 @@
       "overall": 74,
       "grade": "C",
       "topIssue": "Creator Honor needs improvement (55/100)",
-      "timestamp": "2026-08-08T14:14:08.044Z"
+      "timestamp": "2026-08-08T14:52:15.716Z"
     },
     {
       "page": "client/src/pages/VerifyPage.tsx",
@@ -48438,7 +48438,7 @@
       "overall": 78,
       "grade": "B",
       "topIssue": "Typography needs improvement (47/100)",
-      "timestamp": "2026-08-08T14:14:08.045Z"
+      "timestamp": "2026-08-08T14:52:15.717Z"
     },
     {
       "page": "client/src/pages/CreatorProfilePage.tsx",
@@ -48455,7 +48455,7 @@
       "overall": 78,
       "grade": "B",
       "topIssue": "Typography needs improvement (63/100)",
-      "timestamp": "2026-08-08T14:14:08.050Z"
+      "timestamp": "2026-08-08T14:52:15.722Z"
     },
     {
       "page": "client/src/pages/ArchivePage.tsx",
@@ -48472,7 +48472,7 @@
       "overall": 70,
       "grade": "C",
       "topIssue": "Typography needs improvement (63/100)",
-      "timestamp": "2026-08-08T14:14:08.053Z"
+      "timestamp": "2026-08-08T14:52:15.725Z"
     },
     {
       "page": "client/src/pages/DashboardPage.tsx",
@@ -48489,7 +48489,7 @@
       "overall": 73,
       "grade": "C",
       "topIssue": "Typography needs improvement (47/100)",
-      "timestamp": "2026-08-08T14:14:08.056Z"
+      "timestamp": "2026-08-08T14:52:15.727Z"
     },
     {
       "page": "client/src/pages/UploadPage.tsx",
@@ -48506,7 +48506,7 @@
       "overall": 72,
       "grade": "C",
       "topIssue": "Support needs improvement (60/100)",
-      "timestamp": "2026-08-08T14:14:08.061Z"
+      "timestamp": "2026-08-08T14:52:15.732Z"
     },
     {
       "page": "client/src/components/WorkListRow.tsx",
@@ -48523,7 +48523,7 @@
       "overall": 74,
       "grade": "C",
       "topIssue": "Typography needs improvement (47/100)",
-      "timestamp": "2026-08-08T14:14:08.061Z"
+      "timestamp": "2026-08-08T14:52:15.733Z"
     },
     {
       "page": "client/src/components/SupportCreatorDrawer.tsx",
@@ -48540,7 +48540,7 @@
       "overall": 67,
       "grade": "C",
       "topIssue": "Typography needs improvement (39/100)",
-      "timestamp": "2026-08-08T14:14:08.062Z"
+      "timestamp": "2026-08-08T14:52:15.733Z"
     }
   ],
   "passResults": [
@@ -48971,14 +48971,16 @@
         "client/src/components/CinematicSongHeader.tsx",
         "client/src/components/BookCard.tsx",
         "client/src/components/AddToNamedPlaylistPopover.tsx",
-        "client/src/pages/admin/MissionControlPage.tsx",
         "client/src/pages/manifestation-studio/StudioShell.tsx",
+        "client/src/pages/admin/MissionControlPage.tsx",
         "client/src/components/studio/SoundtrackCueMapper.tsx",
         "client/src/components/reader/StoryboardBuilder.tsx",
         "client/src/components/reader/HorizontalBookReader.tsx",
         "client/src/components/reader/FeaturedBookModel.tsx",
         "client/src/components/reader/CinematicComicReader.tsx",
         "client/src/components/reader/ChildrensBookReader.tsx",
+        "client/src/components/manifestation-cards/ManifestationBundle.tsx",
+        "client/src/components/manifestation-reader/ManifestationReader.tsx",
         "client/src/components/player/TheaterPlayer.tsx",
         "client/src/components/player/PlayerTipModal.tsx",
         "client/src/components/player/PlayerBar.tsx",
@@ -48986,8 +48988,6 @@
         "client/src/components/player/ManifestationGestureLayer.tsx",
         "client/src/components/player/GlobalPlayer.tsx",
         "client/src/components/player/CinematicModeEngine.tsx",
-        "client/src/components/manifestation-reader/ManifestationReader.tsx",
-        "client/src/components/manifestation-cards/ManifestationBundle.tsx",
         "client/src/components/layout/TopBar.tsx",
         "client/src/components/layout/QuickRefSlider.tsx",
         "client/src/components/domain/ShelfBlock.tsx",
@@ -49002,53 +49002,6 @@
       "status": "warning",
       "findings": [
         "client/src/App.tsx: Forbidden animation \"animate-spin\" — not cathedral",
-        "client/src/lib/viewportLayers.ts: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
-        "client/src/lib/uploadPipeline.ts: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
-        "client/src/hooks/useWaveformVisualizer.ts: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
-        "client/src/hooks/useScrollRestoration.ts: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
-        "client/src/hooks/useMobileAudioGlow.ts: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
-        "client/src/hooks/useHarmonicSignature.ts: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
-        "client/src/hooks/useFrequencyGlow.ts: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
-        "client/src/design-system/primitives.tsx: Forbidden animation \"animate-spin\" — not cathedral",
-        "client/src/contexts/WorkEditorContext.tsx: Forbidden animation \"animate-spin\" — not cathedral",
-        "client/src/contexts/PlayerContext.tsx: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
-        "client/src/contexts/HarmonicContext.tsx: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
-        "client/src/components/WitnessesPanel.tsx: Forbidden animation \"animate-spin\" — not cathedral",
-        "client/src/components/WhatsNewModal.tsx: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
-        "client/src/components/VisionChamberRitual.tsx: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
-        "client/src/components/VersionHistoryModal.tsx: Forbidden animation \"animate-spin\" — not cathedral",
-        "client/src/components/SacredCanvas.tsx: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
-        "client/src/components/ReferenceCitePanel.tsx: Forbidden animation \"animate-spin\" — not cathedral",
-        "client/src/components/QRIdentityCard.tsx: Forbidden animation \"animate-spin\" — not cathedral",
-        "client/src/components/QRIdentityCard.tsx: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
-        "client/src/components/ProvenanceUploadEngine.tsx: Forbidden animation \"animate-spin\" — not cathedral",
-        "client/src/components/ProvenanceUploadEngine.tsx: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
-        "client/src/components/ProvenanceTimeline.tsx: Forbidden animation \"animate-spin\" — not cathedral",
-        "client/src/components/PNAWorkspacePanel.tsx: Forbidden animation \"animate-spin\" — not cathedral",
-        "client/src/components/ObservatoryCanvas.tsx: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
-        "client/src/components/NexusAvatarViewer.tsx: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
-        "client/src/components/LineageGraph.tsx: Forbidden animation \"animate-spin\" — not cathedral",
-        "client/src/components/KeeperCharacterSheet.tsx: Forbidden animation \"animate-spin\" — not cathedral",
-        "client/src/components/ImagePositioner.tsx: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
-        "client/src/components/GCodeViewer.tsx: Forbidden animation \"animate-spin\" — not cathedral",
-        "client/src/components/GCodeViewer.tsx: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
-        "client/src/components/FloatingAvatar.tsx: Forbidden animation \"animate-spin\" — not cathedral",
-        "client/src/components/FloatingAvatar.tsx: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
-        "client/src/components/ExternalPlaylistsTab.tsx: Forbidden animation \"animate-spin\" — not cathedral",
-        "client/src/components/EvidencePanel.tsx: Forbidden animation \"animate-spin\" — not cathedral",
-        "client/src/components/EditChapel.tsx: Forbidden animation \"animate-spin\" — not cathedral",
-        "client/src/components/EditChapel.tsx: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
-        "client/src/components/CreativeDrawer.tsx: Forbidden animation \"animate-spin\" — not cathedral",
-        "client/src/components/ContextualModal.tsx: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
-        "client/src/components/CometSpinner.tsx: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
-        "client/src/components/CinematicSplash.tsx: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
-        "client/src/components/CinematicSongHeader.tsx: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
-        "client/src/components/AddToPlaylistButton.tsx: Forbidden animation \"animate-spin\" — not cathedral",
-        "client/src/components/AddToNamedPlaylistPopover.tsx: Forbidden animation \"animate-spin\" — not cathedral",
-        "client/src/components/AddToMyListModal.tsx: Forbidden animation \"animate-spin\" — not cathedral",
-        "client/src/components/AddToCollectionModal.tsx: Forbidden animation \"animate-spin\" — not cathedral",
-        "client/src/components/AIChatBox.tsx: Forbidden animation \"animate-spin\" — not cathedral",
-        "client/src/components/AIChatBox.tsx: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
         "client/src/pages/WitnessFlowPage.tsx: Forbidden animation \"animate-spin\" — not cathedral",
         "client/src/pages/VisualWorksNewPage.tsx: Forbidden animation \"animate-spin\" — not cathedral",
         "client/src/pages/VisualWorksDetailPage.tsx: Forbidden animation \"animate-spin\" — not cathedral",
@@ -49103,6 +49056,57 @@
         "client/src/pages/AlbumDetailPage.tsx: Forbidden animation \"animate-spin\" — not cathedral",
         "client/src/pages/AdminUsersPage.tsx: Forbidden animation \"animate-spin\" — not cathedral",
         "client/src/pages/AdminNotificationsPage.tsx: Forbidden animation \"animate-spin\" — not cathedral",
+        "client/src/lib/viewportLayers.ts: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
+        "client/src/lib/uploadPipeline.ts: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
+        "client/src/hooks/useWaveformVisualizer.ts: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
+        "client/src/hooks/useScrollRestoration.ts: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
+        "client/src/hooks/useMobileAudioGlow.ts: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
+        "client/src/hooks/useHarmonicSignature.ts: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
+        "client/src/hooks/useFrequencyGlow.ts: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
+        "client/src/design-system/primitives.tsx: Forbidden animation \"animate-spin\" — not cathedral",
+        "client/src/contexts/WorkEditorContext.tsx: Forbidden animation \"animate-spin\" — not cathedral",
+        "client/src/contexts/PlayerContext.tsx: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
+        "client/src/contexts/HarmonicContext.tsx: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
+        "client/src/components/WitnessesPanel.tsx: Forbidden animation \"animate-spin\" — not cathedral",
+        "client/src/components/WhatsNewModal.tsx: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
+        "client/src/components/VisionChamberRitual.tsx: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
+        "client/src/components/VersionHistoryModal.tsx: Forbidden animation \"animate-spin\" — not cathedral",
+        "client/src/components/SacredCanvas.tsx: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
+        "client/src/components/ReferenceCitePanel.tsx: Forbidden animation \"animate-spin\" — not cathedral",
+        "client/src/components/QRIdentityCard.tsx: Forbidden animation \"animate-spin\" — not cathedral",
+        "client/src/components/QRIdentityCard.tsx: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
+        "client/src/components/ProvenanceUploadEngine.tsx: Forbidden animation \"animate-spin\" — not cathedral",
+        "client/src/components/ProvenanceUploadEngine.tsx: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
+        "client/src/components/ProvenanceTimeline.tsx: Forbidden animation \"animate-spin\" — not cathedral",
+        "client/src/components/PNAWorkspacePanel.tsx: Forbidden animation \"animate-spin\" — not cathedral",
+        "client/src/components/ObservatoryCanvas.tsx: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
+        "client/src/components/NexusAvatarViewer.tsx: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
+        "client/src/components/LineageGraph.tsx: Forbidden animation \"animate-spin\" — not cathedral",
+        "client/src/components/KeeperCharacterSheet.tsx: Forbidden animation \"animate-spin\" — not cathedral",
+        "client/src/components/ImagePositioner.tsx: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
+        "client/src/components/GCodeViewer.tsx: Forbidden animation \"animate-spin\" — not cathedral",
+        "client/src/components/GCodeViewer.tsx: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
+        "client/src/components/FloatingAvatar.tsx: Forbidden animation \"animate-spin\" — not cathedral",
+        "client/src/components/FloatingAvatar.tsx: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
+        "client/src/components/ExternalPlaylistsTab.tsx: Forbidden animation \"animate-spin\" — not cathedral",
+        "client/src/components/EvidencePanel.tsx: Forbidden animation \"animate-spin\" — not cathedral",
+        "client/src/components/EditChapel.tsx: Forbidden animation \"animate-spin\" — not cathedral",
+        "client/src/components/EditChapel.tsx: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
+        "client/src/components/CreativeDrawer.tsx: Forbidden animation \"animate-spin\" — not cathedral",
+        "client/src/components/ContextualModal.tsx: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
+        "client/src/components/CometSpinner.tsx: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
+        "client/src/components/CinematicSplash.tsx: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
+        "client/src/components/CinematicSongHeader.tsx: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
+        "client/src/components/AddToPlaylistButton.tsx: Forbidden animation \"animate-spin\" — not cathedral",
+        "client/src/components/AddToNamedPlaylistPopover.tsx: Forbidden animation \"animate-spin\" — not cathedral",
+        "client/src/components/AddToMyListModal.tsx: Forbidden animation \"animate-spin\" — not cathedral",
+        "client/src/components/AddToCollectionModal.tsx: Forbidden animation \"animate-spin\" — not cathedral",
+        "client/src/components/AIChatBox.tsx: Forbidden animation \"animate-spin\" — not cathedral",
+        "client/src/components/AIChatBox.tsx: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
+        "client/src/pages/manifestation-studio/TypeGateway.tsx: Forbidden animation \"animate-spin\" — not cathedral",
+        "client/src/pages/admin/PhysicalDistributionPage.tsx: Forbidden animation \"animate-spin\" — not cathedral",
+        "client/src/pages/admin/MissionControl.tsx: Forbidden animation \"animate-spin\" — not cathedral",
+        "client/src/pages/admin/CommentModerationPage.tsx: Forbidden animation \"animate-spin\" — not cathedral",
         "client/src/components/ui/spinner.tsx: Forbidden animation \"animate-spin\" — not cathedral",
         "client/src/components/ui/sidebar.tsx: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
         "client/src/components/reader/StoryboardBuilder.tsx: Forbidden animation \"animate-spin\" — not cathedral",
@@ -49118,68 +49122,17 @@
         "client/src/components/layout/MainLayout.tsx: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
         "client/src/components/layout/LeftRail.tsx: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
         "client/src/components/domain/DomainEditor.tsx: Forbidden animation \"animate-spin\" — not cathedral",
-        "client/src/pages/manifestation-studio/TypeGateway.tsx: Forbidden animation \"animate-spin\" — not cathedral",
-        "client/src/pages/admin/PhysicalDistributionPage.tsx: Forbidden animation \"animate-spin\" — not cathedral",
-        "client/src/pages/admin/MissionControl.tsx: Forbidden animation \"animate-spin\" — not cathedral",
-        "client/src/pages/admin/CommentModerationPage.tsx: Forbidden animation \"animate-spin\" — not cathedral",
-        "client/src/components/manifestation-reader/adapters/index.ts: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
         "client/src/pages/manifestation-studio/environments/VideoEnvironment.tsx: Forbidden animation \"animate-spin\" — not cathedral",
         "client/src/pages/manifestation-studio/environments/MusicEnvironment.tsx: Forbidden animation \"animate-spin\" — not cathedral",
         "client/src/pages/manifestation-studio/environments/MusicEnvironment.tsx: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
         "client/src/pages/manifestation-studio/environments/ManuscriptEnvironment.tsx: Forbidden animation \"animate-spin\" — not cathedral",
         "client/src/pages/manifestation-studio/environments/LyricsEnvironment.tsx: Forbidden animation \"animate-spin\" — not cathedral",
         "client/src/pages/manifestation-studio/environments/GcodeEnvironment.tsx: Forbidden animation \"animate-spin\" — not cathedral",
-        "client/src/pages/manifestation-studio/environments/ComicEnvironment.tsx: Forbidden animation \"animate-spin\" — not cathedral"
+        "client/src/pages/manifestation-studio/environments/ComicEnvironment.tsx: Forbidden animation \"animate-spin\" — not cathedral",
+        "client/src/components/manifestation-reader/adapters/index.ts: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002"
       ],
       "recommendations": [
         "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
-        "Add useReducedMotion() guard to canvas animation in lib/viewportLayers.ts",
-        "Add useReducedMotion() guard to canvas animation in lib/uploadPipeline.ts",
-        "Add useReducedMotion() guard to canvas animation in hooks/useWaveformVisualizer.ts",
-        "Add useReducedMotion() guard to canvas animation in hooks/useScrollRestoration.ts",
-        "Add useReducedMotion() guard to canvas animation in hooks/useMobileAudioGlow.ts",
-        "Add useReducedMotion() guard to canvas animation in hooks/useHarmonicSignature.ts",
-        "Add useReducedMotion() guard to canvas animation in hooks/useFrequencyGlow.ts",
-        "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
-        "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
-        "Add useReducedMotion() guard to canvas animation in contexts/PlayerContext.tsx",
-        "Add useReducedMotion() guard to canvas animation in contexts/HarmonicContext.tsx",
-        "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
-        "Add useReducedMotion() guard to canvas animation in components/WhatsNewModal.tsx",
-        "Add useReducedMotion() guard to canvas animation in components/VisionChamberRitual.tsx",
-        "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
-        "Add useReducedMotion() guard to canvas animation in components/SacredCanvas.tsx",
-        "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
-        "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
-        "Add useReducedMotion() guard to canvas animation in components/QRIdentityCard.tsx",
-        "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
-        "Add useReducedMotion() guard to canvas animation in components/ProvenanceUploadEngine.tsx",
-        "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
-        "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
-        "Add useReducedMotion() guard to canvas animation in components/ObservatoryCanvas.tsx",
-        "Add useReducedMotion() guard to canvas animation in components/NexusAvatarViewer.tsx",
-        "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
-        "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
-        "Add useReducedMotion() guard to canvas animation in components/ImagePositioner.tsx",
-        "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
-        "Add useReducedMotion() guard to canvas animation in components/GCodeViewer.tsx",
-        "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
-        "Add useReducedMotion() guard to canvas animation in components/FloatingAvatar.tsx",
-        "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
-        "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
-        "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
-        "Add useReducedMotion() guard to canvas animation in components/EditChapel.tsx",
-        "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
-        "Add useReducedMotion() guard to canvas animation in components/ContextualModal.tsx",
-        "Add useReducedMotion() guard to canvas animation in components/CometSpinner.tsx",
-        "Add useReducedMotion() guard to canvas animation in components/CinematicSplash.tsx",
-        "Add useReducedMotion() guard to canvas animation in components/CinematicSongHeader.tsx",
-        "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
-        "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
-        "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
-        "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
-        "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
-        "Add useReducedMotion() guard to canvas animation in components/AIChatBox.tsx",
         "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
         "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
         "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
@@ -49234,6 +49187,57 @@
         "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
         "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
         "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
+        "Add useReducedMotion() guard to canvas animation in lib/viewportLayers.ts",
+        "Add useReducedMotion() guard to canvas animation in lib/uploadPipeline.ts",
+        "Add useReducedMotion() guard to canvas animation in hooks/useWaveformVisualizer.ts",
+        "Add useReducedMotion() guard to canvas animation in hooks/useScrollRestoration.ts",
+        "Add useReducedMotion() guard to canvas animation in hooks/useMobileAudioGlow.ts",
+        "Add useReducedMotion() guard to canvas animation in hooks/useHarmonicSignature.ts",
+        "Add useReducedMotion() guard to canvas animation in hooks/useFrequencyGlow.ts",
+        "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
+        "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
+        "Add useReducedMotion() guard to canvas animation in contexts/PlayerContext.tsx",
+        "Add useReducedMotion() guard to canvas animation in contexts/HarmonicContext.tsx",
+        "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
+        "Add useReducedMotion() guard to canvas animation in components/WhatsNewModal.tsx",
+        "Add useReducedMotion() guard to canvas animation in components/VisionChamberRitual.tsx",
+        "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
+        "Add useReducedMotion() guard to canvas animation in components/SacredCanvas.tsx",
+        "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
+        "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
+        "Add useReducedMotion() guard to canvas animation in components/QRIdentityCard.tsx",
+        "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
+        "Add useReducedMotion() guard to canvas animation in components/ProvenanceUploadEngine.tsx",
+        "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
+        "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
+        "Add useReducedMotion() guard to canvas animation in components/ObservatoryCanvas.tsx",
+        "Add useReducedMotion() guard to canvas animation in components/NexusAvatarViewer.tsx",
+        "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
+        "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
+        "Add useReducedMotion() guard to canvas animation in components/ImagePositioner.tsx",
+        "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
+        "Add useReducedMotion() guard to canvas animation in components/GCodeViewer.tsx",
+        "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
+        "Add useReducedMotion() guard to canvas animation in components/FloatingAvatar.tsx",
+        "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
+        "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
+        "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
+        "Add useReducedMotion() guard to canvas animation in components/EditChapel.tsx",
+        "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
+        "Add useReducedMotion() guard to canvas animation in components/ContextualModal.tsx",
+        "Add useReducedMotion() guard to canvas animation in components/CometSpinner.tsx",
+        "Add useReducedMotion() guard to canvas animation in components/CinematicSplash.tsx",
+        "Add useReducedMotion() guard to canvas animation in components/CinematicSongHeader.tsx",
+        "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
+        "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
+        "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
+        "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
+        "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
+        "Add useReducedMotion() guard to canvas animation in components/AIChatBox.tsx",
+        "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
+        "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
+        "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
+        "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
         "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
         "Add useReducedMotion() guard to canvas animation in components/ui/sidebar.tsx",
         "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
@@ -49251,61 +49255,16 @@
         "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
         "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
         "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
-        "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
-        "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
-        "Add useReducedMotion() guard to canvas animation in components/manifestation-reader/adapters/index.ts",
-        "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
-        "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
         "Add useReducedMotion() guard to canvas animation in pages/manifestation-studio/environments/MusicEnvironment.tsx",
         "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
         "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
         "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
-        "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition"
+        "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
+        "Add useReducedMotion() guard to canvas animation in components/manifestation-reader/adapters/index.ts"
       ],
       "scoreImpact": 387,
       "filesAffected": [
         "client/src/App.tsx",
-        "client/src/lib/viewportLayers.ts",
-        "client/src/lib/uploadPipeline.ts",
-        "client/src/hooks/useWaveformVisualizer.ts",
-        "client/src/hooks/useScrollRestoration.ts",
-        "client/src/hooks/useMobileAudioGlow.ts",
-        "client/src/hooks/useHarmonicSignature.ts",
-        "client/src/hooks/useFrequencyGlow.ts",
-        "client/src/design-system/primitives.tsx",
-        "client/src/contexts/WorkEditorContext.tsx",
-        "client/src/contexts/PlayerContext.tsx",
-        "client/src/contexts/HarmonicContext.tsx",
-        "client/src/components/WitnessesPanel.tsx",
-        "client/src/components/WhatsNewModal.tsx",
-        "client/src/components/VisionChamberRitual.tsx",
-        "client/src/components/VersionHistoryModal.tsx",
-        "client/src/components/SacredCanvas.tsx",
-        "client/src/components/ReferenceCitePanel.tsx",
-        "client/src/components/QRIdentityCard.tsx",
-        "client/src/components/ProvenanceUploadEngine.tsx",
-        "client/src/components/ProvenanceTimeline.tsx",
-        "client/src/components/PNAWorkspacePanel.tsx",
-        "client/src/components/ObservatoryCanvas.tsx",
-        "client/src/components/NexusAvatarViewer.tsx",
-        "client/src/components/LineageGraph.tsx",
-        "client/src/components/KeeperCharacterSheet.tsx",
-        "client/src/components/ImagePositioner.tsx",
-        "client/src/components/GCodeViewer.tsx",
-        "client/src/components/FloatingAvatar.tsx",
-        "client/src/components/ExternalPlaylistsTab.tsx",
-        "client/src/components/EvidencePanel.tsx",
-        "client/src/components/EditChapel.tsx",
-        "client/src/components/CreativeDrawer.tsx",
-        "client/src/components/ContextualModal.tsx",
-        "client/src/components/CometSpinner.tsx",
-        "client/src/components/CinematicSplash.tsx",
-        "client/src/components/CinematicSongHeader.tsx",
-        "client/src/components/AddToPlaylistButton.tsx",
-        "client/src/components/AddToNamedPlaylistPopover.tsx",
-        "client/src/components/AddToMyListModal.tsx",
-        "client/src/components/AddToCollectionModal.tsx",
-        "client/src/components/AIChatBox.tsx",
         "client/src/pages/WitnessFlowPage.tsx",
         "client/src/pages/VisualWorksNewPage.tsx",
         "client/src/pages/VisualWorksDetailPage.tsx",
@@ -49357,6 +49316,51 @@
         "client/src/pages/AlbumDetailPage.tsx",
         "client/src/pages/AdminUsersPage.tsx",
         "client/src/pages/AdminNotificationsPage.tsx",
+        "client/src/lib/viewportLayers.ts",
+        "client/src/lib/uploadPipeline.ts",
+        "client/src/hooks/useWaveformVisualizer.ts",
+        "client/src/hooks/useScrollRestoration.ts",
+        "client/src/hooks/useMobileAudioGlow.ts",
+        "client/src/hooks/useHarmonicSignature.ts",
+        "client/src/hooks/useFrequencyGlow.ts",
+        "client/src/design-system/primitives.tsx",
+        "client/src/contexts/WorkEditorContext.tsx",
+        "client/src/contexts/PlayerContext.tsx",
+        "client/src/contexts/HarmonicContext.tsx",
+        "client/src/components/WitnessesPanel.tsx",
+        "client/src/components/WhatsNewModal.tsx",
+        "client/src/components/VisionChamberRitual.tsx",
+        "client/src/components/VersionHistoryModal.tsx",
+        "client/src/components/SacredCanvas.tsx",
+        "client/src/components/ReferenceCitePanel.tsx",
+        "client/src/components/QRIdentityCard.tsx",
+        "client/src/components/ProvenanceUploadEngine.tsx",
+        "client/src/components/ProvenanceTimeline.tsx",
+        "client/src/components/PNAWorkspacePanel.tsx",
+        "client/src/components/ObservatoryCanvas.tsx",
+        "client/src/components/NexusAvatarViewer.tsx",
+        "client/src/components/LineageGraph.tsx",
+        "client/src/components/KeeperCharacterSheet.tsx",
+        "client/src/components/ImagePositioner.tsx",
+        "client/src/components/GCodeViewer.tsx",
+        "client/src/components/FloatingAvatar.tsx",
+        "client/src/components/ExternalPlaylistsTab.tsx",
+        "client/src/components/EvidencePanel.tsx",
+        "client/src/components/EditChapel.tsx",
+        "client/src/components/CreativeDrawer.tsx",
+        "client/src/components/ContextualModal.tsx",
+        "client/src/components/CometSpinner.tsx",
+        "client/src/components/CinematicSplash.tsx",
+        "client/src/components/CinematicSongHeader.tsx",
+        "client/src/components/AddToPlaylistButton.tsx",
+        "client/src/components/AddToNamedPlaylistPopover.tsx",
+        "client/src/components/AddToMyListModal.tsx",
+        "client/src/components/AddToCollectionModal.tsx",
+        "client/src/components/AIChatBox.tsx",
+        "client/src/pages/manifestation-studio/TypeGateway.tsx",
+        "client/src/pages/admin/PhysicalDistributionPage.tsx",
+        "client/src/pages/admin/MissionControl.tsx",
+        "client/src/pages/admin/CommentModerationPage.tsx",
         "client/src/components/ui/spinner.tsx",
         "client/src/components/ui/sidebar.tsx",
         "client/src/components/reader/StoryboardBuilder.tsx",
@@ -49372,17 +49376,13 @@
         "client/src/components/layout/MainLayout.tsx",
         "client/src/components/layout/LeftRail.tsx",
         "client/src/components/domain/DomainEditor.tsx",
-        "client/src/pages/manifestation-studio/TypeGateway.tsx",
-        "client/src/pages/admin/PhysicalDistributionPage.tsx",
-        "client/src/pages/admin/MissionControl.tsx",
-        "client/src/pages/admin/CommentModerationPage.tsx",
-        "client/src/components/manifestation-reader/adapters/index.ts",
         "client/src/pages/manifestation-studio/environments/VideoEnvironment.tsx",
         "client/src/pages/manifestation-studio/environments/MusicEnvironment.tsx",
         "client/src/pages/manifestation-studio/environments/ManuscriptEnvironment.tsx",
         "client/src/pages/manifestation-studio/environments/LyricsEnvironment.tsx",
         "client/src/pages/manifestation-studio/environments/GcodeEnvironment.tsx",
-        "client/src/pages/manifestation-studio/environments/ComicEnvironment.tsx"
+        "client/src/pages/manifestation-studio/environments/ComicEnvironment.tsx",
+        "client/src/components/manifestation-reader/adapters/index.ts"
       ]
     }
   ],
