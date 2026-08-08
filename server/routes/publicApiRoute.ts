@@ -22,6 +22,7 @@
 
 import { Router, Request, Response, NextFunction } from "express";
 import { getPublicSongs, getSongWithCreator, getUserById, getDb } from "../utils/db";
+import { buildRokuHome } from "../services/rokuCatalog";
 
 export const publicApiRouter = Router();
 
@@ -118,6 +119,23 @@ publicApiRouter.get("/api/v1/catalog", async (req: Request, res: Response) => {
   } catch (err) {
     console.error("[API] /catalog error:", err);
     res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// ── Roku SceneGraph Home Feed ─────────────────────────────────────────────────
+// GET /api/v1/roku/home
+// A compact read-only projection for the native Living Nexus Roku channel.
+publicApiRouter.get("/api/v1/roku/home", async (req: Request, res: Response) => {
+  try {
+    const baseUrl = `${req.protocol}://${req.get("host")}`;
+    const records = await getPublicSongs({ limit: 48 });
+    const home = buildRokuHome(records as any[], baseUrl);
+
+    res.setHeader("Cache-Control", "public, max-age=300, stale-while-revalidate=900");
+    res.json(home);
+  } catch (err) {
+    console.error("[API] /roku/home error:", err);
+    res.status(500).json({ error: "Unable to prepare the Roku catalog." });
   }
 });
 

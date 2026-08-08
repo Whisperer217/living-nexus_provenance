@@ -11,13 +11,15 @@
     "DRIZZLE_DATABASE_URL": "mysql://4ArHJRmPMKBQTkw.2e571ac7914f:580udJF5SFeu3v3kSYzk@gateway02.us-east-1.prod.aws.tidbcloud.com:4000/7kHkqvMBX9Ci3pQfWTqqQr?ssl={\"rejectUnauthorized\":true}",
     "MANUS_WEBDEV_PROJECT_ID": "7kHkqvMBX9Ci3pQfWTqqQr"
   },
-  "experiments": null,
+  "experiments": [
+    "no_db_push"
+  ],
   "git_remote": {
     "repo_url": "s3://vida-prod-gitrepo/webdev-git/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr",
-    "access_key_id": "ASIAZV3A2ECZFVB4IGEI",
-    "secret_access_key": "KH0Iz5NKdi03s6BTkQzxbwtwiO2Q4upyK9S9lwKv",
-    "session_token": "IQoJb3JpZ2luX2VjEGgaCXVzLWVhc3QtMSJHMEUCIH1rDKmlR6VGTqK4RVLdtnzJmnFvTQtE0OAAjNNf3HbnAiEA0GY2mCqD0mTllFGelzec9ufIzX0B+Er8XKa9Alp8BmQq9QMIMRAEGgw2NjUzODYwOTg4NjYiDDB3Ud/llVcLsgvkiCrSAwMhFO+I29sJUcLbO/uFqM57UEmJG/wR2ssQqhc1+lRRIeI9fu9YONpdbzGEMHfA3xgeKhx/yGSvvH3iUDe5xphzyPx5BPQy4k32iHzxwP2Wzq5NWxVlNfE190767MN4EQw7S/q/WEY9M3xvKuUffSLtIMgVlMzzlU4yoVDyRWdaPoJa/93AoPNVu1WvcVQ6eEeIwXgA+Zgbg4j5F0eey3oQowVUoBSoQP0mWE5fhs9XgIlNYXH6LG8xdIb7wXR3DL3pZpNPJ6eyGled8WzxbBhXnUaSWtS6ePZyFEJa5CYa9YG0OkofjIV592nsSjlcEFydZ4OaWEIzuZigm3IeaevKnMtQFNAb4UTjZuaODN+hkCkNvT8oYxOwbYHxlWx67M7v5MAig/2qizx8MMG0EET80Dk6IlzPcTAt7qx9Eg1Iw5U68lhxJ5IeCzMve22rsJj0VzO9fkb3grW0Zxb/UoNRQLUZ98k29C9jzp3I9WHxNP20yqpSYa8ZVj5lajanVf1uVtDDpStGGGZ11ljFEsWhjE5QV23OI73uOz20LDWb5aKD01isikdFJQNxxB7+JmpELLj1FhwVJhS65WVooWp1A4KebAVs0Y1Isq13am5+CUYww5LP0wY6nQFFkNyBpiDzW45jNjZ2B9JazC5UQZOb4GOMdgXp/4VqwFEArABrmvprbWbRGQ4D0ia3ZiTGALsKPcFaPb9Aspi/VTPrJTTbODk1YWnuMCtjKcDmw8jf+rXoehWXD0viZjtpAaaO8dccL9s4IqEOwF3bejhTb5+3fEjpMpDkvXkJ6glyNCGChiFcVFJsolLD2dQwxCFbbjMTgHcotvOV",
-    "expiration": "2026-08-06T11:37:39.000Z",
+    "access_key_id": "ASIAZV3A2ECZCMLPDHPW",
+    "secret_access_key": "u0vuv+nDAAbTR20pcnjeXR3/eKYEtYygGKJmS5gk",
+    "session_token": "IQoJb3JpZ2luX2VjEKf//////////wEaCXVzLWVhc3QtMSJGMEQCICd4o1bTKSvZOyeHufS7ru9BsIjLCEX99WrozGumT/ETAiByFtp/PPLhOxyV880jDUuCzN5l/eDehyVgkAXPjMlYxSr1AwhvEAQaDDY2NTM4NjA5ODg2NiIM299lwjuh/jUeVoXEKtIDujN0tdHs4g8yojtJZc8+PoWTYzgpm/4LcZ4EIO7JxQTisZcpS8xzLRBvdTjl4d7O5njcN41XrfsPeEZZQyF/pi2MCTxprO6+35LZuflG0qDSBJxvoACsGsJWsC+1O8vK9w1i8QtNML9m7AZAUgL17UhHJnyqDwTZ8PFT/WpbkGqSiBL0Gwd8WPf/Cplf5rLGYbn34KxDUDyI0tCx9b8DVsG0MtkazIbDjHF4AZtIVUdTY6y+/vurvUDX5H0qYP7Hsm8rWYe6HURCSVEsnJMeuHGTHHi5QOos+9x6zkay6jsj8Bw4ris+VsHK94OTaUPB9suOn0dlI11DFp/GTSihB4Z1hTOp0CaRLG2wQGoFQdzwkGEzsdb39Ac/jy4lloVdS5F+kQ+ndSHBi8ek/bmqcO28MdqsOPvmbnK5m1KDhAmFpmI9BHv7iSlUjKji6UWfWmZt+KP0f1fh31l8xsZF0cmQA/Snz3Pko/o2blf08PUVaJIP9h74uNouRTCR8W3yR7huv252Lm4eT4YeviDbf+foiKBn2c7rQ2I2ccg77wPBLWQ7dAwfYp0UQvesFGgge/C0Mc7j6O4cZTr7hU0tCC1uKWpXtJcRzoRMoNXDCJTXwjD079zTBjqeAd44eL10fSMUxbVYi+cioT6BjbI/vawUHI0Ef1SNuGJFat5J7RA/U/GGO0WZvJ+0JsAfHRWUmFGJI8f9nilL509gU6bbDF/JISyQMfxvfn//bOFNKHgX9yxsrL7lTfOZPyk0C19flHPs4MW64cVMWbfqHvG9sirY8ui+UEFiPWwzg29muPG4ZGQSva72fcKt787ds6PRdOZeVgF0aWDW",
+    "expiration": "2026-08-09T02:06:44.000Z",
     "backend": "GIT_BACKEND_S3"
   },
   "name": "living-nexus",

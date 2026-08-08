@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="ArtifactDetail" extends="Group">
+  <interface>
+    <field id="artifact" type="node" onChange="showArtifact" />
+    <field id="showProvenance" type="boolean" value="false" onChange="toggleProvenance" />
+    <field id="playbackState" type="string" onChange="showPlaybackState" />
+  </interface>
+  <script type="text/brightscript" uri="pkg:/components/ArtifactDetail.brs" />
+  <children>
+    <Rectangle width="1280" height="720" color="0x0A0806EE" />
+    <Rectangle translation="[72, 74]" width="1136" height="572" color="0x1C1A14FF" />
+    <Poster id="poster" translation="[110, 118]" width="340" height="340" loadDisplayMode="scaleToFill" />
+    <Label id="overline" translation="[500, 122]" width="610" height="24" text="LIVING NEXUS  ·  MANIFESTATION" color="0xC49A28FF" />
+    <Label id="title" translation="[500, 160]" width="610" height="70" color="0xE8DFC8FF" />
+    <Label id="creator" translation="[500, 238]" width="610" height="30" color="0xC9C0A8FF" />
+    <Label id="wid" translation="[500, 284]" width="610" height="28" color="0xC49A28FF" />
+    <Label id="registered" translation="[500, 319]" width="610" height="24" color="0xC9C0A8FF" />
+    <Label id="instructions" translation="[500, 378]" width="610" height="28" text="OK  Listen     *  Inspect provenance     Back  Return" color="0xE8DFC8FF" />
+    <Label id="playback" translation="[500, 417]" width="610" height="24" color="0xC49A28FF" />
+    <Label id="testimonyLabel" translation="[500, 466]" width="610" height="24" text="TESTIMONY" color="0xC49A28FF" visible="false" />
+    <Label id="testimony" translation="[500, 500]" width="610" height="105" color="0xE8DFC8FF" wrap="true" numLines="4" visible="false" />
+  </children>
+</component>

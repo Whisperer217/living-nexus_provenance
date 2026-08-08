@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="ContentLoaderTask" extends="Task">
+  <interface>
+    <field id="endpoint" type="string" />
+    <field id="content" type="node" />
+    <field id="error" type="string" />
+  </interface>
+  <script type="text/brightscript" uri="pkg:/components/ContentLoaderTask.brs" />
+</component>

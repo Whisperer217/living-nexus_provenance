@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-08-02T17:25:53.508Z",
-  "totalLessons": 9,
+  "lastUpdated": "2026-08-08T14:15:04.255Z",
+  "totalLessons": 10,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -180,6 +180,31 @@
         "CreativeDrawer",
         "freeze"
       ]
+    },
+    {
+      "date": "2026-08-08",
+      "category": "architecture",
+      "problem": "Living Nexus had rich public audio and registry APIs but no native television surface. A browser-wrapper approach would have made the creator's attribution and immutable WID record difficult to navigate with a Roku remote and risked creating an independent, stale data model.",
+      "solution": "Added a bounded, read-only Roku home projection from the existing public song records and a standalone SceneGraph/BrightScript package. The channel uses a Task node for HTTPS JSON loading and carries creator attribution, WID, registration time, optional testimony, and canonical verification links as immutable presentation fields.",
+      "files": [
+        "server/services/rokuCatalog.ts",
+        "server/routes/publicApiRoute.ts",
+        "server/tests/rokuCatalog.test.ts",
+        "roku/",
+        "docs/roku/ADR-001-native-roku-companion.md",
+        "docs/roku/API_CONTRACT.md"
+      ],
+      "score": 0,
+      "tags": [
+        "roku",
+        "scenegraph",
+        "brightscript",
+        "public-api",
+        "witness-id",
+        "provenance",
+        "tv"
+      ],
+      "id": "LESSON-010"
     }
   ]
 }

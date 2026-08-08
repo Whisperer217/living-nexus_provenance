@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="ArtifactCard" extends="Group">
+  <interface>
+    <field id="itemContent" type="node" onChange="showContent" />
+    <field id="focusPercent" type="float" onChange="showFocus" />
+  </interface>
+  <script type="text/brightscript" uri="pkg:/components/ArtifactCard.brs" />
+  <children>
+    <Rectangle id="cardSurface" width="258" height="190" color="0x1C1A14FF" />
+    <Poster id="poster" width="258" height="124" loadDisplayMode="scaleToFill" />
+    <Rectangle id="focusBorder" width="258" height="190" color="0x00000000" borderColor="0xC49A28FF" borderWidth="3" opacity="0" />
+    <Label id="title" translation="[14, 133]" width="232" height="26" color="0xE8DFC8FF" />
+    <Label id="creator" translation="[14, 161]" width="232" height="21" color="0xC9C0A8FF" />
+  </children>
+</component>

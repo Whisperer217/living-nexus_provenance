@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="MainScene" extends="Scene">
+  <script type="text/brightscript" uri="pkg:/components/MainScene.brs" />
+  <children>
+    <Rectangle id="void" width="1280" height="720" color="0x0A0806FF" />
+    <Rectangle id="halo" translation="[0, 0]" width="1280" height="180" color="0x1C1A14FF" />
+    <Label id="eyebrow" translation="[74, 54]" width="900" height="28" text="LIVING NEXUS  ·  THE LIVING REGISTRY" color="0xC49A28FF" />
+    <Label id="heading" translation="[74, 86]" width="1080" height="58" text="Witnessed audio, held in memory." color="0xE8DFC8FF" />
+    <Label id="subheading" translation="[74, 151]" width="920" height="34" text="Every work carries authorship, testimony, and a path back to its record." color="0xC9C0A8FF" />
+    <Label id="status" translation="[74, 194]" width="1000" height="28" color="0xC49A28FF" />
+    <RowList id="artifactRows" translation="[74, 254]" itemSize="[258, 190]" itemSpacing="[22, 22]" rowItemSize="[258, 190]" rowItemSpacing="[22, 22]" rowLabelOffset="[0, -34]" rowFocusAnimationStyle="floatingFocus" rowItemComponentName="ArtifactCard" />
+    <ArtifactDetail id="artifactDetail" visible="false" />
+    <Audio id="player" />
+  </children>
+</component>
