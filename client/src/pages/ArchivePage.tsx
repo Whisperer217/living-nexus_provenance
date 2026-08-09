@@ -700,7 +700,12 @@ export default function ArchivePage() {
         </nav>
 
         {/* ── Upload action ─────────────────────────────────────────────── */}
-        <div className="flex items-center justify-end mb-6">
+        <div className="flex items-center justify-end gap-2 mb-6">
+          <Link href="/my-archive/export">
+            <Button size="sm" variant="outline" style={{ borderColor: "var(--ln-border)", color: "var(--ln-smoke)" }}>
+              <Download className="w-3 h-3 mr-1" /> Download My Archive
+            </Button>
+          </Link>
           <Link href="/upload">
             <Button size="sm" style={{ background: "var(--ln-gold)", color: "var(--ln-parchment)" }}>
               <Upload className="w-3 h-3 mr-1" /> Upload New

@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import Stripe from "stripe";
 import { z } from "zod";
 import { generateShareArtifact } from "../services/shareArtifactService";
@@ -205,6 +206,56 @@ export const onboardingRouter = router({
       if (!data) throw new TRPCError({ code: "NOT_FOUND", message: "User data not found" });
       return data;
     }),
+    /** Batch export: returns up to 10 works at a time with ALL fields including file URLs.
+     *  Used by the Creator Data Export page to build ZIP downloads. */
+    exportBatch: protectedProcedure
+      .input(z.object({ offset: z.number().int().min(0).default(0), limit: z.number().int().min(1).max(50).default(10) }))
+      .query(async ({ ctx, input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+        const { songs: songsTable, users: usersTable } = await import("../../drizzle/schema");
+        const { eq, desc } = await import("drizzle-orm");
+        const [total, batch] = await Promise.all([
+          db.select({ count: sql`count(*)` }).from(songsTable).where(eq(songsTable.userId, ctx.user.id)),
+          db.select().from(songsTable)
+            .where(eq(songsTable.userId, ctx.user.id))
+            .orderBy(desc(songsTable.createdAt))
+            .limit(input.limit)
+            .offset(input.offset),
+        ]);
+        const totalCount = Number((total[0] as any).count ?? 0);
+        const works = batch.map((s: any) => ({
+          id: s.id,
+          title: s.title ?? "Untitled",
+          witnessId: s.witnessId ?? null,
+          lyricsWid: s.lyricsWid ?? null,
+          contentType: s.contentType ?? "audio",
+          genre: s.genre ?? null,
+          status: s.status ?? "Draft",
+          aiDisclosure: s.aiDisclosure ?? "original",
+          aiConsent: s.aiConsent ?? false,
+          bpm: s.bpm ?? null,
+          musicalKey: s.musicalKey ?? null,
+          isrc: s.isrc ?? null,
+          duration: s.duration ?? null,
+          lyricsText: s.lyricsText ?? null,
+          haaiOriginStory: s.haaiOriginStory ?? null,
+          haaiVisualConcept: s.haaiVisualConcept ?? null,
+          haaiStyleLanguage: s.haaiStyleLanguage ?? null,
+          haaiInstrumentation: s.haaiInstrumentation ?? null,
+          haaiVocalConveyance: s.haaiVocalConveyance ?? null,
+          haaiLyricalInspiration: s.haaiLyricalInspiration ?? null,
+          haaiEmotionalTone: s.haaiEmotionalTone ?? null,
+          haaiDeclaredAt: s.haaiDeclaredAt ?? null,
+          fileUrl: s.fileUrl ?? null,
+          fileKey: s.fileKey ?? null,
+          coverArtUrl: s.coverArtUrl ?? null,
+          videoUrl: s.videoUrl ?? null,
+          createdAt: s.createdAt ?? null,
+          updatedAt: s.updatedAt ?? null,
+        }));
+        return { totalCount, offset: input.offset, limit: input.limit, works };
+      }),
 
     /** Submit a data deletion request — sets dataDeletionRequestedAt and notifies the owner. */
     requestDeletion: protectedProcedure.mutation(async ({ ctx }) => {
