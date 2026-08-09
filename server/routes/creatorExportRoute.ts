@@ -21,21 +21,16 @@ const createArchive = _req("archiver") as (format: string, opts?: ArchiverOption
 import { getDb } from "../utils/db";
 import { songs } from "../../drizzle/schema";
 import { eq, desc } from "drizzle-orm";
-import { jwtVerify } from "jose";
-import { COOKIE_NAME } from "@shared/const";
 import { Readable } from "stream";
+import { sdk } from "../_core/sdk";
 
 export const creatorExportRouter = Router();
 
 // ── Auth helper ─────────────────────────────────────────────────────────────
-async function getUserIdFromCookie(req: Request): Promise<number | null> {
+async function getUserIdFromRequest(req: Request): Promise<number | null> {
   try {
-    const token = req.cookies?.[COOKIE_NAME];
-    if (!token) return null;
-    const secret = new TextEncoder().encode(process.env.JWT_SECRET ?? "fallback");
-    const { payload } = await jwtVerify(token, secret);
-    if (typeof payload.userId !== "number") return null;
-    return payload.userId;
+    const user = await sdk.authenticateRequest(req);
+    return user?.id ?? null;
   } catch {
     return null;
   }
@@ -64,7 +59,7 @@ function guessExt(url: string, fallback: string): string {
 // ── Main export endpoint ─────────────────────────────────────────────────────
 creatorExportRouter.get("/api/creator-export/batch", async (req: Request, res: Response) => {
   // 1. Authenticate
-  const userId = await getUserIdFromCookie(req);
+  const userId = await getUserIdFromRequest(req);
   if (!userId) {
     res.status(401).json({ error: "Not authenticated" });
     return;
