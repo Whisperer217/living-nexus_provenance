@@ -16,7 +16,7 @@ import { storagePut } from "../utils/storage";
 import { micronize } from "../services/imageProcessing";
 import { invokeLLM } from "../_core/llm";
 import {
-  addComment, createSong, deleteSong, getAllCreators,
+  addComment, createSong, deleteSong, hardDeleteSong, getAllCreators,
   getCommentsBySong, getPublicSongs, getSongById,
   getSongsByUser, getSongWithCreator, getSongWithCreatorForOwner, getTipsBySong, reorderSongs, getNextDisplayOrder,
   getUserById, incrementPlayCount, recordDownload,
@@ -919,6 +919,12 @@ export const songsRouter = router({
       };
     }),
     delete: protectedProcedure.input(z.object({ songId: z.number() })).mutation(async ({ ctx, input }) => { await deleteSong(input.songId, ctx.user.id); return { success: true }; }),
+    hardDelete: protectedProcedure
+      .input(z.object({ songId: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        const result = await hardDeleteSong(input.songId, ctx.user.id);
+        return result;
+      }),
     batchDelete: protectedProcedure
       .input(z.object({ songIds: z.array(z.number()).min(1).max(100) }))
       .mutation(async ({ ctx, input }) => {

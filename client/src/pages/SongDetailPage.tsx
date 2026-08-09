@@ -406,6 +406,18 @@ export default function SongDetailPage() {
       </div>
     </div>
   );
+  // Hard-deleted works return null from the DB — the row no longer exists.
+  // Soft-deleted (status="Deleted") works are still in the DB but should not be publicly accessible.
+  if (song.status === "Deleted") return (
+    <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--ln-coal)" }}>
+      <div className="text-center max-w-sm mx-auto px-6">
+        <div className="text-4xl mb-4" style={{ color: "var(--ln-gold)", fontFamily: "'Cinzel', serif" }}>◎</div>
+        <h1 className="text-lg font-semibold mb-2" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>Work Removed</h1>
+        <p className="text-sm mb-6" style={{ color: "var(--ln-smoke)" }}>This work has been removed from the Living Nexus Registry by its creator.</p>
+        <Link href="/explore"><Button style={{ background: "var(--ln-gold)", color: "var(--ln-parchment)" }}>Explore Works</Button></Link>
+      </div>
+    </div>
+  );
 
   const tipsEnabled = creator?.stripeAccountStatus === "enabled";
   const artistName = creator?.artistHandle || creator?.name || "Unknown Artist";

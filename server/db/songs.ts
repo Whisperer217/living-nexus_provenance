@@ -2213,3 +2213,98 @@ export async function getCreatorSongsNotInCollection(creatorId: number) {
     )
     .orderBy(desc(songs.createdAt));
 }
+
+/**
+ * HARD DELETE — permanently removes the song row and all associated data.
+ * Returns a deletion proof record for the provenance chain.
+ * 
+ * NOTE: S3 file bytes cannot be deleted via the current storage proxy.
+ * The fileKey and coverArtKey are logged for manual S3 cleanup if needed.
+ * The database row is fully removed — the work will 404 everywhere on the platform.
+ */
+export async function hardDeleteSong(songId: number, userId: number): Promise<{
+  success: boolean;
+  deletionProof: {
+    songId: number;
+    wid: string | null;
+    title: string | null;
+    deletedAt: string;
+    deletedBy: number;
+    fileKey: string | null;
+    coverArtKey: string | null;
+    s3CleanupPending: boolean;
+  };
+}> {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+
+  // 1. Fetch the song record to capture provenance data before deletion
+  const [song] = await db
+    .select({
+      id: songs.id,
+      userId: songs.userId,
+      witnessId: songs.witnessId,
+      title: songs.title,
+      fileKey: songs.fileKey,
+      fileUrl: songs.fileUrl,
+      coverArtUrl: songs.coverArtUrl,
+    })
+    .from(songs)
+    .where(and(eq(songs.id, songId), eq(songs.userId, userId)))
+    .limit(1);
+
+  if (!song) throw new Error("Work not found or access denied");
+
+  const deletedAt = new Date().toISOString();
+
+  // 2. Record a deletion event in workEvents BEFORE deleting the row
+  const { workEvents } = await import("../../drizzle/schema");
+  await db.insert(workEvents).values({
+    songId,
+    eventType: "hard_deleted",
+    eventLabel: `Work permanently deleted by creator`,
+    eventData: {
+      wid: song.witnessId,
+      title: song.title,
+      fileKey: song.fileKey,
+      deletedAt,
+      deletedBy: userId,
+    },
+    actorId: userId,
+    isSystemEvent: false,
+    occurredAt: new Date(),
+  }).catch(() => {
+    // workEvents may cascade-delete with the song — that is acceptable
+  });
+
+  // 3. Remove from all join tables (same as soft delete)
+  const { userCollectionTracks, playlistTracks, playlistItems } = await import("../../drizzle/schema");
+  await db.delete(userCollectionTracks).where(eq(userCollectionTracks.songId, songId));
+  await db.delete(playlistTracks).where(eq(playlistTracks.songId, songId));
+  await db.delete(playlistItems).where(eq(playlistItems.songId, songId));
+
+  // 4. Hard-delete the song row — cascades to workEvents, likes, comments, etc.
+  await db.delete(songs).where(and(eq(songs.id, songId), eq(songs.userId, userId)));
+
+  // 5. Decrement slot counter
+  await db.execute(sql`UPDATE users SET songSlotsUsed = GREATEST(songSlotsUsed - 1, 0) WHERE id = ${userId}`);
+
+  // 6. Log S3 keys for manual cleanup (storage proxy does not support DELETE)
+  if (song.fileKey) {
+    console.log(`[HardDelete] S3 cleanup pending — fileKey: ${song.fileKey} (songId: ${songId})`);
+  }
+
+  return {
+    success: true,
+    deletionProof: {
+      songId,
+      wid: song.witnessId ?? null,
+      title: song.title ?? null,
+      deletedAt,
+      deletedBy: userId,
+      fileKey: song.fileKey ?? null,
+      coverArtKey: null, // coverArtUrl is a CDN URL, key not stored separately
+      s3CleanupPending: !!song.fileKey,
+    },
+  };
+}

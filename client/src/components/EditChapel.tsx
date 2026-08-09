@@ -199,10 +199,10 @@ export function EditChapel({ song, onClose, onSaved }: EditChapelProps) {
     },
   });
 
-  const deleteSong = trpc.songs.delete.useMutation({
+  const deleteSong = trpc.songs.hardDelete.useMutation({
     onSuccess: () => {
       utils.songs.mySongs.invalidate();
-      toast.success("Work removed");
+      toast.success("Work permanently deleted from registry");
       onClose();
     },
     onError: (err: { message?: string }) => {

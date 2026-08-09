@@ -196,6 +196,8 @@ interface PlayerContextValue {
   addComment: (trackId: string, comment: Comment) => void;
   incrementShare: (trackId: string) => void;
   backgroundCreatorHandle: string | null;
+  /** Remove a track from the queue by its numeric song ID. If it is currently playing, skip to next. */
+  removeFromQueue: (songId: number) => void;
 }
 
 const PLAYER_SESSION_KEY = "ln_player_session";
@@ -1122,6 +1124,22 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     return { ...s, tracks: updated };
   }), []);
 
+  const removeFromQueue = useCallback((songId: number) => {
+    setState(s => {
+      const numericId = String(songId);
+      const filtered = s.tracks.filter((t: Track) => t.id !== numericId);
+      if (filtered.length === s.tracks.length) return s; // not in queue
+      // If the deleted track is currently playing, advance to next
+      const curIdx = s.currentIdx;
+      const currentTrack = s.tracks[curIdx];
+      const isCurrentlyPlaying = currentTrack?.id === numericId;
+      const newIdx = isCurrentlyPlaying
+        ? Math.min(curIdx, filtered.length - 1)
+        : s.tracks.slice(0, curIdx).filter((t: Track) => t.id !== numericId).length;
+      return { ...s, tracks: filtered, currentIdx: Math.max(0, newIdx) };
+    });
+  }, []);
+
   const patchTrack = useCallback((trackId: string, patch: Partial<Track>) => {
     setState(s => ({
       ...s,
@@ -1291,6 +1309,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       setProfileAvatar, setProfileBanner,
       addTip, addTrackTip, addComment, incrementShare,
       backgroundCreatorHandle,
+      removeFromQueue,
     }}>
       {children}
     </PlayerContext.Provider>

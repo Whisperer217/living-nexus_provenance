@@ -16,6 +16,7 @@
 */
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { usePlayer } from "@/contexts/PlayerContext";
 import { createPortal } from "react-dom";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
@@ -151,6 +152,7 @@ function RelicRings() {
 
 export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) {
   const utils = trpc.useUtils();
+  const { removeFromQueue } = usePlayer();
 
   /* ── Form state ── */
   const [title, setTitle]               = useState(song.title ?? "");
@@ -268,10 +270,18 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
     },
   });
 
-  const deleteSong = trpc.songs.delete.useMutation({
-    onSuccess: () => {
+  const deleteSong = trpc.songs.hardDelete.useMutation({
+    onSuccess: (data) => {
+      removeFromQueue(song.id);
       utils.songs.mySongs.invalidate();
-      toast.success("Work removed");
+      utils.songs.exploreIndex.invalidate();
+      // Show deletion proof
+      const proof = data?.deletionProof;
+      if (proof?.wid) {
+        toast.success(`Work permanently deleted. WID: ${proof.wid.slice(0, 20)}…`);
+      } else {
+        toast.success("Work permanently deleted from registry");
+      }
       onClose();
     },
     onError: (err: { message?: string }) => {

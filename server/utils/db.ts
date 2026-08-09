@@ -6236,3 +6236,6 @@ export async function getProjectIdByCollectionId(collectionId: number): Promise<
   }
   return bestId;
 }
+
+// Re-export hardDeleteSong from db/songs.ts
+export { hardDeleteSong } from "../db/songs";
