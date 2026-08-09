@@ -26,6 +26,7 @@ import { workRouter } from "../routes/workRoute";
 import { workerCallbackRouter } from "../routes/workerCallbackRoute";
 import { mcpRouter } from "../mcp/index";
 import { sitemapRouter } from "../routes/sitemapRoute";
+import { creatorExportRouter } from "../routes/creatorExportRoute";
 import { bulkDownloadRouter } from "../routes/bulkDownloadRoute";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
@@ -179,6 +180,7 @@ async function startServer() {
   app.use(downloadRouter);
   // Licensed bulk download — GET /api/bulk-download/:token (streams ZIP, token valid 15 min)
   app.use(bulkDownloadRouter);
+  app.use(creatorExportRouter);
   // Physical distribution export (admin-only)
   app.use(physicalExportRouter);
   // Full database export for migration (owner/admin-only)

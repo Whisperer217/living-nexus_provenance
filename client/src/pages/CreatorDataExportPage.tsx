@@ -159,16 +159,28 @@ export default function CreatorDataExportPage() {
   const creatorName = user?.name ?? user?.email ?? "Creator";
 
   const handleDownloadBatch = async () => {
-    if (!works.length) return;
+    if (!data) return;
     setDownloading(true);
     try {
-      const batchLabel = `batch-${currentBatch}-of-${totalBatches}`;
-      await downloadBatchAsZip(works, creatorName, batchLabel);
+      // Use server-side endpoint — fetches actual binary files from CDN
+      const url = `/api/creator-export/batch?offset=${offset}&limit=${BATCH_SIZE}`;
+      const resp = await fetch(url, { credentials: "include" });
+      if (!resp.ok) {
+        const err = await resp.json().catch(() => ({ error: "Download failed" }));
+        throw new Error((err as any).error ?? "Download failed");
+      }
+      const blob = await resp.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.download = `living-nexus-archive-batch-${currentBatch}-of-${totalBatches}.zip`;
+      a.click();
+      URL.revokeObjectURL(blobUrl);
       setDownloadedBatches(prev => new Set(Array.from(prev).concat([currentBatch])));
-      toast.success(`Batch ${currentBatch} downloaded — ${works.length} works`);
-    } catch (err) {
+      toast.success(`Batch ${currentBatch} downloaded — ${works.length} works (with actual audio and image files)`);
+    } catch (err: any) {
       console.error(err);
-      toast.error("Download failed. Please try again.");
+      toast.error(err?.message ?? "Download failed. Please try again.");
     } finally {
       setDownloading(false);
     }
