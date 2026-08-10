@@ -1683,23 +1683,23 @@ export type InsertKeeperCharacterSheet = typeof keeperCharacterSheets.$inferInse
 // ─── Keeper Chat Archives ─────────────────────────────────────────────────────
 export const keeperChatArchives = mysqlTable("keeper_chat_archives", {
   id: int("id").autoincrement().primaryKey(),
-  userId: int("user_id").notNull(),
+  userId: int("userId").notNull(),
   title: varchar("title", { length: 200 }),
   messages: text("messages"),
   /** Stewardship mode / persona at archive time */
-  personaId: varchar("persona_id", { length: 64 }),
+  personaId: varchar("personaId", { length: 64 }),
   /** Optional bound work for cinematic listen+chat threads */
-  songId: int("song_id"),
-  songWid: varchar("song_wid", { length: 128 }),
-  songTitle: varchar("song_title", { length: 256 }),
-  messageCount: int("message_count").default(0).notNull(),
+  songId: int("songId"),
+  songWid: varchar("songWid", { length: 128 }),
+  songTitle: varchar("songTitle", { length: 256 }),
+  messageCount: int("messageCount").default(0).notNull(),
   /** SHA-256 of messages payload — used when sealing as WID-CNV */
-  contentHash: varchar("content_hash", { length: 64 }),
+  contentHash: varchar("contentHash", { length: 64 }),
   /** Sealed conversation WID (WID-CNV-…) when registered */
-  diaryWid: varchar("diary_wid", { length: 128 }),
-  sealedAt: timestamp("sealed_at"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+  diaryWid: varchar("diaryWid", { length: 128 }),
+  sealedAt: timestamp("sealedAt"),
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 }, (t) => ({
   userIdx: index("keeper_chat_archives_user_id_idx").on(t.userId),
   widIdx: index("keeper_chat_archives_diary_wid_idx").on(t.diaryWid),
