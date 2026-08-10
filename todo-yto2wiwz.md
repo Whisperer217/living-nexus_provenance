@@ -11,3 +11,7 @@
 - [x] Hand off the authenticated Draft-registration, WID tone/waveform, and visual/profile publish-gate checks to the user at their request; no production work was created by the agent.
 - [x] Validate a pre-Loop public work (`/song/1`) and creator profile (`/creator/1`): both load with the WID chain, participation defaults, 5W profile, and testimony section.
 - [x] Confirm the live logged-out Register route presents the Loop registration entry point and sign-in handoff.
+- [x] Review PR #3 for the batch Draft/Published toggle and Loop domain hierarchy scope: clean merge state, five focused files, and no schema or migration changes.
+- [x] Merge approved PR #3 (`cursor/loop-post-release-followups-0e97`) into `main` as `0af48d55`.
+- [ ] Run release checks and publish the post-release follow-up revision.
+- [ ] Validate the live batch-status controls and music-focused Loop creator domain while preserving hidden non-music shelves.
