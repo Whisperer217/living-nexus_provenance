@@ -50,6 +50,10 @@ export default function LoopCreatorPage() {
     { creatorId },
     { enabled: !!creatorId && !!user, staleTime: 30_000 }
   );
+  const { data: testimonies = [] } = trpc.testimony.getByCreator.useQuery(
+    { creatorId },
+    { enabled: !!creatorId, staleTime: 60_000 }
+  );
   const publicWitnessCount = trpc.witness.count.useQuery(
     { creatorId },
     { enabled: !!creatorId && !user, staleTime: 60_000 }
@@ -98,7 +102,13 @@ export default function LoopCreatorPage() {
 
   const isOwner = !!user && user.id === creator.id;
   const displayName = creator.artistHandle || creator.name || "Creator";
-  const bio = creator.bio || creator.tagline || "";
+  const bio = creator.bio || creator.originStatement || creator.tagline || "";
+  const why = creator.originStatement || creator.creativeMission || creator.bio || "";
+  const where = creator.location || "";
+  const whenJoined = creator.createdAt
+    ? new Date(creator.createdAt).toLocaleDateString(undefined, { year: "numeric", month: "short" })
+    : "";
+  const what = creator.primaryGenre || "Music";
   const witnessed = songs.filter((s) => !!s.witnessId).length;
   const isWitnessing = !!witnessStatus.data?.witnessing;
 
@@ -238,13 +248,20 @@ export default function LoopCreatorPage() {
           </div>
 
           <p
-            className="text-lg sm:text-xl max-w-2xl mb-8"
+            className="text-lg sm:text-xl max-w-2xl mb-4"
             style={{ fontFamily: "'Cormorant Garamond', serif", color: "rgba(237,229,208,0.8)" }}
           >
-            {bio
-              ? bio.slice(0, 160) + (bio.length > 160 ? "…" : "")
+            {why
+              ? why.slice(0, 180) + (why.length > 180 ? "…" : "")
               : `${songs.length} registered work${songs.length === 1 ? "" : "s"} · ${witnessed} sealed with WID`}
           </p>
+          <div className="flex flex-wrap gap-x-4 gap-y-1 mb-8 text-[11px] uppercase tracking-[0.14em]" style={{ color: "rgba(237,229,208,0.45)" }}>
+            <span>Who · {displayName}</span>
+            <span>What · {what}</span>
+            {whenJoined && <span>When · {whenJoined}</span>}
+            {where && <span>Where · {where}</span>}
+            <span>Why · {why ? "Testified" : "Pending"}</span>
+          </div>
 
           <div className="flex flex-wrap gap-3">
             <button
@@ -330,6 +347,51 @@ export default function LoopCreatorPage() {
             </div>
           </div>
         ))}
+      </section>
+
+      {/* Testimonies */}
+      <section className="max-w-5xl mx-auto px-4 sm:px-6 py-12" style={{ borderBottom: "1px solid rgba(196,154,40,0.12)" }}>
+        <p
+          className="text-[11px] uppercase tracking-[0.22em] mb-3"
+          style={{ color: "var(--ln-gold)", fontFamily: "'Cinzel', serif" }}
+        >
+          Testimonies
+        </p>
+        <h2 className="text-3xl mb-8" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>
+          Why they are here
+        </h2>
+        {testimonies.length === 0 ? (
+          <p style={{ color: "rgba(237,229,208,0.5)", fontFamily: "'Cormorant Garamond', serif", fontSize: 18 }}>
+            {isOwner
+              ? "Add a testimony on your profile to become witness-ready for publishing."
+              : "No testimonies published yet."}
+          </p>
+        ) : (
+          <ul className="space-y-6">
+            {(testimonies as any[]).slice(0, 6).map((t) => (
+              <li key={t.id || t.wid}>
+                <blockquote
+                  className="text-xl leading-relaxed"
+                  style={{
+                    fontFamily: "'Cormorant Garamond', serif",
+                    color: "rgba(237,229,208,0.88)",
+                    borderLeft: "2px solid rgba(196,154,40,0.45)",
+                    paddingLeft: 16,
+                  }}
+                >
+                  {t.content}
+                </blockquote>
+              </li>
+            ))}
+          </ul>
+        )}
+        {isOwner && (
+          <Link href="/profile">
+            <span className="inline-block mt-6 text-sm" style={{ color: "var(--ln-gold)" }}>
+              Edit identity & testimonies →
+            </span>
+          </Link>
+        )}
       </section>
 
       {/* Works */}

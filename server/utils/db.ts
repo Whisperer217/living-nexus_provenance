@@ -657,10 +657,34 @@ export async function updateSongStatus(
   if (!db) return;
   // Enforce publish gate: partial-rights works cannot be Published
   if (status === "Published") {
-    const [row] = await db.select({ ownershipStatus: songs.ownershipStatus }).from(songs)
+    const [row] = await db.select({
+      ownershipStatus: songs.ownershipStatus,
+      coverArtUrl: songs.coverArtUrl,
+      visualSource: (songs as any).visualSource,
+    }).from(songs)
       .where(and(eq(songs.id, songId), eq(songs.userId, userId))).limit(1);
     if (row?.ownershipStatus === "partial") {
       throw new Error("This work cannot be published without full commercial ownership or a commercial license.");
+    }
+    if (!row?.coverArtUrl) {
+      throw new Error("Publish requires a bound visual. Upload or generate cover art first.");
+    }
+    // Witness-ready profile gate (Loop flagship)
+    const [creator] = await db.select({
+      artistHandle: users.artistHandle,
+      name: users.name,
+      bio: users.bio,
+      originStatement: users.originStatement,
+      profilePhotoUrl: users.profilePhotoUrl,
+    }).from(users).where(eq(users.id, userId)).limit(1);
+    const testimonyCount = await getTestimonyCount(userId);
+    const missing: string[] = [];
+    if (!creator?.artistHandle && !creator?.name) missing.push("name or handle");
+    if (!creator?.bio && !creator?.originStatement) missing.push("bio or origin statement");
+    if (!creator?.profilePhotoUrl) missing.push("profile photo");
+    if (testimonyCount < 1) missing.push("at least one testimony");
+    if (missing.length > 0) {
+      throw new Error(`Witness-ready profile required to publish. Missing: ${missing.join(", ")}.`);
     }
   }
   // Keep isPublic in sync: only Published songs are publicly visible in any feed

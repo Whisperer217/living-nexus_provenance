@@ -335,6 +335,42 @@ export default function LoopWorkPage() {
                 WID pending — register completion seals this work.
               </p>
             )}
+
+            {/* Participation axes */}
+            <div className="flex flex-wrap gap-4 mb-6 text-xs uppercase tracking-[0.12em]" style={{ color: "rgba(237,229,208,0.7)" }}>
+              <span>Music · {(song as any).participationMusic ?? "—"}</span>
+              <span>Lyrics · {(song as any).participationLyrics ?? "—"}</span>
+              <span>Voice · {(song as any).participationVoice ?? "—"}</span>
+            </div>
+
+            {/* Tone-from-metadata */}
+            {(() => {
+              let toneLabel = "";
+              try {
+                const tp = (song as any).toneProfileJson ? JSON.parse((song as any).toneProfileJson) : null;
+                toneLabel = tp?.label || "";
+              } catch { /* ignore */ }
+              return toneLabel ? (
+                <p className="mb-4 text-sm" style={{ color: "var(--ln-gold)" }}>
+                  Tone · {toneLabel}
+                </p>
+              ) : null;
+            })()}
+
+            {/* Downloadable waveform */}
+            {(song as any).waveformUrl && (
+              <a
+                href={(song as any).waveformUrl}
+                download
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 mb-6 text-sm underline underline-offset-4"
+                style={{ color: "rgba(237,229,208,0.75)" }}
+              >
+                Download waveform
+              </a>
+            )}
+
             {origin && (
               <blockquote
                 className="text-xl sm:text-2xl leading-relaxed"

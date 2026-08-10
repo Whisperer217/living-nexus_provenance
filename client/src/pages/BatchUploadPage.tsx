@@ -1187,6 +1187,7 @@ export default function BatchUploadPage() {
         genre: batchGenre || undefined,
         aiConsent: batchAiConsent,
         coverArtUrl: resolvedAlbumCoverUrl,
+        status: "Draft",
         tracks: trackPayloads,
       });
 

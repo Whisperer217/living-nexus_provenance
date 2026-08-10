@@ -17,6 +17,8 @@ export const LOOP_PRODUCT = {
   medium: "music" as const,
   contentType: "audio" as const,
   widPrefix: "WID-MUS",
+  /** Authority document */
+  specPath: "docs/LOOP_PRODUCT_SPEC.md",
 } as const;
 
 /** Primary navigation for Loop — nothing else belongs in the rail. */

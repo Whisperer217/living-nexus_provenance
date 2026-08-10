@@ -447,8 +447,7 @@ export default function App() {
             <OverlayRouteGuard />
             <ScrollRestorationManager />
             <QrScanLogger />
-            <AmbientWidget />
-            {/* Loop scope: Keeper / PNA avatar chrome removed from product surface */}
+            {/* Loop reduction: AmbientWidget / Keeper avatar chrome delisted */}
             <ProvenanceUploadEngine />
             <PWAInstallBanner />
             <Router />
