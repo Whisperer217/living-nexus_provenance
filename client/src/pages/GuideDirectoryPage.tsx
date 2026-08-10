@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "wouter";
+import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Badge } from "@/components/ui/badge";
@@ -7,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Shield, Plus, Search, Star, Users, Zap, BookOpen, Sparkles } from "lucide-react";
-
+import { GUIDE_PRODUCT } from "@/lib/loopProduct";
 // ── Stock Living Nexus Canon Guides ─────────────────────────────────────────
 const STOCK_GUIDES = [
   {
@@ -72,6 +73,14 @@ export default function GuideDirectoryPage() {
   const [search, setSearch] = useState("");
 
   const { data: guides, isLoading } = trpc.guides.listPublished.useQuery({ limit: 100 });
+  const { data: mine } = trpc.guides.listMine.useQuery(undefined, { enabled: !!user });
+  const { data: slots } = trpc.guides.mySlots.useQuery(undefined, { enabled: !!user });
+  const buySlots = trpc.guides.createSlotCheckout.useMutation({
+    onSuccess: (res) => {
+      if (res.url) window.location.href = res.url;
+    },
+    onError: (e) => toast.error(e.message),
+  });
 
   const q = search.toLowerCase().trim();
 
@@ -97,6 +106,8 @@ export default function GuideDirectoryPage() {
   });
 
   const totalCount = (guides?.length ?? 0) + STOCK_GUIDES.length;
+  const remaining = slots?.remaining ?? 0;
+  const canUpload = !user || remaining > 0;
 
   return (
     <div className="min-h-screen bg-[#080600] text-[#e8d5a3]">
@@ -111,19 +122,45 @@ export default function GuideDirectoryPage() {
                 </div>
                 <span className="text-[#C9A84C] text-xs tracking-[0.3em] font-bold uppercase">Living Nexus Canon</span>
               </div>
-              <h1 className="text-4xl font-bold text-white mb-2">Guide Directory</h1>
+              <h1 className="text-4xl font-bold text-white mb-2">{GUIDE_PRODUCT.fullName}</h1>
               <p className="text-[#6b5f3e] text-sm max-w-xl">
-                Every Personal Nexus Avatar is provenance-verified and cryptographically linked to its creator.
-                Derivatives, appearances, and lineage are tracked from origin.
+                Creator-owned guide characters for the platform. {GUIDE_PRODUCT.tagline}
+                Drafts keep the full provenance pipeline. Guides level through uploads, contact, and witness acknowledgments.
               </p>
             </div>
             {user && (
-              <Link href="/guides/upload">
-                <Button className="bg-[#C9A84C] hover:bg-[#b8973b] text-black font-bold gap-2 shrink-0">
-                  <Plus className="w-4 h-4" />
-                  Upload New Guide
-                </Button>
-              </Link>
+              <div className="flex flex-col items-end gap-2 shrink-0">
+                <div className="text-xs text-[#6b5f3e]">
+                  Slots{" "}
+                  <span className="text-[#C9A84C] font-bold">
+                    {slots ? `${slots.used}/${slots.total}` : "—"}
+                  </span>
+                  {slots != null && (
+                    <span className="ml-2">({remaining} free)</span>
+                  )}
+                </div>
+                {canUpload ? (
+                  <Link href="/guides/upload">
+                    <Button className="bg-[#C9A84C] hover:bg-[#b8973b] text-black font-bold gap-2">
+                      <Plus className="w-4 h-4" />
+                      Upload New Guide
+                    </Button>
+                  </Link>
+                ) : (
+                  <Button
+                    className="bg-[#C9A84C] hover:bg-[#b8973b] text-black font-bold gap-2"
+                    disabled={buySlots.isPending}
+                    onClick={() =>
+                      buySlots.mutate({
+                        packageId: "guide_3",
+                        origin: window.location.origin,
+                      })
+                    }
+                  >
+                    Buy more slots
+                  </Button>
+                )}
+              </div>
             )}
           </div>
 
@@ -163,6 +200,60 @@ export default function GuideDirectoryPage() {
 
       {/* Content */}
       <div className="max-w-7xl mx-auto px-6 pb-20 space-y-12">
+
+        {/* ── My Guides (creator steward surface) ── */}
+        {user && mine && mine.length > 0 && (
+          <section>
+            <div className="flex items-center justify-between gap-3 mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-[#C9A84C]/20 border border-[#C9A84C]/40 flex items-center justify-center">
+                  <BookOpen className="w-4 h-4 text-[#C9A84C]" />
+                </div>
+                <div>
+                  <h2 className="text-white font-bold text-lg">My Guides</h2>
+                  <p className="text-[#6b5f3e] text-xs">
+                    Drafts and published — {slots ? `${slots.used} of ${slots.total} slots used` : "loading slots…"}
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {(slots?.packages ?? []).map((pkg) => (
+                  <Button
+                    key={pkg.id}
+                    variant="outline"
+                    size="sm"
+                    className="border-[#2a2010] text-[#C9A84C] text-xs"
+                    disabled={buySlots.isPending}
+                    onClick={() =>
+                      buySlots.mutate({
+                        packageId: pkg.id as "guide_1" | "guide_3" | "guide_5",
+                        origin: window.location.origin,
+                      })
+                    }
+                  >
+                    {pkg.label} · ${(pkg.priceCents / 100).toFixed(2)}
+                  </Button>
+                ))}
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+              {mine.map((g) => (
+                <Link key={g.id} href={`/guide/${g.id}`}>
+                  <div className="rounded-xl border border-[#2a2010] bg-[#0a0800] p-4 hover:border-[#C9A84C]/40 transition-colors cursor-pointer h-full">
+                    <div className="flex items-center justify-between mb-2">
+                      <Badge className="bg-[#1e1a0e] text-[#C9A84C] border-0 text-[10px] uppercase">
+                        {g.canonicalStatus}
+                      </Badge>
+                      <span className="text-[10px] text-[#6b5f3e]">Lv {g.growthLevel ?? 1}</span>
+                    </div>
+                    <h3 className="text-white font-bold truncate">{g.canonicalName}</h3>
+                    <p className="text-[#6b5f3e] text-xs mt-1 truncate">{g.role || g.tagline || "Untitled draft"}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* ── Living Nexus Canon Stock Guides ── */}
         {filteredStock.length > 0 && (

@@ -30,6 +30,21 @@ export default function GuideDetailPage() {
     { enabled: !!id }
   );
 
+  const utils = trpc.useUtils();
+
+  const { data: growth } = trpc.guides.growth.useQuery(
+    { guideId: Number(id) },
+    { enabled: !!id }
+  );
+
+  const recordContact = trpc.guides.recordContact.useMutation({
+    onSuccess: () => {
+      utils.guides.growth.invalidate({ guideId: Number(id) });
+      toast.success("Contact signal recorded — bridge personality grows.");
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
   const { data: accessStatus, refetch: refetchAccess } = trpc.guides.myAccessStatus.useQuery(
     { guideId: Number(id) },
     { enabled: !!user && !!id }
@@ -368,6 +383,8 @@ export default function GuideDetailPage() {
                     ["FIRST MANIFESTED", guide.firstManifested],
                     ["WID", guide.widCode],
                     ["STATUS", guide.canonicalStatus?.toUpperCase()],
+                    ["LEVEL", String(growth?.level ?? guide.growthLevel ?? 1)],
+                    ["SIGNAL", growth?.personality?.label],
                   ].filter(([, v]) => v).map(([label, value]) => (
                     <tr key={label as string} className="border-b border-[#1e1a0e] last:border-0">
                       <td className="px-5 py-3 text-[#6b5f3e] text-xs font-bold tracking-wider w-40">{label}</td>
@@ -385,6 +402,65 @@ export default function GuideDetailPage() {
                 </tbody>
               </table>
             </div>
+
+            {/* Signal personality / growth */}
+            {growth && (
+              <div className="bg-[#0d0b06] border border-[#2a2010] rounded-xl p-5 space-y-4">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <div className="text-[#C9A84C] text-xs font-bold tracking-wider mb-1">SIGNAL PERSONALITY</div>
+                    <p className="text-white font-bold text-lg">{growth.personality.label} · Level {growth.level}</p>
+                    <p className="text-[#6b5f3e] text-sm mt-1">{growth.personality.summary}</p>
+                  </div>
+                  {isOwner && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="border-[#2a2010] text-[#C9A84C] shrink-0"
+                      disabled={recordContact.isPending}
+                      onClick={() =>
+                        recordContact.mutate({
+                          guideId: guide.id,
+                          note: "Platform contact pulse",
+                        })
+                      }
+                    >
+                      Log contact
+                    </Button>
+                  )}
+                </div>
+                <div className="grid grid-cols-3 gap-3 text-center">
+                  {[
+                    { label: "Tracks linked", value: growth.personality.counts.track_linked },
+                    { label: "Contacts", value: growth.personality.counts.contact },
+                    { label: "Witness acks", value: growth.personality.counts.witness_ack },
+                  ].map((s) => (
+                    <div key={s.label} className="rounded-lg border border-[#1e1a0e] bg-[#080600] py-3">
+                      <div className="text-[#C9A84C] text-xl font-bold tabular-nums">{s.value}</div>
+                      <div className="text-[10px] uppercase tracking-wider text-[#6b5f3e] mt-1">{s.label}</div>
+                    </div>
+                  ))}
+                </div>
+                {growth.events.length > 0 && (
+                  <ul className="space-y-2 max-h-40 overflow-y-auto">
+                    {growth.events.slice(0, 8).map((ev) => (
+                      <li key={ev.id} className="text-xs text-[#a89060] flex justify-between gap-2">
+                        <span>
+                          <span className="text-[#C9A84C]">{ev.eventType}</span>
+                          {ev.note ? ` · ${ev.note}` : ""}
+                        </span>
+                        <span className="text-[#4a4030] shrink-0">
+                          {ev.createdAt ? new Date(ev.createdAt).toLocaleDateString() : ""}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                <p className="text-[11px] text-[#4a4030]">
+                  Level up by linking registered tracks to this guide, contacting creators on-platform, and acknowledging other witnesses’ uploads.
+                </p>
+              </div>
+            )}
 
             {/* Testimony */}
             {guide.testimony && (

@@ -30,7 +30,7 @@ export const LOOP_NAV = [
   { id: "archive", label: "Archive", path: "/archive", authRequired: true },
 ] as const;
 
-/** Routes and systems removed from the Loop product surface. */
+/** Systems removed from the Loop spine (Discover → Register → Work → Creator → Manage). */
 export const LOOP_REMOVED_SYSTEMS = [
   "comic",
   "manuscript",
@@ -40,7 +40,6 @@ export const LOOP_REMOVED_SYSTEMS = [
   "games",
   "visual-works",
   "projects",
-  "guides",
   "sessions",
   "keeper-compose",
   "marketplace",
@@ -48,9 +47,24 @@ export const LOOP_REMOVED_SYSTEMS = [
   "pna",
 ] as const;
 
+/** Stewarded companion surfaces — kept alive off Loop chrome. */
+export const GUIDE_STEWARD_ROUTES = [
+  "/guides",
+  "/guides/upload",
+  "/guide",
+] as const;
+
+export const GUIDE_PRODUCT = {
+  name: "Guides",
+  fullName: "Living Nexus Guides",
+  tagline: "Creator characters. Three slots. Grown by platform signals.",
+  path: "/guides",
+  uploadPath: "/guides/upload",
+  defaultSlots: 3,
+} as const;
+
 /** Paths that redirect into the Loop spine. */
 export const LOOP_REDIRECTS: Record<string, string> = {
-  "/guides": "/explore",
   "/sessions": "/manage",
   "/new-manifestation": "/manifest",
   "/projects": "/explore",

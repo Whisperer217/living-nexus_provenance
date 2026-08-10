@@ -17,6 +17,7 @@ import {
   Plus,
   Settings,
   Shield,
+  BookOpen,
   Upload,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -24,7 +25,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { useWorkEditorActions } from "@/contexts/WorkEditorContext";
-import { LOOP_PRODUCT } from "@/lib/loopProduct";
+import { LOOP_PRODUCT, GUIDE_PRODUCT } from "@/lib/loopProduct";
 import { trpc } from "@/lib/trpc";
 
 type StatusFilter = "all" | "Published" | "Draft" | "Unlisted";
@@ -206,12 +207,14 @@ export default function LoopManagePage() {
             { href: "/archive", icon: Archive, label: "Archive" },
             { href: "/my-archive/export", icon: Download, label: "Export" },
             { href: "/profile", icon: Settings, label: "Identity" },
+            { href: GUIDE_PRODUCT.path, icon: BookOpen, label: GUIDE_PRODUCT.name },
             { href: "/settings/billing", icon: Shield, label: "Billing" },
           ].map((a) => (
             <Link key={a.href} href={a.href}>
               <span
                 className="inline-flex items-center gap-2 text-sm transition-opacity hover:opacity-100 opacity-75"
                 style={{ color: "var(--ln-parchment)" }}
+                title={a.href === GUIDE_PRODUCT.path ? GUIDE_PRODUCT.fullName : undefined}
               >
                 <a.icon size={14} style={{ color: "var(--ln-gold)" }} />
                 {a.label}

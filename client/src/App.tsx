@@ -369,9 +369,10 @@ function Router() {
                 <Route path="/domain"><Redirect to="/manage" /></Route>
                 <Route path="/creator-surface"><Redirect to="/manage" /></Route>
                 <Route path="/onboarding" component={OnboardingManifest} />
-                <Route path="/guides"><Redirect to="/explore" /></Route>
-                <Route path="/guides/upload"><Redirect to="/manifest" /></Route>
-                <Route path="/guide/:id"><Redirect to="/explore" /></Route>
+                <Route path="/guides" component={GuideDirectoryPage} />
+                <Route path="/guides/upload" component={GuideUploadWizard} />
+                <Route path="/guide/:id" component={GuideDetailPage} />
+                <Route path="/guides/:id" component={GuideDetailPage} />
                 <Route path="/album/:collectionWid" component={AlbumDetailPage} />
                 <Route path="/collection/:slug" component={CollectionPage} />
                 <Route path="/constellation/:songId" component={ConstellationPage} />
