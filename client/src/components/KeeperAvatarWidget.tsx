@@ -6,7 +6,7 @@
  *  - Manages persona, message history, and cinematic mode state
  *  - Calls trpc.keeper.chat with full conversation history + optional imageUrls
  *  - Saves notes to DB via trpc.keeper.saveNote
- *  - Hides on /keeper and auth pages
+ *  - Stewarded on PNA companion routes only (not Loop Discover/Register/Work chrome)
  */
 import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
@@ -24,7 +24,7 @@ interface AgentMessage {
   mode: PersonaMode;
 }
 
-const HIDDEN_PATHS = ["/keeper", "/verify", "/download", "/login"];
+const AUTH_HIDDEN_PATHS = ["/verify", "/download", "/login"];
 
 const PERSONA_ID: Record<PersonaMode, string> = {
   Guide: "guide",
@@ -33,6 +33,20 @@ const PERSONA_ID: Record<PersonaMode, string> = {
   Custodian: "custodian",
   Archivist: "archivist",
 };
+
+/** Routes where the floating Keeper Avatar chrome is allowed (stewarded companion). */
+const FLOATING_AVATAR_PATHS = ["/pna", "/avatar-registry"] as const;
+
+function isPnaSubdomain(): boolean {
+  if (typeof window === "undefined") return false;
+  const subdomain = window.location.hostname.split(".")[0]?.toLowerCase();
+  return subdomain === "pna";
+}
+
+function isFloatingAvatarSurface(location: string): boolean {
+  if (isPnaSubdomain()) return true;
+  return FLOATING_AVATAR_PATHS.some((p) => location === p || location.startsWith(`${p}/`));
+}
 
 export default function KeeperAvatarWidget() {
   const { user } = useAuth();
@@ -80,9 +94,10 @@ export default function KeeperAvatarWidget() {
     return () => window.removeEventListener("ln:nowplaying", handler);
   }, [mode]);
 
-  // Don't render on hidden paths or when not logged in
+  // Stewarded companion only — never Loop spine chrome; /keeper page owns its own presence
   if (!user) return null;
-  if (HIDDEN_PATHS.some(p => location.startsWith(p))) return null;
+  if (AUTH_HIDDEN_PATHS.some(p => location.startsWith(p))) return null;
+  if (!isFloatingAvatarSurface(location)) return null;
 
   const profile = profileQuery.data;
   const activeSkinId = profile?.activeSkinId ?? "hooded-scholar";
