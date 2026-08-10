@@ -27,3 +27,7 @@
 - [x] Reconcile PR #5 with the merged PNA and diary releases while preserving guide-slot limits, growth signals, and the restored stewarded routes (`116010d8`).
 - [x] Run the release validation suite for the ordered PNA sequence: exact conflict-marker scan clean, typecheck passed, 41 files / 413 tests passed, primary route responses returned HTTP 200, and the local production build completed successfully.
 - [x] Publish the residual merge-marker recovery after verifying the repaired management page builds in production.
+- [x] Review the theme persistence and cream-mode typography branch: clean and mergeable PR #7 with no schema migration; theme ownership is centralized and core text is remapped to theme-aware tokens.
+- [x] Merge `cursor/theme-persist-typography-0e97` into `main` as `77ab9b07` after review.
+- [ ] Validate default, Crimson, Illuminated Gold, and Parchment Cream theme behavior across core Loop and chrome surfaces.
+- [ ] Run release checks and publish the validated theme release.
