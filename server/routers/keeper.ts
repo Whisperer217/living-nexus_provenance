@@ -470,6 +470,114 @@ Never collapse multiple sections into a single block. Always label clearly.
         return { success: true };
       }),
 
+    /** Save an entire PNA / Keeper thread as a provenance diary entry */
+    saveChatArchive: protectedProcedure
+      .input(z.object({
+        title: z.string().max(200).optional(),
+        personaId: z.string().max(64).optional(),
+        messages: z.array(z.object({
+          id: z.string().optional(),
+          role: z.enum(["user", "assistant", "pna"]),
+          content: z.string(),
+          mode: z.string().optional(),
+        })).min(1).max(500),
+        songId: z.number().optional(),
+        songWid: z.string().max(128).optional(),
+        songTitle: z.string().max(256).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR' });
+        const { createHash } = await import('crypto');
+        const { keeperChatArchives } = await import('../../drizzle/schema');
+        const payload = JSON.stringify(input.messages);
+        const contentHash = createHash('sha256').update(payload).digest('hex');
+        const title = input.title?.trim()
+          || (input.songTitle ? `Diary · ${input.songTitle}` : null)
+          || `PNA Diary · ${new Date().toLocaleDateString()}`;
+        const [result] = await db.insert(keeperChatArchives).values({
+          userId: ctx.user.id,
+          title,
+          messages: payload,
+          personaId: input.personaId ?? null,
+          songId: input.songId ?? null,
+          songWid: input.songWid ?? null,
+          songTitle: input.songTitle ?? null,
+          messageCount: input.messages.length,
+          contentHash,
+        });
+        return { id: (result as any).insertId as number, title, contentHash };
+      }),
+
+    /** List provenance diary archives for the current creator */
+    listChatArchives: protectedProcedure
+      .input(z.object({ limit: z.number().min(1).max(100).default(40) }).optional())
+      .query(async ({ ctx, input }) => {
+        const db = await getDb();
+        if (!db) return [];
+        const { keeperChatArchives } = await import('../../drizzle/schema');
+        const { eq, desc } = await import('drizzle-orm');
+        return db.select({
+          id: keeperChatArchives.id,
+          title: keeperChatArchives.title,
+          personaId: keeperChatArchives.personaId,
+          songId: keeperChatArchives.songId,
+          songWid: keeperChatArchives.songWid,
+          songTitle: keeperChatArchives.songTitle,
+          messageCount: keeperChatArchives.messageCount,
+          contentHash: keeperChatArchives.contentHash,
+          diaryWid: keeperChatArchives.diaryWid,
+          sealedAt: keeperChatArchives.sealedAt,
+          createdAt: keeperChatArchives.createdAt,
+        })
+          .from(keeperChatArchives)
+          .where(eq(keeperChatArchives.userId, ctx.user.id))
+          .orderBy(desc(keeperChatArchives.createdAt))
+          .limit(input?.limit ?? 40);
+      }),
+
+    /** Load one diary archive (messages included) */
+    getChatArchive: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ ctx, input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR' });
+        const { keeperChatArchives } = await import('../../drizzle/schema');
+        const { eq, and } = await import('drizzle-orm');
+        const [row] = await db.select()
+          .from(keeperChatArchives)
+          .where(and(eq(keeperChatArchives.id, input.id), eq(keeperChatArchives.userId, ctx.user.id)))
+          .limit(1);
+        if (!row) throw new TRPCError({ code: 'NOT_FOUND' });
+        let messages: unknown[] = [];
+        try { messages = JSON.parse(row.messages || '[]'); } catch { messages = []; }
+        return { ...row, messages };
+      }),
+
+    /** Seal a diary archive with a creator-owned WID-CNV (immutable after seal) */
+    sealChatArchive: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR' });
+        const { keeperChatArchives } = await import('../../drizzle/schema');
+        const { eq, and } = await import('drizzle-orm');
+        const [row] = await db.select()
+          .from(keeperChatArchives)
+          .where(and(eq(keeperChatArchives.id, input.id), eq(keeperChatArchives.userId, ctx.user.id)))
+          .limit(1);
+        if (!row) throw new TRPCError({ code: 'NOT_FOUND' });
+        if (row.diaryWid) {
+          return { diaryWid: row.diaryWid, alreadySealed: true as const };
+        }
+        const hash = (row.contentHash || '0').slice(0, 12).toUpperCase();
+        const diaryWid = `WID-CNV-${ctx.user.id}-${row.id}-${hash}`;
+        await db.update(keeperChatArchives)
+          .set({ diaryWid, sealedAt: new Date() })
+          .where(and(eq(keeperChatArchives.id, input.id), eq(keeperChatArchives.userId, ctx.user.id)));
+        return { diaryWid, alreadySealed: false as const };
+      }),
+
     /** Upload a custom portrait image to S3 and store the URL */
     uploadCustomPortrait: protectedProcedure
       .input(z.object({
