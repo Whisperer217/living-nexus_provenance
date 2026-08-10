@@ -144,16 +144,40 @@ export const DEFAULT_DOMAIN_LAYOUT: Array<{
   size: DomainBlockSize;
   config: Record<string, unknown>;
 }> = [
-  { blockType: "hero",           position: 0, visible: true,  size: "full",   config: { showOriginStatement: true, showActiveMediums: true } },
-  { blockType: "shelf_music",    position: 1, visible: true,  size: "full",   config: { heading: "Records", maxItems: 12, viewMode: "rack", showWid: true, showPlayButton: true } },
-  { blockType: "featured_work",  position: 2, visible: true,  size: "full",   config: { heading: "Featured Works", layout: "carousel" } },
-  { blockType: "shelf_books",    position: 3, visible: false, size: "full",   config: { heading: "Library", maxItems: 12, viewMode: "spine" } },
-  { blockType: "shelf_comics",   position: 4, visible: false, size: "full",   config: { heading: "Comics", maxItems: 12, viewMode: "rack" } },
-  { blockType: "shelf_manuscripts", position: 5, visible: false, size: "full", config: { heading: "Manuscripts", maxItems: 12, viewMode: "grid" } },
-  { blockType: "bio",            position: 6, visible: true,  size: "full",   config: { showPhilosophy: true, showDoctrine: false, showSigil: true } },
-  { blockType: "distribution_links", position: 7, visible: true, size: "full", config: { heading: "Find My Work", showSpotify: true, showAppleMusic: true, showBandcamp: true } },
-  { blockType: "provenance_trail", position: 8, visible: true, size: "full",  config: { showDomainVersions: true, showWids: true, maxItems: 10 } },
-  { blockType: "field_notes",    position: 9, visible: false, size: "full",   config: {} },
-  { blockType: "shelf_collections", position: 10, visible: false, size: "full",  config: { heading: "Collections" } },
-  { blockType: "shelf_games",       position: 11, visible: false, size: "full",  config: { heading: "Games" } },
+  // Loop: identity / testimony first, then music — non-music shelves stay in schema but hidden
+  { blockType: "hero",              position: 0,  visible: true,  size: "full", config: { showOriginStatement: true, showActiveMediums: false } },
+  { blockType: "bio",               position: 1,  visible: true,  size: "full", config: { showPhilosophy: true, showDoctrine: false, showSigil: true } },
+  { blockType: "featured_work",     position: 2,  visible: true,  size: "full", config: { heading: "Featured Works", layout: "carousel" } },
+  { blockType: "shelf_music",       position: 3,  visible: true,  size: "full", config: { heading: "Works", maxItems: 24, viewMode: "list", showWid: true, showPlayButton: true } },
+  { blockType: "shelf_collections", position: 4,  visible: true,  size: "full", config: { heading: "Albums" } },
+  { blockType: "distribution_links",position: 5,  visible: true,  size: "full", config: { heading: "Listen", showSpotify: true, showAppleMusic: true, showBandcamp: true } },
+  { blockType: "tip_jar",           position: 6,  visible: true,  size: "full", config: {} },
+  { blockType: "provenance_trail",  position: 7,  visible: true,  size: "full", config: { showDomainVersions: true, showWids: true, maxItems: 10 } },
+  { blockType: "community",         position: 8,  visible: false, size: "full", config: {} },
+  { blockType: "field_notes",       position: 9,  visible: false, size: "full", config: {} },
+  { blockType: "shelf_books",       position: 10, visible: false, size: "full", config: { heading: "Library", maxItems: 12, viewMode: "spine" } },
+  { blockType: "shelf_comics",      position: 11, visible: false, size: "full", config: { heading: "Comics", maxItems: 12, viewMode: "rack" } },
+  { blockType: "shelf_manuscripts", position: 12, visible: false, size: "full", config: { heading: "Manuscripts", maxItems: 12, viewMode: "grid" } },
+  { blockType: "shelf_games",       position: 13, visible: false, size: "full", config: { heading: "Games" } },
+  { blockType: "shelf_artifacts",   position: 14, visible: false, size: "full", config: { heading: "Artifacts" } },
+  { blockType: "shelf_merch",       position: 15, visible: false, size: "full", config: { heading: "Merch" } },
 ];
+
+/** Non-music shelves — kept in schema for export, delisted from Loop product surface. */
+export const LOOP_DELISTED_DOMAIN_BLOCKS: readonly DomainBlockType[] = [
+  "shelf_books",
+  "shelf_comics",
+  "shelf_manuscripts",
+  "shelf_artifacts",
+  "shelf_merch",
+  "shelf_games",
+] as const;
+
+/** Blocks creators may arrange on the Loop music-provenance domain. */
+export const LOOP_DOMAIN_ALLOWED_BLOCKS: readonly DomainBlockType[] = DOMAIN_BLOCK_TYPES.filter(
+  (t) => !LOOP_DELISTED_DOMAIN_BLOCKS.includes(t)
+);
+
+export function isLoopAllowedDomainBlock(blockType: DomainBlockType): boolean {
+  return !LOOP_DELISTED_DOMAIN_BLOCKS.includes(blockType);
+}

@@ -8,7 +8,7 @@
  */
 
 import { trpc } from "@/lib/trpc";
-import { DEFAULT_DOMAIN_LAYOUT, type DomainBlockRecord, type ShelfBlockConfig, type ProvenanceTrailBlockConfig, type CustomTextBlockConfig, type DividerBlockConfig, type DistributionLinksBlockConfig, type FeaturedWorkBlockConfig, type BioBlockConfig, type HeroBlockConfig } from "@shared/domainTypes";
+import { DEFAULT_DOMAIN_LAYOUT, type DomainBlockRecord, type DomainBlockType, type ShelfBlockConfig, type ProvenanceTrailBlockConfig, type CustomTextBlockConfig, type DividerBlockConfig, type DistributionLinksBlockConfig, type FeaturedWorkBlockConfig, type BioBlockConfig, type HeroBlockConfig } from "@shared/domainTypes";
 import { ShelfBlock } from "./ShelfBlock";
 import { Shield, ExternalLink, Music2, Clock, Layers, Hash, Library, GitFork, Heart, Play } from "lucide-react";
 import { Link } from "wouter";
@@ -17,13 +17,27 @@ import { usePlayer, type Track } from "@/contexts/PlayerContext";
 interface DomainRendererProps {
   userId: number;
   isOwner?: boolean;
+  /** Skip these block types (e.g. hero/bio when a flagship page already renders identity). */
+  omitBlockTypes?: readonly DomainBlockType[];
+  /** When set, only these block types render (Loop music-only surface). */
+  allowedBlockTypes?: readonly DomainBlockType[];
 }
 
 // ── Helper: resolve blocks (use saved or default) ─────────────────────────────
-function resolveBlocks(saved: DomainBlockRecord[]): typeof DEFAULT_DOMAIN_LAYOUT {
+function resolveBlocks(
+  saved: DomainBlockRecord[],
+  omitBlockTypes?: readonly DomainBlockType[],
+  allowedBlockTypes?: readonly DomainBlockType[],
+): typeof DEFAULT_DOMAIN_LAYOUT {
+  const omit = new Set(omitBlockTypes ?? []);
+  const allowed = allowedBlockTypes ? new Set(allowedBlockTypes) : null;
+
+  const pass = (blockType: DomainBlockType) =>
+    !omit.has(blockType) && (!allowed || allowed.has(blockType));
+
   if (saved.length > 0) {
     return saved
-      .filter((b) => b.visible)
+      .filter((b) => b.visible && pass(b.blockType))
       .sort((a, b) => a.position - b.position)
       .map((b) => ({
         blockType: b.blockType,
@@ -33,7 +47,7 @@ function resolveBlocks(saved: DomainBlockRecord[]): typeof DEFAULT_DOMAIN_LAYOUT
         config: (b.config as Record<string, unknown>) ?? {},
       }));
   }
-  return DEFAULT_DOMAIN_LAYOUT.filter((b) => b.visible);
+  return DEFAULT_DOMAIN_LAYOUT.filter((b) => b.visible && pass(b.blockType));
 }
 
 // ── HeroBlock ─────────────────────────────────────────────────────────────────
@@ -486,13 +500,22 @@ function BlockWrapper({ size, blockType, children }: { size: string; blockType?:
 }
 
 // ── Main DomainRenderer ───────────────────────────────────────────────────────
-export function DomainRenderer({ userId, isOwner = false }: DomainRendererProps) {
+export function DomainRenderer({
+  userId,
+  isOwner = false,
+  omitBlockTypes,
+  allowedBlockTypes,
+}: DomainRendererProps) {
   const { data: savedBlocks = [], isLoading } = trpc.domain.getLayout.useQuery(
     { userId },
     { enabled: !!userId }
   );
 
-  const blocks = resolveBlocks(savedBlocks as DomainBlockRecord[]);
+  const blocks = resolveBlocks(
+    savedBlocks as DomainBlockRecord[],
+    omitBlockTypes,
+    allowedBlockTypes,
+  );
 
   if (isLoading) {
     return (

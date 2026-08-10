@@ -193,11 +193,20 @@ function VersionHistoryPanel({ userId }: { userId: number }) {
 }
 
 // ── Add block panel ────────────────────────────────────────────────────────────
-function AddBlockPanel({ existingTypes, onAdd }: { existingTypes: Set<DomainBlockType>; onAdd: (t: DomainBlockType) => void }) {
+function AddBlockPanel({
+  existingTypes,
+  onAdd,
+  allowedBlockTypes,
+}: {
+  existingTypes: Set<DomainBlockType>;
+  onAdd: (t: DomainBlockType) => void;
+  allowedBlockTypes?: readonly DomainBlockType[];
+}) {
+  const catalog = allowedBlockTypes ?? DOMAIN_BLOCK_TYPES;
   const grouped = CATEGORY_ORDER.map((cat) => ({
     category: cat,
-    blocks: DOMAIN_BLOCK_TYPES.filter((t) => BLOCK_META[t].category === cat),
-  }));
+    blocks: catalog.filter((t) => BLOCK_META[t].category === cat),
+  })).filter((g) => g.blocks.length > 0);
 
   return (
     <div className="space-y-4">
@@ -243,16 +252,21 @@ function AddBlockPanel({ existingTypes, onAdd }: { existingTypes: Set<DomainBloc
 interface DomainEditorProps {
   userId: number;
   onClose?: () => void;
+  /** When set, only these block types appear in the editor (Loop music-only). */
+  allowedBlockTypes?: readonly DomainBlockType[];
 }
 
-export function DomainEditor({ userId, onClose }: DomainEditorProps) {
+export function DomainEditor({ userId, onClose, allowedBlockTypes }: DomainEditorProps) {
   const utils = trpc.useUtils();
   const { data: savedBlocks = [] } = trpc.domain.getLayout.useQuery({ userId });
 
   // Initialize editor blocks from saved or default
   const initBlocks = useCallback((): EditorBlock[] => {
+    const allowed = allowedBlockTypes ? new Set(allowedBlockTypes) : null;
+    const pass = (t: DomainBlockType) => !allowed || allowed.has(t);
     if ((savedBlocks as DomainBlockRecord[]).length > 0) {
       return (savedBlocks as DomainBlockRecord[])
+        .filter((b) => pass(b.blockType))
         .sort((a, b) => a.position - b.position)
         .map((b) => ({
           blockType: b.blockType,
@@ -263,8 +277,8 @@ export function DomainEditor({ userId, onClose }: DomainEditorProps) {
           savedId: b.id,
         }));
     }
-    return DEFAULT_DOMAIN_LAYOUT.map((b) => ({ ...b }));
-  }, [savedBlocks]);
+    return DEFAULT_DOMAIN_LAYOUT.filter((b) => pass(b.blockType)).map((b) => ({ ...b }));
+  }, [savedBlocks, allowedBlockTypes]);
 
   const [blocks, setBlocks] = useState<EditorBlock[]>(initBlocks);
   const [dragIdx, setDragIdx] = useState<number | null>(null);
@@ -314,6 +328,7 @@ export function DomainEditor({ userId, onClose }: DomainEditorProps) {
   };
 
   const handleAddBlock = (blockType: DomainBlockType) => {
+    if (allowedBlockTypes && !allowedBlockTypes.includes(blockType)) return;
     const newBlock: EditorBlock = {
       blockType,
       position: blocks.length,
@@ -332,14 +347,52 @@ export function DomainEditor({ userId, onClose }: DomainEditorProps) {
   };
 
   const handleSave = () => {
+    // When editing a filtered catalog (Loop), preserve delisted blocks so we stay non-destructive.
+    let preserved: Array<{
+      blockType: DomainBlockType;
+      position: number;
+      visible: boolean;
+      size: DomainBlockSize;
+      config: Record<string, unknown>;
+    }> = [];
+
+    if (allowedBlockTypes != null) {
+      const fromSaved = (savedBlocks as DomainBlockRecord[])
+        .filter((b) => !allowedBlockTypes.includes(b.blockType))
+        .map((b) => ({
+          blockType: b.blockType,
+          position: 0,
+          visible: false as boolean,
+          size: b.size,
+          config: (b.config as Record<string, unknown>) ?? {},
+        }));
+      const fromDefault =
+        fromSaved.length === 0
+          ? DEFAULT_DOMAIN_LAYOUT.filter((b) => !allowedBlockTypes.includes(b.blockType)).map((b) => ({
+              blockType: b.blockType,
+              position: 0,
+              visible: false as boolean,
+              size: b.size,
+              config: b.config,
+            }))
+          : [];
+      preserved = [...fromSaved, ...fromDefault].map((b, i) => ({
+        ...b,
+        position: blocks.length + i,
+      }));
+    }
+
     saveLayout.mutate({
-      blocks: blocks.map((b) => ({
-        blockType: b.blockType,
-        position: b.position,
-        visible: b.visible,
-        size: b.size,
-        config: b.config,
-      })),
+      blocks: [
+        ...blocks.map((b) => ({
+          blockType: b.blockType,
+          position: b.position,
+          visible: b.visible,
+          size: b.size,
+          config: b.config,
+        })),
+        ...preserved,
+      ],
       changeNote: changeNote || undefined,
     });
   };
@@ -419,7 +472,11 @@ export function DomainEditor({ userId, onClose }: DomainEditorProps) {
         ))}
 
         {panel === "add" && (
-          <AddBlockPanel existingTypes={existingTypes} onAdd={handleAddBlock} />
+          <AddBlockPanel
+            existingTypes={existingTypes}
+            onAdd={handleAddBlock}
+            allowedBlockTypes={allowedBlockTypes}
+          />
         )}
 
         {panel === "history" && (
