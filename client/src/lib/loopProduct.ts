@@ -30,7 +30,10 @@ export const LOOP_NAV = [
   { id: "archive", label: "Archive", path: "/archive", authRequired: true },
 ] as const;
 
-/** Routes and systems removed from the Loop product surface. */
+/**
+ * Systems removed from the Loop spine (Discover → Register → Work → Creator → Manage).
+ * PNA / Keeper Avatar / Avatar Registry are stewarded companions — not in this list.
+ */
 export const LOOP_REMOVED_SYSTEMS = [
   "comic",
   "manuscript",
@@ -44,9 +47,21 @@ export const LOOP_REMOVED_SYSTEMS = [
   "sessions",
   "keeper-compose",
   "marketplace",
-  "avatar-registry",
-  "pna",
 ] as const;
+
+/** Stewarded companion surfaces — kept alive off the Loop chrome overlay. */
+export const PNA_STEWARD_ROUTES = [
+  "/pna",
+  "/keeper",
+  "/avatar-registry",
+] as const;
+
+export const PNA_PRODUCT = {
+  name: "PNA",
+  fullName: "Provenance Nexus Avatar",
+  tagline: "Persistent creator intelligence. Stewarded, not discarded.",
+  path: "/pna",
+} as const;
 
 /** Paths that redirect into the Loop spine. */
 export const LOOP_REDIRECTS: Record<string, string> = {
@@ -56,13 +71,11 @@ export const LOOP_REDIRECTS: Record<string, string> = {
   "/projects": "/explore",
   "/my-projects": "/manage",
   "/marketplace": "/explore",
-  "/avatar-registry": "/explore",
   "/visual-works": "/explore",
-  "/keeper": "/explore",
-  "/keeper-compose": "/manifest",
+  "/keeper-compose": "/pna",
   "/store": "/explore",
   "/dashboard": "/manage",
-  "/creator-surface": "/manage",
+  "/creator-surface": "/pna",
   "/domain": "/manage",
 };
 

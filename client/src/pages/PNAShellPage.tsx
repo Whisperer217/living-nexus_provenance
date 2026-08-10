@@ -12,11 +12,12 @@ import { useLocation } from "wouter";
 import { toast } from "sonner";
 import {
   Zap, Eye, Layers, Archive, Sparkles, Search, Music, FileText,
-  Image, Shield, Hash, Upload, BookOpen, Settings, LogOut,
-  ChevronRight, Send, Loader2, Plus, X, ExternalLink, Save,
-  BarChart2, Clock, Star,
+  Image, Shield, Upload, BookOpen, Settings, LogOut,
+  ChevronRight, Send, Loader2, X, ExternalLink, Save,
 } from "lucide-react";
 import { getLoginUrl } from "@/const";
+import NexusAvatarViewer from "@/components/NexusAvatarViewer";
+import { PNA_PRODUCT } from "@/lib/loopProduct";
 
 // ─── PNA Stewardship Modes ────────────────────────────────────────────────────
 
@@ -37,10 +38,10 @@ const PNA_MODES = [
 const QUICK_ACTIONS = [
   { label: "Register Work", icon: Shield, href: "/manifest", desc: "Create a new WID" },
   { label: "My Archive", icon: Archive, href: "/archive", desc: "Your registered works" },
-  { label: "Sessions", icon: Clock, href: "/sessions", desc: "Testimony sessions" },
-  { label: "Collections", icon: Star, href: "/archive?tab=collections", desc: "Your collections" },
+  { label: "Manage", icon: Settings, href: "/manage", desc: "Loop management hub" },
+  { label: "Avatar Registry", icon: Image, href: "/avatar-registry", desc: "Steward AVT skins" },
+  { label: "Keeper", icon: Sparkles, href: "/keeper", desc: "Avatar skins & attributes" },
   { label: "Batch Upload", icon: Upload, href: "/batch-upload", desc: "Register multiple works" },
-  { label: "Analytics", icon: BarChart2, href: "/dashboard", desc: "Your creator stats" },
 ];
 
 // ─── Message type ─────────────────────────────────────────────────────────────
@@ -119,7 +120,7 @@ export default function PNAShellPage() {
       <div className="min-h-screen flex flex-col items-center justify-center gap-6" style={{ background: "#050403" }}>
         <div className="text-center">
           <div style={{ fontFamily: "'Cinzel', serif", fontSize: "1.5rem", color: "#C9A84C", letterSpacing: "0.08em" }}>
-            Provenance Nexus Avatar
+            {PNA_PRODUCT.fullName}
           </div>
           <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.55rem", color: "rgba(255,255,255,0.4)", marginTop: 8 }}>
             pna.livingnexus.org · Creator Workspace
@@ -164,8 +165,8 @@ export default function PNAShellPage() {
         >
           {!sidebarCollapsed && (
             <div>
-              <div style={{ fontFamily: "'Cinzel', serif", fontSize: "0.7rem", color: "#C9A84C", letterSpacing: "0.06em" }}>PNA</div>
-              <div style={{ fontSize: "0.38rem", color: "rgba(255,255,255,0.25)", marginTop: 1 }}>pna.livingnexus.org</div>
+              <div style={{ fontFamily: "'Cinzel', serif", fontSize: "0.7rem", color: "#C9A84C", letterSpacing: "0.06em" }}>{PNA_PRODUCT.name}</div>
+              <div style={{ fontSize: "0.38rem", color: "rgba(255,255,255,0.25)", marginTop: 1 }}>Stewarded companion</div>
             </div>
           )}
           <button
@@ -250,17 +251,24 @@ export default function PNAShellPage() {
                 className="w-full flex items-center gap-2.5 px-3 py-1.5 transition-all hover:opacity-80"
               >
                 <Settings size={12} style={{ color: "rgba(255,255,255,0.3)" }} />
-                <span style={{ fontSize: "0.48rem", color: "rgba(255,255,255,0.4)" }}>Keeper Settings</span>
+                <span style={{ fontSize: "0.48rem", color: "rgba(255,255,255,0.4)" }}>Avatar & Keeper</span>
               </button>
               <button
-                onClick={() => window.location.href = "https://livingnexus.org"}
+                onClick={() => navigate("/avatar-registry")}
+                className="w-full flex items-center gap-2.5 px-3 py-1.5 transition-all hover:opacity-80"
+              >
+                <Image size={12} style={{ color: "rgba(255,255,255,0.3)" }} />
+                <span style={{ fontSize: "0.48rem", color: "rgba(255,255,255,0.4)" }}>Avatar Registry</span>
+              </button>
+              <button
+                onClick={() => navigate("/")}
                 className="w-full flex items-center gap-2.5 px-3 py-1.5 transition-all hover:opacity-80"
               >
                 <ExternalLink size={12} style={{ color: "rgba(255,255,255,0.3)" }} />
-                <span style={{ fontSize: "0.48rem", color: "rgba(255,255,255,0.4)" }}>Public Registry</span>
+                <span style={{ fontSize: "0.48rem", color: "rgba(255,255,255,0.4)" }}>Loop Registry</span>
               </button>
               <button
-                onClick={() => logout().finally(() => window.location.href = "https://livingnexus.org")}
+                onClick={() => logout().finally(() => navigate("/"))}
                 className="w-full flex items-center gap-2.5 px-3 py-1.5 transition-all hover:opacity-80"
               >
                 <LogOut size={12} style={{ color: "rgba(255,255,255,0.25)" }} />
@@ -295,7 +303,7 @@ export default function PNAShellPage() {
               <currentMode.icon size={11} style={{ color: currentMode.color }} />
             </div>
             <div>
-              <span style={{ fontFamily: "'Cinzel', serif", fontSize: "0.7rem", color: "#C9A84C" }}>Provenance Nexus Avatar</span>
+              <span style={{ fontFamily: "'Cinzel', serif", fontSize: "0.7rem", color: "#C9A84C" }}>{PNA_PRODUCT.fullName}</span>
               <span style={{ fontSize: "0.45rem", color: "rgba(255,255,255,0.3)", marginLeft: 8 }}>· {currentMode.label}</span>
             </div>
           </div>
@@ -310,11 +318,11 @@ export default function PNAShellPage() {
               </button>
             )}
             <a
-              href="/keeper-compose"
+              href="/keeper"
               className="flex items-center gap-1 px-2 py-1 rounded transition-opacity hover:opacity-70"
               style={{ fontSize: "0.4rem", color: "rgba(196,154,40,0.6)", border: "1px solid rgba(196,154,40,0.15)", textDecoration: "none" }}
             >
-              FULL WORKSPACE <ExternalLink size={9} />
+              AVATAR STUDIO <ExternalLink size={9} />
             </a>
           </div>
         </div>
@@ -324,17 +332,28 @@ export default function PNAShellPage() {
           {messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full gap-6 max-w-lg mx-auto">
               <div
-                className="w-16 h-16 rounded-full flex items-center justify-center"
-                style={{ background: `${currentMode.color}12`, border: `1.5px solid ${currentMode.color}44`, boxShadow: `0 0 32px ${currentMode.color}18` }}
+                className="relative overflow-hidden"
+                style={{
+                  width: 168,
+                  height: 220,
+                  border: `1px solid ${currentMode.color}44`,
+                  boxShadow: `0 0 40px ${currentMode.color}18`,
+                  background: "#080604",
+                }}
               >
-                <currentMode.icon size={26} style={{ color: currentMode.color }} />
+                <NexusAvatarViewer
+                  seed={user.id}
+                  width={168}
+                  height={220}
+                  accentColor={currentMode.color}
+                />
               </div>
               <div className="text-center">
                 <div style={{ fontFamily: "'Cinzel', serif", fontSize: "1.1rem", color: "#C9A84C", marginBottom: 8 }}>
-                  Provenance Nexus Avatar
+                  {PNA_PRODUCT.fullName}
                 </div>
                 <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "0.85rem", color: "rgba(255,255,255,0.45)", lineHeight: 1.8 }}>
-                  One persistent intelligence. Every creative act becomes part of your permanent knowledge graph. Nothing exists outside provenance.
+                  Stewarded companion to Loop. One persistent intelligence — skins, modes, and memory — without flooding the music provenance spine.
                 </div>
               </div>
               {/* Skill shortcuts */}

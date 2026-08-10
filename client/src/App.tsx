@@ -13,7 +13,6 @@ import { TosAcceptanceModal } from "./components/TosAcceptanceModal";
 import { CommunityToastProvider } from "./components/CommunityToast";
 import { AmbientPlayerProvider } from "./contexts/AmbientPlayerContext";
 import { HarmonicProvider } from "./contexts/HarmonicContext";
-import AmbientWidget from "./components/AmbientWidget";
 import KeeperAvatarWidget from "./components/KeeperAvatarWidget";
 import ProvenanceUploadEngine from "./components/ProvenanceUploadEngine";
 import { useQrScanLogger } from "./hooks/useQrScanLogger";
@@ -358,16 +357,17 @@ function Router() {
                 <Route path="/new-manifestation"><Redirect to="/manifest" /></Route>
                 <Route path="/sessions"><Redirect to="/manage" /></Route>
                 <Route path="/manifestation/:id"><Redirect to="/manage" /></Route>
-                <Route path="/keeper"><Redirect to="/explore" /></Route>
-                <Route path="/keeper-compose"><Redirect to="/manifest" /></Route>
+                <Route path="/keeper" component={KeeperPage} />
+                <Route path="/keeper-compose"><Redirect to="/pna" /></Route>
                 <Route path="/first-witness" component={FirstWitnessPage} />
                 <Route path="/store"><Redirect to="/explore" /></Route>
                 <Route path="/marketplace"><Redirect to="/explore" /></Route>
-                <Route path="/avatar-registry"><Redirect to="/explore" /></Route>
+                <Route path="/avatar-registry" component={AvatarMarketplacePage} />
+                <Route path="/pna" component={PNAShellPage} />
                 <Route path="/distribute" component={DistributionPage} />
                 <Route path="/identity/:id" component={CreatorIdentityPage} />
                 <Route path="/domain"><Redirect to="/manage" /></Route>
-                <Route path="/creator-surface"><Redirect to="/manage" /></Route>
+                <Route path="/creator-surface"><Redirect to="/pna" /></Route>
                 <Route path="/onboarding" component={OnboardingManifest} />
                 <Route path="/guides"><Redirect to="/explore" /></Route>
                 <Route path="/guides/upload"><Redirect to="/manifest" /></Route>
@@ -447,7 +447,8 @@ export default function App() {
             <OverlayRouteGuard />
             <ScrollRestorationManager />
             <QrScanLogger />
-            {/* Loop reduction: AmbientWidget / Keeper avatar chrome delisted */}
+            {/* PNA stewarded: Keeper Avatar on /pna · /keeper · /avatar-registry (and pna subdomain) — not Loop chrome */}
+            <KeeperAvatarWidget />
             <ProvenanceUploadEngine />
             <PWAInstallBanner />
             <Router />

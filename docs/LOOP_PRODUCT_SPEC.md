@@ -39,7 +39,8 @@ Prompts, style language, instrumentation, origin story, richer disclosure.
 - Assist metadata suggestions
 - **Visual generate / remix with prompt mechanics**
 - Prompt + visual source stored as provenance
-- Delisted: Provenance Avatar, moving-head Keeper chrome, other AI theatre
+- Delisted from **Loop chrome** (floating over Discover/Register/Work): moving-head Keeper overlay, AmbientWidget theatre
+- **Stewarded separately:** Provenance Nexus Avatar (PNA) — see §7. Not destroyed. Not delisted from product existence.
 
 ### Visual merge
 1. Bring embedded/ID3 cover if present  
@@ -103,8 +104,33 @@ Must show above the fold / primary provenance:
 | P2 | WID seal: tone-from-metadata + downloadable waveform |
 | P3 | Visual merge + AI generate/remix + prompt provenance |
 | P4 | Flagship creator + testimony publish gate |
-| P5 | Work page surfaces + delist AI chrome |
+| P5 | Work page surfaces + delist AI chrome **from Loop spine** |
 | P6 | Batch parity + cleanup |
+| P7 | **Steward PNA Avatar** as companion OS (not Loop overlay) |
+
+---
+
+## 7. Provenance Nexus Avatar (PNA) — stewarded companion
+
+**Full name:** Provenance Nexus Avatar  
+**Home:** `/pna` and `pna.livingnexus.org`  
+**Law:** Loop stays reductionist. PNA stays amazing. Stewardship ≠ deletion.
+
+### What we steward
+- PNA shell — persistent creator intelligence (stewardship modes)
+- Keeper Avatar surfaces — skins, attributes, cinematic presence (`/keeper`)
+- Avatar Registry — AVT-WID registered creative skins (`/avatar-registry`)
+- Floating / Nexus avatar presence **on PNA stewarded routes only**
+
+### What stays off Loop chrome
+- No floating Keeper head over Explore / Register / Work / Manage by default
+- No AmbientWidget theatre on the music provenance spine
+- Register AI remains: metadata assist + cover generate/remix only
+
+### Non-destructive
+- Do not destroy Keeper skins, AVT records, PNA notes, or chat capability
+- Entry from Manage / TopBar “Provenance” is first-class stewardship access
+- Quick actions inside PNA may deep-link into Loop spine (Register, Archive, Manage)
 
 ---
 

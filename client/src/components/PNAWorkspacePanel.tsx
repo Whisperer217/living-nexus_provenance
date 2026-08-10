@@ -396,7 +396,7 @@ export default function PNAWorkspacePanel({ open, onClose }: PNAWorkspacePanelPr
               </button>
             )}
             <button
-              onClick={() => { onClose(); navigate("/keeper-compose"); }}
+              onClick={() => { onClose(); navigate("/pna"); }}
               className="px-2 py-1 rounded text-xs transition-opacity hover:opacity-70 flex items-center gap-1"
               style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.4rem", color: "rgba(196,154,40,0.6)", border: "1px solid rgba(196,154,40,0.15)" }}
             >

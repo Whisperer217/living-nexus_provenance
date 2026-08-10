@@ -634,7 +634,7 @@ export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCoun
                 (e.currentTarget as HTMLElement).style.borderColor = "rgba(196,154,40,0.2)";
               }
             }}
-            title="Provenance Nexus Avatar — your persistent intelligence layer"
+            title="Provenance Nexus Avatar — stewarded companion intelligence"
           >
             <span style={{ fontSize: "0.7rem", lineHeight: 1 }}>◉</span>
             <span className="hidden xl:inline">Provenance</span>
