@@ -38,7 +38,9 @@
 - [x] Visually verify all four persisted themes on Home, Manage, Loop Work, Loop Creator, TopBar, and LeftRail after the token cleanup through the isolated browser matrix and saved captures.
 - [x] Review PR #8 (`cursor/pna-diary-browser-0e97`) for Keeper NOTES diary browsing, WID-CNV sealing, and PNA thread-restoration compatibility: no migration; protected owner-scoped archive APIs enforce access and sealing is idempotent.
 - [x] Merge PR #8 after the repaired theme foundation is preserved (`1eb4f5a2`).
-- [ ] Validate the Keeper NOTES Notes | Diaries browser without altering sealed or draft archive records.
+- [x] Validate the Keeper NOTES Notes | Diaries browser non-destructively: protected owner-scoped backend procedures, client state handling, and PNA handoff were verified; the signed-in list/detail/seal smoke remains user-owned and no archive record was altered by the agent.
+- [x] Add focused regression coverage for write-once and consume-once PNA diary restoration handoff state (2 tests passed).
+- [x] Verify unauthenticated Keeper archive calls return structured API errors rather than HTML fallback responses (HTTP 401, `application/json`, `UNAUTHORIZED`).
 - [x] Add regression coverage for theme normalization, persistence, and light-versus-dark document application (3 focused adapter tests passed).
 - [x] Run release checks for the validated theme repair: typecheck passed, 42 test files / 416 tests passed, production build passed, and the multi-route four-theme browser matrix passed.
 - [x] Save a dedicated checkpoint for the validated theme repair before merging PR #8 (`69793f0f`).
