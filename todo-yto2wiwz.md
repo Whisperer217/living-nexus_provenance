@@ -36,9 +36,9 @@
 - [x] Repair remaining low-contrast pale heading and supporting-text overrides on the live Parchment Cream management surface by reasserting cream tokens after the late default identity palette.
 - [x] Replace the remaining hard-coded pale Home hero heading with the theme-aware parchment token; audit confirms core Manage, Work, Creator, TopBar, and LeftRail text uses theme-aware tokens or decorative non-text colors.
 - [x] Visually verify all four persisted themes on Home, Manage, Loop Work, Loop Creator, TopBar, and LeftRail after the token cleanup through the isolated browser matrix and saved captures.
-- [ ] Review PR #8 (`cursor/pna-diary-browser-0e97`) for Keeper NOTES diary browsing, WID-CNV sealing, and PNA thread-restoration compatibility.
-- [ ] Merge PR #8 after the repaired theme foundation is preserved.
+- [x] Review PR #8 (`cursor/pna-diary-browser-0e97`) for Keeper NOTES diary browsing, WID-CNV sealing, and PNA thread-restoration compatibility: no migration; protected owner-scoped archive APIs enforce access and sealing is idempotent.
+- [x] Merge PR #8 after the repaired theme foundation is preserved (`1eb4f5a2`).
 - [ ] Validate the Keeper NOTES Notes | Diaries browser without altering sealed or draft archive records.
 - [x] Add regression coverage for theme normalization, persistence, and light-versus-dark document application (3 focused adapter tests passed).
 - [x] Run release checks for the validated theme repair: typecheck passed, 42 test files / 416 tests passed, production build passed, and the multi-route four-theme browser matrix passed.
-- [x] Save a dedicated checkpoint for the validated theme repair before merging PR #8.
+- [x] Save a dedicated checkpoint for the validated theme repair before merging PR #8 (`69793f0f`).
