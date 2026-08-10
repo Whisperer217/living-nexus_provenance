@@ -19,6 +19,7 @@ import { getLoginUrl } from "@/const";
 import { usePlayer } from "@/contexts/PlayerContext";
 import NexusAvatarViewer from "@/components/NexusAvatarViewer";
 import { PNA_PRODUCT } from "@/lib/loopProduct";
+import { consumePnaDiaryReload } from "@/lib/pnaDiary";
 
 // ─── PNA Stewardship Modes ────────────────────────────────────────────────────
 
@@ -76,7 +77,7 @@ export default function PNAShellPage() {
     onSuccess: () => toast.success("Saved to notes."),
   });
   const saveArchive = trpc.keeper.saveChatArchive.useMutation({
-    onSuccess: (res) => toast.success(`Diary saved · ${res.title}`),
+    onSuccess: (res) => toast.success(`Diary saved · ${res.title} — browse in Keeper NOTES`),
     onError: (e) => toast.error(e.message),
   });
   const sealArchive = trpc.keeper.sealChatArchive.useMutation({
@@ -93,6 +94,34 @@ export default function PNAShellPage() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  // Reopen a diary thread written by Keeper NOTES → Open in PNA
+  useEffect(() => {
+    const payload = consumePnaDiaryReload();
+    if (!payload?.messages?.length) return;
+    const modeIds = new Set(PNA_MODES.map(m => m.id));
+    const restored: Message[] = payload.messages.map((m, i) => {
+      const role: "user" | "pna" = m.role === "user" ? "user" : "pna";
+      const mode = (m.mode && modeIds.has(m.mode as PNAMode) ? m.mode : payload.personaId && modeIds.has(payload.personaId as PNAMode) ? payload.personaId : "guide") as PNAMode;
+      return {
+        id: m.id || `diary-${i}`,
+        role,
+        content: m.content,
+        mode,
+        timestamp: new Date(),
+      };
+    });
+    setMessages(restored);
+    if (payload.personaId && modeIds.has(payload.personaId as PNAMode)) {
+      setActiveMode(payload.personaId as PNAMode);
+    }
+    toast.success(
+      payload.diaryWid
+        ? `Diary reopened · ${payload.diaryWid}`
+        : `Diary reopened · ${payload.title}`,
+      { duration: 4500 },
+    );
+  }, []);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
