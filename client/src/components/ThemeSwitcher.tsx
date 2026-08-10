@@ -10,14 +10,19 @@ const THEME_SWATCHES: Record<LNTheme, { bg: string; accent: string; secondary: s
     secondary: "#1A1A1A",
   },
   "crimson": {
-    bg: "#060000",
-    accent: "#C41E3A",
-    secondary: "#160000",
+    bg: "#140008",
+    accent: "#E8294F",
+    secondary: "#2A0010",
   },
   "illuminated-gold": {
-    bg: "#0A0800",
+    bg: "#120E00",
     accent: "#F5C842",
-    secondary: "#1A1500",
+    secondary: "#2A2200",
+  },
+  "parchment-cream": {
+    bg: "#F7F1E6",
+    accent: "#9A7518",
+    secondary: "#EFE6D8",
   },
 };
 
@@ -79,22 +84,22 @@ export function ThemeSwitcher({ compact = false }: { compact?: boolean }) {
           className="absolute right-0 top-full mt-2 rounded-xl overflow-hidden"
           style={{
             zIndex: 9999,
-            background: "rgba(10,8,0,0.97)",
-            border: "1px solid rgba(196,154,40,0.18)",
+            background: "var(--ln-panel)",
+            border: "1px solid var(--ln-panel-border)",
             backdropFilter: "blur(16px)",
-            boxShadow: "0 8px 32px rgba(0,0,0,0.6)",
-            minWidth: 200,
+            boxShadow: "0 8px 32px rgba(0,0,0,0.25)",
+            minWidth: 220,
           }}
         >
           {/* Header */}
           <div
             className="px-4 py-2.5 border-b"
             style={{
-              borderColor: "rgba(196,154,40,0.12)",
+              borderColor: "var(--ln-panel-border)",
               fontFamily: "'Cinzel', serif",
               fontSize: 10,
               letterSpacing: "0.12em",
-              color: "rgba(196,154,40,0.6)",
+              color: "var(--ln-gold-dim)",
             }}
           >
             APPEARANCE

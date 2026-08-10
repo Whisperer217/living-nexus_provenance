@@ -12,11 +12,11 @@ import { useLocation } from "wouter";
 import { toast } from "sonner";
 import {
   Zap, Eye, Layers, Archive, Sparkles, Search, Music, FileText,
-  Image, Shield, Hash, Upload, BookOpen, Settings, LogOut,
-  ChevronRight, Send, Loader2, Plus, X, ExternalLink, Save,
-  BarChart2, Clock, Star,
+  Image, Shield, Upload, BookOpen, Settings, LogOut,
+  ChevronRight, Send, Loader2, X, ExternalLink, Save, Film, BookMarked,
 } from "lucide-react";
 import { getLoginUrl } from "@/const";
+import { usePlayer } from "@/contexts/PlayerContext";
 
 // ─── PNA Stewardship Modes ────────────────────────────────────────────────────
 
@@ -37,10 +37,10 @@ const PNA_MODES = [
 const QUICK_ACTIONS = [
   { label: "Register Work", icon: Shield, href: "/manifest", desc: "Create a new WID" },
   { label: "My Archive", icon: Archive, href: "/archive", desc: "Your registered works" },
-  { label: "Sessions", icon: Clock, href: "/sessions", desc: "Testimony sessions" },
-  { label: "Collections", icon: Star, href: "/archive?tab=collections", desc: "Your collections" },
+  { label: "Manage", icon: Settings, href: "/manage", desc: "Works hub" },
+  { label: "Guides", icon: BookOpen, href: "/guides", desc: "Creator guides" },
   { label: "Batch Upload", icon: Upload, href: "/batch-upload", desc: "Register multiple works" },
-  { label: "Analytics", icon: BarChart2, href: "/dashboard", desc: "Your creator stats" },
+  { label: "Keeper", icon: Sparkles, href: "/keeper", desc: "Avatar studio" },
 ];
 
 // ─── Message type ─────────────────────────────────────────────────────────────
@@ -58,11 +58,13 @@ interface Message {
 export default function PNAShellPage() {
   const { user, loading: authLoading, logout } = useAuth();
   const [, navigate] = useLocation();
+  const { state: playerState } = usePlayer();
   const [activeMode, setActiveMode] = useState<PNAMode>("guide");
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [cinematic, setCinematic] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -70,13 +72,57 @@ export default function PNAShellPage() {
   const saveNoteMutation = trpc.keeper.saveNote.useMutation({
     onSuccess: () => toast.success("Saved to notes."),
   });
+  const saveArchive = trpc.keeper.saveChatArchive.useMutation({
+    onSuccess: (res) => toast.success(`Diary saved · ${res.title}`),
+    onError: (e) => toast.error(e.message),
+  });
+  const sealArchive = trpc.keeper.sealChatArchive.useMutation({
+    onSuccess: (res) => toast.success(res.alreadySealed ? `Already sealed · ${res.diaryWid}` : `Sealed · ${res.diaryWid}`),
+    onError: (e) => toast.error(e.message),
+  });
 
   const currentMode = PNA_MODES.find(m => m.id === activeMode) ?? PNA_MODES[0];
+  const playing = playerState.currentIdx >= 0 ? playerState.tracks[playerState.currentIdx] : null;
+  const nowPlaying = playing
+    ? { title: playing.title, artist: playing.artist, artUrl: playing.artUrl, id: playing.id, wid: playing.witnessId }
+    : null;
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "F11") { e.preventDefault(); setCinematic(v => !v); }
+      if (e.key === "Escape" && cinematic) setCinematic(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [cinematic]);
+
+  const handleSaveDiary = async () => {
+    if (messages.length === 0) {
+      toast.info("Start a conversation before saving a diary.");
+      return;
+    }
+    const saved = await saveArchive.mutateAsync({
+      personaId: activeMode,
+      title: nowPlaying ? `Diary · ${nowPlaying.title}` : undefined,
+      songId: nowPlaying?.id ? Number(nowPlaying.id) || undefined : undefined,
+      songWid: nowPlaying?.wid || undefined,
+      songTitle: nowPlaying?.title || undefined,
+      messages: messages.map(m => ({
+        id: m.id,
+        role: m.role === "pna" ? "pna" as const : "user" as const,
+        content: m.content,
+        mode: m.mode,
+      })),
+    });
+    if (saved?.id) {
+      // Offer seal immediately
+      await sealArchive.mutateAsync({ id: saved.id });
+    }
+  };
   const handleSend = useCallback(async () => {
     const text = input.trim();
     if (!text || isLoading || !user) return;
@@ -300,24 +346,87 @@ export default function PNAShellPage() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setCinematic(v => !v)}
+              className="px-2 py-1 rounded transition-opacity hover:opacity-70 flex items-center gap-1"
+              style={{
+                fontSize: "0.4rem",
+                color: cinematic ? currentMode.color : "rgba(255,255,255,0.35)",
+                border: `1px solid ${cinematic ? `${currentMode.color}55` : "rgba(255,255,255,0.08)"}`,
+              }}
+              title="Cinematic listen + chat (F11)"
+            >
+              <Film size={9} /> {cinematic ? "CINEMATIC ON" : "CINEMATIC"}
+            </button>
             {messages.length > 0 && (
-              <button
-                onClick={() => setMessages([])}
-                className="px-2 py-1 rounded transition-opacity hover:opacity-70"
-                style={{ fontSize: "0.4rem", color: "rgba(255,255,255,0.3)", border: "1px solid rgba(255,255,255,0.08)" }}
-              >
-                CLEAR
-              </button>
+              <>
+                <button
+                  type="button"
+                  onClick={handleSaveDiary}
+                  disabled={saveArchive.isPending || sealArchive.isPending}
+                  className="px-2 py-1 rounded transition-opacity hover:opacity-70 flex items-center gap-1"
+                  style={{ fontSize: "0.4rem", color: "rgba(196,154,40,0.75)", border: "1px solid rgba(196,154,40,0.2)" }}
+                  title="Save thread as provenance diary and seal WID-CNV"
+                >
+                  <BookMarked size={9} /> SAVE DIARY
+                </button>
+                <button
+                  onClick={() => setMessages([])}
+                  className="px-2 py-1 rounded transition-opacity hover:opacity-70"
+                  style={{ fontSize: "0.4rem", color: "rgba(255,255,255,0.3)", border: "1px solid rgba(255,255,255,0.08)" }}
+                >
+                  CLEAR
+                </button>
+              </>
             )}
             <a
-              href="/keeper-compose"
+              href="/keeper"
               className="flex items-center gap-1 px-2 py-1 rounded transition-opacity hover:opacity-70"
               style={{ fontSize: "0.4rem", color: "rgba(196,154,40,0.6)", border: "1px solid rgba(196,154,40,0.15)", textDecoration: "none" }}
             >
-              FULL WORKSPACE <ExternalLink size={9} />
+              AVATAR STUDIO <ExternalLink size={9} />
             </a>
           </div>
         </div>
+
+        {/* Cinematic now-playing strip — chat while listening in the same thread */}
+        {cinematic && (
+          <div
+            className="flex items-center gap-4 px-5 py-3 flex-shrink-0"
+            style={{
+              background: "linear-gradient(90deg, rgba(196,154,40,0.08), transparent)",
+              borderBottom: "1px solid rgba(196,154,40,0.12)",
+            }}
+          >
+            <div
+              className="w-14 h-14 flex-shrink-0 overflow-hidden"
+              style={{ background: "#111", border: "1px solid rgba(196,154,40,0.25)" }}
+            >
+              {nowPlaying?.artUrl ? (
+                <img src={nowPlaying.artUrl} alt="" className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <Music size={16} style={{ color: "rgba(196,154,40,0.5)" }} />
+                </div>
+              )}
+            </div>
+            <div className="min-w-0 flex-1">
+              <div style={{ fontSize: "0.4rem", color: "rgba(196,154,40,0.55)", letterSpacing: "0.12em" }}>
+                {playerState.isPlaying ? "NOW PLAYING · THREAD BOUND" : "CINEMATIC · WAITING FOR MUSIC"}
+              </div>
+              <div className="truncate" style={{ fontFamily: "'Cinzel', serif", fontSize: "0.85rem", color: "#E8D5A3" }}>
+                {nowPlaying?.title ?? "Play a track to bind this diary to music"}
+              </div>
+              {nowPlaying?.artist && (
+                <div className="truncate" style={{ fontSize: "0.55rem", color: "rgba(255,255,255,0.4)" }}>
+                  {nowPlaying.artist}
+                  {nowPlaying.wid ? ` · ${nowPlaying.wid}` : ""}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Messages */}
         <div className="flex-1 overflow-y-auto px-6 py-5" style={{ overscrollBehavior: "contain" }}>
@@ -334,7 +443,7 @@ export default function PNAShellPage() {
                   Provenance Nexus Avatar
                 </div>
                 <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "0.85rem", color: "rgba(255,255,255,0.45)", lineHeight: 1.8 }}>
-                  One persistent intelligence. Every creative act becomes part of your permanent knowledge graph. Nothing exists outside provenance.
+                  One persistent intelligence. Save threads as a provenance diary. Seal them with WID-CNV. Enter cinematic to chat while the music plays.
                 </div>
               </div>
               {/* Skill shortcuts */}

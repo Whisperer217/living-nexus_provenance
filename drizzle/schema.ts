@@ -1686,8 +1686,24 @@ export const keeperChatArchives = mysqlTable("keeper_chat_archives", {
   userId: int("user_id").notNull(),
   title: varchar("title", { length: 200 }),
   messages: text("messages"),
+  /** Stewardship mode / persona at archive time */
+  personaId: varchar("persona_id", { length: 64 }),
+  /** Optional bound work for cinematic listen+chat threads */
+  songId: int("song_id"),
+  songWid: varchar("song_wid", { length: 128 }),
+  songTitle: varchar("song_title", { length: 256 }),
+  messageCount: int("message_count").default(0).notNull(),
+  /** SHA-256 of messages payload — used when sealing as WID-CNV */
+  contentHash: varchar("content_hash", { length: 64 }),
+  /** Sealed conversation WID (WID-CNV-…) when registered */
+  diaryWid: varchar("diary_wid", { length: 128 }),
+  sealedAt: timestamp("sealed_at"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
-});
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+}, (t) => ({
+  userIdx: index("keeper_chat_archives_user_id_idx").on(t.userId),
+  widIdx: index("keeper_chat_archives_diary_wid_idx").on(t.diaryWid),
+}));
 export type KeeperChatArchive = typeof keeperChatArchives.$inferSelect;
 export type InsertKeeperChatArchive = typeof keeperChatArchives.$inferInsert;
 
