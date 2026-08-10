@@ -155,12 +155,9 @@ function WIDTrustLayer() {
         >
           Witnessed Works
         </p>
-        <div className="grid grid-cols-2 gap-2 relative">
+        <div className="grid grid-cols-1 gap-2 relative">
           {([
-            { medium: "audio"      as const, count: mediumCounts?.audio      ?? 0 },
-            { medium: "lyrics"     as const, count: mediumCounts?.lyrics     ?? 0 },
-            { medium: "manuscript" as const, count: mediumCounts?.manuscript ?? 0 },
-            { medium: "comic"      as const, count: mediumCounts?.comic      ?? 0 },
+            { medium: "audio" as const, count: mediumCounts?.audio ?? 0 },
           ]).map(({ medium, count }) => (
             <CosmicMediumIcon
               key={medium}
@@ -172,7 +169,7 @@ function WIDTrustLayer() {
           ))}
         </div>
         <p className="text-[10px] mt-3 relative museum-caption" style={{ fontSize: "0.6875rem" }}>
-          Every medium. One registry. Your proof of origin — sealed at the moment of creation.
+          Music provenance. One WID engine. Sealed at the moment of creation.
         </p>
       </div>
 
@@ -824,7 +821,7 @@ export default function HomePage() {
   // Belt-and-suspenders: set document.title via JS so SEO tools that check
   // the JS-rendered title see the correct 30-60 char value
   useEffect(() => {
-    document.title = "Living Nexus — The Creative Provenance Registry";
+    document.title = "Loop — Music Provenance | Living Nexus";
   }, []);
 
   const [tipTarget, setTipTarget] = useState<any | null>(null);
@@ -834,9 +831,9 @@ export default function HomePage() {
   return (
     <>
       <Helmet>
-        <title>Living Nexus — The Creative Provenance Registry</title>
-        <meta name="description" content="Living Nexus is the sovereign creative registry for independent creators. Register music, lyrics, manuscripts, and visual works with cryptographic Witness IDs — timestamped, attributed, and protected before your work touches any other platform." />
-        <meta name="keywords" content="creative provenance registry, witness ID, WID, music attribution, creator rights, digital provenance, independent creator platform, creative registry, AI-era attribution, Living Nexus" />
+        <title>Loop — Music Provenance | Living Nexus</title>
+        <meta name="description" content="Loop is Living Nexus music provenance. Register tracks with cryptographic Witness IDs — timestamped, attributed, and protected before your work touches any other platform." />
+        <meta name="keywords" content="music provenance, witness ID, WID, music attribution, creator rights, Loop, Living Nexus" />
       </Helmet>
 
 
@@ -899,7 +896,7 @@ function WIDExplainer() {
         <div className="flex items-center gap-3 mb-8">
           <div className="gold-divider flex-1" />
           <span className="text-[9px] font-heading tracking-[0.22em] uppercase flex-shrink-0" style={{ color: "rgba(196,154,40,0.45)" }}>
-            What is Living Nexus
+            What is Loop
           </span>
           <div className="gold-divider flex-1" />
         </div>
@@ -910,17 +907,17 @@ function WIDExplainer() {
             {
               icon: <Fingerprint className="w-5 h-5" style={{ color: "#C49A28" }} />,
               title: "Witness ID",
-              body: "Every registered work receives a cryptographic timestamp — a permanent, tamper-evident record of origin issued the moment you upload. Music, lyrics, manuscripts, visual works, and research all qualify.",
+              body: "Every registered track receives a cryptographic timestamp — a permanent, tamper-evident record of origin issued the moment you register. Music provenance, sealed at the source.",
             },
             {
               icon: <ShieldCheck className="w-5 h-5" style={{ color: "#C49A28" }} />,
-              title: "Sovereign Registry",
-              body: "Your work stays yours. Living Nexus records provenance without claiming rights. The registry is a witness, not a gatekeeper — foundational infrastructure for the AI era.",
+              title: "WID Engine",
+              body: "Loop is the music provenance layer of Living Nexus. Your work stays yours. The registry witnesses authorship without claiming rights.",
             },
             {
               icon: <Compass className="w-5 h-5" style={{ color: "#C49A28" }} />,
               title: "Open Discovery",
-              body: "Browse music, lyrics, manuscripts, and creative works from independent creators. Every work carries a provenance chain that travels with it across platforms.",
+              body: "Browse registered music from independent creators. Every work carries a provenance chain that travels with it across platforms.",
             },
           ] as const).map(({ icon, title, body }) => (
             <div key={title} className="flex flex-col gap-3">

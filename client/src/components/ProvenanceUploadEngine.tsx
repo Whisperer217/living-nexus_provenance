@@ -602,7 +602,7 @@ export default function ProvenanceUploadEngine() {
       music: "music", image: "comic", video: "video",
       document: "manuscript", code: "manuscript", "3d": "manuscript", archive: "manuscript",
     };
-    const detectedType = (typeMap[cat.type] ?? "music") as "music" | "lyrics" | "comic" | "manuscript" | "video" | "gcode";
+    const detectedType = "music" as const;
     // Map free-form AI platform to the enum value
     const aiDisclosureEnum = ((): "original" | "ai_assisted" | "ai_generated" | "human_authored_ai_instrument" => {
       if (!meta.ai.detected) return "original";

@@ -44,7 +44,7 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 
 // ─── Section definitions ────────────────────────────────────────────────────
 
-type SectionId = "home" | "artifacts" | "drafts" | "collections" | "videos" | "images" | "provenance" | "analytics" | "followers" | "publishing" | "settings";
+type SectionId = "home" | "artifacts" | "drafts" | "collections" | "provenance" | "analytics" | "followers" | "publishing" | "settings";
 
 interface NavSection {
   id: SectionId;
@@ -56,14 +56,12 @@ interface NavSection {
 
 const SECTIONS: NavSection[] = [
   { id: "home",        icon: Layers,       label: "Home",        description: "Domain overview and public link" },
-  { id: "artifacts",  icon: Archive,      label: "Artifacts",   description: "All registered works" },
+  { id: "artifacts",  icon: Archive,      label: "Works",       description: "Registered music" },
   { id: "drafts",     icon: PenLine,      label: "Drafts",      description: "Unpublished works", ownerOnly: true },
-  { id: "collections",icon: LayoutGrid,   label: "Collections", description: "Curated groupings" },
-  { id: "videos",     icon: Video,        label: "Videos",      description: "Video works" },
-  { id: "images",     icon: Image,        label: "Images",      description: "Visual works and photography" },
+  { id: "collections",icon: LayoutGrid,   label: "Collections", description: "Albums and shelves" },
   { id: "provenance", icon: GitBranch,    label: "Provenance",  description: "Chain of Record", ownerOnly: true },
   { id: "analytics",  icon: BarChart2,    label: "Analytics",   description: "Witness & discovery metrics", ownerOnly: true },
-  { id: "followers",  icon: Users,        label: "Followers",   description: "Domain audience" },
+  { id: "followers",  icon: Users,        label: "Witnesses",   description: "Domain audience" },
   { id: "publishing", icon: ArrowUpRight, label: "Publishing",  description: "Publish to Registry", ownerOnly: true },
   { id: "settings",   icon: Settings,     label: "Settings",    description: "Domain configuration", ownerOnly: true },
 ];
@@ -497,97 +495,14 @@ export default function CreatorDomainShell() {
                 </div>
               )}
 
-              {/* VIDEOS */}
-              {activeSection === "videos" && (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h2 className="text-lg font-bold" style={{ fontFamily: "var(--ln-font-display)", color: "var(--ln-text-primary)" }}>Videos</h2>
-                    {isOwner && (
-                      <Link href="/upload?type=video">
-                        <Button size="sm" style={{ background: "var(--ln-gold)", color: "var(--ln-surface-void)" }}>
-                          <Upload className="w-4 h-4 mr-2" /> Upload Video
-                        </Button>
-                      </Link>
-                    )}
-                  </div>
-                  {(() => {
-                    const videoWorks = songs.filter((s: any) => s.contentType === "video" || s.medium === "video");
-                    if (videoWorks.length === 0) return (
-                      <div className="text-center py-16 rounded-xl" style={{ background: "var(--ln-surface-panel)", border: "1px solid var(--ln-border-subtle)" }}>
-                        <Video className="w-10 h-10 mx-auto mb-4" style={{ color: "var(--ln-text-muted)" }} />
-                        <div className="text-sm" style={{ color: "var(--ln-text-muted)" }}>No videos registered yet</div>
-                        {isOwner && <Link href="/upload?type=video"><div className="mt-4 text-xs" style={{ color: "var(--ln-gold)" }}>Upload your first video →</div></Link>}
-                      </div>
-                    );
-                    return (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                        {videoWorks.map((s: any) => (
-                          <Link key={s.id} href={`/song/${s.id}`}>
-                            <div className="rounded-xl overflow-hidden cursor-pointer group" style={{ background: "var(--ln-surface-card)", border: "1px solid var(--ln-border-subtle)" }}>
-                              <div className="aspect-video bg-black flex items-center justify-center relative">
-                                {s.coverArtUrl ? <img src={s.coverArtUrl} alt={s.title} className="w-full h-full object-cover" /> : <Video className="w-10 h-10" style={{ color: "var(--ln-text-muted)" }} />}
-                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                  <Play className="w-8 h-8" style={{ color: "var(--ln-gold)" }} />
-                                </div>
-                              </div>
-                              <div className="p-3">
-                                <div className="font-medium truncate" style={{ color: "var(--ln-text-primary)" }}>{s.title}</div>
-                                <div className="text-xs mt-1" style={{ color: "var(--ln-text-muted)" }}>{s.genre || "Video"}</div>
-                              </div>
-                            </div>
-                          </Link>
-                        ))}
-                      </div>
-                    );
-                  })()}
-                </div>
-              )}
-
-              {/* IMAGES */}
-              {activeSection === "images" && (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h2 className="text-lg font-bold" style={{ fontFamily: "var(--ln-font-display)", color: "var(--ln-text-primary)" }}>Images</h2>
-                    {isOwner && (
-                      <Link href="/visual-works">
-                        <Button size="sm" style={{ background: "var(--ln-gold)", color: "var(--ln-surface-void)" }}>
-                          <Image className="w-4 h-4 mr-2" /> Manage Images
-                        </Button>
-                      </Link>
-                    )}
-                  </div>
-                  {(() => {
-                    const imageWorks = songs.filter((s: any) => s.contentType === "visual" || s.medium === "visual" || s.contentType === "comic");
-                    if (imageWorks.length === 0) return (
-                      <div className="text-center py-16 rounded-xl" style={{ background: "var(--ln-surface-panel)", border: "1px solid var(--ln-border-subtle)" }}>
-                        <Image className="w-10 h-10 mx-auto mb-4" style={{ color: "var(--ln-text-muted)" }} />
-                        <div className="text-sm" style={{ color: "var(--ln-text-muted)" }}>No images registered yet</div>
-                        {isOwner && <Link href="/visual-works"><div className="mt-4 text-xs" style={{ color: "var(--ln-gold)" }}>Register visual works →</div></Link>}
-                      </div>
-                    );
-                    return (
-                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                        {imageWorks.map((s: any) => (
-                          <Link key={s.id} href={`/song/${s.id}`}>
-                            <div className="rounded-xl overflow-hidden cursor-pointer group aspect-square" style={{ background: "var(--ln-surface-card)", border: "1px solid var(--ln-border-subtle)" }}>
-                              {s.coverArtUrl ? <img src={s.coverArtUrl} alt={s.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" /> : <div className="w-full h-full flex items-center justify-center"><Image className="w-8 h-8" style={{ color: "var(--ln-text-muted)" }} /></div>}
-                            </div>
-                          </Link>
-                        ))}
-                      </div>
-                    );
-                  })()}
-                </div>
-              )}
-
               {/* FOLLOWERS */}
               {activeSection === "followers" && (
                 <div className="space-y-4">
-                  <h2 className="text-lg font-bold" style={{ fontFamily: "var(--ln-font-display)", color: "var(--ln-text-primary)" }}>Followers</h2>
+                  <h2 className="text-lg font-bold" style={{ fontFamily: "var(--ln-font-display)", color: "var(--ln-text-primary)" }}>Witnesses</h2>
                   <div className="text-center py-16 rounded-xl" style={{ background: "var(--ln-surface-panel)", border: "1px solid var(--ln-border-subtle)" }}>
                     <Users className="w-10 h-10 mx-auto mb-4" style={{ color: "var(--ln-text-muted)" }} />
-                    <div className="text-sm font-medium mb-1" style={{ color: "var(--ln-text-primary)" }}>Follower system coming soon</div>
-                    <div className="text-xs" style={{ color: "var(--ln-text-muted)" }}>Creators who follow this domain will appear here</div>
+                    <div className="text-sm font-medium mb-1" style={{ color: "var(--ln-text-primary)" }}>Witness network</div>
+                    <div className="text-xs" style={{ color: "var(--ln-text-muted)" }}>Creators witnessing this domain appear here</div>
                   </div>
                 </div>
               )}

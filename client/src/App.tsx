@@ -50,8 +50,9 @@ const LikedPage = lazy(() => import("./pages/LikedPage"));
 const ArchivePage = lazy(() => import("./pages/ArchivePage"));
 const CreatorDataExportPage = lazy(() => import("./pages/CreatorDataExportPage"));
 // TrackPage deprecated — /track/:id now redirects to /song/:id
-const SongDetailPage = lazy(() => import("./pages/SongDetailPage"));
-const CreatorProfilePage = lazy(() => import("./pages/CreatorProfilePage"));
+const SongDetailPage = lazy(() => import("./pages/loop/LoopWorkPage"));
+const CreatorProfilePage = lazy(() => import("./pages/loop/LoopCreatorPage"));
+const LoopManagePage = lazy(() => import("./pages/loop/LoopManagePage"));
 const DashboardPage = lazy(() => import("./pages/DashboardPage"));
 const DiscoverPage = lazy(() => import("./pages/DiscoverPage"));
 const ProfilePage = lazy(() => import("./pages/ProfilePage"));
@@ -285,7 +286,7 @@ function Router() {
                 <Route path="/home" component={HomePage} />
                 <Route path="/discover"><Redirect to="/" /></Route>
                 <Route path="/explore" component={ExplorePage} />
-                <Route path="/explore/:medium" component={ExplorePage} />
+                <Route path="/explore/:medium"><Redirect to="/explore" /></Route>
                 <Route path="/search" component={SearchResultsPage} />
                <Route path="/upload"><Redirect to="/manifest" /></Route>
                 <Route path="/manifest" component={ManifestationStudio} />
@@ -295,19 +296,18 @@ function Router() {
           <Route path="/my-archive/export" component={CreatorDataExportPage} />
                 <Route path="/studio/collection/:id" component={CollectionStudioPage} />
                 <Route path="/licensed-downloads" component={LicensedDownloadsPage} />
-                {/* Archive sub-routes — handled in stability redirects section below */}
                 <Route path="/song/:id" component={SongDetailPage} />
-                <Route path="/book/:id" component={BookDetailPage} />
-                <Route path="/game/:id" component={GameDetailPage} />
-                <Route path="/gcode/:id" component={GcodeDetailPage} />
+                <Route path="/book/:id"><Redirect to="/explore" /></Route>
+                <Route path="/game/:id"><Redirect to="/explore" /></Route>
+                <Route path="/gcode/:id"><Redirect to="/explore" /></Route>
                 <Route path="/platform-guides" component={PlatformGuidesPage} />
-                <Route path="/book/:id/studio" component={CreatorStudioPage} />
+                <Route path="/book/:id/studio"><Redirect to="/manage" /></Route>
                 <Route path="/songs/:id" component={SongDetailPage} />
-                {/* /track/:id → canonical /song/:id redirect (TrackPage deprecated) */}
                 <Route path="/track/:id" component={TrackRedirect} />
                 <Route path="/creator/:handle/:medium" component={CreatorCollectionPage} />
                 <Route path="/creator/:id" component={CreatorProfilePage} />
-                <Route path="/dashboard" component={DashboardPage} />
+                <Route path="/manage" component={LoopManagePage} />
+                <Route path="/dashboard"><Redirect to="/manage" /></Route>
                 <Route path="/profile" component={ProfilePage} />
                 <Route path="/contributors" component={ContributorsPage} />
                 <Route path="/playlist" component={PlaylistPage} />
@@ -350,35 +350,34 @@ function Router() {
                 <Route path="/terms/compare" component={TosComparePage} />
                 <Route path="/terms" component={TermsPage} />
                 <Route path="/privacy" component={PrivacyPage} />
-                <Route path="/projects" component={ProjectsDiscoveryPage} />
-                <Route path="/project/:slug" component={ProjectPage} />
-                <Route path="/projects/:slug">{({ slug }: { slug: string }) => <Redirect to={`/project/${slug}`} />}</Route>
-                <Route path="/my-projects" component={MyProjectsPage} />
-                {/* ── Manifestation Sessions — Creative Operating System ── */}
-                <Route path="/new-manifestation" component={NewManifestationPage} />
-                <Route path="/sessions" component={SessionsListPage} />
-                <Route path="/manifestation/:id" component={ManifestationWorkspacePage} />
-                <Route path="/keeper" component={KeeperPage} />
-                <Route path="/keeper-compose" component={KeeperComposePage} />
+                <Route path="/projects"><Redirect to="/explore" /></Route>
+                <Route path="/project/:slug"><Redirect to="/explore" /></Route>
+                <Route path="/projects/:slug"><Redirect to="/explore" /></Route>
+                <Route path="/my-projects"><Redirect to="/manage" /></Route>
+                {/* ── Loop scope: non-music systems redirect into spine ── */}
+                <Route path="/new-manifestation"><Redirect to="/manifest" /></Route>
+                <Route path="/sessions"><Redirect to="/manage" /></Route>
+                <Route path="/manifestation/:id"><Redirect to="/manage" /></Route>
+                <Route path="/keeper"><Redirect to="/explore" /></Route>
+                <Route path="/keeper-compose"><Redirect to="/manifest" /></Route>
                 <Route path="/first-witness" component={FirstWitnessPage} />
-                <Route path="/store"><Redirect to="/marketplace" /></Route>
-                <Route path="/marketplace" component={MarketplacePage} />
-                <Route path="/avatar-registry" component={AvatarMarketplacePage} />
+                <Route path="/store"><Redirect to="/explore" /></Route>
+                <Route path="/marketplace"><Redirect to="/explore" /></Route>
+                <Route path="/avatar-registry"><Redirect to="/explore" /></Route>
                 <Route path="/distribute" component={DistributionPage} />
                 <Route path="/identity/:id" component={CreatorIdentityPage} />
-                <Route path="/domain" component={CreatorDomainPage} />
-                <Route path="/creator-surface" component={CreatorSurface} />
+                <Route path="/domain"><Redirect to="/manage" /></Route>
+                <Route path="/creator-surface"><Redirect to="/manage" /></Route>
                 <Route path="/onboarding" component={OnboardingManifest} />
-                <Route path="/guides" component={GuideDirectoryPage} />
-                <Route path="/guides/upload" component={GuideUploadWizard} />
-                <Route path="/guide/:id" component={GuideDetailPage} />
+                <Route path="/guides"><Redirect to="/explore" /></Route>
+                <Route path="/guides/upload"><Redirect to="/manifest" /></Route>
+                <Route path="/guide/:id"><Redirect to="/explore" /></Route>
                 <Route path="/album/:collectionWid" component={AlbumDetailPage} />
                 <Route path="/collection/:slug" component={CollectionPage} />
                 <Route path="/constellation/:songId" component={ConstellationPage} />
-                {/* ── Visual Works — 6th Creative Medium ── */}
-                <Route path="/visual-works" component={VisualWorksPage} />
-                <Route path="/visual-works/new" component={VisualWorksNewPage} />
-                <Route path="/visual-works/:id" component={VisualWorksDetailPage} />
+                <Route path="/visual-works"><Redirect to="/explore" /></Route>
+                <Route path="/visual-works/new"><Redirect to="/manifest" /></Route>
+                <Route path="/visual-works/:id"><Redirect to="/explore" /></Route>
                 <Route path="/developer" component={DeveloperDashboardPage} />
                 <Route path="/design-system" component={DesignSystemPage} />
                 <Route path="/developers" component={DevelopersPage} />
@@ -386,7 +385,7 @@ function Router() {
                 <Route path="/setup-domain" component={SetupDomainPage} />
                 <Route path="/@:handle" component={CreatorDomainShell} />
                 {/* ── Stability redirects — dead routes → canonical destinations ── */}
-                <Route path="/prompt-studio"><Redirect to="/keeper-compose" /></Route>
+                <Route path="/prompt-studio"><Redirect to="/manifest" /></Route>
                 <Route path="/archive/mine"><Redirect to="/archive" /></Route>
                 <Route path="/archive/favorites"><Redirect to="/archive" /></Route>
                 <Route path="/archive/history"><Redirect to="/archive" /></Route>
@@ -449,7 +448,7 @@ export default function App() {
             <ScrollRestorationManager />
             <QrScanLogger />
             <AmbientWidget />
-            <KeeperAvatarWidget />
+            {/* Loop scope: Keeper / PNA avatar chrome removed from product surface */}
             <ProvenanceUploadEngine />
             <PWAInstallBanner />
             <Router />
