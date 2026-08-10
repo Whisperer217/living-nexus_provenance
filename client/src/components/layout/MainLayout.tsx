@@ -34,7 +34,7 @@ import SiteFooter from "@/components/layout/SiteFooter";
 import TopBar from "@/components/layout/TopBar";
 import { WhatsNewModal } from "@/components/WhatsNewModal";
 import { trpc } from "@/lib/trpc";
-import { useLightsMode } from "@/contexts/LightsModeContext";
+import { useTheme } from "@/contexts/ThemeContext";
 import { Menu, X, Bell, Sparkles } from "lucide-react";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { Z } from "@/lib/viewportLayers";
@@ -135,11 +135,13 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     },
   });
 
-  // ── Warm theme tokens ──────────────────────────────────────────────
-  const { mode: lightsMode } = useLightsMode();
-  const isWarm = lightsMode === "on";
-  const MOBILE_HEADER_BG = isWarm ? "rgba(55,68,85,0.72)" : "rgba(0,0,0,0.97)";
-  const MOBILE_HEADER_BORDER = isWarm ? "rgba(100,125,150,0.22)" : "rgba(196,154,40,0.16)";
+  // ── Light-scheme chrome tokens (follow ThemeProvider, not lights preference alone)
+  const { scheme } = useTheme();
+  const isWarm = scheme === "light";
+  const MOBILE_HEADER_BG = isWarm
+    ? "color-mix(in srgb, var(--ln-coal) 92%, transparent)"
+    : "rgba(0,0,0,0.97)";
+  const MOBILE_HEADER_BORDER = isWarm ? "var(--ln-panel-border)" : "rgba(196,154,40,0.16)";
 
   return (
     <div

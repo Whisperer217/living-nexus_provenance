@@ -1379,14 +1379,14 @@ export default function BatchUploadPage() {
                     style={{
                       border: batchPublishIntent === s ? "1px solid var(--ln-gold)" : "1px solid rgba(196,154,40,0.25)",
                       background: batchPublishIntent === s ? "rgba(196,154,40,0.15)" : "transparent",
-                      color: batchPublishIntent === s ? "var(--ln-gold)" : "rgba(237,229,208,0.55)",
+                      color: batchPublishIntent === s ? "var(--ln-gold)" : "color-mix(in srgb, var(--ln-parchment) 55%, transparent)",
                     }}
                   >
                     {s}
                   </button>
                 ))}
               </div>
-              <p className="text-[10px] mt-1.5" style={{ color: "rgba(237,229,208,0.45)" }}>
+              <p className="text-[10px] mt-1.5" style={{ color: "color-mix(in srgb, var(--ln-parchment) 45%, transparent)" }}>
                 {batchPublishIntent === "Draft"
                   ? "Tracks stay private until you publish from Manage."
                   : "Publish requires bound visuals + witness-ready profile for each seal path."}

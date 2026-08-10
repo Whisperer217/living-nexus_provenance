@@ -84,7 +84,7 @@ function AxisPicker({
             style={{
               border: value === v ? "1px solid var(--ln-gold)" : "1px solid rgba(196,154,40,0.2)",
               background: value === v ? "rgba(196,154,40,0.15)" : "transparent",
-              color: value === v ? "var(--ln-gold)" : "rgba(237,229,208,0.55)",
+              color: value === v ? "var(--ln-gold)" : "color-mix(in srgb, var(--ln-parchment) 55%, transparent)",
             }}
           >
             {v}
@@ -656,7 +656,7 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
                     className="text-[11px] px-2 py-1 rounded-full"
                     style={{
                       border: on ? "1px solid var(--ln-gold)" : "1px solid rgba(196,154,40,0.2)",
-                      color: on ? "var(--ln-gold)" : "rgba(237,229,208,0.5)",
+                      color: on ? "var(--ln-gold)" : "color-mix(in srgb, var(--ln-parchment) 50%, transparent)",
                     }}
                   >
                     {m}
@@ -708,7 +708,7 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
                 onChange={(e) => setAttested(e.target.checked)}
                 className="mt-1"
               />
-              <span className="text-sm" style={{ color: "rgba(237,229,208,0.75)" }}>
+              <span className="text-sm" style={{ color: "color-mix(in srgb, var(--ln-parchment) 75%, transparent)" }}>
                 I attest that the participation declarations above are true to the best of my knowledge.
               </span>
             </label>
@@ -761,7 +761,7 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
                   {witnessData.wid}
                 </p>
                 {toneProfile && (
-                  <p className="text-sm" style={{ color: "rgba(237,229,208,0.8)" }}>
+                  <p className="text-sm" style={{ color: "color-mix(in srgb, var(--ln-parchment) 80%, transparent)" }}>
                     Tone: {toneProfile.label}
                   </p>
                 )}
@@ -810,7 +810,7 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
                   style={{
                     border: publishIntent === s ? "1px solid var(--ln-gold)" : "1px solid rgba(196,154,40,0.2)",
                     background: publishIntent === s ? "rgba(196,154,40,0.15)" : "transparent",
-                    color: publishIntent === s ? "var(--ln-gold)" : "rgba(237,229,208,0.55)",
+                    color: publishIntent === s ? "var(--ln-gold)" : "color-mix(in srgb, var(--ln-parchment) 55%, transparent)",
                   }}
                 >
                   {s}
@@ -818,7 +818,7 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
               ))}
             </div>
 
-            <ul className="text-xs space-y-1" style={{ color: "rgba(237,229,208,0.55)" }}>
+            <ul className="text-xs space-y-1" style={{ color: "color-mix(in srgb, var(--ln-parchment) 55%, transparent)" }}>
               <li>Title: {title}</li>
               <li>WID: {witnessData?.wid}</li>
               <li>Visual: {coverPreview ? visualSource : "none"}</li>
@@ -870,7 +870,7 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
         {title || "Untitled work"}
       </p>
       {toneProfile && (
-        <p className="text-xs" style={{ color: "rgba(237,229,208,0.55)" }}>
+        <p className="text-xs" style={{ color: "color-mix(in srgb, var(--ln-parchment) 55%, transparent)" }}>
           {toneProfile.label}
         </p>
       )}

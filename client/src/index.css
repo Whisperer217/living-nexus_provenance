@@ -653,7 +653,7 @@
      ─────────────────────────────────────────────────────────────────────── */
   html {
     height: 100%;
-    background-color: #000000; /* explicit — iOS paints bounce region from html bg */
+    background-color: var(--background, #000000); /* theme-aware — iOS bounce region */
     overscroll-behavior-y: contain; /* contain bounce within app, don't expose browser chrome */
   }
   /* ── Bottom Stack Layout Tokens ─────────────────────────────────────
@@ -683,7 +683,8 @@
     min-height: 100dvh; /* dvh = true mobile viewport height, not browser-lied vh */
     display: flex;
     flex-direction: column;
-    background-color: #000000; /* seal root — prevents transparent root exposing html canvas */
+    background-color: var(--background, #000000); /* theme-aware seal */
+    color: var(--foreground, #EDE5D0);
   }
   /* scroll-lock override moved outside @layer base — see below */
 
@@ -753,7 +754,7 @@
     font-weight: var(--weight-h1);
     line-height: var(--leading-h1);
     letter-spacing: var(--tracking-h1);
-    color: #EDE5D0;
+    color: var(--ln-parchment, var(--foreground));
     margin-bottom: var(--space-h1);
     -webkit-font-smoothing: antialiased;
   }
@@ -763,7 +764,7 @@
     font-weight: var(--weight-h2);
     line-height: var(--leading-h2);
     letter-spacing: var(--tracking-h2);
-    color: #EDE5D0;
+    color: var(--ln-parchment, var(--foreground));
     margin-bottom: var(--space-h2);
     -webkit-font-smoothing: antialiased;
   }
@@ -773,7 +774,7 @@
     font-weight: var(--weight-h3);
     line-height: var(--leading-h3);
     letter-spacing: var(--tracking-h3);
-    color: #D8C9A8;
+    color: var(--ln-bone, var(--foreground));
     margin-bottom: var(--space-h3);
   }
   h4 {
@@ -782,7 +783,7 @@
     font-weight: var(--weight-h4);
     line-height: var(--leading-h4);
     letter-spacing: var(--tracking-h4);
-    color: #D8C9A8;
+    color: var(--ln-bone, var(--foreground));
     margin-bottom: var(--space-h4);
   }
   h5, h6 {
@@ -791,7 +792,7 @@
     font-weight: 600;
     letter-spacing: var(--tracking-overline);
     text-transform: uppercase;
-    color: #6B6555;
+    color: var(--ln-smoke, var(--muted-foreground));
   }
   button:not(:disabled),
   [role="button"]:not([aria-disabled="true"]),
@@ -1055,7 +1056,7 @@ body.overlay-active-full:has([data-slot="dialog-content"]) {
     letter-spacing: var(--tracking-overline);
     text-transform: uppercase;
     -webkit-font-smoothing: antialiased;
-    color: #C49A28;             /* Quartzite Gold */
+    color: var(--ln-gold);             /* theme-aware gold */
     position: relative;
     display: inline-flex;
     align-items: center;
@@ -1066,7 +1067,7 @@ body.overlay-active-full:has([data-slot="dialog-content"]) {
     display: inline-block;
     width: 1.5rem;
     height: 1px;
-    background: linear-gradient(to right, transparent, #C49A28);
+    background: linear-gradient(to right, transparent, var(--ln-gold));
     flex-shrink: 0;
   }
   .museum-section-title::after {
@@ -1074,7 +1075,7 @@ body.overlay-active-full:has([data-slot="dialog-content"]) {
     display: inline-block;
     width: 1.5rem;
     height: 1px;
-    background: linear-gradient(to left, transparent, #C49A28);
+    background: linear-gradient(to left, transparent, var(--ln-gold));
     flex-shrink: 0;
   }
 
@@ -1085,7 +1086,7 @@ body.overlay-active-full:has([data-slot="dialog-content"]) {
     font-weight: 600;
     letter-spacing: 0.08em;
     -webkit-font-smoothing: antialiased;
-    color: #EDE5D0;
+    color: var(--ln-parchment, var(--foreground));
   }
 
   /* ── MUSEUM CAPTION — Cormorant Garamond for descriptions / pull quotes ── */
@@ -1094,7 +1095,7 @@ body.overlay-active-full:has([data-slot="dialog-content"]) {
     font-size: var(--text-sm);   /* 14px — caption tier */
     font-weight: 400;
     letter-spacing: 0.01em;
-    color: #D8C9A8;
+    color: var(--ln-bone, var(--muted-foreground));
     line-height: var(--leading-body);
   }
 

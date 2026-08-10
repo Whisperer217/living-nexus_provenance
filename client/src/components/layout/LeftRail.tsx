@@ -109,21 +109,21 @@ export default function LeftRail({
           width: isMobile ? 72 : 60,
           height: 56,
           background: active ? "rgba(212,175,55,0.10)" : "transparent",
-          color: active ? "#D4AF37" : "rgba(255,255,255,0.62)",
+          color: active ? "var(--ln-gold)" : "var(--ln-smoke)",
           boxShadow: active
-            ? "0 0 12px rgba(212,175,55,0.20), inset 0 0 8px rgba(212,175,55,0.05)"
+            ? "0 0 12px color-mix(in srgb, var(--ln-gold) 20%, transparent), inset 0 0 8px color-mix(in srgb, var(--ln-gold) 5%, transparent)"
             : "none",
           WebkitTapHighlightColor: "transparent",
         }}
         onMouseEnter={e => {
           if (!active) {
-            (e.currentTarget as HTMLElement).style.color = "rgba(212,175,55,0.70)";
-            (e.currentTarget as HTMLElement).style.background = "rgba(212,175,55,0.06)";
+            (e.currentTarget as HTMLElement).style.color = "var(--ln-gold)";
+            (e.currentTarget as HTMLElement).style.background = "color-mix(in srgb, var(--ln-gold) 8%, transparent)";
           }
         }}
         onMouseLeave={e => {
           if (!active) {
-            (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.62)";
+            (e.currentTarget as HTMLElement).style.color = "var(--ln-smoke)";
             (e.currentTarget as HTMLElement).style.background = "transparent";
           }
         }}
@@ -132,7 +132,7 @@ export default function LeftRail({
         {active && (
           <span
             className="absolute left-0 top-1/2 -translate-y-1/2 rounded-r-full"
-            style={{ width: 3, height: 22, background: "#D4AF37" }}
+            style={{ width: 3, height: 22, background: "var(--ln-gold)" }}
           />
         )}
         <div className="relative">
@@ -235,8 +235,8 @@ export default function LeftRail({
           left: 0,
           bottom: 0,
           width: 72,
-          background: "rgba(0,0,0,0.98)",
-          borderRight: "1px solid rgba(196,154,40,0.12)",
+          background: "var(--ln-panel)",
+          borderRight: "1px solid var(--ln-panel-border)",
           zIndex: 310,
           overflowY: "auto",
           overflowX: "hidden",
@@ -274,8 +274,8 @@ export default function LeftRail({
           left: 0,
           bottom: 0,
           width: 72,
-          background: "rgba(0,0,0,0.98)",
-          borderRight: "1px solid rgba(196,154,40,0.12)",
+          background: "var(--ln-panel)",
+          borderRight: "1px solid var(--ln-panel-border)",
           zIndex: 300,
           overflowY: "auto",
           overflowX: "hidden",

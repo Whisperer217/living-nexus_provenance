@@ -242,7 +242,7 @@ function CreatorMiniCard({
             <div className="px-4 pt-3 pb-2">
               <p
                 className="text-[12px] leading-[1.7] line-clamp-3"
-                style={{ color: "rgba(237,229,208,0.72)" }}
+                style={{ color: "color-mix(in srgb, var(--ln-parchment) 72%, transparent)" }}
               >
                 {data.bio}
               </p>

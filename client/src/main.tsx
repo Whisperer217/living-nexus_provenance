@@ -6,8 +6,10 @@ import { httpBatchLink, TRPCClientError } from "@trpc/client";
 import { createRoot } from "react-dom/client";
 import superjson from "superjson";
 import App from "./App";
+import { ThemeProvider } from "./contexts/ThemeContext";
 import { LightsModeProvider } from "./contexts/LightsModeContext";
 import { KeeperAttrsProvider } from "./contexts/KeeperAttrsContext";
+import { PendingWorkProvider } from "./contexts/PendingWorkContext";
 import { WSPProvider } from "./contexts/WSPContext";
 import { RightRailProvider } from "./contexts/RightRailContext";
 import { WorkEditorProvider } from "./contexts/WorkEditorContext";
@@ -196,24 +198,25 @@ createRoot(document.getElementById("root")!).render(
   <HelmetProvider>
     <trpc.Provider client={trpcClient} queryClient={queryClient}>
       <QueryClientProvider client={queryClient}>
-        {/* LightsModeProvider must be inside QueryClientProvider so it can call trpc hooks */}
-        <KeeperAttrsProvider>
-          <WSPProvider>
-            <RightRailProvider>
-              <LightsModeProvider>
-                <WorkEditorProvider>
-                  <UploadEngineProvider>
-                    <PendingWorkProvider>
-                      <App />
-                    </PendingWorkProvider>
-                  </UploadEngineProvider>
-                </WorkEditorProvider>
-              </LightsModeProvider>
-            </RightRailProvider>
-          </WSPProvider>
-        </KeeperAttrsProvider>
+        {/* ThemeProvider owns data-theme; LightsMode adapts profile lights toggle */}
+        <ThemeProvider defaultTheme="cathedral-dark">
+          <KeeperAttrsProvider>
+            <WSPProvider>
+              <RightRailProvider>
+                <LightsModeProvider>
+                  <WorkEditorProvider>
+                    <UploadEngineProvider>
+                      <PendingWorkProvider>
+                        <App />
+                      </PendingWorkProvider>
+                    </UploadEngineProvider>
+                  </WorkEditorProvider>
+                </LightsModeProvider>
+              </RightRailProvider>
+            </WSPProvider>
+          </KeeperAttrsProvider>
+        </ThemeProvider>
       </QueryClientProvider>
     </trpc.Provider>
   </HelmetProvider>
 );
-import { PendingWorkProvider } from "./contexts/PendingWorkContext";

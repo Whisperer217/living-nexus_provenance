@@ -12,7 +12,7 @@ import { getLoginUrl } from "@/const";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { useWSP } from "@/contexts/WSPContext";
 import { WhatsNewModal } from "@/components/WhatsNewModal";
-import { useLightsMode } from "@/contexts/LightsModeContext";
+import { useTheme } from "@/contexts/ThemeContext";
 import { useHarmonic } from "@/contexts/HarmonicContext";
 import {
   Upload, Bell, LogIn, LogOut, CheckCircle2, Zap, Search, User, Settings,
@@ -98,8 +98,8 @@ function InlinePlayer() {
         <div className="flex items-center gap-2 opacity-20">
           <div className="w-8 h-8 rounded" style={{ background: "rgba(255,215,0,0.1)", border: "1px solid rgba(255,215,0,0.15)" }} />
           <div>
-            <div className="h-2 w-24 rounded" style={{ background: "rgba(255,255,255,0.12)" }} />
-            <div className="h-1.5 w-16 rounded mt-1" style={{ background: "rgba(255,255,255,0.06)" }} />
+            <div className="h-2 w-24 rounded" style={{ background: "color-mix(in srgb, var(--ln-parchment) 12%, transparent)" }} />
+            <div className="h-1.5 w-16 rounded mt-1" style={{ background: "color-mix(in srgb, var(--ln-parchment) 6%, transparent)" }} />
           </div>
         </div>
       </div>
@@ -144,7 +144,7 @@ function InlinePlayer() {
       >
         <span
           className="truncate text-xs font-medium leading-tight"
-          style={{ color: "rgba(255,255,255,0.90)", maxWidth: 140 }}
+          style={{ color: "color-mix(in srgb, var(--ln-parchment) 90%, transparent)", maxWidth: 140 }}
         >
           {track.title}
         </span>
@@ -161,7 +161,7 @@ function InlinePlayer() {
       <div className="flex-1 flex items-center gap-2 min-w-0">
         <span
           className="shrink-0 tabular-nums"
-          style={{ fontSize: "10px", color: "rgba(255,255,255,0.35)", fontFamily: "'Space Mono', monospace" }}
+          style={{ fontSize: "10px", color: "var(--ln-smoke)", fontFamily: "'Space Mono', monospace" }}
         >
           {fmtTime(state.currentTime)}
         </span>
@@ -174,7 +174,7 @@ function InlinePlayer() {
           {/* Track */}
           <div
             className="w-full rounded-full"
-            style={{ height: 3, background: "rgba(255,255,255,0.10)" }}
+            style={{ height: 3, background: "color-mix(in srgb, var(--ln-parchment) 10%, transparent)" }}
           >
             {/* Fill */}
             <div
@@ -200,7 +200,7 @@ function InlinePlayer() {
         </div>
         <span
           className="shrink-0 tabular-nums"
-          style={{ fontSize: "10px", color: "rgba(255,255,255,0.35)", fontFamily: "'Space Mono', monospace" }}
+          style={{ fontSize: "10px", color: "var(--ln-smoke)", fontFamily: "'Space Mono', monospace" }}
         >
           {fmtTime(state.duration)}
         </span>
@@ -212,7 +212,7 @@ function InlinePlayer() {
         <button
           onClick={() => setShuffle(s => !s)}
           className="p-1.5 rounded transition-all"
-          style={{ color: shuffle ? "rgba(255,215,0,0.8)" : "rgba(255,255,255,0.3)" }}
+          style={{ color: shuffle ? "rgba(255,215,0,0.8)" : "color-mix(in srgb, var(--ln-parchment) 30%, transparent)" }}
           aria-label="Shuffle"
           title="Shuffle"
         >
@@ -222,7 +222,7 @@ function InlinePlayer() {
         <button
           onClick={() => prevTrack()}
           className="p-1.5 rounded transition-all hover:bg-white/5"
-          style={{ color: "rgba(255,255,255,0.55)" }}
+          style={{ color: "color-mix(in srgb, var(--ln-parchment) 55%, transparent)" }}
           aria-label="Previous"
         >
           <SkipBack size={15} />
@@ -249,7 +249,7 @@ function InlinePlayer() {
         <button
           onClick={() => nextTrack()}
           className="p-1.5 rounded transition-all hover:bg-white/5"
-          style={{ color: "rgba(255,255,255,0.55)" }}
+          style={{ color: "color-mix(in srgb, var(--ln-parchment) 55%, transparent)" }}
           aria-label="Next"
         >
           <SkipForward size={15} />
@@ -258,7 +258,7 @@ function InlinePlayer() {
         <button
           onClick={() => setRepeat(r => !r)}
           className="p-1.5 rounded transition-all"
-          style={{ color: repeat ? "rgba(255,215,0,0.8)" : "rgba(255,255,255,0.3)" }}
+          style={{ color: repeat ? "rgba(255,215,0,0.8)" : "color-mix(in srgb, var(--ln-parchment) 30%, transparent)" }}
           aria-label="Repeat"
           title="Repeat"
         >
@@ -274,7 +274,7 @@ function InlinePlayer() {
               onClick={() => downloadMutation.mutate({ songId })}
               disabled={downloadMutation.isPending}
               className="p-1.5 rounded transition-all hover:bg-white/5"
-              style={{ color: downloadMutation.isPending ? "rgba(255,255,255,0.2)" : "rgba(255,215,0,0.75)" }}
+              style={{ color: downloadMutation.isPending ? "color-mix(in srgb, var(--ln-parchment) 20%, transparent)" : "rgba(255,215,0,0.75)" }}
               aria-label="Download track"
               title="Free Download"
             >
@@ -287,7 +287,7 @@ function InlinePlayer() {
               onClick={() => tipDownloadMutation.mutate({ songId, origin: window.location.origin })}
               disabled={tipDownloadMutation.isPending}
               className="p-1.5 rounded transition-all hover:bg-white/5"
-              style={{ color: tipDownloadMutation.isPending ? "rgba(255,255,255,0.2)" : "rgba(255,215,0,0.75)" }}
+              style={{ color: tipDownloadMutation.isPending ? "color-mix(in srgb, var(--ln-parchment) 20%, transparent)" : "rgba(255,215,0,0.75)" }}
               aria-label={`Download for $${(tipCents / 100).toFixed(2)}`}
               title={`Paid Download — $${(tipCents / 100).toFixed(2)}`}
             >
@@ -301,7 +301,7 @@ function InlinePlayer() {
           <button
             onClick={() => setShowVolumeSlider(v => !v)}
             className="p-1.5 rounded transition-all hover:bg-white/5"
-            style={{ color: state.isMuted ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.5)" }}
+            style={{ color: state.isMuted ? "color-mix(in srgb, var(--ln-parchment) 20%, transparent)" : "color-mix(in srgb, var(--ln-parchment) 50%, transparent)" }}
             aria-label="Volume"
             title={state.isMuted ? "Unmute" : `Volume ${Math.round(state.volume * 100)}%`}
           >
@@ -338,7 +338,7 @@ function InlinePlayer() {
               <button
                 onClick={toggleMute}
                 className="p-1 rounded-full transition-all"
-                style={{ color: state.isMuted ? "rgba(196,154,40,0.9)" : "rgba(255,255,255,0.3)" }}
+                style={{ color: state.isMuted ? "rgba(196,154,40,0.9)" : "color-mix(in srgb, var(--ln-parchment) 30%, transparent)" }}
                 title={state.isMuted ? "Unmute" : "Mute"}
               >
                 <VolumeX size={10} />
@@ -350,7 +350,7 @@ function InlinePlayer() {
         <button
           onClick={expand}
           className="p-1.5 rounded transition-all hover:bg-white/5"
-          style={{ color: "rgba(255,255,255,0.3)" }}
+          style={{ color: "color-mix(in srgb, var(--ln-parchment) 30%, transparent)" }}
           aria-label="Expand player"
           title="Expand player"
         >
@@ -449,8 +449,8 @@ export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCoun
   const hasWid = user?.licenseStatus === "licensed";
   const userId = (user as any)?.id;
 
-  const { mode: lightsMode } = useLightsMode();
-  const isWarm = lightsMode === "on";
+  const { scheme } = useTheme();
+  const isWarm = scheme === "light";
 
   /* ── Harmonic resonance: the nav bar breathes with the currently playing song ── */
   const { harmonicSig, isPlaying: harmonicPlaying } = useHarmonic();
@@ -467,12 +467,12 @@ export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCoun
     : null;
 
   const NAV_BG = isWarm
-    ? `rgba(55,68,85,0.72)`
+    ? "color-mix(in srgb, var(--ln-coal) 92%, transparent)"
     : harmonicPlaying
       ? `rgba(0,0,0,0.97)`  // keep base dark; tint is layered via pseudo-element below
       : `rgba(0,0,0,0.97)`;
   const NAV_BORDER = harmonicBorderTint
-    ?? (isWarm ? "rgba(100,125,150,0.22)" : "rgba(196,154,40,0.18)");
+    ?? (isWarm ? "var(--ln-panel-border)" : "rgba(196,154,40,0.18)");
 
   return (
     <div className="hidden md:block">
@@ -511,13 +511,13 @@ export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCoun
             style={{
               background: searchFocused
                 ? "rgba(196,154,40,0.08)"
-                : "rgba(255,255,255,0.04)",
+                : "color-mix(in srgb, var(--ln-parchment) 4%, transparent)",
               border: searchFocused
                 ? "1px solid rgba(196,154,40,0.30)"
-                : "1px solid rgba(255,255,255,0.06)",
+                : "1px solid color-mix(in srgb, var(--ln-parchment) 8%, transparent)",
             }}
           >
-            <Search size={13} style={{ color: searchFocused ? "var(--ln-gold)" : "rgba(255,255,255,0.3)", flexShrink: 0 }} />
+            <Search size={13} style={{ color: searchFocused ? "var(--ln-gold)" : "color-mix(in srgb, var(--ln-parchment) 30%, transparent)", flexShrink: 0 }} />
             <input
               ref={searchRef}
               type="text"
@@ -573,8 +573,8 @@ export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCoun
                   </div>
                   {/* Text */}
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium truncate" style={{ color: "rgba(255,255,255,0.88)" }}>{item.label}</p>
-                    <p className="text-[10px] truncate" style={{ color: "rgba(255,255,255,0.35)" }}>{item.sub}</p>
+                    <p className="text-xs font-medium truncate" style={{ color: "color-mix(in srgb, var(--ln-parchment) 88%, transparent)" }}>{item.label}</p>
+                    <p className="text-[10px] truncate" style={{ color: "var(--ln-smoke)" }}>{item.sub}</p>
                   </div>
                   {/* WID badge */}
                   {item.isWid && (
@@ -749,7 +749,7 @@ export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCoun
                 fontWeight: 600,
                 background: "rgba(196,154,40,0.08)",
                 border: "1px solid rgba(196,154,40,0.20)",
-                color: "#C9C0A8",
+                color: "var(--ln-bone)",
               }}
             >
               <LogIn size={12} />
