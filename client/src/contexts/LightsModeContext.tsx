@@ -1,20 +1,13 @@
 /**
  * LightsModeContext
  *
- * Fetches the platform owner's `lightsMode` setting and applies the
- * `data-theme` attribute to <html>:
- *   - "dim"  → data-theme="dark"   (Lantern Light — charred oak)
- *   - "on"   → data-theme="warm"   (Onyx Coffee — cream-clay)
+ * Owner profile "Lights On / Dim" preference.
+ * Maps onto the shared ThemeProvider palette:
+ *   - "dim" → cathedral-dark
+ *   - "on"  → parchment-cream (real cream/white surfaces)
  *
- * Flash prevention strategy:
- *   1. On first render, read `lnx_theme` from localStorage and apply
- *      the attribute synchronously — this runs before the first paint so
- *      there is no visible flash.
- *   2. Once the tRPC query resolves, sync state from the server and persist
- *      the latest value back to localStorage for the next visit.
- *
- * The context also exposes `setMode` so the owner's ProfilePage can
- * optimistically toggle the mode without a full page reload.
+ * ThemeProvider remains the source of truth for data-theme after mount;
+ * this context keeps the owner toggle and ThemeSwitcher aligned via localStorage.
  */
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { trpc } from "@/lib/trpc";
@@ -22,24 +15,35 @@ import { trpc } from "@/lib/trpc";
 export type LightsMode = "dim" | "on";
 
 const LS_KEY = "lnx_theme";
+const THEME_LS_KEY = "ln-theme";
 
 /** Read the stored mode synchronously — safe to call during render */
 function readStoredMode(): LightsMode {
   try {
     const stored = localStorage.getItem(LS_KEY);
     if (stored === "on" || stored === "dim") return stored;
+    const theme = localStorage.getItem(THEME_LS_KEY);
+    if (theme === "parchment-cream" || theme === "warm") return "on";
   } catch {
     /* localStorage blocked (private browsing, etc.) — fall through */
   }
   return "dim";
 }
 
-/** Apply data-theme attribute to <html> immediately (no React state cycle) */
+/** Apply theme keys so ThemeProvider + CSS stay aligned */
 function applyTheme(mode: LightsMode) {
-  document.documentElement.setAttribute(
-    "data-theme",
-    mode === "on" ? "warm" : "dark"
-  );
+  const themeName = mode === "on" ? "parchment-cream" : "cathedral-dark";
+  document.documentElement.setAttribute("data-theme", themeName);
+  document.documentElement.setAttribute("data-scheme", mode === "on" ? "light" : "dark");
+  if (mode === "on") {
+    document.documentElement.classList.remove("dark");
+  } else {
+    document.documentElement.classList.add("dark");
+  }
+  try {
+    localStorage.setItem(LS_KEY, mode);
+    localStorage.setItem(THEME_LS_KEY, themeName);
+  } catch { /* ignore */ }
 }
 
 // Hydrate the theme synchronously before React renders anything.
@@ -71,14 +75,12 @@ export function LightsModeProvider({ children }: { children: ReactNode }) {
       const serverMode = data.lightsMode as LightsMode;
       setModeState(serverMode);
       applyTheme(serverMode);
-      try { localStorage.setItem(LS_KEY, serverMode); } catch { /* ignore */ }
     }
   }, [data?.lightsMode]);
 
   const setMode = (m: LightsMode) => {
     setModeState(m);
     applyTheme(m);
-    try { localStorage.setItem(LS_KEY, m); } catch { /* ignore */ }
   };
 
   return (

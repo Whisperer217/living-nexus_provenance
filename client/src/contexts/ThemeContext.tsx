@@ -5,23 +5,32 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 // CSS variable blocks in index.css respond to [data-theme="..."].
 // The "dark" class is also toggled for Tailwind dark: variants.
 // ──────────────────────────────────────────────────────────────────
-export type LNTheme = "cathedral-dark" | "crimson" | "illuminated-gold";
+export type LNTheme = "cathedral-dark" | "crimson" | "illuminated-gold" | "parchment-cream";
 
-export const THEME_META: Record<LNTheme, { label: string; description: string; accent: string }> = {
+export const THEME_META: Record<LNTheme, { label: string; description: string; accent: string; scheme: "dark" | "light" }> = {
   "cathedral-dark": {
     label: "Cathedral Dark",
     description: "True black void with quartzite gold — the original",
     accent: "#C49A28",
+    scheme: "dark",
   },
   "crimson": {
     label: "Crimson",
-    description: "Blood-red depths with crimson fire and gold",
-    accent: "#C41E3A",
+    description: "Blood-red depths with crimson fire",
+    accent: "#E8294F",
+    scheme: "dark",
   },
   "illuminated-gold": {
     label: "Illuminated Gold",
     description: "Warm amber light on deep charcoal — radiant",
     accent: "#F5C842",
+    scheme: "dark",
+  },
+  "parchment-cream": {
+    label: "Parchment Cream",
+    description: "Museum daylight — cream paper, espresso ink, gold vein",
+    accent: "#9A7518",
+    scheme: "light",
   },
 };
 
@@ -49,6 +58,7 @@ function normalizeTheme(raw: string | null | undefined): LNTheme {
   if (raw === "dark" || raw === "cathedral-dark") return "cathedral-dark";
   if (raw === "crimson") return "crimson";
   if (raw === "illuminated-gold") return "illuminated-gold";
+  if (raw === "parchment-cream" || raw === "warm" || raw === "light" || raw === "cream") return "parchment-cream";
   return DEFAULT_THEME;
 }
 
@@ -64,15 +74,24 @@ export function ThemeProvider({
 
   useEffect(() => {
     const root = document.documentElement;
+    const meta = THEME_META[theme];
 
     // Set data-theme attribute — activates CSS variable blocks
     root.setAttribute("data-theme", theme);
+    root.setAttribute("data-scheme", meta.scheme);
 
-    // Keep Tailwind dark: variants working — all LN themes are dark-base
-    root.classList.add("dark");
+    // Tailwind dark: variants only for dark-scheme themes
+    if (meta.scheme === "dark") {
+      root.classList.add("dark");
+    } else {
+      root.classList.remove("dark");
+    }
 
-    // Persist
+    // Persist + keep Lights Mode preference aligned
     localStorage.setItem(STORAGE_KEY, theme);
+    try {
+      localStorage.setItem("lnx_theme", meta.scheme === "light" ? "on" : "dim");
+    } catch { /* ignore */ }
   }, [theme]);
 
   const setTheme = (t: LNTheme) => setThemeState(t);
@@ -80,7 +99,7 @@ export function ThemeProvider({
   // Legacy compat for any code that calls toggleTheme()
   const toggleTheme = () => {
     setThemeState(prev =>
-      prev === "cathedral-dark" ? "illuminated-gold" : "cathedral-dark"
+      prev === "cathedral-dark" ? "parchment-cream" : "cathedral-dark"
     );
   };
 
