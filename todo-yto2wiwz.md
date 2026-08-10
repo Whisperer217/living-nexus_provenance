@@ -17,8 +17,12 @@
 - [x] Validate public routes and the Loop creator page; verify in the merged implementation that batch intent defaults to Draft and propagates status, while non-music shelves remain preserved but hidden.
 - [x] Hand off the authenticated Batch Upload toggle and rendered domain-layout smoke test to the user’s signed-in checklist; no account-bound production action was performed by the agent.
 - [x] Restore the interrupted archive export repair: Archiver 8 compatibility, structured export failures, client-side ZIP response validation, and route-level regression coverage (41 files / 413 tests passing).
-- [x] Save a dedicated checkpoint for the restored archive export repair before starting the PNA pull-request sequence.
-- [ ] Review and merge PR #4 (PNA routes) after confirming its migration and compatibility impact.
-- [ ] Review and merge PR #6 (theme remapping and PNA diary) after PR #4 is safely on `main`.
-- [ ] Review and merge PR #5 (Guide slots) after PR #6 is safely on `main`.
+- [x] Save a dedicated checkpoint for the restored archive export repair before starting the PNA pull-request sequence (`e8709fed`).
+- [x] Merge PR #4 after review confirmed its eight-file PNA route/presence scope and no schema or migration impact (`74e3e252`).
+- [x] Review and merge PR #6 (theme remapping and PNA diary) after PR #4 is safely on `main` (`0c17049f`).
+- [x] Correct PR #6’s diary schema and migration to use the production table’s existing camelCase base columns before adding the diary fields; apply and verify the additive production migration (9 columns and 2 indexes).
+- [x] Rebase and reconcile PR #6 with merged PR #4 while preserving both the PNA route foundation and theme/diary changes (`1b63dbaf`).
+- [x] Review and merge PR #5 (Guide slots) after PR #6 is safely on `main` (`7a8ec581`).
+- [x] Apply and verify PR #5’s additive Guide slots and growth-signal migration before exposing its create and purchase flows (owner has 2 used / 3 total slots; growth and purchase tables present; no creator exceeds their limit).
+- [x] Reconcile PR #5 with the merged PNA and diary releases while preserving guide-slot limits, growth signals, and the restored stewarded routes (`116010d8`).
 - [ ] Run the release validation suite, publish the ordered PNA sequence, and preserve the final deployment checkpoint.
