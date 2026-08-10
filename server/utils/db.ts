@@ -41,6 +41,11 @@ import {
   guides,
   type Guide,
   type InsertGuide,
+  guideGrowthEvents,
+  type GuideGrowthEvent,
+  type InsertGuideGrowthEvent,
+  guideSlotPurchases,
+  type InsertGuideSlotPurchase,
   domainBlocks,
   domainVersions,
   manifestedCollections,
@@ -4810,7 +4815,147 @@ export async function deleteGuide(id: number, creatorId: number): Promise<boolea
   const db = await getDb();
   if (!db) throw new Error("Database unavailable");
   const [result] = await db.delete(guides).where(and(eq(guides.id, id), eq(guides.creatorId, creatorId)));
-  return (result as { affectedRows: number }).affectedRows > 0;
+  const ok = (result as { affectedRows: number }).affectedRows > 0;
+  if (ok) {
+    await db.execute(sql`UPDATE users SET guideSlotsUsed = GREATEST(0, guideSlotsUsed - 1) WHERE id = ${creatorId}`);
+  }
+  return ok;
+}
+
+/** Count guides owned by a creator (all statuses). */
+export async function countGuidesByCreator(creatorId: number): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  const [row] = await db
+    .select({ c: count() })
+    .from(guides)
+    .where(eq(guides.creatorId, creatorId));
+  return Number(row?.c ?? 0);
+}
+
+/** Guide slot balance for a creator. */
+export async function getGuideSlotBalance(userId: number): Promise<{
+  used: number;
+  total: number;
+  remaining: number;
+}> {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  const [user] = await db
+    .select({
+      guideSlotsTotal: users.guideSlotsTotal,
+      guideSlotsUsed: users.guideSlotsUsed,
+    })
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1);
+  const used = await countGuidesByCreator(userId);
+  const total = user?.guideSlotsTotal ?? 3;
+  // Keep denormalized used in sync
+  if (user && user.guideSlotsUsed !== used) {
+    await db.update(users).set({ guideSlotsUsed: used }).where(eq(users.id, userId));
+  }
+  return { used, total, remaining: Math.max(0, total - used) };
+}
+
+export async function recordGuideSlotPurchase(data: {
+  userId: number;
+  stripePaymentIntentId?: string;
+  slotsPurchased: number;
+  amountCents: number;
+  packageId?: string;
+}): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  await db.insert(guideSlotPurchases).values({
+    userId: data.userId,
+    stripePaymentIntentId: data.stripePaymentIntentId,
+    slotsPurchased: data.slotsPurchased,
+    amountCents: data.amountCents,
+    packageId: data.packageId,
+  });
+  await db.execute(
+    sql`UPDATE users SET guideSlotsTotal = guideSlotsTotal + ${data.slotsPurchased} WHERE id = ${data.userId}`
+  );
+}
+
+export async function recordGuideGrowthEvent(data: {
+  guideId: number;
+  eventType: "track_linked" | "contact" | "witness_ack";
+  actorUserId: number;
+  refWid?: string | null;
+  refSongId?: number | null;
+  note?: string | null;
+}): Promise<GuideGrowthEvent> {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  const [result] = await db.insert(guideGrowthEvents).values({
+    guideId: data.guideId,
+    eventType: data.eventType,
+    actorUserId: data.actorUserId,
+    refWid: data.refWid ?? null,
+    refSongId: data.refSongId ?? null,
+    note: data.note ?? null,
+  });
+  const id = (result as { insertId: number }).insertId;
+  await refreshGuideSignalPersonality(data.guideId);
+  const [row] = await db.select().from(guideGrowthEvents).where(eq(guideGrowthEvents.id, id));
+  return row as GuideGrowthEvent;
+}
+
+export async function getGuideGrowthCounts(guideId: number): Promise<{
+  track_linked: number;
+  contact: number;
+  witness_ack: number;
+}> {
+  const db = await getDb();
+  if (!db) return { track_linked: 0, contact: 0, witness_ack: 0 };
+  const rows = await db
+    .select({
+      eventType: guideGrowthEvents.eventType,
+      c: count(),
+    })
+    .from(guideGrowthEvents)
+    .where(eq(guideGrowthEvents.guideId, guideId))
+    .groupBy(guideGrowthEvents.eventType);
+  const out = { track_linked: 0, contact: 0, witness_ack: 0 };
+  for (const r of rows) {
+    if (r.eventType in out) out[r.eventType as keyof typeof out] = Number(r.c);
+  }
+  return out;
+}
+
+export async function refreshGuideSignalPersonality(guideId: number): Promise<void> {
+  const { deriveGuideSignalPersonality } = await import("@shared/guideGrowth");
+  const counts = await getGuideGrowthCounts(guideId);
+  const personality = deriveGuideSignalPersonality(counts);
+  const db = await getDb();
+  if (!db) return;
+  await db
+    .update(guides)
+    .set({
+      growthLevel: personality.level,
+      signalPersonalityJson: personality,
+    })
+    .where(eq(guides.id, guideId));
+}
+
+export async function listGuideGrowthEvents(guideId: number, limit = 40): Promise<GuideGrowthEvent[]> {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db
+    .select()
+    .from(guideGrowthEvents)
+    .where(eq(guideGrowthEvents.guideId, guideId))
+    .orderBy(desc(guideGrowthEvents.createdAt))
+    .limit(limit);
+  return rows as GuideGrowthEvent[];
+}
+
+/** Resolve a parentGuideWid to guide id for growth linking. */
+export async function resolveGuideIdByWid(widCode: string): Promise<number | null> {
+  const g = await getGuideByWid(widCode);
+  return g?.id ?? null;
 }
 
 // ─── Global Search ────────────────────────────────────────────────────────────

@@ -92,6 +92,7 @@ Must show above the fold / primary provenance:
 - Retain for owner export/download
 - Do **not** destroy registered works or WIDs
 - Remove UI chrome first; hard-delete dead modules only after redirects + export are safe
+- **Exception — stewarded companions:** Creator Guides (§7) and PNA Avatar live off-spine; not destroyed
 
 ---
 
@@ -104,9 +105,11 @@ Must show above the fold / primary provenance:
 | P2 | WID seal: tone-from-metadata + downloadable waveform |
 | P3 | Visual merge + AI generate/remix + prompt provenance |
 | P4 | Flagship creator + testimony publish gate |
-| P5 | Work page surfaces + delist AI chrome **from Loop spine** |
+<<<<<<< HEAD
+| P5 | Work page surfaces + delist AI chrome from Loop spine |
 | P6 | Batch parity + cleanup |
-| P7 | **Steward PNA Avatar** as companion OS (not Loop overlay) |
+| P7 | Steward PNA Avatar as companion OS (not Loop overlay) |
+| P8 | Steward Creator Guides (slots + signal growth) |
 
 ---
 
@@ -131,6 +134,41 @@ Must show above the fold / primary provenance:
 - Do not destroy Keeper skins, AVT records, PNA notes, or chat capability
 - Entry from Manage / TopBar “Provenance” is first-class stewardship access
 - Quick actions inside PNA may deep-link into Loop spine (Register, Archive, Manage)
+
+---
+
+## 8. Creator Guides — stewarded companion
+
+**Audience:** Creators on platform (not Loop Discover chrome)  
+**Home:** `/guides`, `/guides/upload`, `/guide/:id`  
+**Law:** Drafts keep the existing 6-step pipeline. Loop spine stays music-pure. Stewardship ≠ deletion.
+
+### Slots
+- Every creator starts with **3 guide slots**
+- Creating a guide (draft or published) consumes one slot
+- Deleting an unpublished draft frees a slot
+- Published guides cannot be deleted (WID retained)
+- Creators may **buy more slots** (Stripe packages; separate from song upload slots)
+
+### Drafts
+- Preserve existing draft → review → published machine
+- Do not rewrite the upload wizard; only gate create on slots
+
+### Leveling / signal personality
+Guides level through **platform signals**, not XP theatre inside Register:
+
+| Growth event | Meaning |
+|---|---|
+| `track_linked` | Creator uploads/registers a work bound to this guide (`parentGuideWid`) |
+| `contact` | Creator reaches another creator on-platform (access request, tip, intentional contact) |
+| `witness_ack` | Creator acknowledges another witness’s upload (reaction / witness affirmation tied to guide lineage) |
+
+**Signal personality** = derived profile from those event counts (resonance / bridge / archive / nascent) plus the guide’s existing alignment · domain · role identity. Cached on the guide non-destructively; events are append-only.
+
+### Surface rules
+- Not in primary Loop rail
+- Entry from Manage / Guides directory / creator tools
+- Explore may list published guides lightly or hide under steward entry — prefer steward entry first
 
 ---
 

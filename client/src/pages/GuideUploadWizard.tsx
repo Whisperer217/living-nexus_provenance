@@ -862,8 +862,17 @@ export default function GuideUploadWizard() {
   const [form, setForm] = useState<GuideFormData>(DEFAULT_FORM);
   const [guideId, setGuideId] = useState<number | null>(null);
   const createGuide = trpc.guides.create.useMutation();
+  const { data: slots } = trpc.guides.mySlots.useQuery(undefined, { enabled: !!user });
+  const buySlots = trpc.guides.createSlotCheckout.useMutation({
+    onSuccess: (res) => { if (res.url) window.location.href = res.url; },
+    onError: (e) => toast.error(e.message),
+  });
 
   const handleStep1Next = async () => {
+    if (slots && slots.remaining <= 0) {
+      toast.error("Guide slots full — buy more slots to continue.");
+      return;
+    }
     try {
       const guide = await createGuide.mutateAsync({
         canonicalName: "Untitled Guide",
@@ -872,7 +881,9 @@ export default function GuideUploadWizard() {
       });
       setGuideId(guide.id);
       setStep(2);
-    } catch { toast.error("Failed to create guide draft"); }
+    } catch (e: any) {
+      toast.error(e?.message ?? "Failed to create guide draft");
+    }
   };
 
   if (!user) {
@@ -880,7 +891,49 @@ export default function GuideUploadWizard() {
       <div className="min-h-screen flex items-center justify-center" style={{ background: ATM.bg }}>
         <div className="text-center">
           <p className="text-lg font-bold mb-2" style={{ fontFamily: "'Cinzel', serif", color: ATM.gold }}>Sign In Required</p>
-          <p className="text-sm" style={{ color: ATM.textDim }}>You must be signed in to upload a Personal Nexus Avatar.</p>
+          <p className="text-sm" style={{ color: ATM.textDim }}>You must be signed in to upload a Living Nexus Guide.</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (slots && slots.remaining <= 0 && step === 1 && !guideId) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-4" style={{ background: ATM.bg }}>
+        <div className="text-center max-w-md">
+          <p className="text-lg font-bold mb-2" style={{ fontFamily: "'Cinzel', serif", color: ATM.gold }}>
+            Guide slots full
+          </p>
+          <p className="text-sm mb-6" style={{ color: ATM.textDim }}>
+            You are using {slots.used} of {slots.total} slots. Buy more to declare another guide — existing drafts stay intact.
+          </p>
+          <div className="flex flex-col gap-2">
+            {slots.packages.map((pkg) => (
+              <button
+                key={pkg.id}
+                type="button"
+                disabled={buySlots.isPending}
+                onClick={() =>
+                  buySlots.mutate({
+                    packageId: pkg.id as "guide_1" | "guide_3" | "guide_5",
+                    origin: window.location.origin,
+                  })
+                }
+                className="px-4 py-2 rounded text-sm font-semibold"
+                style={{ background: ATM.gold, color: "#0A0806" }}
+              >
+                {pkg.label} · ${(pkg.priceCents / 100).toFixed(2)}
+              </button>
+            ))}
+            <button
+              type="button"
+              onClick={() => navigate("/guides")}
+              className="text-xs mt-2"
+              style={{ color: ATM.gold }}
+            >
+              ← Back to Guides
+            </button>
+          </div>
         </div>
       </div>
     );

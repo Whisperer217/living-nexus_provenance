@@ -116,6 +116,13 @@ import {
   updateGuide,
   publishGuide,
   deleteGuide,
+  getGuideSlotBalance,
+  recordGuideSlotPurchase,
+  recordGuideGrowthEvent,
+  getGuideGrowthCounts,
+  listGuideGrowthEvents,
+  resolveGuideIdByWid,
+  refreshGuideSignalPersonality,
   globalSearch,
   type SearchResults,
   getDomainBlocks,
@@ -163,6 +170,13 @@ import {
 } from "../utils/db";
 import { FOUNDER_PRICE_EARLY_CENTS, FOUNDER_PRICE_LATE_CENTS, FOUNDER_THRESHOLD, LICENSE_PRICE_CENTS, LICENSE_SLOTS, SLOT_PACKAGES, getSlotPackage, type SlotPackageId } from "../services/livingArchiveProducts";
 import { ENV } from "../_core/env";
+import {
+  GUIDE_DEFAULT_SLOTS,
+  GUIDE_SLOT_PACKAGES,
+  getGuideSlotPackage,
+  type GuideSlotPackageId,
+  deriveGuideSignalPersonality,
+} from "@shared/guideGrowth";
 import { getOrGenerateEmbedVideo } from "../services/embedVideo";
 import { enqueueVisualJob } from "../workers/visualQueue";
 import { notifyOwner } from "../_core/notification";
@@ -186,7 +200,7 @@ const KEEPER_PRESETS = [
 ];
 
 export const guidesRouter = router({
-    /** Create a new guide draft (Step 1 — after files uploaded). */
+    /** Create a new guide draft (Step 1 — after files uploaded). Consumes one guide slot. */
     create: protectedProcedure
       .input(z.object({
         canonicalName: z.string().min(1).max(256).optional(),
@@ -194,13 +208,144 @@ export const guidesRouter = router({
         artworkUrl: z.string().url().optional(),
       }))
       .mutation(async ({ ctx, input }) => {
-        return createGuide({
+        const balance = await getGuideSlotBalance(ctx.user.id);
+        if (balance.remaining <= 0) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: `Guide slots full (${balance.used}/${balance.total}). Buy more slots to declare another guide.`,
+          });
+        }
+        const guide = await createGuide({
           creatorId: ctx.user.id,
           canonicalName: input.canonicalName ?? "Untitled Guide",
           provenanceSheetUrl: input.provenanceSheetUrl,
           artworkUrl: input.artworkUrl,
           canonicalStatus: "draft",
           revenueCreatorPct: 90,
+          growthLevel: 1,
+        });
+        // Refresh used count from rows
+        await getGuideSlotBalance(ctx.user.id);
+        return guide;
+      }),
+
+    /** Slot balance + packages for buy-more UI. */
+    mySlots: protectedProcedure.query(async ({ ctx }) => {
+      const balance = await getGuideSlotBalance(ctx.user.id);
+      return {
+        ...balance,
+        defaultSlots: GUIDE_DEFAULT_SLOTS,
+        packages: GUIDE_SLOT_PACKAGES,
+      };
+    }),
+
+    /** Stripe Checkout to purchase additional guide slots. */
+    createSlotCheckout: protectedProcedure
+      .input(z.object({
+        packageId: z.enum(["guide_1", "guide_3", "guide_5"]),
+        origin: z.string().url(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const pkg = getGuideSlotPackage(input.packageId as GuideSlotPackageId);
+        const session = await stripe.checkout.sessions.create({
+          mode: "payment",
+          payment_method_types: ["card"],
+          line_items: [{
+            price_data: {
+              currency: "usd",
+              product_data: {
+                name: pkg.label,
+                description: pkg.description,
+              },
+              unit_amount: pkg.priceCents,
+            },
+            quantity: 1,
+          }],
+          metadata: {
+            type: "guide_slots",
+            userId: ctx.user.id.toString(),
+            slots: String(pkg.slots),
+            packageId: pkg.id,
+          },
+          payment_intent_data: {
+            metadata: {
+              type: "guide_slots",
+              userId: ctx.user.id.toString(),
+              slots: String(pkg.slots),
+              packageId: pkg.id,
+            },
+          },
+          success_url: `${input.origin}/guides?slots=success`,
+          cancel_url: `${input.origin}/guides/upload`,
+        });
+        return { url: session.url };
+      }),
+
+    /** Growth / signal personality for a guide. */
+    growth: publicProcedure
+      .input(z.object({ guideId: z.number() }))
+      .query(async ({ ctx, input }) => {
+        const guide = await getGuideById(input.guideId);
+        if (!guide) throw new TRPCError({ code: "NOT_FOUND" });
+        if (guide.canonicalStatus !== "published" && guide.creatorId !== ctx.user?.id) {
+          throw new TRPCError({ code: "NOT_FOUND" });
+        }
+        const counts = await getGuideGrowthCounts(input.guideId);
+        const personality = (guide.signalPersonalityJson as ReturnType<typeof deriveGuideSignalPersonality> | null)
+          ?? deriveGuideSignalPersonality(counts);
+        const events = await listGuideGrowthEvents(input.guideId, 30);
+        return {
+          level: guide.growthLevel ?? personality.level,
+          personality,
+          events,
+        };
+      }),
+
+    /** Record a contact signal (creator reaches another creator — tied to a guide). */
+    recordContact: protectedProcedure
+      .input(z.object({
+        guideId: z.number(),
+        note: z.string().max(512).optional(),
+        targetUserId: z.number().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const guide = await getGuideById(input.guideId);
+        if (!guide || guide.creatorId !== ctx.user.id) {
+          throw new TRPCError({ code: "FORBIDDEN", message: "Guide not found or access denied" });
+        }
+        return recordGuideGrowthEvent({
+          guideId: input.guideId,
+          eventType: "contact",
+          actorUserId: ctx.user.id,
+          note: input.note
+            ?? (input.targetUserId ? `Contact with creator #${input.targetUserId}` : "Platform contact"),
+        });
+      }),
+
+    /** Acknowledge another witness’s upload — shapes archive signal personality. */
+    acknowledgeWitnessUpload: protectedProcedure
+      .input(z.object({
+        guideId: z.number(),
+        songId: z.number(),
+        note: z.string().max(512).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const guide = await getGuideById(input.guideId);
+        if (!guide || guide.creatorId !== ctx.user.id) {
+          throw new TRPCError({ code: "FORBIDDEN", message: "Guide not found or access denied" });
+        }
+        const song = await getSongById(input.songId);
+        if (!song) throw new TRPCError({ code: "NOT_FOUND", message: "Work not found" });
+        if (song.userId === ctx.user.id) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "Acknowledge another creator’s upload — not your own." });
+        }
+        return recordGuideGrowthEvent({
+          guideId: input.guideId,
+          eventType: "witness_ack",
+          actorUserId: ctx.user.id,
+          refSongId: song.id,
+          refWid: song.witnessId ?? null,
+          note: input.note ?? `Acknowledged “${song.title}”`,
         });
       }),
 

@@ -43,6 +43,9 @@ export const users = mysqlTable("users", {
   licenseStatus: mysqlEnum("licenseStatus", ["free", "licensed"]).default("free").notNull(),
   songSlotsUsed: int("songSlotsUsed").default(0).notNull(),
   songSlotsTotal: int("songSlotsTotal").default(1).notNull(),
+  /** Creator Guide slots — default 3; buy more separately from song upload slots */
+  guideSlotsUsed: int("guideSlotsUsed").default(0).notNull(),
+  guideSlotsTotal: int("guideSlotsTotal").default(3).notNull(),
 
   // Stripe
   stripeCustomerId: varchar("stripeCustomerId", { length: 64 }),
@@ -1793,6 +1796,10 @@ export const guides = mysqlTable("guides", {
   stripeConnectId: varchar("stripeConnectId", { length: 128 }),
   stripePayoutCurrency: varchar("stripePayoutCurrency", { length: 8 }).default("USD"),
   stripePayoutSchedule: varchar("stripePayoutSchedule", { length: 64 }).default("Automatic (Monthly)"),
+  /** Derived growth level from platform signals (track / contact / witness_ack) */
+  growthLevel: int("growthLevel").default(1).notNull(),
+  /** Cached signal personality profile — see shared/guideGrowth.ts */
+  signalPersonalityJson: json("signalPersonalityJson"),
   // Timestamps
   publishedAt: timestamp("publishedAt"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
@@ -1804,6 +1811,39 @@ export const guides = mysqlTable("guides", {
 }));
 export type Guide = typeof guides.$inferSelect;
 export type InsertGuide = typeof guides.$inferInsert;
+
+// ─── Guide growth events (append-only signal log) ─────────────────────────────
+export const guideGrowthEvents = mysqlTable("guideGrowthEvents", {
+  id: int("id").autoincrement().primaryKey(),
+  guideId: int("guideId").notNull(),
+  eventType: mysqlEnum("eventType", ["track_linked", "contact", "witness_ack"]).notNull(),
+  actorUserId: int("actorUserId").notNull(),
+  refWid: varchar("refWid", { length: 128 }),
+  refSongId: int("refSongId"),
+  note: varchar("note", { length: 512 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (t) => ({
+  guideIdx: index("guideGrowthEvents_guideId_idx").on(t.guideId),
+  typeIdx: index("guideGrowthEvents_eventType_idx").on(t.eventType),
+  actorIdx: index("guideGrowthEvents_actorUserId_idx").on(t.actorUserId),
+}));
+export type GuideGrowthEvent = typeof guideGrowthEvents.$inferSelect;
+export type InsertGuideGrowthEvent = typeof guideGrowthEvents.$inferInsert;
+
+// ─── Guide slot purchases (separate from song slotPurchases) ──────────────────
+export const guideSlotPurchases = mysqlTable("guideSlotPurchases", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  stripePaymentIntentId: varchar("stripePaymentIntentId", { length: 128 }),
+  slotsPurchased: int("slotsPurchased").notNull(),
+  amountCents: int("amountCents").notNull(),
+  packageId: varchar("packageId", { length: 32 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (t) => ({
+  userIdx: index("guideSlotPurchases_userId_idx").on(t.userId),
+}));
+export type GuideSlotPurchase = typeof guideSlotPurchases.$inferSelect;
+export type InsertGuideSlotPurchase = typeof guideSlotPurchases.$inferInsert;
 
 // ─── Layer 3 Worker Jobs ──────────────────────────────────────────────────────
 // Pending and completed processing jobs dispatched to the cloud worker.

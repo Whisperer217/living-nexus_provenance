@@ -675,6 +675,27 @@ export const songsRouter = router({
       const nextOrder = await getNextDisplayOrder(ctx.user.id);
       const insertResult = await createSong({ userId: ctx.user.id, title: input.title, genre: input.genre, bpm: input.bpm, keySignature: input.keySignature, moodTags: input.moodTags, coWriters: input.coWriters, albumName: input.albumName, creditsJson: input.creditsJson, releaseDate: input.releaseDate, isrc: input.isrc, officialArtistName: input.officialArtistName, aiConsent: input.aiConsent, ownershipStatus: input.ownershipStatus, lyricsText: input.lyricsText, lyricsHash: input.lyricsHash, isLyricsOnly: input.isLyricsOnly ?? false, contentType: input.contentType ?? (input.isLyricsOnly ? "lyrics" : "audio"), fileUrl, fileKey: audioKey, coverArtUrl, fileHash: input.fileHash, witnessId: input.witnessId, harmonicSignature: input.harmonicSignature, ecdsaPublicKey: input.ecdsaPublicKey, ecdsaSignature: input.ecdsaSignature, caption: input.caption, headlineCaption: input.headlineCaption, description: input.description, galleryImagesJson: input.galleryImagesJson, playerAssetType: input.playerAssetType ?? 'cover', aiToolSuno: input.aiToolSuno ?? false, aiToolUdio: input.aiToolUdio ?? false, aiToolSonato: input.aiToolSonato ?? false, aiToolOther: input.aiToolOther ?? false, aiToolOtherName: input.aiToolOtherName, durationSeconds: input.durationSeconds, sampleRate: input.sampleRate, bitDepth: input.bitDepth, aiDisclosure: input.aiDisclosure, haaiVisualConcept: input.haaiVisualConcept, haaiStyleLanguage: input.haaiStyleLanguage, haaiInstrumentation: input.haaiInstrumentation, haaiVocalConveyance: input.haaiVocalConveyance, haaiLyricalInspiration: input.haaiLyricalInspiration, haaiEmotionalTone: input.haaiEmotionalTone, haaiOriginStory: input.haaiOriginStory, haaiDeclaredAt, pagesJson: input.pagesJson, displayOrder: nextOrder, gcodeUrl: input.gcodeUrl, gcodeKey: input.gcodeKey, printStatsJson: input.printStatsJson, objectLicenseType: input.objectLicenseType, objectPriceCents: input.objectPriceCents, objectPhysicalSpecJson: input.objectPhysicalSpecJson, parentGuideWid: input.parentGuideWid, status: createStatus, participationMusic: input.participationMusic ?? "Human", participationLyrics: input.participationLyrics ?? "Human", participationVoice: input.participationVoice ?? "Human", toneProfileJson: input.toneProfileJson, waveformUrl: input.waveformUrl, waveformKey: input.waveformKey, visualSource: input.visualSource ?? (coverArtUrl ? "uploaded" : "none"), visualPrompt: input.visualPrompt, visualLineageJson: input.visualLineageJson, isPublic: createStatus === "Published" } as any);
        const songId = (insertResult as any)[0]?.insertId as number;
+      // Guide growth: linking a work to a guide levels the guide (signal personality)
+      if (input.parentGuideWid && songId) {
+        void (async () => {
+          try {
+            const { resolveGuideIdByWid, recordGuideGrowthEvent } = await import("../utils/db");
+            const guideId = await resolveGuideIdByWid(input.parentGuideWid!);
+            if (guideId) {
+              await recordGuideGrowthEvent({
+                guideId,
+                eventType: "track_linked",
+                actorUserId: ctx.user.id,
+                refWid: input.witnessId ?? input.parentGuideWid,
+                refSongId: songId,
+                note: `Linked work “${input.title}”`,
+              });
+            }
+          } catch (err) {
+            console.error("[GuideGrowth] track_linked failed:", err);
+          }
+        })();
+      }
       // Trigger visual generation pipeline (non-blocking)
       enqueueVisualJob(songId, isFounder).catch(err => console.error("[VisualQueue] Enqueue error:", err));
       // Generate share artifact (non-blocking) — precomputed OG HTML for Discord/X/iMessage

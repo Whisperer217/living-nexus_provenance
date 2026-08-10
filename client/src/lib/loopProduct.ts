@@ -32,7 +32,8 @@ export const LOOP_NAV = [
 
 /**
  * Systems removed from the Loop spine (Discover → Register → Work → Creator → Manage).
- * PNA / Keeper Avatar / Avatar Registry are stewarded companions — not in this list.
+ * PNA, Creator Guides, Keeper Avatar, and Avatar Registry are stewarded
+ * companions — not in this list.
  */
 export const LOOP_REMOVED_SYSTEMS = [
   "comic",
@@ -43,11 +44,26 @@ export const LOOP_REMOVED_SYSTEMS = [
   "games",
   "visual-works",
   "projects",
-  "guides",
   "sessions",
   "keeper-compose",
   "marketplace",
 ] as const;
+
+/** Stewarded companion surfaces — kept alive off Loop chrome. */
+export const GUIDE_STEWARD_ROUTES = [
+  "/guides",
+  "/guides/upload",
+  "/guide",
+] as const;
+
+export const GUIDE_PRODUCT = {
+  name: "Guides",
+  fullName: "Living Nexus Guides",
+  tagline: "Creator characters. Three slots. Grown by platform signals.",
+  path: "/guides",
+  uploadPath: "/guides/upload",
+  defaultSlots: 3,
+} as const;
 
 /** Stewarded companion surfaces — kept alive off the Loop chrome overlay. */
 export const PNA_STEWARD_ROUTES = [
@@ -65,7 +81,6 @@ export const PNA_PRODUCT = {
 
 /** Paths that redirect into the Loop spine. */
 export const LOOP_REDIRECTS: Record<string, string> = {
-  "/guides": "/explore",
   "/sessions": "/manage",
   "/new-manifestation": "/manifest",
   "/projects": "/explore",
