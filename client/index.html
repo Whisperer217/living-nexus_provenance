@@ -35,6 +35,32 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+    <!-- Pre-paint theme bootstrap — prevents FOUC; mirrors client/src/lib/theme-dom.ts -->
+    <script>
+      (function () {
+        try {
+          var raw = localStorage.getItem("ln-theme");
+          if (!raw) {
+            var lights = localStorage.getItem("lnx_theme");
+            raw = lights === "on" ? "parchment-cream" : "cathedral-dark";
+          }
+          if (raw === "dark") raw = "cathedral-dark";
+          if (raw === "warm" || raw === "light" || raw === "cream") raw = "parchment-cream";
+          var allowed = { "cathedral-dark": 1, crimson: 1, "illuminated-gold": 1, "parchment-cream": 1 };
+          if (!allowed[raw]) raw = "cathedral-dark";
+          var light = raw === "parchment-cream";
+          var root = document.documentElement;
+          root.setAttribute("data-theme", raw);
+          root.setAttribute("data-scheme", light ? "light" : "dark");
+          if (light) root.classList.remove("dark");
+          else root.classList.add("dark");
+          var bg = light ? "#F7F1E6" : "#000000";
+          var metas = document.querySelectorAll('meta[name="theme-color"]');
+          for (var i = 0; i < metas.length; i++) metas[i].setAttribute("content", bg);
+        } catch (e) { /* private browsing */ }
+      })();
+    </script>
   </head>
 
   <body>

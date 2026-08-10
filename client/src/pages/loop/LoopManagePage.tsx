@@ -35,7 +35,7 @@ function statusColor(status: string) {
   if (status === "Published") return "#4ADE80";
   if (status === "Draft") return "#D4A84B";
   if (status === "Unlisted") return "#C8B98A";
-  return "rgba(237,229,208,0.45)";
+  return "color-mix(in srgb, var(--ln-parchment) 45%, transparent)";
 }
 
 export default function LoopManagePage() {
@@ -86,7 +86,7 @@ export default function LoopManagePage() {
           >
             Manage your works
           </h1>
-          <p className="mb-8" style={{ color: "rgba(237,229,208,0.65)", fontFamily: "'Cormorant Garamond', serif", fontSize: 18 }}>
+          <p className="mb-8" style={{ color: "color-mix(in srgb, var(--ln-parchment) 65%, transparent)", fontFamily: "'Cormorant Garamond', serif", fontSize: 18 }}>
             Sign in to register music, edit provenance, and steward your archive.
           </p>
           <a
@@ -139,7 +139,7 @@ export default function LoopManagePage() {
               </h1>
               <p
                 style={{
-                  color: "rgba(237,229,208,0.65)",
+                  color: "color-mix(in srgb, var(--ln-parchment) 65%, transparent)",
                   fontFamily: "'Cormorant Garamond', serif",
                   fontSize: 20,
                   maxWidth: 420,
@@ -194,7 +194,7 @@ export default function LoopManagePage() {
               </div>
               <div
                 className="text-[11px] uppercase tracking-[0.18em] mt-1"
-                style={{ color: "rgba(237,229,208,0.45)" }}
+                style={{ color: "color-mix(in srgb, var(--ln-parchment) 45%, transparent)" }}
               >
                 {s.label}
               </div>
@@ -234,7 +234,7 @@ export default function LoopManagePage() {
               onClick={() => setFilter(f)}
               className="px-3 py-1.5 text-[11px] uppercase tracking-[0.14em] transition-colors"
               style={{
-                color: filter === f ? "var(--ln-gold)" : "rgba(237,229,208,0.45)",
+                color: filter === f ? "var(--ln-gold)" : "color-mix(in srgb, var(--ln-parchment) 45%, transparent)",
                 borderBottom: filter === f ? "1px solid var(--ln-gold)" : "1px solid transparent",
               }}
             >
@@ -257,7 +257,7 @@ export default function LoopManagePage() {
             >
               No works yet
             </p>
-            <p className="mb-6" style={{ color: "rgba(237,229,208,0.55)", fontFamily: "'Cormorant Garamond', serif", fontSize: 18 }}>
+            <p className="mb-6" style={{ color: "color-mix(in srgb, var(--ln-parchment) 55%, transparent)", fontFamily: "'Cormorant Garamond', serif", fontSize: 18 }}>
               Drop a track into {LOOP_PRODUCT.name} and seal its provenance.
             </p>
             <Link href="/manifest">
@@ -330,7 +330,7 @@ export default function LoopManagePage() {
                         {song.title}
                       </span>
                     </Link>
-                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-xs" style={{ color: "rgba(237,229,208,0.5)" }}>
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-xs" style={{ color: "color-mix(in srgb, var(--ln-parchment) 50%, transparent)" }}>
                       <span style={{ color: statusColor(status) }}>{status}</span>
                       {song.genre && <span>{song.genre}</span>}
                       {song.witnessId && (
@@ -352,7 +352,7 @@ export default function LoopManagePage() {
                       }
                       className="hidden sm:block text-[11px] bg-transparent px-2 py-1 outline-none"
                       style={{
-                        color: "rgba(237,229,208,0.7)",
+                        color: "color-mix(in srgb, var(--ln-parchment) 70%, transparent)",
                         border: "1px solid rgba(196,154,40,0.2)",
                       }}
                       aria-label="Work status"
@@ -397,7 +397,7 @@ export default function LoopManagePage() {
                       className="p-2 rounded-full hover:bg-white/[0.06]"
                       title="Open work"
                     >
-                      <ExternalLink size={14} style={{ color: "rgba(237,229,208,0.55)" }} />
+                      <ExternalLink size={14} style={{ color: "color-mix(in srgb, var(--ln-parchment) 55%, transparent)" }} />
                     </button>
                   </div>
                 </li>

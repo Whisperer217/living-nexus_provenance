@@ -245,7 +245,7 @@ export default function LoopCreatorPage() {
                 {displayName}
               </h1>
               {creator.artistHandle && creator.name && creator.artistHandle !== creator.name && (
-                <p className="mt-2 text-sm" style={{ color: "rgba(237,229,208,0.55)" }}>
+                <p className="mt-2 text-sm" style={{ color: "color-mix(in srgb, var(--ln-parchment) 55%, transparent)" }}>
                   {creator.name}
                 </p>
               )}
@@ -254,13 +254,13 @@ export default function LoopCreatorPage() {
 
           <p
             className="text-lg sm:text-xl max-w-2xl mb-4"
-            style={{ fontFamily: "'Cormorant Garamond', serif", color: "rgba(237,229,208,0.8)" }}
+            style={{ fontFamily: "'Cormorant Garamond', serif", color: "color-mix(in srgb, var(--ln-parchment) 80%, transparent)" }}
           >
             {why
               ? why.slice(0, 180) + (why.length > 180 ? "…" : "")
               : `${songs.length} registered work${songs.length === 1 ? "" : "s"} · ${witnessed} sealed with WID`}
           </p>
-          <div className="flex flex-wrap gap-x-4 gap-y-1 mb-8 text-[11px] uppercase tracking-[0.14em]" style={{ color: "rgba(237,229,208,0.45)" }}>
+          <div className="flex flex-wrap gap-x-4 gap-y-1 mb-8 text-[11px] uppercase tracking-[0.14em]" style={{ color: "color-mix(in srgb, var(--ln-parchment) 45%, transparent)" }}>
             <span>Who · {displayName}</span>
             <span>What · {what}</span>
             {whenJoined && <span>When · {whenJoined}</span>}
@@ -314,7 +314,7 @@ export default function LoopCreatorPage() {
               type="button"
               onClick={shareProfile}
               className="p-3 rounded-full"
-              style={{ border: "1px solid rgba(196,154,40,0.25)", color: "rgba(237,229,208,0.7)" }}
+              style={{ border: "1px solid rgba(196,154,40,0.25)", color: "color-mix(in srgb, var(--ln-parchment) 70%, transparent)" }}
               aria-label="Share profile"
             >
               <Share2 size={16} />
@@ -362,7 +362,7 @@ export default function LoopCreatorPage() {
             <div className="text-3xl tabular-nums" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-gold)" }}>
               {m.value}
             </div>
-            <div className="text-[11px] uppercase tracking-[0.16em] mt-1" style={{ color: "rgba(237,229,208,0.45)" }}>
+            <div className="text-[11px] uppercase tracking-[0.16em] mt-1" style={{ color: "color-mix(in srgb, var(--ln-parchment) 45%, transparent)" }}>
               {m.label}
             </div>
           </div>
@@ -381,7 +381,7 @@ export default function LoopCreatorPage() {
           Why they are here
         </h2>
         {testimonies.length === 0 ? (
-          <p style={{ color: "rgba(237,229,208,0.5)", fontFamily: "'Cormorant Garamond', serif", fontSize: 18 }}>
+          <p style={{ color: "color-mix(in srgb, var(--ln-parchment) 50%, transparent)", fontFamily: "'Cormorant Garamond', serif", fontSize: 18 }}>
             {isOwner
               ? "Add a testimony on your profile to become witness-ready for publishing."
               : "No testimonies published yet."}
@@ -394,7 +394,7 @@ export default function LoopCreatorPage() {
                   className="text-xl leading-relaxed"
                   style={{
                     fontFamily: "'Cormorant Garamond', serif",
-                    color: "rgba(237,229,208,0.88)",
+                    color: "color-mix(in srgb, var(--ln-parchment) 88%, transparent)",
                     borderLeft: "2px solid rgba(196,154,40,0.45)",
                     paddingLeft: 16,
                   }}
@@ -442,7 +442,7 @@ export default function LoopCreatorPage() {
         {songs.length === 0 && !showDomainEditor ? (
           <div className="py-16 text-center">
             <Music className="mx-auto mb-4 opacity-40" style={{ color: "var(--ln-gold)" }} />
-            <p style={{ color: "rgba(237,229,208,0.55)", fontFamily: "'Cormorant Garamond', serif", fontSize: 20 }}>
+            <p style={{ color: "color-mix(in srgb, var(--ln-parchment) 55%, transparent)", fontFamily: "'Cormorant Garamond', serif", fontSize: 20 }}>
               No registered works yet.
             </p>
             {isOwner && (
@@ -513,7 +513,7 @@ export default function LoopCreatorPage() {
                         {song.title}
                       </span>
                     </Link>
-                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-xs" style={{ color: "rgba(237,229,208,0.5)" }}>
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-xs" style={{ color: "color-mix(in srgb, var(--ln-parchment) 50%, transparent)" }}>
                       {song.genre && <span>{song.genre}</span>}
                       {song.witnessId ? (
                         <Link href={`/verify/${song.witnessId}`}>

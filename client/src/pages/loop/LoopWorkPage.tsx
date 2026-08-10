@@ -209,7 +209,7 @@ export default function LoopWorkPage() {
             className="text-lg sm:text-xl mb-8 max-w-xl"
             style={{
               fontFamily: "'Cormorant Garamond', serif",
-              color: "rgba(237,229,208,0.78)",
+              color: "color-mix(in srgb, var(--ln-parchment) 78%, transparent)",
             }}
           >
             {origin
@@ -247,7 +247,7 @@ export default function LoopWorkPage() {
               className="p-3 rounded-full"
               style={{
                 border: "1px solid rgba(196,154,40,0.25)",
-                color: liked ? "var(--ln-gold)" : "rgba(237,229,208,0.7)",
+                color: liked ? "var(--ln-gold)" : "color-mix(in srgb, var(--ln-parchment) 70%, transparent)",
               }}
               aria-label="Like"
             >
@@ -257,7 +257,7 @@ export default function LoopWorkPage() {
               type="button"
               onClick={share}
               className="p-3 rounded-full"
-              style={{ border: "1px solid rgba(196,154,40,0.25)", color: "rgba(237,229,208,0.7)" }}
+              style={{ border: "1px solid rgba(196,154,40,0.25)", color: "color-mix(in srgb, var(--ln-parchment) 70%, transparent)" }}
               aria-label="Share"
             >
               <Share2 size={16} />
@@ -326,18 +326,18 @@ export default function LoopWorkPage() {
                 <button type="button" onClick={copyWid} className="p-1.5 opacity-70 hover:opacity-100" aria-label="Copy WID">
                   <Copy size={14} style={{ color: "var(--ln-parchment)" }} />
                 </button>
-                <Link href={`/verify/${wid}`} className="text-xs underline" style={{ color: "rgba(237,229,208,0.6)" }}>
+                <Link href={`/verify/${wid}`} className="text-xs underline" style={{ color: "color-mix(in srgb, var(--ln-parchment) 60%, transparent)" }}>
                   Verify
                 </Link>
               </div>
             ) : (
-              <p className="mb-6 text-sm" style={{ color: "rgba(237,229,208,0.5)" }}>
+              <p className="mb-6 text-sm" style={{ color: "color-mix(in srgb, var(--ln-parchment) 50%, transparent)" }}>
                 WID pending — register completion seals this work.
               </p>
             )}
 
             {/* Participation axes */}
-            <div className="flex flex-wrap gap-4 mb-6 text-xs uppercase tracking-[0.12em]" style={{ color: "rgba(237,229,208,0.7)" }}>
+            <div className="flex flex-wrap gap-4 mb-6 text-xs uppercase tracking-[0.12em]" style={{ color: "color-mix(in srgb, var(--ln-parchment) 70%, transparent)" }}>
               <span>Music · {(song as any).participationMusic ?? "—"}</span>
               <span>Lyrics · {(song as any).participationLyrics ?? "—"}</span>
               <span>Voice · {(song as any).participationVoice ?? "—"}</span>
@@ -365,7 +365,7 @@ export default function LoopWorkPage() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 mb-6 text-sm underline underline-offset-4"
-                style={{ color: "rgba(237,229,208,0.75)" }}
+                style={{ color: "color-mix(in srgb, var(--ln-parchment) 75%, transparent)" }}
               >
                 Download waveform
               </a>
@@ -376,7 +376,7 @@ export default function LoopWorkPage() {
                 className="text-xl sm:text-2xl leading-relaxed"
                 style={{
                   fontFamily: "'Cormorant Garamond', serif",
-                  color: "rgba(237,229,208,0.88)",
+                  color: "color-mix(in srgb, var(--ln-parchment) 88%, transparent)",
                   borderLeft: "2px solid rgba(196,154,40,0.45)",
                   paddingLeft: 16,
                 }}
@@ -385,7 +385,7 @@ export default function LoopWorkPage() {
               </blockquote>
             )}
             {(song.genre || song.bpm) && (
-              <div className="flex flex-wrap gap-4 mt-8 text-xs uppercase tracking-[0.14em]" style={{ color: "rgba(237,229,208,0.45)" }}>
+              <div className="flex flex-wrap gap-4 mt-8 text-xs uppercase tracking-[0.14em]" style={{ color: "color-mix(in srgb, var(--ln-parchment) 45%, transparent)" }}>
                 {song.genre && <span>{song.genre}</span>}
                 {song.bpm && <span>{song.bpm} BPM</span>}
               </div>
@@ -405,7 +405,7 @@ export default function LoopWorkPage() {
                     className="whitespace-pre-wrap text-sm leading-relaxed"
                     style={{
                       fontFamily: "'Cormorant Garamond', serif",
-                      color: "rgba(237,229,208,0.75)",
+                      color: "color-mix(in srgb, var(--ln-parchment) 75%, transparent)",
                       fontSize: 17,
                     }}
                   >
@@ -448,7 +448,7 @@ export default function LoopWorkPage() {
                     {artistName}
                   </div>
                   {creator?.artistHandle && (
-                    <div className="text-sm" style={{ color: "rgba(237,229,208,0.5)" }}>
+                    <div className="text-sm" style={{ color: "color-mix(in srgb, var(--ln-parchment) 50%, transparent)" }}>
                       @{creator.artistHandle}
                     </div>
                   )}
@@ -513,7 +513,7 @@ export default function LoopWorkPage() {
                     >
                       {rSong.title}
                     </h3>
-                    <p className="text-sm truncate" style={{ color: "rgba(237,229,208,0.5)" }}>
+                    <p className="text-sm truncate" style={{ color: "color-mix(in srgb, var(--ln-parchment) 50%, transparent)" }}>
                       {rCreator?.artistHandle || rCreator?.name || ""}
                     </p>
                     {rSong.witnessId && (

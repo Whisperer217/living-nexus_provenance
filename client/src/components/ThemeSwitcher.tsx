@@ -55,11 +55,11 @@ export function ThemeSwitcher({ compact = false }: { compact?: boolean }) {
           minWidth: compact ? 36 : 40,
           minHeight: compact ? 36 : 40,
           padding: "0 8px",
-          color: open ? currentAccent : "rgba(255,255,255,0.4)",
+          color: open ? currentAccent : "var(--ln-smoke)",
           WebkitTapHighlightColor: "transparent",
         }}
         onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = currentAccent; }}
-        onMouseLeave={e => { if (!open) (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.4)"; }}
+        onMouseLeave={e => { if (!open) (e.currentTarget as HTMLElement).style.color = "var(--ln-smoke)"; }}
         aria-label="Change theme"
         aria-expanded={open}
         aria-haspopup="listbox"
@@ -123,7 +123,7 @@ export function ThemeSwitcher({ compact = false }: { compact?: boolean }) {
                   borderLeft: isActive ? `2px solid ${swatch.accent}` : "2px solid transparent",
                 }}
                 onMouseEnter={e => {
-                  if (!isActive) (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.04)";
+                  if (!isActive) (e.currentTarget as HTMLElement).style.background = "color-mix(in srgb, var(--ln-parchment) 6%, transparent)";
                 }}
                 onMouseLeave={e => {
                   if (!isActive) (e.currentTarget as HTMLElement).style.background = "transparent";
@@ -156,7 +156,7 @@ export function ThemeSwitcher({ compact = false }: { compact?: boolean }) {
                       fontFamily: "'Cinzel', serif",
                       fontSize: 11,
                       letterSpacing: "0.04em",
-                      color: isActive ? swatch.accent : "rgba(255,255,255,0.85)",
+                      color: isActive ? swatch.accent : "var(--ln-parchment)",
                     }}
                   >
                     {meta.label}
@@ -165,7 +165,7 @@ export function ThemeSwitcher({ compact = false }: { compact?: boolean }) {
                     className="text-xs leading-tight mt-0.5 truncate"
                     style={{
                       fontSize: 10,
-                      color: "rgba(255,255,255,0.35)",
+                      color: "var(--ln-smoke)",
                     }}
                   >
                     {meta.description}

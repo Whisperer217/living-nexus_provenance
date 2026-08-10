@@ -3,7 +3,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import React, { lazy, Suspense, useEffect, useLayoutEffect, useState } from "react";
 import { Route, Switch, Redirect, useLocation, useParams } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
-import { ThemeProvider } from "./contexts/ThemeContext";
 import { PlayerProvider } from "./contexts/PlayerContext";
 import MainLayout from "./components/layout/MainLayout";
 import QueueLoader from "./components/QueueLoader";
@@ -412,52 +411,48 @@ export default function App() {
   if (!splashDone) {
     return (
       <ErrorBoundary>
-        <ThemeProvider defaultTheme="dark">
-          <CinematicSplash onComplete={() => setSplashDone(true)} />
-        </ThemeProvider>
+        <CinematicSplash onComplete={() => setSplashDone(true)} />
       </ErrorBoundary>
     );
   }
 
   return (
     <ErrorBoundary>
-      <ThemeProvider defaultTheme="dark">
-        <TooltipProvider>
-          <PlayerProvider>
-            <HarmonicProvider>
-            <AmbientPlayerProvider>
-            <QueueLoader />
-            <WhatsNewModal />
-            <TosAcceptanceModal />
-            <WelcomeModal />
-            <CommunityToastProvider />
-            <Toaster
-              theme="dark"
-              position="bottom-center"
-              toastOptions={{
-                duration: 5000,
-                style: {
-                  background: "var(--ln-coal)",
-                  border: "1px solid rgba(196,154,40,0.10)",
-                  color: "var(--ln-parchment)",
-                  fontFamily: "'DM Sans', sans-serif",
-                },
-              }}
-            />
-            <OEmbedUpdater />
-            <OverlayRouteGuard />
-            <ScrollRestorationManager />
-            <QrScanLogger />
-            {/* PNA stewarded: Keeper Avatar on /pna · /keeper · /avatar-registry (and pna subdomain) — not Loop chrome */}
-            <KeeperAvatarWidget />
-            <ProvenanceUploadEngine />
-            <PWAInstallBanner />
-            <Router />
-            </AmbientPlayerProvider>
-            </HarmonicProvider>
-          </PlayerProvider>
-        </TooltipProvider>
-      </ThemeProvider>
+      <TooltipProvider>
+        <PlayerProvider>
+          <HarmonicProvider>
+          <AmbientPlayerProvider>
+          <QueueLoader />
+          <WhatsNewModal />
+          <TosAcceptanceModal />
+          <WelcomeModal />
+          <CommunityToastProvider />
+          <Toaster
+            theme="dark"
+            position="bottom-center"
+            toastOptions={{
+              duration: 5000,
+              style: {
+                background: "var(--ln-coal)",
+                border: "1px solid rgba(196,154,40,0.10)",
+                color: "var(--ln-parchment)",
+                fontFamily: "'DM Sans', sans-serif",
+              },
+            }}
+          />
+          <OEmbedUpdater />
+          <OverlayRouteGuard />
+          <ScrollRestorationManager />
+          <QrScanLogger />
+          {/* PNA stewarded: Keeper Avatar on /pna · /keeper · /avatar-registry (and pna subdomain) — not Loop chrome */}
+          <KeeperAvatarWidget />
+          <ProvenanceUploadEngine />
+          <PWAInstallBanner />
+          <Router />
+          </AmbientPlayerProvider>
+          </HarmonicProvider>
+        </PlayerProvider>
+      </TooltipProvider>
     </ErrorBoundary>
   );
 }

@@ -99,7 +99,7 @@ function WIDTrustLayer() {
       <div
         className="flex items-center gap-4 rounded-2xl px-5 py-4"
         style={{
-          background: "#000000",
+          background: "var(--ln-obsidian)",
           border: "1px solid rgba(196,154,40,0.20)",
           boxShadow: "0 2px 12px rgba(0,0,0,0.50)",
         }}
@@ -108,15 +108,15 @@ function WIDTrustLayer() {
           className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
           style={{ background: "rgba(196,154,40,0.08)", border: "1px solid rgba(196,154,40,0.22)" }}
         >
-          <Shield size={18} style={{ color: "#C49A28" }} />
+          <Shield size={18} style={{ color: "var(--ln-gold)" }} />
         </div>
         <div className="flex-1 min-w-0">
           <p className="museum-section-title mb-0.5">
             Works Witnessed
           </p>
-          <p className="font-display text-[22px] leading-none" style={{ color: "#E8DFC8" }}>
+          <p className="font-display text-[22px] leading-none" style={{ color: "var(--ln-parchment)" }}>
             <AnimatedCounter target={total} />
-            <span className="text-[14px] ml-1.5 font-body" style={{ color: "#6B6555" }}>and counting</span>
+            <span className="text-[14px] ml-1.5 font-body" style={{ color: "var(--ln-smoke)" }}>and counting</span>
           </p>
         </div>
         <Link href="/verify">
@@ -138,7 +138,7 @@ function WIDTrustLayer() {
       <div
         className="rounded-2xl px-5 py-4 relative overflow-hidden"
         style={{
-          background: "#000000",
+          background: "var(--ln-obsidian)",
           border: "1px solid rgba(196,154,40,0.15)",
           boxShadow: "0 2px 12px rgba(0,0,0,0.50)",
         }}
@@ -181,7 +181,7 @@ function WIDTrustLayer() {
               Witnessed Voices
             </p>
             <Link href="/explore">
-              <span className="text-[11px] font-body cursor-pointer transition-colors hover:text-[#C49A28]" style={{ color: "#6B6555" }}>
+              <span className="text-[11px] font-body cursor-pointer transition-colors hover:text-[#C49A28]" style={{ color: "var(--ln-smoke)" }}>
                 See all
               </span>
             </Link>
@@ -198,7 +198,7 @@ function WIDTrustLayer() {
                 style={{
                   width: "148px",
                   height: "196px",
-                  background: "#000000",
+                  background: "var(--ln-obsidian)",
                   border: "1px solid rgba(196,154,40,0.12)",
                   boxShadow: "0 4px 24px rgba(0,0,0,0.70)",
                 }}
@@ -212,7 +212,7 @@ function WIDTrustLayer() {
                   />
                 ) : (
                   <div className="absolute inset-0 flex items-center justify-center"
-                    style={{ background: "#000000" }}>
+                    style={{ background: "var(--ln-obsidian)" }}>
                     <Fingerprint size={28} style={{ color: "rgba(196,154,40,0.25)" }} />
                   </div>
                 )}
@@ -296,7 +296,7 @@ function WIDTrustLayer() {
                       <div className="w-4 h-4 rounded-full flex-shrink-0"
                         style={{ background: "rgba(196,154,40,0.15)" }} />
                     )}
-                    <p className="font-body text-[9px] truncate" style={{ color: "#6B6555" }}>
+                    <p className="font-body text-[9px] truncate" style={{ color: "var(--ln-smoke)" }}>
                       {v.artistHandle || v.userName}
                     </p>
                   </div>
@@ -327,7 +327,7 @@ function FeaturedCreatorsCarousel() {
           Creators
         </h2>
         <Link href="/explore">
-          <span className="text-[11px] font-body cursor-pointer transition-colors hover:text-[#C49A28]" style={{ color: "#6B6555" }}>
+          <span className="text-[11px] font-body cursor-pointer transition-colors hover:text-[#C49A28]" style={{ color: "var(--ln-smoke)" }}>
             See all
           </span>
         </Link>
@@ -358,10 +358,10 @@ function FeaturedCreatorsCarousel() {
                 )}
               </div>
               <div className="text-center min-w-0 w-full">
-                <p className="font-heading text-[10px] truncate w-full" style={{ color: "#E8DFC8" }}>
+                <p className="font-heading text-[10px] truncate w-full" style={{ color: "var(--ln-parchment)" }}>
                   {creator.artistHandle || creator.name}
                 </p>
-                <p className="font-body text-[9px] mt-0.5" style={{ color: "#6B6555" }}>
+                <p className="font-body text-[9px] mt-0.5" style={{ color: "var(--ln-smoke)" }}>
                   {creator.publishedCount ?? 0} tracks
                 </p>
               </div>
@@ -397,7 +397,7 @@ function NewVoicesCarousel() {
           New Voices
         </h2>
         <Link href="/explore">
-          <span className="text-[11px] font-body cursor-pointer transition-colors hover:text-[#C49A28]" style={{ color: "#6B6555" }}>
+          <span className="text-[11px] font-body cursor-pointer transition-colors hover:text-[#C49A28]" style={{ color: "var(--ln-smoke)" }}>
             See all
           </span>
         </Link>
@@ -433,7 +433,7 @@ function NewVoicesCarousel() {
                 </div>
               </div>
               <div className="text-center min-w-0 w-full">
-                <p className="font-heading text-[10px] truncate w-full" style={{ color: "#E8DFC8" }}>
+                <p className="font-heading text-[10px] truncate w-full" style={{ color: "var(--ln-parchment)" }}>
                   {creator.artistHandle || creator.name}
                 </p>
                 <p className="font-body text-[9px] mt-0.5" style={{ color: "rgba(74,222,128,0.75)" }}>New</p>
@@ -579,7 +579,7 @@ function CinematicHero({ isAuthenticated, getLoginUrl: getLogin }: { isAuthentic
   return (
     <div
       className="hero-phi relative overflow-hidden"
-      style={{ background: "#000" }}
+      style={{ background: "var(--ln-obsidian)" }}
     >
       {/* Full-bleed artwork */}
       <div className="absolute inset-0">
@@ -763,7 +763,7 @@ function CinematicHero({ isAuthenticated, getLoginUrl: getLogin }: { isAuthentic
             backdropFilter: "blur(8px)",
           }}
         >
-          <Flame className="w-3 h-3" style={{ color: "#C49A28" }} />
+          <Flame className="w-3 h-3" style={{ color: "var(--ln-gold)" }} />
           <span className="text-[10px] font-heading tracking-[0.12em] uppercase" style={{ color: "rgba(196,154,40,0.85)" }}>
             Trending #1
           </span>
@@ -905,17 +905,17 @@ function WIDExplainer() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
           {([
             {
-              icon: <Fingerprint className="w-5 h-5" style={{ color: "#C49A28" }} />,
+              icon: <Fingerprint className="w-5 h-5" style={{ color: "var(--ln-gold)" }} />,
               title: "Witness ID",
               body: "Every registered track receives a cryptographic timestamp — a permanent, tamper-evident record of origin issued the moment you register. Music provenance, sealed at the source.",
             },
             {
-              icon: <ShieldCheck className="w-5 h-5" style={{ color: "#C49A28" }} />,
+              icon: <ShieldCheck className="w-5 h-5" style={{ color: "var(--ln-gold)" }} />,
               title: "WID Engine",
               body: "Loop is the music provenance layer of Living Nexus. Your work stays yours. The registry witnesses authorship without claiming rights.",
             },
             {
-              icon: <Compass className="w-5 h-5" style={{ color: "#C49A28" }} />,
+              icon: <Compass className="w-5 h-5" style={{ color: "var(--ln-gold)" }} />,
               title: "Open Discovery",
               body: "Browse registered music from independent creators. Every work carries a provenance chain that travels with it across platforms.",
             },
@@ -927,7 +927,7 @@ function WIDExplainer() {
               >
                 {icon}
               </div>
-              <h3 className="font-heading text-[13px] tracking-wide" style={{ color: "#E8DFC8" }}>
+              <h3 className="font-heading text-[13px] tracking-wide" style={{ color: "var(--ln-parchment)" }}>
                 {title}
               </h3>
               <p className="font-body text-[12px] leading-relaxed" style={{ color: "#7A7060" }}>
@@ -943,7 +943,7 @@ function WIDExplainer() {
             <Shield className="w-4 h-4 flex-shrink-0" style={{ color: "rgba(196,154,40,0.50)" }} />
             <span className="font-body text-[12px]" style={{ color: "#5A5040" }}>
               {total > 0 ? (
-                <><span className="font-heading text-[14px]" style={{ color: "#C49A28" }}>{total.toLocaleString()}</span> works witnessed and counting</>
+                <><span className="font-heading text-[14px]" style={{ color: "var(--ln-gold)" }}>{total.toLocaleString()}</span> works witnessed and counting</>
               ) : (
                 "Works witnessed and counting"
               )}
@@ -1021,7 +1021,7 @@ function ContributorsStrip() {
                   {initial}
                 </div>
                 <div className="text-center">
-                  <p className="text-[11px] font-semibold" style={{ color: "#E8DFC8" }}>{handle}</p>
+                  <p className="text-[11px] font-semibold" style={{ color: "var(--ln-parchment)" }}>{handle}</p>
                   <p className="text-[9px] uppercase tracking-wider" style={{ color: "rgba(100,116,139,0.8)" }}>{role}</p>
                 </div>
               </div>
