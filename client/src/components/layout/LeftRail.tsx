@@ -14,12 +14,13 @@
    capture touch events globally, or manipulate the body in any way.
 ═══════════════════════════════════════════════════════════════════ */
 import { useLocation, useRouter } from "wouter";
-import { Home, Compass, BookOpen, Upload, Archive, ExternalLink, Shield, Layers } from "lucide-react";
+import { Home, Compass, Upload, Archive, ExternalLink, Shield, LayoutGrid } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 import { useUploadEngine } from "@/contexts/UploadEngineContext";
+import { LOOP_PRODUCT } from "@/lib/loopProduct";
 
-export type NavMode = "home" | "explore" | "guide" | "sessions" | "upload" | "archive";
+export type NavMode = "home" | "explore" | "upload" | "manage" | "archive";
 
 const LOGO_URL =
   "/manus-storage/living-nexus-logo-2025_19c2d497.png";
@@ -31,12 +32,11 @@ const RAIL_ITEMS: Array<{
   path: string;
   authRequired?: boolean;
 }> = [
-  { id: "home",    icon: Home,     label: "Home",    path: "/"               },
-  { id: "explore", icon: Compass,  label: "Explore", path: "/explore"        },
-  { id: "guide",   icon: BookOpen, label: "Guide",   path: "/guides",        },
-  { id: "sessions", icon: Layers, label: "Sessions", path: "/sessions", authRequired: true },
-  { id: "upload",  icon: Upload,   label: "Register",path: "/manifest",  authRequired: true },
-  { id: "archive", icon: Archive,  label: "LNA",     path: "/archive", authRequired: true },
+  { id: "home",    icon: Home,       label: "Home",    path: "/"        },
+  { id: "explore", icon: Compass,    label: "Explore", path: "/explore" },
+  { id: "upload",  icon: Upload,     label: "Register",path: "/manifest", authRequired: true },
+  { id: "manage",  icon: LayoutGrid, label: "Manage",  path: "/manage",   authRequired: true },
+  { id: "archive", icon: Archive,    label: "Archive", path: "/archive",  authRequired: true },
 ];
 
 interface LeftRailProps {
@@ -174,10 +174,10 @@ export default function LeftRail({
         }
         className="mb-3 flex items-center justify-center rounded-xl transition-all hover:bg-white/[0.04]"
         title="Navigation"
-        aria-label="Living Nexus home"
+        aria-label={`${LOOP_PRODUCT.name} home`}
         style={{ width: 56, height: 48, WebkitTapHighlightColor: "transparent" }}
       >
-        <img src={LOGO_URL} alt="LN" style={{ width: 32, height: 32, borderRadius: 8 }} />
+        <img src={LOGO_URL} alt={LOOP_PRODUCT.name} style={{ width: 32, height: 32, borderRadius: 8 }} />
       </button>
 
       {/* Divider */}

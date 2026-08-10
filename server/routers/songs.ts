@@ -617,6 +617,17 @@ export const songsRouter = router({
       objectPhysicalSpecJson: z.string().max(2048).optional(),
       // Guide provenance chain — WID of the Pre-Creation Declaration Guide this work was created under
       parentGuideWid: z.string().max(64).optional(),
+      // Loop registration
+      status: z.enum(["Draft", "Published"]).optional(),
+      participationMusic: z.enum(["Human", "AI", "Both"]).optional(),
+      participationLyrics: z.enum(["Human", "AI", "Both"]).optional(),
+      participationVoice: z.enum(["Human", "AI", "Both"]).optional(),
+      toneProfileJson: z.string().max(8000).optional(),
+      waveformUrl: z.string().url().optional(),
+      waveformKey: z.string().optional(),
+      visualSource: z.enum(["embedded", "uploaded", "generated", "remixed", "none"]).optional(),
+      visualPrompt: z.string().max(4000).optional(),
+      visualLineageJson: z.string().max(20000).optional(),
     })).mutation(async ({ ctx, input }) => {
       const user = await getUserById(ctx.user.id);
       if (!user) throw new Error("User not found");
@@ -641,12 +652,28 @@ export const songsRouter = router({
         const { url } = await storagePut(`covers/${ctx.user.id}/${Date.now()}.webp`, processedCover, coverMime);
         coverArtUrl = url;
       }
+      // Loop publish gate on create
+      const createStatus = input.status ?? "Published";
+      if (createStatus === "Published") {
+        if (!coverArtUrl) {
+          throw new Error("Publish requires a bound visual. Upload or generate cover art first.");
+        }
+        const testimonyCount = await getTestimonyCount(ctx.user.id);
+        const missing: string[] = [];
+        if (!user.artistHandle && !user.name) missing.push("name or handle");
+        if (!(user as any).bio && !(user as any).originStatement) missing.push("bio or origin statement");
+        if (!user.profilePhotoUrl) missing.push("profile photo");
+        if (testimonyCount < 1) missing.push("at least one testimony");
+        if (missing.length > 0) {
+          throw new Error(`Witness-ready profile required to publish. Missing: ${missing.join(", ")}. Save as Draft instead.`);
+        }
+      }
       // Determine HAAI declared timestamp if all 6 fields are provided
       const haaiFields = [input.haaiVisualConcept, input.haaiStyleLanguage, input.haaiInstrumentation, input.haaiVocalConveyance, input.haaiLyricalInspiration, input.haaiEmotionalTone];
       const haaiDeclaredAt = (input.aiDisclosure === "human_authored_ai_instrument" && haaiFields.every(f => f && f.trim().length > 0)) ? new Date() : undefined;
       // Assign displayOrder so new songs append to the end of the creator's list
       const nextOrder = await getNextDisplayOrder(ctx.user.id);
-      const insertResult = await createSong({ userId: ctx.user.id, title: input.title, genre: input.genre, bpm: input.bpm, keySignature: input.keySignature, moodTags: input.moodTags, coWriters: input.coWriters, albumName: input.albumName, creditsJson: input.creditsJson, releaseDate: input.releaseDate, isrc: input.isrc, officialArtistName: input.officialArtistName, aiConsent: input.aiConsent, ownershipStatus: input.ownershipStatus, lyricsText: input.lyricsText, lyricsHash: input.lyricsHash, isLyricsOnly: input.isLyricsOnly ?? false, contentType: input.contentType ?? (input.isLyricsOnly ? "lyrics" : "audio"), fileUrl, fileKey: audioKey, coverArtUrl, fileHash: input.fileHash, witnessId: input.witnessId, harmonicSignature: input.harmonicSignature, ecdsaPublicKey: input.ecdsaPublicKey, ecdsaSignature: input.ecdsaSignature, caption: input.caption, headlineCaption: input.headlineCaption, description: input.description, galleryImagesJson: input.galleryImagesJson, playerAssetType: input.playerAssetType ?? 'cover', aiToolSuno: input.aiToolSuno ?? false, aiToolUdio: input.aiToolUdio ?? false, aiToolSonato: input.aiToolSonato ?? false, aiToolOther: input.aiToolOther ?? false, aiToolOtherName: input.aiToolOtherName, durationSeconds: input.durationSeconds, sampleRate: input.sampleRate, bitDepth: input.bitDepth, aiDisclosure: input.aiDisclosure, haaiVisualConcept: input.haaiVisualConcept, haaiStyleLanguage: input.haaiStyleLanguage, haaiInstrumentation: input.haaiInstrumentation, haaiVocalConveyance: input.haaiVocalConveyance, haaiLyricalInspiration: input.haaiLyricalInspiration, haaiEmotionalTone: input.haaiEmotionalTone, haaiOriginStory: input.haaiOriginStory, haaiDeclaredAt, pagesJson: input.pagesJson, displayOrder: nextOrder, gcodeUrl: input.gcodeUrl, gcodeKey: input.gcodeKey, printStatsJson: input.printStatsJson, objectLicenseType: input.objectLicenseType, objectPriceCents: input.objectPriceCents, objectPhysicalSpecJson: input.objectPhysicalSpecJson, parentGuideWid: input.parentGuideWid } as any);
+      const insertResult = await createSong({ userId: ctx.user.id, title: input.title, genre: input.genre, bpm: input.bpm, keySignature: input.keySignature, moodTags: input.moodTags, coWriters: input.coWriters, albumName: input.albumName, creditsJson: input.creditsJson, releaseDate: input.releaseDate, isrc: input.isrc, officialArtistName: input.officialArtistName, aiConsent: input.aiConsent, ownershipStatus: input.ownershipStatus, lyricsText: input.lyricsText, lyricsHash: input.lyricsHash, isLyricsOnly: input.isLyricsOnly ?? false, contentType: input.contentType ?? (input.isLyricsOnly ? "lyrics" : "audio"), fileUrl, fileKey: audioKey, coverArtUrl, fileHash: input.fileHash, witnessId: input.witnessId, harmonicSignature: input.harmonicSignature, ecdsaPublicKey: input.ecdsaPublicKey, ecdsaSignature: input.ecdsaSignature, caption: input.caption, headlineCaption: input.headlineCaption, description: input.description, galleryImagesJson: input.galleryImagesJson, playerAssetType: input.playerAssetType ?? 'cover', aiToolSuno: input.aiToolSuno ?? false, aiToolUdio: input.aiToolUdio ?? false, aiToolSonato: input.aiToolSonato ?? false, aiToolOther: input.aiToolOther ?? false, aiToolOtherName: input.aiToolOtherName, durationSeconds: input.durationSeconds, sampleRate: input.sampleRate, bitDepth: input.bitDepth, aiDisclosure: input.aiDisclosure, haaiVisualConcept: input.haaiVisualConcept, haaiStyleLanguage: input.haaiStyleLanguage, haaiInstrumentation: input.haaiInstrumentation, haaiVocalConveyance: input.haaiVocalConveyance, haaiLyricalInspiration: input.haaiLyricalInspiration, haaiEmotionalTone: input.haaiEmotionalTone, haaiOriginStory: input.haaiOriginStory, haaiDeclaredAt, pagesJson: input.pagesJson, displayOrder: nextOrder, gcodeUrl: input.gcodeUrl, gcodeKey: input.gcodeKey, printStatsJson: input.printStatsJson, objectLicenseType: input.objectLicenseType, objectPriceCents: input.objectPriceCents, objectPhysicalSpecJson: input.objectPhysicalSpecJson, parentGuideWid: input.parentGuideWid, status: createStatus, participationMusic: input.participationMusic ?? "Human", participationLyrics: input.participationLyrics ?? "Human", participationVoice: input.participationVoice ?? "Human", toneProfileJson: input.toneProfileJson, waveformUrl: input.waveformUrl, waveformKey: input.waveformKey, visualSource: input.visualSource ?? (coverArtUrl ? "uploaded" : "none"), visualPrompt: input.visualPrompt, visualLineageJson: input.visualLineageJson, isPublic: createStatus === "Published" } as any);
        const songId = (insertResult as any)[0]?.insertId as number;
       // Trigger visual generation pipeline (non-blocking)
       enqueueVisualJob(songId, isFounder).catch(err => console.error("[VisualQueue] Enqueue error:", err));
@@ -701,6 +728,8 @@ export const songsRouter = router({
       // Album-level options from batch upload sketch
       albumArtAcrossAll: z.boolean().optional(), // apply album art to every track
       albumArtIsAi: z.boolean().optional(), // album art is AI-generated
+      /** Loop: explicit publish intent for all tracks in this batch */
+      status: z.enum(["Draft", "Published"]).default("Draft"),
       tracks: z.array(z.object({
         // Preferred: pre-uploaded S3 URL from /api/upload-file
         fileUrl: z.string().url().optional(),
@@ -793,6 +822,8 @@ export const songsRouter = router({
           headlineCaption: track.headlineCaption,
           caption: track.headlineCaption,
           displayOrder: batchDisplayOrder++,
+          status: input.status ?? "Draft",
+          isPublic: (input.status ?? "Draft") === "Published",
         } as any);
         // Capture the auto-increment ID directly from the insert result to preserve upload order
         const songId = (insertResult as any)[0]?.insertId as number | undefined;

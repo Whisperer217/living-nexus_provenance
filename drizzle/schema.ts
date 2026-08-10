@@ -341,6 +341,20 @@ export const songs = mysqlTable("songs", {
   // Status
   status: mysqlEnum("status", ["Draft", "Published", "Unlisted", "Deleted"]).default("Published").notNull(),
 
+  // ─── Loop participation axes (Music / Lyrics / Voice) ───────────────────────
+  participationMusic: mysqlEnum("participationMusic", ["Human", "AI", "Both"]).default("Human"),
+  participationLyrics: mysqlEnum("participationLyrics", ["Human", "AI", "Both"]).default("Human"),
+  participationVoice: mysqlEnum("participationVoice", ["Human", "AI", "Both"]).default("Human"),
+  // Tone-from-metadata JSON (ToneProfile v1)
+  toneProfileJson: text("toneProfileJson"),
+  // Downloadable waveform PNG (from canonical audio at seal)
+  waveformUrl: text("waveformUrl"),
+  waveformKey: text("waveformKey"),
+  // Bound visual provenance
+  visualSource: mysqlEnum("visualSource", ["embedded", "uploaded", "generated", "remixed", "none"]).default("none"),
+  visualPrompt: text("visualPrompt"),
+  visualLineageJson: text("visualLineageJson"),
+
   // AI Disclosure — how the creator describes their authorship role
   // "original"                  = entirely human-made, no AI tools
   // "ai_assisted"               = AI used as a production aid; human vision, human direction

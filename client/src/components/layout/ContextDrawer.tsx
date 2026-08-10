@@ -29,7 +29,7 @@ import { PLATFORM_VERSION } from "@/platformVersion";
 
 // ── Types ─────────────────────────────────────────────────────────
 
-export type NavMode = "home" | "explore" | "guide" | "sessions" | "compose" | "upload" | "archive";
+export type NavMode = "home" | "explore" | "upload" | "manage" | "archive";
 
 // Re-export so callers that previously imported WHATS_NEW_VERSION still work.
 export const WHATS_NEW_VERSION = PLATFORM_VERSION;
@@ -57,72 +57,35 @@ interface ModePanel {
   sections: PanelSection[];
 }
 
-// ── Mode-specific panel definitions ───────────────────────────────
+// ── Mode-specific panel definitions — Loop music provenance spine ─
 
 const PANELS: Record<NavMode, ModePanel> = {
-  sessions: {
-    icon: <Layers size={17} />,
-    title: "Manifestation Sessions",
-    subtitle: "The creative journey begins here",
-    sections: [
-      {
-        links: [
-          { icon: <Plus size={14} />, label: "+ New Manifestation", path: "/new-manifestation", description: "Begin a new creative session", authOnly: true, gold: true },
-          { icon: <Layers size={14} />, label: "My Sessions", path: "/sessions", description: "All your active creative journeys", authOnly: true },
-        ],
-      },
-      {
-        heading: "How It Works",
-        links: [
-          { icon: <ScrollText size={14} />, label: "Declare Intent", path: "/new-manifestation", description: "Name your work and state why it exists" },
-          { icon: <Shield size={14} />, label: "Session WID Issued", path: "/new-manifestation", description: "Protected before the work exists" },
-          { icon: <GitBranch size={14} />, label: "Provenance Graph", path: "/sessions", description: "Every prompt, image, lyric — appended" },
-          { icon: <BookOpen size={14} />, label: "Work WID Issued", path: "/manifest", description: "Culminates in the canonical registry" },
-        ],
-      },
-      {
-        heading: "Related",
-        links: [
-          { icon: <BookOpen size={14} />, label: "Guides", path: "/guides", description: "Pre-creation declarations" },
-          { icon: <Upload size={14} />, label: "Register Work", path: "/manifest", description: "Manifestation Studio", authOnly: true },
-        ],
-      },
-    ],
-  },
   home: {
     icon: <Home size={17} />,
-    title: "Home",
-    subtitle: "Your creative provenance hub",
+    title: "Loop",
+    subtitle: "Music provenance hub",
     sections: [
       {
         links: [
           { icon: <LayoutGrid size={14} />, label: "Discover", path: "/", description: "Featured works & creators" },
-          { icon: <Star size={14} />, label: "New Arrivals", path: "/explore?mode=new", description: "Recently registered works" },
+          { icon: <Star size={14} />, label: "New Arrivals", path: "/explore?mode=new", description: "Recently registered tracks" },
           { icon: <TrendingUp size={14} />, label: "Trending", path: "/explore?sort=trending", description: "Most played this week" },
+        ],
+      },
+      {
+        heading: "Registry",
+        links: [
+          { icon: <Shield size={14} />, label: "Verify a WID", path: "/verify", description: "Confirm authorship", gold: true },
+          { icon: <BookMarked size={14} />, label: "Witness Registry", path: "/witness-registry", description: "Public ledger of sealed works" },
+          { icon: <ScrollText size={14} />, label: "WID Specification", path: "/doctrine/wid-spec", description: "How Witness IDs work" },
         ],
       },
       {
         heading: "Platform",
         links: [
-          { icon: <ScrollText size={14} />, label: "Manifesto", path: "/manifesto", description: "The Living Nexus doctrine" },
-          { icon: <Scale size={14} />, label: "Code of Ethics & Terms", path: "/terms", description: "Platform principles and terms" },
-          { icon: <Shield size={14} />, label: "Privacy Policy", path: "/privacy", description: "How we protect your data" },
-          { icon: <Heart size={14} />, label: "Attribution", path: "/attribution", description: "Contributors & builders" },
-          { icon: <Library size={14} />, label: "Platform Lexicon", path: "/lexicon", description: "Every term, concept & phrase — newcomer guide" },
-          { icon: <Users size={14} />, label: "Founding Creators", path: "/founders", description: "The first witnesses" },
-        ],
-      },
-      {
-        heading: "Founder's Era",
-        links: [
-          { icon: <Shield size={14} />, label: "Founder's Era", path: "/founder-era", description: "Earliest provenance anchors" },
-          { icon: <Users size={14} />, label: "Founding Creators", path: "/founders", description: "View the founding registry" },
-        ],
-      },
-      {
-        heading: "Companion Tools",
-        links: [
-          { icon: <ExternalLink size={14} />, label: "Celestial Codex", path: "__external__https://bardsgrim-qmts67ka.manus.space/", description: "Music wheel — spin the seals", gold: true },
+          { icon: <ScrollText size={14} />, label: "Manifesto", path: "/manifesto", description: "Living Nexus doctrine" },
+          { icon: <Library size={14} />, label: "Lexicon", path: "/lexicon", description: "Platform language" },
+          { icon: <Scale size={14} />, label: "Terms", path: "/terms", description: "Code of ethics & terms" },
         ],
       },
     ],
@@ -131,85 +94,26 @@ const PANELS: Record<NavMode, ModePanel> = {
   explore: {
     icon: <Compass size={17} />,
     title: "Explore",
-    subtitle: "Browse the witnessed archive",
-    sections: [
-      {
-        heading: "By Medium",
-        links: [
-          { icon: <Music size={14} />, label: "Music", path: "/explore?medium=music" },
-          { icon: <FileText size={14} />, label: "Lyrics", path: "/explore?medium=lyrics" },
-          { icon: <BookOpen size={14} />, label: "Manuscripts", path: "/explore?medium=manuscripts" },
-          { icon: <Image size={14} />, label: "Comics & Visual Art", path: "/explore?medium=comics" },
-          { icon: <Palette size={14} />, label: "Visual Works", path: "/visual-works", description: "Photography, art & imagery" },
-        ],
-      },
-      {
-        heading: "By Creator",
-        links: [
-          { icon: <Users size={14} />, label: "All Creators", path: "/explore?filter=creators" },
-          { icon: <Star size={14} />, label: "Founding Creators", path: "/founders", description: "View the founding registry" },
-        ],
-      },
-      {
-        heading: "Creator Guides",
-        links: [
-          { icon: <BookOpen size={14} />, label: "Nexus Avatar Directory", path: "/guides", description: "Browse all creator-uploaded Personal Nexus Avatars", gold: true },
-          { icon: <ShoppingBag size={14} />, label: "Marketplace", path: "/marketplace", description: "Keeper skins, albums & creator goods" },
-        ],
-      },
-    ],
-  },
-
-  guide: {
-    icon: <BookOpenIcon size={17} />,
-    title: "Guide",
-    subtitle: "Pre-Creation Declaration & Creative Process",
-    sections: [
-      {
-        heading: "Pre-Creation Declaration",
-        links: [
-          { icon: <BookOpenIcon size={14} />, label: "Create a Guide", path: "/guides/upload", description: "Establish your creative intent before generating", authOnly: true, gold: true },
-          { icon: <Users size={14} />, label: "Guide Directory", path: "/guides", description: "Browse all creator guides & Nexus Avatars" },
-        ],
-      },
-      {
-        heading: "The Registry",
-        links: [
-          { icon: <Shield size={14} />, label: "Verify a WID", path: "/verify", description: "Check any Witness ID — confirm authorship", gold: true },
-          { icon: <BookMarked size={14} />, label: "Witness Registry", path: "/witness-registry", description: "Public ledger of all registered works" },
-          { icon: <BookOpen size={14} />, label: "WID Specification", path: "/doctrine/wid-spec", description: "How Witness IDs work" },
-        ],
-      },
-      {
-        heading: "Your Creative Domain",
-        links: [
-          { icon: <LayoutGrid size={14} />, label: "My Domain", path: "/domain", description: "Creator Domain Command Center", authOnly: true },
-          { icon: <User size={14} />, label: "My Profile", path: "__my_public_profile__", description: "Your public domain", authOnly: true },
-          { icon: <Music size={14} />, label: "My Works", path: "/profile?tab=works", description: "Your registered works ledger", authOnly: true },
-          { icon: <LayoutDashboard size={14} />, label: "Dashboard", path: "/dashboard", description: "Creator analytics & slots", authOnly: true },
-        ],
-      },
-      {
-        heading: "Keeper & Identity",
-        links: [
-          { icon: <Sparkles size={14} />, label: "My Nexus Avatar", path: "/keeper", description: "Equip & customise your Personal Nexus Avatar", authOnly: true },
-          { icon: <Settings size={14} />, label: "Settings", path: "/settings/billing", authOnly: true },
-          { icon: <LogOut size={14} />, label: "Log Out", path: "__logout__", authOnly: true, danger: true },
-        ],
-      },
-    ],
-  },
-
-  compose: {
-    icon: <PenTool size={17} />,
-    title: "Compose",
-    subtitle: "Create & craft your work",
+    subtitle: "Browse registered music",
     sections: [
       {
         links: [
-          { icon: <Sparkles size={14} />, label: "AI Compose", path: "/compose", description: "Generate images, music & more", authOnly: true, gold: true },
-          { icon: <Sparkles size={14} />, label: "Nexus Compose", path: "/keeper-compose", description: "Lyrics \u2192 AI music prompt" },
-          { icon: <BookOpen size={14} />, label: "Book Studio", path: "/book-studio", description: "Write & illustrate your book", authOnly: true },
+          { icon: <Music size={14} />, label: "All Music", path: "/explore", gold: true },
+          { icon: <Star size={14} />, label: "New Arrivals", path: "/explore?mode=new" },
+          { icon: <TrendingUp size={14} />, label: "Trending", path: "/explore?sort=trending" },
+        ],
+      },
+      {
+        heading: "Creators",
+        links: [
+          { icon: <Users size={14} />, label: "Browse Creators", path: "/explore?filter=creators" },
+          { icon: <Star size={14} />, label: "Founding Creators", path: "/founders", description: "Earliest provenance anchors" },
+        ],
+      },
+      {
+        heading: "Verify",
+        links: [
+          { icon: <Shield size={14} />, label: "Verify WID", path: "/verify", description: "Confirm a Witness ID" },
         ],
       },
     ],
@@ -218,34 +122,48 @@ const PANELS: Record<NavMode, ModePanel> = {
   upload: {
     icon: <Upload size={17} />,
     title: "Register",
-    subtitle: "Register your creative work",
+    subtitle: "Seal music with a Witness ID",
     sections: [
       {
         links: [
-          { icon: <Shield size={14} />, label: "Register Work", path: "/manifest", description: "Issue a Witness ID", authOnly: true, gold: true },
-          { icon: <Palette size={14} />, label: "Register Visual Works", path: "/visual-works/new", description: "Photography, art & imagery", authOnly: true },
-          { icon: <Sparkles size={14} />, label: "Nexus Compose", path: "/keeper-compose", description: "Lyrics \u2192 AI music prompt" },
+          { icon: <Shield size={14} />, label: "Register Music", path: "/manifest", description: "Issue a WID via the Loop engine", authOnly: true, gold: true },
+          { icon: <Upload size={14} />, label: "Batch Register", path: "/batch-upload", description: "Register multiple tracks", authOnly: true },
         ],
       },
       {
-        heading: "Personal Nexus Avatars",
+        heading: "Your record",
         links: [
-          { icon: <Users size={14} />, label: "Nexus Avatar Directory", path: "/guides", description: "Browse all Personal Nexus Avatars" },
-          { icon: <Shield size={14} />, label: "Register Personal Nexus Avatar", path: "/guides/upload", description: "Register your Personal Nexus Avatar", authOnly: true, gold: true },
+          { icon: <LayoutGrid size={14} />, label: "Manage Works", path: "/manage", description: "Status, edit, provenance", authOnly: true },
+          { icon: <Archive size={14} />, label: "Archive", path: "/archive", description: "Personal listening archive", authOnly: true },
+        ],
+      },
+    ],
+  },
+
+  manage: {
+    icon: <LayoutDashboard size={17} />,
+    title: "Manage",
+    subtitle: "Works & creator stewardship",
+    sections: [
+      {
+        links: [
+          { icon: <LayoutGrid size={14} />, label: "Works Ledger", path: "/manage", description: "Publish, draft, unlisted", authOnly: true, gold: true },
+          { icon: <User size={14} />, label: "Public Profile", path: "__my_public_profile__", description: "How witnesses see you", authOnly: true },
+          { icon: <Settings size={14} />, label: "Identity Settings", path: "/profile", description: "Bio, photo, handle", authOnly: true },
         ],
       },
       {
-        heading: "Platform Store",
+        heading: "Archive & export",
         links: [
-          { icon: <Star size={14} />, label: "Platform Store", path: "/store", description: "Creator tools, upgrades & resources", gold: true },
-          { icon: <BookOpen size={14} />, label: "Platform Guides & Tutorials", path: "/platform-guides", description: "Learn how Living Nexus works" },
+          { icon: <Archive size={14} />, label: "My Archive", path: "/archive", authOnly: true },
+          { icon: <Download size={14} />, label: "Export Data", path: "/my-archive/export", description: "Download your provenance record", authOnly: true },
         ],
       },
       {
-        heading: "Your Registrations",
+        heading: "Account",
         links: [
-          { icon: <Archive size={14} />, label: "My Archive", path: "/archive", description: "All your registered works", authOnly: true },
-          { icon: <LayoutDashboard size={14} />, label: "Dashboard", path: "/dashboard", description: "Creator analytics & slots", authOnly: true },
+          { icon: <Shield size={14} />, label: "Billing", path: "/settings/billing", authOnly: true },
+          { icon: <LogOut size={14} />, label: "Log Out", path: "__logout__", authOnly: true, danger: true },
         ],
       },
     ],
@@ -253,22 +171,14 @@ const PANELS: Record<NavMode, ModePanel> = {
 
   archive: {
     icon: <Archive size={17} />,
-    title: "Registry",
-    subtitle: "The permanent provenance ledger",
+    title: "Archive",
+    subtitle: "Your listening & provenance record",
     sections: [
       {
         links: [
-          { icon: <BookMarked size={14} />, label: "Witness Registry", path: "/witness-registry", description: "Public ledger of all registered works", gold: true },
-          { icon: <Archive size={14} />, label: "My Works", path: "/archive", description: "Your personally registered works", authOnly: true },
-          { icon: <Download size={14} />, label: "Licensed Downloads", path: "/licensed-downloads", description: "Bulk download tracks you're licensed for", authOnly: true },
-          { icon: <LayoutDashboard size={14} />, label: "Dashboard", path: "/dashboard", description: "Creator analytics & slots", authOnly: true },
-        ],
-      },
-      {
-        heading: "Verify & Learn",
-        links: [
-          { icon: <Shield size={14} />, label: "Verify a WID", path: "/verify", description: "Check any Witness ID" },
-          { icon: <BookOpen size={14} />, label: "WID Specification", path: "/doctrine/wid-spec", description: "How Witness IDs work" },
+          { icon: <Archive size={14} />, label: "My Archive", path: "/archive", description: "Saved & owned works", authOnly: true, gold: true },
+          { icon: <Download size={14} />, label: "Export Archive", path: "/my-archive/export", description: "Download ZIP + provenance JSON", authOnly: true },
+          { icon: <Shield size={14} />, label: "Witness Registry", path: "/witness-registry", description: "Public ledger" },
         ],
       },
     ],

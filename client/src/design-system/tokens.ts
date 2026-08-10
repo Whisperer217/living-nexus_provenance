@@ -87,9 +87,9 @@ export const COLOR_STATUS = {
   terra:     "#E2725B",
 } as const;
 
-/** Medium accent colors — each creative medium has its own color identity */
+/** Medium accent colors — Loop is music-only; gold is the provenance signal */
 export const COLOR_MEDIUM = {
-  audio:      { primary: "#A78BFA", glow: "rgba(167,139,250,0.35)", bg: "rgba(124,58,237,0.12)",  border: "rgba(167,139,250,0.35)" },
+  audio:      { primary: "#C49A28", glow: "rgba(196,154,40,0.35)", bg: "rgba(196,154,40,0.10)",  border: "rgba(196,154,40,0.40)" },
   lyrics:     { primary: "#F5C451", glow: "rgba(245,196,81,0.35)",  bg: "rgba(208,161,95,0.12)",  border: "rgba(245,196,81,0.40)"  },
   manuscript: { primary: "#4ADE80", glow: "rgba(74,222,128,0.30)",  bg: "rgba(22,163,74,0.12)",   border: "rgba(74,222,128,0.40)"  },
   comic:      { primary: "#F87171", glow: "rgba(248,113,113,0.30)", bg: "rgba(220,38,38,0.12)",   border: "rgba(248,113,113,0.40)" },

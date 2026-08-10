@@ -1,34 +1,13 @@
 /* ═══════════════════════════════════════════════════════════════════
-   TYPE GATEWAY — Immersive manifestation type selector
-   Drop a file to auto-detect type and extract provenance.
-   Or select a type manually from the cards below.
+   LOOP TYPE GATEWAY — Music-only provenance entry
+   Drop audio → extract metadata → enter Music Environment.
 ═══════════════════════════════════════════════════════════════════ */
 
 import { useState, useCallback, useRef } from "react";
-import { Music, PenTool, BookOpen, Film, Palette, Printer, Upload, Sparkles, Loader2 } from "lucide-react";
+import { Music, Upload, Loader2, Shield } from "lucide-react";
 import { extractFileMetadata } from "@/lib/uploadPipeline";
-import { type ManifestationType, ATMOSPHERES } from "./types";
+import { isLoopMusicFile, LOOP_PRODUCT } from "@/lib/loopProduct";
 import type { KeeperPrefill } from "./ManifestationStudio";
-
-const TYPE_ICONS: Record<ManifestationType, typeof Music> = {
-  music: Music,
-  lyrics: PenTool,
-  comic: Palette,
-  manuscript: BookOpen,
-  video: Film,
-  gcode: Printer,
-};
-
-function detectType(file: File): ManifestationType {
-  const mime = file.type.toLowerCase();
-  const ext = file.name.split(".").pop()?.toLowerCase() ?? "";
-  if (mime.startsWith("audio/") || ["mp3","flac","wav","ogg","aac","m4a","opus","aiff"].includes(ext)) return "music";
-  if (mime.startsWith("video/") || ["mp4","mov","webm","mkv","avi"].includes(ext)) return "video";
-  if (["pdf","doc","docx","txt","rtf","md","epub"].includes(ext) || mime.includes("pdf") || mime.includes("word")) return "manuscript";
-  if (mime.startsWith("image/") || ["jpg","jpeg","png","webp","tiff","psd","svg"].includes(ext)) return "comic";
-  if (["gcode","g","nc","ngc"].includes(ext)) return "gcode";
-  return "manuscript";
-}
 
 const AI_LABELS: Record<string, string> = {
   suno: "Suno", udio: "Udio", midjourney: "Midjourney",
@@ -38,31 +17,32 @@ const AI_LABELS: Record<string, string> = {
 };
 
 interface TypeGatewayProps {
-  onSelect: (type: ManifestationType) => void;
-  onSelectWithPrefill?: (type: ManifestationType, prefill: KeeperPrefill) => void;
+  onSelect: (type: "music") => void;
+  onSelectWithPrefill?: (type: "music", prefill: KeeperPrefill) => void;
+  onFileReady?: (file: File) => void;
 }
 
-export function TypeGateway({ onSelect, onSelectWithPrefill }: TypeGatewayProps) {
-  const [hovered, setHovered] = useState<ManifestationType | null>(null);
+export function TypeGateway({ onSelect, onSelectWithPrefill, onFileReady }: TypeGatewayProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [extracting, setExtracting] = useState(false);
   const [extractedFile, setExtractedFile] = useState<string | null>(null);
   const [extractError, setExtractError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const types = Object.values(ATMOSPHERES);
 
   const handleFile = useCallback(async (file: File) => {
+    if (!isLoopMusicFile(file)) {
+      setExtractError("Loop accepts audio only — MP3, WAV, FLAC, AAC, OGG, M4A.");
+      return;
+    }
     setExtracting(true);
     setExtractedFile(file.name);
     setExtractError(null);
     try {
       const meta = await extractFileMetadata(file);
-      const type = detectType(file);
       const prefill: KeeperPrefill = {};
       if (meta.music?.title) prefill.title = meta.music.title;
       if (meta.music?.genre) prefill.genre = meta.music.genre;
       if (meta.music?.lyrics) prefill.lyrics = meta.music.lyrics;
-      if (meta.image?.iptcTitle && !prefill.title) prefill.title = meta.image.iptcTitle;
       if (meta.ai.detected) {
         const platform = AI_LABELS[meta.ai.platform ?? ""] ?? meta.ai.platform ?? "AI";
         const model = meta.ai.model ? ` (${meta.ai.model})` : "";
@@ -72,17 +52,20 @@ export function TypeGateway({ onSelect, onSelectWithPrefill }: TypeGatewayProps)
       if (meta.provenance.embeddedAttribution.creator && !prefill.description) {
         prefill.description = `Created by ${meta.provenance.embeddedAttribution.creator}`;
       }
+      onFileReady?.(file);
       setExtracting(false);
-      if (onSelectWithPrefill && Object.keys(prefill).length > 0) {
-        onSelectWithPrefill(type, prefill);
+      if (onSelectWithPrefill) {
+        onSelectWithPrefill("music", prefill);
       } else {
-        onSelect(type);
+        onSelect("music");
       }
     } catch {
       setExtracting(false);
-      setExtractError("Could not extract metadata. Select a type manually below.");
+      setExtractError("Could not extract metadata. Continue to register manually.");
+      onFileReady?.(file);
+      onSelect("music");
     }
-  }, [onSelect, onSelectWithPrefill]);
+  }, [onSelect, onSelectWithPrefill, onFileReady]);
 
   const onDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -92,185 +75,105 @@ export function TypeGateway({ onSelect, onSelectWithPrefill }: TypeGatewayProps)
   }, [handleFile]);
 
   return (
-    <div className="min-h-[80vh] flex flex-col items-center justify-center px-4 py-12">
-      {/* Header */}
-      <div className="text-center mb-10 max-w-xl">
+    <div className="min-h-[80vh] flex flex-col items-center justify-center px-4 py-12 relative overflow-hidden">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(ellipse 70% 50% at 50% 0%, rgba(196,154,40,0.14), transparent 55%), linear-gradient(180deg, #050505, #000)",
+        }}
+      />
+
+      <div className="relative text-center mb-10 max-w-xl">
         <p
-          className="text-[10px] uppercase tracking-[0.25em] mb-3"
+          className="text-[11px] uppercase tracking-[0.3em] mb-3 inline-flex items-center gap-2"
           style={{ color: "var(--ln-gold)", fontFamily: "'Cinzel', serif" }}
         >
-          Living Nexus Manifestation Studio
+          <Shield size={12} /> {LOOP_PRODUCT.fullName}
         </p>
         <h1
-          className="text-3xl md:text-4xl font-bold mb-3"
+          className="text-3xl md:text-5xl font-bold mb-4"
           style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}
         >
-          What Are You Manifesting?
+          Register music
         </h1>
         <p
-          className="text-sm md:text-base"
+          className="text-base md:text-lg"
           style={{ fontFamily: "'Cormorant Garamond', serif", color: "rgba(245,237,216,0.7)", lineHeight: 1.6 }}
         >
-          Drop your file to begin — provenance is extracted automatically.
-          Or choose your medium below.
+          {LOOP_PRODUCT.supporting}
         </p>
       </div>
 
-      {/* ── Provenance Drop Zone ── */}
       <div
-        onDragOver={e => { e.preventDefault(); setIsDragging(true); }}
+        className="relative w-full max-w-lg mb-8 rounded-sm transition-all duration-300"
+        onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
         onDragLeave={() => setIsDragging(false)}
         onDrop={onDrop}
-        onClick={() => !extracting && fileInputRef.current?.click()}
-        className="w-full max-w-4xl mb-8 rounded-2xl flex flex-col items-center justify-center py-8 px-6 cursor-pointer transition-all duration-300"
         style={{
-          border: `2px dashed ${isDragging ? "#D4AF37" : extracting ? "#A78BFA" : "rgba(212,175,55,0.22)"}`,
-          background: isDragging ? "rgba(212,175,55,0.06)" : extracting ? "rgba(167,139,250,0.04)" : "rgba(255,255,255,0.01)",
-          boxShadow: isDragging ? "0 0 40px rgba(212,175,55,0.12)" : "none",
+          border: isDragging
+            ? "1px solid rgba(196,154,40,0.7)"
+            : "1px dashed rgba(196,154,40,0.28)",
+          background: isDragging ? "rgba(196,154,40,0.08)" : "rgba(196,154,40,0.03)",
+          boxShadow: isDragging ? "0 0 40px rgba(196,154,40,0.12)" : "none",
         }}
       >
-        {extracting ? (
-          <div className="flex flex-col items-center gap-3">
-            <Loader2 size={28} className="animate-spin" style={{ color: "#A78BFA" }} />
-            <div style={{ fontFamily: "'Cinzel', serif", fontSize: 13, color: "#A78BFA", letterSpacing: "0.10em" }}>
-              EXTRACTING PROVENANCE
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={extracting}
+          className="w-full flex flex-col items-center justify-center gap-3 px-6 py-14 cursor-pointer"
+        >
+          {extracting ? (
+            <Loader2 className="w-8 h-8 animate-spin" style={{ color: "var(--ln-gold)" }} />
+          ) : (
+            <div
+              className="w-14 h-14 rounded-full flex items-center justify-center"
+              style={{ background: "rgba(196,154,40,0.1)", border: "1px solid rgba(196,154,40,0.3)" }}
+            >
+              {isDragging ? <Upload className="w-6 h-6" style={{ color: "var(--ln-gold)" }} /> : <Music className="w-6 h-6" style={{ color: "var(--ln-gold)" }} />}
             </div>
-            <div style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", fontFamily: "monospace" }}>
-              {extractedFile}
-            </div>
-            <div style={{ fontSize: 10, color: "rgba(167,139,250,0.50)", fontFamily: "monospace", letterSpacing: "0.06em" }}>
-              Reading metadata · Detecting AI participation · Assembling provenance object
-            </div>
+          )}
+          <div className="text-center">
+            <p className="text-sm font-medium" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>
+              {extracting
+                ? `Reading ${extractedFile ?? "audio"}…`
+                : isDragging
+                  ? "Release to begin"
+                  : "Drop your track"}
+            </p>
+            <p className="text-xs mt-1" style={{ color: "rgba(245,237,216,0.45)" }}>
+              MP3 · WAV · FLAC · AAC · OGG · M4A
+            </p>
           </div>
-        ) : extractError ? (
-          <div className="flex flex-col items-center gap-2">
-            <div style={{ fontSize: 12, color: "#EF4444" }}>{extractError}</div>
-            <div style={{ fontSize: 11, color: "rgba(255,255,255,0.30)" }}>Select a type manually below</div>
-          </div>
-        ) : (
-          <div className="flex flex-col items-center gap-3">
-            <div className="flex items-center gap-3">
-              <div
-                className="w-10 h-10 rounded-xl flex items-center justify-center"
-                style={{ background: "rgba(212,175,55,0.10)", border: "1px solid rgba(212,175,55,0.25)" }}
-              >
-                <Upload size={18} style={{ color: "#D4AF37" }} />
-              </div>
-              <div className="text-left">
-                <div style={{ fontFamily: "'Cinzel', serif", fontSize: 13, color: "#D4AF37", letterSpacing: "0.10em" }}>
-                  DROP A FILE TO BEGIN
-                </div>
-                <div style={{ fontSize: 11, color: "rgba(255,255,255,0.30)", fontFamily: "monospace" }}>
-                  Audio · Video · Image · Document · Code · 3D
-                </div>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 mt-1">
-              <Sparkles size={11} style={{ color: "rgba(212,175,55,0.50)" }} />
-              <span
-                style={{
-                  fontSize: 10,
-                  color: "rgba(255,255,255,0.25)",
-                  fontFamily: "'Cormorant Garamond', serif",
-                  fontStyle: "italic",
-                }}
-              >
-                Type, metadata, AI participation, and origin are detected automatically from the file
-              </span>
-            </div>
-          </div>
-        )}
+        </button>
         <input
           ref={fileInputRef}
           type="file"
+          accept="audio/*,.mp3,.flac,.wav,.ogg,.aac,.m4a,.opus,.aiff"
           className="hidden"
-          onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f); e.target.value = ""; }}
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) handleFile(file);
+          }}
         />
       </div>
 
-      {/* Divider */}
-      <div className="flex items-center gap-4 w-full max-w-4xl mb-8">
-        <div className="flex-1 h-px" style={{ background: "rgba(212,175,55,0.10)" }} />
-        <span style={{ fontSize: 10, color: "rgba(255,255,255,0.20)", fontFamily: "monospace", letterSpacing: "0.12em" }}>
-          OR SELECT MANUALLY
-        </span>
-        <div className="flex-1 h-px" style={{ background: "rgba(212,175,55,0.10)" }} />
-      </div>
+      {extractError && (
+        <p className="relative text-xs mb-6 text-center max-w-md" style={{ color: "#F87171" }}>
+          {extractError}
+        </p>
+      )}
 
-      {/* Type Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl w-full">
-        {types.map((atm) => {
-          const Icon = TYPE_ICONS[atm.type];
-          const isHovered = hovered === atm.type;
-
-          return (
-            <button
-              key={atm.type}
-              onClick={() => onSelect(atm.type)}
-              onMouseEnter={() => setHovered(atm.type)}
-              onMouseLeave={() => setHovered(null)}
-              className="group relative flex flex-col items-start p-6 rounded-2xl text-left transition-all duration-300"
-              style={{
-                background: isHovered ? atm.colorBg : "rgba(17,16,9,0.8)",
-                border: `1px solid ${isHovered ? atm.colorBorder : "rgba(196,154,40,0.12)"}`,
-                boxShadow: isHovered ? `0 8px 32px ${atm.colorGlow}, inset 0 0 40px ${atm.colorBg}` : "none",
-                transform: isHovered ? "translateY(-4px) scale(1.02)" : "none",
-              }}
-            >
-              {isHovered && (
-                <div
-                  className="absolute inset-0 rounded-2xl opacity-30 pointer-events-none"
-                  style={{ background: atm.gradient }}
-                />
-              )}
-              <div className="flex items-center gap-3 mb-3 relative z-10">
-                <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300"
-                  style={{
-                    background: isHovered ? `${atm.colorPrimary}20` : "rgba(196,154,40,0.06)",
-                    border: `1px solid ${isHovered ? atm.colorPrimary : "rgba(196,154,40,0.15)"}`,
-                  }}
-                >
-                  <Icon size={20} style={{ color: isHovered ? atm.colorPrimary : "rgba(196,154,40,0.6)" }} />
-                </div>
-                <div>
-                  <h3
-                    className="text-base font-semibold"
-                    style={{ fontFamily: "'Cinzel', serif", color: isHovered ? atm.colorPrimary : "var(--ln-parchment)" }}
-                  >
-                    {atm.label}
-                  </h3>
-                  <p
-                    className="text-[11px] italic"
-                    style={{ fontFamily: "'Cormorant Garamond', serif", color: isHovered ? atm.colorPrimary : "rgba(245,237,216,0.5)" }}
-                  >
-                    {atm.tagline}
-                  </p>
-                </div>
-              </div>
-              <p className="text-xs leading-relaxed relative z-10" style={{ color: "rgba(245,237,216,0.6)" }}>
-                {atm.description}
-              </p>
-              <div
-                className="absolute bottom-0 left-6 right-6 h-px transition-all duration-300"
-                style={{
-                  background: isHovered
-                    ? `linear-gradient(90deg, transparent, ${atm.colorPrimary}, transparent)`
-                    : "transparent",
-                }}
-              />
-            </button>
-          );
-        })}
-      </div>
-
-      <p
-        className="mt-8 text-[11px] text-center"
-        style={{ color: "rgba(245,237,216,0.4)", fontFamily: "'Cormorant Garamond', serif" }}
+      <button
+        type="button"
+        onClick={() => onSelect("music")}
+        className="relative text-sm underline underline-offset-4 transition-opacity hover:opacity-100 opacity-70"
+        style={{ color: "var(--ln-gold)", fontFamily: "'Cormorant Garamond', serif", fontSize: 17 }}
       >
-        Every manifestation type uses the same provenance infrastructure —
-        your work is cryptographically sealed regardless of medium.
-      </p>
+        Continue without a file
+      </button>
     </div>
   );
 }
