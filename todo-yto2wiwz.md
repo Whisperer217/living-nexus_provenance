@@ -16,3 +16,9 @@
 - [x] Run release checks and publish the post-release follow-up revision (typecheck passed; 39 test files and 406 tests passed; checkpoint `8d8adfd3` published).
 - [x] Validate public routes and the Loop creator page; verify in the merged implementation that batch intent defaults to Draft and propagates status, while non-music shelves remain preserved but hidden.
 - [x] Hand off the authenticated Batch Upload toggle and rendered domain-layout smoke test to the user’s signed-in checklist; no account-bound production action was performed by the agent.
+- [x] Restore the interrupted archive export repair: Archiver 8 compatibility, structured export failures, client-side ZIP response validation, and route-level regression coverage (41 files / 413 tests passing).
+- [x] Save a dedicated checkpoint for the restored archive export repair before starting the PNA pull-request sequence.
+- [ ] Review and merge PR #4 (PNA routes) after confirming its migration and compatibility impact.
+- [ ] Review and merge PR #6 (theme remapping and PNA diary) after PR #4 is safely on `main`.
+- [ ] Review and merge PR #5 (Guide slots) after PR #6 is safely on `main`.
+- [ ] Run the release validation suite, publish the ordered PNA sequence, and preserve the final deployment checkpoint.

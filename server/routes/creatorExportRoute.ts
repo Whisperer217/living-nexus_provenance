@@ -14,15 +14,12 @@
  *     lyrics.txt             — embedded lyrics (if present)
  */
 import { Router, Request, Response } from "express";
-import type { ArchiverOptions, ZipArchive } from "archiver";
-import { createRequire } from "module";
-const _req = createRequire(import.meta.url);
-const createArchive = _req("archiver") as (format: string, opts?: ArchiverOptions) => InstanceType<typeof ZipArchive>;
 import { getDb } from "../utils/db";
 import { songs } from "../../drizzle/schema";
 import { eq, desc } from "drizzle-orm";
 import { Readable } from "stream";
 import { sdk } from "../_core/sdk";
+import { loadArchiveFactory, type ArchiveFactory } from "../utils/archiveFactory";
 
 export const creatorExportRouter = Router();
 
@@ -94,21 +91,31 @@ creatorExportRouter.get("/api/creator-export/batch", async (req: Request, res: R
   const batchNum = Math.floor(offset / limit) + 1;
   const totalBatches = Math.ceil(totalCount / limit);
 
-  // 4. Set ZIP response headers
+  // 4. Create the archive before committing download headers. This returns
+  // structured JSON instead of crashing the API process on a module mismatch.
+  let archive: ReturnType<ArchiveFactory>;
+  try {
+    archive = loadArchiveFactory()("zip", { zlib: { level: 6 } });
+  } catch (error) {
+    console.error("[CreatorExport] Unable to initialize ZIP archive:", error);
+    res.status(500).json({ error: "Archive service is temporarily unavailable. Please try again." });
+    return;
+  }
+
+  // 5. Set ZIP response headers
   const zipName = `living-nexus-archive-batch-${batchNum}-of-${totalBatches}.zip`;
   res.setHeader("Content-Type", "application/zip");
   res.setHeader("Content-Disposition", `attachment; filename="${zipName}"`);
   res.setHeader("X-Content-Type-Options", "nosniff");
 
-  // 5. Create archiver and pipe to response
-  const archive = createArchive("zip", { zlib: { level: 6 } });
+  // 6. Pipe the archive to the response
   archive.on("error", (err: Error) => {
     console.error("[CreatorExport] Archiver error:", err);
     res.destroy(err);
   });
   archive.pipe(res);
 
-  // 6. Build batch manifest
+  // 7. Build batch manifest
   const manifest = {
     _platform: "Living Nexus — BDDT Publishing / Command Domains LLC",
     _exportedAt: new Date().toISOString(),
@@ -135,7 +142,7 @@ creatorExportRouter.get("/api/creator-export/batch", async (req: Request, res: R
   };
   archive.append(JSON.stringify(manifest, null, 2), { name: "batch-manifest.json" });
 
-  // 7. For each work, fetch binary files and add to ZIP
+  // 8. For each work, fetch binary files and add to ZIP
   for (const s of batch) {
     const title = safe(s.title ?? `work-${s.id}`);
     const widSuffix = s.witnessId ? s.witnessId.slice(-8) : `id${s.id}`;
@@ -225,6 +232,6 @@ creatorExportRouter.get("/api/creator-export/batch", async (req: Request, res: R
     }
   }
 
-  // 8. Finalize
+  // 9. Finalize
   await archive.finalize();
 });

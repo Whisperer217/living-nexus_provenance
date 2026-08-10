@@ -139,6 +139,24 @@ async function downloadBatchAsZip(works: WorkRecord[], creatorName: string, batc
   URL.revokeObjectURL(url);
 }
 
+async function getDownloadError(response: Response): Promise<string> {
+  const contentType = response.headers.get("content-type") ?? "";
+  const body = await response.text();
+
+  if (contentType.includes("application/json")) {
+    try {
+      const parsed = JSON.parse(body) as { error?: unknown };
+      if (typeof parsed.error === "string" && parsed.error.trim()) return parsed.error;
+    } catch {
+      // Fall through to the safe fallback message below.
+    }
+  }
+
+  return response.ok
+    ? "The export service returned an invalid download response. Please try again."
+    : "The export could not be prepared. Please try again.";
+}
+
 // ── Main Component ─────────────────────────────────────────────────────────
 export default function CreatorDataExportPage() {
   const { user } = useAuth();
@@ -165,9 +183,9 @@ export default function CreatorDataExportPage() {
       // Use server-side endpoint — fetches actual binary files from CDN
       const url = `/api/creator-export/batch?offset=${offset}&limit=${BATCH_SIZE}`;
       const resp = await fetch(url, { credentials: "include" });
-      if (!resp.ok) {
-        const err = await resp.json().catch(() => ({ error: "Download failed" }));
-        throw new Error((err as any).error ?? "Download failed");
+      const contentType = resp.headers.get("content-type") ?? "";
+      if (!resp.ok || !contentType.includes("application/zip")) {
+        throw new Error(await getDownloadError(resp));
       }
       const blob = await resp.blob();
       const blobUrl = URL.createObjectURL(blob);

@@ -16,12 +16,9 @@
  */
 
 import { Router, Request, Response } from "express";
-import { createRequire } from "module";
-import type { ArchiverOptions, ZipArchive } from "archiver";
 import { jwtVerify } from "jose";
 import { getSongsByIds } from "../utils/db";
-const _require = createRequire(import.meta.url);
-const createArchive = _require("archiver") as (format: string, opts?: ArchiverOptions) => InstanceType<typeof ZipArchive>;
+import { loadArchiveFactory, type ArchiveFactory } from "../utils/archiveFactory";
 
 export const bulkDownloadRouter = Router();
 
@@ -74,14 +71,23 @@ bulkDownloadRouter.get("/api/bulk-download/:token", async (req: Request, res: Re
     return;
   }
 
-  // ── 3. Set response headers ────────────────────────────────────────────────
+  // ── 3. Create the ZIP before committing download headers ───────────────────
+  let archive: ReturnType<ArchiveFactory>;
+  try {
+    archive = loadArchiveFactory()("zip", { zlib: { level: 6 } });
+  } catch (error) {
+    console.error("[BulkDownload] Unable to initialize ZIP archive:", error);
+    res.status(500).json({ error: "Download archive service is temporarily unavailable. Please try again." });
+    return;
+  }
+
+  // ── 4. Set response headers ────────────────────────────────────────────────
   const bundleFilename = `living-nexus-bundle-${Date.now()}.zip`;
   res.setHeader("Content-Type", "application/zip");
   res.setHeader("Content-Disposition", `attachment; filename="${bundleFilename}"`);
   res.setHeader("X-Content-Type-Options", "nosniff");
 
-  // ── 4. Stream the ZIP ──────────────────────────────────────────────────────
-  const archive = createArchive("zip", { zlib: { level: 6 } });
+  // ── 5. Stream the ZIP ──────────────────────────────────────────────────────
 
   archive.on("error", (err: Error) => {
     console.error("[BulkDownload] Archiver error:", err);
