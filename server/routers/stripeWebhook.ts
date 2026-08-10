@@ -57,12 +57,31 @@ export async function handleStripeWebhook(req: any, res: any) {
           await recordLicense({ userId: parseInt(meta.userId), stripePaymentIntentId: pi.id, amountCents: pi.amount, slotsGranted: 100 });
         } else if (meta.type === "slots" && meta.userId && meta.slots) {
           await recordSlotPurchase({ userId: parseInt(meta.userId), stripePaymentIntentId: pi.id, slotsPurchased: parseInt(meta.slots), amountCents: pi.amount });
+        } else if (meta.type === "guide_slots" && meta.userId && meta.slots) {
+          const { recordGuideSlotPurchase } = await import("../utils/db");
+          await recordGuideSlotPurchase({
+            userId: parseInt(meta.userId),
+            stripePaymentIntentId: pi.id,
+            slotsPurchased: parseInt(meta.slots),
+            amountCents: pi.amount,
+            packageId: meta.packageId,
+          });
         }
         break;
       }
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
         const meta = session.metadata || {};
+        if (meta.type === "guide_slots" && meta.userId && meta.slots) {
+          const { recordGuideSlotPurchase } = await import("../utils/db");
+          await recordGuideSlotPurchase({
+            userId: parseInt(meta.userId),
+            stripePaymentIntentId: typeof session.payment_intent === "string" ? session.payment_intent : undefined,
+            slotsPurchased: parseInt(meta.slots),
+            amountCents: session.amount_total ?? 0,
+            packageId: meta.packageId,
+          });
+        }
         // Song-page tip: record tip via webhook (reliable path)
         if (meta.type === "tip" && meta.songId) {
           const amountCents = session.amount_total ?? 0;

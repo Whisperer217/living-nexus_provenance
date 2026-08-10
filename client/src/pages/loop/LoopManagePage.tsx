@@ -17,6 +17,7 @@ import {
   Plus,
   Settings,
   Shield,
+  BookOpen,
   Sparkles,
   Upload,
 } from "lucide-react";
@@ -25,7 +26,8 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { useWorkEditorActions } from "@/contexts/WorkEditorContext";
-import { LOOP_PRODUCT, PNA_PRODUCT } from "@/lib/loopProduct";
+<<<<<<< HEAD
+import { LOOP_PRODUCT, GUIDE_PRODUCT, PNA_PRODUCT } from "@/lib/loopProduct";
 import { trpc } from "@/lib/trpc";
 
 type StatusFilter = "all" | "Published" | "Draft" | "Unlisted";
@@ -207,6 +209,7 @@ export default function LoopManagePage() {
             { href: "/archive", icon: Archive, label: "Archive" },
             { href: "/my-archive/export", icon: Download, label: "Export" },
             { href: "/profile", icon: Settings, label: "Identity" },
+            { href: GUIDE_PRODUCT.path, icon: BookOpen, label: GUIDE_PRODUCT.name },
             { href: PNA_PRODUCT.path, icon: Sparkles, label: PNA_PRODUCT.name },
             { href: "/settings/billing", icon: Shield, label: "Billing" },
           ].map((a) => (
@@ -214,7 +217,7 @@ export default function LoopManagePage() {
               <span
                 className="inline-flex items-center gap-2 text-sm transition-opacity hover:opacity-100 opacity-75"
                 style={{ color: "var(--ln-parchment)" }}
-                title={a.href === PNA_PRODUCT.path ? PNA_PRODUCT.fullName : undefined}
+                title={a.href === GUIDE_PRODUCT.path ? GUIDE_PRODUCT.fullName : a.href === PNA_PRODUCT.path ? PNA_PRODUCT.fullName : undefined}
               >
                 <a.icon size={14} style={{ color: "var(--ln-gold)" }} />
                 {a.label}
