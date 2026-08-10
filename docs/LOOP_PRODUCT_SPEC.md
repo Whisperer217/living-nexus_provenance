@@ -105,7 +105,6 @@ Must show above the fold / primary provenance:
 | P2 | WID seal: tone-from-metadata + downloadable waveform |
 | P3 | Visual merge + AI generate/remix + prompt provenance |
 | P4 | Flagship creator + testimony publish gate |
-<<<<<<< HEAD
 | P5 | Work page surfaces + delist AI chrome from Loop spine |
 | P6 | Batch parity + cleanup |
 | P7 | Steward PNA Avatar as companion OS (not Loop overlay) |

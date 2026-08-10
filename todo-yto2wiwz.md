@@ -25,4 +25,5 @@
 - [x] Review and merge PR #5 (Guide slots) after PR #6 is safely on `main` (`7a8ec581`).
 - [x] Apply and verify PR #5’s additive Guide slots and growth-signal migration before exposing its create and purchase flows (owner has 2 used / 3 total slots; growth and purchase tables present; no creator exceeds their limit).
 - [x] Reconcile PR #5 with the merged PNA and diary releases while preserving guide-slot limits, growth signals, and the restored stewarded routes (`116010d8`).
-- [ ] Run the release validation suite, publish the ordered PNA sequence, and preserve the final deployment checkpoint.
+- [x] Run the release validation suite for the ordered PNA sequence: exact conflict-marker scan clean, typecheck passed, 41 files / 413 tests passed, primary route responses returned HTTP 200, and the local production build completed successfully.
+- [x] Publish the residual merge-marker recovery after verifying the repaired management page builds in production.

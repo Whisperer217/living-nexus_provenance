@@ -26,7 +26,6 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { useWorkEditorActions } from "@/contexts/WorkEditorContext";
-<<<<<<< HEAD
 import { LOOP_PRODUCT, GUIDE_PRODUCT, PNA_PRODUCT } from "@/lib/loopProduct";
 import { trpc } from "@/lib/trpc";
 
