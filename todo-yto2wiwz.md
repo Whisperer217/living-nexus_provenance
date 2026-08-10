@@ -29,5 +29,16 @@
 - [x] Publish the residual merge-marker recovery after verifying the repaired management page builds in production.
 - [x] Review the theme persistence and cream-mode typography branch: clean and mergeable PR #7 with no schema migration; theme ownership is centralized and core text is remapped to theme-aware tokens.
 - [x] Merge `cursor/theme-persist-typography-0e97` into `main` as `77ab9b07` after review.
-- [ ] Validate default, Crimson, Illuminated Gold, and Parchment Cream theme behavior across core Loop and chrome surfaces.
-- [ ] Run release checks and publish the validated theme release.
+- [x] Validate the theme contract in code: named-theme selectors are present, ThemeProvider is the sole runtime writer, and Parchment Cream maps to espresso ink on a cream surface.
+- [x] Visually validate all four themes on core Loop and chrome surfaces in an isolated live-browser context; persisted captures confirmed distinct dark schemes and a readable Parchment Cream management surface.
+- [x] Exercise theme persistence across reloads: Cathedral Dark, Crimson (with legacy Lights On set), Illuminated Gold, and Parchment Cream each restored the selected scheme without a Lights Mode overwrite.
+- [x] Repair the live-browser Parchment Cream reload fallback to Cathedral Dark by preventing server Lights Mode sync from overriding an explicit saved theme.
+- [x] Repair remaining low-contrast pale heading and supporting-text overrides on the live Parchment Cream management surface by reasserting cream tokens after the late default identity palette.
+- [x] Replace the remaining hard-coded pale Home hero heading with the theme-aware parchment token; audit confirms core Manage, Work, Creator, TopBar, and LeftRail text uses theme-aware tokens or decorative non-text colors.
+- [x] Visually verify all four persisted themes on Home, Manage, Loop Work, Loop Creator, TopBar, and LeftRail after the token cleanup through the isolated browser matrix and saved captures.
+- [ ] Review PR #8 (`cursor/pna-diary-browser-0e97`) for Keeper NOTES diary browsing, WID-CNV sealing, and PNA thread-restoration compatibility.
+- [ ] Merge PR #8 after the repaired theme foundation is preserved.
+- [ ] Validate the Keeper NOTES Notes | Diaries browser without altering sealed or draft archive records.
+- [x] Add regression coverage for theme normalization, persistence, and light-versus-dark document application (3 focused adapter tests passed).
+- [x] Run release checks for the validated theme repair: typecheck passed, 42 test files / 416 tests passed, production build passed, and the multi-route four-theme browser matrix passed.
+- [x] Save a dedicated checkpoint for the validated theme repair before merging PR #8.

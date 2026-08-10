@@ -8,7 +8,7 @@
  */
 import { createContext, useContext, useEffect, useRef, type ReactNode } from "react";
 import { trpc } from "@/lib/trpc";
-import { THEME_META, type LNTheme } from "@/lib/theme-dom";
+import { hasExplicitStoredTheme, THEME_META, type LNTheme } from "@/lib/theme-dom";
 import { useTheme } from "@/contexts/ThemeContext";
 
 export type LightsMode = "dim" | "on";
@@ -37,11 +37,14 @@ export function LightsModeProvider({ children }: { children: ReactNode }) {
     refetchOnWindowFocus: false,
   });
 
-  // One-shot server sync: only nudge base cathedral ↔ cream; never clobber specialty themes.
+  // One-shot server sync: only nudge base cathedral ↔ cream when the visitor has
+  // not explicitly selected a named theme. A saved choice (including cream) wins.
   useEffect(() => {
     if (appliedServerSync.current) return;
     if (!data?.lightsMode || (data.lightsMode !== "on" && data.lightsMode !== "dim")) return;
     appliedServerSync.current = true;
+
+    if (hasExplicitStoredTheme()) return;
 
     const serverMode = data.lightsMode as LightsMode;
     const isSpecialty = theme === "crimson" || theme === "illuminated-gold";

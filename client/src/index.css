@@ -2116,9 +2116,30 @@ input[type="range"].volume-slider-theater::-moz-range-thumb {
   --ln-seal-bright:   #3A8A56;   /* checkmark icons, confirmed badges */
 
   /* ── Typography ── */
-  --font-display:     'Cinzel', 'Georgia', serif;
-  --font-body:        'DM Sans', system-ui, sans-serif;
-  --font-mono:        'JetBrains Mono', 'Fira Code', monospace;
+	  --font-display:     'Cinzel', 'Georgia', serif;
+	  --font-body:        'DM Sans', system-ui, sans-serif;
+	  --font-mono:        'JetBrains Mono', 'Fira Code', monospace;
+}
+
+/* The late identity palette above is dark by default. Reassert cream's complete
+   Loop/chrome palette here so the final cascade keeps ink visible on paper. */
+[data-theme="parchment-cream"],
+[data-theme="warm"] {
+  --ln-void:          #F7F1E6;
+  --ln-coal:          #FFFCFA;
+  --ln-iron:          #E6DCC8;
+  --ln-ash:           #D4C4A8;
+  --ln-steel:         #B8A890;
+  --ln-smoke:         #6B5A48;
+  --ln-bone:          #3D2E22;
+  --ln-parchment:     #1C140E;
+  --ln-obsidian:      #EFE6D8;
+  --ln-panel:         rgba(255, 252, 250, 0.98);
+  --ln-panel-border:  rgba(154, 117, 24, 0.22);
+  --ln-gold-dim:      #7A5C14;
+  --ln-gold:          #9A7518;
+  --ln-gold-hot:      #C49A28;
+  --ln-gold-flame:    #D4A84B;
 }
 
 /* ── Base Typography (redesign v2.31) ── */

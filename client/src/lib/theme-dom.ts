@@ -63,6 +63,15 @@ export function readStoredTheme(): LNTheme {
   return DEFAULT_THEME;
 }
 
+/** Whether a named theme has been explicitly selected and must outrank legacy Lights Mode sync. */
+export function hasExplicitStoredTheme(): boolean {
+  try {
+    return Boolean(localStorage.getItem(THEME_STORAGE_KEY));
+  } catch {
+    return false;
+  }
+}
+
 /** Apply theme to <html> and persist. Idempotent. */
 export function applyDocumentTheme(theme: LNTheme): void {
   const root = document.documentElement;

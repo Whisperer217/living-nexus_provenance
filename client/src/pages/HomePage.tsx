@@ -671,7 +671,7 @@ function CinematicHero({ isAuthenticated, getLoginUrl: getLogin }: { isAuthentic
               className="font-display leading-tight mb-2"
               style={{
                 fontSize: "clamp(1.6rem, 5vw, 3rem)",
-                color: "#F0EAD8",
+                color: "var(--ln-parchment)",
                 textShadow: "0 2px 32px rgba(0,0,0,0.70)",
                 maxWidth: "22ch",
               }}
