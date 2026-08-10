@@ -910,6 +910,7 @@ export default function BatchUploadPage() {
   const [, navigate] = useLocation();
 
   const [albumName, setAlbumName] = useState("");
+  const [batchPublishIntent, setBatchPublishIntent] = useState<"Draft" | "Published">("Draft");
   const [albumCoverFile, setAlbumCoverFile] = useState<File | null>(null);
   const [albumCoverPreview, setAlbumCoverPreview] = useState<string | null>(null);
   const [albumCoverUrl, setAlbumCoverUrl] = useState<string | undefined>();
@@ -1187,7 +1188,7 @@ export default function BatchUploadPage() {
         genre: batchGenre || undefined,
         aiConsent: batchAiConsent,
         coverArtUrl: resolvedAlbumCoverUrl,
-        status: "Draft",
+        status: batchPublishIntent,
         tracks: trackPayloads,
       });
 
@@ -1363,6 +1364,34 @@ export default function BatchUploadPage() {
             <p className="text-[10px]" style={{ color: "var(--ln-parchment)" }}>
               Shared collection name. Individual tracks can override genre and AI consent below.
             </p>
+            {/* Loop: explicit Draft / Published for the whole batch */}
+            <div className="pt-2">
+              <p className="text-[10px] uppercase tracking-widest mb-2" style={{ color: "var(--ln-gold)" }}>
+                Register as
+              </p>
+              <div className="flex gap-2">
+                {(["Draft", "Published"] as const).map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => setBatchPublishIntent(s)}
+                    className="flex-1 py-2 text-xs rounded-full transition-colors"
+                    style={{
+                      border: batchPublishIntent === s ? "1px solid var(--ln-gold)" : "1px solid rgba(196,154,40,0.25)",
+                      background: batchPublishIntent === s ? "rgba(196,154,40,0.15)" : "transparent",
+                      color: batchPublishIntent === s ? "var(--ln-gold)" : "rgba(237,229,208,0.55)",
+                    }}
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+              <p className="text-[10px] mt-1.5" style={{ color: "rgba(237,229,208,0.45)" }}>
+                {batchPublishIntent === "Draft"
+                  ? "Tracks stay private until you publish from Manage."
+                  : "Publish requires bound visuals + witness-ready profile for each seal path."}
+              </p>
+            </div>
           </div>
           {/* Album cover */}
           <div
@@ -1702,7 +1731,7 @@ export default function BatchUploadPage() {
                 : "Add audio files to begin"}
           </p>
           <p className="text-[11px] mt-0.5" style={{ color: "var(--ln-parchment)" }}>
-            {albumName ? `"${albumName}"` : "Set a collection name above"}
+            {albumName ? `"${albumName}" · ${batchPublishIntent}` : "Set a collection name above"}
           </p>
         </div>
         <Button
@@ -1717,7 +1746,9 @@ export default function BatchUploadPage() {
           {isUploading ? <Loader2 size={16} className="animate-spin" /> : <Fingerprint size={16} />}
           {isUploading
             ? `Witnessing ${witnessedCount} of ${totalToWitness}...`
-            : `Witness ${readyCount > 0 ? readyCount : ""} Track${readyCount !== 1 ? "s" : ""}`}
+            : batchPublishIntent === "Published"
+              ? `Publish ${readyCount > 0 ? readyCount : ""} Track${readyCount !== 1 ? "s" : ""}`
+              : `Save ${readyCount > 0 ? readyCount : ""} Draft${readyCount !== 1 ? "s" : ""}`}
         </Button>
       </div>
     </div>

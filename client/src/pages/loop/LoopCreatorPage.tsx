@@ -1,6 +1,6 @@
 /**
  * Loop Creator Profile — music provenance creator surface
- * Brand-first hero. One story. Works shelf. Witness + Support.
+ * Brand-first hero. One story. Domain hierarchy (music-only). Witness + Support.
  */
 
 import { useMemo, useState } from "react";
@@ -8,6 +8,7 @@ import { Helmet } from "react-helmet-async";
 import { Link, useLocation, useParams } from "wouter";
 import {
   Eye,
+  LayoutGrid,
   Loader2,
   Music,
   Pause,
@@ -20,10 +21,13 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { DomainEditor } from "@/components/domain/DomainEditor";
+import { DomainRenderer } from "@/components/domain/DomainRenderer";
 import { SupportCreatorDrawer } from "@/components/SupportCreatorDrawer";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { LOOP_PRODUCT } from "@/lib/loopProduct";
 import { trpc } from "@/lib/trpc";
+import { LOOP_DOMAIN_ALLOWED_BLOCKS } from "@shared/domainTypes";
 
 export default function LoopCreatorPage() {
   const { id } = useParams<{ id: string }>();
@@ -31,6 +35,7 @@ export default function LoopCreatorPage() {
   const [, navigate] = useLocation();
   const { addAndPlay, playQueueAt, togglePlay, currentTrackId, state: playerState } = usePlayer();
   const [supportOpen, setSupportOpen] = useState(false);
+  const [showDomainEditor, setShowDomainEditor] = useState(false);
 
   const isNumeric = /^\d+$/.test(id || "");
   const numericId = isNumeric ? parseInt(id || "0", 10) : 0;
@@ -315,14 +320,29 @@ export default function LoopCreatorPage() {
               <Share2 size={16} />
             </button>
             {isOwner && (
-              <button
-                type="button"
-                onClick={() => navigate("/manage")}
-                className="inline-flex items-center gap-2 px-4 py-3 rounded-full text-sm"
-                style={{ color: "var(--ln-gold)" }}
-              >
-                <Settings size={14} /> Manage
-              </button>
+              <>
+                <button
+                  type="button"
+                  onClick={() => setShowDomainEditor((v) => !v)}
+                  className="inline-flex items-center gap-2 px-4 py-3 rounded-full text-sm"
+                  style={{
+                    border: showDomainEditor ? "1px solid rgba(196,154,40,0.5)" : "1px solid rgba(196,154,40,0.25)",
+                    color: "var(--ln-gold)",
+                    background: showDomainEditor ? "rgba(196,154,40,0.12)" : "transparent",
+                  }}
+                >
+                  <LayoutGrid size={14} />
+                  {showDomainEditor ? "Close arrange" : "Arrange domain"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigate("/manage")}
+                  className="inline-flex items-center gap-2 px-4 py-3 rounded-full text-sm"
+                  style={{ color: "var(--ln-gold)" }}
+                >
+                  <Settings size={14} /> Manage
+                </button>
+              </>
             )}
           </div>
         </div>
@@ -394,7 +414,17 @@ export default function LoopCreatorPage() {
         )}
       </section>
 
-      {/* Works */}
+      {isOwner && showDomainEditor && (
+        <section className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
+          <DomainEditor
+            userId={creator.id}
+            allowedBlockTypes={LOOP_DOMAIN_ALLOWED_BLOCKS}
+            onClose={() => setShowDomainEditor(false)}
+          />
+        </section>
+      )}
+
+      {/* Domain hierarchy — music-only; identity lives in the flagship hero above */}
       <section className="max-w-5xl mx-auto px-4 sm:px-6 py-14 pb-28">
         <p
           className="text-[11px] uppercase tracking-[0.22em] mb-3"
@@ -406,10 +436,10 @@ export default function LoopCreatorPage() {
           className="text-3xl mb-10"
           style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}
         >
-          Works
+          Works & domain
         </h2>
 
-        {songs.length === 0 ? (
+        {songs.length === 0 && !showDomainEditor ? (
           <div className="py-16 text-center">
             <Music className="mx-auto mb-4 opacity-40" style={{ color: "var(--ln-gold)" }} />
             <p style={{ color: "rgba(237,229,208,0.55)", fontFamily: "'Cormorant Garamond', serif", fontSize: 20 }}>
@@ -427,8 +457,11 @@ export default function LoopCreatorPage() {
               </Link>
             )}
           </div>
-        ) : (
-          <ul>
+        ) : null}
+
+        {/* Compact Loop works list (always the music shelf signal) */}
+        {songs.length > 0 && (
+          <ul className="mb-14">
             {songs.map((song, index) => {
               const active = currentTrackId === String(song.id);
               const playing = active && playerState.isPlaying;
@@ -501,6 +534,14 @@ export default function LoopCreatorPage() {
             })}
           </ul>
         )}
+
+        {/* Arranged domain blocks — skip identity + music shelf (flagship + list above) */}
+        <DomainRenderer
+          userId={creator.id}
+          isOwner={isOwner}
+          allowedBlockTypes={LOOP_DOMAIN_ALLOWED_BLOCKS}
+          omitBlockTypes={["hero", "bio", "shelf_music"]}
+        />
       </section>
 
       <SupportCreatorDrawer
