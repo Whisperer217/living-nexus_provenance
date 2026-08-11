@@ -125,7 +125,7 @@ function WIDTrustLayer() {
             style={{
               background: "rgba(196,154,40,0.06)",
               border: "1px solid rgba(196,154,40,0.22)",
-              color: "#C49A28",
+              color: "var(--ln-gold)",
             }}
           >
             <Fingerprint size={12} />
@@ -181,7 +181,7 @@ function WIDTrustLayer() {
               Witnessed Voices
             </p>
             <Link href="/explore">
-              <span className="text-[11px] font-body cursor-pointer transition-colors hover:text-[#C49A28]" style={{ color: "var(--ln-smoke)" }}>
+              <span className="text-[11px] font-body cursor-pointer transition-colors hover:text-[var(--ln-gold)]" style={{ color: "var(--ln-smoke)" }}>
                 See all
               </span>
             </Link>
@@ -228,7 +228,7 @@ function WIDTrustLayer() {
                   style={{
                     background: "rgba(196,154,40,0.10)",
                     border: "1px solid rgba(196,154,40,0.35)",
-                    color: "#C49A28",
+                    color: "var(--ln-gold)",
                     backdropFilter: "blur(6px)",
                   }}
                 >
@@ -265,7 +265,7 @@ function WIDTrustLayer() {
                       <div
                         className="w-12 h-12 rounded-full flex items-center justify-center transition-transform active:scale-90"
                         style={{
-                          background: isVoiceActive ? "rgba(196,154,40,0.22)" : "#0A0A0A",
+                          background: isVoiceActive ? "color-mix(in srgb, var(--ln-gold) 22%, transparent)" : "var(--ln-obsidian)",
                           border: isVoiceActive ? "2px solid rgba(196,154,40,0.9)" : "none",
                           boxShadow: isVoiceActive ? "0 0 0 6px rgba(196,154,40,0.15), 0 0 24px rgba(196,154,40,0.4)" : "0 0 24px rgba(196,154,40,0.30)",
                           animation: isVoicePlaying ? "pulse-gold 1.8s ease-in-out infinite" : "none",
@@ -327,7 +327,7 @@ function FeaturedCreatorsCarousel() {
           Creators
         </h2>
         <Link href="/explore">
-          <span className="text-[11px] font-body cursor-pointer transition-colors hover:text-[#C49A28]" style={{ color: "var(--ln-smoke)" }}>
+          <span className="text-[11px] font-body cursor-pointer transition-colors hover:text-[var(--ln-gold)]" style={{ color: "var(--ln-smoke)" }}>
             See all
           </span>
         </Link>
@@ -342,7 +342,7 @@ function FeaturedCreatorsCarousel() {
               className="flex-shrink-0 flex flex-col items-center gap-2 p-3 rounded-2xl cursor-pointer transition-all hover:scale-105"
               style={{
                 width: "88px",
-                background: "#0A0A0A",
+                background: "var(--ln-obsidian)",
                 border: "1px solid rgba(196,154,40,0.12)",
               }}
             >
@@ -352,7 +352,7 @@ function FeaturedCreatorsCarousel() {
                   <img src={creator.profilePhotoUrl} alt={creator.name} className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-[16px] font-bold"
-                    style={{ background: "rgba(196,154,40,0.10)", color: "#C49A28" }}>
+                    style={{ background: "rgba(196,154,40,0.10)", color: "var(--ln-gold)" }}>
                     {(creator.artistHandle || creator.name || "?")[0].toUpperCase()}
                   </div>
                 )}
@@ -397,7 +397,7 @@ function NewVoicesCarousel() {
           New Voices
         </h2>
         <Link href="/explore">
-          <span className="text-[11px] font-body cursor-pointer transition-colors hover:text-[#C49A28]" style={{ color: "var(--ln-smoke)" }}>
+          <span className="text-[11px] font-body cursor-pointer transition-colors hover:text-[var(--ln-gold)]" style={{ color: "var(--ln-smoke)" }}>
             See all
           </span>
         </Link>
@@ -428,8 +428,8 @@ function NewVoicesCarousel() {
                 )}
                 {/* NEW badge */}
                 <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full flex items-center justify-center"
-                  style={{ background: "var(--ln-seal-bright)", border: "1.5px solid #000000" }}>
-                  <Sparkles size={8} style={{ color: "#000000" }} />
+                  style={{ background: "var(--ln-seal-bright)", border: "1.5px solid var(--ln-void)" }}>
+                  <Sparkles size={8} style={{ color: "var(--ln-void)" }} />
                 </div>
               </div>
               <div className="text-center min-w-0 w-full">
@@ -635,7 +635,7 @@ function CinematicHero({ isAuthenticated, getLoginUrl: getLogin }: { isAuthentic
                 style={{
                   background: "rgba(196,154,40,0.12)",
                   border: "1px solid rgba(196,154,40,0.28)",
-                  color: "#C49A28",
+                  color: "var(--ln-gold)",
                 }}
               >
                 {hero.contentType === "audio" ? "Music" :
@@ -658,8 +658,8 @@ function CinematicHero({ isAuthenticated, getLoginUrl: getLogin }: { isAuthentic
                   boxShadow: "0 0 14px rgba(196,154,40,0.22), 0 0 0 1px rgba(196,154,40,0.08), inset 0 1px 0 rgba(255,220,100,0.24)",
                   }}
                 >
-                  <Shield className="w-3 h-3" style={{ color: "#D4A843", filter: "drop-shadow(0 0 5px rgba(196,154,40,0.65))" }} />
-                  <span className="text-[9px] font-heading tracking-[0.20em] uppercase" style={{ color: "#D4A843", textShadow: "0 0 10px rgba(196,154,40,0.60)" }}>
+                  <Shield className="w-3 h-3" style={{ color: "var(--ln-gold-hot, var(--ln-gold))", filter: "drop-shadow(0 0 5px rgba(196,154,40,0.65))" }} />
+                  <span className="text-[9px] font-heading tracking-[0.20em] uppercase" style={{ color: "var(--ln-gold-hot, var(--ln-gold))", textShadow: "0 0 10px rgba(196,154,40,0.60)" }}>
                     WID Witnessed
                   </span>
                 </div>
@@ -708,7 +708,7 @@ function CinematicHero({ isAuthenticated, getLoginUrl: getLogin }: { isAuthentic
                 <button
                   onClick={handlePlay}
                   className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-heading font-bold text-[12px] tracking-wide transition-all active:scale-95 hover:brightness-110"
-                  style={{ background: "#C49A28", color: "#0A0806", boxShadow: "0 2px 20px rgba(196,154,40,0.38), inset 0 1px 0 rgba(255,240,160,0.20)" }}
+                  style={{ background: "var(--ln-gold)", color: "var(--ln-void)", boxShadow: "0 2px 20px color-mix(in srgb, var(--ln-gold) 38%, transparent), inset 0 1px 0 color-mix(in srgb, var(--ln-gold-flame, #F5CC5A) 20%, transparent)" }}
                 >
                   <Play className="w-3.5 h-3.5 fill-current" />
                   Play Now
@@ -720,7 +720,7 @@ function CinematicHero({ isAuthenticated, getLoginUrl: getLogin }: { isAuthentic
                   style={{
                     background: "rgba(196,154,40,0.10)",
                     border: "1px solid rgba(196,154,40,0.45)",
-                    color: "#D4A843",
+                    color: "var(--ln-gold-hot, var(--ln-gold))",
                     boxShadow: "0 0 16px rgba(196,154,40,0.14), inset 0 1px 0 rgba(255,220,100,0.18)",
                   }}
                 >
@@ -731,7 +731,7 @@ function CinematicHero({ isAuthenticated, getLoginUrl: getLogin }: { isAuthentic
               <Link href={isAuthenticated ? "/upload" : getLogin("/upload")}>
                 <button
                   className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-heading font-bold text-[12px] tracking-wide transition-all active:scale-95 hover:brightness-110"
-                  style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.10)", color: "rgba(220,210,190,0.70)" }}
+                  style={{ background: "color-mix(in srgb, var(--ln-parchment) 6%, transparent)", border: "1px solid color-mix(in srgb, var(--ln-parchment) 14%, transparent)", color: "var(--ln-bone)" }}
                 >
                   <Upload className="w-3.5 h-3.5" />
                   Register Yours
@@ -743,11 +743,11 @@ function CinematicHero({ isAuthenticated, getLoginUrl: getLogin }: { isAuthentic
           /* Skeleton while loading */
           <>
             <div className="h-3 w-24 rounded mb-3 animate-pulse" style={{ background: "rgba(196,154,40,0.12)" }} />
-            <div className="h-10 w-64 rounded mb-2 animate-pulse" style={{ background: "rgba(255,255,255,0.06)" }} />
-            <div className="h-4 w-40 rounded mb-5 animate-pulse" style={{ background: "rgba(255,255,255,0.04)" }} />
+            <div className="h-10 w-64 rounded mb-2 animate-pulse" style={{ background: "color-mix(in srgb, var(--ln-parchment) 8%, transparent)" }} />
+            <div className="h-4 w-40 rounded mb-5 animate-pulse" style={{ background: "color-mix(in srgb, var(--ln-parchment) 6%, transparent)" }} />
             <div className="flex gap-3">
               <div className="h-10 w-28 rounded-xl animate-pulse" style={{ background: "rgba(196,154,40,0.10)" }} />
-              <div className="h-10 w-28 rounded-xl animate-pulse" style={{ background: "rgba(255,255,255,0.04)" }} />
+              <div className="h-10 w-28 rounded-xl animate-pulse" style={{ background: "color-mix(in srgb, var(--ln-parchment) 6%, transparent)" }} />
             </div>
           </>
         )}
@@ -930,7 +930,7 @@ function WIDExplainer() {
               <h3 className="font-heading text-[13px] tracking-wide" style={{ color: "var(--ln-parchment)" }}>
                 {title}
               </h3>
-              <p className="font-body text-[12px] leading-relaxed" style={{ color: "#7A7060" }}>
+              <p className="font-body text-[12px] leading-relaxed" style={{ color: "var(--ln-smoke)" }}>
                 {body}
               </p>
             </div>
@@ -941,7 +941,7 @@ function WIDExplainer() {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-6" style={{ borderTop: "1px solid rgba(196,154,40,0.08)" }}>
           <div className="flex items-center gap-3">
             <Shield className="w-4 h-4 flex-shrink-0" style={{ color: "rgba(196,154,40,0.50)" }} />
-            <span className="font-body text-[12px]" style={{ color: "#5A5040" }}>
+            <span className="font-body text-[12px]" style={{ color: "var(--ln-smoke)" }}>
               {total > 0 ? (
                 <><span className="font-heading text-[14px]" style={{ color: "var(--ln-gold)" }}>{total.toLocaleString()}</span> works witnessed and counting</>
               ) : (
@@ -962,7 +962,7 @@ function WIDExplainer() {
             <Link href="/verify">
               <button
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-heading tracking-wide transition-all hover:brightness-110"
-                style={{ background: "rgba(196,154,40,0.06)", border: "1px solid rgba(196,154,40,0.18)", color: "#C49A28" }}
+                style={{ background: "rgba(196,154,40,0.06)", border: "1px solid rgba(196,154,40,0.18)", color: "var(--ln-gold)" }}
               >
                 <Fingerprint className="w-3 h-3" />
                 Verify a WID
@@ -971,7 +971,7 @@ function WIDExplainer() {
             <Link href="/explore">
               <button
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-heading tracking-wide transition-all hover:brightness-110"
-                style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(200,190,170,0.60)" }}
+                style={{ background: "color-mix(in srgb, var(--ln-parchment) 5%, transparent)", border: "1px solid color-mix(in srgb, var(--ln-parchment) 12%, transparent)", color: "var(--ln-smoke)" }}
               >
                 <Compass className="w-3 h-3" />
                 Explore Works
@@ -981,7 +981,7 @@ function WIDExplainer() {
         </div>
 
         {/* Disclaimer — minimal */}
-        <p className="text-[10px] font-body leading-relaxed mt-6" style={{ color: "#3A3428" }}>
+        <p className="text-[10px] font-body leading-relaxed mt-6" style={{ color: "var(--ln-bone)" }}>
           Living Nexus is operated by BDDT Publishing, a DBA of Command Domains LLC. Witness IDs are cryptographic provenance records and do not constitute legal copyright registration.{" "}
           <a href="https://www.copyright.gov/registration/" target="_blank" rel="noopener noreferrer" className="underline transition-colors" style={{ color: "rgba(196,154,40,0.35)" }}>
             copyright.gov/registration
@@ -1015,7 +1015,7 @@ function ContributorsStrip() {
                   style={{
                     background: "rgba(196,154,40,0.08)",
                     border: "1px solid rgba(196,154,40,0.18)",
-                    color: "#C49A28",
+                    color: "var(--ln-gold)",
                   }}
                 >
                   {initial}
