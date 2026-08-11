@@ -358,8 +358,8 @@ function Router() {
                 <Route path="/keeper" component={KeeperPage} />
                 <Route path="/keeper-compose"><Redirect to="/pna" /></Route>
                 <Route path="/first-witness" component={FirstWitnessPage} />
-                <Route path="/store"><Redirect to="/explore" /></Route>
-                <Route path="/marketplace"><Redirect to="/explore" /></Route>
+                <Route path="/store"><Redirect to="/avatar-registry" /></Route>
+                <Route path="/marketplace"><Redirect to="/avatar-registry" /></Route>
                 <Route path="/avatar-registry" component={AvatarMarketplacePage} />
                 <Route path="/pna" component={PNAShellPage} />
                 <Route path="/distribute" component={DistributionPage} />

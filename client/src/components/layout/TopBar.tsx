@@ -21,7 +21,6 @@ import {
 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
-import PNAWorkspacePanel from "@/components/PNAWorkspacePanel";
 import { useUploadEngine } from "@/contexts/UploadEngineContext";
 import NotificationBellDropdown from "@/components/NotificationBellDropdown";
 
@@ -366,7 +365,6 @@ export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCoun
   const { user, loading: authLoading, logout } = useAuth();
   const [avatarMenuOpen, setAvatarMenuOpen] = useState(false);
   const avatarMenuRef = useRef<HTMLDivElement>(null);
-  const [pnaOpen, setPnaOpen] = useState(false);
   const { openEngine } = useUploadEngine();
 
   // Close avatar dropdown when clicking outside
@@ -611,28 +609,32 @@ export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCoun
             height: "100%",
           }}
         >
-          {/* ◉ Provenance — PNA persistent nav button */}
+          {/* ◉ Provenance — enter PNA cockpit (sign-in if guest) */}
           <button
-            onClick={() => setPnaOpen(v => !v)}
+            onClick={() => {
+              if (user) {
+                goTo("/pna");
+              } else {
+                goTo(getLoginUrl("/pna"));
+              }
+            }}
             className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-all"
             style={{
               fontSize: "clamp(9px, 0.7vw, 11px)",
               fontFamily: "'Cinzel', serif",
               fontWeight: 500,
               letterSpacing: "0.05em",
-              background: pnaOpen ? "rgba(196,154,40,0.12)" : "transparent",
-              border: pnaOpen ? "1px solid rgba(196,154,40,0.5)" : "1px solid rgba(196,154,40,0.2)",
-              color: pnaOpen ? "var(--ln-parchment)" : "var(--ln-gold)",
+              background: "transparent",
+              border: "1px solid rgba(196,154,40,0.2)",
+              color: "var(--ln-gold)",
             }}
             onMouseEnter={e => {
               (e.currentTarget as HTMLElement).style.color = "var(--ln-parchment)";
               (e.currentTarget as HTMLElement).style.borderColor = "rgba(196,154,40,0.4)";
             }}
             onMouseLeave={e => {
-              if (!pnaOpen) {
-                (e.currentTarget as HTMLElement).style.color = "var(--ln-gold)";
-                (e.currentTarget as HTMLElement).style.borderColor = "rgba(196,154,40,0.2)";
-              }
+              (e.currentTarget as HTMLElement).style.color = "var(--ln-gold)";
+              (e.currentTarget as HTMLElement).style.borderColor = "rgba(196,154,40,0.2)";
             }}
             title="Provenance Nexus Avatar — stewarded companion intelligence"
           >
@@ -763,8 +765,6 @@ export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCoun
       {whatsNewOpen && (
         <WhatsNewModal forceOpen={true} onClose={() => setWhatsNewOpen(false)} />
       )}
-      {/* PNA Workspace Panel */}
-      <PNAWorkspacePanel open={pnaOpen} onClose={() => setPnaOpen(false)} />
     </div>
   );
 }
