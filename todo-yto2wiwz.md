@@ -79,3 +79,7 @@
 - [x] Deduplicate the PNA navigation model while preserving the intended Keeper/NOTES entry point and add regression coverage.
 - [x] Verify the PNA workspace emits no duplicate-key warning in the isolated route validator; focused PNA tests, full regression suite, and production build passed.
 - [x] Retain the `Notes & Diaries` Keeper entry and remove the duplicate `/keeper` navigation row from `PNAShellPage`.
+- [x] Review Draft PR #14 for final Porch, Explore, marketplace-chrome, and surface-contract insulation compatibility: mergeable against `c9dd8b37`, migration-free, and consistently isolates PNA Store commerce from Loop chrome while narrowing Explore to audio discovery.
+- [ ] Verify Home Capture copy is track-specific and Explore is songs-and-artists-only without multi-medium content.
+- [ ] Verify Marketplace drawer removal from Loop chrome and canonical Avatar Registry redirects.
+- [x] Merge PR #14 (`ec35f031`) after review; surface-contract, browser, regression validation, and publication remain pending.
