@@ -62,3 +62,4 @@
 - [x] Review PR #12 (`cursor/pna-unify-legible-0e97`) as the preferred replacement for PR #11: it excludes the floating Keeper chat from `/pna`, preserves the avatar-registry surface, and keeps Keeper NOTES handoff consume-once.
 - [x] Verify PNA mode, NOTES, track-stage, and scholar presentation share the site theme tokens: local chat-skin storage and mode rainbow colors are removed; modes and chat use `--ln-gold`, `--ln-parchment`, `--ln-smoke`, and panel tokens.
 - [x] Merge PR #12 (`0861061e`) after confirming compatibility with the current workspace repair; combined validation and publication remain pending.
+- [x] Validate PR #12 non-destructively: the `/pna` sign-in workspace gate renders without an error boundary, unified-chat regression coverage passes, and the four-theme browser matrix passes across Home, Manage, Work, Creator, TopBar, and LeftRail.
