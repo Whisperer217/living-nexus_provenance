@@ -327,7 +327,7 @@ export default function ContextDrawer({
                   >
                     {panel.title}
                   </div>
-                  <div className="text-[10px] mt-0.5" style={{ color: "rgba(255,255,255,0.35)" }}>
+                  <div className="text-[10px] mt-0.5" style={{ color: "color-mix(in srgb, var(--ln-parchment) 35%, transparent)" }}>
                     {panel.subtitle}
                   </div>
                 </div>
@@ -335,9 +335,9 @@ export default function ContextDrawer({
               <button
                 onClick={onClose}
                 className="flex items-center justify-center w-7 h-7 rounded-full transition-colors"
-                style={{ color: "rgba(255,255,255,0.35)" }}
-                onMouseEnter={e => ((e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.75)")}
-                onMouseLeave={e => ((e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.35)")}
+                style={{ color: "color-mix(in srgb, var(--ln-parchment) 35%, transparent)" }}
+                onMouseEnter={e => ((e.currentTarget as HTMLElement).style.color = "color-mix(in srgb, var(--ln-parchment) 75%, transparent)")}
+                onMouseLeave={e => ((e.currentTarget as HTMLElement).style.color = "color-mix(in srgb, var(--ln-parchment) 35%, transparent)")}
                 aria-label="Close drawer"
               >
                 <X size={14} />
@@ -377,7 +377,7 @@ export default function ContextDrawer({
                           onMouseEnter={e => {
                             if (!active)
                               (e.currentTarget as HTMLElement).style.background =
-                                "rgba(255,255,255,0.04)";
+                                "color-mix(in srgb, var(--ln-parchment) 4%, transparent)";
                           }}
                           onMouseLeave={e => {
                             if (!active)
@@ -393,7 +393,7 @@ export default function ContextDrawer({
                                 ? "rgba(255,80,80,0.55)"
                                 : link.gold
                                 ? "rgba(212,175,55,0.60)"
-                                : "rgba(255,255,255,0.32)",
+                                : "color-mix(in srgb, var(--ln-parchment) 32%, transparent)",
                             }}
                           >
                             {link.icon}
@@ -408,7 +408,7 @@ export default function ContextDrawer({
                                   ? "rgba(255,100,100,0.75)"
                                   : link.gold
                                   ? "rgba(212,175,55,0.85)"
-                                  : "rgba(255,255,255,0.72)",
+                                  : "color-mix(in srgb, var(--ln-parchment) 72%, transparent)",
                               }}
                             >
                               {link.label}
@@ -416,7 +416,7 @@ export default function ContextDrawer({
                             {link.description && (
                               <div
                                 className="text-[11px] mt-0.5 truncate"
-                                style={{ color: "rgba(255,255,255,0.28)" }}
+                                style={{ color: "color-mix(in srgb, var(--ln-parchment) 28%, transparent)" }}
                               >
                                 {link.description}
                               </div>
@@ -438,9 +438,9 @@ export default function ContextDrawer({
               <button
                 onClick={handleWhatsNew}
                 className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-sm"
-                style={{ color: "rgba(255,255,255,0.45)" }}
+                style={{ color: "color-mix(in srgb, var(--ln-parchment) 45%, transparent)" }}
                 onMouseEnter={e =>
-                  ((e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.04)")
+                  ((e.currentTarget as HTMLElement).style.background = "color-mix(in srgb, var(--ln-parchment) 4%, transparent)")
                 }
                 onMouseLeave={e =>
                   ((e.currentTarget as HTMLElement).style.background = "transparent")
@@ -482,7 +482,7 @@ export default function ContextDrawer({
         ) : (
           /* Fallback: drawer open but no mode selected (shouldn't happen) */
           <div className="flex items-center justify-center flex-1">
-            <span style={{ color: "rgba(255,255,255,0.20)", fontSize: 12 }}>Select a mode</span>
+            <span style={{ color: "color-mix(in srgb, var(--ln-parchment) 20%, transparent)", fontSize: 12 }}>Select a mode</span>
           </div>
         )}
       </div>

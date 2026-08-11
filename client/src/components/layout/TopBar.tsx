@@ -193,7 +193,7 @@ function InlinePlayer() {
             style={{
               left: `${progress}%`,
               transform: `translateX(-50%) translateY(-50%)`,
-              background: "#C49A28",
+              background: "var(--ln-gold)",
               boxShadow: "0 0 6px rgba(196,154,40,0.5)",
             }}
           />
@@ -540,7 +540,7 @@ export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCoun
                 top: "calc(100% + 4px)",
                 left: 0,
                 width: 280,
-                background: "rgba(0,0,0,0.98)",
+                background: "var(--ln-panel)",
                 border: "1px solid rgba(196,154,40,0.28)",
                 boxShadow: "0 8px 32px rgba(0,0,0,0.6)",
                 backdropFilter: "blur(16px)",
@@ -647,13 +647,13 @@ export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCoun
             style={{
               fontSize: "clamp(9px, 0.7vw, 11px)",
               fontWeight: 700,
-              background: "#C49A28",
-              color: "#0A0806",
+              background: "var(--ln-gold)",
+              color: "var(--ln-void)",
               border: "none",
               borderRadius: "2px",
             }}
             onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#E8B840"; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "#C49A28"; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "var(--ln-gold)"; }}
           >
             <Upload size={12} />
             <span>Register Work</span>
@@ -680,7 +680,7 @@ export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCoun
                   style={{
                     background: "linear-gradient(135deg, #111111, #1A1A1A)",
                     boxShadow: hasWid
-                      ? "0 0 0 2px #C49A28, 0 0 10px rgba(196,154,40,0.25)"
+                      ? "0 0 0 2px var(--ln-gold), 0 0 10px rgba(196,154,40,0.25)"
                       : avatarMenuOpen
                       ? "0 0 0 2px rgba(196,154,40,0.5)"
                       : "none",
@@ -699,7 +699,7 @@ export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCoun
                 {hasWid && (
                   <div
                     className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full flex items-center justify-center"
-                    style={{ background: "#C49A28" }}
+                    style={{ background: "var(--ln-gold)" }}
                   >
                     <CheckCircle2 size={8} className="text-black" />
                   </div>
