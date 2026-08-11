@@ -3,7 +3,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import React, { lazy, Suspense, useEffect, useLayoutEffect, useState } from "react";
 import { Route, Switch, Redirect, useLocation, useParams } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
-import { PlayerProvider } from "./contexts/PlayerContext";
 import MainLayout from "./components/layout/MainLayout";
 import QueueLoader from "./components/QueueLoader";
 import { WhatsNewModal } from "./components/WhatsNewModal";
@@ -419,8 +418,7 @@ export default function App() {
   return (
     <ErrorBoundary>
       <TooltipProvider>
-        <PlayerProvider>
-          <HarmonicProvider>
+        <HarmonicProvider>
           <AmbientPlayerProvider>
           <QueueLoader />
           <WhatsNewModal />
@@ -450,8 +448,7 @@ export default function App() {
           <PWAInstallBanner />
           <Router />
           </AmbientPlayerProvider>
-          </HarmonicProvider>
-        </PlayerProvider>
+        </HarmonicProvider>
       </TooltipProvider>
     </ErrorBoundary>
   );
