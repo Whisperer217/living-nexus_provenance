@@ -218,6 +218,17 @@ export default function Keeper() {
     }
   }, [notesOpen]);
 
+  // Open NOTES when arriving from PNA (session handoff)
+  useEffect(() => {
+    try {
+      if (sessionStorage.getItem("ln-keeper-notes-open") === "1") {
+        sessionStorage.removeItem("ln-keeper-notes-open");
+        setNotesOpen(true);
+        setNotesTab("diaries");
+      }
+    } catch { /* ignore */ }
+  }, []);
+
   /** Reload a saved note into the Keeper chat by navigating to the Keeper chat page with the note pre-filled */
   const handleReloadNote = (content: string, noteId: number) => {
     setReloadingNoteId(noteId);

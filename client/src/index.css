@@ -483,7 +483,7 @@
   --secondary:           #1A1500;
   --secondary-foreground:#FFF8E1;
   --muted:               #2A2200;
-  --muted-foreground:    #A08840;
+  --muted-foreground:    #C4B070; /* stronger legibility vs washed #A08840 */
   --accent:              #FFD966;
   --accent-foreground:   #120E00;
   --destructive:         #E2725B;
@@ -508,14 +508,14 @@
   --lnx-gold-glow:  #FFD966;
   --lnx-gold-muted: #8A7230;
   --stone-light:  #FFF8E1;
-  --stone-shadow: #A08840;
+  --stone-shadow: #C4B070;
   --skeleton-bg:  #2A2200;
   --ln-void:          #120E00;
   --ln-coal:          #1A1500;
   --ln-iron:          #2A2200;
   --ln-ash:           #3A2E00;
   --ln-steel:         #4A3C10;
-  --ln-smoke:         #A08840;
+  --ln-smoke:         #C4B070; /* readable muted ink under illuminated gold */
   --ln-bone:          #E8D9A8;
   --ln-parchment:     #FFF8E1;
   --ln-obsidian:      #0A0800;

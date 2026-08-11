@@ -17,7 +17,7 @@ import {
   Image, Shield, Upload, BookOpen, Settings, LogOut,
   ChevronRight, Send, Loader2, ExternalLink, Save, Film, BookMarked,
   Play, Pause, SkipBack, SkipForward, PanelRightOpen, PanelRightClose,
-  Maximize2, Minimize2, Palette, GripVertical,
+  Maximize2, Minimize2, GripVertical,
 } from "lucide-react";
 import { getLoginUrl } from "@/const";
 import { usePlayer } from "@/contexts/PlayerContext";
@@ -31,119 +31,49 @@ import { consumePnaDiaryReload } from "@/lib/pnaDiary";
 type PNAMode = "guide" | "conductor" | "witness" | "custodian" | "archivist" | "vision" | "research";
 
 const PNA_MODES = [
-  { id: "guide" as PNAMode, label: "Guide", desc: "Creative direction and intent", icon: Zap, color: "#C9A84C", persona: "guide" as const },
-  { id: "conductor" as PNAMode, label: "Compose", desc: "Structure, arrangement, flow", icon: Music, color: "#7B9EA6", persona: "conductor" as const },
-  { id: "witness" as PNAMode, label: "Witness", desc: "Emotional truth and testimony", icon: Eye, color: "#7C3AED", persona: "witness" as const },
-  { id: "custodian" as PNAMode, label: "Registry", desc: "Provenance, registration, lineage", icon: Layers, color: "#059669", persona: "custodian" as const },
-  { id: "archivist" as PNAMode, label: "Archive", desc: "Patterns across your corpus", icon: Archive, color: "#D97706", persona: "archivist" as const },
-  { id: "vision" as PNAMode, label: "Vision", desc: "Image and visual generation", icon: Sparkles, color: "#8B5CF6", persona: "guide" as const },
-  { id: "research" as PNAMode, label: "Research", desc: "Search and cross-reference", icon: Search, color: "#3B82F6", persona: "archivist" as const },
+  { id: "guide" as PNAMode, label: "Guide", desc: "Creative direction and intent", icon: Zap, persona: "guide" as const },
+  { id: "conductor" as PNAMode, label: "Compose", desc: "Structure, arrangement, flow", icon: Music, persona: "conductor" as const },
+  { id: "witness" as PNAMode, label: "Witness", desc: "Emotional truth and testimony", icon: Eye, persona: "witness" as const },
+  { id: "custodian" as PNAMode, label: "Registry", desc: "Provenance, registration, lineage", icon: Layers, persona: "custodian" as const },
+  { id: "archivist" as PNAMode, label: "Archive", desc: "Patterns across your corpus", icon: Archive, persona: "archivist" as const },
+  { id: "vision" as PNAMode, label: "Vision", desc: "Image and visual generation", icon: Sparkles, persona: "guide" as const },
+  { id: "research" as PNAMode, label: "Research", desc: "Search and cross-reference", icon: Search, persona: "archivist" as const },
 ];
+
+/** Single accent — site theme gold. Mode rainbow accents castrate typography under illuminated skins. */
+const ACCENT = "var(--ln-gold)";
+const INK = "var(--ln-parchment)";
+const INK_MUTED = "var(--ln-smoke)";
+const INK_BODY = "var(--ln-bone)";
+const SURFACE = "var(--ln-coal)";
+const PANEL = "var(--ln-panel)";
+const PANEL_BORDER = "var(--ln-panel-border)";
+const VOID = "var(--ln-void)";
+const STAGE_BG = "var(--background)";
 
 const QUICK_ACTIONS = [
   { label: "Register Work", icon: Shield, href: "/manifest", desc: "Create a new WID" },
   { label: "My Archive", icon: Archive, href: "/archive", desc: "Your registered works" },
   { label: "Manage", icon: Settings, href: "/manage", desc: "Loop management hub" },
   { label: "Guides", icon: BookOpen, href: "/guides", desc: "Creator guides" },
+  { label: "Notes & Diaries", icon: BookMarked, href: "/keeper", desc: "Keeper NOTES + PNA diaries" },
   { label: "Avatar Registry", icon: Image, href: "/avatar-registry", desc: "Steward AVT skins" },
   { label: "Keeper", icon: Sparkles, href: "/keeper", desc: "Avatar skins & attributes" },
   { label: "Batch Upload", icon: Upload, href: "/batch-upload", desc: "Register multiple works" },
 ];
 
 const AVATAR_SKINS = [
-  { id: "hooded-scholar", name: "Hooded Scholar", color: "#C9A84C" },
-  { id: "conductor", name: "The Conductor", color: "#7B9EA6" },
-  { id: "witness", name: "The Witness", color: "#B8956A" },
-  { id: "archivist", name: "The Archivist", color: "#8B7355" },
-  { id: "cipher", name: "The Cipher", color: "#A67B7B" },
+  { id: "hooded-scholar", name: "Hooded Scholar" },
+  { id: "conductor", name: "The Conductor" },
+  { id: "witness", name: "The Witness" },
+  { id: "archivist", name: "The Archivist" },
+  { id: "cipher", name: "The Cipher" },
 ] as const;
 
-type ChatBgSkin = {
-  id: string;
-  label: string;
-  stage: string;
-  chat: string;
-  userBubble: string;
-  userBorder: string;
-  pnaBubble: string;
-  pnaBorder: string;
-  text: string;
-  muted: string;
-  inputBg: string;
-};
-
-const CHAT_BG_SKINS: ChatBgSkin[] = [
-  {
-    id: "void",
-    label: "Void",
-    stage: "#050403",
-    chat: "#080604",
-    userBubble: "rgba(196,154,40,0.12)",
-    userBorder: "rgba(196,154,40,0.28)",
-    pnaBubble: "rgba(255,255,255,0.045)",
-    pnaBorder: "rgba(255,255,255,0.08)",
-    text: "#E8D5A3",
-    muted: "rgba(232,213,163,0.45)",
-    inputBg: "rgba(255,255,255,0.04)",
-  },
-  {
-    id: "ink",
-    label: "Ink",
-    stage: "#0A0E14",
-    chat: "#0F1520",
-    userBubble: "rgba(90,140,200,0.14)",
-    userBorder: "rgba(90,140,200,0.32)",
-    pnaBubble: "rgba(255,255,255,0.05)",
-    pnaBorder: "rgba(255,255,255,0.09)",
-    text: "#D8E2F0",
-    muted: "rgba(216,226,240,0.45)",
-    inputBg: "rgba(255,255,255,0.05)",
-  },
-  {
-    id: "ember",
-    label: "Ember",
-    stage: "#120808",
-    chat: "#1A0C0C",
-    userBubble: "rgba(232,41,79,0.14)",
-    userBorder: "rgba(232,41,79,0.32)",
-    pnaBubble: "rgba(255,255,255,0.05)",
-    pnaBorder: "rgba(255,200,200,0.1)",
-    text: "#F5D0D6",
-    muted: "rgba(245,208,214,0.45)",
-    inputBg: "rgba(255,255,255,0.05)",
-  },
-  {
-    id: "gilded",
-    label: "Gilded",
-    stage: "#120E00",
-    chat: "#1A1500",
-    userBubble: "rgba(245,200,66,0.14)",
-    userBorder: "rgba(245,200,66,0.32)",
-    pnaBubble: "rgba(255,248,225,0.06)",
-    pnaBorder: "rgba(245,200,66,0.14)",
-    text: "#FFF8E1",
-    muted: "rgba(255,248,225,0.45)",
-    inputBg: "rgba(255,248,225,0.06)",
-  },
-  {
-    id: "parchment",
-    label: "Parchment",
-    stage: "#EFE6D8",
-    chat: "#F7F1E6",
-    userBubble: "rgba(154,117,24,0.14)",
-    userBorder: "rgba(154,117,24,0.35)",
-    pnaBubble: "rgba(28,20,14,0.05)",
-    pnaBorder: "rgba(28,20,14,0.12)",
-    text: "#1C140E",
-    muted: "rgba(28,20,14,0.5)",
-    inputBg: "rgba(255,252,250,0.9)",
-  },
-];
-
 const LS_CHAT_WIDTH = "ln-pna-chat-width";
-const LS_CHAT_BG = "ln-pna-chat-bg";
 const LS_LAYOUT = "ln-pna-layout";
 const LS_DRAWER = "ln-pna-drawer-open";
+const LS_OPEN_NOTES = "ln-keeper-notes-open";
 
 interface Message {
   id: string;
@@ -199,8 +129,6 @@ export default function PNAShellPage() {
     readString(LS_LAYOUT, "workspace") === "popout" ? "popout" : "workspace",
   );
   const [chatWidth, setChatWidth] = useState(() => readNumber(LS_CHAT_WIDTH, 520, 360, 900));
-  const [bgSkinId, setBgSkinId] = useState(() => readString(LS_CHAT_BG, "void"));
-  const [bgMenuOpen, setBgMenuOpen] = useState(false);
   const [popoutPos, setPopoutPos] = useState({ x: 72, y: 64 });
   const [popoutSize, setPopoutSize] = useState({ w: 440, h: 640 });
 
@@ -233,7 +161,6 @@ export default function PNAShellPage() {
   const utils = trpc.useUtils();
 
   const currentMode = PNA_MODES.find(m => m.id === activeMode) ?? PNA_MODES[0];
-  const bgSkin = CHAT_BG_SKINS.find(s => s.id === bgSkinId) ?? CHAT_BG_SKINS[0];
   const playing = playerState.currentIdx >= 0 ? playerState.tracks[playerState.currentIdx] : null;
   const nowPlaying = playing
     ? { title: playing.title, artist: playing.artist, artUrl: playing.artUrl, id: playing.id, wid: playing.witnessId }
@@ -296,9 +223,6 @@ export default function PNAShellPage() {
     try { localStorage.setItem(LS_CHAT_WIDTH, String(chatWidth)); } catch { /* ignore */ }
   }, [chatWidth]);
 
-  useEffect(() => {
-    try { localStorage.setItem(LS_CHAT_BG, bgSkinId); } catch { /* ignore */ }
-  }, [bgSkinId]);
 
   useEffect(() => {
     try { localStorage.setItem(LS_LAYOUT, layoutMode); } catch { /* ignore */ }
@@ -474,17 +398,17 @@ export default function PNAShellPage() {
         <div style={{ fontSize: "0.4rem", color: "rgba(196,154,40,0.6)", letterSpacing: "0.12em", fontFamily: "'Space Mono', monospace" }}>
           {playerState.isPlaying ? "NOW PLAYING · BOUND TO THREAD" : nowPlaying ? "PAUSED · BOUND TO THREAD" : "MUSIC · PLAY A TRACK TO BIND"}
         </div>
-        <div className="truncate" style={{ fontFamily: "'Cinzel', serif", fontSize: "0.78rem", color: bgSkin.text }}>
+        <div className="truncate" style={{ fontFamily: "'Cinzel', serif", fontSize: "0.78rem", color: INK }}>
           {nowPlaying?.title ?? "No track loaded"}
         </div>
-        <div className="truncate" style={{ fontSize: "0.5rem", color: bgSkin.muted, fontFamily: "'Space Mono', monospace" }}>
+        <div className="truncate" style={{ fontSize: "0.5rem", color: INK_MUTED, fontFamily: "'Space Mono', monospace" }}>
           {nowPlaying
             ? `${nowPlaying.artist ?? "Unknown"}${nowPlaying.wid ? ` · ${nowPlaying.wid}` : ""} · ${formatTime(playerState.currentTime)} / ${formatTime(playerState.duration)}`
             : "Use Explore or Archive, then return — playback stays in this dock"}
         </div>
       </div>
       <div className="flex items-center gap-1 flex-shrink-0">
-        <button type="button" onClick={() => prevTrack()} className="w-8 h-8 rounded-full flex items-center justify-center hover:opacity-80" style={{ color: bgSkin.muted }} aria-label="Previous">
+        <button type="button" onClick={() => prevTrack()} className="w-8 h-8 rounded-full flex items-center justify-center hover:opacity-80" style={{ color: INK_MUTED }} aria-label="Previous">
           <SkipBack size={14} />
         </button>
         <button
@@ -492,12 +416,12 @@ export default function PNAShellPage() {
           onClick={() => togglePlay()}
           disabled={!nowPlaying}
           className="w-9 h-9 rounded-full flex items-center justify-center disabled:opacity-30"
-          style={{ background: currentMode.color, color: "#0A0806" }}
+          style={{ background: ACCENT, color: VOID }}
           aria-label={playerState.isPlaying ? "Pause" : "Play"}
         >
           {playerState.isPlaying ? <Pause size={14} fill="currentColor" /> : <Play size={14} fill="currentColor" />}
         </button>
-        <button type="button" onClick={() => nextTrack()} className="w-8 h-8 rounded-full flex items-center justify-center hover:opacity-80" style={{ color: bgSkin.muted }} aria-label="Next">
+        <button type="button" onClick={() => nextTrack()} className="w-8 h-8 rounded-full flex items-center justify-center hover:opacity-80" style={{ color: INK_MUTED }} aria-label="Next">
           <SkipForward size={14} />
         </button>
       </div>
@@ -507,7 +431,7 @@ export default function PNAShellPage() {
   const chatHeader = (
     <div
       className="flex items-center justify-between px-4 py-2.5 flex-shrink-0 gap-2"
-      style={{ borderBottom: `1px solid ${bgSkin.pnaBorder}`, background: "rgba(0,0,0,0.12)" }}
+      style={{ borderBottom: `1px solid ${PANEL_BORDER}`, background: "rgba(0,0,0,0.12)" }}
       onMouseDown={layoutMode === "popout" ? (e) => {
         // drag only from header chrome, not buttons
         if ((e.target as HTMLElement).closest("button,a")) return;
@@ -524,61 +448,38 @@ export default function PNAShellPage() {
           src={activeSkinImg}
           alt=""
           className="w-8 h-8 rounded-full object-cover flex-shrink-0"
-          style={{ border: `1.5px solid ${currentMode.color}66` }}
+          style={{ border: "1.5px solid color-mix(in srgb, var(--ln-gold) 40%, transparent)" }}
         />
         <div className="min-w-0">
-          <div className="truncate" style={{ fontFamily: "'Cinzel', serif", fontSize: "0.72rem", color: currentMode.color }}>
+          <div className="truncate" style={{ fontFamily: "'Cinzel', serif", fontSize: "0.72rem", color: ACCENT }}>
             {PNA_PRODUCT.name} · {currentMode.label}
           </div>
-          <div style={{ fontSize: "0.4rem", color: bgSkin.muted, fontFamily: "'Space Mono', monospace", letterSpacing: "0.06em" }}>
+          <div style={{ fontSize: "0.4rem", color: INK_MUTED, fontFamily: "'Space Mono', monospace", letterSpacing: "0.06em" }}>
             {layoutMode === "popout" ? "POP-OUT CHAT · DRAG HEADER" : "DOCKED CHAT · RESIZE FROM LEFT EDGE"}
           </div>
         </div>
       </div>
       <div className="flex items-center gap-1.5 flex-shrink-0">
-        <div className="relative">
-          <button
-            type="button"
-            onClick={() => setBgMenuOpen(v => !v)}
-            className="px-2 py-1 rounded flex items-center gap-1"
-            style={{ fontSize: "0.4rem", color: bgSkin.muted, border: `1px solid ${bgSkin.pnaBorder}`, fontFamily: "'Space Mono', monospace" }}
-            title="Chat background skin"
-          >
-            <Palette size={10} /> SKIN
-          </button>
-          {bgMenuOpen && (
-            <div
-              className="absolute right-0 top-full mt-1 z-50 rounded-lg overflow-hidden min-w-[140px]"
-              style={{ background: "#0A0806", border: "1px solid rgba(196,154,40,0.25)", boxShadow: "0 12px 40px rgba(0,0,0,0.45)" }}
-            >
-              {CHAT_BG_SKINS.map(s => (
-                <button
-                  key={s.id}
-                  type="button"
-                  onClick={() => { setBgSkinId(s.id); setBgMenuOpen(false); }}
-                  className="w-full flex items-center gap-2 px-3 py-2 text-left hover:opacity-90"
-                  style={{
-                    background: bgSkinId === s.id ? "rgba(196,154,40,0.12)" : "transparent",
-                    color: bgSkinId === s.id ? "#C9A84C" : "rgba(232,213,163,0.75)",
-                    fontFamily: "'Space Mono', monospace",
-                    fontSize: "0.5rem",
-                  }}
-                >
-                  <span className="w-3.5 h-3.5 rounded-sm border border-white/20" style={{ background: s.chat }} />
-                  {s.label}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
+        <button
+          type="button"
+          onClick={() => {
+            try { sessionStorage.setItem(LS_OPEN_NOTES, "1"); } catch { /* ignore */ }
+            navigate("/keeper");
+          }}
+          className="px-2 py-1 rounded flex items-center gap-1"
+          style={{ fontSize: "0.4rem", color: INK_MUTED, border: `1px solid ${PANEL_BORDER}`, fontFamily: "'Space Mono', monospace" }}
+          title="Keeper NOTES & diaries"
+        >
+          <BookOpen size={10} /> NOTES
+        </button>
         <button
           type="button"
           onClick={() => setCinematic(v => !v)}
           className="px-2 py-1 rounded flex items-center gap-1"
           style={{
             fontSize: "0.4rem",
-            color: cinematic ? currentMode.color : bgSkin.muted,
-            border: `1px solid ${cinematic ? `${currentMode.color}55` : bgSkin.pnaBorder}`,
+            color: cinematic ? ACCENT : INK_MUTED,
+            border: `1px solid ${cinematic ? "color-mix(in srgb, var(--ln-gold) 45%, transparent)" : PANEL_BORDER}`,
             fontFamily: "'Space Mono', monospace",
           }}
           title="Cinematic listen + chat (F11)"
@@ -589,7 +490,7 @@ export default function PNAShellPage() {
           type="button"
           onClick={() => setLayoutMode(m => m === "workspace" ? "popout" : "workspace")}
           className="px-2 py-1 rounded flex items-center gap-1"
-          style={{ fontSize: "0.4rem", color: bgSkin.muted, border: `1px solid ${bgSkin.pnaBorder}`, fontFamily: "'Space Mono', monospace" }}
+          style={{ fontSize: "0.4rem", color: INK_MUTED, border: `1px solid ${PANEL_BORDER}`, fontFamily: "'Space Mono', monospace" }}
           title={layoutMode === "workspace" ? "Pop out chat panel" : "Dock chat into workspace"}
         >
           {layoutMode === "workspace" ? <><PanelRightOpen size={10} /> POP OUT</> : <><PanelRightClose size={10} /> DOCK</>}
@@ -601,7 +502,7 @@ export default function PNAShellPage() {
               onClick={handleSaveDiary}
               disabled={saveArchive.isPending || sealArchive.isPending}
               className="px-2 py-1 rounded flex items-center gap-1"
-              style={{ fontSize: "0.4rem", color: "rgba(196,154,40,0.85)", border: "1px solid rgba(196,154,40,0.25)", fontFamily: "'Space Mono', monospace" }}
+              style={{ fontSize: "0.4rem", color: ACCENT, border: `1px solid color-mix(in srgb, var(--ln-gold) 30%, transparent)`, fontFamily: "'Space Mono', monospace" }}
             >
               <BookMarked size={9} /> DIARY
             </button>
@@ -609,13 +510,44 @@ export default function PNAShellPage() {
               type="button"
               onClick={() => setMessages([])}
               className="px-2 py-1 rounded"
-              style={{ fontSize: "0.4rem", color: bgSkin.muted, border: `1px solid ${bgSkin.pnaBorder}`, fontFamily: "'Space Mono', monospace" }}
+              style={{ fontSize: "0.4rem", color: INK_MUTED, border: `1px solid ${PANEL_BORDER}`, fontFamily: "'Space Mono', monospace" }}
             >
               CLEAR
             </button>
           </>
         )}
       </div>
+    </div>
+  );
+
+  const modeTabs = (
+    <div
+      className="flex items-center gap-1 px-3 py-2 flex-shrink-0 overflow-x-auto"
+      style={{ borderBottom: `1px solid ${PANEL_BORDER}`, background: "color-mix(in srgb, var(--ln-panel) 80%, transparent)" }}
+    >
+      {PNA_MODES.map(mode => {
+        const active = activeMode === mode.id;
+        return (
+          <button
+            key={mode.id}
+            type="button"
+            onClick={() => setActiveMode(mode.id)}
+            className="flex items-center gap-1 px-2.5 py-1 rounded-full flex-shrink-0"
+            style={{
+              background: active ? "color-mix(in srgb, var(--ln-gold) 18%, transparent)" : "transparent",
+              border: active ? `1px solid color-mix(in srgb, var(--ln-gold) 45%, transparent)` : `1px solid transparent`,
+              color: active ? ACCENT : INK_MUTED,
+              fontFamily: "'Space Mono', monospace",
+              fontSize: "0.45rem",
+              letterSpacing: "0.06em",
+            }}
+            title={mode.desc}
+          >
+            <mode.icon size={10} />
+            {mode.label.toUpperCase()}
+          </button>
+        );
+      })}
     </div>
   );
 
@@ -628,21 +560,21 @@ export default function PNAShellPage() {
             style={{
               width: 132,
               height: 168,
-              border: `1px solid ${currentMode.color}44`,
-              boxShadow: `0 0 36px ${currentMode.color}18`,
+              border: "1px solid color-mix(in srgb, var(--ln-gold) 28%, transparent)",
+              boxShadow: "0 0 36px color-mix(in srgb, var(--ln-gold) 12%, transparent)",
               background: "#080604",
             }}
           >
             <img src={activeSkinImg} alt="" className="absolute inset-0 w-full h-full object-cover opacity-90" />
             <div className="absolute inset-0 opacity-40">
-              <NexusAvatarViewer seed={user.id} width={132} height={168} accentColor={currentMode.color} />
+              <NexusAvatarViewer seed={user.id} width={132} height={168} accentColor="#C49A28" />
             </div>
           </div>
           <div className="text-center">
-            <div style={{ fontFamily: "'Cinzel', serif", fontSize: "1rem", color: currentMode.color, marginBottom: 6 }}>
+            <div style={{ fontFamily: "'Cinzel', serif", fontSize: "1rem", color: ACCENT, marginBottom: 6 }}>
               {PNA_PRODUCT.fullName}
             </div>
-            <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "0.9rem", color: bgSkin.muted, lineHeight: 1.7 }}>
+            <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "0.9rem", color: INK_MUTED, lineHeight: 1.7 }}>
               Traditional chat · music dock · avatar skins. Ask, witness, and seal the thread.
             </div>
           </div>
@@ -658,10 +590,10 @@ export default function PNAShellPage() {
                 type="button"
                 onClick={() => { setInput(s.label); inputRef.current?.focus(); }}
                 className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl text-left transition-all hover:opacity-80"
-                style={{ background: bgSkin.pnaBubble, border: `1px solid ${bgSkin.pnaBorder}` }}
+                style={{ background: SURFACE, border: `1px solid ${PANEL_BORDER}` }}
               >
-                <s.icon size={12} style={{ color: currentMode.color, flexShrink: 0 }} />
-                <span style={{ fontSize: "0.55rem", color: bgSkin.muted, fontFamily: "'Space Mono', monospace" }}>{s.label}</span>
+                <s.icon size={12} style={{ color: ACCENT, flexShrink: 0 }} />
+                <span style={{ fontSize: "0.55rem", color: INK_MUTED, fontFamily: "'Space Mono', monospace" }}>{s.label}</span>
               </button>
             ))}
           </div>
@@ -678,23 +610,23 @@ export default function PNAShellPage() {
                     src={activeSkinImg}
                     alt=""
                     className="w-8 h-8 rounded-full object-cover flex-shrink-0 mr-2 mt-0.5"
-                    style={{ border: `1px solid ${modeConfig.color}55` }}
+                    style={{ border: `1px solid color-mix(in srgb, var(--ln-gold) 40%, transparent)` }}
                   />
                 )}
                 <div className={`max-w-[78%] flex flex-col ${isUser ? "items-end" : "items-start"}`}>
                   <div className="flex items-center gap-2 mb-1 px-0.5">
-                    <span style={{ fontSize: "0.4rem", color: isUser ? currentMode.color : modeConfig.color, letterSpacing: "0.08em", fontFamily: "'Space Mono', monospace" }}>
+                    <span style={{ fontSize: "0.4rem", color: ACCENT, letterSpacing: "0.08em", fontFamily: "'Space Mono', monospace" }}>
                       {isUser ? "YOU" : `PNA · ${modeConfig.label.toUpperCase()}`}
                     </span>
-                    <span style={{ fontSize: "0.38rem", color: bgSkin.muted, fontFamily: "'Space Mono', monospace" }}>
+                    <span style={{ fontSize: "0.38rem", color: INK_MUTED, fontFamily: "'Space Mono', monospace" }}>
                       {msg.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                     </span>
                   </div>
                   <div
                     className="rounded-2xl px-3.5 py-2.5"
                     style={{
-                      background: isUser ? bgSkin.userBubble : bgSkin.pnaBubble,
-                      border: `1px solid ${isUser ? bgSkin.userBorder : bgSkin.pnaBorder}`,
+                      background: isUser ? "color-mix(in srgb, var(--ln-gold) 14%, transparent)" : SURFACE,
+                      border: `1px solid ${isUser ? "color-mix(in srgb, var(--ln-gold) 32%, transparent)" : PANEL_BORDER}`,
                       borderBottomRightRadius: isUser ? 6 : 16,
                       borderBottomLeftRadius: isUser ? 16 : 6,
                     }}
@@ -704,7 +636,7 @@ export default function PNAShellPage() {
                       style={{
                         fontFamily: isUser ? "'DM Sans', sans-serif" : "'Cormorant Garamond', serif",
                         fontSize: isUser ? "0.82rem" : "0.95rem",
-                        color: bgSkin.text,
+                        color: INK,
                         lineHeight: 1.65,
                       }}
                     >
@@ -716,7 +648,7 @@ export default function PNAShellPage() {
                       type="button"
                       onClick={() => saveNoteMutation.mutate({ content: msg.content, personaId: msg.mode })}
                       className="flex items-center gap-1 mt-1 transition-opacity hover:opacity-70"
-                      style={{ fontSize: "0.38rem", color: bgSkin.muted, letterSpacing: "0.06em", fontFamily: "'Space Mono', monospace" }}
+                      style={{ fontSize: "0.38rem", color: INK_MUTED, letterSpacing: "0.06em", fontFamily: "'Space Mono', monospace" }}
                     >
                       <Save size={9} /> SAVE TO NOTES
                     </button>
@@ -744,10 +676,10 @@ export default function PNAShellPage() {
           })}
           {isLoading && (
             <div className="flex items-center gap-2.5 mb-3">
-              <img src={activeSkinImg} alt="" className="w-8 h-8 rounded-full object-cover" style={{ border: `1px solid ${currentMode.color}44` }} />
-              <div className="flex gap-1 px-3 py-2 rounded-2xl" style={{ background: bgSkin.pnaBubble, border: `1px solid ${bgSkin.pnaBorder}` }}>
+              <img src={activeSkinImg} alt="" className="w-8 h-8 rounded-full object-cover" style={{ border: "1px solid color-mix(in srgb, var(--ln-gold) 28%, transparent)" }} />
+              <div className="flex gap-1 px-3 py-2 rounded-2xl" style={{ background: SURFACE, border: `1px solid ${PANEL_BORDER}` }}>
                 {[0, 1, 2].map(i => (
-                  <div key={i} className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: currentMode.color, opacity: 0.55, animationDelay: `${i * 0.15}s` }} />
+                  <div key={i} className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: ACCENT, opacity: 0.55, animationDelay: `${i * 0.15}s` }} />
                 ))}
               </div>
             </div>
@@ -759,10 +691,10 @@ export default function PNAShellPage() {
   );
 
   const composer = (
-    <div className="flex-shrink-0 px-4 py-3" style={{ borderTop: `1px solid ${bgSkin.pnaBorder}` }}>
+    <div className="flex-shrink-0 px-4 py-3" style={{ borderTop: `1px solid ${PANEL_BORDER}` }}>
       <div
         className="flex items-end gap-2.5 rounded-2xl px-3.5 py-2.5"
-        style={{ background: bgSkin.inputBg, border: `1px solid ${currentMode.color}44` }}
+        style={{ background: SURFACE, border: "1px solid color-mix(in srgb, var(--ln-gold) 28%, transparent)" }}
       >
         <textarea
           ref={inputRef}
@@ -775,7 +707,7 @@ export default function PNAShellPage() {
           style={{
             fontFamily: "'DM Sans', sans-serif",
             fontSize: "0.9rem",
-            color: bgSkin.text,
+            color: INK,
             lineHeight: 1.5,
             maxHeight: "140px",
             overflowY: "auto",
@@ -791,17 +723,17 @@ export default function PNAShellPage() {
           onClick={handleSend}
           disabled={!input.trim() || isLoading}
           className="flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center transition-all hover:opacity-80 disabled:opacity-30"
-          style={{ background: currentMode.color, color: "#0A0806" }}
+          style={{ background: ACCENT, color: VOID }}
         >
           {isLoading ? <Loader2 size={15} className="animate-spin" /> : <Send size={15} />}
         </button>
       </div>
       <div className="flex items-center justify-between mt-1.5 px-0.5">
-        <span style={{ fontSize: "0.38rem", color: bgSkin.muted, fontFamily: "'Space Mono', monospace" }}>
+        <span style={{ fontSize: "0.38rem", color: INK_MUTED, fontFamily: "'Space Mono', monospace" }}>
           Enter to send · Shift+Enter newline
         </span>
-        <span style={{ fontSize: "0.38rem", color: bgSkin.muted, fontFamily: "'Space Mono', monospace" }}>
-          {bgSkin.label} skin
+        <span style={{ fontSize: "0.38rem", color: INK_MUTED, fontFamily: "'Space Mono', monospace" }}>
+          {"theme"} skin
         </span>
       </div>
     </div>
@@ -810,21 +742,22 @@ export default function PNAShellPage() {
   const chatColumn = (
     <div
       className="flex flex-col min-h-0 h-full overflow-hidden"
-      style={{ background: bgSkin.chat }}
+      style={{ background: PANEL }}
     >
       {chatHeader}
+      {modeTabs}
       {(cinematic || nowPlaying) && (
         <div
           className="flex items-center gap-3 px-4 py-2 flex-shrink-0"
           style={{
             background: cinematic
-              ? `linear-gradient(90deg, ${currentMode.color}18, transparent)`
+              ? "linear-gradient(90deg, color-mix(in srgb, var(--ln-gold) 12%, transparent), transparent)"
               : "transparent",
-            borderBottom: `1px solid ${bgSkin.pnaBorder}`,
+            borderBottom: `1px solid ${PANEL_BORDER}`,
           }}
         >
-          <Music size={12} style={{ color: currentMode.color }} />
-          <div className="min-w-0 flex-1 truncate" style={{ fontSize: "0.55rem", color: bgSkin.text, fontFamily: "'Space Mono', monospace" }}>
+          <Music size={12} style={{ color: ACCENT }} />
+          <div className="min-w-0 flex-1 truncate" style={{ fontSize: "0.55rem", color: INK, fontFamily: "'Space Mono', monospace" }}>
             {nowPlaying ? `${playerState.isPlaying ? "▶" : "❚❚"} ${nowPlaying.title}` : "Cinematic ready — start playback"}
           </div>
         </div>
@@ -869,7 +802,7 @@ export default function PNAShellPage() {
         <div className="px-3 pt-3 pb-2 flex-shrink-0">
           <div
             className="relative overflow-hidden rounded-xl"
-            style={{ height: 168, border: `1px solid ${currentMode.color}44`, background: "#050403" }}
+            style={{ height: 168, border: "1px solid color-mix(in srgb, var(--ln-gold) 28%, transparent)", background: VOID }}
           >
             <img src={activeSkinImg} alt="Active avatar" className="w-full h-full object-cover" />
             <div
@@ -910,7 +843,7 @@ export default function PNAShellPage() {
                 style={{
                   aspectRatio: sidebarCollapsed ? "1" : "3/4",
                   width: sidebarCollapsed ? 40 : "100%",
-                  border: active ? `2px solid ${skin.color}` : "1px solid rgba(255,255,255,0.08)",
+                  border: active ? `2px solid ${ACCENT}` : `1px solid ${PANEL_BORDER}`,
                   opacity: owned ? 1 : 0.45,
                 }}
               >
@@ -951,15 +884,15 @@ export default function PNAShellPage() {
             style={{
               padding: sidebarCollapsed ? "8px 0" : "7px 12px",
               justifyContent: sidebarCollapsed ? "center" : "flex-start",
-              background: activeMode === mode.id ? `${mode.color}12` : "transparent",
-              borderLeft: activeMode === mode.id ? `2px solid ${mode.color}` : "2px solid transparent",
+              background: activeMode === mode.id ? "color-mix(in srgb, var(--ln-gold) 12%, transparent)" : "transparent",
+              borderLeft: activeMode === mode.id ? `2px solid ${ACCENT}` : "2px solid transparent",
             }}
             title={sidebarCollapsed ? mode.label : undefined}
           >
-            <mode.icon size={13} style={{ color: activeMode === mode.id ? mode.color : "rgba(255,255,255,0.35)", flexShrink: 0 }} />
+            <mode.icon size={13} style={{ color: activeMode === mode.id ? ACCENT : INK_MUTED, flexShrink: 0 }} />
             {!sidebarCollapsed && (
               <div className="min-w-0 text-left">
-                <div style={{ fontSize: "0.5rem", color: activeMode === mode.id ? mode.color : "rgba(255,255,255,0.6)", letterSpacing: "0.04em", fontFamily: "'Space Mono', monospace" }}>
+                <div style={{ fontSize: "0.5rem", color: activeMode === mode.id ? ACCENT : INK_BODY, letterSpacing: "0.04em", fontFamily: "'Space Mono', monospace" }}>
                   {mode.label}
                 </div>
               </div>
@@ -1022,7 +955,7 @@ export default function PNAShellPage() {
   return (
     <div
       className="flex h-[100dvh] overflow-hidden relative"
-      style={{ background: bgSkin.stage, fontFamily: "'Space Mono', monospace" }}
+      style={{ background: STAGE_BG, fontFamily: "'Space Mono', monospace" }}
     >
       {leftDrawer}
 
@@ -1033,27 +966,39 @@ export default function PNAShellPage() {
             <div
               className="relative overflow-hidden rounded-2xl w-[min(320px,28vw)] h-[min(420px,55vh)]"
               style={{
-                border: `1px solid ${currentMode.color}33`,
-                boxShadow: cinematic ? `0 0 80px ${currentMode.color}22` : "0 20px 60px rgba(0,0,0,0.35)",
+                border: `1px solid color-mix(in srgb, var(--ln-gold) 28%, transparent)`,
+                boxShadow: cinematic ? "0 0 80px color-mix(in srgb, var(--ln-gold) 18%, transparent)" : "0 20px 60px rgba(0,0,0,0.35)",
+                background: VOID,
               }}
             >
-              <img src={activeSkinImg} alt="" className="w-full h-full object-cover" />
-              {nowPlaying?.artUrl && cinematic && (
-                <img
-                  src={nowPlaying.artUrl}
-                  alt=""
-                  className="absolute inset-0 w-full h-full object-cover opacity-35 mix-blend-lighten"
-                />
+              {/* Track art is the stage subject when music is bound; scholar is companion badge */}
+              {nowPlaying?.artUrl ? (
+                <img src={nowPlaying.artUrl} alt="" className="w-full h-full object-cover" />
+              ) : (
+                <img src={activeSkinImg} alt="" className="w-full h-full object-cover" />
+              )}
+              {nowPlaying?.artUrl && (
+                <div
+                  className="absolute bottom-3 left-3 w-14 h-18 overflow-hidden rounded-lg"
+                  style={{
+                    width: 56,
+                    height: 72,
+                    border: `1.5px solid color-mix(in srgb, var(--ln-gold) 50%, transparent)`,
+                    boxShadow: "0 8px 24px rgba(0,0,0,0.45)",
+                  }}
+                >
+                  <img src={activeSkinImg} alt="Active avatar" className="w-full h-full object-cover" />
+                </div>
               )}
             </div>
             <div className="mt-5 text-center max-w-sm">
-              <div style={{ fontFamily: "'Cinzel', serif", fontSize: "1.05rem", color: currentMode.color }}>
+              <div style={{ fontFamily: "'Cinzel', serif", fontSize: "1.05rem", color: ACCENT }}>
                 {nowPlaying?.title ?? "Witness stage"}
               </div>
-              <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "0.95rem", color: bgSkin.muted, marginTop: 6, lineHeight: 1.6 }}>
+              <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "0.95rem", color: INK_MUTED, marginTop: 6, lineHeight: 1.6 }}>
                 {nowPlaying
-                  ? `${nowPlaying.artist ?? ""} · chat stays locked on the right while music plays`
-                  : "Play music from Loop — it docks into the PNA chat architecture"}
+                  ? `${nowPlaying.artist ?? ""} · track art on stage · avatar stays as companion`
+                  : "Play music from Loop — cover art takes the stage; your avatar stays beside it"}
               </div>
             </div>
             <div className="mt-4 flex items-center gap-2">
@@ -1061,7 +1006,7 @@ export default function PNAShellPage() {
                 type="button"
                 onClick={() => setLayoutMode("popout")}
                 className="px-3 py-1.5 rounded-lg flex items-center gap-1.5"
-                style={{ border: `1px solid ${bgSkin.pnaBorder}`, color: bgSkin.muted, fontSize: "0.45rem", letterSpacing: "0.08em" }}
+                style={{ border: `1px solid ${PANEL_BORDER}`, color: INK_MUTED, fontSize: "0.45rem", letterSpacing: "0.08em" }}
               >
                 <Maximize2 size={11} /> POP-OUT CHAT
               </button>
@@ -1069,7 +1014,7 @@ export default function PNAShellPage() {
                 type="button"
                 onClick={() => navigate("/explore")}
                 className="px-3 py-1.5 rounded-lg flex items-center gap-1.5"
-                style={{ border: `1px solid ${currentMode.color}44`, color: currentMode.color, fontSize: "0.45rem", letterSpacing: "0.08em" }}
+                style={{ border: "1px solid color-mix(in srgb, var(--ln-gold) 28%, transparent)", color: ACCENT, fontSize: "0.45rem", letterSpacing: "0.08em" }}
               >
                 <Music size={11} /> FIND MUSIC
               </button>
@@ -1101,20 +1046,35 @@ export default function PNAShellPage() {
             <div
               className="relative overflow-hidden rounded-2xl w-[min(360px,40vw)] h-[min(460px,58vh)]"
               style={{
-                border: `1px solid ${currentMode.color}33`,
-                boxShadow: `0 0 80px ${currentMode.color}18`,
+                border: "1px solid color-mix(in srgb, var(--ln-gold) 20%, transparent)",
+                boxShadow: "0 0 80px color-mix(in srgb, var(--ln-gold) 12%, transparent)",
+                background: VOID,
               }}
             >
-              <img src={activeSkinImg} alt="" className="w-full h-full object-cover" />
+              {nowPlaying?.artUrl ? (
+                <img src={nowPlaying.artUrl} alt="" className="w-full h-full object-cover" />
+              ) : (
+                <img src={activeSkinImg} alt="" className="w-full h-full object-cover" />
+              )}
               {nowPlaying?.artUrl && (
-                <img src={nowPlaying.artUrl} alt="" className="absolute inset-0 w-full h-full object-cover opacity-30 mix-blend-lighten" />
+                <div
+                  className="absolute bottom-3 left-3 overflow-hidden rounded-lg"
+                  style={{
+                    width: 56,
+                    height: 72,
+                    border: "1.5px solid color-mix(in srgb, var(--ln-gold) 50%, transparent)",
+                    boxShadow: "0 8px 24px rgba(0,0,0,0.45)",
+                  }}
+                >
+                  <img src={activeSkinImg} alt="Active avatar" className="w-full h-full object-cover" />
+                </div>
               )}
             </div>
             <div className="mt-4 text-center">
-              <div style={{ fontFamily: "'Cinzel', serif", fontSize: "1rem", color: currentMode.color }}>
+              <div style={{ fontFamily: "'Cinzel', serif", fontSize: "1rem", color: ACCENT }}>
                 {nowPlaying?.title ?? "Pop-out chat active"}
               </div>
-              <div style={{ fontSize: "0.55rem", color: bgSkin.muted, marginTop: 4, fontFamily: "'Space Mono', monospace" }}>
+              <div style={{ fontSize: "0.55rem", color: INK_MUTED, marginTop: 4, fontFamily: "'Space Mono', monospace" }}>
                 Drag the chat · resize from corner · dock anytime
               </div>
             </div>
@@ -1122,7 +1082,7 @@ export default function PNAShellPage() {
               type="button"
               onClick={() => setLayoutMode("workspace")}
               className="mt-4 px-3 py-1.5 rounded-lg flex items-center gap-1.5"
-              style={{ border: `1px solid ${bgSkin.pnaBorder}`, color: bgSkin.muted, fontSize: "0.45rem" }}
+              style={{ border: `1px solid ${PANEL_BORDER}`, color: INK_MUTED, fontSize: "0.45rem" }}
             >
               <Minimize2 size={11} /> DOCK CHAT
             </button>
@@ -1136,7 +1096,7 @@ export default function PNAShellPage() {
               top: popoutPos.y,
               width: popoutSize.w,
               height: popoutSize.h,
-              border: `1px solid ${currentMode.color}44`,
+              border: "1px solid color-mix(in srgb, var(--ln-gold) 28%, transparent)",
               boxShadow: "0 24px 80px rgba(0,0,0,0.55)",
             }}
           >
