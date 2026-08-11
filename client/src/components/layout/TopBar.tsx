@@ -615,7 +615,7 @@ export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCoun
               if (user) {
                 goTo("/pna");
               } else {
-                goTo(getLoginUrl("/pna"));
+                window.location.assign(getLoginUrl("/pna"));
               }
             }}
             className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-all"

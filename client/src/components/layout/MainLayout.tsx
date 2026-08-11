@@ -62,6 +62,7 @@ const CREATOR_FOCUS_ROUTES = [
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   const [location, navigate] = useLocation();
   const { state } = usePlayer();
+  const isExploreSurface = location === "/explore" || location.startsWith("/explore?");
   const isCreatorFocus = CREATOR_FOCUS_ROUTES.some(
     (r) => location === r || location.startsWith(r + "/") || location.startsWith(r + "?")
   ) || location.includes("/studio");
@@ -294,7 +295,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       <RightRail />
 
       {/* ── DRAWER LAYER ── */}
-      <MarketplaceDrawer />
+      {!isExploreSurface && <MarketplaceDrawer />}
       <ScrollToTopButton />
 
       {whatsNewOpen && (

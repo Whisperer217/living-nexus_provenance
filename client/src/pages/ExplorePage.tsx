@@ -784,19 +784,6 @@ export default function ExplorePage() {
             {/* ── Supplemental horizontal strips (always shown) ── */}
             {!search && !selectedCreatorId && (
               <div className="pt-6">
-                {/* Skins / Guides commerce lives under PNA store — Explore = songs & artists only */}
-                <div className="mb-6 px-1 flex flex-wrap items-center justify-between gap-3">
-                  <p className="text-xs" style={{ color: "var(--ln-smoke)", fontFamily: "'Space Mono', monospace", letterSpacing: "0.04em" }}>
-                    SONGS & ARTISTS · SKINS & GUIDES LIVE IN PNA
-                  </p>
-                  <Link
-                    href="/avatar-registry"
-                    className="text-xs hover:underline"
-                    style={{ color: "var(--ln-gold)" }}
-                  >
-                    Open PNA Store →
-                  </Link>
-                </div>
                 {SUPPLEMENTAL_SECTIONS.map(section => (
                   <SupplementalRow key={section.key} section={section} rows={data[section.key]} likedMap={likedMap} search={search} />
                 ))}

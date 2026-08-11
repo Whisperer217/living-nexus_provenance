@@ -13,5 +13,11 @@ describe("TopBar harmonic background style", () => {
     expect(source).not.toContain("background: NAV_BG");
     expect(source).toContain("background-color 0.4s ease");
   });
-});
 
+  it("uses browser navigation for the external guest PNA sign-in URL", () => {
+    const source = fs.readFileSync(topBarPath, "utf8");
+
+    expect(source).toContain('window.location.assign(getLoginUrl("/pna"))');
+    expect(source).not.toContain('goTo(getLoginUrl("/pna"))');
+  });
+});
