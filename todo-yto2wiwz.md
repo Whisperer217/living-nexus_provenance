@@ -44,3 +44,9 @@
 - [x] Add regression coverage for theme normalization, persistence, and light-versus-dark document application (3 focused adapter tests passed).
 - [x] Run release checks for the validated theme repair: typecheck passed, 42 test files / 416 tests passed, production build passed, and the multi-route four-theme browser matrix passed.
 - [x] Save a dedicated checkpoint for the validated theme repair before merging PR #8 (`69793f0f`).
+- [x] Review PR #10 (`cursor/pna-chat-workspace-0e97`) for chat-workspace integration and provider hierarchy impact: PlayerProvider is lifted around WorkEditorProvider, covering both CreativeDrawer and PNA with a single player context.
+- [x] Repair the `CreativeDrawer` `usePlayer` crash by restoring a valid PlayerProvider ownership boundary in the reviewed PR #10 composition.
+- [x] Trace the reported PNA 503 and distinguish it from a code-path regression: the supplied report contains no target request URL; it is separate from the provider crash and cannot be reproduced or attributed from the available evidence.
+- [x] Merge PR #10 PNA chat workspace and PlayerProvider repair into `main` (`a97c98ca`).
+- [ ] Add regression coverage for the repaired PNA workspace provider composition.
+- [ ] Run PNA workspace validation and publish the repaired PR #10 release.
