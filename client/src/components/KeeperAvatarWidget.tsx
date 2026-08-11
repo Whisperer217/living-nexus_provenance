@@ -34,8 +34,9 @@ const PERSONA_ID: Record<PersonaMode, string> = {
   Archivist: "archivist",
 };
 
-/** Routes where the floating Keeper Avatar chrome is allowed (stewarded companion). */
-const FLOATING_AVATAR_PATHS = ["/pna", "/avatar-registry"] as const;
+/** Routes where the floating Keeper Avatar chrome is allowed.
+ *  `/pna` is excluded — PNAShellPage is the sole chat surface there. */
+const FLOATING_AVATAR_PATHS = ["/avatar-registry"] as const;
 
 function isPnaSubdomain(): boolean {
   if (typeof window === "undefined") return false;
@@ -44,7 +45,9 @@ function isPnaSubdomain(): boolean {
 }
 
 function isFloatingAvatarSurface(location: string): boolean {
-  if (isPnaSubdomain()) return true;
+  // Full PNA workspace owns chat — never stack FloatingAvatar on top
+  if (isPnaSubdomain()) return false;
+  if (location === "/pna" || location.startsWith("/pna/")) return false;
   return FLOATING_AVATAR_PATHS.some((p) => location === p || location.startsWith(`${p}/`));
 }
 

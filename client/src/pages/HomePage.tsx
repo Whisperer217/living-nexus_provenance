@@ -2,6 +2,8 @@
  * Home — Orientation porch (§9 Surface map)
  * Process, PNA/avatars, limited showcase, Discord, CTAs.
  * Guests may see, listen, and support. Signed-in enter PNA / Register.
+ * Typography uses theme classes (font-display / font-heading / font-body)
+ * so cream and dark cascades stay legible.
  */
 
 import { useEffect, useMemo, useState } from "react";
@@ -91,7 +93,7 @@ const AVATAR_PREVIEWS = [
 ] as const;
 
 export default function HomePage() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading: authLoading } = useAuth();
   const { addAndPlay } = usePlayer();
   const [tipTarget, setTipTarget] = useState<Track | null>(null);
 
@@ -123,6 +125,8 @@ export default function HomePage() {
 
   const enterPnaHref = isAuthenticated ? "/pna" : getLoginUrl("/pna");
   const registerHref = isAuthenticated ? "/manifest" : getLoginUrl("/manifest");
+  const enterPnaLabel = authLoading || isAuthenticated ? "ENTER PNA" : "SIGN IN · ENTER PNA";
+  const closingPnaLabel = authLoading || isAuthenticated ? "PNA WORKSPACE" : "SIGN IN";
 
   const openTip = (v: ShowcaseTrack) => {
     setTipTarget({
@@ -149,7 +153,7 @@ export default function HomePage() {
         />
       </Helmet>
 
-      <div className="cosmic-bg min-h-screen ln-atmosphere">
+      <div className="cosmic-bg min-h-screen ln-atmosphere" style={{ position: "relative" }}>
         {/* ── Porch hero ── */}
         <section className="relative px-6 pt-14 pb-12 md:pt-20 md:pb-16 overflow-hidden">
           <div
@@ -161,15 +165,14 @@ export default function HomePage() {
           />
           <div className="relative max-w-4xl mx-auto text-center">
             <p
-              className="text-[10px] uppercase tracking-[0.28em] mb-4"
-              style={{ color: "var(--ln-gold)", fontFamily: "'Space Mono', monospace" }}
+              className="font-heading text-[10px] uppercase tracking-[0.28em] mb-4"
+              style={{ color: "var(--ln-gold)" }}
             >
               {LOOP_PRODUCT.fullName}
             </p>
             <h1
-              className="mb-4"
+              className="font-display mb-4"
               style={{
-                fontFamily: "'Cinzel', serif",
                 fontSize: "clamp(1.75rem, 4vw, 2.75rem)",
                 color: "var(--ln-parchment)",
                 letterSpacing: "0.06em",
@@ -181,9 +184,8 @@ export default function HomePage() {
               Music that can prove its origin.
             </h1>
             <p
-              className="max-w-xl mx-auto mb-8"
+              className="font-body max-w-xl mx-auto mb-8"
               style={{
-                fontFamily: "'Cormorant Garamond', serif",
                 fontSize: "1.15rem",
                 color: "var(--ln-bone)",
                 lineHeight: 1.7,
@@ -195,26 +197,24 @@ export default function HomePage() {
             <div className="flex flex-wrap items-center justify-center gap-3">
               <a
                 href={enterPnaHref}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl transition-opacity hover:opacity-90"
+                className="font-heading inline-flex items-center gap-2 px-5 py-2.5 rounded-xl transition-opacity hover:opacity-90"
                 style={{
                   background: "var(--ln-gold)",
                   color: "var(--ln-void)",
-                  fontFamily: "'Space Mono', monospace",
                   fontSize: "0.65rem",
                   letterSpacing: "0.1em",
                   textDecoration: "none",
                 }}
               >
                 <Sparkles size={14} />
-                {isAuthenticated ? "ENTER PNA" : "SIGN IN · ENTER PNA"}
+                {enterPnaLabel}
               </a>
               <Link href="/explore">
                 <span
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl cursor-pointer"
+                  className="font-heading inline-flex items-center gap-2 px-5 py-2.5 rounded-xl cursor-pointer"
                   style={{
                     border: "1px solid var(--ln-panel-border)",
                     color: "var(--ln-parchment)",
-                    fontFamily: "'Space Mono', monospace",
                     fontSize: "0.65rem",
                     letterSpacing: "0.1em",
                   }}
@@ -225,11 +225,10 @@ export default function HomePage() {
               </Link>
               <a
                 href={registerHref}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl"
+                className="font-heading inline-flex items-center gap-2 px-5 py-2.5 rounded-xl"
                 style={{
                   border: "1px solid color-mix(in srgb, var(--ln-gold) 35%, transparent)",
                   color: "var(--ln-gold)",
-                  fontFamily: "'Space Mono', monospace",
                   fontSize: "0.65rem",
                   letterSpacing: "0.1em",
                   textDecoration: "none",
@@ -240,7 +239,7 @@ export default function HomePage() {
               </a>
             </div>
             {(countData?.count ?? 0) > 0 && (
-              <p className="mt-6 text-xs" style={{ color: "var(--ln-smoke)", fontFamily: "'Space Mono', monospace" }}>
+              <p className="font-heading mt-6 text-xs" style={{ color: "var(--ln-smoke)" }}>
                 <Fingerprint size={12} className="inline mr-1.5" style={{ color: "var(--ln-gold)" }} />
                 {(countData?.count ?? 0).toLocaleString()} works witnessed
               </p>
@@ -252,14 +251,14 @@ export default function HomePage() {
         <section className="px-6 py-12" style={{ borderTop: "1px solid var(--ln-panel-border)" }}>
           <div className="max-w-5xl mx-auto">
             <p
-              className="text-[10px] uppercase tracking-[0.22em] mb-2 text-center"
-              style={{ color: "var(--ln-gold)", fontFamily: "'Space Mono', monospace" }}
+              className="font-heading text-[10px] uppercase tracking-[0.22em] mb-2 text-center"
+              style={{ color: "var(--ln-gold)" }}
             >
               The process
             </p>
             <h2
-              className="text-center mb-10"
-              style={{ fontFamily: "'Cinzel', serif", fontSize: "1.35rem", color: "var(--ln-parchment)" }}
+              className="font-heading text-center mb-10"
+              style={{ fontSize: "1.35rem", color: "var(--ln-parchment)" }}
             >
               From capture to discovery
             </h2>
@@ -274,15 +273,15 @@ export default function HomePage() {
                   }}
                 >
                   <div
-                    className="text-[10px] mb-3"
-                    style={{ color: "var(--ln-gold)", fontFamily: "'Space Mono', monospace", letterSpacing: "0.14em" }}
+                    className="font-heading text-[10px] mb-3"
+                    style={{ color: "var(--ln-gold)", letterSpacing: "0.14em" }}
                   >
                     {step.n}
                   </div>
-                  <h3 className="mb-2" style={{ fontFamily: "'Cinzel', serif", fontSize: "0.95rem", color: "var(--ln-parchment)" }}>
+                  <h3 className="font-heading mb-2" style={{ fontSize: "0.95rem", color: "var(--ln-parchment)" }}>
                     {step.title}
                   </h3>
-                  <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "0.95rem", color: "var(--ln-smoke)", lineHeight: 1.55 }}>
+                  <p className="font-body" style={{ fontSize: "0.95rem", color: "var(--ln-smoke)", lineHeight: 1.55 }}>
                     {step.body}
                   </p>
                 </div>
@@ -296,27 +295,26 @@ export default function HomePage() {
           <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
             <div>
               <p
-                className="text-[10px] uppercase tracking-[0.22em] mb-2"
-                style={{ color: "var(--ln-gold)", fontFamily: "'Space Mono', monospace" }}
+                className="font-heading text-[10px] uppercase tracking-[0.22em] mb-2"
+                style={{ color: "var(--ln-gold)" }}
               >
                 {PNA_PRODUCT.fullName}
               </p>
-              <h2 className="mb-3" style={{ fontFamily: "'Cinzel', serif", fontSize: "1.45rem", color: "var(--ln-parchment)" }}>
+              <h2 className="font-heading mb-3" style={{ fontSize: "1.45rem", color: "var(--ln-parchment)" }}>
                 A stewarded creator OS — not a bolted-on chatbot.
               </h2>
-              <p className="mb-5" style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.1rem", color: "var(--ln-bone)", lineHeight: 1.7 }}>
+              <p className="font-body mb-5" style={{ fontSize: "1.1rem", color: "var(--ln-bone)", lineHeight: 1.7 }}>
                 Chat that can route into register, seal diaries, bind music, and grow avatar identity.
                 Skins, slots, and personality locks live in the PNA store — same structure as the avatars below.
               </p>
               <div className="flex flex-wrap gap-3">
                 <a
                   href={enterPnaHref}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg"
+                  className="font-heading inline-flex items-center gap-2 px-4 py-2 rounded-lg"
                   style={{
                     background: "color-mix(in srgb, var(--ln-gold) 16%, transparent)",
                     border: "1px solid color-mix(in srgb, var(--ln-gold) 40%, transparent)",
                     color: "var(--ln-gold)",
-                    fontFamily: "'Space Mono', monospace",
                     fontSize: "0.6rem",
                     letterSpacing: "0.08em",
                     textDecoration: "none",
@@ -326,11 +324,10 @@ export default function HomePage() {
                 </a>
                 <Link href="/avatar-registry">
                   <span
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg cursor-pointer"
+                    className="font-heading inline-flex items-center gap-2 px-4 py-2 rounded-lg cursor-pointer"
                     style={{
                       border: "1px solid var(--ln-panel-border)",
                       color: "var(--ln-parchment)",
-                      fontFamily: "'Space Mono', monospace",
                       fontSize: "0.6rem",
                       letterSpacing: "0.08em",
                     }}
@@ -349,7 +346,7 @@ export default function HomePage() {
                   >
                     <img src={SKIN_IMAGES[skin.id]} alt={skin.name} className="w-full h-full object-cover" />
                   </div>
-                  <span className="text-[9px] text-center" style={{ color: "var(--ln-smoke)", fontFamily: "'Space Mono', monospace" }}>
+                  <span className="font-heading text-[9px] text-center" style={{ color: "var(--ln-smoke)" }}>
                     {skin.name.split(" ").slice(-1)[0]}
                   </span>
                 </div>
@@ -363,15 +360,18 @@ export default function HomePage() {
           <div className="max-w-5xl mx-auto">
             <div className="flex items-end justify-between gap-4 mb-6">
               <div>
-                <p className="text-[10px] uppercase tracking-[0.22em] mb-1" style={{ color: "var(--ln-gold)", fontFamily: "'Space Mono', monospace" }}>
+                <p
+                  className="font-heading text-[10px] uppercase tracking-[0.22em] mb-1"
+                  style={{ color: "var(--ln-gold)" }}
+                >
                   Limited showcase
                 </p>
-                <h2 style={{ fontFamily: "'Cinzel', serif", fontSize: "1.25rem", color: "var(--ln-parchment)" }}>
+                <h2 className="font-heading" style={{ fontSize: "1.25rem", color: "var(--ln-parchment)" }}>
                   Sealed works & creators
                 </h2>
               </div>
               <Link href="/explore">
-                <span className="text-xs cursor-pointer" style={{ color: "var(--ln-gold)" }}>
+                <span className="font-heading text-xs cursor-pointer" style={{ color: "var(--ln-gold)" }}>
                   Full Explore →
                 </span>
               </Link>
@@ -417,18 +417,18 @@ export default function HomePage() {
                         <Play size={12} fill="currentColor" />
                       </div>
                     </div>
-                    <div className="truncate text-xs" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>
+                    <div className="font-heading truncate text-xs" style={{ color: "var(--ln-parchment)" }}>
                       {v.title}
                     </div>
-                    <div className="truncate text-[10px]" style={{ color: "var(--ln-smoke)" }}>
+                    <div className="font-body truncate text-[10px]" style={{ color: "var(--ln-smoke)" }}>
                       @{v.artistHandle || "creator"}
                     </div>
                   </button>
                   {v.tipsEnabled && (
                     <button
                       type="button"
-                      className="mt-1.5 inline-flex items-center gap-1 text-[10px] hover:opacity-90"
-                      style={{ color: "var(--ln-gold)", fontFamily: "'Space Mono', monospace" }}
+                      className="font-heading mt-1.5 inline-flex items-center gap-1 text-[10px] hover:opacity-90"
+                      style={{ color: "var(--ln-gold)" }}
                       onClick={() => openTip(v)}
                     >
                       <Heart size={10} /> Support
@@ -437,7 +437,7 @@ export default function HomePage() {
                 </div>
               ))}
               {showcaseTracks.length === 0 && (
-                <p className="col-span-full text-sm" style={{ color: "var(--ln-smoke)" }}>
+                <p className="font-body col-span-full text-sm" style={{ color: "var(--ln-smoke)" }}>
                   Witnessed works will appear here as the registry grows.
                 </p>
               )}
@@ -451,7 +451,7 @@ export default function HomePage() {
                   return (
                     <Link key={c.id || handle} href={href}>
                       <span
-                        className="inline-flex items-center gap-2 px-3 py-2 rounded-full cursor-pointer"
+                        className="font-body inline-flex items-center gap-2 px-3 py-2 rounded-full cursor-pointer"
                         style={{
                           background: "var(--ln-obsidian)",
                           border: "1px solid var(--ln-panel-border)",
@@ -486,10 +486,10 @@ export default function HomePage() {
               <ExternalLink size={20} />
             </div>
             <div className="flex-1 min-w-0">
-              <h2 className="mb-1" style={{ fontFamily: "'Cinzel', serif", fontSize: "1.1rem", color: "var(--ln-parchment)" }}>
+              <h2 className="font-heading mb-1" style={{ fontSize: "1.1rem", color: "var(--ln-parchment)" }}>
                 Community on Discord
               </h2>
-              <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.05rem", color: "var(--ln-smoke)", lineHeight: 1.6 }}>
+              <p className="font-body" style={{ fontSize: "1.05rem", color: "var(--ln-smoke)", lineHeight: 1.6 }}>
                 Creators, witnesses, and stewards — process talk, feedback, and releases.
               </p>
             </div>
@@ -497,11 +497,10 @@ export default function HomePage() {
               href={DISCORD_COMMUNITY_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg flex-shrink-0"
+              className="font-heading inline-flex items-center gap-2 px-4 py-2.5 rounded-lg flex-shrink-0"
               style={{
                 background: "#5865F2",
                 color: "#fff",
-                fontFamily: "'Space Mono', monospace",
                 fontSize: "0.6rem",
                 letterSpacing: "0.08em",
                 textDecoration: "none",
@@ -515,20 +514,27 @@ export default function HomePage() {
         {/* ── Closing CTAs ── */}
         <section className="px-6 py-14 text-center" style={{ borderTop: "1px solid var(--ln-panel-border)" }}>
           <ShieldCheck className="mx-auto mb-4" size={28} style={{ color: "var(--ln-gold)" }} />
-          <h2 className="mb-3" style={{ fontFamily: "'Cinzel', serif", fontSize: "1.35rem", color: "var(--ln-parchment)" }}>
+          <h2 className="font-heading mb-3" style={{ fontSize: "1.35rem", color: "var(--ln-parchment)" }}>
             Easy to start. Hard to fake. Optional to go deep.
           </h2>
-          <p className="max-w-md mx-auto mb-6" style={{ color: "var(--ln-smoke)", fontFamily: "'Cormorant Garamond', serif", fontSize: "1.05rem" }}>
+          <p className="font-body max-w-md mx-auto mb-6" style={{ color: "var(--ln-smoke)", fontSize: "1.05rem" }}>
             Guests can see and support. Signing in unlocks register, seal, manage, and the full PNA cockpit.
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             <Link href="/explore">
-              <span className="px-4 py-2 rounded-lg cursor-pointer inline-block" style={{ border: "1px solid var(--ln-panel-border)", color: "var(--ln-parchment)", fontSize: "0.65rem", fontFamily: "'Space Mono', monospace" }}>
+              <span
+                className="font-heading px-4 py-2 rounded-lg cursor-pointer inline-block"
+                style={{ border: "1px solid var(--ln-panel-border)", color: "var(--ln-parchment)", fontSize: "0.65rem" }}
+              >
                 EXPLORE
               </span>
             </Link>
-            <a href={enterPnaHref} className="px-4 py-2 rounded-lg inline-block" style={{ background: "var(--ln-gold)", color: "var(--ln-void)", fontSize: "0.65rem", fontFamily: "'Space Mono', monospace", textDecoration: "none" }}>
-              {isAuthenticated ? "PNA WORKSPACE" : "SIGN IN"}
+            <a
+              href={enterPnaHref}
+              className="font-heading px-4 py-2 rounded-lg inline-block"
+              style={{ background: "var(--ln-gold)", color: "var(--ln-void)", fontSize: "0.65rem", textDecoration: "none" }}
+            >
+              {closingPnaLabel}
             </a>
           </div>
         </section>

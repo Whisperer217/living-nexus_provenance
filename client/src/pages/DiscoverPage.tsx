@@ -169,7 +169,7 @@ export default function DiscoverPage() {
   return (
     <div className="min-h-screen overflow-hidden" style={{ background: "var(--ln-coal)" }}>
       {/* Hero */}
-      <div className="relative overflow-hidden" style={{ background: "linear-gradient(135deg, #111111 0%, #000000 50%, #000000 100%)" }}>
+      <div className="relative overflow-hidden" style={{ background: "linear-gradient(135deg, var(--ln-obsidian) 0%, var(--ln-void) 50%, var(--background) 100%)" }}>
         <div className="absolute inset-0 opacity-20" style={{ backgroundImage: "radial-gradient(circle at 20% 50%, rgba(196,154,40,0.25) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(196,154,40,0.15) 0%, transparent 50%)" }} />
         {/* Radial depth: dark center bleeding to deep purple/blue edge */}
         <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 100% 80% at 50% 50%, transparent 0%, rgba(44,52,56,0.3) 50%, rgba(44,52,56,0.6) 100%)" }} />
@@ -193,7 +193,7 @@ export default function DiscoverPage() {
                 </Button>
               </Link>
               <Link href="/explore">
-                <Button size="lg" variant="outline" className="btn-violet-glow" style={{ borderColor: "rgba(230,205,174,0.55)", color: "#FFFFFF" }}>
+                <Button size="lg" variant="outline" className="btn-violet-glow" style={{ borderColor: "rgba(230,205,174,0.55)", color: "var(--ln-parchment)" }}>
                   Explore All Tracks
                 </Button>
               </Link>
@@ -285,7 +285,7 @@ export default function DiscoverPage() {
               {["Register your work. Get your WID.", "Keep 90% of every gift received.", "Own your catalog. Always.", "Batch register entire albums at once."].map(t => (
                 <li key={t} className="flex items-start gap-2">
                   <Shield size={12} className="flex-shrink-0 mt-0.5" style={{ color: "rgba(196,154,40,0.5)" }} />
-                  <span className="text-[13px]" style={{ color: "#E2E8F0" }}>{t}</span>
+                  <span className="text-[13px]" style={{ color: "var(--ln-bone)" }}>{t}</span>
                 </li>
               ))}
             </ul>
@@ -297,7 +297,7 @@ export default function DiscoverPage() {
               {["Discover real music from real people.", "Gift creators directly. 90% reaches them.", "Verify any track's origin with its WID.", "No algorithm. No ads. No noise."].map(t => (
                 <li key={t} className="flex items-start gap-2">
                   <Star size={12} className="flex-shrink-0 mt-0.5" style={{ color: "rgba(196,154,40,0.5)" }} />
-                  <span className="text-[13px]" style={{ color: "#E2E8F0" }}>{t}</span>
+                  <span className="text-[13px]" style={{ color: "var(--ln-bone)" }}>{t}</span>
                 </li>
               ))}
             </ul>
@@ -343,7 +343,7 @@ export default function DiscoverPage() {
                     <Icon size={18} style={{ color }} />
                     <span className="font-mono text-[9px] px-1.5 py-0.5 rounded" style={{ background: `${color}22`, color, border: `1px solid ${color}55` }}>{widLabel}</span>
                   </div>
-                  <p className="text-sm font-bold" style={{ color: isActive ? color : "#FFFFFF", fontFamily: "'Cinzel', serif" }}>{label}</p>
+                  <p className="text-sm font-bold" style={{ color: isActive ? color : "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>{label}</p>
                   {count !== null && (
                     <p className="text-[11px] mt-0.5" style={{ color: "var(--ln-iron)" }}>{count.toLocaleString()} witnessed</p>
                   )}
@@ -391,7 +391,7 @@ export default function DiscoverPage() {
               <button
                 onClick={() => setActiveGenre(undefined)}
                 className="px-3 py-1.5 rounded-full text-xs font-medium transition-all"
-                style={{ background: !activeGenre ? "var(--ln-gold)" : "var(--ln-coal)", color: !activeGenre ? "var(--ln-coal)" : "#E2E8F0", border: `1px solid ${!activeGenre ? "var(--ln-gold)" : "rgba(196,154,40,0.2)"}` }}
+                style={{ background: !activeGenre ? "var(--ln-gold)" : "var(--ln-coal)", color: !activeGenre ? "var(--ln-coal)" : "var(--ln-bone)", border: `1px solid ${!activeGenre ? "var(--ln-gold)" : "rgba(196,154,40,0.2)"}` }}
               >
                 All Music
               </button>
@@ -400,7 +400,7 @@ export default function DiscoverPage() {
                   key={genre}
                   onClick={() => setActiveGenre(genre === activeGenre ? undefined : genre)}
                   className="px-3 py-1.5 rounded-full text-xs font-medium transition-all"
-                  style={{ background: activeGenre === genre ? "var(--ln-gold)" : "var(--ln-coal)", color: activeGenre === genre ? "var(--ln-coal)" : "#E2E8F0", border: `1px solid ${activeGenre === genre ? "var(--ln-gold)" : "rgba(196,154,40,0.2)"}` }}
+                  style={{ background: activeGenre === genre ? "var(--ln-gold)" : "var(--ln-coal)", color: activeGenre === genre ? "var(--ln-coal)" : "var(--ln-bone)", border: `1px solid ${activeGenre === genre ? "var(--ln-gold)" : "rgba(196,154,40,0.2)"}` }}
                 >
                   {genre}
                 </button>
@@ -420,7 +420,7 @@ export default function DiscoverPage() {
                   key={cat}
                   onClick={() => toast.info(`Filtering by ${cat} coming soon`)}
                   className="px-3 py-1.5 rounded-full text-xs font-medium transition-all"
-                  style={{ background: "var(--ln-coal)", color: "#E2E8F0", border: "1px solid rgba(74,222,128,0.28)" }}
+                  style={{ background: "var(--ln-coal)", color: "var(--ln-bone)", border: "1px solid rgba(74,222,128,0.28)" }}
                 >
                   {cat}
                 </button>
@@ -440,7 +440,7 @@ export default function DiscoverPage() {
                   key={cat}
                   onClick={() => toast.info(`Filtering by ${cat} coming soon`)}
                   className="px-3 py-1.5 rounded-full text-xs font-medium transition-all"
-                  style={{ background: "var(--ln-coal)", color: "#E2E8F0", border: "1px solid rgba(196,154,40,0.26)" }}
+                  style={{ background: "var(--ln-coal)", color: "var(--ln-bone)", border: "1px solid rgba(196,154,40,0.26)" }}
                 >
                   {cat}
                 </button>
@@ -549,18 +549,18 @@ export default function DiscoverPage() {
                         className="flex-1 min-w-0"
                         onClick={e => e.stopPropagation()}
                       >
-                        <p className="font-semibold text-sm truncate hover:underline" style={{ color: "#FFFFFF", fontFamily: "'Cinzel', serif" }}>{item.song.title}</p>
+                        <p className="font-semibold text-sm truncate hover:underline" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>{item.song.title}</p>
                       </Link>
                       <button
                         onClick={(e) => openMenu(e, item)}
                         className="shrink-0 p-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white/[0.08]"
-                        style={{ color: "rgba(255,255,255,0.55)" }}
+                        style={{ color: "color-mix(in srgb, var(--ln-parchment) 55%, transparent)" }}
                       >
                         <MoreHorizontal size={13} />
                       </button>
                     </div>
                     <Link href={`/creator/${item.creator?.id}`}>
-                      <p className="text-xs truncate mt-0.5 hover:underline" style={{ color: "#E2E8F0" }}>{item.creator?.artistHandle || item.creator?.name || "Unknown"}</p>
+                      <p className="text-xs truncate mt-0.5 hover:underline" style={{ color: "var(--ln-bone)" }}>{item.creator?.artistHandle || item.creator?.name || "Unknown"}</p>
                     </Link>
                     {item.song.genre && <span className="genre-pill mt-1 inline-block">{item.song.genre}</span>}
                   </div>
@@ -664,8 +664,8 @@ export default function DiscoverPage() {
                           <span className="text-2xl font-bold" style={{ color: `#1C1A14`, fontFamily: "'Cinzel', serif" }}>{initial}</span>
                         )}
                       </div>
-                      <p className="text-xs font-semibold truncate" style={{ color: "#FFFFFF", fontFamily: "'Cinzel', serif" }}>{displayName}</p>
-                      <p className="text-xs mt-0.5" style={{ color: "#E2E8F0" }}>{(creator as any).publishedCount ?? 0} track{((creator as any).publishedCount ?? 0) !== 1 ? "s" : ""}</p>
+                      <p className="text-xs font-semibold truncate" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>{displayName}</p>
+                      <p className="text-xs mt-0.5" style={{ color: "var(--ln-bone)" }}>{(creator as any).publishedCount ?? 0} track{((creator as any).publishedCount ?? 0) !== 1 ? "s" : ""}</p>
                       {creator.licenseStatus === "licensed" && (
                         <Badge className="mt-1" style={{ background: "rgba(196,154,40,0.15)", color: "var(--ln-gold)", fontSize: "9px" }}>Licensed</Badge>
                       )}
@@ -686,8 +686,8 @@ export default function DiscoverPage() {
           ].map(({ icon: Icon, title, desc }) => (
             <div key={title} className="rounded-xl p-6" style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.12)" }}>
               <Icon className="w-6 h-6 mb-3" style={{ color: "var(--ln-gold)" }} />
-              <h3 className="font-semibold mb-2" style={{ fontFamily: "'Cinzel', serif", color: "#FFFFFF" }}>{title}</h3>
-              <p className="text-sm" style={{ color: "#E2E8F0" }}>{desc}</p>
+              <h3 className="font-semibold mb-2" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>{title}</h3>
+              <p className="text-sm" style={{ color: "var(--ln-bone)" }}>{desc}</p>
             </div>
           ))}
         </div>
@@ -699,10 +699,10 @@ export default function DiscoverPage() {
               <Star size={14} />
               Founding Creators
             </Link>
-            <Link href="/explore" className="text-sm opacity-50 hover:opacity-80 transition-all" style={{ color: "#E2E8F0" }}>
+            <Link href="/explore" className="text-sm opacity-50 hover:opacity-80 transition-all" style={{ color: "var(--ln-bone)" }}>
               Explore All Tracks
             </Link>
-            <Link href="/upload" className="text-sm opacity-50 hover:opacity-80 transition-all" style={{ color: "#E2E8F0" }}>
+            <Link href="/upload" className="text-sm opacity-50 hover:opacity-80 transition-all" style={{ color: "var(--ln-bone)" }}>
               Register Your Work
             </Link>
           </div>

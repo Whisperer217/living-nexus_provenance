@@ -54,3 +54,13 @@
 - [x] Locate the Home-page render path that mixes `background` with `backgroundImage` across rerenders: TopBar layered `background` with an optional harmonic `backgroundImage`.
 - [x] Replace the conflicting shorthand with `backgroundColor`, update the transition property, and add a focused TopBar style regression assertion.
 - [x] Validate the Home render path and publish readiness: focused TopBar test passed, isolated Home rerender assertion found no background style conflict, full regression suite passed, and production build passed.
+- [x] Trace the Explore maximum update depth loop to render-phase `useAuth` localStorage writes, which can force external-store rerenders in authenticated route chrome.
+- [x] Stabilize the subscription boundary by moving runtime user synchronization into an idempotent post-commit effect and add focused regression coverage.
+- [x] Move `useAuth` runtime user-info persistence and session marking out of render into an idempotent effect.
+- [x] Validate Explore rendering in an isolated browser with no maximum-depth error; focused test, full regression suite, and production build passed.
+- [x] Validate authenticated `/explore` after the `useAuth` persistence repair: an isolated signed sandbox session loaded the owner user record, rendered the Explore heading, and emitted neither a maximum-update-depth error nor an error boundary.
+- [x] Add and run a working route-level authenticated Explore regression harness that uses the project session SDK, checks persisted user state after commit, captures runtime errors, and clears its sandbox cookie afterward.
+- [x] Review PR #12 (`cursor/pna-unify-legible-0e97`) as the preferred replacement for PR #11: it excludes the floating Keeper chat from `/pna`, preserves the avatar-registry surface, and keeps Keeper NOTES handoff consume-once.
+- [x] Verify PNA mode, NOTES, track-stage, and scholar presentation share the site theme tokens: local chat-skin storage and mode rainbow colors are removed; modes and chat use `--ln-gold`, `--ln-parchment`, `--ln-smoke`, and panel tokens.
+- [x] Merge and publish PR #12 (`0861061e`) after confirming compatibility with the current workspace repair (published checkpoint `92a27be9`); combined route, theme, and authenticated Explore validation completed.
+- [x] Validate PR #12 non-destructively: the `/pna` sign-in workspace gate renders without an error boundary, unified-chat regression coverage passes, and the four-theme browser matrix passes across Home, Manage, Work, Creator, TopBar, and LeftRail.
