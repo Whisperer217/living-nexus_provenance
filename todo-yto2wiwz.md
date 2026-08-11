@@ -64,3 +64,10 @@
 - [x] Verify PNA mode, NOTES, track-stage, and scholar presentation share the site theme tokens: local chat-skin storage and mode rainbow colors are removed; modes and chat use `--ln-gold`, `--ln-parchment`, `--ln-smoke`, and panel tokens.
 - [x] Merge and publish PR #12 (`0861061e`) after confirming compatibility with the current workspace repair (published checkpoint `92a27be9`); combined route, theme, and authenticated Explore validation completed.
 - [x] Validate PR #12 non-destructively: the `/pna` sign-in workspace gate renders without an error boundary, unified-chat regression coverage passes, and the four-theme browser matrix passes across Home, Manage, Work, Creator, TopBar, and LeftRail.
+- [x] Review PR #13 for Surface Map alignment, public redirect safety, and compatibility with the PNA and Explore releases: refreshed branch `8dcfa908` is cleanly mergeable, migration-free, and retains the unified PNA routing and Explore repair foundations.
+- [ ] Verify Explore exposes songs and artists only while marketplace and store redirect to Avatar Registry and TopBar Provenance routes to PNA.
+- [ ] Review the rebuilt Home orientation flow for guest listen/support and signed-in PNA/Register paths.
+- [x] Merge PR #13 (`96e4069d`) after the resolved Home review; regression, route validation, and publication remain pending.
+- [x] Directly verify PR #13’s resolved `HomePage` retains the orientation porch with current authenticated state handling and theme-safe typography.
+- [x] Confirm the resolved Home source uses theme-safe `font-display`, `font-heading`, and `font-body` classes without hardcoded families and exposes loading-aware `ENTER PNA` / `SIGN IN · ENTER PNA` labels before merge.
+- [ ] Verify Home orientation, Explore insulation, and canonical redirect behavior after the resolved PR is merged.
