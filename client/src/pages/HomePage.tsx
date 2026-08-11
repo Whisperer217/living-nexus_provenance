@@ -1,1042 +1,542 @@
-/* ═══════════════════════════════════════════════════════════════════
-   LIVING NEXUS — HomePage v3
-   Layout hierarchy:
-     1. Hero — emotional headline + CTAs
-     2. Founder's Era block
-     3. WID Trust Layer — counter + Witnessed Voices (8 panels, 2×4 grid)
-     4. Featured Creators — horizontal panning carousel
-     5. Genre filters
-     6. Discover Tracks — side-pane horizontal scroll (2 rows × 12)
-     7. Trending Now — side-pane horizontal scroll (2 rows × 12)
-═══════════════════════════════════════════════════════════════════ */
+/**
+ * Home — Orientation porch (§9 Surface map)
+ * Process, PNA/avatars, limited showcase, Discord, CTAs.
+ * Guests may see, listen, and support. Signed-in enter PNA / Register.
+ */
 
-import { useState, useEffect, useRef, useMemo, useCallback } from "react"; // useRef/useCallback used in AnimatedCounter and WIDTrustLayer
+import { useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { usePlayer } from "@/contexts/PlayerContext";
-import { useAuth } from "@/_core/hooks/useAuth";
-import TipModal from "@/components/TipModal";
-// Card width is now responsive via CSS variable --card-pan-w (see index.css)
-import { Sparkles, ShieldCheck, Upload, Compass, Star, Lock, Fingerprint, Shield, Users, Play, Pause, Heart, DollarSign, Cpu, CheckCircle2, ChevronLeft, ChevronRight, Send, Flame, Layers, Plus } from "lucide-react";
 import { Link } from "wouter";
+import {
+  ShieldCheck, Users, ExternalLink, Play, Music, Heart,
+  Sparkles, Compass, Upload, Fingerprint,
+} from "lucide-react";
+import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
-import { CosmicMediumIcon } from "@/components/CosmicMediumIcon"; // used in WIDTrustLayer
-import { ShowcaseRow } from "@/components/ShowcaseRow";
-import { StoreTrackCard } from "@/components/StoreTrackCard";
-import { StoreCreatorCard } from "@/components/StoreCreatorCard";
+import { usePlayer, type Track } from "@/contexts/PlayerContext";
+import TipModal from "@/components/TipModal";
+import { SKIN_IMAGES } from "@/components/FloatingAvatar";
+import {
+  DISCORD_COMMUNITY_URL,
+  LOOP_PRODUCT,
+  PNA_PRODUCT,
+} from "@/lib/loopProduct";
 
-import { ConstellationReveal } from "@/components/ConstellationReveal";
+type ShowcaseTrack = {
+  id: number;
+  title: string;
+  coverArtUrl: string | null;
+  fileUrl: string | null;
+  genre: string | null;
+  witnessId: string | null;
+  artistHandle: string | null;
+  artistName: string;
+  creatorId: number | undefined;
+  tipsEnabled: boolean;
+};
 
-/** Animated counter that counts up from 0 to `target` over ~1.2 s */
-function AnimatedCounter({ target }: { target: number }) {
-  const [display, setDisplay] = useState(0);
-  const rafRef = useRef<number | null>(null);
-  useEffect(() => {
-    if (target === 0) return;
-    const start = performance.now();
-    const duration = 1200;
-    function step(now: number) {
-      const elapsed = now - start;
-      const progress = Math.min(elapsed / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      setDisplay(Math.round(eased * target));
-      if (progress < 1) rafRef.current = requestAnimationFrame(step);
-    }
-    rafRef.current = requestAnimationFrame(step);
-    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
-  }, [target]);
-  return <span>{display.toLocaleString()}</span>;
+/** Map canonical FeedRow { song, creator } into porch showcase shape. */
+function mapWitnessedVoice(row: any): ShowcaseTrack {
+  const song = row?.song ?? row;
+  const creator = row?.creator ?? null;
+  return {
+    id: song?.id as number,
+    title: (song?.title as string) ?? "Untitled Work",
+    coverArtUrl: (song?.coverArtUrl as string | null) ?? null,
+    fileUrl: (song?.fileUrl as string | null) ?? null,
+    genre: (song?.genre as string | null) ?? null,
+    witnessId: (song?.witnessId as string | null) ?? null,
+    artistHandle: (creator?.artistHandle as string | null) ?? null,
+    artistName: (creator?.artistHandle || creator?.name || "Creator") as string,
+    creatorId: (creator?.id as number | undefined) ?? (song?.userId as number | undefined),
+    tipsEnabled: song?.tipsEnabled !== false,
+  };
 }
 
-/** WID Trust Layer — animated counter + Witnessed Voices (horizontal scroll) */
-function WIDTrustLayer() {
+const PROCESS_STEPS = [
+  {
+    n: "01",
+    title: "Capture",
+    body: "Bring a track, lyric, image, or note into the stewarded workspace.",
+  },
+  {
+    n: "02",
+    title: "Steward",
+    body: "PNA modes guide intent — Guide, Witness, Compose, Registry, Archive.",
+  },
+  {
+    n: "03",
+    title: "Seal",
+    body: "Mint a Witness ID. Optional diary seal (WID-CNV) for threads and notes.",
+  },
+  {
+    n: "04",
+    title: "Register",
+    body: "Choose Draft or Published. The registry holds the chain of record.",
+  },
+  {
+    n: "05",
+    title: "Discover",
+    body: "Explore finds songs and artists. Creators meet through attributed work.",
+  },
+];
+
+const AVATAR_PREVIEWS = [
+  { id: "hooded-scholar", name: "Hooded Scholar" },
+  { id: "conductor", name: "The Conductor" },
+  { id: "witness", name: "The Witness" },
+  { id: "archivist", name: "The Archivist" },
+  { id: "cipher", name: "The Cipher" },
+] as const;
+
+export default function HomePage() {
+  const { isAuthenticated } = useAuth();
+  const { addAndPlay } = usePlayer();
+  const [tipTarget, setTipTarget] = useState<Track | null>(null);
+
   const { data: countData } = trpc.songs.getWitnessedCount.useQuery(undefined, {
-    staleTime: 60_000,
+    staleTime: 120_000,
     refetchOnWindowFocus: false,
   });
   const { data: voices } = trpc.songs.getWitnessedVoices.useQuery(undefined, {
-    staleTime: 60_000,
+    staleTime: 120_000,
     refetchOnWindowFocus: false,
   });
-  const { data: mediumCounts } = trpc.songs.getCountsByContentType.useQuery(undefined, {
-    staleTime: 60_000,
-    refetchOnWindowFocus: false,
-  });
-  const { addAndPlay, playQueueAt, togglePlay, openNowPlayingPanel, currentTrackId, state } = usePlayer();
-
-  const total = countData?.count ?? 0;
-
-  // Build a stable queue from all witnessed voices for ordered playback
-  const voiceQueue = (voices ?? []).slice(0, 10).map((v: any) => ({
-    id: String(v.songId),
-    title: v.title,
-    artist: v.artistHandle || v.userName,
-    artUrl: v.coverArtUrl || undefined,
-    audioUrl: v.fileUrl || "",
-    witnessId: v.witnessId || undefined,
-    genre: v.genre || "",
-  }));
-
-  const handleVoicePlay = (songId: number) => {
-    // If this track is already active, toggle play/pause instead of restarting
-    if (currentTrackId === String(songId)) {
-      togglePlay();
-      openNowPlayingPanel();
-      return;
-    }
-    if (voiceQueue.length > 1) {
-      const startIdx = voiceQueue.findIndex((t: { id: string }) => t.id === String(songId));
-      playQueueAt(voiceQueue, startIdx >= 0 ? startIdx : 0, "HOME");
-    } else if (voiceQueue.length === 1) {
-      addAndPlay(voiceQueue[0]);
-    }
-    openNowPlayingPanel();
-  };
-
-  return (
-    <div className="px-6 pt-4 pb-6 space-y-4 overflow-hidden">
-      {/* ── Animated WID counter ── */}
-      <div
-        className="flex items-center gap-4 rounded-2xl px-5 py-4"
-        style={{
-          background: "var(--ln-obsidian)",
-          border: "1px solid rgba(196,154,40,0.20)",
-          boxShadow: "0 2px 12px rgba(0,0,0,0.50)",
-        }}
-      >
-        <div
-          className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-          style={{ background: "rgba(196,154,40,0.08)", border: "1px solid rgba(196,154,40,0.22)" }}
-        >
-          <Shield size={18} style={{ color: "var(--ln-gold)" }} />
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="museum-section-title mb-0.5">
-            Works Witnessed
-          </p>
-          <p className="font-display text-[22px] leading-none" style={{ color: "var(--ln-parchment)" }}>
-            <AnimatedCounter target={total} />
-            <span className="text-[14px] ml-1.5 font-body" style={{ color: "var(--ln-smoke)" }}>and counting</span>
-          </p>
-        </div>
-        <Link href="/verify">
-          <button
-            className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-heading tracking-wide transition-all hover:brightness-110"
-            style={{
-              background: "rgba(196,154,40,0.06)",
-              border: "1px solid rgba(196,154,40,0.22)",
-              color: "#C49A28",
-            }}
-          >
-            <Fingerprint size={12} />
-            Verify WID
-          </button>
-        </Link>
-      </div>
-
-      {/* ── Witnessed Works by Medium — Cosmic Edition ── */}
-      <div
-        className="rounded-2xl px-5 py-4 relative overflow-hidden"
-        style={{
-          background: "var(--ln-obsidian)",
-          border: "1px solid rgba(196,154,40,0.15)",
-          boxShadow: "0 2px 12px rgba(0,0,0,0.50)",
-        }}
-      >
-        {/* Deep space background shimmer */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background: "radial-gradient(ellipse at 20% 50%, rgba(196,154,40,0.04) 0%, transparent 60%), radial-gradient(ellipse at 80% 50%, rgba(196,154,40,0.03) 0%, transparent 60%)",
-          }}
-        />
-        <p
-          className="museum-section-title mb-3 relative"
-        >
-          Witnessed Works
-        </p>
-        <div className="grid grid-cols-1 gap-2 relative">
-          {([
-            { medium: "audio" as const, count: mediumCounts?.audio ?? 0 },
-          ]).map(({ medium, count }) => (
-            <CosmicMediumIcon
-              key={medium}
-              medium={medium}
-              size={36}
-              card
-              count={count > 0 ? count.toLocaleString() : "—"}
-            />
-          ))}
-        </div>
-        <p className="text-[10px] mt-3 relative museum-caption" style={{ fontSize: "0.6875rem" }}>
-          Music provenance. One WID engine. Sealed at the moment of creation.
-        </p>
-      </div>
-
-      {/* ── Witnessed Voices — horizontal scroll row ── */}
-      {voices && voices.length > 0 && (
-        <div>
-          <div className="flex items-center justify-between mb-3">
-            <p className="museum-section-title">
-              Witnessed Voices
-            </p>
-            <Link href="/explore">
-              <span className="text-[11px] font-body cursor-pointer transition-colors hover:text-[#C49A28]" style={{ color: "var(--ln-smoke)" }}>
-                See all
-              </span>
-            </Link>
-          </div>
-          {/* Horizontal scroll container — negative margin to break out of px-6 padding */}
-          <div
-            className="museum-pan-row -mx-6 px-6"
-            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-          >
-            {voices.slice(0, 10).map((v: any) => (
-              <div
-                key={v.songId}
-                className="relative flex-shrink-0 rounded-2xl overflow-hidden cursor-pointer group"
-                style={{
-                  width: "148px",
-                  height: "196px",
-                  background: "var(--ln-obsidian)",
-                  border: "1px solid rgba(196,154,40,0.12)",
-                  boxShadow: "0 4px 24px rgba(0,0,0,0.70)",
-                }}
-              >
-                {/* Cover art */}
-                {v.coverArtUrl ? (
-                  <img
-                    src={v.coverArtUrl}
-                    alt={v.title}
-                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                ) : (
-                  <div className="absolute inset-0 flex items-center justify-center"
-                    style={{ background: "var(--ln-obsidian)" }}>
-                    <Fingerprint size={28} style={{ color: "rgba(196,154,40,0.25)" }} />
-                  </div>
-                )}
-
-                {/* Gradient overlay — bottom 65% */}
-                <div className="absolute inset-0"
-                  style={{ background: "linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.30) 50%, transparent 100%)" }}
-                />
-
-                {/* WID badge — top left */}
-                <div
-                  className="absolute top-2 left-2 flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[8px] font-mono font-bold z-10"
-                  style={{
-                    background: "rgba(196,154,40,0.10)",
-                    border: "1px solid rgba(196,154,40,0.35)",
-                    color: "#C49A28",
-                    backdropFilter: "blur(6px)",
-                  }}
-                >
-                  <Fingerprint size={8} />
-                  WID
-                </div>
-
-                {/* Creator avatar — top right */}
-                {v.profilePhotoUrl && (
-                  <img
-                    src={v.profilePhotoUrl}
-                    alt={v.artistHandle || v.userName}
-                    className="absolute top-2 right-2 w-7 h-7 rounded-full object-cover z-10"
-                    style={{ border: "1.5px solid rgba(196,154,40,0.35)" }}
-                  />
-                )}
-
-                {/* Play/Pause button — center, appears on hover/tap or when active */}
-                {(() => {
-                  const isVoiceActive = currentTrackId === String(v.songId);
-                  const isVoicePlaying = isVoiceActive && state.isPlaying;
-                  return (
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        handleVoicePlay(v.songId);
-                      }}
-                      className={`absolute inset-0 flex items-center justify-center z-20 transition-opacity duration-200 ${
-                        isVoiceActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-                      }`}
-                      style={{ background: "rgba(0,0,0,0.15)" }}
-                    >
-                      <div
-                        className="w-12 h-12 rounded-full flex items-center justify-center transition-transform active:scale-90"
-                        style={{
-                          background: isVoiceActive ? "rgba(196,154,40,0.22)" : "#0A0A0A",
-                          border: isVoiceActive ? "2px solid rgba(196,154,40,0.9)" : "none",
-                          boxShadow: isVoiceActive ? "0 0 0 6px rgba(196,154,40,0.15), 0 0 24px rgba(196,154,40,0.4)" : "0 0 24px rgba(196,154,40,0.30)",
-                          animation: isVoicePlaying ? "pulse-gold 1.8s ease-in-out infinite" : "none",
-                        }}
-                      >
-                        {isVoicePlaying ? (
-                          <div className="live-wave scale-[0.65]"><span /><span /><span /></div>
-                        ) : (
-                          <Play size={20} fill="#C9A84C" style={{ color: "#C9A84C", marginLeft: "2px" }} />
-                        )}
-                      </div>
-                    </button>
-                  );
-                })()}
-
-                {/* Navigate to song page on card tap */}
-                <Link href={`/song/${v.songId}`}>
-                  <div className="absolute inset-0 z-10" />
-                </Link>
-
-                {/* Title + creator name — bottom */}
-                <div className="absolute bottom-0 left-0 right-0 px-3 pb-3 z-20 pointer-events-none">
-                  <p className="font-heading text-[11px] leading-tight truncate text-white">
-                    {v.title}
-                  </p>
-                  <div className="flex items-center gap-1.5 mt-1">
-                    {!v.profilePhotoUrl && (
-                      <div className="w-4 h-4 rounded-full flex-shrink-0"
-                        style={{ background: "rgba(196,154,40,0.15)" }} />
-                    )}
-                    <p className="font-body text-[9px] truncate" style={{ color: "var(--ln-smoke)" }}>
-                      {v.artistHandle || v.userName}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-/** Featured Creators horizontal carousel */
-function FeaturedCreatorsCarousel() {
-  const { data: creators } = trpc.profile.featuredCreators.useQuery(undefined, {
+  const { data: featuredCreators } = trpc.profile.featuredCreators.useQuery(undefined, {
     staleTime: 120_000,
     refetchOnWindowFocus: false,
   });
 
-  if (!creators || creators.length === 0) return null;
+  useEffect(() => {
+    document.title = "Living Nexus — Provenance-first music for creators";
+  }, []);
 
-  return (
-    <div className="px-6 pb-6 overflow-hidden">
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="museum-section-title">
-          <Users size={13} className="inline mr-1.5 opacity-70" />
-          Creators
-        </h2>
-        <Link href="/explore">
-          <span className="text-[11px] font-body cursor-pointer transition-colors hover:text-[#C49A28]" style={{ color: "var(--ln-smoke)" }}>
-            See all
-          </span>
-        </Link>
-      </div>
-      <div
-        className="museum-pan-row"
-        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-      >
-        {creators.map((creator: any) => (
-          <Link key={creator.id} href={`/creator/${creator.id}`}>
-            <div
-              className="flex-shrink-0 flex flex-col items-center gap-2 p-3 rounded-2xl cursor-pointer transition-all hover:scale-105"
-              style={{
-                width: "88px",
-                background: "#0A0A0A",
-                border: "1px solid rgba(196,154,40,0.12)",
-              }}
-            >
-              <div className="relative w-12 h-12 rounded-full overflow-hidden flex-shrink-0"
-                style={{ border: "2px solid rgba(196,154,40,0.20)" }}>
-                {creator.profilePhotoUrl ? (
-                  <img src={creator.profilePhotoUrl} alt={creator.name} className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-[16px] font-bold"
-                    style={{ background: "rgba(196,154,40,0.10)", color: "#C49A28" }}>
-                    {(creator.artistHandle || creator.name || "?")[0].toUpperCase()}
-                  </div>
-                )}
-              </div>
-              <div className="text-center min-w-0 w-full">
-                <p className="font-heading text-[10px] truncate w-full" style={{ color: "var(--ln-parchment)" }}>
-                  {creator.artistHandle || creator.name}
-                </p>
-                <p className="font-body text-[9px] mt-0.5" style={{ color: "var(--ln-smoke)" }}>
-                  {creator.publishedCount ?? 0} tracks
-                </p>
-              </div>
-            </div>
-          </Link>
-        ))}
-      </div>
-    </div>
+  const showcaseTracks = useMemo(
+    () => (voices ?? []).map(mapWitnessedVoice).filter((v: ShowcaseTrack) => v.id != null).slice(0, 6),
+    [voices],
   );
-}
+  const creators = useMemo(() => {
+    const list = Array.isArray(featuredCreators) ? featuredCreators : [];
+    return list.slice(0, 6);
+  }, [featuredCreators]);
 
-/** New Voices — recently joined creators who have published at least one track.
- *  Excludes any creator already shown in FeaturedCreatorsCarousel to prevent duplicates. */
-function NewVoicesCarousel() {
-  const { data: allRecent } = trpc.profile.recentCreators.useQuery(
-    { limit: 20 },
-    { staleTime: 120_000, refetchOnWindowFocus: false }
-  );
-  const { data: featured } = trpc.profile.featuredCreators.useQuery(undefined, {
-    staleTime: 120_000,
-    refetchOnWindowFocus: false,
-  });
-  // Build a set of IDs already shown in the Featured row
-  const featuredIds = new Set((featured ?? []).map((c: any) => c.id as number));
-  // Only show creators NOT already in the Featured row, capped at 10
-  const creators = (allRecent ?? []).filter((c: any) => !featuredIds.has(c.id)).slice(0, 10);
-  if (creators.length === 0) return null;
-  return (
-    <div className="px-6 pb-6 overflow-hidden">
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="museum-section-title">
-          <Sparkles size={13} className="inline mr-1.5" style={{ color: "var(--ln-seal-bright)" }} />
-          New Voices
-        </h2>
-        <Link href="/explore">
-          <span className="text-[11px] font-body cursor-pointer transition-colors hover:text-[#C49A28]" style={{ color: "var(--ln-smoke)" }}>
-            See all
-          </span>
-        </Link>
-      </div>
-      <div
-        className="museum-pan-row"
-        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-      >
-        {creators.map((creator: any) => (
-          <Link key={creator.id} href={`/creator/${creator.id}`}>
-            <div
-              className="flex-shrink-0 flex flex-col items-center gap-2 p-3 rounded-2xl cursor-pointer transition-all hover:scale-105"
-              style={{
-                width: "88px",
-                background: "rgba(17,16,9,0.7)",
-                border: "1px solid rgba(58,138,86,0.15)",
-              }}
-            >
-              <div className="relative w-12 h-12 rounded-full overflow-hidden flex-shrink-0"
-                style={{ border: "2px solid rgba(74,222,128,0.35)" }}>
-                {creator.profilePhotoUrl ? (
-                  <img src={creator.profilePhotoUrl} alt={creator.name} className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-[16px] font-bold"
-                    style={{ background: "rgba(58,138,86,0.15)", color: "var(--ln-seal-bright)" }}>
-                    {(creator.artistHandle || creator.name || "?")[0].toUpperCase()}
-                  </div>
-                )}
-                {/* NEW badge */}
-                <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full flex items-center justify-center"
-                  style={{ background: "var(--ln-seal-bright)", border: "1.5px solid #000000" }}>
-                  <Sparkles size={8} style={{ color: "#000000" }} />
-                </div>
-              </div>
-              <div className="text-center min-w-0 w-full">
-                <p className="font-heading text-[10px] truncate w-full" style={{ color: "var(--ln-parchment)" }}>
-                  {creator.artistHandle || creator.name}
-                </p>
-                <p className="font-body text-[9px] mt-0.5" style={{ color: "rgba(74,222,128,0.75)" }}>New</p>
-              </div>
-            </div>
-          </Link>
-        ))}
-      </div>
-    </div>
-  );
-}
+  const enterPnaHref = isAuthenticated ? "/pna" : getLoginUrl("/pna");
+  const registerHref = isAuthenticated ? "/manifest" : getLoginUrl("/manifest");
 
-/** Horizontal 2-row track grid — accepts pre-fetched like data to avoid per-card queries */
-function ShowcaseSection() {
-  const newInput = useMemo(() => ({ limit: 16 }), []);
-  const { data: newRaw, isLoading: newLoading } = trpc.songs.newThisWeek.useQuery(newInput, { staleTime: 60_000, refetchOnWindowFocus: false });
-  const trendInput = useMemo(() => ({ limit: 16 }), []);
-  const { data: trendRaw, isLoading: trendLoading } = trpc.songs.trending.useQuery(trendInput, { staleTime: 60_000, refetchOnWindowFocus: false });
-  const { data: creators, isLoading: creatorsLoading } = trpc.profile.featuredCreators.useQuery(undefined, { staleTime: 120_000, refetchOnWindowFocus: false });
-  const { data: voicesRaw } = trpc.songs.getWitnessedVoices.useQuery(undefined, { staleTime: 60_000, refetchOnWindowFocus: false });
-
-  const newSongs = useMemo(() => (newRaw ?? []).map(mapToSongData), [newRaw]);
-  const trendSongs = useMemo(() => (trendRaw ?? []).map(mapToSongData), [trendRaw]);
-  // getWitnessedVoices now returns canonical FeedRow { song, creator } — same shape as newRaw/trendRaw
-  const voiceSongs = useMemo(() => (voicesRaw ?? []).map(mapToSongData), [voicesRaw]);
-
-  const hasNew = newSongs.length > 0;
-  const hasTrend = trendSongs.length > 0;
-  const hasCreators = (creators ?? []).length > 0;
-  const hasVoices = voiceSongs.length > 0;
-
-  // While queries are still in-flight, show skeleton rows so the section is
-  // always present in the DOM — never silently invisible.
-  const isAnyLoading = newLoading || trendLoading || creatorsLoading;
-  if (!hasNew && !hasTrend && !hasCreators && !hasVoices && !isAnyLoading) return null;
-
-  // Loading skeleton — two rows of 6 placeholder cards each
-  if (isAnyLoading && !hasNew && !hasTrend && !hasCreators && !hasVoices) {
-    return (
-      <div className="px-4 pt-10 pb-6">
-        {["New Arrivals", "Trending This Week"].map((title) => (
-          <div key={title} className="mb-10">
-            <div className="flex items-center justify-between mb-4 px-1">
-              <div className="h-5 w-36 bg-white/10 rounded animate-pulse" />
-              <div className="h-4 w-16 bg-white/10 rounded animate-pulse" />
-            </div>
-            <div className="flex gap-3 overflow-hidden">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="flex-none w-40 aspect-[2/3] bg-white/5 rounded-lg animate-pulse" style={{ animationDelay: `${i * 80}ms` }} />
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-    );
-  }
-
-  return (
-    <div className="px-4 pt-10 pb-6">
-      {hasNew && (
-        <ShowcaseRow title="New Arrivals" seeAllHref="/explore?sort=new">
-          {newSongs.map((song: ReturnType<typeof mapToSongData>, idx: number) => (
-            <StoreTrackCard key={song.id} song={song} size="md" allSongs={newSongs} songIndex={idx} isNew />
-          ))}
-        </ShowcaseRow>
-      )}
-      {hasTrend && (
-        <ShowcaseRow title="Trending This Week" seeAllHref="/explore">
-          {trendSongs.map((song: ReturnType<typeof mapToSongData>, idx: number) => (
-            <StoreTrackCard key={song.id} song={song} size="md" allSongs={trendSongs} songIndex={idx} />
-          ))}
-        </ShowcaseRow>
-      )}
-      {hasCreators && (
-        <ShowcaseRow title="Featured Creators" seeAllHref="/explore?view=creators">
-          {(creators as any[]).map((creator: any) => (
-            <StoreCreatorCard key={creator.id} creator={creator} />
-          ))}
-        </ShowcaseRow>
-      )}
-      {hasVoices && (
-        <ShowcaseRow title="Recently Witnessed" seeAllHref="/explore">
-          {voiceSongs.map((song: (typeof voiceSongs)[number], idx: number) => (
-            <StoreTrackCard key={song.id} song={song} size="md" allSongs={voiceSongs} songIndex={idx} />
-          ))}
-        </ShowcaseRow>
-      )}
-    </div>
-  );
-}
-
-/* ─── Cinematic Hero — live trending work, golden-ratio height ─────────────── */
-const FALLBACK_HERO_IMG = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663123503966/CikRjojXDGlVnusc.png";
-
-function CinematicHero({ isAuthenticated, getLoginUrl: getLogin }: { isAuthenticated: boolean; getLoginUrl: (path?: string) => string }) {
-  const heroInput = useMemo(() => ({ limit: 1 }), []);
-  const { data: trendingRaw } = trpc.songs.trending.useQuery(heroInput, {
-    staleTime: 120_000,
-    refetchOnWindowFocus: false,
-  });
-  const { addAndPlay } = usePlayer();
-
-  const hero = useMemo(() => {
-    const row = (trendingRaw ?? [])[0];
-    if (!row) return null;
-    const song = (row as any).song ?? row;
-    const creator = (row as any).creator ?? null;
-    return {
-      id: song.id as number,
-      title: song.title as string ?? "Untitled Work",
-      coverArtUrl: (song.coverArtUrl as string | null) ?? null,
-      fileUrl: (song.fileUrl as string | null) ?? null,
-      genre: (song.genre as string | null) ?? null,
-      witnessId: (song.witnessId as string | null) ?? null,
-      contentType: (song.contentType as string) ?? "audio",
-      artistHandle: creator?.artistHandle ?? null,
-      artistName: creator?.name ?? null,
-      profilePhotoUrl: creator?.profilePhotoUrl ?? null,
-      userId: song.userId as number | null ?? null,
-    };
-  }, [trendingRaw]);
-
-  const imgSrc = hero?.coverArtUrl ?? FALLBACK_HERO_IMG;
-  const hasAudio = !!hero?.fileUrl;
-
-  const handlePlay = (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (!hero || !hasAudio) return;
-    addAndPlay({
-      id: String(hero.id),
-      title: hero.title,
-      artist: hero.artistHandle || hero.artistName || "Unknown",
-      genre: hero.genre || "",
-      audioUrl: hero.fileUrl || undefined,
-      artUrl: hero.coverArtUrl || undefined,
-      witnessId: hero.witnessId || undefined,
-      creatorHandle: hero.artistHandle || undefined,
-      creatorId: hero.userId || undefined,
-      contentType: (hero.contentType as any) || "audio",
+  const openTip = (v: ShowcaseTrack) => {
+    setTipTarget({
+      id: String(v.id),
+      title: v.title,
+      artist: v.artistName,
+      genre: v.genre || "",
+      artUrl: v.coverArtUrl || undefined,
+      audioUrl: v.fileUrl || undefined,
+      witnessId: v.witnessId || undefined,
+      creatorHandle: v.artistHandle || undefined,
+      creatorId: v.creatorId,
+      tipsEnabled: v.tipsEnabled,
     });
   };
 
   return (
-    <div
-      className="hero-phi relative overflow-hidden"
-      style={{ background: "var(--ln-obsidian)" }}
-    >
-      {/* Full-bleed artwork */}
-      <div className="absolute inset-0">
-        <img
-          src={imgSrc}
-          alt=""
-          aria-hidden="true"
-          className="w-full h-full object-cover"
-          style={{ filter: "brightness(0.58) saturate(1.22)", transform: "scale(1.04)", transformOrigin: "center center" }}
-        />
-      </div>
-
-      {/* Layered scrims — deeper cinematic left-heavy + bottom */}
-      <div
-        className="absolute inset-0 pointer-events-none hero-cinematic-scrim"
-      />
-
-      {/* Sacred geometry border frame — stronger gold corona */}
-      <div
-        className="absolute inset-0 pointer-events-none z-10"
-        style={{
-          boxShadow: "inset 0 0 0 1px rgba(196,154,40,0.14), inset 0 0 120px rgba(196,154,40,0.08), inset 0 0 240px rgba(196,154,40,0.03)",
-        }}
-      />
-
-      {/* Corner vignette — deeper */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background: "radial-gradient(ellipse 110% 110% at 50% 50%, transparent 28%, rgba(0,0,0,0.40) 68%, rgba(0,0,0,0.75) 100%)",
-        }}
-      />
-
-      {/* Sacred corner brackets — all four corners */}
-      {/* Top-left */}
-      <div className="absolute top-5 left-5 z-20 pointer-events-none" style={{ width: 28, height: 28, borderTop: "1.5px solid rgba(196,154,40,0.55)", borderLeft: "1.5px solid rgba(196,154,40,0.55)" }} />
-      {/* Top-right */}
-      <div className="absolute top-5 right-5 z-20 pointer-events-none" style={{ width: 28, height: 28, borderTop: "1.5px solid rgba(196,154,40,0.55)", borderRight: "1.5px solid rgba(196,154,40,0.55)" }} />
-      {/* Bottom-left */}
-      <div className="absolute bottom-5 left-5 z-20 pointer-events-none" style={{ width: 28, height: 28, borderBottom: "1.5px solid rgba(196,154,40,0.55)", borderLeft: "1.5px solid rgba(196,154,40,0.55)" }} />
-      {/* Bottom-right */}
-      <div className="absolute bottom-5 right-5 z-20 pointer-events-none" style={{ width: 28, height: 28, borderBottom: "1.5px solid rgba(196,154,40,0.55)", borderRight: "1.5px solid rgba(196,154,40,0.55)" }} />
-
-      {/* Content — anchored to lower 38.2% (golden ratio) */}
-      <div className="hero-phi-content relative z-20">
-        {/* Work title — dominant */}
-        {hero ? (
-          <>
-            {/* Eyebrow — content type + genre */}
-            <div className="flex items-center gap-2 mb-2">
-              <span
-                className="text-[9px] font-heading tracking-[0.22em] uppercase px-2 py-0.5 rounded"
-                style={{
-                  background: "rgba(196,154,40,0.12)",
-                  border: "1px solid rgba(196,154,40,0.28)",
-                  color: "#C49A28",
-                }}
-              >
-                {hero.contentType === "audio" ? "Music" :
-                 hero.contentType === "lyrics" ? "Lyrics" :
-                 hero.contentType === "manuscript" ? "Manuscript" :
-                 hero.contentType === "comic" ? "Comic" : hero.contentType}
-              </span>
-              {hero.genre && (
-                <span className="text-[9px] font-heading tracking-[0.15em] uppercase" style={{ color: "rgba(196,154,40,0.55)" }}>
-                  {hero.genre}
-                </span>
-              )}
-              {hero.witnessId && (
-                <div
-                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-full"
-                  style={{
-                  background: "rgba(196,154,40,0.14)",
-                  border: "1px solid rgba(196,154,40,0.55)",
-                  backdropFilter: "blur(12px)",
-                  boxShadow: "0 0 14px rgba(196,154,40,0.22), 0 0 0 1px rgba(196,154,40,0.08), inset 0 1px 0 rgba(255,220,100,0.24)",
-                  }}
-                >
-                  <Shield className="w-3 h-3" style={{ color: "#D4A843", filter: "drop-shadow(0 0 5px rgba(196,154,40,0.65))" }} />
-                  <span className="text-[9px] font-heading tracking-[0.20em] uppercase" style={{ color: "#D4A843", textShadow: "0 0 10px rgba(196,154,40,0.60)" }}>
-                    WID Witnessed
-                  </span>
-                </div>
-              )}
-            </div>
-
-            {/* Work title — the creation, dominant */}
-            <h1
-              className="font-display leading-tight mb-2"
-              style={{
-                fontSize: "clamp(1.6rem, 5vw, 3rem)",
-                color: "var(--ln-parchment)",
-                textShadow: "0 2px 32px rgba(0,0,0,0.70)",
-                maxWidth: "22ch",
-              }}
-            >
-              {hero.title}
-            </h1>
-
-            {/* Creator — secondary, whispered */}
-            <div className="flex items-center gap-2 mb-5">
-              {hero.profilePhotoUrl ? (
-                <img
-                  src={hero.profilePhotoUrl}
-                  alt=""
-                  className="w-5 h-5 rounded-full object-cover flex-shrink-0"
-                  style={{ border: "1px solid rgba(196,154,40,0.25)" }}
-                />
-              ) : (
-                <div
-                  className="w-5 h-5 rounded-full flex-shrink-0"
-                  style={{ background: "rgba(196,154,40,0.10)", border: "1px solid rgba(196,154,40,0.18)" }}
-                />
-              )}
-              <span
-                className="font-heading text-[11px] tracking-[0.08em]"
-                style={{ color: "rgba(196,154,40,0.70)" }}
-              >
-                {hero.artistHandle ? `@${hero.artistHandle}` : (hero.artistName || "Unknown Creator")}
-              </span>
-            </div>
-
-            {/* CTAs */}
-            <div className="flex flex-wrap gap-3">
-              {hasAudio && (
-                <button
-                  onClick={handlePlay}
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-heading font-bold text-[12px] tracking-wide transition-all active:scale-95 hover:brightness-110"
-                  style={{ background: "#C49A28", color: "#0A0806", boxShadow: "0 2px 20px rgba(196,154,40,0.38), inset 0 1px 0 rgba(255,240,160,0.20)" }}
-                >
-                  <Play className="w-3.5 h-3.5 fill-current" />
-                  Play Now
-                </button>
-              )}
-              <Link href={`/song/${hero.id}`}>
-                <button
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-heading font-bold text-[12px] tracking-wide transition-all active:scale-95 hover:brightness-110"
-                  style={{
-                    background: "rgba(196,154,40,0.10)",
-                    border: "1px solid rgba(196,154,40,0.45)",
-                    color: "#D4A843",
-                    boxShadow: "0 0 16px rgba(196,154,40,0.14), inset 0 1px 0 rgba(255,220,100,0.18)",
-                  }}
-                >
-                  <Shield className="w-3.5 h-3.5" />
-                  Witness This Work
-                </button>
-              </Link>
-              <Link href={isAuthenticated ? "/upload" : getLogin("/upload")}>
-                <button
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-heading font-bold text-[12px] tracking-wide transition-all active:scale-95 hover:brightness-110"
-                  style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.10)", color: "rgba(220,210,190,0.70)" }}
-                >
-                  <Upload className="w-3.5 h-3.5" />
-                  Register Yours
-                </button>
-              </Link>
-            </div>
-          </>
-        ) : (
-          /* Skeleton while loading */
-          <>
-            <div className="h-3 w-24 rounded mb-3 animate-pulse" style={{ background: "rgba(196,154,40,0.12)" }} />
-            <div className="h-10 w-64 rounded mb-2 animate-pulse" style={{ background: "rgba(255,255,255,0.06)" }} />
-            <div className="h-4 w-40 rounded mb-5 animate-pulse" style={{ background: "rgba(255,255,255,0.04)" }} />
-            <div className="flex gap-3">
-              <div className="h-10 w-28 rounded-xl animate-pulse" style={{ background: "rgba(196,154,40,0.10)" }} />
-              <div className="h-10 w-28 rounded-xl animate-pulse" style={{ background: "rgba(255,255,255,0.04)" }} />
-            </div>
-          </>
-        )}
-      </div>
-
-      {/* "Trending #1" badge — top right */}
-      {hero && (
-        <div
-          className="absolute top-4 right-4 z-30 flex items-center gap-1.5 px-3 py-1.5 rounded-full"
-          style={{
-            background: "rgba(0,0,0,0.55)",
-            border: "1px solid rgba(196,154,40,0.25)",
-            backdropFilter: "blur(8px)",
-          }}
-        >
-          <Flame className="w-3 h-3" style={{ color: "var(--ln-gold)" }} />
-          <span className="text-[10px] font-heading tracking-[0.12em] uppercase" style={{ color: "rgba(196,154,40,0.85)" }}>
-            Trending #1
-          </span>
-        </div>
-      )}
-    </div>
-  );
-}
-
-/** Map a { song, creator } row from the API into the flat SongData shape StoreTrackCard expects */
-function mapToSongData(row: any) {
-  const song = row.song ?? row;
-  const creator = row.creator ?? null;
-  return {
-    id: typeof song.id === "string" ? parseInt(song.id, 10) : (song.id as number),
-    title: song.title ?? "Untitled Work",
-    coverArtUrl: song.coverArtUrl ?? null,
-    artistName: creator?.artistHandle || creator?.name || "Unknown Creator",
-    genre: song.genre ?? null,
-    wid: song.witnessId ?? null,
-    widShort: null,
-    playCount: song.playCount ?? null,
-    fileUrl: song.fileUrl ?? null,
-    duration: song.durationSeconds ?? null,
-    userId: song.userId ?? null,
-    artistHandle: creator?.artistHandle ?? null,
-    profilePhotoUrl: creator?.profilePhotoUrl ?? null,
-    aiDisclosure: song.aiDisclosure ?? null,
-    contentType: song.contentType ?? "audio",
-    // Testimony fields
-    description: song.description ?? null,
-    lyricsText: song.lyricsText ?? null,
-    totalFundingCents: song.totalFundingCents ?? null,
-    tipCount: song.tipCount ?? null,
-  };
-}
-
-const GENRE_CARDS = [
-  { label: "All",        icon: null,    color: "#A78BFA" },
-  { label: "Ambient",    icon: "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/icon-book_038e31c9.png",      color: "#7dd3fc" },
-  { label: "Gospel",    icon: "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/icon-cross_39407625.png",     color: "#fbbf24" },
-  { label: "Jazz",      icon: "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/icon-lyre_40247746.png",      color: "#c4b5fd" },
-  { label: "Electronic",icon: "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/icon-fire-lyre_42893087.png", color: "#f97316" },
-  { label: "Hip-Hop",   icon: "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/icon-eye_0e10b572.png",      color: "#fb923c" },
-  { label: "Rock",      icon: "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/icon-guitar_41a22a6e.png",    color: "#f87171" },
-  { label: "R&B",       icon: "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/icon-feather_40dcaa6d.png",   color: "#a78bfa" },
-  { label: "Metal",     icon: "https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr/icon-guitar_41a22a6e.png",    color: "#ef4444" },
-];
-
-const HERO_IMG = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663123503966/CikRjojXDGlVnusc.png";
-
-export default function HomePage() {
-  const { isAuthenticated, user } = useAuth();
-
-  // Belt-and-suspenders: set document.title via JS so SEO tools that check
-  // the JS-rendered title see the correct 30-60 char value
-  useEffect(() => {
-    document.title = "Loop — Music Provenance | Living Nexus";
-  }, []);
-
-  const [tipTarget, setTipTarget] = useState<any | null>(null);
-  const [tipRect, setTipRect] = useState<DOMRect | null>(null);
-  const tipTrack = tipTarget ?? null;
-
-  return (
     <>
       <Helmet>
-        <title>Loop — Music Provenance | Living Nexus</title>
-        <meta name="description" content="Loop is Living Nexus music provenance. Register tracks with cryptographic Witness IDs — timestamped, attributed, and protected before your work touches any other platform." />
-        <meta name="keywords" content="music provenance, witness ID, WID, music attribution, creator rights, Loop, Living Nexus" />
+        <title>Living Nexus — Provenance-first music for creators</title>
+        <meta
+          name="description"
+          content="Orientation to Living Nexus: Witness IDs, Provenance Nexus Avatar, Explore songs & artists, and a stewarded creator OS. Guests can listen and support."
+        />
       </Helmet>
 
+      <div className="cosmic-bg min-h-screen ln-atmosphere">
+        {/* ── Porch hero ── */}
+        <section className="relative px-6 pt-14 pb-12 md:pt-20 md:pb-16 overflow-hidden">
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background:
+                "radial-gradient(ellipse 70% 50% at 50% 0%, color-mix(in srgb, var(--ln-gold) 14%, transparent), transparent 70%)",
+            }}
+          />
+          <div className="relative max-w-4xl mx-auto text-center">
+            <p
+              className="text-[10px] uppercase tracking-[0.28em] mb-4"
+              style={{ color: "var(--ln-gold)", fontFamily: "'Space Mono', monospace" }}
+            >
+              {LOOP_PRODUCT.fullName}
+            </p>
+            <h1
+              className="mb-4"
+              style={{
+                fontFamily: "'Cinzel', serif",
+                fontSize: "clamp(1.75rem, 4vw, 2.75rem)",
+                color: "var(--ln-parchment)",
+                letterSpacing: "0.06em",
+                lineHeight: 1.15,
+              }}
+            >
+              Provenance first.
+              <br />
+              Music that can prove its origin.
+            </h1>
+            <p
+              className="max-w-xl mx-auto mb-8"
+              style={{
+                fontFamily: "'Cormorant Garamond', serif",
+                fontSize: "1.15rem",
+                color: "var(--ln-bone)",
+                lineHeight: 1.7,
+              }}
+            >
+              Home is the porch: learn the process, meet the {PNA_PRODUCT.name}, hear a few sealed works.
+              Guests may listen and support. Creators enter the stewarded cockpit to register and seal.
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              <a
+                href={enterPnaHref}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl transition-opacity hover:opacity-90"
+                style={{
+                  background: "var(--ln-gold)",
+                  color: "var(--ln-void)",
+                  fontFamily: "'Space Mono', monospace",
+                  fontSize: "0.65rem",
+                  letterSpacing: "0.1em",
+                  textDecoration: "none",
+                }}
+              >
+                <Sparkles size={14} />
+                {isAuthenticated ? "ENTER PNA" : "SIGN IN · ENTER PNA"}
+              </a>
+              <Link href="/explore">
+                <span
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl cursor-pointer"
+                  style={{
+                    border: "1px solid var(--ln-panel-border)",
+                    color: "var(--ln-parchment)",
+                    fontFamily: "'Space Mono', monospace",
+                    fontSize: "0.65rem",
+                    letterSpacing: "0.1em",
+                  }}
+                >
+                  <Compass size={14} style={{ color: "var(--ln-gold)" }} />
+                  EXPLORE SONGS
+                </span>
+              </Link>
+              <a
+                href={registerHref}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl"
+                style={{
+                  border: "1px solid color-mix(in srgb, var(--ln-gold) 35%, transparent)",
+                  color: "var(--ln-gold)",
+                  fontFamily: "'Space Mono', monospace",
+                  fontSize: "0.65rem",
+                  letterSpacing: "0.1em",
+                  textDecoration: "none",
+                }}
+              >
+                <Upload size={14} />
+                REGISTER
+              </a>
+            </div>
+            {(countData?.count ?? 0) > 0 && (
+              <p className="mt-6 text-xs" style={{ color: "var(--ln-smoke)", fontFamily: "'Space Mono', monospace" }}>
+                <Fingerprint size={12} className="inline mr-1.5" style={{ color: "var(--ln-gold)" }} />
+                {(countData?.count ?? 0).toLocaleString()} works witnessed
+              </p>
+            )}
+          </div>
+        </section>
 
-      <div className="cosmic-bg min-h-screen" style={{ position: "relative" }}>
+        {/* ── Process flow ── */}
+        <section className="px-6 py-12" style={{ borderTop: "1px solid var(--ln-panel-border)" }}>
+          <div className="max-w-5xl mx-auto">
+            <p
+              className="text-[10px] uppercase tracking-[0.22em] mb-2 text-center"
+              style={{ color: "var(--ln-gold)", fontFamily: "'Space Mono', monospace" }}
+            >
+              The process
+            </p>
+            <h2
+              className="text-center mb-10"
+              style={{ fontFamily: "'Cinzel', serif", fontSize: "1.35rem", color: "var(--ln-parchment)" }}
+            >
+              From capture to discovery
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+              {PROCESS_STEPS.map((step) => (
+                <div
+                  key={step.n}
+                  className="rounded-2xl p-4"
+                  style={{
+                    background: "var(--ln-obsidian)",
+                    border: "1px solid var(--ln-panel-border)",
+                  }}
+                >
+                  <div
+                    className="text-[10px] mb-3"
+                    style={{ color: "var(--ln-gold)", fontFamily: "'Space Mono', monospace", letterSpacing: "0.14em" }}
+                  >
+                    {step.n}
+                  </div>
+                  <h3 className="mb-2" style={{ fontFamily: "'Cinzel', serif", fontSize: "0.95rem", color: "var(--ln-parchment)" }}>
+                    {step.title}
+                  </h3>
+                  <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "0.95rem", color: "var(--ln-smoke)", lineHeight: 1.55 }}>
+                    {step.body}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
 
-        {/* ══════════════════════════════════════════════════════════════
-            §1 — CINEMATIC HERO (φ-height: 61.8vh)
-            Live trending work — creation dominant, creator secondary
-        ══════════════════════════════════════════════════════════════ */}
-        <CinematicHero isAuthenticated={isAuthenticated} getLoginUrl={getLoginUrl} />
+        {/* ── PNA + avatars ── */}
+        <section className="px-6 py-12" style={{ borderTop: "1px solid var(--ln-panel-border)" }}>
+          <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+            <div>
+              <p
+                className="text-[10px] uppercase tracking-[0.22em] mb-2"
+                style={{ color: "var(--ln-gold)", fontFamily: "'Space Mono', monospace" }}
+              >
+                {PNA_PRODUCT.fullName}
+              </p>
+              <h2 className="mb-3" style={{ fontFamily: "'Cinzel', serif", fontSize: "1.45rem", color: "var(--ln-parchment)" }}>
+                A stewarded creator OS — not a bolted-on chatbot.
+              </h2>
+              <p className="mb-5" style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.1rem", color: "var(--ln-bone)", lineHeight: 1.7 }}>
+                Chat that can route into register, seal diaries, bind music, and grow avatar identity.
+                Skins, slots, and personality locks live in the PNA store — same structure as the avatars below.
+              </p>
+              <div className="flex flex-wrap gap-3">
+                <a
+                  href={enterPnaHref}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg"
+                  style={{
+                    background: "color-mix(in srgb, var(--ln-gold) 16%, transparent)",
+                    border: "1px solid color-mix(in srgb, var(--ln-gold) 40%, transparent)",
+                    color: "var(--ln-gold)",
+                    fontFamily: "'Space Mono', monospace",
+                    fontSize: "0.6rem",
+                    letterSpacing: "0.08em",
+                    textDecoration: "none",
+                  }}
+                >
+                  OPEN PNA
+                </a>
+                <Link href="/avatar-registry">
+                  <span
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg cursor-pointer"
+                    style={{
+                      border: "1px solid var(--ln-panel-border)",
+                      color: "var(--ln-parchment)",
+                      fontFamily: "'Space Mono', monospace",
+                      fontSize: "0.6rem",
+                      letterSpacing: "0.08em",
+                    }}
+                  >
+                    PNA STORE
+                  </span>
+                </Link>
+              </div>
+            </div>
+            <div className="grid grid-cols-5 gap-2">
+              {AVATAR_PREVIEWS.map((skin) => (
+                <div key={skin.id} className="flex flex-col items-center gap-2">
+                  <div
+                    className="w-full aspect-[3/4] rounded-xl overflow-hidden"
+                    style={{ border: "1px solid var(--ln-panel-border)", background: "var(--ln-void)" }}
+                  >
+                    <img src={SKIN_IMAGES[skin.id]} alt={skin.name} className="w-full h-full object-cover" />
+                  </div>
+                  <span className="text-[9px] text-center" style={{ color: "var(--ln-smoke)", fontFamily: "'Space Mono', monospace" }}>
+                    {skin.name.split(" ").slice(-1)[0]}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
 
-        {/* SEO: visible H2 for crawlers */}
-        <h2 className="sr-only">Living Nexus — The Sovereign Creative Provenance Registry for Independent Creators</h2>
+        {/* ── Limited showcase — guests can play / support ── */}
+        <section className="px-6 py-12" style={{ borderTop: "1px solid var(--ln-panel-border)" }}>
+          <div className="max-w-5xl mx-auto">
+            <div className="flex items-end justify-between gap-4 mb-6">
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.22em] mb-1" style={{ color: "var(--ln-gold)", fontFamily: "'Space Mono', monospace" }}>
+                  Limited showcase
+                </p>
+                <h2 style={{ fontFamily: "'Cinzel', serif", fontSize: "1.25rem", color: "var(--ln-parchment)" }}>
+                  Sealed works & creators
+                </h2>
+              </div>
+              <Link href="/explore">
+                <span className="text-xs cursor-pointer" style={{ color: "var(--ln-gold)" }}>
+                  Full Explore →
+                </span>
+              </Link>
+            </div>
 
-        {/* ══════════════════════════════════════════════════════════════
-            §2 — DISCOVERY SHOWCASE (Steam-style rows)
-            New Arrivals · Trending · Featured Creators · Recently Witnessed
-        ══════════════════════════════════════════════════════════════ */}
-        <ShowcaseSection />
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 mb-8">
+              {showcaseTracks.map((v: ShowcaseTrack) => (
+                <div key={v.id} className="text-left group">
+                  <button
+                    type="button"
+                    className="w-full text-left"
+                    onClick={() => {
+                      if (!v.fileUrl) return;
+                      addAndPlay({
+                        id: String(v.id),
+                        title: v.title,
+                        artist: v.artistName,
+                        artUrl: v.coverArtUrl || undefined,
+                        audioUrl: v.fileUrl,
+                        witnessId: v.witnessId || undefined,
+                        genre: v.genre || "",
+                        creatorHandle: v.artistHandle || undefined,
+                        creatorId: v.creatorId,
+                        tipsEnabled: v.tipsEnabled,
+                      });
+                    }}
+                  >
+                    <div
+                      className="aspect-square rounded-xl overflow-hidden mb-2 relative"
+                      style={{ background: "var(--ln-obsidian)", border: "1px solid var(--ln-panel-border)" }}
+                    >
+                      {v.coverArtUrl ? (
+                        <img src={v.coverArtUrl} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Music size={20} style={{ color: "var(--ln-gold)", opacity: 0.5 }} />
+                        </div>
+                      )}
+                      <div
+                        className="absolute bottom-2 right-2 w-7 h-7 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                        style={{ background: "var(--ln-gold)", color: "var(--ln-void)" }}
+                      >
+                        <Play size={12} fill="currentColor" />
+                      </div>
+                    </div>
+                    <div className="truncate text-xs" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>
+                      {v.title}
+                    </div>
+                    <div className="truncate text-[10px]" style={{ color: "var(--ln-smoke)" }}>
+                      @{v.artistHandle || "creator"}
+                    </div>
+                  </button>
+                  {v.tipsEnabled && (
+                    <button
+                      type="button"
+                      className="mt-1.5 inline-flex items-center gap-1 text-[10px] hover:opacity-90"
+                      style={{ color: "var(--ln-gold)", fontFamily: "'Space Mono', monospace" }}
+                      onClick={() => openTip(v)}
+                    >
+                      <Heart size={10} /> Support
+                    </button>
+                  )}
+                </div>
+              ))}
+              {showcaseTracks.length === 0 && (
+                <p className="col-span-full text-sm" style={{ color: "var(--ln-smoke)" }}>
+                  Witnessed works will appear here as the registry grows.
+                </p>
+              )}
+            </div>
 
-        {/* ── Sacred Geometry Divider ── */}
-        <div className="sg-divider-wide px-6">
-          <div className="sg-divider-wide-center"><div className="sg-divider-wide-center-dot" /></div>
-        </div>
+            {creators.length > 0 && (
+              <div className="flex flex-wrap gap-3">
+                {creators.map((c: any) => {
+                  const handle = c.artistHandle || c.handle;
+                  const href = handle ? `/creator/${handle}` : c.id ? `/creator/${c.id}` : "/explore";
+                  return (
+                    <Link key={c.id || handle} href={href}>
+                      <span
+                        className="inline-flex items-center gap-2 px-3 py-2 rounded-full cursor-pointer"
+                        style={{
+                          background: "var(--ln-obsidian)",
+                          border: "1px solid var(--ln-panel-border)",
+                          color: "var(--ln-parchment)",
+                          fontSize: "0.75rem",
+                        }}
+                      >
+                        <Users size={12} style={{ color: "var(--ln-gold)" }} />
+                        @{handle || c.name || "creator"}
+                      </span>
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </section>
 
-        {/* ══════════════════════════════════════════════════════════════
-            §3 — WHAT IS LIVING NEXUS (compact, secondary, not preachy)
-        ══════════════════════════════════════════════════════════════ */}
-        <ConstellationReveal delay={120} dotCount={3} skipDots>
-          <WIDExplainer />
-        </ConstellationReveal>
+        {/* ── Discord ── */}
+        <section className="px-6 py-12" style={{ borderTop: "1px solid var(--ln-panel-border)" }}>
+          <div
+            className="max-w-3xl mx-auto rounded-2xl p-6 md:p-8 flex flex-col sm:flex-row items-start sm:items-center gap-5"
+            style={{
+              background: "var(--ln-obsidian)",
+              border: "1px solid var(--ln-panel-border)",
+            }}
+          >
+            <div
+              className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+              style={{ background: "color-mix(in srgb, #5865F2 22%, transparent)", color: "#8B9CF6" }}
+            >
+              <ExternalLink size={20} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h2 className="mb-1" style={{ fontFamily: "'Cinzel', serif", fontSize: "1.1rem", color: "var(--ln-parchment)" }}>
+                Community on Discord
+              </h2>
+              <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.05rem", color: "var(--ln-smoke)", lineHeight: 1.6 }}>
+                Creators, witnesses, and stewards — process talk, feedback, and releases.
+              </p>
+            </div>
+            <a
+              href={DISCORD_COMMUNITY_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg flex-shrink-0"
+              style={{
+                background: "#5865F2",
+                color: "#fff",
+                fontFamily: "'Space Mono', monospace",
+                fontSize: "0.6rem",
+                letterSpacing: "0.08em",
+                textDecoration: "none",
+              }}
+            >
+              JOIN DISCORD
+            </a>
+          </div>
+        </section>
 
-        {/* ── Contributors Strip ── */}
-        <ContributorsStrip />
+        {/* ── Closing CTAs ── */}
+        <section className="px-6 py-14 text-center" style={{ borderTop: "1px solid var(--ln-panel-border)" }}>
+          <ShieldCheck className="mx-auto mb-4" size={28} style={{ color: "var(--ln-gold)" }} />
+          <h2 className="mb-3" style={{ fontFamily: "'Cinzel', serif", fontSize: "1.35rem", color: "var(--ln-parchment)" }}>
+            Easy to start. Hard to fake. Optional to go deep.
+          </h2>
+          <p className="max-w-md mx-auto mb-6" style={{ color: "var(--ln-smoke)", fontFamily: "'Cormorant Garamond', serif", fontSize: "1.05rem" }}>
+            Guests can see and support. Signing in unlocks register, seal, manage, and the full PNA cockpit.
+          </p>
+          <div className="flex flex-wrap justify-center gap-3">
+            <Link href="/explore">
+              <span className="px-4 py-2 rounded-lg cursor-pointer inline-block" style={{ border: "1px solid var(--ln-panel-border)", color: "var(--ln-parchment)", fontSize: "0.65rem", fontFamily: "'Space Mono', monospace" }}>
+                EXPLORE
+              </span>
+            </Link>
+            <a href={enterPnaHref} className="px-4 py-2 rounded-lg inline-block" style={{ background: "var(--ln-gold)", color: "var(--ln-void)", fontSize: "0.65rem", fontFamily: "'Space Mono', monospace", textDecoration: "none" }}>
+              {isAuthenticated ? "PNA WORKSPACE" : "SIGN IN"}
+            </a>
+          </div>
+        </section>
 
-        {/* Tip modal */}
-        {tipTarget !== null && (
-          <TipModal track={tipTrack} onClose={() => { setTipTarget(null); setTipRect(null); }} originRect={tipRect} />
+        {tipTarget && (
+          <TipModal track={tipTarget} onClose={() => setTipTarget(null)} originRect={null} />
         )}
       </div>
     </>
-  );
-}
-
-/* ─── WID Explainer — compact, secondary, not preachy ──────────────────────── */
-function WIDExplainer() {
-  const { data: countData } = trpc.songs.getWitnessedCount.useQuery(undefined, {
-    staleTime: 120_000,
-    refetchOnWindowFocus: false,
-  });
-  const total = countData?.count ?? 0;
-
-  return (
-    <section
-      className="px-4 md:px-8 py-16"
-      style={{ borderTop: "1px solid rgba(196,154,40,0.08)" }}
-    >
-      <div className="max-w-4xl mx-auto">
-        {/* Section label */}
-        <div className="flex items-center gap-3 mb-8">
-          <div className="gold-divider flex-1" />
-          <span className="text-[9px] font-heading tracking-[0.22em] uppercase flex-shrink-0" style={{ color: "rgba(196,154,40,0.45)" }}>
-            What is Loop
-          </span>
-          <div className="gold-divider flex-1" />
-        </div>
-
-        {/* 3-column explainer */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
-          {([
-            {
-              icon: <Fingerprint className="w-5 h-5" style={{ color: "var(--ln-gold)" }} />,
-              title: "Witness ID",
-              body: "Every registered track receives a cryptographic timestamp — a permanent, tamper-evident record of origin issued the moment you register. Music provenance, sealed at the source.",
-            },
-            {
-              icon: <ShieldCheck className="w-5 h-5" style={{ color: "var(--ln-gold)" }} />,
-              title: "WID Engine",
-              body: "Loop is the music provenance layer of Living Nexus. Your work stays yours. The registry witnesses authorship without claiming rights.",
-            },
-            {
-              icon: <Compass className="w-5 h-5" style={{ color: "var(--ln-gold)" }} />,
-              title: "Open Discovery",
-              body: "Browse registered music from independent creators. Every work carries a provenance chain that travels with it across platforms.",
-            },
-          ] as const).map(({ icon, title, body }) => (
-            <div key={title} className="flex flex-col gap-3">
-              <div
-                className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-                style={{ background: "rgba(196,154,40,0.06)", border: "1px solid rgba(196,154,40,0.16)" }}
-              >
-                {icon}
-              </div>
-              <h3 className="font-heading text-[13px] tracking-wide" style={{ color: "var(--ln-parchment)" }}>
-                {title}
-              </h3>
-              <p className="font-body text-[12px] leading-relaxed" style={{ color: "#7A7060" }}>
-                {body}
-              </p>
-            </div>
-          ))}
-        </div>
-
-        {/* Compact counter + CTA row */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-6" style={{ borderTop: "1px solid rgba(196,154,40,0.08)" }}>
-          <div className="flex items-center gap-3">
-            <Shield className="w-4 h-4 flex-shrink-0" style={{ color: "rgba(196,154,40,0.50)" }} />
-            <span className="font-body text-[12px]" style={{ color: "#5A5040" }}>
-              {total > 0 ? (
-                <><span className="font-heading text-[14px]" style={{ color: "var(--ln-gold)" }}>{total.toLocaleString()}</span> works witnessed and counting</>
-              ) : (
-                "Works witnessed and counting"
-              )}
-            </span>
-          </div>
-          <div className="flex items-center gap-3 flex-wrap">
-            <Link href="/new-manifestation">
-              <button
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-heading tracking-wide transition-all hover:brightness-110"
-                style={{ background: "rgba(124,58,237,0.12)", border: "1px solid rgba(124,58,237,0.35)", color: "rgba(167,139,250,0.90)" }}
-              >
-                <Plus className="w-3 h-3" />
-                New Manifestation
-              </button>
-            </Link>
-            <Link href="/verify">
-              <button
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-heading tracking-wide transition-all hover:brightness-110"
-                style={{ background: "rgba(196,154,40,0.06)", border: "1px solid rgba(196,154,40,0.18)", color: "#C49A28" }}
-              >
-                <Fingerprint className="w-3 h-3" />
-                Verify a WID
-              </button>
-            </Link>
-            <Link href="/explore">
-              <button
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-heading tracking-wide transition-all hover:brightness-110"
-                style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(200,190,170,0.60)" }}
-              >
-                <Compass className="w-3 h-3" />
-                Explore Works
-              </button>
-            </Link>
-          </div>
-        </div>
-
-        {/* Disclaimer — minimal */}
-        <p className="text-[10px] font-body leading-relaxed mt-6" style={{ color: "#3A3428" }}>
-          Living Nexus is operated by BDDT Publishing, a DBA of Command Domains LLC. Witness IDs are cryptographic provenance records and do not constitute legal copyright registration.{" "}
-          <a href="https://www.copyright.gov/registration/" target="_blank" rel="noopener noreferrer" className="underline transition-colors" style={{ color: "rgba(196,154,40,0.35)" }}>
-            copyright.gov/registration
-          </a>
-        </p>
-      </div>
-    </section>
-  );
-}
-
-/* ─── Contributors Strip ─────────────────────────────────────────────────── */
-const STRIP_CONTRIBUTORS = [
-  { handle: "Doc Seraph Mercer", role: "Founder", initial: "D" },
-  { handle: "Slimdoggy", role: "QA · Bug Hunter", initial: "S" },
-  { handle: "thiiirdgenkill", role: "QA · Feature Requests", initial: "T" },
-];
-
-function ContributorsStrip() {
-  return (
-    <div className="w-full max-w-3xl mx-auto px-4 py-10">
-      <div className="flex flex-col items-center gap-5">
-        <p className="text-[10px] uppercase tracking-[0.2em]" style={{ color: "rgba(139,105,20,0.70)" }}>
-          Built with
-        </p>
-        <div className="flex items-center gap-6 flex-wrap justify-center">
-          {STRIP_CONTRIBUTORS.map(({ handle, role, initial }) => (
-            <Link key={handle} href="/attribution">
-              <div className="flex flex-col items-center gap-2 group cursor-pointer">
-                <div
-                  className="w-12 h-12 rounded-full flex items-center justify-center text-base font-bold transition-all group-hover:scale-105"
-                  style={{
-                    background: "rgba(196,154,40,0.08)",
-                    border: "1px solid rgba(196,154,40,0.18)",
-                    color: "#C49A28",
-                  }}
-                >
-                  {initial}
-                </div>
-                <div className="text-center">
-                  <p className="text-[11px] font-semibold" style={{ color: "var(--ln-parchment)" }}>{handle}</p>
-                  <p className="text-[9px] uppercase tracking-wider" style={{ color: "rgba(100,116,139,0.8)" }}>{role}</p>
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-        <Link href="/attribution">
-          <span
-            className="text-[10px] uppercase tracking-[0.15em] transition-opacity hover:opacity-80 cursor-pointer"
-            style={{ color: "rgba(139,105,20,0.65)" }}
-          >
-            View full attribution →
-          </span>
-        </Link>
-      </div>
-    </div>
   );
 }

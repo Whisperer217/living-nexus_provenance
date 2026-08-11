@@ -171,4 +171,30 @@ Guides level through **platform signals**, not XP theatre inside Register:
 
 ---
 
+## 9. Surface map — porch, square, cockpit
+
+**Law:** One provenance-first architecture. Home orients. Explore finds music & artists. PNA stewards work + identity commerce. Manage and Creator stay.
+
+| Surface | Job | Guest | Signed-in |
+|---|---|---|---|
+| **Home `/`** | Orientation porch — process, PNA/avatars, limited showcase, Discord, CTAs | See + listen + support (tip where allowed) | Same + Enter PNA / Register |
+| **Explore `/explore`** | Find **songs & artists only** | Browse / play / support | Same |
+| **Register `/manifest`** | Seal audio into the registry | Sign-in gate | Register Draft/Published |
+| **Work / Creator** | Public attributed presence | See + support | Same |
+| **Manage `/manage`** | Catalog ops | Sign-in gate | Full |
+| **Verify** | Solemn receipt | See | See |
+| **PNA `/pna`** | Stewarded creator OS — chat, seal, diary, identity | Sign-in gate | Cockpit |
+| **PNA Store** (`/avatar-registry`, `/keeper`, skin/slot purchase) | Skins, backstory slots, personality locks — same structure as on-site avatars | Browse; purchase requires auth | Buy / equip / configure |
+
+### Insulation
+- **Not on Explore:** Keeper skins shop, Guides marketplace, non-music multimedia commerce
+- **Not on Home:** Full Discover feed / dense registry ops — Home teaches and invites
+- **Guest support:** listening, tipping, and public provenance viewing remain open unless an action explicitly requires auth (register, seal, manage, skin purchase, PNA workspace mutations)
+
+### Entry
+- TopBar **Provenance** → `/pna` (auth) or sign-in → `/pna`
+- Home primary CTA **Enter PNA** for signed-in creators; guests get Explore + Register sign-in paths
+
+---
+
 *Living Nexus Loop — Command Domains LLC*

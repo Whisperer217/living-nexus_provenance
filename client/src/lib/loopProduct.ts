@@ -79,20 +79,32 @@ export const PNA_PRODUCT = {
   path: "/pna",
 } as const;
 
-/** Paths that redirect into the Loop spine. */
+/** Paths that redirect into the Loop spine or PNA store. */
 export const LOOP_REDIRECTS: Record<string, string> = {
   "/sessions": "/manage",
   "/new-manifestation": "/manifest",
   "/projects": "/explore",
   "/my-projects": "/manage",
-  "/marketplace": "/explore",
+  "/marketplace": "/avatar-registry",
   "/visual-works": "/explore",
   "/keeper-compose": "/pna",
-  "/store": "/explore",
+  "/store": "/avatar-registry",
   "/dashboard": "/manage",
   "/creator-surface": "/pna",
   "/domain": "/manage",
 };
+
+/** Canonical surface map (see docs/LOOP_PRODUCT_SPEC.md §9). */
+export const SURFACE_MAP = {
+  home: { path: "/", job: "Orientation porch — process, PNA, limited showcase, Discord" },
+  explore: { path: "/explore", job: "Find songs & artists only" },
+  register: { path: "/manifest", job: "Seal audio into the registry", authRequired: true },
+  manage: { path: "/manage", job: "Catalog ops", authRequired: true },
+  pna: { path: "/pna", job: "Stewarded creator OS", authRequired: true },
+  pnaStore: { path: "/avatar-registry", job: "Skins, slots, personality — PNA commerce" },
+} as const;
+
+export const DISCORD_COMMUNITY_URL = "https://discord.gg/ADF9dtVA";
 
 export function isLoopMusicFile(file: File): boolean {
   const mime = file.type.toLowerCase();

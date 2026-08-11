@@ -11,14 +11,12 @@ import { Link, useLocation, useParams } from "wouter";
 import {
   Search, RefreshCw, Shield, Music, BookOpen, Eye, Flame,
   Sparkles, Film, Feather, Star, ChevronRight, ChevronLeft, LayoutList, LayoutGrid,
-  Headphones, FileText, Image as ImageIcon, Users, X, Lock, ShoppingBag, Check,
+  Headphones, FileText, Image as ImageIcon, Users, X, Lock,
   Play, FileImage, FileVideo, FileAudio, File,
 } from "lucide-react";
 import { WorkListRow, type WorkListRowItem } from "@/components/WorkListRow";
 import type { FeedRow } from "@shared/coreDataTypes";
-import { useAuth } from "@/_core/hooks/useAuth";
 import { toast } from "sonner";
-import { getLoginUrl } from "@/const";
 import { usePlayer, type Track } from "@/contexts/PlayerContext";
 
 // ── Column definitions (one per content type) ─────────────────────────────
@@ -538,134 +536,6 @@ function SupplementalRow({
   );
 }
 
-// ── Keeper Skins Section (preserved from v2) ──────────────────────────────
-function KeeperSkinsSection() {
-  const { user } = useAuth();
-  const utils = trpc.useUtils();
-  const [selectedItem, setSelectedItem] = useState<any | null>(null);
-  const [equippingId, setEquippingId] = useState<number | null>(null);
-  const [purchasingId, setPurchasingId] = useState<number | null>(null);
-  const equippedAvatarItemId = (user as any)?.equippedAvatarItemId ?? null;
-  const { data: marketplaceItems = [], isLoading: mktLoading } = trpc.marketplace.listItems.useQuery({ type: "skin", limit: 20 }, { staleTime: 3 * 60 * 1000, refetchOnWindowFocus: false });
-  const { data: creatorPortraits = [], isLoading: portraitsLoading } = trpc.keeper.listCreatorPortraits.useQuery({ limit: 100 }, { staleTime: 5 * 60 * 1000, refetchOnWindowFocus: false });
-  const marketplaceArtworkUrls = new Set((marketplaceItems as any[]).map((i: any) => i.artworkUrl));
-  const creatorCards = (creatorPortraits as any[]).filter((p: any) => !marketplaceArtworkUrls.has(p.portraitUrl)).map((p: any) => ({ id: `creator-${p.userId}`, title: p.artistHandle ? `@${p.artistHandle}` : (p.creatorName ?? "Creator"), artworkUrl: p.portraitUrl, priceCents: 0, description: `Portrait uploaded by ${p.creatorName ?? "a creator"} on Living Nexus.`, artistCredit: p.artistHandle ? `@${p.artistHandle}` : null, artStyle: null, isCreatorPortrait: true }));
-  const items = [...(marketplaceItems as any[]), ...creatorCards];
-  const isLoading = mktLoading || portraitsLoading;
-  const equipAvatar = trpc.marketplace.equipAvatar.useMutation({ onSuccess: () => { toast.success("Avatar equipped!"); utils.marketplace.listItems.invalidate(); utils.auth.me.invalidate(); setEquippingId(null); setSelectedItem(null); }, onError: (err) => { toast.error(err.message ?? "Equip failed."); setEquippingId(null); } });
-  const createCheckout = trpc.marketplace.createCheckout.useMutation({ onSuccess: (data) => { if (data.url) window.open(data.url, "_blank"); setPurchasingId(null); }, onError: (err) => { toast.error(err.message ?? "Purchase failed."); setPurchasingId(null); } });
-  const handleEquip = (item: any) => { if (!user) { window.location.href = getLoginUrl("/explore"); return; } setEquippingId(item.id); equipAvatar.mutate({ itemId: item.id }); };
-  const handleBuy = (item: any) => { if (!user) { window.location.href = getLoginUrl("/explore"); return; } if (item.priceCents === 0) { handleEquip(item); return; } setPurchasingId(item.id); createCheckout.mutate({ itemId: item.id, origin: window.location.origin }); };
-  const scrollRef = useRef<HTMLDivElement>(null);
-  if (isLoading || items.length === 0) return null;
-  return (
-    <div className="mb-8">
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
-          <ShoppingBag className="w-4 h-4 text-[var(--gold)]" />
-          <h3 className="font-heading font-semibold text-sm tracking-wide text-[var(--ln-parchment)]">Keeper Skins</h3>
-          <span className="text-[10px] font-mono text-[var(--stone-shadow)]">{items.length}</span>
-        </div>
-        <Link href="/marketplace" className="text-xs text-[var(--gold)] hover:underline flex items-center gap-1">View all <ChevronRight className="w-3 h-3" /></Link>
-      </div>
-      <div ref={scrollRef} className="flex gap-3 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
-        {(items as any[]).map((item) => {
-          const isEquipped = equippedAvatarItemId === item.id;
-          const isFree = item.priceCents === 0;
-          return (
-            <div key={item.id} onClick={() => setSelectedItem(item)} className="flex-shrink-0 cursor-pointer group" style={{ width: 120, border: `1px solid ${isEquipped ? "var(--ln-gold)" : "rgba(255,255,255,0.08)"}`, borderRadius: 8, background: isEquipped ? "rgba(196,154,40,0.06)" : "var(--ln-panel)", transition: "all 0.2s" }}>
-              <div className="relative overflow-hidden" style={{ aspectRatio: "3/4", borderRadius: "7px 7px 0 0" }}>
-                <img src={item.artworkUrl} alt={item.title} className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300" />
-                {isEquipped && <div className="absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center" style={{ background: "var(--ln-gold)" }}><Check style={{ width: 10, height: 10, color: "#000" }} /></div>}
-                <div className="absolute bottom-2 left-2 px-1.5 py-0.5 rounded text-xs font-mono" style={{ background: isFree ? "rgba(34,197,94,0.2)" : "rgba(0,0,0,0.7)", border: `1px solid ${isFree ? "rgba(34,197,94,0.4)" : "rgba(255,255,255,0.15)"}`, color: isFree ? "#4ade80" : "var(--ln-parchment)", fontSize: "0.6rem" }}>{isFree ? "FREE" : `$${(item.priceCents / 100).toFixed(2)}`}</div>
-              </div>
-              <div className="p-2"><div className="text-xs font-semibold truncate" style={{ color: "var(--ln-parchment)", fontSize: "0.65rem" }}>{item.title.replace("Keeper Skin Pack — ", "")}</div></div>
-            </div>
-          );
-        })}
-      </div>
-      {selectedItem && (
-        <div style={{ position: "fixed", inset: 0, zIndex: 9999, background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "20px", overflowY: "auto" }} onClick={() => setSelectedItem(null)}>
-          <div style={{ background: "var(--ln-panel)", border: "1px solid var(--ln-panel-border)", borderRadius: "12px", maxWidth: "480px", width: "100%", marginTop: "40px", overflow: "hidden" }} onClick={(e) => e.stopPropagation()}>
-            <div className="relative" style={{ aspectRatio: "16/9" }}>
-              <img src={selectedItem.artworkUrl} alt={selectedItem.title} className="w-full h-full object-cover object-top" />
-              <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.9) 100%)" }} />
-              <button onClick={() => setSelectedItem(null)} style={{ position: "absolute", top: 12, right: 12, width: 28, height: 28, borderRadius: "50%", background: "rgba(0,0,0,0.6)", border: "1px solid rgba(255,255,255,0.2)", color: "white", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}><X style={{ width: 14, height: 14 }} /></button>
-              <div style={{ position: "absolute", bottom: 16, left: 16, right: 16 }}>
-                <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "10px", letterSpacing: "0.15em", color: "var(--ln-gold)", marginBottom: "4px", textTransform: "uppercase" }}>Keeper Skin</div>
-                <div style={{ fontFamily: "var(--font-display)", fontSize: "20px", fontWeight: 700, color: "white", lineHeight: 1.2 }}>{selectedItem.title.replace("Keeper Skin Pack — ", "")}</div>
-              </div>
-            </div>
-            <div style={{ padding: "20px" }}>
-              {selectedItem.description && <p style={{ fontSize: "13px", color: "rgba(255,255,255,0.6)", lineHeight: 1.6, marginBottom: "16px" }}>{selectedItem.description}</p>}
-              {equippedAvatarItemId === selectedItem.id ? (
-                <div style={{ padding: "12px 16px", borderRadius: 8, background: "rgba(196,154,40,0.1)", border: "1px solid rgba(196,154,40,0.3)", display: "flex", alignItems: "center", gap: 8 }}>
-                  <Check style={{ width: 16, height: 16, color: "var(--ln-gold)", flexShrink: 0 }} />
-                  <span style={{ fontSize: "13px", color: "var(--ln-gold)", fontFamily: "'Space Mono', monospace" }}>Currently Equipped</span>
-                </div>
-              ) : (
-                <div style={{ display: "flex", gap: "10px" }}>
-                  {selectedItem.priceCents === 0 ? (
-                    <button onClick={() => handleEquip(selectedItem)} disabled={equippingId === selectedItem.id} style={{ flex: 1, padding: "12px", background: "var(--ln-gold)", color: "#000", border: "none", borderRadius: 8, fontFamily: "'Space Mono', monospace", fontWeight: 700, fontSize: "12px", letterSpacing: "0.08em", cursor: equippingId === selectedItem.id ? "wait" : "pointer", opacity: equippingId === selectedItem.id ? 0.7 : 1 }}>{equippingId === selectedItem.id ? "Equipping…" : "EQUIP FREE SKIN"}</button>
-                  ) : (
-                    <button onClick={() => handleBuy(selectedItem)} disabled={purchasingId === selectedItem.id} style={{ flex: 1, padding: "12px", background: "var(--ln-gold)", color: "#000", border: "none", borderRadius: 8, fontFamily: "'Space Mono', monospace", fontWeight: 700, fontSize: "12px", letterSpacing: "0.08em", cursor: purchasingId === selectedItem.id ? "wait" : "pointer", opacity: purchasingId === selectedItem.id ? 0.7 : 1 }}>{purchasingId === selectedItem.id ? "Opening…" : `PURCHASE · $${(selectedItem.priceCents / 100).toFixed(2)}`}</button>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ── Guides Section (preserved from v2) ────────────────────────────────────
-function GuidesSection() {
-  const [selected, setSelected] = useState<any | null>(null);
-  const { data: guides = [], isLoading } = trpc.guides.listPublished.useQuery({ limit: 20 }, { staleTime: 5 * 60 * 1000, refetchOnWindowFocus: false });
-  const scrollRef = useRef<HTMLDivElement>(null);
-  if (isLoading || guides.length === 0) return null;
-  return (
-    <div className="mb-8">
-      <div className="flex items-center justify-between mb-3">
-        <div>
-          <div className="text-xs uppercase tracking-widest mb-0.5" style={{ color: "var(--ln-gold)", fontFamily: "'Space Mono', monospace", fontSize: "0.65rem" }}>Creator Guides</div>
-          <p className="text-[10px]" style={{ color: "var(--ln-smoke)" }}>Sovereign creative companions — each anchored to a WID</p>
-        </div>
-        <a href="/guides" className="text-xs flex items-center gap-1 hover:underline" style={{ color: "var(--ln-gold)", fontFamily: "'Space Mono', monospace" }}>View all <ChevronRight className="w-3 h-3" /></a>
-      </div>
-      <div ref={scrollRef} className="flex gap-3 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
-        {(guides as any[]).map((guide: any) => (
-          <button key={guide.id} onClick={() => setSelected(guide)} className="flex-shrink-0 text-left flex flex-col transition-all duration-200 hover:scale-[1.02]" style={{ width: 100, border: "1px solid var(--ln-panel-border)", borderRadius: 6, background: "var(--ln-panel)", overflow: "hidden" }}>
-            <div style={{ aspectRatio: "3/4", overflow: "hidden", background: "var(--ln-void)" }}>
-              {guide.artworkUrl ? <img src={guide.artworkUrl} alt={guide.canonicalName} className="w-full h-full object-cover object-top" /> : <div className="w-full h-full flex items-center justify-center"><Shield className="w-6 h-6" style={{ color: "var(--ln-gold)", opacity: 0.4 }} /></div>}
-            </div>
-            <div className="p-1.5"><div className="truncate font-semibold" style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.55rem", color: "var(--ln-parchment)" }}>{guide.canonicalName}</div></div>
-          </button>
-        ))}
-      </div>
-      {selected && (
-        <div style={{ position: "fixed", inset: 0, zIndex: 9999, background: "rgba(0,0,0,0.88)", display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "20px", overflowY: "auto" }} onClick={() => setSelected(null)}>
-          <div style={{ background: "var(--ln-panel)", border: "1px solid var(--ln-gold)40", borderRadius: 8, width: "100%", maxWidth: 560, padding: 24, position: "relative" }} onClick={(e) => e.stopPropagation()}>
-            <button onClick={() => setSelected(null)} style={{ position: "absolute", top: 12, right: 12, color: "var(--ln-smoke)", background: "none", border: "none", cursor: "pointer", fontSize: 20 }}>×</button>
-            <div className="flex gap-4">
-              {selected.artworkUrl && <div style={{ width: 120, flexShrink: 0, borderRadius: 6, overflow: "hidden", border: "1px solid var(--ln-panel-border)" }}><img src={selected.artworkUrl} alt={selected.canonicalName} className="w-full h-full object-cover" style={{ aspectRatio: "3/4" }} /></div>}
-              <div className="flex-1 min-w-0">
-                <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.6rem", color: "var(--ln-gold)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4 }}>{selected.archetypeType ?? "Guide"}</div>
-                <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.4rem", color: "var(--ln-parchment)", fontWeight: 700, lineHeight: 1.2, marginBottom: 8 }}>{selected.canonicalName}</h2>
-                {selected.widCode && <div style={{ display: "inline-block", padding: "2px 8px", borderRadius: 4, background: "var(--ln-gold)15", border: "1px solid var(--ln-gold)30", fontSize: "0.6rem", color: "var(--ln-gold)", fontFamily: "'Space Mono', monospace", marginBottom: 12 }}>{selected.widCode}</div>}
-              </div>
-            </div>
-            {selected.loreDescription && <div style={{ marginTop: 16, padding: 12, borderRadius: 6, background: "var(--ln-void)", border: "1px solid var(--ln-panel-border)" }}><p style={{ fontSize: "0.8rem", color: "var(--ln-smoke)", lineHeight: 1.6 }}>{selected.loreDescription}</p></div>}
-            <div className="flex gap-2 mt-4"><a href={`/guide/${selected.id}`} style={{ flex: 1, textAlign: "center", padding: "8px 12px", borderRadius: 4, background: "var(--ln-gold)", color: "#0a0a0a", fontFamily: "'Space Mono', monospace", fontSize: "0.65rem", fontWeight: 700, textDecoration: "none", textTransform: "uppercase", letterSpacing: "0.08em" }}>View Guide</a></div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
 // ── View Toggle (columns / list / grid) ───────────────────────────────────
 function ViewToggle({ value, onChange }: { value: ViewMode; onChange: (v: ViewMode) => void }) {
   const modes: { key: ViewMode; icon: React.ReactNode; label: string }[] = [
@@ -914,8 +784,19 @@ export default function ExplorePage() {
             {/* ── Supplemental horizontal strips (always shown) ── */}
             {!search && !selectedCreatorId && (
               <div className="pt-6">
-                <KeeperSkinsSection />
-                <GuidesSection />
+                {/* Skins / Guides commerce lives under PNA store — Explore = songs & artists only */}
+                <div className="mb-6 px-1 flex flex-wrap items-center justify-between gap-3">
+                  <p className="text-xs" style={{ color: "var(--ln-smoke)", fontFamily: "'Space Mono', monospace", letterSpacing: "0.04em" }}>
+                    SONGS & ARTISTS · SKINS & GUIDES LIVE IN PNA
+                  </p>
+                  <Link
+                    href="/avatar-registry"
+                    className="text-xs hover:underline"
+                    style={{ color: "var(--ln-gold)" }}
+                  >
+                    Open PNA Store →
+                  </Link>
+                </div>
                 {SUPPLEMENTAL_SECTIONS.map(section => (
                   <SupplementalRow key={section.key} section={section} rows={data[section.key]} likedMap={likedMap} search={search} />
                 ))}
