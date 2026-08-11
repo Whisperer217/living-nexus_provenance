@@ -51,3 +51,6 @@
 - [x] Add regression coverage for the repaired PNA workspace provider composition (2 assertions verify PlayerProvider encloses WorkEditorProvider and is not duplicated inside App).
 - [x] Run PNA workspace validation: typecheck passed, 44 test files / 420 tests passed, production build passed, and the reported 503 remains unlinked to a reproducible request.
 - [x] Confirm a route-specific PNA workspace element renders in an isolated browser: `/pna` reached the Provenance Nexus Avatar sign-in gate with no ErrorBoundary or PlayerProvider error.
+- [x] Locate the Home-page render path that mixes `background` with `backgroundImage` across rerenders: TopBar layered `background` with an optional harmonic `backgroundImage`.
+- [x] Replace the conflicting shorthand with `backgroundColor`, update the transition property, and add a focused TopBar style regression assertion.
+- [x] Validate the Home render path and publish readiness: focused TopBar test passed, isolated Home rerender assertion found no background style conflict, full regression suite passed, and production build passed.
