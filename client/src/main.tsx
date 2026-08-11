@@ -10,6 +10,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { LightsModeProvider } from "./contexts/LightsModeContext";
 import { KeeperAttrsProvider } from "./contexts/KeeperAttrsContext";
 import { PendingWorkProvider } from "./contexts/PendingWorkContext";
+import { PlayerProvider } from "./contexts/PlayerContext";
 import { WSPProvider } from "./contexts/WSPContext";
 import { RightRailProvider } from "./contexts/RightRailContext";
 import { WorkEditorProvider } from "./contexts/WorkEditorContext";
@@ -204,13 +205,16 @@ createRoot(document.getElementById("root")!).render(
             <WSPProvider>
               <RightRailProvider>
                 <LightsModeProvider>
-                  <WorkEditorProvider>
-                    <UploadEngineProvider>
-                      <PendingWorkProvider>
-                        <App />
-                      </PendingWorkProvider>
-                    </UploadEngineProvider>
-                  </WorkEditorProvider>
+                  {/* PlayerProvider must wrap WorkEditorProvider — CreativeDrawer calls usePlayer */}
+                  <PlayerProvider>
+                    <WorkEditorProvider>
+                      <UploadEngineProvider>
+                        <PendingWorkProvider>
+                          <App />
+                        </PendingWorkProvider>
+                      </UploadEngineProvider>
+                    </WorkEditorProvider>
+                  </PlayerProvider>
                 </LightsModeProvider>
               </RightRailProvider>
             </WSPProvider>
