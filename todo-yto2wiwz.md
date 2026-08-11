@@ -48,5 +48,6 @@
 - [x] Repair the `CreativeDrawer` `usePlayer` crash by restoring a valid PlayerProvider ownership boundary in the reviewed PR #10 composition.
 - [x] Trace the reported PNA 503 and distinguish it from a code-path regression: the supplied report contains no target request URL; it is separate from the provider crash and cannot be reproduced or attributed from the available evidence.
 - [x] Merge PR #10 PNA chat workspace and PlayerProvider repair into `main` (`a97c98ca`).
-- [ ] Add regression coverage for the repaired PNA workspace provider composition.
-- [ ] Run PNA workspace validation and publish the repaired PR #10 release.
+- [x] Add regression coverage for the repaired PNA workspace provider composition (2 assertions verify PlayerProvider encloses WorkEditorProvider and is not duplicated inside App).
+- [x] Run PNA workspace validation: typecheck passed, 44 test files / 420 tests passed, production build passed, and the reported 503 remains unlinked to a reproducible request.
+- [x] Confirm a route-specific PNA workspace element renders in an isolated browser: `/pna` reached the Provenance Nexus Avatar sign-in gate with no ErrorBoundary or PlayerProvider error.
