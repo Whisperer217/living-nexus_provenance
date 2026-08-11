@@ -83,9 +83,10 @@ describe("Porch public route browser contract", () => {
       const state = statePayload ? JSON.parse(Buffer.from(statePayload, "base64url").toString("utf8")) as { returnPath?: string } : null;
 
       expect(home.text).toMatch(/Home is the porch|Music that can prove its origin|EXPLORE SONGS/);
-      expect(explore.text).toMatch(/CONNECTED MANIFESTATIONS|Audio/);
-      expect(explore.text).toMatch(/Creator Domains|Creator/);
-      expect(explore.text).not.toMatch(/MARKETPLACE|Creator-anchored goods|Keeper Skins|Guides|Open PNA Store/);
+      expect(explore.text).toMatch(/Explore|Songs|artists|Music/i);
+      expect(explore.text).toMatch(/Creator|Songs/);
+      expect(explore.text).not.toMatch(/MARKETPLACE|Creator-anchored goods|Keeper Skins|Open PNA Store|Grand Hall of Human Creative Contribution/);
+      expect(explore.text).not.toMatch(/\bBooks\b|\bFilm\b|\bDoctrine\b/);
       expect(marketplace.path).toBe("/avatar-registry");
       expect(store.path).toBe("/avatar-registry");
       expect(JSON.parse(click.result.value)).toEqual({ found: true });

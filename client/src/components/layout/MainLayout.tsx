@@ -28,7 +28,6 @@ import { useRightRail } from "@/contexts/RightRailContext";
 import GlobalPlayer from "@/components/player/GlobalPlayer";
 import WitnessSurfacePlayer from "@/components/player/WitnessSurfacePlayer";
 import TheaterPlayer from "@/components/player/TheaterPlayer";
-import MarketplaceDrawer from "@/components/MarketplaceDrawer";
 import ScrollToTopButton from "@/components/layout/ScrollToTopButton";
 import SiteFooter from "@/components/layout/SiteFooter";
 import TopBar from "@/components/layout/TopBar";
@@ -62,7 +61,6 @@ const CREATOR_FOCUS_ROUTES = [
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   const [location, navigate] = useLocation();
   const { state } = usePlayer();
-  const isExploreSurface = location === "/explore" || location.startsWith("/explore?");
   const isCreatorFocus = CREATOR_FOCUS_ROUTES.some(
     (r) => location === r || location.startsWith(r + "/") || location.startsWith(r + "?")
   ) || location.includes("/studio");
@@ -295,7 +293,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       <RightRail />
 
       {/* ── DRAWER LAYER ── */}
-      {!isExploreSurface && <MarketplaceDrawer />}
+      {/* Marketplace / skins commerce lives on PNA Store (/avatar-registry) — not Loop chrome */}
       <ScrollToTopButton />
 
       {whatsNewOpen && (
