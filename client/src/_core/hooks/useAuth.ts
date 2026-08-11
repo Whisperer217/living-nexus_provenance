@@ -9,6 +9,8 @@ type UseAuthOptions = {
   redirectPath?: string;
 };
 
+const RUNTIME_USER_INFO_KEY = "manus-runtime-user-info";
+
 export function useAuth(options?: UseAuthOptions) {
   const { redirectOnUnauthenticated = false, redirectPath = getLoginUrl() } =
     options ?? {};
@@ -42,14 +44,18 @@ export function useAuth(options?: UseAuthOptions) {
     }
   }, [logoutMutation, utils]);
 
-  const state = useMemo(() => {
-    localStorage.setItem(
-      "manus-runtime-user-info",
-      JSON.stringify(meQuery.data)
-    );
-    // Mark that this tab had an authenticated session so the global redirect
-    // handler knows to redirect on future 401s (session expiry), not just ignore them.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const serializedUser = JSON.stringify(meQuery.data ?? null);
+    if (localStorage.getItem(RUNTIME_USER_INFO_KEY) !== serializedUser) {
+      localStorage.setItem(RUNTIME_USER_INFO_KEY, serializedUser);
+    }
+
     if (meQuery.data) markHadSession();
+  }, [meQuery.data]);
+
+  const state = useMemo(() => {
     return {
       user: meQuery.data ?? null,
       loading: meQuery.isLoading || logoutMutation.isPending,
