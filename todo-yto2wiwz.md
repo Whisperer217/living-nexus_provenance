@@ -75,3 +75,7 @@
 - [x] Restore actual Explore insulation by hiding the shared marketplace drawer and removing the remaining PNA store CTA.
 - [x] Add a project-owned rendered-route browser integration test that clicks guest Provenance navigation and asserts OAuth returns to `/pna` while Explore excludes marketplace, store, skins, and guides content.
 - [x] Re-run the project-owned browser integration test and Porch matrix after the durable test is in place; the CDP test and final matrix both passed against preview, default regression completed with 49 files / 427 tests passing (one preview-only browser test skipped without a target), and production build passed.
+- [x] Trace the duplicate `/keeper` entry in the PNA navigation source that produces non-unique React keys: `QUICK_ACTIONS` defined both Notes & Diaries and Keeper with the same href.
+- [x] Deduplicate the PNA navigation model while preserving the intended Keeper/NOTES entry point and add regression coverage.
+- [x] Verify the PNA workspace emits no duplicate-key warning in the isolated route validator; focused PNA tests, full regression suite, and production build passed.
+- [x] Retain the `Notes & Diaries` Keeper entry and remove the duplicate `/keeper` navigation row from `PNAShellPage`.

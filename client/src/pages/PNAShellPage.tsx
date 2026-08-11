@@ -58,7 +58,6 @@ const QUICK_ACTIONS = [
   { label: "Guides", icon: BookOpen, href: "/guides", desc: "Creator guides" },
   { label: "Notes & Diaries", icon: BookMarked, href: "/keeper", desc: "Keeper NOTES + PNA diaries" },
   { label: "Avatar Registry", icon: Image, href: "/avatar-registry", desc: "Steward AVT skins" },
-  { label: "Keeper", icon: Sparkles, href: "/keeper", desc: "Avatar skins & attributes" },
   { label: "Batch Upload", icon: Upload, href: "/batch-upload", desc: "Register multiple works" },
 ];
 
