@@ -1,9 +1,10 @@
 /**
- * MarketplaceDrawer — right-side persistent mini storefront
- * Slides in from the right edge. Shows featured marketplace items
- * with a quick-buy flow. Full catalog links to /marketplace.
+ * MarketplaceDrawer — optional mini storefront for PNA Store surfaces.
+ * Slides in from the right edge. Shows featured skin/commerce items
+ * with a quick-buy flow. Full catalog links to /avatar-registry.
  *
  * Z-index: 55 (above PlayerBar at 50, below Keeper at 60)
+ * Not mounted on Loop chrome (Home / Explore / Register / Manage).
  */
 import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
@@ -136,13 +137,12 @@ export default function MarketplaceDrawer() {
     return () => mql.removeEventListener("change", onChange);
   }, []);
 
-  // Listen for external open trigger (e.g. from PlaylistDrawer SHOP tab)
-  // On mobile, navigate to /marketplace instead of opening the drawer
+  // Listen for external open trigger (e.g. from legacy SHOP events)
+  // On mobile, navigate to PNA Store instead of opening the drawer
   useEffect(() => {
     const handler = () => {
       if (window.innerWidth < 768) {
-        // On mobile, navigate to the full marketplace page instead
-        window.location.href = "/marketplace";
+        window.location.href = "/avatar-registry";
         return;
       }
       setIsOpen(true);
@@ -189,7 +189,7 @@ export default function MarketplaceDrawer() {
 
   const handleBuy = (item: any) => {
     if (!user) {
-      window.location.href = getLoginUrl("/marketplace");
+      window.location.href = getLoginUrl("/avatar-registry");
       return;
     }
     if (item.priceCents === 0) {
@@ -290,14 +290,14 @@ export default function MarketplaceDrawer() {
           ))}
         </div>
 
-        {/* Footer — link to full marketplace */}
+        {/* Footer — link to PNA Store */}
         <div style={{
           padding: "12px 16px",
           borderTop: "1px solid var(--ln-panel-border)",
           flexShrink: 0,
         }}>
           <button
-            onClick={() => { navigate("/marketplace"); setIsOpen(false); }}
+            onClick={() => { navigate("/avatar-registry"); setIsOpen(false); }}
             style={{
               width: "100%",
               padding: "10px",
@@ -313,7 +313,7 @@ export default function MarketplaceDrawer() {
               textTransform: "uppercase",
             }}
           >
-            View Full Marketplace →
+            Open PNA Store →
           </button>
         </div>
       </div>

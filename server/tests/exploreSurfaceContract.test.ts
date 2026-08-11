@@ -6,13 +6,19 @@ const explorePagePath = path.resolve(process.cwd(), "client/src/pages/ExplorePag
 const mainLayoutPath = path.resolve(process.cwd(), "client/src/components/layout/MainLayout.tsx");
 
 describe("Explore public-surface contract", () => {
-  it("keeps music and creator discovery free of store, skins, and guides calls to action", () => {
+  it("keeps Explore songs-and-artists only and free of store commerce CTAs", () => {
     const exploreSource = fs.readFileSync(explorePagePath, "utf8");
     const layoutSource = fs.readFileSync(mainLayoutPath, "utf8");
 
-    expect(exploreSource).toContain("SUPPLEMENTAL_SECTIONS.map(section");
+    expect(exploreSource).toContain('title: "Songs"');
+    expect(exploreSource).toContain("Songs & artists");
+    expect(exploreSource).not.toContain('title: "Books"');
+    expect(exploreSource).not.toContain('title: "Film"');
+    expect(exploreSource).not.toContain('title: "Doctrine"');
     expect(exploreSource).not.toContain("Open PNA Store");
     expect(exploreSource).not.toContain("SKINS & GUIDES LIVE IN PNA");
-    expect(layoutSource).toContain("{!isExploreSurface && <MarketplaceDrawer />}");
+    expect(exploreSource).not.toContain("Keeper Skins");
+    expect(layoutSource).not.toContain("<MarketplaceDrawer");
+    expect(layoutSource).toContain("not Loop chrome");
   });
 });

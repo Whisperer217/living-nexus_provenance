@@ -264,9 +264,9 @@ export const songsRouter = router({
      */
     newThisWeek: publicProcedure.input(z.object({ genre: z.string().optional(), contentType: z.enum(["audio", "lyrics", "manuscript", "comic", "written", "game", "gcode", "3dmodel"]).optional(), limit: z.number().max(2000).optional() }).optional()).query(async ({ input }) => getNewThisWeek(input as any ?? {})),
     /**
-     * @version 1.0.0
-     * Cathedral Explore index — returns blended section buckets for the Explore page.
-     * Each section is independently randomized/scored so every page load reveals new works.
+     * @version 1.1.0
+     * Explore index — songs & artists only (§9 Surface map).
+     * Non-audio buckets retained as empty arrays for wire compatibility.
      */
     exploreIndex: publicProcedure
       .input(z.object({
@@ -287,20 +287,28 @@ export const songsRouter = router({
           seed: randomize ? seed : undefined,
           limit: sectionLimit,
         });
-        const [featured, newManifestations, music, books, research, visualWorks, film, doctrine, recentlyWitnessed, hiddenGems, trendingWorks] = await Promise.all([
-          getPublicSongs({ ...base(), limit: Math.min(sectionLimit, 8) }),
-          getNewThisWeek({ limit: Math.min(sectionLimit, 20) }),
-          getPublicSongs({ ...base('audio'), seed: seed + 1 }),
-          getPublicSongs({ ...base('manuscript'), seed: seed + 2 }),
-          getPublicSongs({ ...base('lyrics'), seed: seed + 3 }),
-          getPublicSongs({ ...base('image' as any), seed: seed + 4 }),
-          getPublicSongs({ ...base('game' as any), seed: seed + 5 }),
-          getPublicSongs({ ...base('comic'), seed: seed + 6 }),
-          getPublicSongs({ ...base(), randomize: false, seed: undefined }),
-          getPublicSongs({ ...base(), seed: seed + 7 }),
-          getTrendingWorks({ limit: Math.min(sectionLimit, 20) }),
+        const [featured, newManifestations, music, recentlyWitnessed, hiddenGems, trendingWorks] = await Promise.all([
+          getPublicSongs({ ...base("audio"), limit: Math.min(sectionLimit, 8) }),
+          getNewThisWeek({ limit: Math.min(sectionLimit, 20), contentType: "audio" }),
+          getPublicSongs({ ...base("audio"), seed: seed + 1 }),
+          getPublicSongs({ ...base("audio"), randomize: false, seed: undefined }),
+          getPublicSongs({ ...base("audio"), seed: seed + 7 }),
+          getTrendingWorks({ limit: Math.min(sectionLimit, 20), contentType: "audio" }),
         ]);
-        return { seed, featured, newManifestations, music, books, research, visualWorks, film, doctrine, recentlyWitnessed, hiddenGems, trending: trendingWorks };
+        return {
+          seed,
+          featured,
+          newManifestations,
+          music,
+          books: [] as typeof music,
+          research: [] as typeof music,
+          visualWorks: [] as typeof music,
+          film: [] as typeof music,
+          doctrine: [] as typeof music,
+          recentlyWitnessed,
+          hiddenGems,
+          trending: trendingWorks,
+        };
       }),
     updateCredits: protectedProcedure.input(z.object({ songId: z.number().int(), creditsJson: z.string().max(4096) })).mutation(async ({ ctx, input }) => {
       const song = await getSongById(input.songId);

@@ -1,85 +1,37 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   LIVING NEXUS — ExplorePage (Column Edition v3)
-   Layout: horizontal scroll rail with one column per content type.
-   Each column shows all available works — no global slider.
-   Per-column "Load more" if the backend returns a full page.
+   LIVING NEXUS — ExplorePage (§9 Surface map)
+   Songs & artists only. Skins / guides / non-music commerce live in PNA Store.
 ═══════════════════════════════════════════════════════════════════════════ */
 import React, { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { trpc } from "@/lib/trpc";
 import { Link, useLocation, useParams } from "wouter";
 import {
-  Search, RefreshCw, Shield, Music, BookOpen, Eye, Flame,
-  Sparkles, Film, Feather, Star, ChevronRight, ChevronLeft, LayoutList, LayoutGrid,
-  Headphones, FileText, Image as ImageIcon, Users, X, Lock,
-  Play, FileImage, FileVideo, FileAudio, File,
+  Search, RefreshCw, Shield, Music, Eye, Flame,
+  Sparkles, Star, ChevronRight, ChevronLeft, LayoutList, LayoutGrid,
+  FileText, Users, X, Lock,
+  Play, FileAudio, File,
 } from "lucide-react";
 import { WorkListRow, type WorkListRowItem } from "@/components/WorkListRow";
 import type { FeedRow } from "@shared/coreDataTypes";
 import { toast } from "sonner";
 import { usePlayer, type Track } from "@/contexts/PlayerContext";
 
-// ── Column definitions (one per content type) ─────────────────────────────
+function isAudioRow(row: FeedRow): boolean {
+  return (row.song.contentType ?? "audio") === "audio";
+}
+
+// ── Columns — music only (§9) ─────────────────────────────────────────────
 const COLUMNS = [
   {
     key: "music" as const,
-    title: "Music",
-    subtitle: "Songs, albums, compositions",
+    title: "Songs",
+    subtitle: "Witnessed tracks & compositions",
     icon: <Music className="w-4 h-4" />,
     accentColor: "text-emerald-400",
     borderColor: "border-emerald-400/30",
     glowColor: "rgba(52,211,153,0.12)",
-    emptyMessage: "No music registered yet",
-  },
-  {
-    key: "books" as const,
-    title: "Books",
-    subtitle: "Manuscripts & long-form works",
-    icon: <BookOpen className="w-4 h-4" />,
-    accentColor: "text-amber-400",
-    borderColor: "border-amber-400/30",
-    glowColor: "rgba(251,191,36,0.12)",
-    emptyMessage: "No books registered yet",
-  },
-  {
-    key: "research" as const,
-    title: "Research",
-    subtitle: "Papers, essays, written testimony",
-    icon: <FileText className="w-4 h-4" />,
-    accentColor: "text-sky-400",
-    borderColor: "border-sky-400/30",
-    glowColor: "rgba(56,189,248,0.12)",
-    emptyMessage: "No research registered yet",
-  },
-  {
-    key: "visualWorks" as const,
-    title: "Visual",
-    subtitle: "Artwork, photography, images",
-    icon: <ImageIcon className="w-4 h-4" />,
-    accentColor: "text-rose-400",
-    borderColor: "border-rose-400/30",
-    glowColor: "rgba(251,113,133,0.12)",
-    emptyMessage: "No visual works registered yet",
-  },
-  {
-    key: "film" as const,
-    title: "Film",
-    subtitle: "Video works & motion content",
-    icon: <Film className="w-4 h-4" />,
-    accentColor: "text-orange-400",
-    borderColor: "border-orange-400/30",
-    glowColor: "rgba(251,146,60,0.12)",
-    emptyMessage: "No film works registered yet",
-  },
-  {
-    key: "doctrine" as const,
-    title: "Doctrine",
-    subtitle: "Comics & sequential art",
-    icon: <Feather className="w-4 h-4" />,
-    accentColor: "text-violet-400",
-    borderColor: "border-violet-400/30",
-    glowColor: "rgba(167,139,250,0.12)",
-    emptyMessage: "No doctrine works registered yet",
+    emptyMessage: "No songs registered yet",
   },
 ];
 
@@ -105,17 +57,12 @@ function useExploreData(seed: number, randomize: boolean, creatorId?: number) {
     { staleTime: 2 * 60 * 1000, refetchOnWindowFocus: false }
   );
   return {
-    featured: (data?.featured ?? []) as FeedRow[],
-    newManifestations: (data?.newManifestations ?? []) as FeedRow[],
-    music: (data?.music ?? []) as FeedRow[],
-    books: (data?.books ?? []) as FeedRow[],
-    research: (data?.research ?? []) as FeedRow[],
-    visualWorks: (data?.visualWorks ?? []) as FeedRow[],
-    film: (data?.film ?? []) as FeedRow[],
-    doctrine: (data?.doctrine ?? []) as FeedRow[],
-    recentlyWitnessed: (data?.recentlyWitnessed ?? []) as FeedRow[],
-    hiddenGems: (data?.hiddenGems ?? []) as FeedRow[],
-    trending: (data?.trending ?? []) as FeedRow[],
+    featured: ((data?.featured ?? []) as FeedRow[]).filter(isAudioRow),
+    newManifestations: ((data?.newManifestations ?? []) as FeedRow[]).filter(isAudioRow),
+    music: ((data?.music ?? []) as FeedRow[]).filter(isAudioRow),
+    recentlyWitnessed: ((data?.recentlyWitnessed ?? []) as FeedRow[]).filter(isAudioRow),
+    hiddenGems: ((data?.hiddenGems ?? []) as FeedRow[]).filter(isAudioRow),
+    trending: ((data?.trending ?? []) as FeedRow[]).filter(isAudioRow),
     isLoading, error,
   };
 }
@@ -157,23 +104,13 @@ function feedRowToTrack(row: FeedRow): Track {
 function ContentTypeIcon({ contentType }: { contentType: string }) {
   switch (contentType) {
     case "audio": return <FileAudio className="w-3.5 h-3.5" />;
-    case "video": return <FileVideo className="w-3.5 h-3.5" />;
     case "lyrics": return <FileText className="w-3.5 h-3.5" />;
-    case "manuscript": return <BookOpen className="w-3.5 h-3.5" />;
-    case "comic": return <FileImage className="w-3.5 h-3.5" />;
     default: return <File className="w-3.5 h-3.5" />;
   }
 }
 
 const CONTENT_ACTION: Record<string, { label: string; icon: React.ReactNode }> = {
-  audio:      { label: "Play",  icon: <Play className="w-5 h-5 ml-0.5" fill="currentColor" /> },
-  lyrics:     { label: "Read",  icon: <FileText className="w-5 h-5" /> },
-  manuscript: { label: "Read",  icon: <BookOpen className="w-5 h-5" /> },
-  comic:      { label: "Read",  icon: <BookOpen className="w-5 h-5" /> },
-  image:      { label: "View",  icon: <ImageIcon className="w-5 h-5" /> },
-  game:       { label: "Watch", icon: <Film className="w-5 h-5" /> },
-  gcode:      { label: "View",  icon: <Eye className="w-5 h-5" /> },
-  "3dmodel":  { label: "View",  icon: <Eye className="w-5 h-5" /> },
+  audio: { label: "Play", icon: <Play className="w-5 h-5 ml-0.5" fill="currentColor" /> },
 };
 function getContentAction(contentType?: string) {
   return CONTENT_ACTION[contentType ?? "audio"] ?? CONTENT_ACTION["audio"];
@@ -661,15 +598,7 @@ export default function ExplorePage() {
   const params = useParams<{ medium?: string }>();
   const mediumParam = params.medium?.toLowerCase();
   // Map URL segment to column key
-  const MEDIUM_MAP: Record<string, ColumnKey> = {
-    music: "music", audio: "music", songs: "music",
-    books: "books", book: "books", manuscripts: "books",
-    research: "research", papers: "research", essays: "research",
-    visual: "visualWorks", visuals: "visualWorks", images: "visualWorks", art: "visualWorks",
-    film: "film", video: "film", videos: "film",
-    doctrine: "doctrine", comics: "doctrine",
-  };
-  const focusedColumn = mediumParam ? MEDIUM_MAP[mediumParam] ?? null : null;
+  void mediumParam; // /explore/:medium redirects to /explore in App
 
   const [seed] = useState(() => Math.floor(Math.random() * 999999));
   const [search, setSearch] = useState("");
@@ -715,7 +644,7 @@ export default function ExplorePage() {
           <div className="flex items-center justify-between pt-4 pb-2 gap-3 flex-wrap">
             <div className="flex-shrink-0">
               <h1 className="font-heading font-bold tracking-[0.08em] leading-none" style={{ fontSize: "clamp(1.5rem,1.3rem+1vw,2.25rem)", color: "var(--ln-parchment)" }}>Explore</h1>
-              <p className="font-editorial italic mt-0.5 hidden sm:block" style={{ fontSize: "0.8rem", color: "var(--ln-smoke)", letterSpacing: "0.02em" }}>The Grand Hall of Human Creative Contribution</p>
+              <p className="font-editorial italic mt-0.5 hidden sm:block" style={{ fontSize: "0.8rem", color: "var(--ln-smoke)", letterSpacing: "0.02em" }}>Songs & artists — music provenance discovery</p>
             </div>
             <div className="flex items-center gap-2 sm:gap-3 flex-wrap justify-end">
               <div className="flex items-center gap-1.5">
@@ -794,7 +723,7 @@ export default function ExplorePage() {
             {!search && !selectedCreatorId && viewMode === "columns" && (
               <div className="flex items-center gap-4 my-6">
                 <div className="h-px flex-1 bg-gradient-to-r from-transparent via-[var(--gold)]/30 to-transparent" />
-                <span className="text-[10px] font-mono text-[var(--gold)] uppercase tracking-widest px-2">By Type</span>
+                <span className="text-[10px] font-mono text-[var(--gold)] uppercase tracking-widest px-2">Songs</span>
                 <div className="h-px flex-1 bg-gradient-to-l from-transparent via-[var(--gold)]/30 to-transparent" />
               </div>
             )}
@@ -836,7 +765,7 @@ export default function ExplorePage() {
             <div className="py-16 text-center border-t border-white/5 mt-8">
               <div className="h-px w-24 bg-gradient-to-r from-transparent via-[var(--gold)]/40 to-transparent mx-auto mb-6" />
               <p className="text-xs font-mono text-[var(--stone-shadow)] uppercase tracking-widest mb-2">Living Nexus</p>
-              <p className="text-sm text-[var(--stone-shadow)] max-w-sm mx-auto leading-relaxed">Every work is a preserved manifestation. Every creator is a steward. Every discovery is intentional.</p>
+              <p className="text-sm text-[var(--stone-shadow)] max-w-sm mx-auto leading-relaxed">Every track is a preserved manifestation. Every artist is a steward. Every discovery is intentional.</p>
             </div>
           </>
         )}

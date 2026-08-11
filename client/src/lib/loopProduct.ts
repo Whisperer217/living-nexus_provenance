@@ -5,7 +5,7 @@
  * All other creative mediums and adjacent product systems are out of scope.
  *
  * Product spine:
- *   Discover → Work → Creator → Register → Manage → Verify
+ *   Discover → Register → Work → Creator → Manage → Verify
  */
 
 export const LOOP_PRODUCT = {
@@ -101,7 +101,7 @@ export const SURFACE_MAP = {
   register: { path: "/manifest", job: "Seal audio into the registry", authRequired: true },
   manage: { path: "/manage", job: "Catalog ops", authRequired: true },
   pna: { path: "/pna", job: "Stewarded creator OS", authRequired: true },
-  pnaStore: { path: "/avatar-registry", job: "Skins, slots, personality — PNA commerce" },
+  pnaStore: { path: "/avatar-registry", job: "Skins, slots, personality — PNA commerce (/keeper companion)" },
 } as const;
 
 export const DISCORD_COMMUNITY_URL = "https://discord.gg/ADF9dtVA";

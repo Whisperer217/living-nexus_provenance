@@ -657,13 +657,11 @@ export default function PlaylistDrawer() {
     touchStartX.current = null;
   };
 
-  // Handle tab click: open + switch tab, or collapse if already active
-  // SHOP tab dispatches a custom event to open MarketplaceDrawer instead
+  // SHOP tab opens the PNA Store (avatar registry) — not a Loop-chrome marketplace drawer
   function handleTabClick(tabId: PlaylistTab) {
     if (tabId === "shop") {
-      // Close this drawer and open the Marketplace drawer
       setIsOpen(false);
-      window.dispatchEvent(new CustomEvent("ln:open-shop"));
+      window.location.href = "/avatar-registry";
       return;
     }
     if (isOpen && activeTab === tabId) {

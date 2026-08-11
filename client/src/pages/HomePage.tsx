@@ -60,7 +60,7 @@ const PROCESS_STEPS = [
   {
     n: "01",
     title: "Capture",
-    body: "Bring a track, lyric, image, or note into the stewarded workspace.",
+    body: "Bring a track into the stewarded workspace.",
   },
   {
     n: "02",

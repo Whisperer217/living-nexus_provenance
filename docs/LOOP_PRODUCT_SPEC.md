@@ -187,8 +187,8 @@ Guides level through **platform signals**, not XP theatre inside Register:
 | **PNA Store** (`/avatar-registry`, `/keeper`, skin/slot purchase) | Skins, backstory slots, personality locks — same structure as on-site avatars | Browse; purchase requires auth | Buy / equip / configure |
 
 ### Insulation
-- **Not on Explore:** Keeper skins shop, Guides marketplace, non-music multimedia commerce
-- **Not on Home:** Full Discover feed / dense registry ops — Home teaches and invites
+- **Not on Explore:** Keeper skins shop, Guides marketplace, non-music multimedia columns/commerce — **songs & artists only**
+- **Not on Home / Loop chrome:** Full Discover feed, dense registry ops, floating marketplace/skins drawer — Home teaches and invites; skins live in PNA Store
 - **Guest support:** listening, tipping, and public provenance viewing remain open unless an action explicitly requires auth (register, seal, manage, skin purchase, PNA workspace mutations)
 
 ### Entry
