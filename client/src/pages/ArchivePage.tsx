@@ -257,7 +257,7 @@ function ConfirmDeleteModal({
         <p className="font-bold text-lg mb-1" style={{ color: "var(--ln-ember)", fontFamily: "'Cinzel', serif" }}>
           Delete Track
         </p>
-        <p className="text-sm mb-1" style={{ color: "#E2E8F0" }}>
+        <p className="text-sm mb-1" style={{ color: "var(--ln-parchment)" }}>
           Are you sure you want to delete:
         </p>
         <p className="font-semibold mb-4 truncate" style={{ color: "var(--ln-parchment)" }}>
@@ -278,7 +278,7 @@ function ConfirmDeleteModal({
               WID Preserved
             </p>
           </div>
-          <p className="text-xs leading-relaxed" style={{ color: "#E2E8F0" }}>
+          <p className="text-xs leading-relaxed" style={{ color: "var(--ln-parchment)" }}>
             Your Witness ID{" "}
             <span className="font-mono text-[11px]" style={{ color: "var(--ln-gold)" }}>
               {song.witnessId}
@@ -304,7 +304,7 @@ function ConfirmDeleteModal({
             onClick={onCancel}
             disabled={isPending}
             className="flex-1 py-2.5 rounded-xl text-sm"
-            style={{ border: "1px solid #C3AB7D", color: "#E2E8F0" }}
+            style={{ border: "1px solid #C3AB7D", color: "var(--ln-parchment)" }}
           >
             Cancel
           </button>
@@ -671,7 +671,7 @@ export default function ArchivePage() {
   })();
   return (
     <>
-    <div className="min-h-screen" style={{ background: "#000000" }}>
+    <div className="min-h-screen" style={{ background: "var(--background)" }}>
       {/* ── Hero Banner ─────────────────────────────────────────────────── */}
       <div className="relative w-full overflow-hidden" style={{ height: "200px" }}>
         <img
@@ -691,7 +691,7 @@ export default function ArchivePage() {
       <div className="container py-10 max-w-4xl mx-auto px-4" style={{ paddingBottom: "calc(100px + env(safe-area-inset-bottom, 0px))" }}>
 
         {/* ── Breadcrumb ──────────────────────────────────────────── */}
-        <nav className="flex items-center gap-1.5 text-xs mb-5" style={{ color: "#E2E8F0" }}>
+        <nav className="flex items-center gap-1.5 text-xs mb-5" style={{ color: "var(--ln-parchment)" }}>
           <Link href="/dashboard">
             <span className="hover:underline cursor-pointer" style={{ color: "var(--ln-gold)" }}>Dashboard</span>
           </Link>
@@ -988,7 +988,7 @@ export default function ArchivePage() {
                 style={{
                   background: "rgba(255,255,255,0.05)",
                   border: trackSearch ? "1px solid rgba(196,154,40,0.45)" : "1px solid rgba(255,255,255,0.1)",
-                  color: "#E2E8F0",
+                  color: "var(--ln-parchment)",
                 }}
               />
               {trackSearch && (
@@ -1074,7 +1074,7 @@ export default function ArchivePage() {
           <div className="flex items-center justify-between mb-3">
             {/* Left: count + batch toggle */}
             <div className="flex items-center gap-3">
-              <p className="text-xs" style={{ color: "#E2E8F0" }}>
+              <p className="text-xs" style={{ color: "var(--ln-parchment)" }}>
                 {nonDeletedCount} {nonDeletedCount === 1 ? "work" : "works"}
               </p>
               <button
@@ -1172,7 +1172,7 @@ export default function ArchivePage() {
               <p className="font-bold text-lg mb-1" style={{ color: "var(--ln-ember)", fontFamily: "'Cinzel', serif" }}>
                 Delete {selectedIds.size} Track{selectedIds.size === 1 ? "" : "s"}
               </p>
-              <p className="text-sm mb-4" style={{ color: "#E2E8F0" }}>
+              <p className="text-sm mb-4" style={{ color: "var(--ln-parchment)" }}>
                 This will remove {selectedIds.size} track{selectedIds.size === 1 ? "" : "s"} from public view. This action cannot be undone.
               </p>
               <div
@@ -1183,7 +1183,7 @@ export default function ArchivePage() {
                   <Shield className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "var(--ln-gold)" }} />
                   <p className="text-xs font-bold" style={{ color: "var(--ln-gold)" }}>WID Records Preserved</p>
                 </div>
-                <p className="text-xs leading-relaxed" style={{ color: "#E2E8F0" }}>
+                <p className="text-xs leading-relaxed" style={{ color: "var(--ln-parchment)" }}>
                   All Witness IDs for the selected tracks remain on record permanently. Cryptographic proof of origin is never deleted.
                 </p>
               </div>
@@ -1204,7 +1204,7 @@ export default function ArchivePage() {
                   onClick={() => setBatchDeleteConfirm(false)}
                   disabled={batchDeleteMutation.isPending}
                   className="flex-1 py-2.5 rounded-xl text-sm"
-                  style={{ border: "1px solid #C3AB7D", color: "#E2E8F0" }}
+                  style={{ border: "1px solid #C3AB7D", color: "var(--ln-parchment)" }}
                 >
                   Cancel
                 </button>
@@ -1480,14 +1480,14 @@ export default function ArchivePage() {
                     })()}
                     {/* Genre — only if no WID shown */}
                     {!song.witnessId && song.genre && (
-                      <p className="text-xs mt-0.5 truncate" style={{ color: "#E2E8F0" }}>
+                      <p className="text-xs mt-0.5 truncate" style={{ color: "var(--ln-parchment)" }}>
                         {song.genre}
                       </p>
                     )}
                   </div>
 
                   {/* Upload date */}
-                  <span className="text-xs flex-shrink-0 hidden sm:block" style={{ color: "#E2E8F0" }}>
+                  <span className="text-xs flex-shrink-0 hidden sm:block" style={{ color: "var(--ln-parchment)" }}>
                     {formatDate(song.createdAt)}
                   </span>
 

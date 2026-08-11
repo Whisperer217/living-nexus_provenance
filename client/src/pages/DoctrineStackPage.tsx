@@ -266,7 +266,7 @@ function LayerCard({
               style={{
                 fontFamily: "'Cinzel', serif",
                 fontSize: "0.95rem",
-                color: expanded ? "rgba(255,255,255,0.97)" : "rgba(255,255,255,0.75)",
+                color: expanded ? "var(--ln-parchment)" : "var(--ln-bone)",
                 transition: "color 0.3s ease",
               }}
             >
@@ -294,7 +294,7 @@ function LayerCard({
           <div className="mt-5 pt-5" style={{ borderTop: `1px solid ${layer.dimColor}` }}>
             <p
               className="text-sm leading-relaxed mb-4"
-              style={{ color: "rgba(232,223,200,0.82)", lineHeight: 1.75 }}
+              style={{ color: "var(--ln-bone)", lineHeight: 1.75 }}
             >
               {layer.doctrine}
             </p>
@@ -391,7 +391,7 @@ export default function DoctrineStackPage() {
             style={{
               fontFamily: "'Cinzel', serif",
               fontSize: "clamp(1.8rem, 5vw, 3rem)",
-              color: "rgba(255,255,255,0.97)",
+              color: "var(--ln-parchment)",
               letterSpacing: "0.04em",
               textShadow: "0 0 60px rgba(196,154,40,0.15)",
               lineHeight: 1.2,
@@ -404,7 +404,7 @@ export default function DoctrineStackPage() {
           <p
             className="text-sm mx-auto"
             style={{
-              color: "rgba(232,223,200,0.55)",
+              color: "var(--ln-smoke)",
               maxWidth: 440,
               lineHeight: 1.75,
               fontFamily: "'Cinzel', serif",
@@ -447,7 +447,7 @@ export default function DoctrineStackPage() {
               <div>
                 <p
                   className="font-heading tracking-[0.18em] uppercase"
-                  style={{ fontFamily: "'Cinzel', serif", fontSize: "1.05rem", color: "rgba(255,255,255,0.97)" }}
+                  style={{ fontFamily: "'Cinzel', serif", fontSize: "1.05rem", color: "var(--ln-parchment)" }}
                 >
                   Creator
                 </p>
@@ -508,7 +508,7 @@ export default function DoctrineStackPage() {
               <div>
                 <p
                   className="font-heading tracking-[0.14em] uppercase"
-                  style={{ fontFamily: "'Cinzel', serif", fontSize: "0.9rem", color: "rgba(255,255,255,0.90)" }}
+                  style={{ fontFamily: "'Cinzel', serif", fontSize: "0.9rem", color: "var(--ln-parchment)" }}
                 >
                   Creator Creates Again
                 </p>
@@ -580,7 +580,7 @@ export default function DoctrineStackPage() {
               <div>
                 <p
                   className="font-heading tracking-[0.18em] uppercase"
-                  style={{ fontFamily: "'Cinzel', serif", fontSize: "1.05rem", color: "rgba(255,255,255,0.90)" }}
+                  style={{ fontFamily: "'Cinzel', serif", fontSize: "1.05rem", color: "var(--ln-parchment)" }}
                 >
                   Society
                 </p>
@@ -633,7 +633,7 @@ export default function DoctrineStackPage() {
               style={{
                 fontFamily: "'Cinzel', serif",
                 fontSize: "clamp(1rem, 2.5vw, 1.25rem)",
-                color: "rgba(255,255,255,0.85)",
+                color: "var(--ln-parchment)",
                 letterSpacing: "0.04em",
                 lineHeight: 1.5,
               }}
@@ -642,7 +642,7 @@ export default function DoctrineStackPage() {
             </p>
             <p
               className="text-sm"
-              style={{ color: "rgba(232,223,200,0.45)", lineHeight: 1.75, maxWidth: 420, margin: "0 auto" }}
+              style={{ color: "var(--ln-smoke)", lineHeight: 1.75, maxWidth: 420, margin: "0 auto" }}
             >
               Every work that enters the registry strengthens the chain. Every citation adds a node.
               Every payment closes a loop. Every creator who creates again proves the architecture works.

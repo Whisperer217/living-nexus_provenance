@@ -741,7 +741,7 @@ export default function LexiconPage() {
               onChange={(e) => setQuery(e.target.value)}
               className="w-full pl-11 pr-10 py-3.5 rounded-xl text-sm outline-none transition-all"
               style={{
-                background: "rgba(28,26,20,0.9)",
+                background: "color-mix(in srgb, var(--ln-obsidian) 90%, transparent)",
                 border: "1px solid rgba(196,154,40,0.2)",
                 color: "var(--ln-parchment)",
               }}
@@ -848,7 +848,7 @@ export default function LexiconPage() {
                         {section.label}
                       </h2>
                     </div>
-                    <p className="text-sm max-w-lg" style={{ color: "rgba(232,223,200,0.75)" }}>
+                    <p className="text-sm max-w-lg" style={{ color: "color-mix(in srgb, var(--ln-parchment) 75%, transparent)" }}>
                       {section.tagline}
                     </p>
                     <p className="text-xs mt-2" style={{ color: "rgba(107,101,85,0.8)" }}>

@@ -124,7 +124,7 @@ export default function RightRail() {
           transform: "translateY(-50%)",
           width: 20,
           height: 48,
-          background: "rgba(0,0,0,0.95)",
+          background: "var(--ln-panel)",
           border: "1px solid rgba(212,175,55,0.18)",
           borderRight: isOpen ? "none" : "1px solid rgba(212,175,55,0.18)",
           borderRadius: isOpen ? "6px 0 0 6px" : "0 6px 6px 0",
@@ -147,7 +147,7 @@ export default function RightRail() {
           right: isOpen ? 0 : -300,
           bottom: 0,
           width: 300,
-          background: "rgba(0,0,0,0.95)",
+          background: "var(--ln-panel)",
           borderLeft: "1px solid rgba(212,175,55,0.08)",
           /* z-index: 80 — below ContextDrawer (300) and LeftRail (310),
              but above page content so it never disappears behind it */
@@ -183,15 +183,15 @@ export default function RightRail() {
                 <div key={i} className="flex items-start gap-2 py-2 border-b animate-pulse" style={{ borderColor: "rgba(212,175,55,0.06)" }}>
                   <div style={{ width: 12, height: 12, borderRadius: 3, background: "rgba(212,175,55,0.12)", marginTop: 2, flexShrink: 0 }} />
                   <div className="flex-1">
-                    <div style={{ height: 10, borderRadius: 4, background: "rgba(255,255,255,0.07)", marginBottom: 4 }} />
-                    <div style={{ height: 8, width: "50%", borderRadius: 4, background: "rgba(255,255,255,0.04)" }} />
+                    <div style={{ height: 10, borderRadius: 4, background: "color-mix(in srgb, var(--ln-parchment) 7%, transparent)", marginBottom: 4 }} />
+                    <div style={{ height: 8, width: "50%", borderRadius: 4, background: "color-mix(in srgb, var(--ln-parchment) 4%, transparent)" }} />
                   </div>
                 </div>
               ))}
             </div>
           )}
           {user && !signalsLoading && (signals as any[] | undefined)?.length === 0 && (
-            <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.3)" }}>No signals yet.</p>
+            <p className="text-[11px]" style={{ color: "color-mix(in srgb, var(--ln-parchment) 30%, transparent)" }}>No signals yet.</p>
           )}
           {user && (signals as any[] | undefined)?.map((sig: any) => (
             <div
@@ -209,16 +209,16 @@ export default function RightRail() {
                     {sig.actorName}
                   </p>
                 )}
-                <p className="text-[11px] leading-snug line-clamp-2" style={{ color: sig.title ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,0.65)" }}>
+                <p className="text-[11px] leading-snug line-clamp-2" style={{ color: sig.title ? "color-mix(in srgb, var(--ln-parchment) 85%, transparent)" : "color-mix(in srgb, var(--ln-parchment) 65%, transparent)" }}>
                   {sig.title ?? sig.body ?? "New signal"}
                 </p>
                 {/* Body is the comment/content preview — show as secondary line when title is also present */}
                 {sig.body && sig.title && (
-                  <p className="text-[10px] leading-snug line-clamp-1 mt-0.5" style={{ color: "rgba(255,255,255,0.40)" }}>
+                  <p className="text-[10px] leading-snug line-clamp-1 mt-0.5" style={{ color: "color-mix(in srgb, var(--ln-parchment) 40%, transparent)" }}>
                     {sig.body}
                   </p>
                 )}
-                <p className="text-[10px] mt-0.5" style={{ color: "rgba(255,255,255,0.3)" }}>
+                <p className="text-[10px] mt-0.5" style={{ color: "color-mix(in srgb, var(--ln-parchment) 30%, transparent)" }}>
                   {sig.createdAt ? timeAgo(typeof sig.createdAt === "number" ? sig.createdAt : new Date(sig.createdAt).getTime()) : ""}
                 </p>
               </div>
@@ -226,7 +226,7 @@ export default function RightRail() {
           ))}
           {/* Not logged-in: public activity feed */}
           {!user && (publicFeed as any[] | undefined)?.length === 0 && (
-            <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.3)" }}>No recent activity.</p>
+            <p className="text-[11px]" style={{ color: "color-mix(in srgb, var(--ln-parchment) 30%, transparent)" }}>No recent activity.</p>
           )}
           {!user && (publicFeed as any[] | undefined)?.map((item: any) => (
             <div
@@ -237,13 +237,13 @@ export default function RightRail() {
             >
               <SignalIcon type={item.type} />
               <div className="flex-1 min-w-0">
-                <p className="text-[11px] leading-snug line-clamp-2" style={{ color: "rgba(255,255,255,0.75)" }}>
+                <p className="text-[11px] leading-snug line-clamp-2" style={{ color: "color-mix(in srgb, var(--ln-parchment) 75%, transparent)" }}>
                   {item.type === "tip" && `${item.actorName} tipped ${item.songTitle ? `“${item.songTitle}”` : "a track"}`}
                   {item.type === "comment" && `${item.actorName} commented on ${item.songTitle ? `“${item.songTitle}”` : "a track"}`}
                   {item.type === "like" && `Someone liked ${item.songTitle ? `“${item.songTitle}”` : "a track"}`}
                   {item.type === "witness" && `New work witnessed: ${item.songTitle ?? "Untitled"}`}
                 </p>
-                <p className="text-[10px] mt-0.5" style={{ color: "rgba(255,255,255,0.3)" }}>
+                <p className="text-[10px] mt-0.5" style={{ color: "color-mix(in srgb, var(--ln-parchment) 30%, transparent)" }}>
                   {item.createdAt ? timeAgo(item.createdAt) : ""}
                 </p>
               </div>
@@ -331,7 +331,7 @@ export default function RightRail() {
                   <div className="flex-1 min-w-0 flex flex-col justify-between">
                     {/* Title + verified badge */}
                     <div className="flex items-start justify-between gap-1">
-                      <p className="text-[11px] font-medium leading-tight" style={{ color: "rgba(255,255,255,0.88)", overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>
+                      <p className="text-[11px] font-medium leading-tight" style={{ color: "color-mix(in srgb, var(--ln-parchment) 88%, transparent)", overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>
                         {w.title}
                       </p>
                       <CheckCircle2 size={11} style={{ color: "#D4AF37", flexShrink: 0, marginTop: 1 }} />
@@ -339,7 +339,7 @@ export default function RightRail() {
 
                     {/* Creator handle */}
                     {handle && (
-                      <p className="text-[10px] truncate mt-0.5" style={{ color: "rgba(255,255,255,0.4)" }}>
+                      <p className="text-[10px] truncate mt-0.5" style={{ color: "color-mix(in srgb, var(--ln-parchment) 40%, transparent)" }}>
                         {handle}
                       </p>
                     )}
@@ -378,7 +378,7 @@ export default function RightRail() {
           </div>
 
           {provenanceTracks.length === 0 && (
-            <p className="text-[11px] mt-1" style={{ color: "rgba(255,255,255,0.3)" }}>No verified works yet.</p>
+            <p className="text-[11px] mt-1" style={{ color: "color-mix(in srgb, var(--ln-parchment) 30%, transparent)" }}>No verified works yet.</p>
           )}
         </section>
 
@@ -400,7 +400,7 @@ export default function RightRail() {
             <p className="text-2xl font-bold" style={{ color: "#D4AF37" }}>
               {registryItems.length > 0 ? (totalWitnesses ?? registryItems.length).toLocaleString() : "—"}
             </p>
-            <p className="text-[10px] mt-0.5" style={{ color: "rgba(255,255,255,0.4)" }}>
+            <p className="text-[10px] mt-0.5" style={{ color: "color-mix(in srgb, var(--ln-parchment) 40%, transparent)" }}>
               Total Witnesses<br />Across all works
             </p>
           </div>
@@ -414,10 +414,10 @@ export default function RightRail() {
                 onClick={() => navigate(`/song/${item.songId ?? item.id}`)}
               >
                 <Shield size={10} style={{ color: "rgba(212,175,55,0.5)", flexShrink: 0 }} />
-                <p className="text-[10px] truncate flex-1" style={{ color: "rgba(255,255,255,0.55)" }}>
+                <p className="text-[10px] truncate flex-1" style={{ color: "color-mix(in srgb, var(--ln-parchment) 55%, transparent)" }}>
                   {item.title ?? item.songTitle ?? "Untitled"}
                 </p>
-                <p className="text-[9px] flex-shrink-0" style={{ color: "rgba(255,255,255,0.25)" }}>
+                <p className="text-[9px] flex-shrink-0" style={{ color: "color-mix(in srgb, var(--ln-parchment) 25%, transparent)" }}>
                   {item.createdAt ? timeAgo(typeof item.createdAt === "number" ? item.createdAt : new Date(item.createdAt).getTime()) : ""}
                 </p>
               </div>
@@ -470,14 +470,14 @@ export default function RightRail() {
                         </div>
                     }
                     <div className="flex-1 min-w-0">
-                      <p className="text-[11px] font-medium truncate" style={{ color: "rgba(255,255,255,0.8)" }}>
+                      <p className="text-[11px] font-medium truncate" style={{ color: "color-mix(in srgb, var(--ln-parchment) 80%, transparent)" }}>
                         {item.title ?? item.songTitle ?? "Untitled"}
                       </p>
                       <p className="text-[9px] truncate" style={{ color: "rgba(212,175,55,0.5)" }}>
                         {item.artistName ?? item.creatorName ?? item.userName ?? ""}
                       </p>
                     </div>
-                    <p className="text-[9px] flex-shrink-0" style={{ color: "rgba(255,255,255,0.25)" }}>
+                    <p className="text-[9px] flex-shrink-0" style={{ color: "color-mix(in srgb, var(--ln-parchment) 25%, transparent)" }}>
                       {item.createdAt ? timeAgo(typeof item.createdAt === "number" ? item.createdAt : new Date(item.createdAt).getTime()) : ""}
                     </p>
                   </div>
