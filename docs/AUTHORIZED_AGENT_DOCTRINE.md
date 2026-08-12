@@ -55,7 +55,7 @@ CAPABILITIES  BRIDGES  CONTINUITY
 | **Bridge** | Provenance-crossing connector to an external system or off-platform reasoning engine. |
 | **Commission** | Creator (or admin) direction that starts an authorized run of agency. |
 | **Exchange** | Conversational turn sequence (chat). Working state, not Domain Continuity. |
-| **Domain Continuity** | Creator’s attributable knowledge across agents, models, and time. Never called “AI memory.” |
+| **Domain Continuity** | Creator’s attributable knowledge across agents, models, and time. Never called “AI memory.” Recorded continuity truths obey Law V: they cannot be erased — only access-restricted or superseded. |
 | **Knowledge Record** | Provenance-bearing unit of knowledge (originated / witnessed / derived / external / unverified). |
 | **Agent Ledger** | Append-only record of consequential agent actions. |
 | **Reasoning Engine** | Model that produces derivations. Local-first; off-platform via Bridge. |
@@ -256,7 +256,9 @@ Knowledge Records live in the domain:
 | External | Entered via Bridge |
 | Unverified | Encountered claim, no established provenance |
 
-Agents retrieve **Domain Continuity** via Provenance Retrieval — attributable, inspectable, revocable.
+**Immutability (Law V):** Once a Knowledge Record, Agent Ledger entry, or other Chain-of-Record truth is recorded, it **cannot be erased**. Creators and admins may **revoke access** (restrict who can retrieve or act on it) or **supersede** it with a newer record — never delete recorded truth.
+
+Agents retrieve **Domain Continuity** via Provenance Retrieval — attributable, inspectable; access may be restricted, records may be superseded, but recorded truth is not erased.
 
 ---
 
@@ -317,7 +319,7 @@ IDENTIFIER (Admin)
 
 Rules:
 - **Identifier required** — every admin act attributed  
-- **Full charter** ≠ rewrite origin — cannot forge WIDs or erase lineage  
+- **Full charter** ≠ rewrite origin — cannot forge WIDs, erase lineage, or delete Chain-of-Record truth; may restrict access or supersede records only  
 - **Creator Domain remains sovereign** — admin stewards the Nexus, does not own creator meaning  
 - **Admin Ledger** parallels Agent Ledger  
 - UI must show: `Acting as Admin <identifier>`
@@ -354,6 +356,7 @@ Theme: one ThemeProvider owner; no competing Lights/theme fights on agent chrome
 ## 12. Hard prohibitions
 
 - Do not call Domain Continuity “AI memory.”  
+- Do not erase recorded Chain-of-Record or Domain Continuity truth — revoke access or supersede only (Law V).  
 - Do not let agents silent-publish or silent-seal.  
 - Do not make Manus (or any vendor) required for domain stewardship.  
 - Do not build multi-agent spectacle before Agent Ledger + Capabilities exist.  
