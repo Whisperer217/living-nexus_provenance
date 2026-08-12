@@ -104,8 +104,8 @@ export const SURFACE_MAP = {
   pnaStore: { path: "/avatar-registry", job: "Skins, slots, personality — PNA commerce (/keeper companion)" },
 } as const;
 
-/** Canonical Living Nexus community invite. */
-export const DISCORD_COMMUNITY_URL = "https://discord.gg/GfyPrjzU6";
+/** Canonical Living Nexus community invite (non-expiring). */
+export const DISCORD_COMMUNITY_URL = "https://discord.gg/dqCmTY5Ucb";
 
 /** Guild id for Discord server widget embed (Server Settings → Widget). */
 export const DISCORD_GUILD_ID = "1459384199025918073";
