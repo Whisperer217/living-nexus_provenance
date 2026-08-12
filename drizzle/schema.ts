@@ -172,6 +172,65 @@ export const agents = mysqlTable("agents", {
 export type Agent = typeof agents.$inferSelect;
 export type InsertAgent = typeof agents.$inferInsert;
 
+// ─── Authorized Agent Foundation (music Draft beachhead) ───────────────────────
+// These tables deliberately sit beside, rather than inside, WID provenance events.
+// They record granted authority and consequential agentic actions without changing
+// the semantics of an existing Chain-of-Record event or WID.
+export const agentCapabilityAuthorities = mysqlTable("agentCapabilityAuthorities", {
+  id: int("id").autoincrement().primaryKey(),
+  creatorId: int("creatorId").notNull(),
+  agentId: int("agentId").notNull(),
+  capability: mysqlEnum("capability", ["music_draft"]).notNull().default("music_draft"),
+  enabled: boolean("enabled").notNull().default(false),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (t) => ({
+  creatorAgentCapabilityUnique: uniqueIndex("agentCapabilityAuthorities_creator_agent_capability_uq").on(t.creatorId, t.agentId, t.capability),
+  creatorIdx: index("agentCapabilityAuthorities_creatorId_idx").on(t.creatorId),
+}));
+
+export const agentCommissions = mysqlTable("agentCommissions", {
+  commissionId: varchar("commissionId", { length: 64 }).primaryKey(),
+  creatorId: int("creatorId").notNull(),
+  agentId: int("agentId").notNull(),
+  songId: int("songId").notNull(),
+  capability: mysqlEnum("capability", ["music_draft"]).notNull().default("music_draft"),
+  direction: text("direction").notNull(),
+  status: mysqlEnum("status", ["active", "revoked", "completed"]).notNull().default("active"),
+  issuedAt: timestamp("issuedAt").defaultNow().notNull(),
+  revokedAt: timestamp("revokedAt"),
+  completedAt: timestamp("completedAt"),
+}, (t) => ({
+  creatorIdx: index("agentCommissions_creatorId_idx").on(t.creatorId),
+  songIdx: index("agentCommissions_songId_idx").on(t.songId),
+  agentIdx: index("agentCommissions_agentId_idx").on(t.agentId),
+  statusIdx: index("agentCommissions_status_idx").on(t.status),
+}));
+
+// Insert-only at the application boundary. There are intentionally no mutation
+// helpers or tRPC procedures for this table; Law V evidence is never rewritten.
+export const agentLedgerEntries = mysqlTable("agentLedgerEntries", {
+  entryId: varchar("entryId", { length: 64 }).primaryKey(),
+  creatorId: int("creatorId").notNull(),
+  agentId: int("agentId").notNull(),
+  agentIdentifier: varchar("agentIdentifier", { length: 96 }).notNull(),
+  commissionId: varchar("commissionId", { length: 64 }),
+  songId: int("songId"),
+  capability: mysqlEnum("capability", ["music_draft"]).notNull().default("music_draft"),
+  action: mysqlEnum("action", ["capability_enabled", "capability_disabled", "commission_issued"]).notNull(),
+  payloadCanonical: text("payloadCanonical").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (t) => ({
+  creatorIdx: index("agentLedgerEntries_creatorId_idx").on(t.creatorId),
+  commissionIdx: index("agentLedgerEntries_commissionId_idx").on(t.commissionId),
+  songIdx: index("agentLedgerEntries_songId_idx").on(t.songId),
+  createdIdx: index("agentLedgerEntries_createdAt_idx").on(t.createdAt),
+}));
+
+export type AgentCapabilityAuthority = typeof agentCapabilityAuthorities.$inferSelect;
+export type AgentCommission = typeof agentCommissions.$inferSelect;
+export type AgentLedgerEntry = typeof agentLedgerEntries.$inferSelect;
+
 // ─── WIDs (Witness IDs — provenance anchors) ──────────────────────────────────
 export const wids = mysqlTable("wids", {
   wid: varchar("wid", { length: 64 }).primaryKey(),

@@ -12,6 +12,13 @@ import { storagePut } from "../utils/storage";
 import { micronize } from "../services/imageProcessing";
 import { invokeLLM } from "../_core/llm";
 import {
+  getMusicDraftCapabilityAuthority,
+  issueMusicDraftCommission,
+  listAgentLedgerEntries,
+  listMusicDraftCommissions,
+  setMusicDraftCapabilityAuthority,
+} from "../services/agenticFoundation";
+import {
   addComment, createSong, deleteSong, getAllCreators,
   getCommentsBySong, getPublicSongs, getSongById,
   getSongsByUser, getSongWithCreator, getTipsBySong, reorderSongs, getNextDisplayOrder,
@@ -220,6 +227,24 @@ export const agentsRouter = router({
         await updateAgentFingerprint(input.agentId, input.styleFingerprint, input.frozenTraits);
         return { ok: true };
       }),
+    /** First governed agentic slice: explicit capability authority for private audio Drafts only. */
+    musicDraftCapability: protectedProcedure
+      .query(async ({ ctx }) => getMusicDraftCapabilityAuthority(ctx.user.id)),
+    setMusicDraftCapability: protectedProcedure
+      .input(z.object({ enabled: z.boolean() }))
+      .mutation(async ({ ctx, input }) => setMusicDraftCapabilityAuthority(ctx.user.id, input.enabled)),
+    /** Issues a single, creator-directed Commission. It cannot publish, seal, or invoke a Bridge. */
+    issueMusicDraftCommission: protectedProcedure
+      .input(z.object({
+        songId: z.number().int().positive(),
+        direction: z.string().trim().min(1).max(4000),
+      }))
+      .mutation(async ({ ctx, input }) => issueMusicDraftCommission(ctx.user.id, input)),
+    musicDraftCommissions: protectedProcedure
+      .input(z.object({ limit: z.number().int().min(1).max(100).optional() }).optional())
+      .query(async ({ ctx, input }) => listMusicDraftCommissions(ctx.user.id, input?.limit)),
+    agentLedger: protectedProcedure
+      .input(z.object({ limit: z.number().int().min(1).max(100).optional() }).optional())
+      .query(async ({ ctx, input }) => listAgentLedgerEntries(ctx.user.id, input?.limit)),
   });
-
 
