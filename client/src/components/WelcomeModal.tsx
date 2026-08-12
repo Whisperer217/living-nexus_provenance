@@ -18,8 +18,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, Music2, Shield, Users } from "lucide-react";
-
-const DISCORD_URL = "https://discord.gg/ADF9dtVA";
+import { DISCORD_COMMUNITY_URL } from "@/lib/loopProduct";
 
 const TIER_LABEL: Record<string, string> = {
   covenant: "Covenant Partner",
@@ -196,7 +195,7 @@ export default function WelcomeModal() {
             Get Started
           </Button>
           <a
-            href={DISCORD_URL}
+            href={DISCORD_COMMUNITY_URL}
             target="_blank"
             rel="noopener noreferrer"
             className="flex-1"
