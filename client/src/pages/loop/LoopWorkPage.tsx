@@ -9,7 +9,6 @@ import { Helmet } from "react-helmet-async";
 import { Link, useParams } from "wouter";
 import {
   Copy,
-  DollarSign,
   Heart,
   Loader2,
   Music,
@@ -206,12 +205,12 @@ export default function LoopWorkPage() {
             {song.title}
           </h1>
           <p
-            className="text-lg sm:text-xl mb-8 max-w-xl"
+            className="font-body text-lg sm:text-xl mb-8 max-w-xl"
             style={{
-              fontFamily: "'Cormorant Garamond', serif",
               color: "color-mix(in srgb, var(--ln-parchment) 78%, transparent)",
             }}
           >
+            {/* Hero keeps a compact teaser only — full origin lives in Testimony column */}
             {origin
               ? origin.slice(0, 140) + (origin.length > 140 ? "…" : "")
               : `Registered music by ${artistName}. Provenance sealed in the WID engine.`}
@@ -227,20 +226,6 @@ export default function LoopWorkPage() {
               {isPlaying ? <Pause size={16} fill="currentColor" /> : <Play size={16} fill="currentColor" />}
               {isPlaying ? "Pause" : "Listen"}
             </button>
-            {creator?.id && (
-              <button
-                type="button"
-                onClick={() => setSupportOpen(true)}
-                className="inline-flex items-center gap-2 px-5 py-3 rounded-full text-sm"
-                style={{
-                  border: "1px solid rgba(196,154,40,0.4)",
-                  color: "var(--ln-parchment)",
-                  background: "rgba(0,0,0,0.35)",
-                }}
-              >
-                <DollarSign size={15} /> Support
-              </button>
-            )}
             <button
               type="button"
               onClick={() => toggleLike()}
@@ -298,19 +283,61 @@ export default function LoopWorkPage() {
         </div>
       </section>
 
-      {/* Provenance + creator */}
-      <section className="max-w-5xl mx-auto px-4 sm:px-6 py-14">
-        <div className="grid md:grid-cols-[1.2fr_0.8fr] gap-12">
+      {/* Three columns: Testimony | Provenance | Creator */}
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 py-14">
+        <div className="grid gap-10 lg:grid-cols-[1.15fr_1fr_0.9fr] lg:gap-8 xl:gap-12">
+          {/* ── Left: Testimony (kept) ── */}
           <div>
             <p
-              className="text-[11px] uppercase tracking-[0.22em] mb-3"
-              style={{ color: "var(--ln-gold)", fontFamily: "'Cinzel', serif" }}
+              className="font-heading text-[11px] uppercase tracking-[0.22em] mb-3"
+              style={{ color: "var(--ln-gold)" }}
+            >
+              Testimony
+            </p>
+            <h2
+              className="font-heading text-2xl sm:text-3xl mb-6"
+              style={{ color: "var(--ln-parchment)" }}
+            >
+              Origin
+            </h2>
+            {origin ? (
+              <blockquote
+                className="font-body text-xl sm:text-2xl leading-relaxed"
+                style={{
+                  color: "color-mix(in srgb, var(--ln-parchment) 88%, transparent)",
+                  borderLeft: "2px solid rgba(196,154,40,0.45)",
+                  paddingLeft: 16,
+                }}
+              >
+                {origin}
+              </blockquote>
+            ) : (
+              <p className="font-body text-base" style={{ color: "color-mix(in srgb, var(--ln-parchment) 50%, transparent)" }}>
+                No origin testimony recorded for this work yet.
+              </p>
+            )}
+            {(song.genre || song.bpm) && (
+              <div
+                className="flex flex-wrap gap-4 mt-8 text-xs uppercase tracking-[0.14em]"
+                style={{ color: "color-mix(in srgb, var(--ln-parchment) 45%, transparent)" }}
+              >
+                {song.genre && <span>{song.genre}</span>}
+                {song.bpm && <span>{song.bpm} BPM</span>}
+              </div>
+            )}
+          </div>
+
+          {/* ── Center: Chain of record ── */}
+          <div>
+            <p
+              className="font-heading text-[11px] uppercase tracking-[0.22em] mb-3"
+              style={{ color: "var(--ln-gold)" }}
             >
               Provenance
             </p>
             <h2
-              className="text-2xl sm:text-3xl mb-4"
-              style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}
+              className="font-heading text-2xl sm:text-3xl mb-4"
+              style={{ color: "var(--ln-parchment)" }}
             >
               Chain of record
             </h2>
@@ -320,7 +347,7 @@ export default function LoopWorkPage() {
                 style={{ borderTop: "1px solid rgba(196,154,40,0.2)", borderBottom: "1px solid rgba(196,154,40,0.2)" }}
               >
                 <ShieldCheck size={18} style={{ color: "#4ADE80" }} />
-                <code className="font-mono text-sm sm:text-base" style={{ color: "var(--ln-gold)" }}>
+                <code className="font-mono text-sm" style={{ color: "var(--ln-gold)" }}>
                   {wid}
                 </code>
                 <button type="button" onClick={copyWid} className="p-1.5 opacity-70 hover:opacity-100" aria-label="Copy WID">
@@ -331,19 +358,20 @@ export default function LoopWorkPage() {
                 </Link>
               </div>
             ) : (
-              <p className="mb-6 text-sm" style={{ color: "color-mix(in srgb, var(--ln-parchment) 50%, transparent)" }}>
+              <p className="mb-6 text-sm font-body" style={{ color: "color-mix(in srgb, var(--ln-parchment) 50%, transparent)" }}>
                 WID pending — register completion seals this work.
               </p>
             )}
 
-            {/* Participation axes */}
-            <div className="flex flex-wrap gap-4 mb-6 text-xs uppercase tracking-[0.12em]" style={{ color: "color-mix(in srgb, var(--ln-parchment) 70%, transparent)" }}>
+            <div
+              className="flex flex-wrap gap-4 mb-6 text-xs uppercase tracking-[0.12em]"
+              style={{ color: "color-mix(in srgb, var(--ln-parchment) 70%, transparent)" }}
+            >
               <span>Music · {(song as any).participationMusic ?? "—"}</span>
               <span>Lyrics · {(song as any).participationLyrics ?? "—"}</span>
               <span>Voice · {(song as any).participationVoice ?? "—"}</span>
             </div>
 
-            {/* Tone-from-metadata */}
             {(() => {
               let toneLabel = "";
               try {
@@ -357,56 +385,125 @@ export default function LoopWorkPage() {
               ) : null;
             })()}
 
-            {/* Downloadable waveform */}
             {(song as any).waveformUrl && (
               <a
                 href={(song as any).waveformUrl}
                 download
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 mb-6 text-sm underline underline-offset-4"
+                className="inline-flex items-center gap-2 text-sm underline underline-offset-4"
                 style={{ color: "color-mix(in srgb, var(--ln-parchment) 75%, transparent)" }}
               >
                 Download waveform
               </a>
             )}
+          </div>
 
-            {origin && (
-              <blockquote
-                className="text-xl sm:text-2xl leading-relaxed"
+          {/* ── Right: Creator tab + Support + Share + Lyrics ── */}
+          <aside
+            className="rounded-2xl p-5 h-fit"
+            style={{
+              background: "color-mix(in srgb, var(--ln-obsidian) 92%, transparent)",
+              border: "1px solid var(--ln-panel-border)",
+            }}
+          >
+            <p
+              className="font-heading text-[11px] uppercase tracking-[0.22em] mb-4"
+              style={{ color: "var(--ln-gold)" }}
+            >
+              Creator
+            </p>
+            <Link href={creator?.id ? `/creator/${creator.id}` : "#"}>
+              <div className="flex items-center gap-3 mb-5 group">
+                <div
+                  className="w-14 h-14 rounded-full overflow-hidden flex-shrink-0"
+                  style={{ outline: "1px solid rgba(196,154,40,0.35)" }}
+                >
+                  {creator?.profilePhotoUrl ? (
+                    <img src={creator.profilePhotoUrl} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    <div
+                      className="w-full h-full flex items-center justify-center text-lg"
+                      style={{ background: "var(--ln-void)", color: "var(--ln-gold)" }}
+                    >
+                      {(artistName || "?").charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                </div>
+                <div className="min-w-0">
+                  <div
+                    className="font-heading text-lg truncate group-hover:underline"
+                    style={{ color: "var(--ln-parchment)" }}
+                  >
+                    {artistName}
+                  </div>
+                  {creator?.artistHandle && (
+                    <div className="text-sm truncate" style={{ color: "var(--ln-smoke)" }}>
+                      @{creator.artistHandle}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </Link>
+
+            {creator?.id && (
+              <button
+                type="button"
+                onClick={() => setSupportOpen(true)}
+                className="font-heading w-full py-3 rounded-full text-sm mb-3"
                 style={{
-                  fontFamily: "'Cormorant Garamond', serif",
-                  color: "color-mix(in srgb, var(--ln-parchment) 88%, transparent)",
-                  borderLeft: "2px solid rgba(196,154,40,0.45)",
-                  paddingLeft: 16,
+                  background: "rgba(196,154,40,0.12)",
+                  border: "1px solid rgba(196,154,40,0.35)",
+                  color: "var(--ln-gold)",
                 }}
               >
-                {origin}
-              </blockquote>
+                Support {artistName}
+              </button>
             )}
-            {(song.genre || song.bpm) && (
-              <div className="flex flex-wrap gap-4 mt-8 text-xs uppercase tracking-[0.14em]" style={{ color: "color-mix(in srgb, var(--ln-parchment) 45%, transparent)" }}>
-                {song.genre && <span>{song.genre}</span>}
-                {song.bpm && <span>{song.bpm} BPM</span>}
-              </div>
+
+            {creator?.id && (
+              <button
+                type="button"
+                onClick={async () => {
+                  const url = `${window.location.origin}/creator/${creator.artistHandle || creator.id}`;
+                  try {
+                    await navigator.clipboard.writeText(url);
+                    toast.success("Creator link copied");
+                  } catch {
+                    toast.error("Could not copy link");
+                  }
+                }}
+                className="font-heading w-full py-2.5 rounded-full text-xs mb-5 inline-flex items-center justify-center gap-2"
+                style={{
+                  border: "1px solid color-mix(in srgb, var(--ln-parchment) 14%, transparent)",
+                  color: "color-mix(in srgb, var(--ln-parchment) 75%, transparent)",
+                }}
+              >
+                <Share2 size={12} /> Share creator
+              </button>
             )}
+
             {song.lyricsText && (
-              <div className="mt-10">
+              <div
+                className="pt-4"
+                style={{ borderTop: "1px solid color-mix(in srgb, var(--ln-gold) 18%, transparent)" }}
+              >
                 <button
                   type="button"
                   onClick={() => setShowLyrics((v) => !v)}
-                  className="text-[11px] uppercase tracking-[0.18em] mb-3"
+                  className="font-heading text-[11px] uppercase tracking-[0.18em] mb-3 w-full text-left flex items-center justify-between"
                   style={{ color: "var(--ln-gold)" }}
                 >
-                  {showLyrics ? "Hide lyrics" : "Show lyrics"}
+                  <span>{showLyrics ? "Hide lyrics" : "Lyrics"}</span>
+                  <span style={{ opacity: 0.7 }}>{showLyrics ? "−" : "+"}</span>
                 </button>
                 {showLyrics && (
                   <pre
-                    className="whitespace-pre-wrap text-sm leading-relaxed"
+                    className="whitespace-pre-wrap leading-relaxed max-h-72 overflow-y-auto"
                     style={{
-                      fontFamily: "'Cormorant Garamond', serif",
+                      fontFamily: "var(--font-editorial, 'Cormorant Garamond', serif)",
                       color: "color-mix(in srgb, var(--ln-parchment) 75%, transparent)",
-                      fontSize: 17,
+                      fontSize: 15,
                     }}
                   >
                     {song.lyricsText}
@@ -414,64 +511,13 @@ export default function LoopWorkPage() {
                 )}
               </div>
             )}
-          </div>
-
-          <aside>
-            <p
-              className="text-[11px] uppercase tracking-[0.22em] mb-3"
-              style={{ color: "var(--ln-gold)", fontFamily: "'Cinzel', serif" }}
-            >
-              Creator
-            </p>
-            <Link href={creator?.id ? `/creator/${creator.id}` : "#"}>
-              <div className="flex items-center gap-4 mb-4 group">
-                <div
-                  className="w-16 h-16 rounded-full overflow-hidden flex-shrink-0"
-                  style={{ outline: "1px solid rgba(196,154,40,0.35)" }}
-                >
-                  {creator?.profilePhotoUrl ? (
-                    <img src={creator.profilePhotoUrl} alt="" className="w-full h-full object-cover" />
-                  ) : (
-                    <div
-                      className="w-full h-full flex items-center justify-center text-xl"
-                      style={{ background: "#111", color: "var(--ln-gold)" }}
-                    >
-                      {(artistName || "?").charAt(0).toUpperCase()}
-                    </div>
-                  )}
-                </div>
-                <div>
-                  <div
-                    className="text-xl group-hover:underline"
-                    style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}
-                  >
-                    {artistName}
-                  </div>
-                  {creator?.artistHandle && (
-                    <div className="text-sm" style={{ color: "color-mix(in srgb, var(--ln-parchment) 50%, transparent)" }}>
-                      @{creator.artistHandle}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </Link>
-            {creator?.id && (
-              <button
-                type="button"
-                onClick={() => setSupportOpen(true)}
-                className="w-full py-3 rounded-full text-sm font-semibold"
-                style={{ background: "rgba(196,154,40,0.12)", border: "1px solid rgba(196,154,40,0.35)", color: "var(--ln-gold)" }}
-              >
-                Support {artistName}
-              </button>
-            )}
           </aside>
         </div>
       </section>
 
       {/* Related works */}
       {related.length > 0 && (
-        <section className="max-w-5xl mx-auto px-4 sm:px-6 pb-28">
+        <section className="max-w-6xl mx-auto px-4 sm:px-6 pb-28">
           <p
             className="text-[11px] uppercase tracking-[0.22em] mb-3"
             style={{ color: "var(--ln-gold)", fontFamily: "'Cinzel', serif" }}
