@@ -1,0 +1,87 @@
+{
+  "schemaVersion": "0.1",
+  "purpose": "Machine-readable cartography claim registry. Not legal advice and not a marketing approval list.",
+  "lastVerified": "2026-08-12",
+  "claims": [
+    {
+      "id": "LN-CLM-001",
+      "statement": "Living Nexus stores a WID record containing a WID, event ID, content hash, creator ID, optional signature, and timestamp.",
+      "category": "FACT",
+      "evidence": ["drizzle/schema.ts:234-245"],
+      "source": ["Internal code"],
+      "publicUse": true,
+      "requiresLegalReview": false,
+      "boundary": "This is a database fact, not a statement of legal effect."
+    },
+    {
+      "id": "LN-CLM-002",
+      "statement": "The inspected provenance service canonicalizes input, hashes it with SHA-256, and supports Ed25519 signatures.",
+      "category": "TECHNICAL_CAPABILITY",
+      "evidence": ["server/services/provenance.ts:15-141"],
+      "source": ["Internal code"],
+      "publicUse": true,
+      "requiresLegalReview": false,
+      "boundary": "Requires issuance-path, key-custody, and historical-data verification before broader cryptographic or permanence claims."
+    },
+    {
+      "id": "LN-CLM-003",
+      "statement": "A creator may declare participation, AI disclosure, origin, and rights-related metadata for a work.",
+      "category": "CREATOR_DECLARATION",
+      "evidence": ["drizzle/schema.ts:265-289", "drizzle/schema.ts:406-435", "drizzle/schema.ts:505-512"],
+      "source": ["Internal schema"],
+      "publicUse": true,
+      "requiresLegalReview": false,
+      "boundary": "A recorded declaration is not independently verified authorship, clearance, ownership, or legal entitlement."
+    },
+    {
+      "id": "LN-CLM-004",
+      "statement": "Living Nexus believes Chain-of-Record truth cannot be erased and may only be superseded.",
+      "category": "DOCTRINE",
+      "evidence": ["ARCHITECTURAL_LAWS.md:172-178"],
+      "source": ["Architectural Laws Law V"],
+      "publicUse": true,
+      "requiresLegalReview": false,
+      "boundary": "Technical enforcement across schema, APIs, administration, exports, backups, and third-party infrastructure remains under audit."
+    },
+    {
+      "id": "LN-CLM-005",
+      "statement": "A WID protects copyright or establishes legal ownership.",
+      "category": "UNSUPPORTED",
+      "evidence": ["TermsPage.tsx:146-176 expressly narrows this claim", "U.S. Copyright Office AI materials"],
+      "source": ["Internal Terms; U.S. Copyright Office"],
+      "publicUse": false,
+      "requiresLegalReview": true,
+      "boundary": "Do not use. A WID may be evidence of a platform record, not a substitute for copyright registration or legal determination."
+    },
+    {
+      "id": "LN-CLM-006",
+      "statement": "AI disclosure determines copyrightability or human authorship.",
+      "category": "UNSUPPORTED",
+      "evidence": ["U.S. Copyright Office NewsNet 1060; 88 FR 16190"],
+      "source": ["U.S. Copyright Office"],
+      "publicUse": false,
+      "requiresLegalReview": true,
+      "boundary": "Do not use. Disclosure is context; copyrightability requires case-specific legal analysis."
+    },
+    {
+      "id": "LN-CLM-007",
+      "statement": "Living Nexus has implemented a music-draft-only Agent Capability, Commission, and append-only Agent Ledger foundation.",
+      "category": "TECHNICAL_CAPABILITY",
+      "evidence": ["drizzle/schema.ts:175-232", "docs/ADR-016-MUSIC-DRAFT-AGENTIC-FOUNDATION.md"],
+      "source": ["Internal schema and ADR"],
+      "publicUse": true,
+      "requiresLegalReview": false,
+      "boundary": "Do not imply a full capability marketplace, Bridge billing, local reasoning, Knowledge Record, or autonomous publishing system."
+    },
+    {
+      "id": "LN-CLM-008",
+      "statement": "Living Nexus is legally compliant with EU AI Act Article 50.",
+      "category": "LEGAL_POSITION",
+      "evidence": ["European Commission Article 50 materials"],
+      "source": ["European Commission"],
+      "publicUse": false,
+      "requiresLegalReview": true,
+      "boundary": "UNRESOLVED — QUALIFIED COUNSEL REQUIRED. Applicability depends on jurisdiction, roles, system behavior, and deployment facts."
+    }
+  ]
+}
