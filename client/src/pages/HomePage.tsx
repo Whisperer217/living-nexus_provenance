@@ -483,7 +483,7 @@ export default function HomePage() {
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 mb-6">
               <div
                 className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
-                style={{ background: "color-mix(in srgb, #5865F2 22%, transparent)", color: "#8B9CF6" }}
+                style={{ background: "color-mix(in srgb, var(--ln-gold) 22%, transparent)", color: "var(--ln-gold)" }}
               >
                 <ExternalLink size={20} />
               </div>
@@ -501,8 +501,8 @@ export default function HomePage() {
                 rel="noopener noreferrer"
                 className="font-heading inline-flex items-center gap-2 px-4 py-2.5 rounded-lg flex-shrink-0"
                 style={{
-                  background: "#5865F2",
-                  color: "#fff",
+                  background: "var(--ln-gold)",
+                  color: "var(--ln-void)",
                   fontSize: "0.6rem",
                   letterSpacing: "0.08em",
                   textDecoration: "none",
@@ -514,7 +514,7 @@ export default function HomePage() {
 
             <div
               className="overflow-hidden rounded-xl"
-              style={{ border: "1px solid color-mix(in srgb, #5865F2 35%, transparent)" }}
+              style={{ border: "1px solid color-mix(in srgb, var(--ln-gold) 35%, transparent)" }}
             >
               <iframe
                 title="Living Nexus Discord"
@@ -524,7 +524,7 @@ export default function HomePage() {
                 allowTransparency
                 frameBorder={0}
                 sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
-                style={{ display: "block", background: "#1e1f22" }}
+                style={{ display: "block", background: "var(--ln-void)" }}
               />
             </div>
           </div>

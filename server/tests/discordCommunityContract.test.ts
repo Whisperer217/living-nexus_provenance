@@ -2,52 +2,52 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
-const projectFile = (path: string) =>
-  readFileSync(resolve(process.cwd(), path), "utf8");
+const source = (path: string) => readFileSync(resolve(process.cwd(), path), "utf8");
 
 describe("Discord community release contract", () => {
-  it("centralizes the non-expiring invite in the Loop product contract", () => {
-    const loopProduct = projectFile("client/src/lib/loopProduct.ts");
+  const chromeSurfaces = [
+    "client/src/components/layout/LeftRail.tsx",
+    "client/src/components/layout/MainLayout.tsx",
+    "client/src/components/layout/TopBar.tsx",
+    "client/src/pages/HomePage.tsx",
+  ];
 
-    expect(loopProduct).toContain(
-      'export const DISCORD_COMMUNITY_URL = "https://discord.gg/dqCmTY5Ucb"',
-    );
+  it("centralizes the non-expiring invite", () => {
+    const loopProduct = source("client/src/lib/loopProduct.ts");
+    expect(loopProduct).toContain('export const DISCORD_COMMUNITY_URL = "https://discord.gg/dqCmTY5Ucb"');
     expect(loopProduct).not.toContain("ADF9dtVA");
     expect(loopProduct).not.toContain("GfyPrjzU6");
   });
 
-  it("routes every community entry point through the shared canonical constant", () => {
-    const surfaces = [
+  it("routes each community entry point through that shared constant", () => {
+    for (const path of [
       "client/src/components/WelcomeModal.tsx",
       "client/src/components/layout/LeftRail.tsx",
       "client/src/components/layout/MainLayout.tsx",
       "client/src/components/layout/TopBar.tsx",
       "client/src/pages/AttributionPage.tsx",
       "client/src/pages/HomePage.tsx",
-    ];
-
-    for (const surface of surfaces) {
-      const source = projectFile(surface);
-      expect(source).toContain("DISCORD_COMMUNITY_URL");
-      expect(source).not.toMatch(/discord\.gg\/(?:ADF9dtVA|GfyPrjzU6)/);
+    ]) {
+      const file = source(path);
+      expect(file).toContain("DISCORD_COMMUNITY_URL");
+      expect(file).not.toMatch(/discord\.gg\/(?:ADF9dtVA|GfyPrjzU6)/);
     }
   });
 
-  it("uses cathedral theme tokens rather than Discord brand hex values on Loop chrome", () => {
-    const surfaces = [
-      "client/src/components/layout/LeftRail.tsx",
-      "client/src/components/layout/MainLayout.tsx",
-      "client/src/components/layout/TopBar.tsx",
-      "client/src/pages/HomePage.tsx",
-    ];
-    const prohibitedColors = ["#5865F2", "#A5B4FC", "#8B9CF6", "#C7D2FE", "#1e1f22"];
-
-    for (const surface of surfaces) {
-      const source = projectFile(surface);
-      expect(source).toContain("var(--ln-gold)");
-      for (const color of prohibitedColors) {
-        expect(source).not.toContain(color);
+  it("uses cathedral tokens and the shared active Discord glyph on Loop chrome", () => {
+    for (const path of chromeSurfaces) {
+      const file = source(path);
+      expect(file).toContain("var(--ln-gold)");
+      for (const color of ["#5865F2", "#A5B4FC", "#8B9CF6", "#C7D2FE", "#1e1f22"]) {
+        expect(file).not.toContain(color);
       }
+    }
+
+    expect(source("client/src/components/layout/LeftRail.tsx")).toContain(
+      'from "@/components/icons/DiscordGlyph"',
+    );
+    for (const path of chromeSurfaces.slice(1, 3)) {
+      expect(source(path)).toContain("SharedDiscordGlyph");
     }
   });
 });
