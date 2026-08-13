@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "wouter";
 import { ChevronLeft, Heart, Shield, Wrench, Star, Users, Bug, FileText } from "lucide-react";
 import { trpc } from "@/lib/trpc";
+import { DISCORD_COMMUNITY_URL } from "@/lib/loopProduct";
 
 /* ─── Contributor Data ───────────────────────────────────────────────────────
    To add a contributor: append an entry to the relevant section below.
@@ -347,7 +348,7 @@ export default function AttributionPage() {
             Join the Living Nexus Discord. Test things. Break things. Tell us what you find. The platform gets better because real people use it and speak up.
           </p>
           <a
-            href="https://discord.gg/ADF9dtVA"
+            href={DISCORD_COMMUNITY_URL}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-medium transition-colors"

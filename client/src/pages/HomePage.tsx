@@ -21,6 +21,7 @@ import TipModal from "@/components/TipModal";
 import { SKIN_IMAGES } from "@/components/FloatingAvatar";
 import {
   DISCORD_COMMUNITY_URL,
+  DISCORD_WIDGET_EMBED_URL,
   LOOP_PRODUCT,
   PNA_PRODUCT,
 } from "@/lib/loopProduct";
@@ -473,41 +474,59 @@ export default function HomePage() {
         {/* ── Discord ── */}
         <section className="px-6 py-12" style={{ borderTop: "1px solid var(--ln-panel-border)" }}>
           <div
-            className="max-w-3xl mx-auto rounded-2xl p-6 md:p-8 flex flex-col sm:flex-row items-start sm:items-center gap-5"
+            className="max-w-3xl mx-auto rounded-2xl p-6 md:p-8"
             style={{
               background: "var(--ln-obsidian)",
               border: "1px solid var(--ln-panel-border)",
             }}
           >
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 mb-6">
+              <div
+                className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+                style={{ background: "color-mix(in srgb, #5865F2 22%, transparent)", color: "#8B9CF6" }}
+              >
+                <ExternalLink size={20} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h2 className="font-heading mb-1" style={{ fontSize: "1.1rem", color: "var(--ln-parchment)" }}>
+                  Community on Discord
+                </h2>
+                <p className="font-body" style={{ fontSize: "1.05rem", color: "var(--ln-smoke)", lineHeight: 1.6 }}>
+                  Creators, witnesses, and stewards — process talk, feedback, and releases.
+                </p>
+              </div>
+              <a
+                href={DISCORD_COMMUNITY_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-heading inline-flex items-center gap-2 px-4 py-2.5 rounded-lg flex-shrink-0"
+                style={{
+                  background: "#5865F2",
+                  color: "#fff",
+                  fontSize: "0.6rem",
+                  letterSpacing: "0.08em",
+                  textDecoration: "none",
+                }}
+              >
+                JOIN DISCORD
+              </a>
+            </div>
+
             <div
-              className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
-              style={{ background: "color-mix(in srgb, #5865F2 22%, transparent)", color: "#8B9CF6" }}
+              className="overflow-hidden rounded-xl"
+              style={{ border: "1px solid color-mix(in srgb, #5865F2 35%, transparent)" }}
             >
-              <ExternalLink size={20} />
+              <iframe
+                title="Living Nexus Discord"
+                src={DISCORD_WIDGET_EMBED_URL}
+                width="100%"
+                height="320"
+                allowTransparency
+                frameBorder={0}
+                sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
+                style={{ display: "block", background: "#1e1f22" }}
+              />
             </div>
-            <div className="flex-1 min-w-0">
-              <h2 className="font-heading mb-1" style={{ fontSize: "1.1rem", color: "var(--ln-parchment)" }}>
-                Community on Discord
-              </h2>
-              <p className="font-body" style={{ fontSize: "1.05rem", color: "var(--ln-smoke)", lineHeight: 1.6 }}>
-                Creators, witnesses, and stewards — process talk, feedback, and releases.
-              </p>
-            </div>
-            <a
-              href={DISCORD_COMMUNITY_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-heading inline-flex items-center gap-2 px-4 py-2.5 rounded-lg flex-shrink-0"
-              style={{
-                background: "#5865F2",
-                color: "#fff",
-                fontSize: "0.6rem",
-                letterSpacing: "0.08em",
-                textDecoration: "none",
-              }}
-            >
-              JOIN DISCORD
-            </a>
           </div>
         </section>
 

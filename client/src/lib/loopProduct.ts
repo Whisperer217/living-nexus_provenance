@@ -104,7 +104,13 @@ export const SURFACE_MAP = {
   pnaStore: { path: "/avatar-registry", job: "Skins, slots, personality — PNA commerce (/keeper companion)" },
 } as const;
 
-export const DISCORD_COMMUNITY_URL = "https://discord.gg/ADF9dtVA";
+/** Canonical Living Nexus community invite (non-expiring). */
+export const DISCORD_COMMUNITY_URL = "https://discord.gg/dqCmTY5Ucb";
+
+/** Guild id for Discord server widget embed (Server Settings → Widget). */
+export const DISCORD_GUILD_ID = "1459384199025918073";
+
+export const DISCORD_WIDGET_EMBED_URL = `https://discord.com/widget?id=${DISCORD_GUILD_ID}&theme=dark`;
 
 export function isLoopMusicFile(file: File): boolean {
   const mime = file.type.toLowerCase();
