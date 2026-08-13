@@ -44,16 +44,30 @@ export function useAuth(options?: UseAuthOptions) {
     }
   }, [logoutMutation, utils]);
 
+  // Query observers may provide an equivalent user object with a new reference
+  // after unrelated cache notifications. Persist against stable identity/version
+  // fields so route-heavy authenticated surfaces never turn that reference churn
+  // into repeated storage/session side effects.
+  const runtimeUserPayload = useMemo(
+    () => JSON.stringify(meQuery.data ?? null),
+    [
+      meQuery.data?.id,
+      meQuery.data?.openId,
+      meQuery.data?.role,
+      meQuery.data?.updatedAt,
+    ],
+  );
+  const hasAuthenticatedUser = Boolean(meQuery.data);
+
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const serializedUser = JSON.stringify(meQuery.data ?? null);
-    if (localStorage.getItem(RUNTIME_USER_INFO_KEY) !== serializedUser) {
-      localStorage.setItem(RUNTIME_USER_INFO_KEY, serializedUser);
+    if (localStorage.getItem(RUNTIME_USER_INFO_KEY) !== runtimeUserPayload) {
+      localStorage.setItem(RUNTIME_USER_INFO_KEY, runtimeUserPayload);
     }
 
-    if (meQuery.data) markHadSession();
-  }, [meQuery.data]);
+    if (hasAuthenticatedUser) markHadSession();
+  }, [hasAuthenticatedUser, runtimeUserPayload]);
 
   const state = useMemo(() => {
     return {
