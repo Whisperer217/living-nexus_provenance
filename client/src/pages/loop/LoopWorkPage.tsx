@@ -10,6 +10,7 @@ import { Link, useParams } from "wouter";
 import {
   Copy,
   DollarSign,
+  Download,
   Heart,
   Loader2,
   Music,
@@ -28,6 +29,7 @@ import { useWorkEditorActions } from "@/contexts/WorkEditorContext";
 import { useLike } from "@/hooks/useLike";
 import { LOOP_PRODUCT } from "@/lib/loopProduct";
 import { trpc } from "@/lib/trpc";
+import { getLoginUrl } from "@/const";
 
 export default function LoopWorkPage() {
   const { id } = useParams<{ id: string }>();
@@ -48,6 +50,24 @@ export default function LoopWorkPage() {
   );
   const playMutation = trpc.songs.play.useMutation();
   const { liked, toggle: toggleLike } = useLike(songId);
+  const downloadMutation = trpc.songs.download.useMutation({
+    onSuccess: (data: any) => {
+      if (!data?.url) return;
+      const a = document.createElement("a");
+      a.href = data.url;
+      a.download = data.filename || "download";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    },
+    onError: (err) => toast.error(err.message || "Download unavailable"),
+  });
+  const tipDownloadMutation = trpc.tips.createTipDownloadCheckout.useMutation({
+    onSuccess: (data: any) => {
+      if (data?.url) window.location.href = data.url;
+    },
+    onError: (err) => toast.error(err.message || "Checkout unavailable"),
+  });
 
   const song = songData?.song;
   const creator = songData?.creator;
@@ -129,6 +149,8 @@ export default function LoopWorkPage() {
       coverPositionX: song.coverPositionX ?? 50,
       coverPositionY: song.coverPositionY ?? 50,
       creatorHandle: creator?.artistHandle || undefined,
+      downloadPermission: (song as any).downloadPermission ?? null,
+      downloadTipThresholdCents: (song as any).downloadTipThresholdCents ?? null,
     });
   };
 
@@ -227,6 +249,64 @@ export default function LoopWorkPage() {
               {isPlaying ? <Pause size={16} fill="currentColor" /> : <Play size={16} fill="currentColor" />}
               {isPlaying ? "Pause" : "Listen"}
             </button>
+            {(() => {
+              const dlPerm = (song as any).downloadPermission as string | undefined;
+              const tipCents = ((song as any).downloadTipThresholdCents as number | undefined) ?? 179;
+              if (!dlPerm || dlPerm === "none") return null;
+              if (dlPerm === "free") {
+                return (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!user) {
+                        window.location.href = getLoginUrl();
+                        return;
+                      }
+                      downloadMutation.mutate({ songId: song.id });
+                    }}
+                    disabled={downloadMutation.isPending}
+                    className="inline-flex items-center gap-2 px-5 py-3 rounded-full text-sm"
+                    style={{
+                      border: "1px solid rgba(34,197,94,0.45)",
+                      color: "rgba(74,222,128,0.95)",
+                      background: "rgba(34,197,94,0.08)",
+                    }}
+                  >
+                    <Download size={15} />
+                    {downloadMutation.isPending ? "…" : "Free Download"}
+                  </button>
+                );
+              }
+              if (dlPerm === "tipped") {
+                return (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!user) {
+                        window.location.href = getLoginUrl();
+                        return;
+                      }
+                      tipDownloadMutation.mutate({ songId: song.id, origin: window.location.origin });
+                    }}
+                    disabled={tipDownloadMutation.isPending}
+                    title={`Gift $${(tipCents / 100).toFixed(2)} to unlock download`}
+                    className="inline-flex items-center gap-2 px-5 py-3 rounded-full text-sm font-semibold"
+                    style={{
+                      border: "1px solid rgba(196,154,40,0.55)",
+                      color: "var(--ln-gold-hot, var(--ln-gold))",
+                      background: "rgba(196,154,40,0.12)",
+                      boxShadow: "0 0 22px rgba(196,154,40,0.12)",
+                    }}
+                  >
+                    <Download size={15} />
+                    {tipDownloadMutation.isPending
+                      ? "Opening checkout…"
+                      : `Download — $${(tipCents / 100).toFixed(2)}`}
+                  </button>
+                );
+              }
+              return null;
+            })()}
             {creator?.id && (
               <button
                 type="button"

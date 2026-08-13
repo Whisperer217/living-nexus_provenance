@@ -3922,3 +3922,16 @@ h1, h2, h3, h4, h5, h6,
     padding: 0.5625rem 0.75rem;
   }
 }
+
+/* ── DepthAtmosphere / 2.5D shared ken ── */
+@keyframes ln-depth-ken {
+  from { transform: scale(1.05) translate3d(0, 0, 0); }
+  to   { transform: scale(1.1) translate3d(-1.2%, 0.7%, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ln-sanctuary *,
+  [data-tier="low"] * {
+    animation: none !important;
+  }
+}

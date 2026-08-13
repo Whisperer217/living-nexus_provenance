@@ -16,6 +16,7 @@ import { WorkListRow, type WorkListRowItem } from "@/components/WorkListRow";
 import type { FeedRow } from "@shared/coreDataTypes";
 import { toast } from "sonner";
 import { usePlayer, type Track } from "@/contexts/PlayerContext";
+import { DepthAtmosphere } from "@/components/atmosphere/DepthAtmosphere";
 
 function isAudioRow(row: FeedRow): boolean {
   return (row.song.contentType ?? "audio") === "audio";
@@ -98,6 +99,8 @@ function feedRowToTrack(row: FeedRow): Track {
     creatorHandle: c?.artistHandle ?? c?.name ?? undefined,
     creatorId: c?.id ?? undefined,
     contentType: (s.contentType as Track["contentType"]) ?? "audio",
+    downloadPermission: (s as any).downloadPermission ?? null,
+    downloadTipThresholdCents: (s as any).downloadTipThresholdCents ?? null,
   };
 }
 
@@ -636,13 +639,26 @@ export default function ExplorePage() {
   const handleRandomizeToggle = useCallback((v: boolean) => { setRandomize(v); }, []);
 
   return (
-    <div className="min-h-screen bg-[var(--void)]">
+    <DepthAtmosphere className="min-h-screen" hue={43} variant="page">
       {/* ── Sticky header ─────────────────────────────────────────── */}
-      <div className="sticky top-0 z-30 bg-[var(--void)]/95 backdrop-blur-md border-b border-white/5">
+      <div
+        className="sticky top-0 z-30 border-b"
+        style={{
+          background: "color-mix(in srgb, var(--ln-void, var(--void)) 88%, transparent)",
+          borderColor: "color-mix(in srgb, var(--ln-gold) 14%, transparent)",
+          backdropFilter: "saturate(1.1)",
+        }}
+      >
         <div className="max-w-[1800px] mx-auto px-4 sm:px-6">
           {/* Row 1: Title + controls */}
           <div className="flex items-center justify-between pt-4 pb-2 gap-3 flex-wrap">
             <div className="flex-shrink-0">
+              <p
+                className="font-heading text-[10px] uppercase tracking-[0.28em] mb-1"
+                style={{ color: "var(--ln-gold)" }}
+              >
+                Living Nexus · Square
+              </p>
               <h1 className="font-heading font-bold tracking-[0.08em] leading-none" style={{ fontSize: "clamp(1.5rem,1.3rem+1vw,2.25rem)", color: "var(--ln-parchment)" }}>Explore</h1>
               <p className="font-editorial italic mt-0.5 hidden sm:block" style={{ fontSize: "0.8rem", color: "var(--ln-smoke)", letterSpacing: "0.02em" }}>Songs & artists — music provenance discovery</p>
             </div>
@@ -770,6 +786,6 @@ export default function ExplorePage() {
           </>
         )}
       </div>
-    </div>
+    </DepthAtmosphere>
   );
 }
