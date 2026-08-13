@@ -19,9 +19,9 @@ import { trpc } from "@/lib/trpc";
 import { usePlayer, type Track } from "@/contexts/PlayerContext";
 import TipModal from "@/components/TipModal";
 import { SKIN_IMAGES } from "@/components/FloatingAvatar";
+import { DiscordGlyph } from "@/components/icons/DiscordGlyph";
 import {
   DISCORD_COMMUNITY_URL,
-  DISCORD_WIDGET_EMBED_URL,
   LOOP_PRODUCT,
   PNA_PRODUCT,
 } from "@/lib/loopProduct";
@@ -485,7 +485,7 @@ export default function HomePage() {
                 className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
                 style={{ background: "color-mix(in srgb, var(--ln-gold) 22%, transparent)", color: "var(--ln-gold)" }}
               >
-                <ExternalLink size={20} />
+                <DiscordGlyph size={20} />
               </div>
               <div className="flex-1 min-w-0">
                 <h2 className="font-heading mb-1" style={{ fontSize: "1.1rem", color: "var(--ln-parchment)" }}>
@@ -513,19 +513,45 @@ export default function HomePage() {
             </div>
 
             <div
-              className="overflow-hidden rounded-xl"
-              style={{ border: "1px solid color-mix(in srgb, var(--ln-gold) 35%, transparent)" }}
+              data-testid="discord-community-panel"
+              className="rounded-xl p-5 md:p-6 flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between"
+              style={{
+                border: "1px solid color-mix(in srgb, var(--ln-gold) 25%, transparent)",
+                background: "color-mix(in srgb, var(--ln-void) 84%, var(--ln-panel))",
+              }}
             >
-              <iframe
-                title="Living Nexus Discord"
-                src={DISCORD_WIDGET_EMBED_URL}
-                width="100%"
-                height="320"
-                allowTransparency
-                frameBorder={0}
-                sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
-                style={{ display: "block", background: "var(--ln-void)" }}
-              />
+              <div className="flex items-start gap-3 min-w-0">
+                <div
+                  className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
+                  style={{ background: "color-mix(in srgb, var(--ln-gold) 14%, transparent)", color: "var(--ln-gold)" }}
+                >
+                  <DiscordGlyph size={17} />
+                </div>
+                <div>
+                  <p className="font-heading text-[10px] uppercase tracking-[0.14em]" style={{ color: "var(--ln-gold)" }}>
+                    Direct community access
+                  </p>
+                  <p className="font-body mt-1" style={{ color: "var(--ln-smoke)", fontSize: "0.95rem", lineHeight: 1.55 }}>
+                    Discord opens directly in its own trusted surface—no embedded feed, no endless load state.
+                  </p>
+                </div>
+              </div>
+              <a
+                href={DISCORD_COMMUNITY_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-heading inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg shrink-0"
+                style={{
+                  border: "1px solid color-mix(in srgb, var(--ln-gold) 45%, transparent)",
+                  color: "var(--ln-gold)",
+                  fontSize: "0.6rem",
+                  letterSpacing: "0.08em",
+                  textDecoration: "none",
+                }}
+              >
+                OPEN COMMUNITY
+                <ExternalLink size={13} aria-hidden="true" />
+              </a>
             </div>
           </div>
         </section>
