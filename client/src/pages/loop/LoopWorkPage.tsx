@@ -50,17 +50,19 @@ export default function LoopWorkPage() {
   );
   const playMutation = trpc.songs.play.useMutation();
   const { liked, toggle: toggleLike } = useLike(songId);
+
+  const deliverDownload = (data: any) => {
+    if (!data?.url) return;
+    const a = document.createElement("a");
+    a.href = data.url;
+    a.download = data.filename || "download";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
+
   const downloadMutation = trpc.songs.download.useMutation({
-    onSuccess: (data: any) => {
-      if (!data?.url) return;
-      const a = document.createElement("a");
-      a.href = data.url;
-      a.download = data.filename || "download";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    },
-    onError: (err) => toast.error(err.message || "Download unavailable"),
+    onSuccess: deliverDownload,
   });
   const tipDownloadMutation = trpc.tips.createTipDownloadCheckout.useMutation({
     onSuccess: (data: any) => {
@@ -72,10 +74,72 @@ export default function LoopWorkPage() {
   const song = songData?.song;
   const creator = songData?.creator;
 
+  const stripDownloadReturnFlag = () => {
+    const url = new URL(window.location.href);
+    url.searchParams.delete("download");
+    window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
+  };
+
+  const runFreeDownload = async () => {
+    try {
+      await downloadMutation.mutateAsync({ songId });
+    } catch (err: any) {
+      toast.error(err?.message || "Download unavailable");
+    }
+  };
+
+  const runPaidDownload = async () => {
+    try {
+      // Already-unlocked supporters download immediately instead of paying twice.
+      await downloadMutation.mutateAsync({ songId });
+    } catch (err: any) {
+      const code = err?.data?.code ?? err?.shape?.data?.code;
+      if (code !== "FORBIDDEN") {
+        toast.error(err?.message || "Download unavailable");
+        return;
+      }
+      tipDownloadMutation.mutate({ songId, origin: window.location.origin });
+    }
+  };
+
   useEffect(() => {
     if (songId > 0) playMutation.mutate({ songId });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [songId]);
+
+  useEffect(() => {
+    if (!song || !user || new URLSearchParams(window.location.search).get("download") !== "unlocked") {
+      return;
+    }
+
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let attempt = 0;
+
+    const claimDownload = async () => {
+      try {
+        await downloadMutation.mutateAsync({ songId: song.id });
+        if (!cancelled) stripDownloadReturnFlag();
+      } catch {
+        attempt += 1;
+        if (!cancelled && attempt < 4) {
+          // Stripe webhook delivery can trail the browser redirect briefly.
+          timer = setTimeout(claimDownload, 1200 * attempt);
+        } else if (!cancelled) {
+          stripDownloadReturnFlag();
+          toast.info("Payment received. Click Download again if the file did not begin.");
+        }
+      }
+    };
+
+    void claimDownload();
+    return () => {
+      cancelled = true;
+      if (timer) clearTimeout(timer);
+    };
+    // Mutations are intentionally excluded; this is a one-time checkout return handler.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [song?.id, user?.id]);
 
   if (isLoading) {
     return (
@@ -262,7 +326,7 @@ export default function LoopWorkPage() {
                         window.location.href = getLoginUrl();
                         return;
                       }
-                      downloadMutation.mutate({ songId: song.id });
+                      void runFreeDownload();
                     }}
                     disabled={downloadMutation.isPending}
                     className="inline-flex items-center gap-2 px-5 py-3 rounded-full text-sm"
@@ -286,7 +350,7 @@ export default function LoopWorkPage() {
                         window.location.href = getLoginUrl();
                         return;
                       }
-                      tipDownloadMutation.mutate({ songId: song.id, origin: window.location.origin });
+                      void runPaidDownload();
                     }}
                     disabled={tipDownloadMutation.isPending}
                     title={`Gift $${(tipCents / 100).toFixed(2)} to unlock download`}
