@@ -22,9 +22,16 @@ import {
 import { getLoginUrl } from "@/const";
 import { usePlayer } from "@/contexts/PlayerContext";
 import NexusAvatarViewer from "@/components/NexusAvatarViewer";
+import { NexusContextPanel } from "@/components/NexusContextPanel";
 import { SKIN_IMAGES } from "@/components/FloatingAvatar";
 import { PNA_PRODUCT } from "@/lib/loopProduct";
 import { consumePnaDiaryReload } from "@/lib/pnaDiary";
+import {
+  contextRoute,
+  createContextSuggestion,
+  type NexusContextRef,
+  type NexusContextSuggestion,
+} from "@/lib/nexusContext";
 
 // ─── Stewardship modes ────────────────────────────────────────────────────────
 
@@ -130,6 +137,8 @@ export default function PNAShellPage() {
   const [chatWidth, setChatWidth] = useState(() => readNumber(LS_CHAT_WIDTH, 520, 360, 900));
   const [popoutPos, setPopoutPos] = useState({ x: 72, y: 64 });
   const [popoutSize, setPopoutSize] = useState({ w: 440, h: 640 });
+  const [contextRef, setContextRef] = useState<NexusContextRef | null>(null);
+  const [contextSuggestion, setContextSuggestion] = useState<NexusContextSuggestion | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -212,11 +221,12 @@ export default function PNAShellPage() {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "F11") { e.preventDefault(); setCinematic(v => !v); }
+      if (e.key === "Escape" && contextRef) { setContextRef(null); return; }
       if (e.key === "Escape" && cinematic) setCinematic(false);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [cinematic]);
+  }, [cinematic, contextRef]);
 
   useEffect(() => {
     try { localStorage.setItem(LS_CHAT_WIDTH, String(chatWidth)); } catch { /* ignore */ }
@@ -230,6 +240,53 @@ export default function PNAShellPage() {
   useEffect(() => {
     try { localStorage.setItem(LS_DRAWER, sidebarCollapsed ? "1" : "0"); } catch { /* ignore */ }
   }, [sidebarCollapsed]);
+
+  // ADR-023 Phase 1: context remains session-only and click-to-open. A track
+  // becoming contextual never changes playback or queue state on its own.
+  useEffect(() => {
+    if (!nowPlaying?.id) return;
+    const ref: NexusContextRef = { version: 1, kind: "now-playing" };
+    setContextSuggestion(current => current?.ref.kind === "now-playing"
+      ? current
+      : createContextSuggestion(ref, nowPlaying.title, "deterministic"));
+  }, [nowPlaying?.id, nowPlaying?.title]);
+
+  const openContext = useCallback((ref: NexusContextRef) => {
+    setContextRef(ref);
+  }, []);
+
+  const openNowPlayingContext = useCallback(() => {
+    if (!nowPlaying) {
+      toast.message("Play a work from Loop before opening its context.");
+      return;
+    }
+    openContext({ version: 1, kind: "now-playing" });
+  }, [nowPlaying, openContext]);
+
+  const closeContext = useCallback(() => setContextRef(null), []);
+
+  const handleContextOpen = useCallback(() => {
+    if (!contextRef) return;
+    const route = contextRoute(contextRef);
+    if (route) navigate(route);
+  }, [contextRef, navigate]);
+
+  const handleContextVerify = useCallback(() => {
+    if (!contextRef) return;
+    const wid = contextRef.kind === "now-playing"
+      ? nowPlaying?.wid
+      : contextRef.kind === "work"
+        ? contextRef.wid
+        : contextRef.kind === "provenance"
+          ? contextRef.wid
+          : null;
+    if (wid) navigate(`/verify/${encodeURIComponent(wid)}`);
+  }, [contextRef, navigate, nowPlaying?.wid]);
+
+  const handleContextPlay = useCallback(() => {
+    // Reachable only through a direct user click in the Context Canvas.
+    togglePlay();
+  }, [togglePlay]);
 
   // Chat column resize (workspace docked)
   useEffect(() => {
@@ -459,6 +516,16 @@ export default function PNAShellPage() {
         </div>
       </div>
       <div className="flex items-center gap-1.5 flex-shrink-0">
+        <button
+          type="button"
+          onClick={openNowPlayingContext}
+          aria-expanded={Boolean(contextRef)}
+          className="px-2 py-1 rounded flex items-center gap-1"
+          style={{ fontSize: "0.4rem", color: contextRef ? ACCENT : INK_MUTED, border: `1px solid ${contextRef ? "color-mix(in srgb, var(--ln-gold) 45%, transparent)" : PANEL_BORDER}`, fontFamily: "'Space Mono', monospace" }}
+          title="Open current music context"
+        >
+          <PanelRightOpen size={10} /> CONTEXT
+        </button>
         <button
           type="button"
           onClick={() => {
@@ -1037,6 +1104,19 @@ export default function PNAShellPage() {
               {chatColumn}
             </div>
           </div>
+          {contextRef && (
+            <div className="hidden 2xl:flex h-full w-[300px] flex-shrink-0">
+              <NexusContextPanel
+                context={contextRef}
+                suggestion={contextSuggestion}
+                nowPlaying={nowPlaying ? { ...nowPlaying, isPlaying: playerState.isPlaying } : null}
+                onClose={closeContext}
+                onOpen={handleContextOpen}
+                onVerify={handleContextVerify}
+                onPlay={handleContextPlay}
+              />
+            </div>
+          )}
         </>
       ) : (
         <>
@@ -1119,6 +1199,33 @@ export default function PNAShellPage() {
             </button>
           </div>
         </>
+      )}
+      {contextRef && (
+        <div
+          className="fixed inset-0 z-50 2xl:hidden"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) closeContext();
+          }}
+          style={{ background: "color-mix(in srgb, var(--ln-void) 54%, transparent)" }}
+        >
+          <div
+            className="absolute inset-x-3 top-16 bottom-4"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Nexus Context Canvas"
+          >
+            <NexusContextPanel
+              context={contextRef}
+              suggestion={contextSuggestion}
+              nowPlaying={nowPlaying ? { ...nowPlaying, isPlaying: playerState.isPlaying } : null}
+              onClose={closeContext}
+              onOpen={handleContextOpen}
+              onVerify={handleContextVerify}
+              onPlay={handleContextPlay}
+            />
+          </div>
+        </div>
       )}
     </div>
   );

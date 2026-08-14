@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-08-08T16:12:30.000Z",
-  "totalLessons": 12,
+  "lastUpdated": "2026-08-14T15:18:00.000Z",
+  "totalLessons": 13,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -250,6 +250,31 @@
         "mobile",
         "safe-area",
         "cinematic-splash"
+      ]
+    },
+    {
+      "id": "LESSON-013",
+      "date": "2026-08-14",
+      "category": "architecture",
+      "problem": "A contextual agent workspace can accidentally become a second chat owner, a hidden persistence channel, or an authority-escalation surface when it accepts free-form Agent payloads or lets contextual state trigger playback, provenance, commerce, or diary mutations.",
+      "solution": "ADR-023 Phase 1 introduced strict versioned Work/Creator/Provenance/Explore/Now Playing references, rejected extra mutation-shaped fields, labelled Agent output as a suggestion, kept state in the PNA session only, and exposed only explicit Open, Verify, and user-initiated Play actions. The Context Canvas has no query, persistence, registry mutation, commerce, or diary behavior.",
+      "files": [
+        "client/src/lib/nexusContext.ts",
+        "client/src/components/NexusContextPanel.tsx",
+        "client/src/pages/PNAShellPage.tsx",
+        "server/tests/nexusContextContract.test.ts",
+        "server/tests/nexusContextPanel.test.ts",
+        "docs/ADR-023-NEXUS-CONTEXT-PANEL.md"
+      ],
+      "score": 0,
+      "tags": [
+        "ADR-023",
+        "context-canvas",
+        "PNA",
+        "session-only",
+        "agent-suggestion",
+        "provenance",
+        "authority-boundary"
       ]
     }
   ]
