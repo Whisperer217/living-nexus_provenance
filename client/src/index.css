@@ -3923,6 +3923,30 @@ h1, h2, h3, h4, h5, h6,
   }
 }
 
+/* ═══════════════════════════════════════════════════════════════════
+   CREATOR SANCTUARY — 2.5D depth (not full 3D)
+   Layered planes + parallax + particles; real DOM stays crisp.
+═══════════════════════════════════════════════════════════════════ */
+
+@keyframes ln-sanctuary-ken {
+  from { transform: scale(1.04) translate3d(0, 0, 0); }
+  to   { transform: scale(1.09) translate3d(-1.4%, 0.8%, 0); }
+}
+
+@keyframes ln-breath-plane {
+  0%, 100% { opacity: 0.55; }
+  50%       { opacity: 1; }
+}
+
+@keyframes ln-breath-reveal {
+  from { opacity: 0; transform: translate3d(0, 12px, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+.ln-sanctuary {
+  isolation: isolate;
+}
+
 /* ── DepthAtmosphere / 2.5D shared ken ── */
 @keyframes ln-depth-ken {
   from { transform: scale(1.05) translate3d(0, 0, 0); }

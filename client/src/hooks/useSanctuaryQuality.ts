@@ -1,5 +1,6 @@
 /**
  * Sanctuary quality tiers — progressive 2.5D rendering.
+ * Low-power / reduced-motion devices get architectural depth without particles or parallax.
  */
 
 import { useEffect, useState } from "react";

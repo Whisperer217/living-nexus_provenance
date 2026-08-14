@@ -364,7 +364,30 @@ export const profileRouter = router({
       // Deleted, Draft, and Unlisted works are excluded from public statistics.
       // The provenance record (WID) is never erased — only the public visibility changes.
       const publicSongs = songs.filter((s: any) => s.isPublic && s.status === 'Published');
-      return { creator, songs: publicSongs };
+
+      // Public sanctuary extras — playlists + witness count for creator/visitor stage
+      const playlistRows = await getPlaylistsByUser(input.creatorId);
+      const publicPlaylists = (playlistRows as any[])
+        .filter((p: any) => p.isPublic === true || p.isPublic === 1)
+        .slice(0, 24)
+        .map((p: any) => ({
+          id: p.id,
+          name: p.name,
+          description: p.description ?? null,
+          coverArtUrl: p.coverArtUrl ?? null,
+          shareSlug: p.shareSlug ?? null,
+          playCount: p.playCount ?? 0,
+          updatedAt: p.updatedAt ?? null,
+        }));
+
+      const witnessCount = await getWitnessCount(input.creatorId);
+
+      return {
+        creator,
+        songs: publicSongs,
+        playlists: publicPlaylists,
+        witnessCount,
+      };
     }),
 
     /**
