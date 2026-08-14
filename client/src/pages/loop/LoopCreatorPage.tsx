@@ -1,33 +1,33 @@
 /**
- * Loop Creator Profile — music provenance creator surface
- * Brand-first hero. One story. Domain hierarchy (music-only). Witness + Support.
+ * Loop Creator Profile — 2.5D Creator Sanctuary
+ * Brand-first hero over layered depth. Works + playlists for creator & witness.
+ * Progressive rendering: low-power skips particles / parallax.
  */
 
 import { useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, useLocation, useParams } from "wouter";
 import {
-  Eye,
   LayoutGrid,
   Loader2,
-  Music,
-  Pause,
   Play,
   Settings,
   Share2,
-  Shield,
   UserPlus,
   UserCheck,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { CreatorSanctuaryStage } from "@/components/creator/CreatorSanctuaryStage";
+import { SanctuaryWorksOrganizer } from "@/components/creator/SanctuaryWorksOrganizer";
 import { DomainEditor } from "@/components/domain/DomainEditor";
 import { DomainRenderer } from "@/components/domain/DomainRenderer";
 import { SupportCreatorDrawer } from "@/components/SupportCreatorDrawer";
 import { usePlayer } from "@/contexts/PlayerContext";
+import { useHarmonicSignature } from "@/hooks/useHarmonicSignature";
 import { LOOP_PRODUCT } from "@/lib/loopProduct";
 import { trpc } from "@/lib/trpc";
-import { LOOP_DOMAIN_ALLOWED_BLOCKS } from "@shared/domainTypes";
+import { LOOP_DEFAULT_DOMAIN_LAYOUT, LOOP_DOMAIN_ALLOWED_BLOCKS } from "@shared/domainTypes";
 
 export default function LoopCreatorPage() {
   const { id } = useParams<{ id: string }>();
@@ -36,6 +36,7 @@ export default function LoopCreatorPage() {
   const { addAndPlay, playQueueAt, togglePlay, currentTrackId, state: playerState } = usePlayer();
   const [supportOpen, setSupportOpen] = useState(false);
   const [showDomainEditor, setShowDomainEditor] = useState(false);
+  const [orgMode, setOrgMode] = useState<"all" | "sealed" | "unsealed">("all");
 
   const isNumeric = /^\d+$/.test(id || "");
   const numericId = isNumeric ? parseInt(id || "0", 10) : 0;
@@ -75,12 +76,14 @@ export default function LoopCreatorPage() {
   const creator = (data as any)?.creator;
   const songs = useMemo(() => {
     const list = ((data as any)?.songs ?? []) as any[];
-    // Loop is music-only — keep audio / music works
     return list.filter((s) => {
       const ct = (s.contentType || "audio").toLowerCase();
       return ct === "audio" || ct === "music" || !s.contentType;
     });
   }, [data]);
+
+  const seedWid = songs.find((s) => s.witnessId)?.witnessId ?? null;
+  const breath = useHarmonicSignature(seedWid, null);
 
   if ((!isNumeric && handleQuery.isLoading) || isLoading) {
     return (
@@ -106,6 +109,7 @@ export default function LoopCreatorPage() {
   }
 
   const isOwner = !!user && user.id === creator.id;
+  const perspective = isOwner ? "creator" : "witness";
   const displayName = creator.artistHandle || creator.name || "Creator";
   const bio = creator.bio || creator.originStatement || creator.tagline || "";
   const why = creator.originStatement || creator.creativeMission || creator.bio || "";
@@ -113,9 +117,24 @@ export default function LoopCreatorPage() {
   const whenJoined = creator.createdAt
     ? new Date(creator.createdAt).toLocaleDateString(undefined, { year: "numeric", month: "short" })
     : "";
-  const what = creator.primaryGenre || "Music";
+  const genrePaths = Array.from(new Set(
+    songs.flatMap((song) =>
+      String(song.genre || "")
+        .split(",")
+        .map((genre) => genre.trim())
+        .filter((genre) => genre && genre.toLowerCase() !== "other"),
+    ),
+  ));
+  const what = `${songs.length} registered track${songs.length === 1 ? "" : "s"}${genrePaths.length ? ` · ${genrePaths.length} genre path${genrePaths.length === 1 ? "" : "s"}` : ""}`;
   const witnessed = songs.filter((s) => !!s.witnessId).length;
   const isWitnessing = !!witnessStatus.data?.witnessing;
+  const witnessCount =
+    witnessStatus.data?.count ??
+    publicWitnessCount.data?.count ??
+    (data as any)?.witnessCount ??
+    "—";
+
+  const anyPlaying = playerState.isPlaying && songs.some((s) => String(s.id) === currentTrackId);
 
   const queue = songs
     .filter((s) => s.fileUrl)
@@ -140,7 +159,7 @@ export default function LoopCreatorPage() {
     playQueueAt(queue, 0);
   };
 
-  const playOne = (song: any, index: number) => {
+  const playOne = (song: any) => {
     if (currentTrackId === String(song.id)) {
       togglePlay();
       return;
@@ -183,48 +202,40 @@ export default function LoopCreatorPage() {
         <meta property="og:image" content={creator.profilePhotoUrl || creator.bannerUrl || ""} />
       </Helmet>
 
-      {/* Brand-first full-bleed hero */}
-      <section className="relative min-h-[78vh] flex flex-col justify-end overflow-hidden">
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage: creator.bannerUrl
-              ? `url(${creator.bannerUrl})`
-              : creator.profilePhotoUrl
-                ? `url(${creator.profilePhotoUrl})`
-                : "linear-gradient(145deg, #1a1408 0%, #050505 45%, #000 100%)",
-            backgroundSize: "cover",
-            backgroundPosition: `${creator.bannerPositionX ?? 50}% ${creator.bannerPositionY ?? 50}%`,
-            animation: "loopDrift 22s ease-in-out infinite alternate",
-          }}
-        />
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              "linear-gradient(180deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.65) 45%, rgba(0,0,0,0.94) 82%, #000 100%)",
-          }}
-        />
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background:
-              "radial-gradient(ellipse 55% 40% at 15% 80%, rgba(196,154,40,0.16), transparent 55%)",
-          }}
-        />
-
-        <div className="relative z-10 max-w-5xl mx-auto w-full px-4 sm:px-6 pb-12 pt-24">
+      <CreatorSanctuaryStage
+        bannerUrl={creator.bannerUrl}
+        photoUrl={creator.profilePhotoUrl}
+        bannerPositionX={creator.bannerPositionX}
+        bannerPositionY={creator.bannerPositionY}
+        hue={breath.hue}
+        sat={breath.saturation}
+        playing={anyPlaying}
+        perspective={perspective}
+      >
+        <div className="max-w-5xl mx-auto w-full px-4 sm:px-6 pb-12 pt-24">
           <p
-            className="text-[11px] uppercase tracking-[0.32em] mb-5"
-            style={{ color: "var(--ln-gold)", fontFamily: "'Cinzel', serif" }}
+            className="text-[11px] uppercase tracking-[0.32em] mb-2"
+            style={{ color: "var(--ln-gold-hot, var(--ln-gold))", fontFamily: "'Cinzel', serif" }}
           >
             {LOOP_PRODUCT.name}
+          </p>
+          <p
+            className="text-[10px] uppercase tracking-[0.2em] mb-5"
+            style={{ color: "color-mix(in srgb, var(--ln-parchment) 45%, transparent)" }}
+          >
+            {isOwner ? "Creator sanctuary · your domain" : "Witness sanctuary · provenance hall"}
           </p>
 
           <div className="flex items-end gap-5 mb-5">
             <div
               className="w-20 h-20 sm:w-28 sm:h-28 rounded-full overflow-hidden flex-shrink-0"
-              style={{ outline: "2px solid rgba(196,154,40,0.55)", outlineOffset: 3 }}
+              style={{
+                outline: "2px solid color-mix(in srgb, var(--ln-gold) 55%, transparent)",
+                outlineOffset: 3,
+                boxShadow: anyPlaying
+                  ? `0 0 36px hsla(${breath.hue.toFixed(1)}, 65%, 50%, 0.35)`
+                  : undefined,
+              }}
             >
               {creator.profilePhotoUrl ? (
                 <img src={creator.profilePhotoUrl} alt="" className="w-full h-full object-cover" />
@@ -240,7 +251,11 @@ export default function LoopCreatorPage() {
             <div className="min-w-0 pb-1">
               <h1
                 className="text-4xl sm:text-6xl leading-[0.95] truncate"
-                style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}
+                style={{
+                  fontFamily: "'Cinzel', serif",
+                  color: "var(--ln-parchment)",
+                  textShadow: "0 2px 28px rgba(0,0,0,0.55)",
+                }}
               >
                 {displayName}
               </h1>
@@ -254,13 +269,19 @@ export default function LoopCreatorPage() {
 
           <p
             className="text-lg sm:text-xl max-w-2xl mb-4"
-            style={{ fontFamily: "'Cormorant Garamond', serif", color: "color-mix(in srgb, var(--ln-parchment) 80%, transparent)" }}
+            style={{
+              fontFamily: "'Cormorant Garamond', serif",
+              color: "color-mix(in srgb, var(--ln-parchment) 88%, transparent)",
+            }}
           >
             {why
               ? why.slice(0, 180) + (why.length > 180 ? "…" : "")
               : `${songs.length} registered work${songs.length === 1 ? "" : "s"} · ${witnessed} sealed with WID`}
           </p>
-          <div className="flex flex-wrap gap-x-4 gap-y-1 mb-8 text-[11px] uppercase tracking-[0.14em]" style={{ color: "color-mix(in srgb, var(--ln-parchment) 45%, transparent)" }}>
+          <div
+            className="flex flex-wrap gap-x-4 gap-y-1 mb-8 text-[11px] uppercase tracking-[0.14em]"
+            style={{ color: "color-mix(in srgb, var(--ln-parchment) 45%, transparent)" }}
+          >
             <span>Who · {displayName}</span>
             <span>What · {what}</span>
             {whenJoined && <span>When · {whenJoined}</span>}
@@ -273,7 +294,11 @@ export default function LoopCreatorPage() {
               type="button"
               onClick={playAll}
               className="inline-flex items-center gap-2 px-6 py-3 rounded-full text-sm font-semibold transition-transform hover:scale-[1.03]"
-              style={{ background: "var(--ln-gold)", color: "#0A0806" }}
+              style={{
+                background: "var(--ln-gold-hot, var(--ln-gold))",
+                color: "#0A0806",
+                boxShadow: "0 0 28px color-mix(in srgb, var(--ln-gold) 28%, transparent)",
+              }}
             >
               <Play size={16} fill="currentColor" /> Play works
             </button>
@@ -314,7 +339,10 @@ export default function LoopCreatorPage() {
               type="button"
               onClick={shareProfile}
               className="p-3 rounded-full"
-              style={{ border: "1px solid rgba(196,154,40,0.25)", color: "color-mix(in srgb, var(--ln-parchment) 70%, transparent)" }}
+              style={{
+                border: "1px solid rgba(196,154,40,0.25)",
+                color: "color-mix(in srgb, var(--ln-parchment) 70%, transparent)",
+              }}
               aria-label="Share profile"
             >
               <Share2 size={16} />
@@ -326,7 +354,9 @@ export default function LoopCreatorPage() {
                   onClick={() => setShowDomainEditor((v) => !v)}
                   className="inline-flex items-center gap-2 px-4 py-3 rounded-full text-sm"
                   style={{
-                    border: showDomainEditor ? "1px solid rgba(196,154,40,0.5)" : "1px solid rgba(196,154,40,0.25)",
+                    border: showDomainEditor
+                      ? "1px solid rgba(196,154,40,0.5)"
+                      : "1px solid rgba(196,154,40,0.25)",
                     color: "var(--ln-gold)",
                     background: showDomainEditor ? "rgba(196,154,40,0.12)" : "transparent",
                   }}
@@ -346,9 +376,9 @@ export default function LoopCreatorPage() {
             )}
           </div>
         </div>
-      </section>
+      </CreatorSanctuaryStage>
 
-      {/* Metrics — typographic, not cards */}
+      {/* Metrics */}
       <section
         className="max-w-5xl mx-auto px-4 sm:px-6 py-10 grid grid-cols-3 gap-4"
         style={{ borderBottom: "1px solid rgba(196,154,40,0.12)" }}
@@ -356,13 +386,16 @@ export default function LoopCreatorPage() {
         {[
           { label: "Works", value: songs.length },
           { label: "WIDs", value: witnessed },
-          { label: "Witnesses", value: witnessStatus.data?.count ?? publicWitnessCount.data?.count ?? "—" },
+          { label: "Witnesses", value: witnessCount },
         ].map((m) => (
           <div key={m.label}>
             <div className="text-3xl tabular-nums" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-gold)" }}>
               {m.value}
             </div>
-            <div className="text-[11px] uppercase tracking-[0.16em] mt-1" style={{ color: "color-mix(in srgb, var(--ln-parchment) 45%, transparent)" }}>
+            <div
+              className="text-[11px] uppercase tracking-[0.16em] mt-1"
+              style={{ color: "color-mix(in srgb, var(--ln-parchment) 45%, transparent)" }}
+            >
               {m.label}
             </div>
           </div>
@@ -370,7 +403,10 @@ export default function LoopCreatorPage() {
       </section>
 
       {/* Testimonies */}
-      <section className="max-w-5xl mx-auto px-4 sm:px-6 py-12" style={{ borderBottom: "1px solid rgba(196,154,40,0.12)" }}>
+      <section
+        className="max-w-5xl mx-auto px-4 sm:px-6 py-12"
+        style={{ borderBottom: "1px solid rgba(196,154,40,0.12)" }}
+      >
         <p
           className="text-[11px] uppercase tracking-[0.22em] mb-3"
           style={{ color: "var(--ln-gold)", fontFamily: "'Cinzel', serif" }}
@@ -378,10 +414,16 @@ export default function LoopCreatorPage() {
           Testimonies
         </p>
         <h2 className="text-3xl mb-8" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>
-          Why they are here
+          {isOwner ? "Why you are here" : "Why they are here"}
         </h2>
         {testimonies.length === 0 ? (
-          <p style={{ color: "color-mix(in srgb, var(--ln-parchment) 50%, transparent)", fontFamily: "'Cormorant Garamond', serif", fontSize: 18 }}>
+          <p
+            style={{
+              color: "color-mix(in srgb, var(--ln-parchment) 50%, transparent)",
+              fontFamily: "'Cormorant Garamond', serif",
+              fontSize: 18,
+            }}
+          >
             {isOwner
               ? "Add a testimony on your profile to become witness-ready for publishing."
               : "No testimonies published yet."}
@@ -395,7 +437,7 @@ export default function LoopCreatorPage() {
                   style={{
                     fontFamily: "'Cormorant Garamond', serif",
                     color: "color-mix(in srgb, var(--ln-parchment) 88%, transparent)",
-                    borderLeft: "2px solid rgba(196,154,40,0.45)",
+                    borderLeft: `2px solid hsla(${breath.hue.toFixed(1)}, 65%, 55%, 0.55)`,
                     paddingLeft: 16,
                   }}
                 >
@@ -419,129 +461,33 @@ export default function LoopCreatorPage() {
           <DomainEditor
             userId={creator.id}
             allowedBlockTypes={LOOP_DOMAIN_ALLOWED_BLOCKS}
+            defaultLayout={LOOP_DEFAULT_DOMAIN_LAYOUT}
             onClose={() => setShowDomainEditor(false)}
           />
         </section>
       )}
 
-      {/* Domain hierarchy — music-only; identity lives in the flagship hero above */}
+      {/* Creator-arranged music rooms + canonical track library */}
       <section className="max-w-5xl mx-auto px-4 sm:px-6 py-14 pb-28">
-        <p
-          className="text-[11px] uppercase tracking-[0.22em] mb-3"
-          style={{ color: "var(--ln-gold)", fontFamily: "'Cinzel', serif" }}
-        >
-          Registered music
-        </p>
-        <h2
-          className="text-3xl mb-10"
-          style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}
-        >
-          Works & domain
-        </h2>
-
-        {songs.length === 0 && !showDomainEditor ? (
-          <div className="py-16 text-center">
-            <Music className="mx-auto mb-4 opacity-40" style={{ color: "var(--ln-gold)" }} />
-            <p style={{ color: "color-mix(in srgb, var(--ln-parchment) 55%, transparent)", fontFamily: "'Cormorant Garamond', serif", fontSize: 20 }}>
-              No registered works yet.
-            </p>
-            {isOwner && (
-              <Link href="/manifest">
-                <button
-                  type="button"
-                  className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold"
-                  style={{ background: "var(--ln-gold)", color: "#0A0806" }}
-                >
-                  Register a work
-                </button>
-              </Link>
-            )}
-          </div>
-        ) : null}
-
-        {/* Compact Loop works list (always the music shelf signal) */}
-        {songs.length > 0 && (
-          <ul className="mb-14">
-            {songs.map((song, index) => {
-              const active = currentTrackId === String(song.id);
-              const playing = active && playerState.isPlaying;
-              return (
-                <li
-                  key={song.id}
-                  className="group flex items-center gap-4 py-4"
-                  style={{
-                    borderBottom: "1px solid rgba(196,154,40,0.1)",
-                    animation: "loopFadeUp 420ms ease both",
-                    animationDelay: `${Math.min(index, 14) * 40}ms`,
-                  }}
-                >
-                  <button
-                    type="button"
-                    onClick={() => playOne(song, index)}
-                    className="relative w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 overflow-hidden"
-                    style={{ background: "#111" }}
-                  >
-                    {song.coverArtUrl ? (
-                      <img
-                        src={song.coverArtUrl}
-                        alt=""
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        style={{
-                          objectPosition: `${song.coverPositionX ?? 50}% ${song.coverPositionY ?? 50}%`,
-                        }}
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <Music size={18} style={{ color: "var(--ln-gold)", opacity: 0.45 }} />
-                      </div>
-                    )}
-                    <span className="absolute inset-0 flex items-center justify-center bg-black/45 opacity-0 group-hover:opacity-100 transition-opacity">
-                      {playing ? (
-                        <Pause size={18} fill="currentColor" style={{ color: "var(--ln-gold)" }} />
-                      ) : (
-                        <Play size={18} fill="currentColor" style={{ color: "var(--ln-gold)" }} />
-                      )}
-                    </span>
-                  </button>
-
-                  <div className="flex-1 min-w-0">
-                    <Link href={`/song/${song.id}`}>
-                      <span
-                        className="block truncate text-lg hover:underline"
-                        style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}
-                      >
-                        {song.title}
-                      </span>
-                    </Link>
-                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-xs" style={{ color: "color-mix(in srgb, var(--ln-parchment) 50%, transparent)" }}>
-                      {song.genre && <span>{song.genre}</span>}
-                      {song.witnessId ? (
-                        <Link href={`/verify/${song.witnessId}`}>
-                          <span className="inline-flex items-center gap-1" style={{ color: "var(--ln-gold)" }}>
-                            <Shield size={10} />
-                            <span className="font-mono text-[10px] truncate max-w-[160px]">{song.witnessId}</span>
-                          </span>
-                        </Link>
-                      ) : (
-                        <span className="inline-flex items-center gap-1">
-                          <Eye size={10} /> Unsealed
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-        )}
-
-        {/* Arranged domain blocks — skip identity + music shelf (flagship + list above) */}
         <DomainRenderer
           userId={creator.id}
           isOwner={isOwner}
           allowedBlockTypes={LOOP_DOMAIN_ALLOWED_BLOCKS}
-          omitBlockTypes={["hero", "bio", "shelf_music"]}
+          defaultLayout={LOOP_DEFAULT_DOMAIN_LAYOUT}
         />
+
+        <div className="mt-16 pt-12" style={{ borderTop: "1px solid color-mix(in srgb, var(--ln-gold) 14%, transparent)" }}>
+        <SanctuaryWorksOrganizer
+          works={songs}
+          mode={orgMode}
+          onModeChange={setOrgMode}
+          currentTrackId={currentTrackId}
+          isPlaying={playerState.isPlaying}
+          onPlay={playOne}
+          isOwner={isOwner}
+          handle={creator.artistHandle}
+        />
+        </div>
       </section>
 
       <SupportCreatorDrawer
@@ -562,17 +508,6 @@ export default function LoopCreatorPage() {
         }
         onClose={() => setSupportOpen(false)}
       />
-
-      <style>{`
-        @keyframes loopDrift {
-          from { transform: scale(1.02) translate3d(0,0,0); }
-          to { transform: scale(1.07) translate3d(-1.5%, 1%, 0); }
-        }
-        @keyframes loopFadeUp {
-          from { opacity: 0; transform: translateY(12px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
     </div>
   );
 }

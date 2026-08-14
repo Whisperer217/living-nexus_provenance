@@ -34,6 +34,7 @@ import {
   ExternalLink, Plus, Pencil, Download,
 } from "lucide-react";
 import { EDIT_GENRES as GENRES } from "@shared/contentTypes";
+import { DepthAtmosphere } from "@/components/atmosphere/DepthAtmosphere";
 
 /* ─── Types ─────────────────────────────────────────────────────────────── */
 
@@ -444,9 +445,8 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
       <div
         className="absolute inset-0"
         style={{
-          background: "rgba(4,2,10,0.72)",
-          backdropFilter: "blur(6px)",
-          WebkitBackdropFilter: "blur(6px)",
+          background:
+            "radial-gradient(ellipse 70% 55% at 85% 15%, rgba(196,154,40,0.12), transparent 55%), rgba(4,2,10,0.78)",
         }}
         onClick={() => { if (backdropActive) stableOnClose(); }}
       />
@@ -457,26 +457,23 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
         className="relative flex flex-col h-full overflow-hidden"
         style={{
           width: "min(640px, 100vw)",
-          background: SURFACE,
+          background: "color-mix(in srgb, #06040E 82%, transparent)",
           borderLeft: `1px solid ${GOLD_BORDER}`,
           boxShadow: `-24px 0 80px rgba(0,0,0,0.7), -4px 0 24px rgba(212,175,55,0.06)`,
           animation: "slideInRight 0.32s cubic-bezier(0.22,1,0.36,1)",
         }}
         onPointerDown={(e) => e.stopPropagation()}
       >
-        {/* Sacred geometric background texture */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            backgroundImage: `
-              radial-gradient(circle at 20% 20%, rgba(212,175,55,0.025) 0%, transparent 50%),
-              radial-gradient(circle at 80% 80%, rgba(212,175,55,0.018) 0%, transparent 50%),
-              radial-gradient(circle at 50% 50%, rgba(212,175,55,0.012) 0%, transparent 70%)
-            `,
-            zIndex: 0,
-          }}
-        />
-
+        {/* 2.5D chapel atmosphere — progressive depth behind the form */}
+        <DepthAtmosphere
+          variant="drawer"
+          hue={43}
+          imageUrl={coverUrl || null}
+          className="!absolute inset-0 pointer-events-none"
+          style={{ zIndex: 0 }}
+        >
+          <span className="sr-only">Chapel atmosphere</span>
+        </DepthAtmosphere>
         {/* ── Header ── */}
         <div
           className="relative flex items-center justify-between px-7 py-5 flex-shrink-0"

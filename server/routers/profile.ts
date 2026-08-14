@@ -30,7 +30,7 @@ import {
   updateFieldNote, deleteFieldNote,
   witnessCreator, unwatchCreator, isWitnessing, getWitnessCount,
   getWitnessNetwork, createReference, getReferencesForSong, getReferencesForUser,
-  createPlaylist, getPlaylistsByUser, getPlaylistById, updatePlaylist, deletePlaylist,
+  createPlaylist, getPlaylistsByUser, getPublicPlaylistsByOwner, getPlaylistById, updatePlaylist, deletePlaylist,
   getPlaylistTracks, addTrackToPlaylist, removeTrackFromPlaylist,
   getPlaylistCollaborators, inviteCollaborator, acceptPlaylistInvite, removeCollaborator,
   isPlaylistMember,
@@ -364,7 +364,42 @@ export const profileRouter = router({
       // Deleted, Draft, and Unlisted works are excluded from public statistics.
       // The provenance record (WID) is never erased — only the public visibility changes.
       const publicSongs = songs.filter((s: any) => s.isPublic && s.status === 'Published');
-      return { creator, songs: publicSongs };
+
+      // Public sanctuary extras — playlists + witness count for creator/visitor stage
+      const playlistRows = await getPublicPlaylistsByOwner(input.creatorId, 24);
+      const publicPlaylists = (playlistRows as any[])
+        .map((p: any) => ({
+          id: p.id,
+          name: p.name,
+          description: p.description ?? null,
+          coverArtUrl: p.coverArtUrl ?? null,
+          shareSlug: p.shareSlug ?? null,
+          playCount: p.playCount ?? 0,
+          updatedAt: p.updatedAt ?? null,
+        }));
+
+      const albumRows = await getCollectionsByCreator(input.creatorId);
+      const publicAlbums = (albumRows as any[])
+        .filter((album: any) => album.visibility === "public")
+        .map((album: any) => ({
+          id: album.id,
+          name: album.name,
+          collectionWid: album.collectionWid,
+          description: album.description ?? null,
+          coverArtUrl: album.coverArtUrl ?? null,
+          trackCount: album.trackCount ?? 0,
+          createdAt: album.createdAt ?? null,
+        }));
+
+      const witnessCount = await getWitnessCount(input.creatorId);
+
+      return {
+        creator,
+        songs: publicSongs,
+        playlists: publicPlaylists,
+        albums: publicAlbums,
+        witnessCount,
+      };
     }),
 
     /**

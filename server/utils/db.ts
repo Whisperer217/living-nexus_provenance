@@ -1851,6 +1851,19 @@ export async function getPlaylistsByUser(userId: number) {
   return all;
 }
 
+/** Public playlists owned by a creator; excludes playlists they only collaborate on. */
+export async function getPublicPlaylistsByOwner(ownerId: number, limit = 24) {
+  const db = await getDb();
+  if (!db) return [];
+  const { playlists } = await import("../../drizzle/schema");
+  return db
+    .select()
+    .from(playlists)
+    .where(and(eq(playlists.ownerId, ownerId), eq(playlists.isPublic, true)))
+    .orderBy(desc(playlists.updatedAt))
+    .limit(limit);
+}
+
 export async function getPlaylistById(playlistId: number) {
   const db = await getDb();
   if (!db) return null;

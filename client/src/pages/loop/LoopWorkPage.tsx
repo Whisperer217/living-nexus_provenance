@@ -9,6 +9,8 @@ import { Helmet } from "react-helmet-async";
 import { Link, useParams } from "wouter";
 import {
   Copy,
+  DollarSign,
+  Download,
   Heart,
   Loader2,
   Music,
@@ -28,6 +30,7 @@ import { useLike } from "@/hooks/useLike";
 import { useHarmonicSignature } from "@/hooks/useHarmonicSignature";
 import { LOOP_PRODUCT } from "@/lib/loopProduct";
 import { trpc } from "@/lib/trpc";
+import { getLoginUrl } from "@/const";
 
 export default function LoopWorkPage() {
   const { id } = useParams<{ id: string }>();
@@ -49,15 +52,97 @@ export default function LoopWorkPage() {
   const playMutation = trpc.songs.play.useMutation();
   const { liked, toggle: toggleLike } = useLike(songId);
 
+  const deliverDownload = (data: any) => {
+    if (!data?.url) return;
+    const a = document.createElement("a");
+    a.href = data.url;
+    a.download = data.filename || "download";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
+
+  const downloadMutation = trpc.songs.download.useMutation({
+    onSuccess: deliverDownload,
+  });
+  const tipDownloadMutation = trpc.tips.createTipDownloadCheckout.useMutation({
+    onSuccess: (data: any) => {
+      if (data?.url) window.location.href = data.url;
+    },
+    onError: (err) => toast.error(err.message || "Checkout unavailable"),
+  });
+
   const song = songData?.song;
   const creator = songData?.creator;
   const widForBreath = (song?.witnessId as string | null | undefined) ?? null;
   const breath = useHarmonicSignature(widForBreath, null);
 
+  const stripDownloadReturnFlag = () => {
+    const url = new URL(window.location.href);
+    url.searchParams.delete("download");
+    window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
+  };
+
+  const runFreeDownload = async () => {
+    try {
+      await downloadMutation.mutateAsync({ songId });
+    } catch (err: any) {
+      toast.error(err?.message || "Download unavailable");
+    }
+  };
+
+  const runPaidDownload = async () => {
+    try {
+      // Already-unlocked supporters download immediately instead of paying twice.
+      await downloadMutation.mutateAsync({ songId });
+    } catch (err: any) {
+      const code = err?.data?.code ?? err?.shape?.data?.code;
+      if (code !== "FORBIDDEN") {
+        toast.error(err?.message || "Download unavailable");
+        return;
+      }
+      tipDownloadMutation.mutate({ songId, origin: window.location.origin });
+    }
+  };
+
   useEffect(() => {
     if (songId > 0) playMutation.mutate({ songId });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [songId]);
+
+  useEffect(() => {
+    if (!song || !user || new URLSearchParams(window.location.search).get("download") !== "unlocked") {
+      return;
+    }
+
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let attempt = 0;
+
+    const claimDownload = async () => {
+      try {
+        await downloadMutation.mutateAsync({ songId: song.id });
+        if (!cancelled) stripDownloadReturnFlag();
+      } catch {
+        attempt += 1;
+        if (!cancelled && attempt < 4) {
+          // Stripe webhook delivery can trail the browser redirect briefly.
+          timer = setTimeout(claimDownload, 1200 * attempt);
+        } else if (!cancelled) {
+          stripDownloadReturnFlag();
+          toast.info("Payment received. Click Download again if the file did not begin.");
+        }
+      }
+    };
+
+    void claimDownload();
+    return () => {
+      cancelled = true;
+      if (timer) clearTimeout(timer);
+    };
+    // Mutations are intentionally excluded; this is a one-time checkout return handler.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [song?.id, user?.id]);
 
   if (isLoading) {
     return (
@@ -131,6 +216,8 @@ export default function LoopWorkPage() {
       coverPositionX: song.coverPositionX ?? 50,
       coverPositionY: song.coverPositionY ?? 50,
       creatorHandle: creator?.artistHandle || undefined,
+      downloadPermission: (song as any).downloadPermission ?? null,
+      downloadTipThresholdCents: (song as any).downloadTipThresholdCents ?? null,
     });
   };
 
@@ -235,6 +322,78 @@ export default function LoopWorkPage() {
               {isPlaying ? <Pause size={16} fill="currentColor" /> : <Play size={16} fill="currentColor" />}
               {isPlaying ? "Pause" : "Listen"}
             </button>
+            {(() => {
+              const dlPerm = (song as any).downloadPermission as string | undefined;
+              const tipCents = ((song as any).downloadTipThresholdCents as number | undefined) ?? 179;
+              if (!dlPerm || dlPerm === "none") return null;
+              if (dlPerm === "free") {
+                return (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!user) {
+                        window.location.href = getLoginUrl();
+                        return;
+                      }
+                      void runFreeDownload();
+                    }}
+                    disabled={downloadMutation.isPending}
+                    className="inline-flex items-center gap-2 px-5 py-3 rounded-full text-sm"
+                    style={{
+                      border: "1px solid rgba(34,197,94,0.45)",
+                      color: "rgba(74,222,128,0.95)",
+                      background: "rgba(34,197,94,0.08)",
+                    }}
+                  >
+                    <Download size={15} />
+                    {downloadMutation.isPending ? "…" : "Free Download"}
+                  </button>
+                );
+              }
+              if (dlPerm === "tipped") {
+                return (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!user) {
+                        window.location.href = getLoginUrl();
+                        return;
+                      }
+                      void runPaidDownload();
+                    }}
+                    disabled={tipDownloadMutation.isPending}
+                    title={`Gift $${(tipCents / 100).toFixed(2)} to unlock download`}
+                    className="inline-flex items-center gap-2 px-5 py-3 rounded-full text-sm font-semibold"
+                    style={{
+                      border: "1px solid rgba(196,154,40,0.55)",
+                      color: "var(--ln-gold-hot, var(--ln-gold))",
+                      background: "rgba(196,154,40,0.12)",
+                      boxShadow: "0 0 22px rgba(196,154,40,0.12)",
+                    }}
+                  >
+                    <Download size={15} />
+                    {tipDownloadMutation.isPending
+                      ? "Opening checkout…"
+                      : `Download — $${(tipCents / 100).toFixed(2)}`}
+                  </button>
+                );
+              }
+              return null;
+            })()}
+            {creator?.id && (
+              <button
+                type="button"
+                onClick={() => setSupportOpen(true)}
+                className="inline-flex items-center gap-2 px-5 py-3 rounded-full text-sm"
+                style={{
+                  border: "1px solid rgba(196,154,40,0.4)",
+                  color: "var(--ln-parchment)",
+                  background: "rgba(0,0,0,0.35)",
+                }}
+              >
+                <DollarSign size={15} /> Support
+              </button>
+            )}
             <button
               type="button"
               onClick={() => toggleLike()}

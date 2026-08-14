@@ -284,6 +284,12 @@ export const tipsRouter = router({
       const songData = await getSongWithCreator(input.songId);
       if (!songData) throw new Error("Song not found");
       const { song, creator } = songData;
+      if ((song as any).downloadPermission !== "tipped") {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "This work is not configured for paid download.",
+        });
+      }
       if (!creator?.stripeAccountId) throw new Error("This creator has not enabled tips yet. Ask them to connect Stripe in their Dashboard.");
       // Verify the connected account is ready to receive transfers
       try {

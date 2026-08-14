@@ -18,6 +18,9 @@ export const DOMAIN_BLOCK_TYPES = [
   "shelf_games",       // Game arcade — playable games
   // ── Featured Category ─────────────────────────────────────────────────────
   "featured_work",     // Pinned/highlighted works (up to 6 IDs)
+  "latest_releases",   // Newest public music, ordered by release/registration date
+  "genre_paths",       // Music grouped into creator-defined genre paths
+  "playlists_shelf",   // Public creator-owned playlists
   // ── Commerce Category ─────────────────────────────────────────────────────
   "distribution_links",// DSP links (Spotify, Apple Music, Bandcamp, etc.)
   "tip_jar",           // Direct support / tip jar
@@ -57,6 +60,8 @@ export interface ShelfBlockConfig {
   showWid?: boolean;        // Show WID badges
   showPlayButton?: boolean; // Show play buttons (music only)
   collectionId?: number;    // Pin to a specific collection/album
+  sortMode?: "latest" | "displayOrder" | "alphabetical";
+  groupBy?: "none" | "genre" | "album";
 }
 
 export interface FeaturedWorkBlockConfig {
@@ -163,6 +168,19 @@ export const DEFAULT_DOMAIN_LAYOUT: Array<{
   { blockType: "shelf_merch",       position: 15, visible: false, size: "full", config: { heading: "Merch" } },
 ];
 
+/** Loop creator sanctuary default: music-native rooms, not mixed-media shelves. */
+export const LOOP_DEFAULT_DOMAIN_LAYOUT: typeof DEFAULT_DOMAIN_LAYOUT = [
+  { blockType: "featured_work",     position: 0, visible: true,  size: "full", config: { heading: "Featured Tracks", layout: "grid" } },
+  { blockType: "latest_releases",   position: 1, visible: true,  size: "full", config: { heading: "Latest Releases", maxItems: 6 } },
+  { blockType: "shelf_collections", position: 2, visible: true,  size: "full", config: { heading: "Albums & Releases" } },
+  { blockType: "playlists_shelf",   position: 3, visible: true,  size: "full", config: { heading: "Playlists" } },
+  { blockType: "genre_paths",       position: 4, visible: true,  size: "full", config: { heading: "Genre Paths", maxItems: 12 } },
+  { blockType: "distribution_links",position: 5, visible: true,  size: "full", config: { heading: "Listen Elsewhere", showSpotify: true, showAppleMusic: true, showBandcamp: true, showSoundCloud: true, showYouTube: true } },
+  { blockType: "provenance_trail",  position: 6, visible: false, size: "full", config: { showDomainVersions: true, showWids: true, maxItems: 10 } },
+  { blockType: "custom_text",       position: 7, visible: false, size: "full", config: {} },
+  { blockType: "divider",           position: 8, visible: false, size: "full", config: { style: "ornament" } },
+];
+
 /** Non-music shelves — kept in schema for export, delisted from Loop product surface. */
 export const LOOP_DELISTED_DOMAIN_BLOCKS: readonly DomainBlockType[] = [
   "shelf_books",
@@ -173,11 +191,24 @@ export const LOOP_DELISTED_DOMAIN_BLOCKS: readonly DomainBlockType[] = [
   "shelf_games",
 ] as const;
 
-/** Blocks creators may arrange on the Loop music-provenance domain. */
-export const LOOP_DOMAIN_ALLOWED_BLOCKS: readonly DomainBlockType[] = DOMAIN_BLOCK_TYPES.filter(
-  (t) => !LOOP_DELISTED_DOMAIN_BLOCKS.includes(t)
-);
+/** Blocks creators may arrange on Loop. Identity/testimony/support/library are flagship page fixtures. */
+export const LOOP_DOMAIN_ALLOWED_BLOCKS: readonly DomainBlockType[] = [
+  "featured_work",
+  "latest_releases",
+  "shelf_collections",
+  "playlists_shelf",
+  "genre_paths",
+  "distribution_links",
+  "provenance_trail",
+  "custom_text",
+  "divider",
+] as const;
 
 export function isLoopAllowedDomainBlock(blockType: DomainBlockType): boolean {
-  return !LOOP_DELISTED_DOMAIN_BLOCKS.includes(blockType);
+  return LOOP_DOMAIN_ALLOWED_BLOCKS.includes(blockType);
+}
+
+export function isLoopMusicContentType(contentType?: string | null): boolean {
+  const value = (contentType || "audio").toLowerCase();
+  return value === "audio" || value === "music";
 }
