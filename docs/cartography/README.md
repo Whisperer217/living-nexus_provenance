@@ -21,6 +21,8 @@
 | K. Implementation Roadmap | [IMPLEMENTATION_ROADMAP.md](./IMPLEMENTATION_ROADMAP.md) | P0–P3 sequencing with evidence, debt, migration, and counsel gates. |
 | Audit charter and source ledger | [CARTOGRAPHY_AUDIT.md](./CARTOGRAPHY_AUDIT.md) | Scope, classification rules, legal boundary, and external-source provenance. |
 | Current technical truth | [CURRENT_STATE_REPORT.md](./CURRENT_STATE_REPORT.md) | Observed codebase topology, registry facts, public claims, and findings register. |
+| Read-only production-equivalent audit | [PRODUCTION_EQUIVALENT_INTEGRATION_AUDIT.md](./PRODUCTION_EQUIVALENT_INTEGRATION_AUDIT.md) | Runtime, database, storage, route, source-contract, and observability evidence gathered without mutations. |
+| Integration pass–fail matrix | [INTEGRATION_AUDIT_MATRIX.md](./INTEGRATION_AUDIT_MATRIX.md) | Sanitized procedure shapes, status evidence, environment deltas, blocker register, and authorized next validation. |
 
 ## Governing Classification
 
@@ -48,4 +50,3 @@
 ## Use After This Audit
 
 All future work must begin with the **Decision Gate** in `IMPLEMENTATION_ROADMAP.md`. The next action is not a page optimization. It is P0 architecture/claim/registry alignment, authorized separately by the Keeper.
-
