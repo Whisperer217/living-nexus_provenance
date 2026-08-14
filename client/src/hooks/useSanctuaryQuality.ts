@@ -53,16 +53,23 @@ export function useSanctuaryParallax(enabled: boolean, strength = 1) {
     let targetY = 0;
     let curX = 0;
     let curY = 0;
+
     const tick = () => {
       curX += (targetX - curX) * 0.08;
       curY += (targetY - curY) * 0.08;
       setOffset({ x: curX * strength, y: curY * strength });
-      raf = requestAnimationFrame(tick);
+      const distance = Math.abs(targetX - curX) + Math.abs(targetY - curY);
+      raf = distance > 0.002 ? requestAnimationFrame(tick) : 0;
     };
-    raf = requestAnimationFrame(tick);
+
+    const schedule = () => {
+      if (!raf) raf = requestAnimationFrame(tick);
+    };
+
     const onMove = (clientX: number, clientY: number) => {
       targetX = Math.max(-1, Math.min(1, (clientX / window.innerWidth - 0.5) * 2));
       targetY = Math.max(-1, Math.min(1, (clientY / window.innerHeight - 0.5) * 2));
+      schedule();
     };
     const onPointer = (e: PointerEvent) => onMove(e.clientX, e.clientY);
     const onTouch = (e: TouchEvent) => {

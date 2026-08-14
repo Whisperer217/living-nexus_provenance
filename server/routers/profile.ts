@@ -30,7 +30,7 @@ import {
   updateFieldNote, deleteFieldNote,
   witnessCreator, unwatchCreator, isWitnessing, getWitnessCount,
   getWitnessNetwork, createReference, getReferencesForSong, getReferencesForUser,
-  createPlaylist, getPlaylistsByUser, getPlaylistById, updatePlaylist, deletePlaylist,
+  createPlaylist, getPlaylistsByUser, getPublicPlaylistsByOwner, getPlaylistById, updatePlaylist, deletePlaylist,
   getPlaylistTracks, addTrackToPlaylist, removeTrackFromPlaylist,
   getPlaylistCollaborators, inviteCollaborator, acceptPlaylistInvite, removeCollaborator,
   isPlaylistMember,
@@ -366,10 +366,8 @@ export const profileRouter = router({
       const publicSongs = songs.filter((s: any) => s.isPublic && s.status === 'Published');
 
       // Public sanctuary extras — playlists + witness count for creator/visitor stage
-      const playlistRows = await getPlaylistsByUser(input.creatorId);
+      const playlistRows = await getPublicPlaylistsByOwner(input.creatorId, 24);
       const publicPlaylists = (playlistRows as any[])
-        .filter((p: any) => p.isPublic === true || p.isPublic === 1)
-        .slice(0, 24)
         .map((p: any) => ({
           id: p.id,
           name: p.name,

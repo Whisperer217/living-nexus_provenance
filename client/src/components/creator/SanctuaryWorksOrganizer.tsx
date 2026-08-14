@@ -273,7 +273,13 @@ export function SanctuaryPlaylists({ playlists, isOwner, handle }: PlaylistsProp
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {playlists.map((pl) => {
-            const href = pl.shareSlug ? `/p/${pl.shareSlug}` : `/playlists`;
+            const href = pl.shareSlug
+              ? `/p/${pl.shareSlug}`
+              : isOwner
+                ? "/playlists"
+                : handle
+                  ? `/creator/${handle}/playlists`
+                  : "#";
             return (
               <Link key={pl.id} href={href}>
                 <article

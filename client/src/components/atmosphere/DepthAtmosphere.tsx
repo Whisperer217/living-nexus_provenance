@@ -116,7 +116,7 @@ export function DepthAtmosphere({
 
   return (
     <div
-      className={`relative overflow-hidden ${className}`}
+      className={`relative ${isDrawer ? "overflow-hidden" : "overflow-x-clip"} ${className}`}
       data-tier={tier}
       style={{
         ...style,
