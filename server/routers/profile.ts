@@ -378,12 +378,26 @@ export const profileRouter = router({
           updatedAt: p.updatedAt ?? null,
         }));
 
+      const albumRows = await getCollectionsByCreator(input.creatorId);
+      const publicAlbums = (albumRows as any[])
+        .filter((album: any) => album.visibility === "public")
+        .map((album: any) => ({
+          id: album.id,
+          name: album.name,
+          collectionWid: album.collectionWid,
+          description: album.description ?? null,
+          coverArtUrl: album.coverArtUrl ?? null,
+          trackCount: album.trackCount ?? 0,
+          createdAt: album.createdAt ?? null,
+        }));
+
       const witnessCount = await getWitnessCount(input.creatorId);
 
       return {
         creator,
         songs: publicSongs,
         playlists: publicPlaylists,
+        albums: publicAlbums,
         witnessCount,
       };
     }),

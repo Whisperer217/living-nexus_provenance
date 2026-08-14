@@ -10,14 +10,14 @@
  *   - Preview mode toggle
  */
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
 import { DEFAULT_DOMAIN_LAYOUT, DOMAIN_BLOCK_TYPES, type DomainBlockType, type DomainBlockSize, type DomainBlockRecord } from "@shared/domainTypes";
 import {
   GripVertical, Eye, EyeOff, Save, History, ChevronDown,
   Music, BookOpen, BookMarked, FileText, Package, ShoppingBag,
   User, AlignLeft, Link2, Shield, FileEdit, Minus, Star, LayoutGrid,
-  Library, Gamepad2, Loader2, Check, X
+  Library, Gamepad2, Loader2, Check, X, Disc3, Radio, ListMusic
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -27,15 +27,18 @@ import { toast } from "sonner";
 const BLOCK_META: Record<DomainBlockType, { label: string; category: string; icon: React.ElementType; description: string }> = {
   hero:               { label: "Hero Banner",       category: "Identity",   icon: User,         description: "Your avatar, name, and origin statement" },
   bio:                { label: "Biography",          category: "Identity",   icon: AlignLeft,    description: "Philosophy, doctrine, and creator story" },
-  shelf_music:        { label: "Music Shelf",        category: "Shelf",      icon: Music,        description: "Record rack — your music tracks" },
+  shelf_music:        { label: "Track Library",      category: "Music",      icon: Music,        description: "Your complete registered music catalog" },
   shelf_books:        { label: "Book Shelf",         category: "Shelf",      icon: BookOpen,     description: "Library — novels, essays, short stories" },
   shelf_comics:       { label: "Comic Rack",         category: "Shelf",      icon: BookMarked,   description: "Comics and graphic novels" },
   shelf_manuscripts:  { label: "Manuscript Cabinet", category: "Shelf",      icon: FileText,     description: "Academic papers and manuscripts" },
   shelf_artifacts:    { label: "Artifact Case",      category: "Shelf",      icon: Package,      description: "Relics, objects, and visual art" },
   shelf_merch:        { label: "Merch Display",      category: "Shelf",      icon: ShoppingBag,  description: "Physical products and merchandise" },
-  shelf_collections:  { label: "Collections Shelf",  category: "Shelf",      icon: Library,      description: "Manifested Collections — curated provenance paths" },
+  shelf_collections:  { label: "Albums & Releases",  category: "Music",      icon: Disc3,        description: "WID-ALB releases and grouped tracks" },
   shelf_games:         { label: "Games Shelf",         category: "Shelf",      icon: Gamepad2,     description: "Game arcade — playable and downloadable games" },
-  featured_work:      { label: "Featured Works",     category: "Featured",   icon: Star,         description: "Pinned and highlighted works (up to 6)" },
+  featured_work:      { label: "Featured Tracks",    category: "Music",      icon: Star,         description: "Pinned music at the entrance to your sanctuary" },
+  latest_releases:    { label: "Latest Releases",    category: "Music",      icon: Radio,        description: "Newest releases ordered by release date" },
+  genre_paths:        { label: "Genre Paths",        category: "Music",      icon: Music,        description: "Organize your catalog by sound and genre" },
+  playlists_shelf:    { label: "Playlists",          category: "Music",      icon: ListMusic,    description: "Public listening paths through your catalog" },
   distribution_links: { label: "Distribution Links", category: "Commerce",   icon: Link2,        description: "Spotify, Apple Music, Bandcamp, etc." },
   tip_jar:            { label: "Tip Jar",            category: "Commerce",   icon: Package,      description: "Direct support and tipping" },
   provenance_trail:   { label: "Provenance Trail",   category: "Provenance", icon: Shield,       description: "WID timeline and domain version history" },
@@ -45,7 +48,7 @@ const BLOCK_META: Record<DomainBlockType, { label: string; category: string; ico
   custom_text:        { label: "Custom Text",        category: "Structure",  icon: AlignLeft,    description: "Free-form announcement or text block" },
 };
 
-const CATEGORY_ORDER = ["Identity", "Shelf", "Featured", "Commerce", "Provenance", "Community", "Structure"];
+const CATEGORY_ORDER = ["Music", "Identity", "Shelf", "Featured", "Commerce", "Provenance", "Community", "Structure"];
 
 // ── Editable block row ─────────────────────────────────────────────────────────
 interface EditorBlock {
@@ -254,9 +257,16 @@ interface DomainEditorProps {
   onClose?: () => void;
   /** When set, only these block types appear in the editor (Loop music-only). */
   allowedBlockTypes?: readonly DomainBlockType[];
+  /** Surface-specific fallback layout (Loop uses music-native rooms). */
+  defaultLayout?: typeof DEFAULT_DOMAIN_LAYOUT;
 }
 
-export function DomainEditor({ userId, onClose, allowedBlockTypes }: DomainEditorProps) {
+export function DomainEditor({
+  userId,
+  onClose,
+  allowedBlockTypes,
+  defaultLayout = DEFAULT_DOMAIN_LAYOUT,
+}: DomainEditorProps) {
   const utils = trpc.useUtils();
   const { data: savedBlocks = [] } = trpc.domain.getLayout.useQuery({ userId });
 
@@ -277,8 +287,8 @@ export function DomainEditor({ userId, onClose, allowedBlockTypes }: DomainEdito
           savedId: b.id,
         }));
     }
-    return DEFAULT_DOMAIN_LAYOUT.filter((b) => pass(b.blockType)).map((b) => ({ ...b }));
-  }, [savedBlocks, allowedBlockTypes]);
+    return defaultLayout.filter((b) => pass(b.blockType)).map((b) => ({ ...b }));
+  }, [savedBlocks, allowedBlockTypes, defaultLayout]);
 
   const [blocks, setBlocks] = useState<EditorBlock[]>(initBlocks);
   const [dragIdx, setDragIdx] = useState<number | null>(null);
@@ -286,6 +296,11 @@ export function DomainEditor({ userId, onClose, allowedBlockTypes }: DomainEdito
   const [panel, setPanel] = useState<"blocks" | "add" | "history">("blocks");
   const [changeNote, setChangeNote] = useState("");
   const [isDirty, setIsDirty] = useState(false);
+
+  // The public layout query resolves after first render; hydrate saved blocks once available.
+  useEffect(() => {
+    if (!isDirty) setBlocks(initBlocks());
+  }, [initBlocks, isDirty]);
 
   const saveLayout = trpc.domain.saveLayout.useMutation({
     onSuccess: () => {

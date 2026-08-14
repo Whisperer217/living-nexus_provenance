@@ -8,9 +8,22 @@
  */
 
 import { trpc } from "@/lib/trpc";
-import { DEFAULT_DOMAIN_LAYOUT, type DomainBlockRecord, type DomainBlockType, type ShelfBlockConfig, type ProvenanceTrailBlockConfig, type CustomTextBlockConfig, type DividerBlockConfig, type DistributionLinksBlockConfig, type FeaturedWorkBlockConfig, type BioBlockConfig, type HeroBlockConfig } from "@shared/domainTypes";
+import {
+  DEFAULT_DOMAIN_LAYOUT,
+  isLoopMusicContentType,
+  type DomainBlockRecord,
+  type DomainBlockType,
+  type ShelfBlockConfig,
+  type ProvenanceTrailBlockConfig,
+  type CustomTextBlockConfig,
+  type DividerBlockConfig,
+  type DistributionLinksBlockConfig,
+  type FeaturedWorkBlockConfig,
+  type BioBlockConfig,
+  type HeroBlockConfig,
+} from "@shared/domainTypes";
 import { ShelfBlock } from "./ShelfBlock";
-import { Shield, ExternalLink, Music2, Clock, Layers, Hash, Library, GitFork, Heart, Play } from "lucide-react";
+import { Shield, ExternalLink, Music2, Clock, Layers, Hash, Library, Play, ListMusic, Radio } from "lucide-react";
 import { Link } from "wouter";
 import { usePlayer, type Track } from "@/contexts/PlayerContext";
 
@@ -21,6 +34,8 @@ interface DomainRendererProps {
   omitBlockTypes?: readonly DomainBlockType[];
   /** When set, only these block types render (Loop music-only surface). */
   allowedBlockTypes?: readonly DomainBlockType[];
+  /** Surface-specific fallback when the creator has not saved a layout. */
+  defaultLayout?: typeof DEFAULT_DOMAIN_LAYOUT;
 }
 
 // ── Helper: resolve blocks (use saved or default) ─────────────────────────────
@@ -28,6 +43,7 @@ function resolveBlocks(
   saved: DomainBlockRecord[],
   omitBlockTypes?: readonly DomainBlockType[],
   allowedBlockTypes?: readonly DomainBlockType[],
+  defaultLayout: typeof DEFAULT_DOMAIN_LAYOUT = DEFAULT_DOMAIN_LAYOUT,
 ): typeof DEFAULT_DOMAIN_LAYOUT {
   const omit = new Set(omitBlockTypes ?? []);
   const allowed = allowedBlockTypes ? new Set(allowedBlockTypes) : null;
@@ -47,7 +63,7 @@ function resolveBlocks(
         config: (b.config as Record<string, unknown>) ?? {},
       }));
   }
-  return DEFAULT_DOMAIN_LAYOUT.filter((b) => b.visible && pass(b.blockType));
+  return defaultLayout.filter((b) => b.visible && pass(b.blockType));
 }
 
 // ── HeroBlock ─────────────────────────────────────────────────────────────────
@@ -292,27 +308,47 @@ function DividerBlock({ config }: { config: DividerBlockConfig }) {
 }
 
 // ── FeaturedWorkBlock ─────────────────────────────────────────────────────────
-function FeaturedWorkBlock({ userId, config }: { userId: number; config: FeaturedWorkBlockConfig }) {
+function FeaturedWorkBlock({
+  userId,
+  config,
+  latest = false,
+}: {
+  userId: number;
+  config: FeaturedWorkBlockConfig & ShelfBlockConfig;
+  latest?: boolean;
+}) {
   const { data: creatorData } = trpc.profile.getCreator.useQuery({ creatorId: userId });
-  const songs = creatorData?.songs ?? [];
+  const songs = (creatorData?.songs ?? [])
+    .filter((song: any) => isLoopMusicContentType(song.contentType));
 
-  const featured = config.songIds?.length
-    ? songs.filter((s: any) => config.songIds!.includes(s.id)).slice(0, 6)
-    : songs.slice(0, 3);
+  const sorted = latest
+    ? [...songs].sort((a: any, b: any) => {
+        const aDate = new Date(a.releaseDate ?? a.createdAt ?? 0).getTime();
+        const bDate = new Date(b.releaseDate ?? b.createdAt ?? 0).getTime();
+        return bDate - aDate;
+      })
+    : songs;
+  const maxItems = config.maxItems ?? (latest ? 6 : 3);
+  const featured = !latest && config.songIds?.length
+    ? sorted.filter((s: any) => config.songIds!.includes(s.id)).slice(0, maxItems)
+    : sorted.slice(0, maxItems);
 
   if (featured.length === 0) return null;
+  const heading = config.heading === "Featured Works"
+    ? "Featured Tracks"
+    : config.heading;
 
   return (
     <div>
-      {config.heading && (
+      {heading && (
         <h3 className="text-xs tracking-widest uppercase text-white/30 mb-3"
           style={{ fontFamily: "var(--font-display)", letterSpacing: "0.14em" }}>
-          {config.heading}
+          {heading}
         </h3>
       )}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         {featured.map((song: any) => (
-          <Link key={song.id} href={`/track/${song.id}`}>
+          <Link key={song.id} href={`/song/${song.id}`}>
             <div className="group relative aspect-square overflow-hidden rounded cursor-pointer"
               style={{ boxShadow: "0 4px 16px rgba(0,0,0,0.6)" }}>
               {song.coverArtUrl ? (
@@ -352,20 +388,20 @@ function CollectionPlayButton({ collectionId, collectionName }: { collectionId: 
     e.preventDefault();
     e.stopPropagation();
     try {
-      const result = await utils.client.collections.getTracksById.query({ collectionId });
+      const result = await utils.client.songs.getCollectionTracks.query({ collectionId });
       if (!result?.length) return;
       const tracks: Track[] = result
-        .filter((t: any) => t.song?.fileUrl)
-        .map((t: any) => ({
-          id: String(t.song.id),
-          title: t.song.title,
-          artist: t.creator?.artistHandle ?? t.creator?.name ?? "Unknown",
-          genre: t.song.genre ?? "",
-          audioUrl: t.song.fileUrl ?? undefined,
-          artUrl: t.song.coverArtUrl ?? undefined,
-          witnessId: t.song.witnessId ?? undefined,
-          creatorHandle: t.creator?.artistHandle ?? t.creator?.name ?? undefined,
-          creatorId: t.creator?.id,
+        .filter((song: any) => song.fileUrl && isLoopMusicContentType(song.contentType))
+        .map((song: any) => ({
+          id: String(song.id),
+          title: song.title,
+          artist: song.artistName ?? "Creator",
+          genre: song.genre ?? "",
+          audioUrl: song.fileUrl ?? undefined,
+          artUrl: song.coverArtUrl ?? undefined,
+          witnessId: song.witnessId ?? undefined,
+          creatorHandle: song.artistHandle ?? undefined,
+          creatorId: song.userId,
         }));
       if (tracks.length > 0) playQueueAt(tracks, 0, "PLAYLIST");
     } catch {
@@ -385,11 +421,20 @@ function CollectionPlayButton({ collectionId, collectionName }: { collectionId: 
   );
 }
 
-function CollectionsShelfBlock({ userId, isOwner }: { userId: number; isOwner: boolean }) {
-  const { data: collections = [], isLoading } = trpc.collections.listByUser.useQuery(
-    { userId },
-    { enabled: !!userId }
+function CollectionsShelfBlock({
+  userId,
+  isOwner,
+  config,
+}: {
+  userId: number;
+  isOwner: boolean;
+  config: ShelfBlockConfig;
+}) {
+  const { data: creatorData, isLoading } = trpc.profile.getCreator.useQuery(
+    { creatorId: userId },
+    { enabled: !!userId },
   );
+  const collections = ((creatorData as any)?.albums ?? []) as any[];
 
   if (isLoading) {
     return (
@@ -407,8 +452,8 @@ function CollectionsShelfBlock({ userId, isOwner }: { userId: number; isOwner: b
     return (
       <div className="text-center py-8 text-white/30 text-sm">
         <Library className="w-8 h-8 mx-auto mb-2 opacity-40" />
-        <p>No public collections yet.</p>
-        <p className="text-xs mt-1">Create your first Manifested Collection from any song page.</p>
+        <p>No public albums yet.</p>
+        <p className="text-xs mt-1">Group registered tracks into an album from Manage.</p>
       </div>
     );
   }
@@ -420,7 +465,7 @@ function CollectionsShelfBlock({ userId, isOwner }: { userId: number; isOwner: b
           <Library className="w-4 h-4 text-[#D4AF37]/60" />
           <h3 className="text-xs tracking-widest uppercase text-white/30"
             style={{ fontFamily: "var(--font-display)", letterSpacing: "0.14em" }}>
-            Collections
+            {config.heading ?? "Albums & Releases"}
           </h3>
         </div>
         {isOwner && (
@@ -431,7 +476,7 @@ function CollectionsShelfBlock({ userId, isOwner }: { userId: number; isOwner: b
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {(collections as any[]).map((col: any) => (
-          <Link key={col.id} href={`/collection/${col.slug}`}>
+          <Link key={col.id} href={`/album/${col.collectionWid}`}>
             <div className="group flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all"
               style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}
               onMouseEnter={e => (e.currentTarget.style.background = "rgba(255,255,255,0.06)")}
@@ -446,19 +491,14 @@ function CollectionsShelfBlock({ userId, isOwner }: { userId: number; isOwner: b
               {/* Info */}
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-white/80 truncate group-hover:text-white transition-colors">{col.name}</p>
-                {col.forkedFromWid && (
-                  <p className="text-[10px] text-[#D4AF37]/50 flex items-center gap-1 mt-0.5">
-                    <GitFork className="w-2.5 h-2.5" /> Forked
-                  </p>
-                )}
                 <div className="flex items-center gap-2 mt-1">
                   <span className="text-[10px] text-white/30 flex items-center gap-0.5">
                     <Music2 className="w-2.5 h-2.5" /> {col.trackCount ?? 0}
                   </span>
                   <span className="text-[10px] text-white/30 flex items-center gap-0.5">
-                    <Heart className="w-2.5 h-2.5" /> {col.followerCount ?? 0}
+                    <Shield className="w-2.5 h-2.5" /> Album
                   </span>
-                  <span className="text-[9px] font-mono text-[#D4AF37]/30 truncate">{col.wid}</span>
+                  <span className="text-[9px] font-mono text-[#D4AF37]/30 truncate">{col.collectionWid}</span>
                 </div>
               </div>
               {/* Play button — appears on hover */}
@@ -473,6 +513,130 @@ function CollectionsShelfBlock({ userId, isOwner }: { userId: number; isOwner: b
   );
 }
 
+function GenrePathsBlock({
+  userId,
+  config,
+}: {
+  userId: number;
+  config: ShelfBlockConfig;
+}) {
+  const { data: creatorData } = trpc.profile.getCreator.useQuery({ creatorId: userId });
+  const songs = ((creatorData?.songs ?? []) as any[]).filter((song) =>
+    isLoopMusicContentType(song.contentType),
+  );
+  const counts = new Map<string, number>();
+  for (const song of songs) {
+    const labels = String(song.genre || "")
+      .split(",")
+      .map((genre) => genre.trim())
+      .filter((genre) => genre && genre.toLowerCase() !== "other");
+    for (const genre of labels) counts.set(genre, (counts.get(genre) ?? 0) + 1);
+  }
+  const paths = [...counts.entries()]
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .slice(0, config.maxItems ?? 12);
+
+  if (paths.length === 0) return null;
+  return (
+    <section>
+      <div className="flex items-center gap-2 mb-4">
+        <Radio className="w-4 h-4 text-[#D4AF37]/70" />
+        <h3 className="text-sm font-semibold tracking-widest uppercase text-white/60"
+          style={{ fontFamily: "var(--font-display)", letterSpacing: "0.12em" }}>
+          {config.heading ?? "Genre Paths"}
+        </h3>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {paths.map(([genre, count]) => (
+          <span
+            key={genre}
+            className="inline-flex items-center gap-2 rounded-full px-3 py-2"
+            style={{
+              border: "1px solid color-mix(in srgb, var(--ln-gold) 20%, transparent)",
+              background: "color-mix(in srgb, var(--ln-gold) 7%, transparent)",
+              color: "color-mix(in srgb, var(--ln-parchment) 75%, transparent)",
+            }}
+          >
+            <span className="text-xs">{genre}</span>
+            <span className="font-mono text-[9px]" style={{ color: "var(--ln-gold)" }}>{count}</span>
+          </span>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function PlaylistsShelfBlock({
+  userId,
+  isOwner,
+  config,
+}: {
+  userId: number;
+  isOwner: boolean;
+  config: ShelfBlockConfig;
+}) {
+  const { data: creatorData } = trpc.profile.getCreator.useQuery({ creatorId: userId });
+  const playlists = ((creatorData as any)?.playlists ?? []) as any[];
+  const creator = (creatorData as any)?.creator;
+  if (playlists.length === 0) {
+    if (!isOwner) return null;
+    return (
+      <div className="py-8 text-center text-white/30 text-sm">
+        <ListMusic className="w-8 h-8 mx-auto mb-2 opacity-40" />
+        <p>No public playlists yet.</p>
+        <Link href="/playlists">
+          <span className="inline-block mt-2 text-xs cursor-pointer" style={{ color: "var(--ln-gold)" }}>
+            Build a listening path →
+          </span>
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <section>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <ListMusic className="w-4 h-4 text-[#D4AF37]/70" />
+          <h3 className="text-sm font-semibold tracking-widest uppercase text-white/60"
+            style={{ fontFamily: "var(--font-display)", letterSpacing: "0.12em" }}>
+            {config.heading ?? "Playlists"}
+          </h3>
+        </div>
+        {isOwner && <Link href="/playlists"><span className="text-[10px] cursor-pointer" style={{ color: "var(--ln-gold)" }}>Manage</span></Link>}
+      </div>
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {playlists.slice(0, config.maxItems ?? 6).map((playlist: any) => {
+          const href = playlist.shareSlug
+            ? `/p/${playlist.shareSlug}`
+            : `/creator/${creator?.artistHandle ?? userId}/playlists`;
+          return (
+            <Link key={playlist.id} href={href}>
+              <article
+                className="group flex items-center gap-3 rounded-xl p-3 cursor-pointer"
+                style={{
+                  border: "1px solid color-mix(in srgb, var(--ln-gold) 16%, transparent)",
+                  background: "color-mix(in srgb, var(--ln-obsidian) 88%, transparent)",
+                }}
+              >
+                <div className="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 bg-black/40">
+                  {playlist.coverArtUrl
+                    ? <img src={playlist.coverArtUrl} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                    : <div className="w-full h-full flex items-center justify-center"><ListMusic className="w-5 h-5 text-[#D4AF37]/50" /></div>}
+                </div>
+                <div className="min-w-0">
+                  <h4 className="truncate text-sm text-white/80">{playlist.name}</h4>
+                  {playlist.description && <p className="truncate text-xs text-white/35 mt-1">{playlist.description}</p>}
+                </div>
+              </article>
+            </Link>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 // ── Block type → stable section anchor ID ────────────────────────────────────
 const BLOCK_SECTION_IDS: Record<string, string> = {
   shelf_music:        "section-music",
@@ -482,6 +646,9 @@ const BLOCK_SECTION_IDS: Record<string, string> = {
   shelf_artifacts:    "section-artifacts",
   shelf_merch:        "section-merch",
   shelf_collections:  "section-collections",
+  latest_releases:    "section-latest",
+  genre_paths:        "section-genres",
+  playlists_shelf:    "section-playlists",
   shelf_games:        "section-games",
   provenance_trail:   "section-provenance",
   bio:                "section-bio",
@@ -493,7 +660,7 @@ function BlockWrapper({ size, blockType, children }: { size: string; blockType?:
   const paddingClass = size === "full" ? "px-0" : "px-4";
   const sectionId = blockType ? BLOCK_SECTION_IDS[blockType] : undefined;
   return (
-    <div id={sectionId} className={`w-full ${paddingClass}`}>
+    <div id={sectionId} className={`w-full empty:hidden ${paddingClass}`}>
       {children}
     </div>
   );
@@ -505,6 +672,7 @@ export function DomainRenderer({
   isOwner = false,
   omitBlockTypes,
   allowedBlockTypes,
+  defaultLayout = DEFAULT_DOMAIN_LAYOUT,
 }: DomainRendererProps) {
   const { data: savedBlocks = [], isLoading } = trpc.domain.getLayout.useQuery(
     { userId },
@@ -515,6 +683,7 @@ export function DomainRenderer({
     savedBlocks as DomainBlockRecord[],
     omitBlockTypes,
     allowedBlockTypes,
+    defaultLayout,
   );
 
   if (isLoading) {
@@ -531,6 +700,8 @@ export function DomainRenderer({
     <div className="space-y-10">
       {blocks.map((block, i) => {
         const cfg = block.config ?? {};
+        if (block.blockType === "provenance_trail" && !isOwner) return null;
+        if (block.blockType === "tip_jar" || block.blockType === "community") return null;
 
         return (
           <BlockWrapper key={`${block.blockType}-${i}`} size={block.size} blockType={block.blockType}>
@@ -559,7 +730,16 @@ export function DomainRenderer({
               <ShelfBlock userId={userId} config={cfg as ShelfBlockConfig} medium="merch" isOwner={isOwner} />
             )}
             {block.blockType === "featured_work" && (
-              <FeaturedWorkBlock userId={userId} config={cfg as FeaturedWorkBlockConfig} />
+              <FeaturedWorkBlock userId={userId} config={cfg as FeaturedWorkBlockConfig & ShelfBlockConfig} />
+            )}
+            {block.blockType === "latest_releases" && (
+              <FeaturedWorkBlock userId={userId} config={cfg as FeaturedWorkBlockConfig & ShelfBlockConfig} latest />
+            )}
+            {block.blockType === "genre_paths" && (
+              <GenrePathsBlock userId={userId} config={cfg as ShelfBlockConfig} />
+            )}
+            {block.blockType === "playlists_shelf" && (
+              <PlaylistsShelfBlock userId={userId} isOwner={isOwner} config={cfg as ShelfBlockConfig} />
             )}
             {block.blockType === "distribution_links" && (
               <DistributionLinksBlock userId={userId} config={cfg as DistributionLinksBlockConfig} />
@@ -577,7 +757,7 @@ export function DomainRenderer({
               <div className="text-sm text-white/30 italic">Field Notes coming soon</div>
             )}
             {block.blockType === "shelf_collections" && (
-              <CollectionsShelfBlock userId={userId} isOwner={isOwner} />
+              <CollectionsShelfBlock userId={userId} isOwner={isOwner} config={cfg as ShelfBlockConfig} />
             )}
             {block.blockType === "shelf_games" && (
               <ShelfBlock userId={userId} config={cfg as ShelfBlockConfig} medium="games" isOwner={isOwner} />

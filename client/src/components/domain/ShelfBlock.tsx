@@ -16,7 +16,7 @@ import { useState, useRef } from "react";
 import { Play, Pause, Music, BookOpen, BookMarked, FileText, Package, ShoppingBag, ExternalLink, Shield, ChevronLeft, ChevronRight } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { usePlayer, type Track } from "@/contexts/PlayerContext";
-import type { ShelfBlockConfig } from "@shared/domainTypes";
+import { isLoopMusicContentType, type ShelfBlockConfig } from "@shared/domainTypes";
 import { Link } from "wouter";
 
 interface ShelfBlockProps {
@@ -86,7 +86,7 @@ function RackItem({ song, isPlaying, onPlay }: {
   onPlay: () => void;
 }) {
   return (
-    <Link href={`/track/${song.id}`}>
+    <Link href={`/song/${song.id}`}>
       <div className="group relative flex-shrink-0 cursor-pointer" style={{ width: 120 }}>
         {/* Cover */}
         <div className="relative w-full aspect-square overflow-hidden rounded-sm"
@@ -141,7 +141,7 @@ function GridItem({ song, ratio }: {
   const height = Math.round(width * (aspectH / aspectW));
 
   return (
-    <Link href={`/track/${song.id}`}>
+    <Link href={`/song/${song.id}`}>
       <div className="group relative flex-shrink-0 cursor-pointer" style={{ width }}>
         <div className="relative overflow-hidden rounded-sm"
           style={{ width, height, boxShadow: "3px 3px 10px rgba(0,0,0,0.8), inset 0 0 0 1px rgba(255,255,255,0.05)" }}>
@@ -174,7 +174,7 @@ function ListItem({ song, index, isPlaying, onPlay, showPlay }: {
   showPlay: boolean;
 }) {
   return (
-    <Link href={`/track/${song.id}`}>
+    <Link href={`/song/${song.id}`}>
       <div className="group flex items-center gap-3 px-3 py-2 rounded-md hover:bg-white/5 transition-colors cursor-pointer">
         <span className="w-5 text-right text-xs text-white/30 flex-shrink-0">{index + 1}</span>
         {/* Thumbnail */}
@@ -246,11 +246,19 @@ export function ShelfBlock({ userId, config, medium, isOwner = false }: ShelfBlo
   const allSongs: CreatorSong[] = creatorData?.songs ?? [];
   const filteredSongs = allSongs
     .filter((s) => {
-      if (medium === "music") return !s.contentType || s.contentType === "audio";
+      if (medium === "music") return isLoopMusicContentType(s.contentType);
       if (medium === "books" || medium === "manuscripts") return s.contentType === "manuscript";
       if (medium === "comics") return s.contentType === "comic";
       if (medium === "games") return s.contentType === "game";
       return true;
+    })
+    .sort((a: any, b: any) => {
+      if (config.sortMode === "latest") {
+        return new Date(b.releaseDate ?? b.createdAt ?? 0).getTime()
+          - new Date(a.releaseDate ?? a.createdAt ?? 0).getTime();
+      }
+      if (config.sortMode === "alphabetical") return a.title.localeCompare(b.title);
+      return 0;
     })
     .slice(0, maxItems);
 

@@ -52,4 +52,31 @@ describe("Creator sanctuary + paid-download integration contract", () => {
     expect(playlists).toContain("pl.shareSlug");
     expect(playlists).toContain("`/creator/${handle}/playlists`");
   });
+
+  it("uses a music-native creator domain instead of mixed-media shelves", () => {
+    const types = source("shared/domainTypes.ts");
+    const renderer = source("client/src/components/domain/DomainRenderer.tsx");
+    const editor = source("client/src/components/domain/DomainEditor.tsx");
+    const creator = source("client/src/pages/loop/LoopCreatorPage.tsx");
+    const profile = source("server/routers/profile.ts");
+
+    expect(types).toContain("LOOP_DEFAULT_DOMAIN_LAYOUT");
+    for (const block of ["latest_releases", "genre_paths", "playlists_shelf"]) {
+      expect(types).toContain(`"${block}"`);
+      expect(renderer).toContain(`block.blockType === "${block}"`);
+    }
+    expect(types).toContain("isLoopMusicContentType");
+    expect(renderer).toContain("isLoopMusicContentType(song.contentType)");
+    expect(types).not.toMatch(
+      /LOOP_DOMAIN_ALLOWED_BLOCKS[^;]+shelf_(?:books|comics|manuscripts|artifacts|merch|games)/s,
+    );
+    expect(editor).toContain("Featured Tracks");
+    expect(editor).toContain("Albums & Releases");
+    expect(editor).toContain("if (!isDirty) setBlocks(initBlocks())");
+    expect(creator.indexOf("<DomainRenderer")).toBeLessThan(
+      creator.indexOf("<SanctuaryWorksOrganizer"),
+    );
+    expect(creator).not.toContain("<SanctuaryPlaylists");
+    expect(profile).toContain("albums: publicAlbums");
+  });
 });

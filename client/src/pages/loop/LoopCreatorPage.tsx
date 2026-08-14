@@ -19,11 +19,7 @@ import {
 import { toast } from "sonner";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { CreatorSanctuaryStage } from "@/components/creator/CreatorSanctuaryStage";
-import {
-  SanctuaryPlaylists,
-  SanctuaryWorksOrganizer,
-  type SanctuaryPlaylist,
-} from "@/components/creator/SanctuaryWorksOrganizer";
+import { SanctuaryWorksOrganizer } from "@/components/creator/SanctuaryWorksOrganizer";
 import { DomainEditor } from "@/components/domain/DomainEditor";
 import { DomainRenderer } from "@/components/domain/DomainRenderer";
 import { SupportCreatorDrawer } from "@/components/SupportCreatorDrawer";
@@ -31,7 +27,7 @@ import { usePlayer } from "@/contexts/PlayerContext";
 import { useHarmonicSignature } from "@/hooks/useHarmonicSignature";
 import { LOOP_PRODUCT } from "@/lib/loopProduct";
 import { trpc } from "@/lib/trpc";
-import { LOOP_DOMAIN_ALLOWED_BLOCKS } from "@shared/domainTypes";
+import { LOOP_DEFAULT_DOMAIN_LAYOUT, LOOP_DOMAIN_ALLOWED_BLOCKS } from "@shared/domainTypes";
 
 export default function LoopCreatorPage() {
   const { id } = useParams<{ id: string }>();
@@ -86,11 +82,6 @@ export default function LoopCreatorPage() {
     });
   }, [data]);
 
-  const playlists = useMemo(
-    () => (((data as any)?.playlists ?? []) as SanctuaryPlaylist[]),
-    [data]
-  );
-
   const seedWid = songs.find((s) => s.witnessId)?.witnessId ?? null;
   const breath = useHarmonicSignature(seedWid, null);
 
@@ -126,7 +117,15 @@ export default function LoopCreatorPage() {
   const whenJoined = creator.createdAt
     ? new Date(creator.createdAt).toLocaleDateString(undefined, { year: "numeric", month: "short" })
     : "";
-  const what = creator.primaryGenre || "Music";
+  const genrePaths = Array.from(new Set(
+    songs.flatMap((song) =>
+      String(song.genre || "")
+        .split(",")
+        .map((genre) => genre.trim())
+        .filter((genre) => genre && genre.toLowerCase() !== "other"),
+    ),
+  ));
+  const what = `${songs.length} registered track${songs.length === 1 ? "" : "s"}${genrePaths.length ? ` · ${genrePaths.length} genre path${genrePaths.length === 1 ? "" : "s"}` : ""}`;
   const witnessed = songs.filter((s) => !!s.witnessId).length;
   const isWitnessing = !!witnessStatus.data?.witnessing;
   const witnessCount =
@@ -462,13 +461,22 @@ export default function LoopCreatorPage() {
           <DomainEditor
             userId={creator.id}
             allowedBlockTypes={LOOP_DOMAIN_ALLOWED_BLOCKS}
+            defaultLayout={LOOP_DEFAULT_DOMAIN_LAYOUT}
             onClose={() => setShowDomainEditor(false)}
           />
         </section>
       )}
 
-      {/* Works + playlists */}
+      {/* Creator-arranged music rooms + canonical track library */}
       <section className="max-w-5xl mx-auto px-4 sm:px-6 py-14 pb-28">
+        <DomainRenderer
+          userId={creator.id}
+          isOwner={isOwner}
+          allowedBlockTypes={LOOP_DOMAIN_ALLOWED_BLOCKS}
+          defaultLayout={LOOP_DEFAULT_DOMAIN_LAYOUT}
+        />
+
+        <div className="mt-16 pt-12" style={{ borderTop: "1px solid color-mix(in srgb, var(--ln-gold) 14%, transparent)" }}>
         <SanctuaryWorksOrganizer
           works={songs}
           mode={orgMode}
@@ -479,20 +487,6 @@ export default function LoopCreatorPage() {
           isOwner={isOwner}
           handle={creator.artistHandle}
         />
-
-        <SanctuaryPlaylists
-          playlists={playlists}
-          isOwner={isOwner}
-          handle={creator.artistHandle}
-        />
-
-        <div className="mt-16">
-          <DomainRenderer
-            userId={creator.id}
-            isOwner={isOwner}
-            allowedBlockTypes={LOOP_DOMAIN_ALLOWED_BLOCKS}
-            omitBlockTypes={["hero", "bio", "shelf_music"]}
-          />
         </div>
       </section>
 

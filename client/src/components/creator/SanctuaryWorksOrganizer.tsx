@@ -3,6 +3,7 @@
  * Real DOM. Depth comes from the stage behind, not card chrome.
  */
 
+import { useState } from "react";
 import { Link } from "wouter";
 import { Eye, ListMusic, Music, Pause, Play, Shield } from "lucide-react";
 
@@ -49,11 +50,13 @@ export function SanctuaryWorksOrganizer({
   isOwner,
   handle,
 }: WorksProps) {
+  const [expanded, setExpanded] = useState(false);
   const filtered = works.filter((w) => {
     if (mode === "sealed") return !!w.witnessId;
     if (mode === "unsealed") return !w.witnessId;
     return true;
   });
+  const visibleWorks = expanded ? filtered : filtered.slice(0, 12);
 
   const genres = Array.from(
     new Set(works.map((w) => (w.genre || "").trim()).filter(Boolean))
@@ -138,8 +141,9 @@ export function SanctuaryWorksOrganizer({
           )}
         </div>
       ) : (
+        <>
         <ul className="mb-4">
-          {filtered.map((song, index) => {
+          {visibleWorks.map((song, index) => {
             const active = currentTrackId === String(song.id);
             const playing = !!(active && isPlaying);
             return (
@@ -218,6 +222,20 @@ export function SanctuaryWorksOrganizer({
             );
           })}
         </ul>
+        {filtered.length > 12 && (
+          <button
+            type="button"
+            onClick={() => setExpanded((value) => !value)}
+            className="w-full py-3 text-xs uppercase tracking-[0.16em]"
+            style={{
+              borderTop: "1px solid color-mix(in srgb, var(--ln-gold) 14%, transparent)",
+              color: "var(--ln-gold)",
+            }}
+          >
+            {expanded ? "Show less" : `Show all ${filtered.length} tracks`}
+          </button>
+        )}
+        </>
       )}
     </div>
   );
