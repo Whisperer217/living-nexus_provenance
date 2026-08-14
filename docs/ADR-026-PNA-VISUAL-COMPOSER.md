@@ -4,7 +4,7 @@
 **Date:** 2026-08-14. **Author:** Manus AI.  
 **Depends on:** ADR-016 (governed Agent foundation), ADR-022 (Guide/AVT representation boundary), ADR-024 (Local ↔ Public custody), and ADR-025 (model-agnostic PNA Ingestion Commission).
 
-> **Decision:** Restore image generation as a first-class PNA Creator Studio capability. PNA will orchestrate a model-neutral **Visual Composer** that may use up to four creator-approved reference images, retrieves authorized music/registry/Quiver context through application tools, records prompt and reference lineage, and saves every generated asset to the creator-private Quiver. PNA may offer an optional, clearly labeled *AI reflection* on the work’s intended emotional arc; it must never state what an image objectively means or how a viewer will respond. No generated asset is attached, registered, synchronized, or published without a separate, single-use creator confirmation.
+> **Decision:** Restore image generation as a first-class, **mobile-first** PNA Creator Studio capability. PNA will orchestrate a model-neutral **Visual Composer** that may use up to four creator-approved reference images, retrieves authorized music/registry/Quiver context through application tools, records prompt and reference lineage, and saves every generated asset to the creator-private Quiver. Artwork and reference previews will support two-finger pinch-to-zoom and pan inside their own bounded canvas, while preserving the phone’s native browser accessibility zoom for the rest of the page. PNA may offer an optional, clearly labeled *AI reflection* on the work’s intended emotional arc; it must never state what an image objectively means or how a viewer will respond. No generated asset is attached, registered, synchronized, or published without a separate, single-use creator confirmation.
 
 This ADR is a design record. It makes **no** code, schema, service, database, storage, listing, account, or publication change.
 
@@ -166,6 +166,21 @@ The result panel must visibly separate these categories:
 | **Measured technical facts** | MIME, file dimensions, output hash, generation timestamp, provider adapter identity. |
 | **AI suggestion** | Prompt enrichment or optional intended-arc reflection, always editable/rejectable. |
 
+### 6.3 Mobile-first canvas and gesture contract
+
+The first design target is a narrow mobile viewport with the global player and navigation present. Desktop enhances this design; it does not define it. PNA’s existing shell already uses a `100dvh` workspace and has fixed mobile presentation layers, so the Visual Composer must join its panel hierarchy rather than establish competing full-screen geometry.[7]
+
+| Interaction | Mobile contract | Desktop and accessibility equivalent |
+|---|---|---|
+| **Inspect reference or generated artwork** | Two-finger pinch zooms a bounded image canvas from 1× to a capped inspection scale; one finger pans only while the canvas is magnified. `touch-action` is limited to the canvas so the rest of PNA preserves normal scroll/browser gestures. | Mouse wheel/trackpad zoom plus drag pan; visible zoom in/out/reset buttons; keyboard-operable controls. |
+| **Return to composition** | A visible **Reset view** control recenters and returns to 1×; closing the panel always clears gesture state. | Same control and Escape handling. |
+| **Choose references** | Four compact, ordered slots with a role chip, remove control, and tap target sized for touch. No hover-only information or action. | Drag ordering may enhance the ordered list but never replace button-based reorder controls. |
+| **Confirm action** | One full-width, plain-language confirmation card at a time; explicit cancel/return route. | Same confirmation contract; no shortcut bypass. |
+| **Panel geometry** | Visual Composer is a portal-mounted, fixed panel constrained above the mobile navigation/player stack, with `dvh` sizing and safe-area padding. | Docked/resizable panel may enhance workspace without changing content order. |
+| **Motion and performance** | `prefers-reduced-motion` disables nonessential canvas transitions; gesture transforms use `transform`, not layout properties. Reference thumbnails are decoded lazily and only the active inspection image is high-resolution. | Same reduced-motion setting and bounded asset behavior. |
+
+The image canvas must never disable the browser’s global pinch zoom through a viewport restriction. The scoped two-finger gesture exists only to inspect creative imagery, and it must release immediately when the interaction moves outside the canvas. Opening the Visual Composer must preserve the platform’s bottom stack: content cannot hide behind player/navigation, panel scroll cannot leak into the page, and close/unmount must restore all scroll/gesture state.[8]
+
 ## 7. Sequential creator confirmation
 
 ADR-025’s `PnaConfirmation` contract applies unchanged. This feature adds visual action types:
@@ -231,6 +246,8 @@ The existing scalar `referenceImageUrl` remains supported for legacy Quiver item
 | A PNA visual panel recreates competing chat/legacy navigation. | One PNA owner; bounded workspace/context panel; `/keeper-compose` stays redirected/decommissioned after migration parity. |
 | Quiver bloat or accidental public exposure. | Private-by-default save; explicit lifecycle states; no publication default; retention/usage data available to creator. |
 | Existing artwork loses lineage during migration. | Additive tables; no destructive backfill; legacy reference remains a preserved historical field. |
+| Canvas gesture prevents page navigation or leaves mobile scroll locked. | Bound `touch-action` and pointer state to the image canvas only; use portal/fixed panel discipline; reset gesture/scroll state on close and unmount; verify iOS Safari and Android Chrome. |
+| Player or mobile navigation obscures a confirmation/action. | Use the platform bottom-stack/safe-area tokens, full-width actions, and mobile screenshot/interaction tests with the player both absent and present. |
 
 ## 11. Test, validation, and rollback plan
 
@@ -246,6 +263,7 @@ The existing scalar `referenceImageUrl` remains supported for legacy Quiver item
 | Public safety | Generate/save/attach flows leave gallery/public records unchanged; public action needs a separate proposal and confirmation. |
 | Regression | Existing PNA, Music Environment, Quiver, generation, WID, Explore, player, and theme tests remain green; no PNA duplicate-chat or mobile/drawer regression. |
 | Visual/accessibility | Keyboard reference management, focus restoration, reduced-motion behavior, image alt/source labels, responsive panel layout, and theme-token contrast pass. |
+| Mobile gesture/stack | On iOS Safari and Android Chrome: page retains native browser zoom; two fingers zoom/pan only inside the artwork canvas; single-finger panel scrolling still works at 1×; reset/close clears transform state; no content is hidden behind navigation/player; no viewport-floor void or leaked body scroll occurs. |
 
 Rollback disables the `visual_composer` capability and adapter availability, leaving existing PNA chat, Quiver, and Music registration untouched. All Commission/proposal/confirmation/audit rows remain append-oriented records. No rollback deletes creator imagery, prior Quiver records, or WIDs.
 
@@ -270,3 +288,7 @@ Rollback disables the `visual_composer` capability and adapter availability, lea
 [5]: [`docs/ADR-025-MODEL-AGNOSTIC-PNA-INGESTION-COMMISSION.md`](ADR-025-MODEL-AGNOSTIC-PNA-INGESTION-COMMISSION.md) — model-neutral Tool Gateway, Commission, confirmation, and deterministic-service boundary.
 
 [6]: [`docs/ADR-024-LOCAL-FIRST-CREATIVE-WORKSPACE.md`](ADR-024-LOCAL-FIRST-CREATIVE-WORKSPACE.md) — Local ↔ Public custody, local execution, and consent-based synchronization direction.
+
+[7]: [`client/src/pages/PNAShellPage.tsx`](../client/src/pages/PNAShellPage.tsx) and [`client/src/components/PNAWorkspacePanel.tsx`](../client/src/components/PNAWorkspacePanel.tsx) — active PNA shell/workspace viewport, fixed-layer, and scrolling seams.
+
+[8]: [`/home/ubuntu/skills/mobile-layout-triage/SKILL.md`](../../skills/mobile-layout-triage/SKILL.md) — mobile viewport floor, bottom-stack, panel, and scroll-lock design guidance applied to this proposal.
