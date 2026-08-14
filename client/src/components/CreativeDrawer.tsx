@@ -457,7 +457,7 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
         className="relative flex flex-col h-full overflow-hidden"
         style={{
           width: "min(640px, 100vw)",
-          background: SURFACE,
+          background: "color-mix(in srgb, #06040E 82%, transparent)",
           borderLeft: `1px solid ${GOLD_BORDER}`,
           boxShadow: `-24px 0 80px rgba(0,0,0,0.7), -4px 0 24px rgba(212,175,55,0.06)`,
           animation: "slideInRight 0.32s cubic-bezier(0.22,1,0.36,1)",
