@@ -1,10 +1,10 @@
 # ADR-026: PNA Visual Composer and Creator-Private Image Generation
 
-**Status:** Proposed — requires Keeper approval before implementation.  
+**Status:** Interaction model approved; implementation remains pending the remaining capability, provider, and attachment approvals.
 **Date:** 2026-08-14. **Author:** Manus AI.  
 **Depends on:** ADR-016 (governed Agent foundation), ADR-022 (Guide/AVT representation boundary), ADR-024 (Local ↔ Public custody), and ADR-025 (model-agnostic PNA Ingestion Commission).
 
-> **Decision:** Restore image generation as a first-class, **mobile-first** PNA Creator Studio capability. PNA will orchestrate a model-neutral **Visual Composer** that may use up to four creator-approved reference images, retrieves authorized music/registry/Quiver context through application tools, records prompt and reference lineage, and saves every generated asset to the creator-private Quiver. Artwork and reference previews will support two-finger pinch-to-zoom and pan inside their own bounded canvas, while preserving the phone’s native browser accessibility zoom for the rest of the page. PNA may offer an optional, clearly labeled *AI reflection* on the work’s intended emotional arc; it must never state what an image objectively means or how a viewer will respond. No generated asset is attached, registered, synchronized, or published without a separate, single-use creator confirmation.
+> **Decision:** Restore image generation as a first-class, **mobile-first** PNA Creator Studio capability. The creator interface presents one primary **Visual Composer** model, while provider adapters remain replaceable beneath that single experience. PNA may accept up to four creator-approved reference images, retrieves authorized music/registry/Quiver context through application tools, records prompt and reference lineage, and saves every generated, uploaded reference, remix, cover-candidate, and attached-image record to one creator-private **Quiver** shelf. The canonical Studio states are **Compose**, **Quiver**, and **asset detail**; `/keeper-compose` must not return as a competing legacy page. Artwork and reference previews will support two-finger pinch-to-zoom and pan inside their own bounded canvas, while preserving the phone’s native browser accessibility zoom for the rest of the page. PNA may offer an optional, clearly labeled *AI reflection* on the work’s intended emotional arc; it must never state what an image objectively means or how a viewer will respond. No generated asset is attached, registered, synchronized, or published without a separate, single-use creator confirmation.
 
 This ADR is a design record. It makes **no** code, schema, service, database, storage, listing, account, or publication change.
 
@@ -65,6 +65,18 @@ PNA Orchestrator
 ```
 
 The model and image provider are **replaceable reasoning/generation adapters**. The database, Quiver, WID, provenance, access controls, confirmations, and public-manifestation rules remain application services. No model has database credentials or direct write access.
+
+### 3.3 Keeper-approved creator interaction model
+
+The creator does **not** choose among a confusing grid of models. PNA presents one primary Visual Composer card with a clear capability, privacy, and reference disclosure. A model/provider swap is a managed adapter decision, or later an explicit creator choice when more than one approved capability is genuinely available; it never changes Quiver custody, prompt lineage, WID rules, or confirmation requirements.
+
+| Canonical Studio state | Creator job | Required boundary |
+|---|---|---|
+| **Compose** | Declare visual intention; link an optional music Draft; select up to four references; inspect the prompt/source proposal; generate privately. | One primary Composer experience; no autonomous-avatar or multi-model control-room UI. |
+| **Quiver** | Search, filter, and organize every creator-private image asset by source, linked Draft/song, Guide, lifecycle, date, or relationship. | It is the sole working shelf, not a public gallery and not an auxiliary legacy vault. |
+| **Asset detail** | Inspect artwork, prompt/reference lineage, model/disclosure, remix parentage, intended-arc labels, and available next actions. | Attachment, registration, sync, or publication stays a new explicit confirmation. |
+
+Every image belongs to the single Quiver inventory but may also belong to a generation session/Visual Commission. A session groups variants and provenance evidence; it does not create a second shelf. The Quiver’s source kinds must include `generated`, `commission_reference`, `uploaded`, `remix`, `cover_candidate`, and `attached_work_asset` so a creator can find every image without navigating between disconnected tools.
 
 ### 3.1 Capability declaration
 
@@ -269,7 +281,7 @@ Rollback disables the `visual_composer` capability and adapter availability, lea
 
 ## 12. Decisions required before code
 
-1. Approve **Visual Composer** as a capability of PNA—not a new autonomous avatar or an independent `/keeper-compose` surface.
+1. **Approved:** Visual Composer is a capability of PNA—not a new autonomous avatar or an independent `/keeper-compose` surface. The creator sees one primary Composer model, and all image assets live in one private Quiver through the Compose → Quiver → asset-detail workflow.
 2. Approve the first slice: four creator-owned references, hosted adapter behind a provider-neutral interface, generation to **private Quiver only**, and no public sync/publication.
 3. Confirm whether the first user-facing image adapter may send creator-selected reference images to the existing hosted Forge service, with clear disclosure, while a local adapter is built afterward.
 4. Approve the optional `intended emotional arc` feature under the labels and non-diagnostic/non-predictive boundary above.
