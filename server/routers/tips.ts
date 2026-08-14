@@ -165,6 +165,10 @@ import { ENV } from "../_core/env";
 import { getOrGenerateEmbedVideo } from "../services/embedVideo";
 import { enqueueVisualJob } from "../workers/visualQueue";
 import { notifyOwner } from "../_core/notification";
+import {
+  CANONICAL_TIP_DOWNLOAD_ORIGIN,
+  tipDownloadCheckoutInput,
+} from "../services/tipDownloadCheckout";
 
 const stripe = process.env.STRIPE_SECRET_KEY
   ? new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: "2024-06-20" as any })
@@ -280,7 +284,7 @@ export const tipsRouter = router({
       }));
     }),
     /** Tip-to-Download: create a Stripe checkout that, on success, unlocks the download */
-    createTipDownloadCheckout: publicProcedure.input(z.object({ songId: z.number(), origin: z.string().url() })).mutation(async ({ ctx, input }) => {
+    createTipDownloadCheckout: protectedProcedure.input(tipDownloadCheckoutInput).mutation(async ({ ctx, input }) => {
       const songData = await getSongWithCreator(input.songId);
       if (!songData) throw new Error("Song not found");
       const { song, creator } = songData;
@@ -304,10 +308,10 @@ export const tipsRouter = router({
       const session = await stripe.checkout.sessions.create({
         mode: "payment", payment_method_types: ["card"],
         line_items: [{ price_data: { currency: "usd", product_data: { name: `Download: "${song.title}"`, description: `Tip-to-download — supporting ${creator.artistHandle || creator.name || "this creator"} on Living Nexus` }, unit_amount: thresholdCents }, quantity: 1 }],
-        metadata: { type: "tip_download", songId: input.songId.toString(), userId: ctx.user?.id?.toString() || "", tipperName: ctx.user?.name || "" },
+        metadata: { type: "tip_download", songId: input.songId.toString(), userId: ctx.user.id.toString(), tipperName: ctx.user.name || "" },
         payment_intent_data: { application_fee_amount: feeAmount, transfer_data: { destination: creator.stripeAccountId } },
-        success_url: `${input.origin}/song/${input.songId}?download=unlocked`,
-        cancel_url: `${input.origin}/song/${input.songId}`,
+        success_url: `${CANONICAL_TIP_DOWNLOAD_ORIGIN}/song/${input.songId}?download=unlocked`,
+        cancel_url: `${CANONICAL_TIP_DOWNLOAD_ORIGIN}/song/${input.songId}`,
         allow_promotion_codes: false,
       });
       return { url: session.url };
@@ -364,5 +368,4 @@ export const tipsRouter = router({
       return { url: session.url };
     }),
   });
-
 
