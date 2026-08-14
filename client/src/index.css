@@ -3922,3 +3922,159 @@ h1, h2, h3, h4, h5, h6,
     padding: 0.5625rem 0.75rem;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   BREATH CANON — Home + Work living atmosphere
+   Quiet life: contrast + slow breathe. No motion blur. No circus.
+   Motions: (1) plane breath  (2) ken drift  (3) reveal enter
+═══════════════════════════════════════════════════════════════════ */
+
+@keyframes ln-breath-plane {
+  0%, 100% { opacity: 0.55; transform: scale(1); }
+  50%       { opacity: 1;    transform: scale(1.06); }
+}
+
+@keyframes ln-breath-ken {
+  from { transform: scale(1.03) translate3d(0, 0, 0); }
+  to   { transform: scale(1.08) translate3d(-1.2%, 0.6%, 0); }
+}
+
+@keyframes ln-breath-reveal {
+  from { opacity: 0; transform: translate3d(0, 14px, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+@keyframes ln-breath-rule {
+  from { transform: scaleY(0); opacity: 0.2; }
+  to   { transform: scaleY(1); opacity: 1; }
+}
+
+@keyframes ln-breath-accent {
+  0%, 100% { opacity: 0.45; }
+  50%       { opacity: 0.95; }
+}
+
+.ln-breath-shell {
+  position: relative;
+  isolation: isolate;
+}
+
+/* Soft radial that slowly brightens — color via --ln-breath-hue */
+.ln-breath-plane {
+  position: absolute;
+  inset: -8%;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(
+      ellipse 72% 55% at 50% 8%,
+      hsla(var(--ln-breath-hue, 43), var(--ln-breath-sat, 62%), 48%, 0.22),
+      transparent 68%
+    ),
+    radial-gradient(
+      ellipse 55% 40% at 85% 70%,
+      hsla(var(--ln-breath-hue, 43), var(--ln-breath-sat, 62%), 40%, 0.10),
+      transparent 70%
+    );
+  animation: ln-breath-plane 16s ease-in-out infinite;
+  will-change: opacity, transform;
+}
+
+.ln-breath-plane--playing {
+  animation-duration: 9s;
+  background:
+    radial-gradient(
+      ellipse 75% 58% at 48% 10%,
+      hsla(var(--ln-breath-hue, 43), var(--ln-breath-sat, 68%), 52%, 0.32),
+      transparent 66%
+    ),
+    radial-gradient(
+      ellipse 50% 45% at 90% 75%,
+      hsla(var(--ln-breath-hue, 43), var(--ln-breath-sat, 68%), 42%, 0.16),
+      transparent 72%
+    );
+}
+
+/* Full-bleed cover drift — Work hero */
+.ln-breath-ken {
+  animation: ln-breath-ken 22s ease-in-out infinite alternate;
+  will-change: transform;
+  transform-origin: center center;
+}
+
+.ln-breath-ken--playing {
+  animation-duration: 14s;
+}
+
+/* Harmonic edge — inset color presence when playing */
+.ln-breath-edge {
+  box-shadow:
+    inset 0 0 0 1px hsla(var(--ln-breath-hue, 43), 55%, 55%, 0.18),
+    inset 0 0 120px 0 hsla(var(--ln-breath-hue, 43), 55%, 45%, 0.06);
+  transition: box-shadow 1.2s ease;
+}
+
+.ln-breath-edge--playing {
+  box-shadow:
+    inset 0 0 0 1px hsla(var(--ln-breath-hue, 43), 65%, 58%, 0.42),
+    inset 0 0 140px 0 hsla(var(--ln-breath-hue, 43), 60%, 48%, 0.12),
+    0 0 48px 0 hsla(var(--ln-breath-hue, 43), 55%, 45%, 0.10);
+}
+
+/* Staggered enter — opacity/transform only */
+.ln-breath-reveal {
+  animation: ln-breath-reveal 0.85s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.ln-breath-reveal-d1 { animation-delay: 0.08s; }
+.ln-breath-reveal-d2 { animation-delay: 0.16s; }
+.ln-breath-reveal-d3 { animation-delay: 0.26s; }
+.ln-breath-reveal-d4 { animation-delay: 0.36s; }
+
+/* Testimony gold rule grows in */
+.ln-breath-rule {
+  transform-origin: top center;
+  animation: ln-breath-rule 1.1s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: 0.2s;
+}
+
+/* Showcase cover: quiet scale breathe on art only */
+.ln-breath-cover img {
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.ln-breath-cover:hover img {
+  transform: scale(1.045);
+}
+.ln-breath-cover-alive img {
+  animation: art-breathe 16s ease-in-out infinite;
+}
+
+/* Accent line that pulses gently (section headers) */
+.ln-breath-accent-line {
+  height: 1px;
+  width: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    hsla(var(--ln-breath-hue, 43), 70%, 55%, 0.55),
+    transparent
+  );
+  animation: ln-breath-accent 10s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ln-breath-plane,
+  .ln-breath-plane--playing,
+  .ln-breath-ken,
+  .ln-breath-ken--playing,
+  .ln-breath-reveal,
+  .ln-breath-rule,
+  .ln-breath-accent-line,
+  .ln-breath-cover-alive img {
+    animation: none !important;
+  }
+  .ln-breath-reveal,
+  .ln-breath-rule {
+    opacity: 1;
+    transform: none;
+  }
+}

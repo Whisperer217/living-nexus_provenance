@@ -17,6 +17,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
 import { usePlayer, type Track } from "@/contexts/PlayerContext";
+import { useHarmonic } from "@/contexts/HarmonicContext";
 import TipModal from "@/components/TipModal";
 import { SKIN_IMAGES } from "@/components/FloatingAvatar";
 import { DiscordGlyph } from "@/components/icons/DiscordGlyph";
@@ -96,6 +97,7 @@ const AVATAR_PREVIEWS = [
 export default function HomePage() {
   const { isAuthenticated, loading: authLoading } = useAuth();
   const { addAndPlay } = usePlayer();
+  const { isPlaying, hue, harmonicSig } = useHarmonic();
   const [tipTarget, setTipTarget] = useState<Track | null>(null);
 
   const { data: countData } = trpc.songs.getWitnessedCount.useQuery(undefined, {
@@ -154,30 +156,33 @@ export default function HomePage() {
         />
       </Helmet>
 
-      <div className="cosmic-bg min-h-screen ln-atmosphere" style={{ position: "relative" }}>
+      <div
+        className={`cosmic-bg min-h-screen ln-atmosphere ln-breath-shell ${isPlaying ? "ln-breath-edge--playing" : "ln-breath-edge"}`}
+        style={{
+          position: "relative",
+          ["--ln-breath-hue" as string]: isPlaying ? hue.toFixed(1) : "43",
+          ["--ln-breath-sat" as string]: isPlaying ? harmonicSig.saturation.toFixed(1) : "62",
+        }}
+      >
+        <div className={`ln-breath-plane ${isPlaying ? "ln-breath-plane--playing" : ""}`} aria-hidden />
+
         {/* ── Porch hero ── */}
-        <section className="relative px-6 pt-14 pb-12 md:pt-20 md:pb-16 overflow-hidden">
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              background:
-                "radial-gradient(ellipse 70% 50% at 50% 0%, color-mix(in srgb, var(--ln-gold) 14%, transparent), transparent 70%)",
-            }}
-          />
+        <section className="relative px-6 pt-14 pb-12 md:pt-20 md:pb-16 overflow-hidden z-[1]">
           <div className="relative max-w-4xl mx-auto text-center">
             <p
-              className="font-heading text-[10px] uppercase tracking-[0.28em] mb-4"
-              style={{ color: "var(--ln-gold)" }}
+              className="font-heading text-[10px] uppercase tracking-[0.28em] mb-4 ln-breath-reveal"
+              style={{ color: "var(--ln-gold-hot, var(--ln-gold))" }}
             >
               {LOOP_PRODUCT.fullName}
             </p>
             <h1
-              className="font-display mb-4"
+              className="font-display mb-4 ln-breath-reveal ln-breath-reveal-d1"
               style={{
                 fontSize: "clamp(1.75rem, 4vw, 2.75rem)",
                 color: "var(--ln-parchment)",
                 letterSpacing: "0.06em",
                 lineHeight: 1.15,
+                textShadow: "0 2px 28px rgba(0,0,0,0.45)",
               }}
             >
               Provenance first.
@@ -185,7 +190,7 @@ export default function HomePage() {
               Music that can prove its origin.
             </h1>
             <p
-              className="font-body max-w-xl mx-auto mb-8"
+              className="font-body max-w-xl mx-auto mb-8 ln-breath-reveal ln-breath-reveal-d2"
               style={{
                 fontSize: "1.15rem",
                 color: "var(--ln-bone)",
@@ -195,16 +200,17 @@ export default function HomePage() {
               Home is the porch: learn the process, meet the {PNA_PRODUCT.name}, hear a few sealed works.
               Guests may listen and support. Creators enter the stewarded cockpit to register and seal.
             </p>
-            <div className="flex flex-wrap items-center justify-center gap-3">
+            <div className="flex flex-wrap items-center justify-center gap-3 ln-breath-reveal ln-breath-reveal-d3">
               <a
                 href={enterPnaHref}
                 className="font-heading inline-flex items-center gap-2 px-5 py-2.5 rounded-xl transition-opacity hover:opacity-90"
                 style={{
-                  background: "var(--ln-gold)",
+                  background: "var(--ln-gold-hot, var(--ln-gold))",
                   color: "var(--ln-void)",
                   fontSize: "0.65rem",
                   letterSpacing: "0.1em",
                   textDecoration: "none",
+                  boxShadow: "0 0 28px color-mix(in srgb, var(--ln-gold) 28%, transparent)",
                 }}
               >
                 <Sparkles size={14} />
@@ -214,13 +220,14 @@ export default function HomePage() {
                 <span
                   className="font-heading inline-flex items-center gap-2 px-5 py-2.5 rounded-xl cursor-pointer"
                   style={{
-                    border: "1px solid var(--ln-panel-border)",
+                    border: "1px solid color-mix(in srgb, var(--ln-parchment) 28%, transparent)",
                     color: "var(--ln-parchment)",
                     fontSize: "0.65rem",
                     letterSpacing: "0.1em",
+                    background: "color-mix(in srgb, var(--ln-void) 55%, transparent)",
                   }}
                 >
-                  <Compass size={14} style={{ color: "var(--ln-gold)" }} />
+                  <Compass size={14} style={{ color: "var(--ln-gold-hot, var(--ln-gold))" }} />
                   EXPLORE SONGS
                 </span>
               </Link>
@@ -228,8 +235,8 @@ export default function HomePage() {
                 href={registerHref}
                 className="font-heading inline-flex items-center gap-2 px-5 py-2.5 rounded-xl"
                 style={{
-                  border: "1px solid color-mix(in srgb, var(--ln-gold) 35%, transparent)",
-                  color: "var(--ln-gold)",
+                  border: "1px solid color-mix(in srgb, var(--ln-gold) 45%, transparent)",
+                  color: "var(--ln-gold-hot, var(--ln-gold))",
                   fontSize: "0.65rem",
                   letterSpacing: "0.1em",
                   textDecoration: "none",
@@ -240,7 +247,10 @@ export default function HomePage() {
               </a>
             </div>
             {(countData?.count ?? 0) > 0 && (
-              <p className="font-heading mt-6 text-xs" style={{ color: "var(--ln-smoke)" }}>
+              <p
+                className="font-heading mt-6 text-xs ln-breath-reveal ln-breath-reveal-d4"
+                style={{ color: "var(--ln-smoke)" }}
+              >
                 <Fingerprint size={12} className="inline mr-1.5" style={{ color: "var(--ln-gold)" }} />
                 {(countData?.count ?? 0).toLocaleString()} works witnessed
               </p>
@@ -248,8 +258,12 @@ export default function HomePage() {
           </div>
         </section>
 
+        <div className="relative z-[1] px-6">
+          <div className="ln-breath-accent-line max-w-5xl mx-auto" aria-hidden />
+        </div>
+
         {/* ── Process flow ── */}
-        <section className="px-6 py-12" style={{ borderTop: "1px solid var(--ln-panel-border)" }}>
+        <section className="relative z-[1] px-6 py-12" style={{ borderTop: "1px solid var(--ln-panel-border)" }}>
           <div className="max-w-5xl mx-auto">
             <p
               className="font-heading text-[10px] uppercase tracking-[0.22em] mb-2 text-center"
@@ -292,7 +306,7 @@ export default function HomePage() {
         </section>
 
         {/* ── PNA + avatars ── */}
-        <section className="px-6 py-12" style={{ borderTop: "1px solid var(--ln-panel-border)" }}>
+        <section className="relative z-[1] px-6 py-12" style={{ borderTop: "1px solid var(--ln-panel-border)" }}>
           <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
             <div>
               <p
@@ -357,7 +371,7 @@ export default function HomePage() {
         </section>
 
         {/* ── Limited showcase — guests can play / support ── */}
-        <section className="px-6 py-12" style={{ borderTop: "1px solid var(--ln-panel-border)" }}>
+        <section className="relative z-[1] px-6 py-12" style={{ borderTop: "1px solid var(--ln-panel-border)" }}>
           <div className="max-w-5xl mx-auto">
             <div className="flex items-end justify-between gap-4 mb-6">
               <div>
@@ -401,8 +415,12 @@ export default function HomePage() {
                     }}
                   >
                     <div
-                      className="aspect-square rounded-xl overflow-hidden mb-2 relative"
-                      style={{ background: "var(--ln-obsidian)", border: "1px solid var(--ln-panel-border)" }}
+                      className="aspect-square rounded-xl overflow-hidden mb-2 relative ln-breath-cover ln-breath-cover-alive"
+                      style={{
+                        background: "var(--ln-obsidian)",
+                        border: "1px solid color-mix(in srgb, var(--ln-gold) 28%, transparent)",
+                        boxShadow: "0 8px 24px rgba(0,0,0,0.35)",
+                      }}
                     >
                       {v.coverArtUrl ? (
                         <img src={v.coverArtUrl} alt="" className="w-full h-full object-cover" />
@@ -472,7 +490,7 @@ export default function HomePage() {
         </section>
 
         {/* ── Discord ── */}
-        <section className="px-6 py-12" style={{ borderTop: "1px solid var(--ln-panel-border)" }}>
+        <section className="relative z-[1] px-6 py-12" style={{ borderTop: "1px solid var(--ln-panel-border)" }}>
           <div
             className="max-w-3xl mx-auto rounded-2xl p-6 md:p-8"
             style={{
@@ -557,7 +575,7 @@ export default function HomePage() {
         </section>
 
         {/* ── Closing CTAs ── */}
-        <section className="px-6 py-14 text-center" style={{ borderTop: "1px solid var(--ln-panel-border)" }}>
+        <section className="relative z-[1] px-6 py-14 text-center" style={{ borderTop: "1px solid var(--ln-panel-border)" }}>
           <ShieldCheck className="mx-auto mb-4" size={28} style={{ color: "var(--ln-gold)" }} />
           <h2 className="font-heading mb-3" style={{ fontSize: "1.35rem", color: "var(--ln-parchment)" }}>
             Easy to start. Hard to fake. Optional to go deep.

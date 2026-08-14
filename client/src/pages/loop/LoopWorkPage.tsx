@@ -25,6 +25,7 @@ import { SupportCreatorDrawer } from "@/components/SupportCreatorDrawer";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { useWorkEditorActions } from "@/contexts/WorkEditorContext";
 import { useLike } from "@/hooks/useLike";
+import { useHarmonicSignature } from "@/hooks/useHarmonicSignature";
 import { LOOP_PRODUCT } from "@/lib/loopProduct";
 import { trpc } from "@/lib/trpc";
 
@@ -50,6 +51,8 @@ export default function LoopWorkPage() {
 
   const song = songData?.song;
   const creator = songData?.creator;
+  const widForBreath = (song?.witnessId as string | null | undefined) ?? null;
+  const breath = useHarmonicSignature(widForBreath, null);
 
   useEffect(() => {
     if (songId > 0) playMutation.mutate({ songId });
@@ -154,7 +157,13 @@ export default function LoopWorkPage() {
   const related = (relatedData ?? []) as any[];
 
   return (
-    <div className="min-h-screen relative">
+    <div
+      className={`min-h-screen relative ln-breath-shell ${isPlaying ? "ln-breath-edge--playing" : "ln-breath-edge"}`}
+      style={{
+        ["--ln-breath-hue" as string]: breath.hue.toFixed(1),
+        ["--ln-breath-sat" as string]: breath.saturation.toFixed(1),
+      }}
+    >
       <Helmet>
         <title>{`${song.title} — ${LOOP_PRODUCT.fullName}`}</title>
         <meta name="description" content={origin?.slice(0, 160) || `${song.title} by ${artistName}`} />
@@ -165,49 +174,49 @@ export default function LoopWorkPage() {
       {/* Full-bleed hero plane */}
       <section className="relative min-h-[88vh] flex flex-col justify-end overflow-hidden">
         <div
-          className="absolute inset-0"
+          className={`absolute inset-0 ln-breath-ken ${isPlaying ? "ln-breath-ken--playing" : ""}`}
           style={{
             backgroundImage: cover
               ? `url(${cover})`
               : "linear-gradient(135deg, #1a1408 0%, #000 55%, #050505 100%)",
             backgroundSize: "cover",
             backgroundPosition: `${song.coverPositionX ?? 50}% ${song.coverPositionY ?? 50}%`,
-            transform: "scale(1.04)",
-            animation: "loopKen 18s ease-in-out infinite alternate",
           }}
         />
         <div
           className="absolute inset-0"
           style={{
             background:
-              "linear-gradient(180deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.55) 40%, rgba(0,0,0,0.92) 78%, #000 100%)",
+              "linear-gradient(180deg, rgba(0,0,0,0.28) 0%, rgba(0,0,0,0.48) 38%, rgba(0,0,0,0.88) 76%, #000 100%)",
           }}
         />
         <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background:
-              "radial-gradient(ellipse 70% 50% at 70% 30%, rgba(196,154,40,0.12), transparent 60%)",
-          }}
+          className={`absolute inset-0 pointer-events-none ln-breath-plane ${isPlaying ? "ln-breath-plane--playing" : ""}`}
+          aria-hidden
         />
 
         <div className="relative z-10 max-w-5xl mx-auto w-full px-4 sm:px-6 pb-14 pt-28">
           <p
-            className="text-[11px] uppercase tracking-[0.32em] mb-4"
-            style={{ color: "var(--ln-gold)", fontFamily: "'Cinzel', serif" }}
+            className="text-[11px] uppercase tracking-[0.32em] mb-4 ln-breath-reveal"
+            style={{ color: "var(--ln-gold-hot, var(--ln-gold))", fontFamily: "'Cinzel', serif" }}
           >
             {LOOP_PRODUCT.name}
           </p>
           <h1
-            className="text-4xl sm:text-6xl md:text-7xl leading-[0.95] mb-4 max-w-4xl"
-            style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}
+            className="text-4xl sm:text-6xl md:text-7xl leading-[0.95] mb-4 max-w-4xl ln-breath-reveal ln-breath-reveal-d1"
+            style={{
+              fontFamily: "'Cinzel', serif",
+              color: "var(--ln-parchment)",
+              textShadow: "0 2px 32px rgba(0,0,0,0.55)",
+            }}
           >
             {song.title}
           </h1>
           <p
-            className="font-body text-lg sm:text-xl mb-8 max-w-xl"
+            className="font-body text-lg sm:text-xl mb-8 max-w-xl ln-breath-reveal ln-breath-reveal-d2"
             style={{
-              color: "color-mix(in srgb, var(--ln-parchment) 78%, transparent)",
+              fontFamily: "'Cormorant Garamond', serif",
+              color: "color-mix(in srgb, var(--ln-parchment) 88%, transparent)",
             }}
           >
             {/* Hero keeps a compact teaser only — full origin lives in Testimony column */}
@@ -216,7 +225,7 @@ export default function LoopWorkPage() {
               : `Registered music by ${artistName}. Provenance sealed in the WID engine.`}
           </p>
 
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3 ln-breath-reveal ln-breath-reveal-d3">
             <button
               type="button"
               onClick={handlePlay}
@@ -284,13 +293,14 @@ export default function LoopWorkPage() {
       </section>
 
       {/* Three columns: Testimony | Provenance | Creator */}
-      <section className="max-w-6xl mx-auto px-4 sm:px-6 py-14">
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 py-14 ln-breath-reveal ln-breath-reveal-d4">
+        <div className="ln-breath-accent-line mb-10" aria-hidden />
         <div className="grid gap-10 lg:grid-cols-[1.15fr_1fr_0.9fr] lg:gap-8 xl:gap-12">
           {/* ── Left: Testimony (kept) ── */}
           <div>
             <p
               className="font-heading text-[11px] uppercase tracking-[0.22em] mb-3"
-              style={{ color: "var(--ln-gold)" }}
+              style={{ color: "var(--ln-gold-hot, var(--ln-gold))", fontFamily: "'Cinzel', serif" }}
             >
               Testimony
             </p>
@@ -302,10 +312,11 @@ export default function LoopWorkPage() {
             </h2>
             {origin ? (
               <blockquote
-                className="font-body text-xl sm:text-2xl leading-relaxed"
+                className="font-body text-xl sm:text-2xl leading-relaxed ln-breath-rule"
                 style={{
-                  color: "color-mix(in srgb, var(--ln-parchment) 88%, transparent)",
-                  borderLeft: "2px solid rgba(196,154,40,0.45)",
+                  fontFamily: "'Cormorant Garamond', serif",
+                  color: "color-mix(in srgb, var(--ln-parchment) 92%, transparent)",
+                  borderLeft: `2px solid hsla(${breath.hue.toFixed(1)}, 65%, 55%, 0.65)`,
                   paddingLeft: 16,
                 }}
               >
@@ -331,7 +342,7 @@ export default function LoopWorkPage() {
           <div>
             <p
               className="font-heading text-[11px] uppercase tracking-[0.22em] mb-3"
-              style={{ color: "var(--ln-gold)" }}
+              style={{ color: "var(--ln-gold-hot, var(--ln-gold))", fontFamily: "'Cinzel', serif" }}
             >
               Provenance
             </p>
@@ -409,7 +420,7 @@ export default function LoopWorkPage() {
           >
             <p
               className="font-heading text-[11px] uppercase tracking-[0.22em] mb-4"
-              style={{ color: "var(--ln-gold)" }}
+              style={{ color: "var(--ln-gold-hot, var(--ln-gold))", fontFamily: "'Cinzel', serif" }}
             >
               Creator
             </p>
@@ -594,13 +605,6 @@ export default function LoopWorkPage() {
         }
         onClose={() => setSupportOpen(false)}
       />
-
-      <style>{`
-        @keyframes loopKen {
-          from { transform: scale(1.02); }
-          to { transform: scale(1.08); }
-        }
-      `}</style>
     </div>
   );
 }
