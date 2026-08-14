@@ -532,7 +532,7 @@ function GenrePathsBlock({
       .filter((genre) => genre && genre.toLowerCase() !== "other");
     for (const genre of labels) counts.set(genre, (counts.get(genre) ?? 0) + 1);
   }
-  const paths = [...counts.entries()]
+  const paths = Array.from(counts.entries())
     .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
     .slice(0, config.maxItems ?? 12);
 
