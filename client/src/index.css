@@ -4105,3 +4105,145 @@ h1, h2, h3, h4, h5, h6,
     animation: none !important;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   PNA CHAT ATMOSPHERE — music-reactive field, vine/ember frame, stream seal
+   No motion blur. Reduced-motion stills pulse and bounce.
+═══════════════════════════════════════════════════════════════════ */
+
+.ln-pna-chat {
+  position: relative;
+  isolation: isolate;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--ln-panel, #0A0806);
+}
+
+.ln-pna-chat__field,
+.ln-pna-chat__frame {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.ln-pna-chat__field {
+  background:
+    radial-gradient(
+      ellipse 80% 50% at 50% 0%,
+      hsla(var(--ln-pna-hue, 43), var(--ln-pna-sat, 62%), 48%, 0.16),
+      transparent 70%
+    ),
+    radial-gradient(
+      ellipse 60% 40% at 80% 100%,
+      hsla(var(--ln-pna-hue, 43), var(--ln-pna-sat, 62%), 40%, 0.08),
+      transparent 65%
+    );
+  opacity: 0.72;
+}
+
+.ln-pna-chat--playing .ln-pna-chat__field {
+  animation: ln-pna-pulse 5.5s ease-in-out infinite;
+}
+
+.ln-pna-chat--vine .ln-pna-chat__corner {
+  opacity: 0.82;
+}
+
+.ln-pna-chat--ember .ln-pna-chat__field {
+  background:
+    radial-gradient(
+      ellipse 90% 55% at 40% 0%,
+      hsla(22, 72%, 48%, 0.22),
+      transparent 68%
+    ),
+    radial-gradient(
+      ellipse 50% 45% at 90% 90%,
+      hsla(var(--ln-pna-hue, 32), 70%, 42%, 0.14),
+      transparent 60%
+    );
+}
+
+.ln-pna-chat__frame {
+  inset: 7px;
+  border: 1px solid color-mix(in srgb, var(--ln-gold) 38%, transparent);
+  border-radius: 18px;
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--ln-gold) 12%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--ln-gold) 8%, transparent);
+}
+
+.ln-pna-chat--ember .ln-pna-chat__frame {
+  border-color: color-mix(in srgb, #e07030 55%, var(--ln-gold));
+}
+
+.ln-pna-chat__corner {
+  position: absolute;
+  font-size: 0.7rem;
+  line-height: 1;
+  color: var(--ln-gold);
+  opacity: 0.72;
+}
+
+.ln-pna-chat__corner--tl { top: 4px; left: 8px; }
+.ln-pna-chat__corner--tr { top: 4px; right: 8px; }
+.ln-pna-chat__corner--bl { bottom: 4px; left: 8px; }
+.ln-pna-chat__corner--br { bottom: 4px; right: 8px; }
+
+.ln-pna-chat__body {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+@keyframes ln-pna-pulse {
+  0%, 100% { opacity: 0.62; }
+  50% { opacity: 1; }
+}
+
+@keyframes ln-pna-seal-bob {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(8px, 5px, 0); }
+}
+
+@keyframes ln-pna-seal-spin {
+  to { transform: rotate(360deg); }
+}
+
+.ln-pna-seal {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 4px 0 10px;
+  padding-left: 2px;
+}
+
+.ln-pna-seal__bob {
+  animation: ln-pna-seal-bob 2.4s ease-in-out infinite;
+}
+
+.ln-pna-seal__mark {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  animation: ln-pna-seal-spin 6s linear infinite;
+}
+
+.ln-pna-seal__label {
+  font-family: "Space Mono", monospace;
+  font-size: 0.4rem;
+  letter-spacing: 0.14em;
+  color: var(--ln-gold);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ln-pna-chat--playing .ln-pna-chat__field,
+  .ln-pna-seal__bob,
+  .ln-pna-seal__mark {
+    animation: none !important;
+  }
+}
