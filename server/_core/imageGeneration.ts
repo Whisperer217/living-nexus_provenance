@@ -33,8 +33,12 @@ export type GenerateImageResponse = {
   url?: string;
 };
 
-/** The stable creator-facing default for PNA visual proposals. */
-export const PRIMARY_IMAGE_MODEL = "MODEL_GPT_IMAGE_2";
+/**
+ * The current creator-facing primary for PNA visual proposals. The internal
+ * catalog confirms this model is available and it completed the non-persistent
+ * health probe within the PNA deadline; model selection remains adapter-owned.
+ */
+export const PRIMARY_IMAGE_MODEL = "MODEL_GEMINI_2_5_FLASH_IMAGE_PREVIEW";
 /** A creator-facing image request must fail visibly rather than strand PNA in a loading state. */
 export const IMAGE_GENERATION_TIMEOUT_MS = 45_000;
 

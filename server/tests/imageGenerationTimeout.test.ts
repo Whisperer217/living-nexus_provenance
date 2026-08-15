@@ -25,7 +25,7 @@ describe("image generation request deadline", () => {
       init.signal?.addEventListener("abort", () => reject(new Error("aborted by caller")));
     })));
 
-    const request = generateImage({ prompt: "A private cover concept", model: "MODEL_GPT_IMAGE_2" });
+    const request = generateImage({ prompt: "A private cover concept", model: "MODEL_GEMINI_2_5_FLASH_IMAGE_PREVIEW" });
     const timeoutAssertion = expect(request).rejects.toThrow("Image generation timed out after 45 seconds");
     await vi.advanceTimersByTimeAsync(IMAGE_GENERATION_TIMEOUT_MS);
 
@@ -40,9 +40,9 @@ describe("image generation request deadline", () => {
     }));
     storage.storagePut.mockResolvedValue({ url: "https://storage.example/generated.png" });
 
-    await generateImage({ prompt: "A private cover concept", model: "MODEL_GPT_IMAGE_2" });
+    await generateImage({ prompt: "A private cover concept", model: "MODEL_GEMINI_2_5_FLASH_IMAGE_PREVIEW" });
 
     const [, init] = (fetch as ReturnType<typeof vi.fn>).mock.calls[0];
-    expect(JSON.parse(init.body)).toMatchObject({ model: "MODEL_GPT_IMAGE_2", prompt: "A private cover concept" });
+    expect(JSON.parse(init.body)).toMatchObject({ model: "MODEL_GEMINI_2_5_FLASH_IMAGE_PREVIEW", prompt: "A private cover concept" });
   });
 });

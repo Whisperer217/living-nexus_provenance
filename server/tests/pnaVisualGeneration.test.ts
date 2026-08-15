@@ -3,7 +3,7 @@ import type { TrpcContext } from "../_core/context";
 
 const imageService = vi.hoisted(() => ({
   generateImage: vi.fn(),
-  PRIMARY_IMAGE_MODEL: "MODEL_GPT_IMAGE_2",
+  PRIMARY_IMAGE_MODEL: "MODEL_GEMINI_2_5_FLASH_IMAGE_PREVIEW",
 }));
 const storage = vi.hoisted(() => ({ storagePut: vi.fn() }));
 
@@ -50,7 +50,7 @@ describe("PNA private visual generation", () => {
 
     expect(imageService.generateImage).toHaveBeenCalledWith({
       prompt: "A gold and midnight-blue cover for a testimony song",
-      model: "MODEL_GPT_IMAGE_2",
+      model: "MODEL_GEMINI_2_5_FLASH_IMAGE_PREVIEW",
     });
     expect(storage.storagePut).toHaveBeenCalledWith(
       expect.stringMatching(/^keeper-artwork\/42\//),
