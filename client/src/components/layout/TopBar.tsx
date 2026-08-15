@@ -386,6 +386,7 @@ export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCoun
   }, [avatarMenuOpen]);
 
   const { state } = usePlayer();
+  const nowPlaying = state.currentIdx >= 0 ? state.tracks[state.currentIdx] : null;
   const [whatsNewOpen, setWhatsNewOpen] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -479,24 +480,20 @@ export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCoun
     ?? (isWarm ? "var(--ln-panel-border)" : "rgba(196,154,40,0.18)");
 
   return (
-    <div className="hidden md:block">
-      {/* ── Integrated TopBar + Player ─────────────────────────────── */}
+    <div className="hidden md:flex shrink-0 w-full">
+      {/* ── In-flow TopBar + player strip (not a viewport overlay) ── */}
       <header
-        className="fixed top-0 z-[400] flex items-center"
+        id="global-player"
+        data-track-id={nowPlaying?.id ?? ""}
+        data-provenance-state={nowPlaying?.witnessId ? "verified" : "none"}
+        className="flex items-center w-full"
         style={{
-          left: 72,
-          right: 0,
           height: "56px",
-          // Base background — dark and clean
           backgroundColor: NAV_BG,
-          // Harmonic tint layered on top of the base via backgroundImage gradient.
-          // At 0.05 opacity this is subliminal — the cathedral breathing, not a disco light.
           backgroundImage: harmonicTint !== "transparent"
             ? `linear-gradient(to right, ${harmonicTint}, ${harmonicTint})`
             : undefined,
           borderBottom: `1px solid ${NAV_BORDER}`,
-          // Bottom edge glow: a soft inset shadow in the harmonic color when playing.
-          // This is the primary visual cue — the nav "lights up" from below.
           boxShadow: harmonicPlaying
             ? `inset 0 -1px 0 0 ${harmonicBorderTint}, 0 1px 12px 0 hsla(${harmonicSig.hue}, ${harmonicSig.saturation}%, 45%, 0.12)`
             : undefined,

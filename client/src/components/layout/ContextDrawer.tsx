@@ -5,12 +5,11 @@
    • Rail selects a mode → drawer opens and renders ONLY that mode's panel
    • Each mode has its own panel: header + contextual links + actions
    • No universal nav list. No mixed content. One mode. One panel.
-   • Drawer slides in from left:72px (right of LeftRail)
-   • Player stays dominant (z-9000+). Drawer is z-300.
-   • Close on: backdrop click, Escape key, route change
+   • Desktop: in-flow GPT-style sidebar (class .ln-context-drawer--open)
+   • Mobile: overlay slide from the 72px rail
+   • Close on: mobile backdrop, Escape. Desktop persists across navigation.
 ═══════════════════════════════════════════════════════════════════ */
 import { useEffect, useCallback } from "react";
-import { createPortal } from "react-dom";
 import { useLocation } from "wouter";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
@@ -203,13 +202,10 @@ export default function ContextDrawer({
   const [location, navigate] = useLocation();
   const { user, logout } = useAuth();
 
-  // Close on route change
-  useEffect(() => {
-    if (open) onClose();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location]);
+  const persistDesktopSidebar = () =>
+    typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches;
 
-  // Close on Escape
+  // Close on Escape (collapses the GPT-style sidebar)
   useEffect(() => {
     if (!open) return;
     const handler = (e: KeyboardEvent) => {
@@ -230,7 +226,7 @@ export default function ContextDrawer({
   const handleLinkClick = useCallback(
     (path: string) => {
       if (path === "__logout__") {
-        logout().finally(() => { onClose(); navigate("/"); });
+        logout().finally(() => { if (!persistDesktopSidebar()) onClose(); navigate("/"); });
         return;
       }
       if (path === "__my_public_profile__") {
@@ -241,22 +237,22 @@ export default function ContextDrawer({
           ? `/creator/${user.artistHandle || user.id}`
           : "/profile";
         navigate(dest);
-        onClose();
+        if (!persistDesktopSidebar()) onClose();
         return;
       }
       if (path.startsWith("__external__")) {
         window.open(path.replace("__external__", ""), "_blank", "noopener,noreferrer");
-        onClose();
+        if (!persistDesktopSidebar()) onClose();
         return;
       }
       navigate(path);
-      onClose();
+      if (!persistDesktopSidebar()) onClose();
     },
     [navigate, onClose, logout, user]
   );
 
   const handleWhatsNew = useCallback(() => {
-    onClose();
+    if (!persistDesktopSidebar()) onClose();
     if (onOpenWhatsNew) {
       onOpenWhatsNew();
     } else {
@@ -266,51 +262,21 @@ export default function ContextDrawer({
 
   const panel = activeMode ? PANELS[activeMode] : null;
 
-  return createPortal(
+  return (
     <>
-      {/* Backdrop */}
       <div
+        className={`ln-context-drawer__backdrop${open ? " ln-context-drawer__backdrop--open" : ""}`}
         onClick={onClose}
         aria-hidden="true"
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 72,   /* rail width — backdrop never covers the rail */
-          right: 0,
-          bottom: 0,
-          zIndex: 299,
-          background: "rgba(0,0,0,0.40)",
-          opacity: open ? 1 : 0,
-          pointerEvents: open ? "auto" : "none",
-          transition: "opacity 220ms cubic-bezier(0.22,1,0.36,1)",
-        }}
       />
 
-      {/* Drawer panel — visibility is open-state only (transform + pointer-events). Never display:none. */}
-      <div
-        role="dialog"
-        aria-modal={open}
-        aria-hidden={!open}
+      <aside
+        id="context-drawer"
+        data-context={activeMode ?? "loop"}
+        role="navigation"
         aria-label={panel ? `${panel.title} navigation` : "Navigation"}
-        className="flex flex-col"
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 72,
-          bottom: 0,
-          width: "min(300px, calc(100vw - 72px))",
-          zIndex: 300,
-          background: "rgba(0,0,0,0.99)",
-          borderRight: "1px solid rgba(196,154,40,0.14)",
-          backdropFilter: "blur(20px)",
-          /* Close: push fully off-screen left past the rail so no artifact bleeds into the 72px rail zone */
-          transform: open ? "translateX(0)" : "translateX(calc(-100% - 72px))",
-          transition: "transform 220ms cubic-bezier(0.22,1,0.36,1)",
-          boxShadow: open ? "8px 0 40px rgba(0,0,0,0.65)" : "none",
-          pointerEvents: open ? "auto" : "none",
-          overflowY: "auto",
-          scrollbarWidth: "none",
-        }}
+        aria-hidden={!open}
+        className={`ln-context-drawer${open ? " ln-context-drawer--open" : ""}`}
       >
         {panel ? (
           <>
@@ -486,8 +452,7 @@ export default function ContextDrawer({
             <span style={{ color: "color-mix(in srgb, var(--ln-parchment) 20%, transparent)", fontSize: 12 }}>Select a mode</span>
           </div>
         )}
-      </div>
-    </>,
-    document.body
+      </aside>
+    </>
   );
 }

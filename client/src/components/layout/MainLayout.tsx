@@ -22,7 +22,6 @@ import type { NavMode } from "@/components/layout/LeftRail";
 import RightRail from "@/components/layout/RightRail";
 import ContextDrawer from "@/components/layout/ContextDrawer";
 import { useLocation } from "wouter";
-import { usePlayer } from "@/contexts/PlayerContext";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useRightRail } from "@/contexts/RightRailContext";
 import GlobalPlayer from "@/components/player/GlobalPlayer";
@@ -66,16 +65,19 @@ const CREATOR_FOCUS_ROUTES = [
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   const [location, navigate] = useLocation();
-  const { state } = usePlayer();
   const isCreatorFocus = CREATOR_FOCUS_ROUTES.some(
     (r) => location === r || location.startsWith(r + "/") || location.startsWith(r + "?")
   ) || location.includes("/studio");
   const { user, loading: authLoading, logout } = useAuth();
   const { isOpen: rightRailOpen } = useRightRail();
 
-  // ── Desktop: ContextDrawer two-state model ──────────────────────────
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [activeMode, setActiveMode] = useState<NavMode | null>(null);
+  // GPT-style: desktop sidebar starts open (Home panel). Mobile starts closed.
+  const [drawerOpen, setDrawerOpen] = useState(
+    () => typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches,
+  );
+  const [activeMode, setActiveMode] = useState<NavMode | null>(
+    () => (typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches ? "home" : null),
+  );
 
   const handleRailClick = useCallback((mode: NavMode) => {
     setActiveMode(mode);
@@ -98,10 +100,12 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     setDrawerOpen(false);
   }, []);
 
-  // Close mobile rail + drawer on route change
+  // Mobile overlay dismisses on route change. Desktop GPT sidebar stays open.
   useEffect(() => {
     setMobileMenuOpen(false);
-    setDrawerOpen(false);
+    if (typeof window !== "undefined" && !window.matchMedia("(min-width: 1024px)").matches) {
+      setDrawerOpen(false);
+    }
   }, [location]);
 
   // ── What's New modal ───────────────────────────────────────────────
@@ -154,7 +158,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
   return (
     <div
-      className="noise-overlay flex flex-col h-dvh overflow-hidden bg-background relative"
+      className="noise-overlay flex h-dvh overflow-hidden bg-background relative"
       style={{ overscrollBehavior: "none" }}
     >
       {/* ── LeftRail — unified navigation authority (desktop + mobile) ── */}
@@ -167,7 +171,6 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         archiveSongCount={archiveSongCount}
       />
 
-      {/* ── ContextDrawer — open-state only (all breakpoints) ── */}
       <ContextDrawer
         open={drawerOpen}
         activeMode={activeMode}
@@ -175,7 +178,8 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         onOpenWhatsNew={() => setWhatsNewOpen(true)}
       />
 
-      {/* ── TopBar — desktop only (hidden on mobile) ── */}
+      <div className="flex-1 flex flex-col min-w-0 min-h-0">
+      {/* ── TopBar — in-flow player strip lives here (desktop/tablet) ── */}
       <TopBar archiveSongCount={archiveSongCount} unreadCount={unreadCount as number} />
 
       {/* ==============================================
@@ -184,7 +188,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           No overlayController. No body lock.
       ============================================== */}
       <div
-        className="lg:hidden fixed top-0 left-0 right-0 flex items-center gap-3 px-4 py-3"
+        className="lg:hidden flex items-center gap-3 px-4 py-3 shrink-0"
         style={{
           zIndex: Z.MOBILE_HEADER,
           background: MOBILE_HEADER_BG,
@@ -260,26 +264,17 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       {/* ── WSP (Witness Surface Player) — mobile only ── */}
       <WitnessSurfacePlayer />
 
-      {/* ==============================================
-          PAGE CONTENT
-          Desktop: lg:pl-[72px] to clear LeftRail
-          Mobile:  pt-14 (56px) to clear mobile header
-      ============================================== */}
       <div
-        className={`flex-1 flex overflow-hidden pt-14 lg:pt-[56px] ${drawerOpen ? "lg:pl-[372px]" : "lg:pl-[72px]"}`}
-        style={{
-          overscrollBehavior: "none",
-          transition: "padding-left 220ms cubic-bezier(0.22,1,0.36,1)",
-        }}
+        className="flex-1 flex overflow-hidden min-h-0"
+        style={{ overscrollBehavior: "none" }}
       >
-        <main className="flex-1 flex overflow-hidden" style={{ overscrollBehavior: "none" }}>
+        <main className="flex-1 flex overflow-hidden" data-region="content" style={{ overscrollBehavior: "none" }}>
           <style>{`
-            @media (min-width: 1024px) { .player-scroll-area { padding-bottom: 130px !important; } }
+            @media (min-width: 1024px) { .player-scroll-area { padding-bottom: 24px !important; } }
             @media (min-width: 768px) and (max-width: 1023px) { .player-scroll-area { padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important; } }
             @media (max-width: 767px) { .player-scroll-area { padding-bottom: var(--bottom-stack) !important; } }
           `}</style>
 
-          {/* ── Global pull-to-refresh indicator — covers every page ── */}
           <PullToRefreshIndicator
             pullProgress={pullProgress}
             isRefreshing={isRefreshing}
@@ -296,8 +291,9 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           </div>
         </main>
       </div>
+      </div>
 
-      {/* ── PLAYER LAYER ── */}
+      {/* ── PLAYER LAYER — expanded / theater only; desktop mini lives in TopBar ── */}
       <div
         style={{
           position: "fixed",

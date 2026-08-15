@@ -467,6 +467,8 @@ export default function PNAShellPage() {
   const musicDock = (
     <div
       className="flex items-center gap-3 px-4 py-2.5 flex-shrink-0"
+      data-track-id={nowPlaying?.id ?? ""}
+      data-provenance-state={nowPlaying?.wid ? "verified" : "none"}
       style={{
         background: "color-mix(in srgb, var(--ln-panel, #0A0806) 88%, transparent)",
         borderTop: "1px solid color-mix(in srgb, var(--ln-gold, #C49A28) 22%, transparent)",
@@ -655,7 +657,7 @@ export default function PNAShellPage() {
   );
 
   const messagesPane = (
-    <div className="flex-1 overflow-y-auto px-4 py-4" style={{ overscrollBehavior: "contain" }}>
+    <div id="chat" data-session-id={user.id} className="flex-1 overflow-y-auto px-4 py-4" style={{ overscrollBehavior: "contain" }}>
       {messages.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-full gap-5 max-w-md mx-auto">
           <div
@@ -708,7 +710,7 @@ export default function PNAShellPage() {
             const modeConfig = PNA_MODES.find(m => m.id === msg.mode) ?? PNA_MODES[0];
             const isUser = msg.role === "user";
             return (
-              <div key={msg.id} className={`flex ${isUser ? "justify-end" : "justify-start"} mb-3.5`}>
+              <div key={msg.id} className={`flex ${isUser ? "justify-end" : "justify-start"} mb-3.5`} data-role={isUser ? "user" : "assistant"}>
                 {!isUser && (
                   <img
                     src={activeSkinImg}
@@ -882,6 +884,7 @@ export default function PNAShellPage() {
   const leftDrawer = (
     <div
       className="flex flex-col flex-shrink-0 transition-all duration-300 h-full"
+      data-context="pna"
       style={{
         width: sidebarCollapsed ? 64 : 248,
         background: "rgba(8,6,4,0.98)",

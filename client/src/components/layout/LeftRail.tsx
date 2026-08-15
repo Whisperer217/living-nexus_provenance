@@ -247,13 +247,11 @@ export default function LeftRail({
       {/* ── DESKTOP RAIL (lg+): always visible, fixed 72px ── */}
       <aside
         data-rail="true"
-        className="hidden lg:flex flex-col items-center py-3 gap-1"
+        className="hidden lg:flex flex-col items-center py-3 gap-1 shrink-0"
         style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          bottom: 0,
+          position: "relative",
           width: 72,
+          height: "100%",
           background: "var(--ln-panel)",
           borderRight: "1px solid var(--ln-panel-border)",
           zIndex: 310,
