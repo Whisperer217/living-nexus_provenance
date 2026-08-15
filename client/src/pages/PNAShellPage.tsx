@@ -23,6 +23,7 @@ import { getLoginUrl } from "@/const";
 import { usePlayer } from "@/contexts/PlayerContext";
 import NexusAvatarViewer from "@/components/NexusAvatarViewer";
 import { NexusContextPanel } from "@/components/NexusContextPanel";
+import { PNAVisualProposalCard, type PNAVisualProposal } from "@/components/PNAVisualProposalCard";
 import { SKIN_IMAGES } from "@/components/FloatingAvatar";
 import { PNA_PRODUCT } from "@/lib/loopProduct";
 import { consumePnaDiaryReload } from "@/lib/pnaDiary";
@@ -87,6 +88,7 @@ interface Message {
   content: string;
   mode: PNAMode;
   timestamp: Date;
+  visualProposal?: PNAVisualProposal;
 }
 
 type LayoutMode = "workspace" | "popout";
@@ -159,6 +161,9 @@ export default function PNAShellPage() {
     onError: (e) => toast.error(e.message),
   });
   const profileQuery = trpc.keeper.getProfile.useQuery(undefined, { enabled: !!user });
+  const utils = trpc.useUtils();
+  const generateArtwork = trpc.keeper.generateArtwork.useMutation();
+  const saveQuiverAsset = trpc.quiver.save.useMutation();
   const setActiveSkin = trpc.keeper.setActiveSkin.useMutation({
     onSuccess: () => {
       utils.keeper.getProfile.invalidate();
@@ -166,7 +171,6 @@ export default function PNAShellPage() {
     },
     onError: (e) => toast.error(e.message ?? "Could not activate skin."),
   });
-  const utils = trpc.useUtils();
 
   const currentMode = PNA_MODES.find(m => m.id === activeMode) ?? PNA_MODES[0];
   const playing = playerState.currentIdx >= 0 ? playerState.tracks[playerState.currentIdx] : null;
@@ -354,6 +358,18 @@ export default function PNAShellPage() {
     setIsLoading(true);
 
     try {
+      if (activeMode === "vision") {
+        const visual = await generateArtwork.mutateAsync({ prompt: text });
+        setMessages(prev => [...prev, {
+          id: `p-visual-${Date.now()}`,
+          role: "pna",
+          content: "A private cover-art proposal is ready. Review it below; it will not enter Quiver until you choose to save it.",
+          mode: "vision",
+          timestamp: new Date(),
+          visualProposal: { url: visual.url, prompt: text },
+        }]);
+        return;
+      }
       const result = await chatMutation.mutateAsync({
         message: text,
         persona: currentMode.persona,
@@ -375,7 +391,28 @@ export default function PNAShellPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [input, isLoading, activeMode, currentMode, messages, chatMutation, user]);
+  }, [input, isLoading, activeMode, currentMode, messages, chatMutation, generateArtwork, user]);
+
+  const handleSaveVisualProposal = useCallback(async (messageId: string) => {
+    const message = messages.find(candidate => candidate.id === messageId);
+    const proposal = message?.visualProposal;
+    if (!proposal || proposal.savedQuiverId || saveQuiverAsset.isPending) return;
+
+    try {
+      const saved = await saveQuiverAsset.mutateAsync({
+        url: proposal.url,
+        prompt: proposal.prompt,
+        title: "PNA visual proposal",
+      });
+      setMessages(previous => previous.map(candidate => candidate.id === messageId && candidate.visualProposal
+        ? { ...candidate, visualProposal: { ...candidate.visualProposal, savedQuiverId: saved.id } }
+        : candidate));
+      await utils.quiver.list.invalidate();
+      toast.success("Saved privately to Quiver.");
+    } catch (error: any) {
+      toast.error(error.message ?? "Could not save this visual to Quiver.");
+    }
+  }, [messages, saveQuiverAsset, utils]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); }
@@ -645,16 +682,17 @@ export default function PNAShellPage() {
             </div>
           </div>
           <div className="w-full grid grid-cols-2 gap-2">
-            {[
-              { label: "Analyze my lyrics", icon: FileText },
-              { label: "Build arrangement", icon: Music },
-              { label: "Write testimony", icon: BookOpen },
-              { label: "Register a work", icon: Shield },
-            ].map(s => (
+              {[
+                { label: "Analyze my lyrics", icon: FileText },
+                { label: "Build arrangement", icon: Music },
+                { label: "Write testimony", icon: BookOpen },
+                { label: "Generate cover art", icon: Image, mode: "vision" as PNAMode },
+                { label: "Register a work", icon: Shield },
+              ].map(s => (
               <button
                 key={s.label}
                 type="button"
-                onClick={() => { setInput(s.label); inputRef.current?.focus(); }}
+                onClick={() => { if (s.mode) setActiveMode(s.mode); setInput(s.mode ? "" : s.label); inputRef.current?.focus(); }}
                 className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl text-left transition-all hover:opacity-80"
                 style={{ background: SURFACE, border: `1px solid ${PANEL_BORDER}` }}
               >
@@ -709,6 +747,13 @@ export default function PNAShellPage() {
                       {msg.content}
                     </p>
                   </div>
+                  {msg.visualProposal && (
+                    <PNAVisualProposalCard
+                      proposal={msg.visualProposal}
+                      isSaving={saveQuiverAsset.isPending}
+                      onSave={() => handleSaveVisualProposal(msg.id)}
+                    />
+                  )}
                   {!isUser && (
                     <button
                       type="button"
@@ -767,7 +812,7 @@ export default function PNAShellPage() {
           value={input}
           onChange={e => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder={`Message ${currentMode.label}…`}
+          placeholder={activeMode === "vision" ? "Describe private cover art…" : `Message ${currentMode.label}…`}
           rows={1}
           className="flex-1 bg-transparent outline-none resize-none"
           style={{

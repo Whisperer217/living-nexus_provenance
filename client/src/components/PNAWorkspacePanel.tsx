@@ -10,6 +10,7 @@ import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useLocation } from "wouter";
 import { toast } from "sonner";
+import { PNAVisualProposalCard, type PNAVisualProposal } from "@/components/PNAVisualProposalCard";
 import {
   X, Send, Loader2, ChevronDown, ChevronRight,
   Zap, Eye, Layers, Archive, Sparkles, BookOpen,
@@ -114,6 +115,7 @@ interface Message {
   mode: PNAMode;
   timestamp: Date;
   provenanceAction?: "register" | "save_session" | "save_note";
+  visualProposal?: PNAVisualProposal;
 }
 
 // ─── Provenance Output Actions ────────────────────────────────────────────────
@@ -166,9 +168,11 @@ function ProvenanceActions({ content, mode, onAction }: {
 
 // ─── Message Bubble ───────────────────────────────────────────────────────────
 
-function MessageBubble({ msg, onProvenance }: {
+function MessageBubble({ msg, onProvenance, onSaveVisual, isSavingVisual }: {
   msg: Message;
   onProvenance: (type: "register" | "save_session" | "save_note", content: string) => void;
+  onSaveVisual: (messageId: string) => void;
+  isSavingVisual: boolean;
 }) {
   const modeConfig = PNA_MODES.find(m => m.id === msg.mode) ?? PNA_MODES[0];
   const isUser = msg.role === "user";
@@ -214,6 +218,13 @@ function MessageBubble({ msg, onProvenance }: {
             {msg.content}
           </p>
         </div>
+        {msg.visualProposal && (
+          <PNAVisualProposalCard
+            proposal={msg.visualProposal}
+            isSaving={isSavingVisual}
+            onSave={() => onSaveVisual(msg.id)}
+          />
+        )}
         {!isUser && (
           <ProvenanceActions
             content={msg.content}
@@ -248,6 +259,9 @@ export default function PNAWorkspacePanel({ open, onClose }: PNAWorkspacePanelPr
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const chatMutation = trpc.keeper.chat.useMutation();
+  const generateArtwork = trpc.keeper.generateArtwork.useMutation();
+  const saveQuiverAsset = trpc.quiver.save.useMutation();
+  const utils = trpc.useUtils();
   const saveNoteMutation = trpc.keeper.saveNote.useMutation({
     onSuccess: () => toast.success("Saved to Keeper notes."),
     onError: () => toast.error("Failed to save note."),
@@ -293,6 +307,18 @@ export default function PNAWorkspacePanel({ open, onClose }: PNAWorkspacePanelPr
     setIsLoading(true);
 
     try {
+      if (activeMode === "vision") {
+        const visual = await generateArtwork.mutateAsync({ prompt: text });
+        setMessages(prev => [...prev, {
+          id: `p-visual-${Date.now()}`,
+          role: "pna",
+          content: "A private cover-art proposal is ready. Review it below; it will not enter Quiver until you choose to save it.",
+          mode: "vision",
+          timestamp: new Date(),
+          visualProposal: { url: visual.url, prompt: text },
+        }]);
+        return;
+      }
       const result = await chatMutation.mutateAsync({
         message: text,
         persona: currentMode.backendPersona,
@@ -312,7 +338,27 @@ export default function PNAWorkspacePanel({ open, onClose }: PNAWorkspacePanelPr
     } finally {
       setIsLoading(false);
     }
-  }, [input, isLoading, activeMode, currentMode, messages, chatMutation]);
+  }, [input, isLoading, activeMode, currentMode, messages, chatMutation, generateArtwork]);
+
+  const handleSaveVisualProposal = useCallback(async (messageId: string) => {
+    const message = messages.find(candidate => candidate.id === messageId);
+    const proposal = message?.visualProposal;
+    if (!proposal || proposal.savedQuiverId || saveQuiverAsset.isPending) return;
+    try {
+      const saved = await saveQuiverAsset.mutateAsync({
+        url: proposal.url,
+        prompt: proposal.prompt,
+        title: "PNA visual proposal",
+      });
+      setMessages(previous => previous.map(candidate => candidate.id === messageId && candidate.visualProposal
+        ? { ...candidate, visualProposal: { ...candidate.visualProposal, savedQuiverId: saved.id } }
+        : candidate));
+      await utils.quiver.list.invalidate();
+      toast.success("Saved privately to Quiver.");
+    } catch (error: any) {
+      toast.error(error.message ?? "Could not save this visual to Quiver.");
+    }
+  }, [messages, saveQuiverAsset, utils]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -507,9 +553,12 @@ export default function PNAWorkspacePanel({ open, onClose }: PNAWorkspacePanelPr
                   { label: "Build arrangement", icon: Music },
                   { label: "Write testimony", icon: BookOpen },
                 ].map(s => (
-                  <button
-                    key={s.label}
-                    onClick={() => setInput(s.label)}
+	                  <button
+	                    key={s.label}
+	                    onClick={() => {
+	                      if (s.label === "Generate artwork") setActiveMode("vision");
+	                      setInput(s.label === "Generate artwork" ? "" : s.label);
+	                    }}
                     className="flex items-center gap-1.5 px-2.5 py-2 rounded-lg text-left transition-all hover:opacity-80"
                     style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}
                   >
@@ -532,7 +581,13 @@ export default function PNAWorkspacePanel({ open, onClose }: PNAWorkspacePanelPr
           ) : (
             <>
               {messages.map(msg => (
-                <MessageBubble key={msg.id} msg={msg} onProvenance={handleProvenance} />
+                <MessageBubble
+                  key={msg.id}
+                  msg={msg}
+                  onProvenance={handleProvenance}
+                  onSaveVisual={handleSaveVisualProposal}
+                  isSavingVisual={saveQuiverAsset.isPending}
+                />
               ))}
               {isLoading && (
                 <div className="flex items-center gap-2 mb-3">
@@ -579,7 +634,7 @@ export default function PNAWorkspacePanel({ open, onClose }: PNAWorkspacePanelPr
                 value={input}
                 onChange={e => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder={`Ask your ${currentMode.displayLabel}...`}
+                placeholder={activeMode === "vision" ? "Describe private cover art..." : `Ask your ${currentMode.displayLabel}...`}
                 rows={1}
                 className="flex-1 bg-transparent outline-none resize-none"
                 style={{
