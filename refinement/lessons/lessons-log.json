@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-08-14T15:18:00.000Z",
-  "totalLessons": 13,
+  "lastUpdated": "2026-08-15T23:00:00.000Z",
+  "totalLessons": 14,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -250,6 +250,28 @@
         "mobile",
         "safe-area",
         "cinematic-splash"
+      ]
+    },
+    {
+      "id": "LESSON-014",
+      "date": "2026-08-15",
+      "category": "creator_experience",
+      "problem": "Draft and Publish registration could fail with `Cannot read properties of undefined (reading 'charCodeAt')` when an incomplete or restored tone profile supplied a missing accent string while the client assembled its harmonic signature.",
+      "solution": "Centralized harmonic-signature construction in the shared Loop registration contract. The helper preserves valid deterministic accents, supplies explicit three-slot fallbacks for incomplete legacy data, and prevents malformed display metadata from blocking creator-owned Draft or Publish actions.",
+      "files": [
+        "shared/loopRegistration.ts",
+        "client/src/pages/manifestation-studio/environments/MusicEnvironment.tsx",
+        "server/tests/loopRegistrationHarmonicSignature.test.ts"
+      ],
+      "score": 0,
+      "tags": [
+        "registration",
+        "draft",
+        "publish",
+        "tone-profile",
+        "normalization",
+        "charCodeAt",
+        "creator-experience"
       ]
     },
     {

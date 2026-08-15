@@ -81,6 +81,21 @@ export function deriveToneFromMetadata(input: {
   };
 }
 
+/**
+ * Convert a tone profile's decorative color accents into the numeric signature
+ * expected by the registration contract. Older or partially restored profiles
+ * may not contain all three strings; preserve the three-slot signature without
+ * allowing a missing value to break a Draft or Publish submission.
+ */
+export function harmonicSignatureFromAccents(accents: unknown): number[] {
+  const source = Array.isArray(accents) ? accents : [];
+  return [0, 1, 2].map((index) => {
+    const accent = typeof source[index] === "string" ? source[index] : "";
+    const accentOffset = accent.length > 1 ? accent.charCodeAt(1) % 40 : 0;
+    return 110 + index * 55 + accentOffset;
+  });
+}
+
 function accentsFromSeed(seed: string): string[] {
   let h = 0;
   for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
