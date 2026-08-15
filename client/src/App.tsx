@@ -136,6 +136,7 @@ const NewManifestationPage = lazy(() => import("./pages/NewManifestationPage"));
 const ManifestationWorkspacePage = lazy(() => import("./pages/ManifestationWorkspacePage"));
 const SessionsListPage = lazy(() => import("./pages/SessionsListPage"));
 const SharedPlaylistPage = lazy(() => import("./pages/SharedPlaylistPage"));
+const SpatialRegistryMockPage = lazy(() => import("./pages/SpatialRegistryMockPage"));
 // UploadVNextPage removed — replaced by ProvenanceUploadEngine (persistent panel)
 
 // Minimal fallback shown while a page chunk loads (typically <200ms on CDN)
@@ -270,6 +271,7 @@ function Router() {
         <Route path="/verify" component={VerifyPage} />
         <Route path="/verify/:witnessId" component={VerifyPage} />
         <Route path="/download" component={DownloadPage} />
+        <Route path="/prototype/spatial-registry" component={SpatialRegistryMockPage} />
         {/* DIAGNOSTIC — Strip to Bone: zero nav infrastructure, raw React only */}
         <Route path="/diag/strip-to-bone" component={StripToBone} />
 
@@ -405,7 +407,10 @@ function Router() {
 }
 
 export default function App() {
-  const [splashDone, setSplashDone] = useState(() => !shouldShowSplash());
+  const isSpatialRegistryMock = typeof window !== "undefined" && window.location.pathname === "/prototype/spatial-registry";
+  const [splashDone, setSplashDone] = useState(() => {
+    return isSpatialRegistryMock || !shouldShowSplash();
+  });
 
   if (!splashDone) {
     return (
@@ -421,9 +426,9 @@ export default function App() {
         <HarmonicProvider>
           <AmbientPlayerProvider>
           <QueueLoader />
-          <WhatsNewModal />
-          <TosAcceptanceModal />
-          <WelcomeModal />
+          {!isSpatialRegistryMock && <WhatsNewModal />}
+          {!isSpatialRegistryMock && <TosAcceptanceModal />}
+          {!isSpatialRegistryMock && <WelcomeModal />}
           <CommunityToastProvider />
           <Toaster
             theme="dark"
@@ -443,9 +448,9 @@ export default function App() {
           <ScrollRestorationManager />
           <QrScanLogger />
           {/* PNA stewarded: Keeper Avatar on /pna · /keeper · /avatar-registry (and pna subdomain) — not Loop chrome */}
-          <KeeperAvatarWidget />
-          <ProvenanceUploadEngine />
-          <PWAInstallBanner />
+          {!isSpatialRegistryMock && <KeeperAvatarWidget />}
+          {!isSpatialRegistryMock && <ProvenanceUploadEngine />}
+          {!isSpatialRegistryMock && <PWAInstallBanner />}
           <Router />
           </AmbientPlayerProvider>
         </HarmonicProvider>
