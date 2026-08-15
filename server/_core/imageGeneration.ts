@@ -35,6 +35,8 @@ export type GenerateImageResponse = {
 
 /** The stable creator-facing default for PNA visual proposals. */
 export const PRIMARY_IMAGE_MODEL = "MODEL_GPT_IMAGE_2";
+/** A creator-facing image request must fail visibly rather than strand PNA in a loading state. */
+export const IMAGE_GENERATION_TIMEOUT_MS = 45_000;
 
 export async function generateImage(
   options: GenerateImageOptions
@@ -55,20 +57,33 @@ export async function generateImage(
     baseUrl
   ).toString();
 
-  const response = await fetch(fullUrl, {
-    method: "POST",
-    headers: {
-      accept: "application/json",
-      "content-type": "application/json",
-      "connect-protocol-version": "1",
-      authorization: `Bearer ${ENV.forgeApiKey}`,
-    },
-    body: JSON.stringify({
-      prompt: options.prompt,
-      model: options.model,
-      original_images: options.originalImages || [],
-    }),
-  });
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), IMAGE_GENERATION_TIMEOUT_MS);
+  let response: Response;
+  try {
+    response = await fetch(fullUrl, {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "content-type": "application/json",
+        "connect-protocol-version": "1",
+        authorization: `Bearer ${ENV.forgeApiKey}`,
+      },
+      body: JSON.stringify({
+        prompt: options.prompt,
+        model: options.model,
+        original_images: options.originalImages || [],
+      }),
+      signal: controller.signal,
+    });
+  } catch (error) {
+    if (controller.signal.aborted) {
+      throw new Error(`Image generation timed out after ${IMAGE_GENERATION_TIMEOUT_MS / 1000} seconds`);
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeout);
+  }
 
   if (!response.ok) {
     const detail = await response.text().catch(() => "");
