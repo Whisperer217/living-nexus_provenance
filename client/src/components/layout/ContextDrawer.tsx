@@ -286,18 +286,19 @@ export default function ContextDrawer({
         }}
       />
 
-      {/* Drawer panel — desktop only */}
+      {/* Drawer panel — visibility is open-state only (transform + pointer-events). Never display:none. */}
       <div
         role="dialog"
-        aria-modal="true"
+        aria-modal={open}
+        aria-hidden={!open}
         aria-label={panel ? `${panel.title} navigation` : "Navigation"}
-        className="hidden lg:flex flex-col"
+        className="flex flex-col"
         style={{
           position: "fixed",
           top: 0,
           left: 72,
           bottom: 0,
-          width: 300,
+          width: "min(300px, calc(100vw - 72px))",
           zIndex: 300,
           background: "rgba(0,0,0,0.99)",
           borderRight: "1px solid rgba(196,154,40,0.14)",

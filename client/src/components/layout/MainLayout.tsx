@@ -93,11 +93,15 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const openMobileMenu = useCallback(() => setMobileMenuOpen(true), []);
-  const closeMobileMenu = useCallback(() => setMobileMenuOpen(false), []);
+  const closeMobileMenu = useCallback(() => {
+    setMobileMenuOpen(false);
+    setDrawerOpen(false);
+  }, []);
 
-  // Close mobile menu on route change
+  // Close mobile rail + drawer on route change
   useEffect(() => {
     setMobileMenuOpen(false);
+    setDrawerOpen(false);
   }, [location]);
 
   // ── What's New modal ───────────────────────────────────────────────
@@ -163,7 +167,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         archiveSongCount={archiveSongCount}
       />
 
-      {/* ── ContextDrawer — desktop only ── */}
+      {/* ── ContextDrawer — open-state only (all breakpoints) ── */}
       <ContextDrawer
         open={drawerOpen}
         activeMode={activeMode}
