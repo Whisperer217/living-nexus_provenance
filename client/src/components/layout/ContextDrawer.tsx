@@ -25,6 +25,8 @@ import {
   Layers, Plus, GitBranch,
 } from "lucide-react";
 import { PLATFORM_VERSION } from "@/platformVersion";
+import { usePlayer } from "@/contexts/PlayerContext";
+import { provenanceFromWid } from "@shared/provenanceWorkingState";
 
 // ── Types ─────────────────────────────────────────────────────────
 
@@ -201,6 +203,10 @@ export default function ContextDrawer({
 }: ContextDrawerProps) {
   const [location, navigate] = useLocation();
   const { user, logout } = useAuth();
+  const { state: playerState } = usePlayer();
+  const boundTrack = playerState.currentIdx >= 0 ? playerState.tracks[playerState.currentIdx] : null;
+  const boundWid = boundTrack?.witnessId?.trim() || null;
+  const boundProvenance = boundTrack ? provenanceFromWid(boundWid) : "idle";
 
   const persistDesktopSidebar = () =>
     typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches;
@@ -396,6 +402,42 @@ export default function ContextDrawer({
                 );
               })}
             </div>
+
+            {boundTrack && (
+              <div
+                className="flex-shrink-0 mx-3 mb-2 px-3 py-2.5 rounded-xl"
+                data-bound-work="true"
+                data-provenance-state={boundProvenance}
+                style={{
+                  border: "1px solid rgba(212,175,55,0.18)",
+                  background: "rgba(212,175,55,0.05)",
+                }}
+              >
+                <div style={{ fontSize: 9, letterSpacing: "0.16em", color: "rgba(212,175,55,0.55)", fontFamily: "'Space Mono', monospace" }}>
+                  BOUND WORK
+                </div>
+                <div className="truncate mt-1" style={{ fontSize: 13, color: "rgba(212,175,55,0.95)" }}>
+                  {boundTrack.title}
+                </div>
+                <div className="truncate" style={{ fontSize: 11, color: "color-mix(in srgb, var(--ln-parchment) 45%, transparent)" }}>
+                  {boundTrack.artist || "Unknown"}
+                </div>
+                {boundProvenance === "sealed" && boundWid ? (
+                  <button
+                    type="button"
+                    onClick={() => navigate(`/verify/${encodeURIComponent(boundWid)}`)}
+                    className="mt-1.5 text-left"
+                    style={{ fontSize: 10, color: "rgba(212,175,55,0.85)", fontFamily: "'Space Mono', monospace" }}
+                  >
+                    Sealed · {boundWid} · Verify
+                  </button>
+                ) : (
+                  <div style={{ fontSize: 10, color: "color-mix(in srgb, var(--ln-parchment) 40%, transparent)", marginTop: 6, lineHeight: 1.45 }}>
+                    Unsealed — this hearing has no WID. Register to give it a record. Do not invent lineage here.
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Footer — What's New + sign-in prompt for guests */}
             <div

@@ -15,6 +15,7 @@ import { adminProcedure, protectedProcedure, publicProcedure, router } from "../
 import { storagePut } from "../utils/storage";
 import { micronize } from "../services/imageProcessing";
 import { invokeLLM } from "../_core/llm";
+import { formatWorkingStateForAgent } from "@shared/provenanceWorkingState";
 import {
   addComment, createSong, deleteSong, getAllCreators,
   getCommentsBySong, getPublicSongs, getSongById,
@@ -295,6 +296,20 @@ export const keeperRouter = router({
           provenanceDepth: z.number().min(0).max(100),
           corpusSize: z.number().min(0).max(1000),
         }).optional(),
+        workingState: z.object({
+          version: z.literal(1),
+          route: z.string().max(256),
+          navMode: z.enum(["home", "explore", "upload", "manage", "archive"]).nullable(),
+          pnaMode: z.string().max(32).nullable().optional(),
+          playback: z.object({
+            playing: z.boolean(),
+            title: z.string().max(256).nullable(),
+            artist: z.string().max(256).nullable(),
+            trackId: z.string().max(64).nullable(),
+            wid: z.string().max(128).nullable(),
+            provenance: z.enum(["idle", "unsealed", "sealed"]),
+          }),
+        }).optional(),
       }))
       .mutation(async ({ ctx, input }) => {
         // ── Persona system prompts — each with a distinct voice, strength, and depth ──
@@ -373,7 +388,10 @@ Never collapse multiple sections into a single block. Always label clearly.
           if (lines.length === 0) return '';
           return `\n--- CREATOR IDENTITY PROFILE ---\n${lines.join('\n')}\n--- END CREATOR PROFILE ---`;
         })() : '';
-        const systemPrompt = PERSONA_PROMPTS[input.persona] + profileBlock + attrBlock + lyricsFormatInstruction;
+        const workingStateBlock = input.workingState
+          ? `\n${formatWorkingStateForAgent(input.workingState)}`
+          : '';
+        const systemPrompt = PERSONA_PROMPTS[input.persona] + profileBlock + attrBlock + lyricsFormatInstruction + workingStateBlock;
 
         // Build message array — history first, then current turn
         const historyMessages = (input.history ?? []).map(h => ({

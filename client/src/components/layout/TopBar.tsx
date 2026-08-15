@@ -141,10 +141,10 @@ function InlinePlayer() {
 
       {/* Title + Artist — hidden when on the track's own detail page */}
       {!isOnThisTrackPage && (
+      <div className="flex flex-col text-left shrink-0 min-w-0" style={{ width: 140 }}>
       <button
         onClick={expand}
-        className="flex flex-col text-left shrink-0 min-w-0"
-        style={{ width: 140 }}
+        className="flex flex-col text-left min-w-0"
         aria-label="Expand player"
       >
         <span
@@ -160,6 +160,24 @@ function InlinePlayer() {
           {track.artist}
         </span>
       </button>
+        {track.witnessId ? (
+          <a
+            href={`/verify/${encodeURIComponent(track.witnessId)}`}
+            className="truncate text-[9px] leading-tight mt-0.5 no-underline"
+            style={{ color: "var(--ln-gold)", fontFamily: "'Space Mono', monospace", letterSpacing: "0.06em", maxWidth: 140 }}
+            title={`Sealed provenance · ${track.witnessId}`}
+          >
+            Sealed · {track.witnessId}
+          </a>
+        ) : (
+          <span
+            className="truncate text-[9px] leading-tight mt-0.5"
+            style={{ color: "var(--ln-smoke)", fontFamily: "'Space Mono', monospace", letterSpacing: "0.06em", maxWidth: 140 }}
+          >
+            Unsealed · no WID
+          </span>
+        )}
+      </div>
       )}
 
       {/* Time + Seek bar + Time */}

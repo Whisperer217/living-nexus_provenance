@@ -33,6 +33,7 @@ import {
   type NexusContextRef,
   type NexusContextSuggestion,
 } from "@/lib/nexusContext";
+import { collectProvenanceWorkingState } from "@shared/provenanceWorkingState";
 
 // ─── Stewardship modes ────────────────────────────────────────────────────────
 
@@ -377,6 +378,14 @@ export default function PNAShellPage() {
           role: m.role === "user" ? "user" as const : "assistant" as const,
           content: m.content,
         })),
+        workingState: collectProvenanceWorkingState({
+          route: "/pna",
+          pnaMode: activeMode,
+          playing: playerState.isPlaying,
+          track: nowPlaying
+            ? { title: nowPlaying.title, artist: nowPlaying.artist, id: nowPlaying.id, wid: nowPlaying.wid }
+            : null,
+        }),
       });
       const replyText = typeof result.reply === "string" ? result.reply : (result.reply as any)?.[0]?.text ?? "";
       setMessages(prev => [...prev, {
@@ -391,7 +400,7 @@ export default function PNAShellPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [input, isLoading, activeMode, currentMode, messages, chatMutation, generateArtwork, user]);
+  }, [input, isLoading, activeMode, currentMode, messages, chatMutation, generateArtwork, user, nowPlaying, playerState.isPlaying]);
 
   const handleSaveVisualProposal = useCallback(async (messageId: string) => {
     const message = messages.find(candidate => candidate.id === messageId);
@@ -492,6 +501,7 @@ export default function PNAShellPage() {
       <div className="min-w-0 flex-1">
         <div style={{ fontSize: "0.4rem", color: "rgba(196,154,40,0.6)", letterSpacing: "0.12em", fontFamily: "'Space Mono', monospace" }}>
           {playerState.isPlaying ? "NOW PLAYING · BOUND TO THREAD" : nowPlaying ? "PAUSED · BOUND TO THREAD" : "MUSIC · PLAY A TRACK TO BIND"}
+          {nowPlaying?.wid ? ` · SEALED ${nowPlaying.wid}` : nowPlaying ? " · UNSEALED" : ""}
         </div>
         <div className="truncate" style={{ fontFamily: "'Cinzel', serif", fontSize: "0.78rem", color: INK }}>
           {nowPlaying?.title ?? "No track loaded"}
