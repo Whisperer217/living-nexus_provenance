@@ -54,7 +54,7 @@ CAPABILITIES  BRIDGES  CONTINUITY
 | **Instrument** | Concrete mechanism that fulfills a capability (local model call, file transform, registry API). |
 | **Bridge** | Provenance-crossing connector to an external system or off-platform reasoning engine. |
 | **Commission** | Creator (or admin) direction that starts an authorized run of agency. |
-| **Exchange** | Conversational turn sequence (chat). Working state, not Domain Continuity. |
+| **Exchange** | Conversational turn sequence (chat). Working state, not Domain Continuity. Player, drawer, route, and sealed/unsealed provenance may be attached as Working State (ADR-027). The agent must not invent a WID or lineage. Witness mode must not decorate, perform, or extract; it holds the creator's own sacred weight and never borrows another creator's images as a generic voice. |
 | **Domain Continuity** | Creator’s attributable knowledge across agents, models, and time. Never called “AI memory.” Recorded continuity truths obey Law V: they cannot be erased — only access-restricted or superseded. |
 | **Knowledge Record** | Provenance-bearing unit of knowledge (originated / witnessed / derived / external / unverified). |
 | **Agent Ledger** | Append-only record of consequential agent actions. |

@@ -201,10 +201,12 @@ Guides level through **platform signals**, not XP theatre inside Register:
 
 Agentic mechanics are **not** a bolted chatbot product. They operate inside the **Creator Domain** under granted authority.
 
-**Authority document:** `docs/AUTHORIZED_AGENT_DOCTRINE.md`
+**Authority document:** `docs/AUTHORIZED_AGENT_DOCTRINE.md`  
+**Working State:** `docs/ADR-027-PROVENANCE-WORKING-STATE.md`
 
 Frozen briefly:
 - Agent = authorized participant (replaceable); provenance / Domain Continuity is not
+- Player, drawer, route, and WID (or its absence) are **Working State** the agent may read — never invent
 - Capabilities (switchable) replace “skills”; Bridges replace connectors; local reasoning default; Manus = optional purchasable Reasoning Bridge
 - Consequential actions → Agent Ledger; seal/publish never silent
 - Admins: full platform charter **with identifier**, cannot rewrite origin

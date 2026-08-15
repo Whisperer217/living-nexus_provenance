@@ -13,11 +13,8 @@
    The backdrop is a dismissal surface only — it does not lock scroll,
    capture touch events globally, or manipulate the body in any way.
 ═══════════════════════════════════════════════════════════════════ */
-import { useLocation, useRouter } from "wouter";
-import { Home, Compass, Upload, Archive, ExternalLink, Shield, LayoutGrid } from "lucide-react";
-import { useAuth } from "@/_core/hooks/useAuth";
-import { getLoginUrl } from "@/const";
-import { useUploadEngine } from "@/contexts/UploadEngineContext";
+import { useLocation } from "wouter";
+import { Home, Compass, Upload, Archive, ExternalLink, LayoutGrid } from "lucide-react";
 import { LOOP_PRODUCT, DISCORD_COMMUNITY_URL } from "@/lib/loopProduct";
 import { DiscordGlyph } from "@/components/icons/DiscordGlyph";
 
@@ -60,9 +57,7 @@ export default function LeftRail({
   onMobileClose,
   archiveSongCount = 0,
 }: LeftRailProps) {
-  const [location, navigate] = useLocation();
-  const { user } = useAuth();
-  const { openEngine } = useUploadEngine();
+  const [location] = useLocation();
 
   const isRouteActive = (path: string) => {
     if (path === "/" && (location === "/" || location === "/home")) return true;
@@ -75,26 +70,19 @@ export default function LeftRail({
     onRailClick(mode);
   };
 
-  // Mobile: navigate directly, then close the sidebar
-  const handleMobileClick = (path: string, authRequired?: boolean) => {
-    if (authRequired && !user) {
-      window.location.href = getLoginUrl(path);
-      return;
-    }
-    // Upload item opens the engine instead of navigating
-    if (path === "/manifest") { openEngine(); onMobileClose?.(); return; }
-    navigate(path);
-    onMobileClose?.();
+  // Mobile: same as desktop — rail opens ContextDrawer; the drawer navigates.
+  const handleMobileClick = (mode: NavMode) => {
+    onRailClick(mode);
   };
 
   // ── Shared item renderer ──────────────────────────────────────────
   const renderItem = (
-    { id, icon: Icon, label, path, authRequired }: typeof RAIL_ITEMS[0],
+    { id, icon: Icon, label, path }: typeof RAIL_ITEMS[0],
     isMobile: boolean
   ) => {
     const routeActive = isRouteActive(path);
     const modeActive = activeMode === id;
-    const active = isMobile ? routeActive : ((drawerOpen && modeActive) || routeActive);
+    const active = (drawerOpen && modeActive) || routeActive;
 
     return (
       <button
@@ -102,7 +90,7 @@ export default function LeftRail({
         title={label}
         aria-label={label}
         onClick={isMobile
-          ? () => handleMobileClick(path, authRequired)
+          ? () => handleMobileClick(id)
           : (e) => handleDesktopClick(e as React.MouseEvent, id)
         }
         className="relative flex flex-col items-center justify-center gap-0.5 transition-all duration-150 rounded-xl"
@@ -170,7 +158,7 @@ export default function LeftRail({
       {/* Logo */}
       <button
         onClick={isMobile
-          ? () => handleMobileClick("/")
+          ? () => handleMobileClick("home")
           : (e) => handleDesktopClick(e as React.MouseEvent, activeMode ?? "home")
         }
         className="mb-3 flex items-center justify-center rounded-xl transition-all hover:bg-white/[0.04]"
@@ -259,13 +247,11 @@ export default function LeftRail({
       {/* ── DESKTOP RAIL (lg+): always visible, fixed 72px ── */}
       <aside
         data-rail="true"
-        className="hidden lg:flex flex-col items-center py-3 gap-1"
+        className="hidden lg:flex flex-col items-center py-3 gap-1 shrink-0"
         style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          bottom: 0,
+          position: "relative",
           width: 72,
+          height: "100%",
           background: "var(--ln-panel)",
           borderRight: "1px solid var(--ln-panel-border)",
           zIndex: 310,
@@ -307,7 +293,7 @@ export default function LeftRail({
           width: 72,
           background: "var(--ln-panel)",
           borderRight: "1px solid var(--ln-panel-border)",
-          zIndex: 300,
+          zIndex: 310,
           overflowY: "auto",
           overflowX: "hidden",
           // Off-canvas transform — the ONLY mechanism for show/hide
