@@ -1769,6 +1769,41 @@ export const keeperChatArchives = mysqlTable("keeper_chat_archives", {
 export type KeeperChatArchive = typeof keeperChatArchives.$inferSelect;
 export type InsertKeeperChatArchive = typeof keeperChatArchives.$inferInsert;
 
+// ─── PNA Working Threads ─────────────────────────────────────────────────────
+// Mutable, creator-private workspace continuity. These are deliberately distinct
+// from keeperChatArchives: archives can be sealed as WID-CNV; working threads
+// remain exchange context and never create provenance by themselves.
+export const pnaThreads = mysqlTable("pna_threads", {
+  id: varchar("id", { length: 64 }).primaryKey(),
+  userId: int("user_id").notNull(),
+  title: varchar("title", { length: 200 }).notNull(),
+  activeMode: varchar("active_mode", { length: 32 }).notNull().default("guide"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
+}, (t) => ({
+  userUpdatedIdx: index("pna_threads_user_updated_idx").on(t.userId, t.updatedAt),
+}));
+export type PnaThread = typeof pnaThreads.$inferSelect;
+export type InsertPnaThread = typeof pnaThreads.$inferInsert;
+
+export const pnaThreadMessages = mysqlTable("pna_thread_messages", {
+  id: varchar("id", { length: 64 }).primaryKey(),
+  threadId: varchar("thread_id", { length: 64 }).notNull(),
+  userId: int("user_id").notNull(),
+  position: int("position").notNull(),
+  role: mysqlEnum("role", ["user", "pna"]).notNull(),
+  content: text("content").notNull(),
+  mode: varchar("mode", { length: 32 }).notNull().default("guide"),
+  // Creator-private proposal state only; this never becomes a WID or public asset.
+  visualProposalJson: json("visual_proposal_json"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (t) => ({
+  threadPositionIdx: index("pna_thread_messages_thread_position_idx").on(t.threadId, t.position),
+  userIdx: index("pna_thread_messages_user_idx").on(t.userId),
+}));
+export type PnaThreadMessage = typeof pnaThreadMessages.$inferSelect;
+export type InsertPnaThreadMessage = typeof pnaThreadMessages.$inferInsert;
+
 // ─── User Collections (Curation Folders) ─────────────────────────────────────
 // User-created named curation folders (distinct from Album WID `collections`).
 // These are the personal playlists/folders shown in the LIKED drawer BUILD tab

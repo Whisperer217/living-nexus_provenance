@@ -10,20 +10,21 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { useLocation } from "wouter";
+import { useLocation, useSearch } from "wouter";
 import { toast } from "sonner";
 import {
   Zap, Eye, Layers, Archive, Sparkles, Search, Music, FileText,
   Image, Shield, Upload, BookOpen, Settings, LogOut,
   ChevronRight, Send, Loader2, ExternalLink, Save, Film, BookMarked,
   Play, Pause, SkipBack, SkipForward, PanelRightOpen, PanelRightClose,
-  Maximize2, Minimize2, GripVertical,
+  Maximize2, Minimize2, GripVertical, Plus,
 } from "lucide-react";
 import { getLoginUrl } from "@/const";
 import { usePlayer } from "@/contexts/PlayerContext";
 import NexusAvatarViewer from "@/components/NexusAvatarViewer";
 import { NexusContextPanel } from "@/components/NexusContextPanel";
 import { PNAVisualProposalCard, type PNAVisualProposal } from "@/components/PNAVisualProposalCard";
+import { PNAQuiverWorkspace } from "@/components/PNAQuiverWorkspace";
 import { SKIN_IMAGES } from "@/components/FloatingAvatar";
 import { PNA_PRODUCT } from "@/lib/loopProduct";
 import { consumePnaDiaryReload } from "@/lib/pnaDiary";
@@ -126,6 +127,7 @@ function formatTime(sec: number) {
 export default function PNAShellPage() {
   const { user, loading: authLoading, logout } = useAuth();
   const [, navigate] = useLocation();
+  const search = useSearch();
   const {
     state: playerState,
     togglePlay,
@@ -148,6 +150,11 @@ export default function PNAShellPage() {
   const [popoutSize, setPopoutSize] = useState({ w: 440, h: 640 });
   const [contextRef, setContextRef] = useState<NexusContextRef | null>(null);
   const [contextSuggestion, setContextSuggestion] = useState<NexusContextSuggestion | null>(null);
+  const query = new URLSearchParams(search);
+  const routeThreadId = query.get("thread");
+  const showQuiver = query.get("view") === "quiver";
+  const [threadId, setThreadId] = useState<string | null>(routeThreadId);
+  const [threadHydrated, setThreadHydrated] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -171,6 +178,10 @@ export default function PNAShellPage() {
   const utils = trpc.useUtils();
   const generateArtwork = trpc.keeper.generateArtwork.useMutation();
   const saveQuiverAsset = trpc.quiver.save.useMutation();
+  const createThread = trpc.pnaThread.create.useMutation();
+  const appendThreadMessage = trpc.pnaThread.append.useMutation();
+  const setThreadVisual = trpc.pnaThread.setVisualProposal.useMutation();
+  const threadQuery = trpc.pnaThread.get.useQuery({ id: threadId ?? "" }, { enabled: Boolean(user && threadId) });
   const setActiveSkin = trpc.keeper.setActiveSkin.useMutation({
     onSuccess: () => {
       utils.keeper.getProfile.invalidate();
@@ -195,6 +206,25 @@ export default function PNAShellPage() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  useEffect(() => {
+    setThreadId(routeThreadId);
+    setThreadHydrated(false);
+  }, [routeThreadId]);
+
+  useEffect(() => {
+    if (!threadQuery.data || threadHydrated) return;
+    setMessages(threadQuery.data.messages.map((message: any) => ({
+      id: message.id,
+      role: message.role === "user" ? "user" as const : "pna" as const,
+      content: message.content,
+      mode: message.mode as PNAMode,
+      timestamp: new Date(message.createdAt),
+      visualProposal: message.visualProposalJson as PNAVisualProposal | undefined,
+    })));
+    setActiveMode(threadQuery.data.thread.activeMode as PNAMode);
+    setThreadHydrated(true);
+  }, [threadQuery.data, threadHydrated]);
 
   useEffect(() => {
     const payload = consumePnaDiaryReload();
@@ -355,6 +385,20 @@ export default function PNAShellPage() {
     if (saved?.id) await sealArchive.mutateAsync({ id: saved.id });
   };
 
+  const openThread = useCallback((id: string) => {
+    setThreadHydrated(false);
+    navigate(`/pna?thread=${encodeURIComponent(id)}`);
+  }, [navigate]);
+
+  const startThread = useCallback(async (mode: PNAMode = activeMode) => {
+    const created = await createThread.mutateAsync({ activeMode: mode });
+    setMessages([]);
+    openThread(created.id);
+    return created.id;
+  }, [activeMode, createThread, openThread]);
+
+  const ensureThread = useCallback(async (mode: PNAMode) => threadId ?? startThread(mode), [threadId, startThread]);
+
   const handleSend = useCallback(async () => {
     const text = input.trim();
     if (!text || isLoading || !user) return;
@@ -363,18 +407,21 @@ export default function PNAShellPage() {
       return;
     }
 
-    const userMsg: Message = { id: `u-${Date.now()}`, role: "user", content: text, mode: activeMode, timestamp: new Date() };
-    setMessages(prev => [...prev, userMsg]);
     setInput("");
     setIsLoading(true);
 
     try {
+      const activeThreadId = await ensureThread(activeMode);
+      const persistedUser = await appendThreadMessage.mutateAsync({ threadId: activeThreadId, role: "user", content: text, mode: activeMode });
+      setMessages(prev => [...prev, { id: persistedUser.id, role: "user", content: text, mode: activeMode, timestamp: new Date() }]);
       if (activeMode === "vision") {
         const visual = await generateArtwork.mutateAsync({ prompt: text });
+        const content = "A private cover-art proposal is ready. Review it below; it will not enter Quiver until you choose to save it.";
+        const persistedPna = await appendThreadMessage.mutateAsync({ threadId: activeThreadId, role: "pna", content, mode: "vision", visualProposal: { url: visual.url, prompt: text } });
         setMessages(prev => [...prev, {
-          id: `p-visual-${Date.now()}`,
+          id: persistedPna.id,
           role: "pna",
-          content: "A private cover-art proposal is ready. Review it below; it will not enter Quiver until you choose to save it.",
+          content,
           mode: "vision",
           timestamp: new Date(),
           visualProposal: { url: visual.url, prompt: text },
@@ -390,8 +437,9 @@ export default function PNAShellPage() {
         })),
       });
       const replyText = typeof result.reply === "string" ? result.reply : (result.reply as any)?.[0]?.text ?? "";
+      const persistedPna = await appendThreadMessage.mutateAsync({ threadId: activeThreadId, role: "pna", content: replyText, mode: activeMode });
       setMessages(prev => [...prev, {
-        id: `p-${Date.now()}`,
+        id: persistedPna.id,
         role: "pna",
         content: replyText,
         mode: activeMode,
@@ -402,7 +450,7 @@ export default function PNAShellPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [input, isLoading, activeMode, currentMode, messages, chatMutation, generateArtwork, user]);
+  }, [input, isLoading, activeMode, currentMode, messages, chatMutation, generateArtwork, user, ensureThread, appendThreadMessage]);
 
   const handleSaveVisualProposal = useCallback(async (messageId: string) => {
     const message = messages.find(candidate => candidate.id === messageId);
@@ -418,12 +466,13 @@ export default function PNAShellPage() {
       setMessages(previous => previous.map(candidate => candidate.id === messageId && candidate.visualProposal
         ? { ...candidate, visualProposal: { ...candidate.visualProposal, savedQuiverId: saved.id } }
         : candidate));
+      if (threadId) await setThreadVisual.mutateAsync({ threadId, messageId, visualProposal: { ...proposal, savedQuiverId: saved.id } });
       await utils.quiver.list.invalidate();
       toast.success("Saved privately to Quiver.");
     } catch (error: any) {
       toast.error(error.message ?? "Could not save this visual to Quiver.");
     }
-  }, [messages, saveQuiverAsset, utils]);
+  }, [messages, saveQuiverAsset, utils, threadId, setThreadVisual]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); }
@@ -471,6 +520,14 @@ export default function PNAShellPage() {
         <a href="https://livingnexus.org" style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.45rem", color: "rgba(255,255,255,0.25)", textDecoration: "none" }}>
           ← Back to Living Nexus
         </a>
+      </div>
+    );
+  }
+
+  if (showQuiver) {
+    return (
+      <div className="min-h-screen" style={{ background: "var(--ln-void)" }}>
+        <PNAQuiverWorkspace onBack={() => navigate(threadId ? `/pna?thread=${encodeURIComponent(threadId)}` : "/pna")} />
       </div>
     );
   }
@@ -564,6 +621,25 @@ export default function PNAShellPage() {
         </div>
       </div>
       <div className="flex items-center gap-1.5 flex-shrink-0">
+        <button
+          type="button"
+          onClick={() => startThread()}
+          disabled={createThread.isPending}
+          className="px-2 py-1 rounded flex items-center gap-1 disabled:opacity-40"
+          style={{ fontSize: "0.4rem", color: INK_MUTED, border: `1px solid ${PANEL_BORDER}`, fontFamily: "'Space Mono', monospace" }}
+          title="Start a new private working thread"
+        >
+          <Plus size={10} /> NEW
+        </button>
+        <button
+          type="button"
+          onClick={() => navigate(threadId ? `/pna?view=quiver&thread=${encodeURIComponent(threadId)}` : "/pna?view=quiver")}
+          className="px-2 py-1 rounded flex items-center gap-1"
+          style={{ fontSize: "0.4rem", color: INK_MUTED, border: `1px solid ${PANEL_BORDER}`, fontFamily: "'Space Mono', monospace" }}
+          title="Open private Quiver"
+        >
+          <Image size={10} /> QUIVER
+        </button>
         <button
           type="button"
           onClick={openNowPlayingContext}
@@ -763,6 +839,7 @@ export default function PNAShellPage() {
                       proposal={msg.visualProposal}
                       isSaving={saveQuiverAsset.isPending}
                       onSave={() => handleSaveVisualProposal(msg.id)}
+                      onOpenQuiver={msg.visualProposal.savedQuiverId ? () => navigate(`/pna?view=quiver&thread=${encodeURIComponent(threadId ?? "")}`) : undefined}
                     />
                   )}
                   {!isUser && (

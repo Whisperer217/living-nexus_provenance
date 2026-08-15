@@ -70,6 +70,7 @@ import { workerRouter }  from "./worker";
 // ── Keeper / AI domain ────────────────────────────────────────────────────────
 import { keeperRouter }       from "./keeper";
 import { promptStudioRouter } from "./promptStudio";
+import { pnaThreadRouter }    from "./pnaThreads";
 
 // ── Collection Studio domain ────────────────────────────────────────────────
 import { collectionStudioRouter } from "./collectionStudio";
@@ -159,6 +160,7 @@ export const appRouter = router({
 
   // Keeper / AI domain
   keeper:       keeperRouter,
+  pnaThread:    pnaThreadRouter,
   promptStudio: promptStudioRouter,
 
   // Platform domain

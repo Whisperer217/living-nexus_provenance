@@ -1,4 +1,4 @@
-import { Check, Image, Loader2, Save } from "lucide-react";
+import { Check, ExternalLink, Image, Loader2, Save } from "lucide-react";
 
 export interface PNAVisualProposal {
   url: string;
@@ -10,13 +10,14 @@ interface PNAVisualProposalCardProps {
   proposal: PNAVisualProposal;
   isSaving?: boolean;
   onSave: () => void;
+  onOpenQuiver?: () => void;
 }
 
 /**
  * An unsaved PNA visual is deliberately a proposal, not a registry asset.
  * The creator must use the explicit save control before Quiver persistence.
  */
-export function PNAVisualProposalCard({ proposal, isSaving = false, onSave }: PNAVisualProposalCardProps) {
+export function PNAVisualProposalCard({ proposal, isSaving = false, onSave, onOpenQuiver }: PNAVisualProposalCardProps) {
   const isSaved = Boolean(proposal.savedQuiverId);
 
   return (
@@ -48,9 +49,9 @@ export function PNAVisualProposalCard({ proposal, isSaving = false, onSave }: PN
           {proposal.prompt}
         </p>
         {isSaved ? (
-          <div className="mt-3 flex items-center gap-1.5" style={{ color: "var(--ln-bone)", fontFamily: "var(--font-body)", fontSize: "0.75rem" }}>
-            <Check size={14} aria-hidden="true" />
-            Private asset preserved. Nothing has been attached, registered, or published.
+          <div className="mt-3 space-y-2">
+            <div className="flex items-center gap-1.5" style={{ color: "var(--ln-bone)", fontFamily: "var(--font-body)", fontSize: "0.75rem" }}><Check size={14} aria-hidden="true" />Private asset preserved. Nothing has been attached, registered, or published.</div>
+            {onOpenQuiver && <button type="button" onClick={onOpenQuiver} className="flex min-h-10 w-full items-center justify-center gap-2 rounded-lg px-3" style={{ border: "1px solid var(--ln-panel-border)", color: "var(--ln-gold)", fontFamily: "var(--font-display)", fontSize: "0.55rem" }}><ExternalLink size={13} />OPEN IN QUIVER</button>}
           </div>
         ) : (
           <button

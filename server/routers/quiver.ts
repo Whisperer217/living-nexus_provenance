@@ -257,6 +257,20 @@ export const quiverRouter = router({
         return rows;
       }),
 
+    /** Load one private image with the same owner boundary as the shelf. */
+    get: protectedProcedure
+      .input(z.object({ id: z.number().int().positive() }))
+      .query(async ({ ctx, input }) => {
+        const { quiverImages } = await import('../../drizzle/schema');
+        const { eq: eqOp, and: andOp } = await import('drizzle-orm');
+        const db = await getDb();
+        const [image] = await db.select().from(quiverImages).where(
+          andOp(eqOp(quiverImages.id, input.id), eqOp(quiverImages.userId, ctx.user.id))
+        ).limit(1);
+        if (!image) throw new TRPCError({ code: 'NOT_FOUND', message: 'Private Quiver asset not found.' });
+        return image;
+      }),
+
     /**
      * Delete a quiver image (owner only).
      */
@@ -317,5 +331,4 @@ export const quiverRouter = router({
         return { ok: true };
       }),
   });
-
 

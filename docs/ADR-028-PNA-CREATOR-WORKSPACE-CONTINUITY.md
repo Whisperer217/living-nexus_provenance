@@ -148,6 +148,8 @@ If a selected work is unsealed, the only permitted provenance display is **“Un
 
 The first implementation must add behavioral coverage for owner-only thread access, reload/resume, no cross-thread leakage, forked diary immutability, Quiver list/detail ownership, generated-asset thread reference, and no WID/publication side effect. It must validate desktop and narrow mobile PNA with the player visible, the Quiver shelf reachable, a safe back path to the thread, and no fixed-layer overlap.
 
+**Public-entry observation (2026-08-15):** desktop and 375px mobile checks of `/pna` reached the intentional unauthenticated splash gate. They did not expose owner-only thread or Quiver state and therefore do not substitute for the authenticated Slice A smoke listed above.
+
 Rollback removes the new routes and hides the new workspace navigation while retaining additive private records. It never deletes Quiver assets, thread records, archive records, or sealed evidence. Threads remain exportable as private working data even if the UI is temporarily withdrawn.
 
 ## References
