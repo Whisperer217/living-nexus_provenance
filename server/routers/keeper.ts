@@ -644,18 +644,26 @@ Never collapse multiple sections into a single block. Always label clearly.
         styleTags: z.array(z.string()).optional(),
       }))
       .mutation(async ({ ctx, input }) => {
-        const { generateImage } = await import('../_core/imageGeneration');
+        const { generateImage, PRIMARY_IMAGE_MODEL } = await import('../_core/imageGeneration');
         const fullPrompt = input.styleTags?.length
           ? `${input.prompt}. Style: ${input.styleTags.join(', ')}`
           : input.prompt;
-        const genResult = await generateImage({ prompt: fullPrompt });
-        if (!genResult?.url) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Image generation failed' });
-        // Re-upload to our S3 so it persists permanently
-        const imgRes = await fetch(genResult.url);
-        const imgBuf = new Uint8Array(await imgRes.arrayBuffer());
-        const key = `keeper-artwork/${ctx.user.id}/${Date.now()}.png`;
-        const { url } = await storagePut(key, imgBuf, 'image/png');
-        return { url };
+        try {
+          const genResult = await generateImage({ prompt: fullPrompt, model: PRIMARY_IMAGE_MODEL });
+          if (!genResult?.url) throw new Error('The image provider returned no image');
+          // Re-upload to creator-scoped storage. Quiver persistence remains a later, explicit action.
+          const imgRes = await fetch(genResult.url);
+          const imgBuf = new Uint8Array(await imgRes.arrayBuffer());
+          const key = `keeper-artwork/${ctx.user.id}/${Date.now()}.png`;
+          const { url } = await storagePut(key, imgBuf, 'image/png');
+          return { url };
+        } catch (error) {
+          console.error('[Keeper] PNA image proposal failed', error);
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'PNA image generation is temporarily unavailable. Nothing was saved to Quiver. Please retry.',
+          });
+        }
       }),
 
     /** Analyze an image with the Keeper's vision */

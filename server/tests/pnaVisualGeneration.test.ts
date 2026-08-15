@@ -1,7 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { TrpcContext } from "../_core/context";
 
-const imageService = vi.hoisted(() => ({ generateImage: vi.fn() }));
+const imageService = vi.hoisted(() => ({
+  generateImage: vi.fn(),
+  PRIMARY_IMAGE_MODEL: "MODEL_GPT_IMAGE_2",
+}));
 const storage = vi.hoisted(() => ({ storagePut: vi.fn() }));
 
 vi.mock("../_core/imageGeneration", () => imageService);
@@ -45,7 +48,10 @@ describe("PNA private visual generation", () => {
     const caller = appRouter.createCaller(contextFor(creator(42)));
     const result = await caller.keeper.generateArtwork({ prompt: "A gold and midnight-blue cover for a testimony song" });
 
-    expect(imageService.generateImage).toHaveBeenCalledWith({ prompt: "A gold and midnight-blue cover for a testimony song" });
+    expect(imageService.generateImage).toHaveBeenCalledWith({
+      prompt: "A gold and midnight-blue cover for a testimony song",
+      model: "MODEL_GPT_IMAGE_2",
+    });
     expect(storage.storagePut).toHaveBeenCalledWith(
       expect.stringMatching(/^keeper-artwork\/42\//),
       expect.any(Uint8Array),
@@ -58,6 +64,17 @@ describe("PNA private visual generation", () => {
     const caller = appRouter.createCaller(contextFor(null));
     await expect(caller.keeper.generateArtwork({ prompt: "Private cover art" })).rejects.toMatchObject({ code: "UNAUTHORIZED" });
     expect(imageService.generateImage).not.toHaveBeenCalled();
+  });
+
+  it("contains a provider failure without creating stored artwork or a Quiver asset", async () => {
+    imageService.generateImage.mockRejectedValueOnce(new Error("provider unavailable"));
+    const caller = appRouter.createCaller(contextFor(creator(42)));
+
+    await expect(caller.keeper.generateArtwork({ prompt: "Private cover art" })).rejects.toMatchObject({
+      code: "INTERNAL_SERVER_ERROR",
+      message: "PNA image generation is temporarily unavailable. Nothing was saved to Quiver. Please retry.",
+    });
+    expect(storage.storagePut).not.toHaveBeenCalled();
   });
 
   it("keeps Quiver persistence behind an explicit result-card confirmation", () => {

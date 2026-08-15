@@ -20,6 +20,8 @@ import { ENV } from "./env";
 
 export type GenerateImageOptions = {
   prompt: string;
+  /** Optional server-selected model identifier from the internal ImageService catalog. */
+  model?: string;
   originalImages?: Array<{
     url?: string;
     b64Json?: string;
@@ -30,6 +32,9 @@ export type GenerateImageOptions = {
 export type GenerateImageResponse = {
   url?: string;
 };
+
+/** The stable creator-facing default for PNA visual proposals. */
+export const PRIMARY_IMAGE_MODEL = "MODEL_GPT_IMAGE_2";
 
 export async function generateImage(
   options: GenerateImageOptions
@@ -60,6 +65,7 @@ export async function generateImage(
     },
     body: JSON.stringify({
       prompt: options.prompt,
+      model: options.model,
       original_images: options.originalImages || [],
     }),
   });
