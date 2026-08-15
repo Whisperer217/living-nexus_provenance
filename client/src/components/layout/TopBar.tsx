@@ -480,7 +480,7 @@ export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCoun
     ?? (isWarm ? "var(--ln-panel-border)" : "rgba(196,154,40,0.18)");
 
   return (
-    <div className="hidden md:flex shrink-0 w-full">
+    <div className="hidden lg:flex shrink-0 w-full">
       {/* ── In-flow TopBar + player strip (not a viewport overlay) ── */}
       <header
         id="global-player"

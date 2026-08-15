@@ -11,8 +11,8 @@
    - ContentLayer  : scrollable page content
    - PlayerLayer   : GlobalPlayer + TheaterPlayer
    - GuideLayer    : FloatingAvatar / KeeperAvatarWidget
-   Desktop: LeftRail (72px fixed) + ContextDrawer + MainColumn + RightRail
-   Mobile:  LeftRail (off-canvas) + mobile header (hamburger + logo + bell)
+   Desktop: in-flow LeftRail (72px) + ContextDrawer + MainColumn + RightRail
+   Mobile:  LeftRail (off-canvas) + in-flow mobile header
 =================================================================== */
 import { useState, useCallback, useEffect } from "react";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
