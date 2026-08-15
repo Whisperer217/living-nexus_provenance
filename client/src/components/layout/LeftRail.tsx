@@ -77,7 +77,7 @@ export default function LeftRail({
 
   // ── Shared item renderer ──────────────────────────────────────────
   const renderItem = (
-    { id, icon: Icon, label, path, authRequired }: typeof RAIL_ITEMS[0],
+    { id, icon: Icon, label, path }: typeof RAIL_ITEMS[0],
     isMobile: boolean
   ) => {
     const routeActive = isRouteActive(path);
