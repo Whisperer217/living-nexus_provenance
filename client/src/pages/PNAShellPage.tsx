@@ -3,8 +3,8 @@
  * Traditional chat architecture with:
  *  - Fixed/adjustable chat column (or floating pop-out)
  *  - Music dock bound into the PNA stage
- *  - Chat background skins
- *  - Avatar portraits in the left Full Workspace drawer
+ *  - Vine/ember chat atmosphere (music-reactive, no blur)
+ *  - One-click avatars that unlock in place and switch capability
  */
 
 import { useState, useRef, useEffect, useCallback } from "react";
@@ -17,7 +17,7 @@ import {
   Image, Shield, Upload, BookOpen, Settings, LogOut,
   ChevronRight, Send, Loader2, ExternalLink, Save, Film, BookMarked,
   Play, Pause, SkipBack, SkipForward, PanelRightOpen, PanelRightClose,
-  Maximize2, Minimize2, GripVertical,
+  Maximize2, Minimize2, GripVertical, Lock,
 } from "lucide-react";
 import { getLoginUrl } from "@/const";
 import { usePlayer } from "@/contexts/PlayerContext";
@@ -33,6 +33,18 @@ import {
   type NexusContextRef,
   type NexusContextSuggestion,
 } from "@/lib/nexusContext";
+import { PnaChatAtmosphere, PnaStreamSeal } from "@/components/pna/PnaChatAtmosphere";
+import { useHarmonicSignature } from "@/hooks/useHarmonicSignature";
+import {
+  bindNowPlayingContext,
+  persistPnaChatTheme,
+  PNA_AVATARS,
+  PNA_CHAT_THEMES,
+  PNA_LOGO_URL,
+  pnaAvatarById,
+  type PnaChatThemeId,
+  readPnaChatTheme,
+} from "@/lib/pnaChatAtmosphere";
 
 // ─── Stewardship modes ────────────────────────────────────────────────────────
 
@@ -68,14 +80,6 @@ const QUICK_ACTIONS = [
   { label: "Avatar Registry", icon: Image, href: "/avatar-registry", desc: "Steward AVT skins" },
   { label: "Batch Upload", icon: Upload, href: "/batch-upload", desc: "Register multiple works" },
 ];
-
-const AVATAR_SKINS = [
-  { id: "hooded-scholar", name: "Hooded Scholar" },
-  { id: "conductor", name: "The Conductor" },
-  { id: "witness", name: "The Witness" },
-  { id: "archivist", name: "The Archivist" },
-  { id: "cipher", name: "The Cipher" },
-] as const;
 
 const LS_CHAT_WIDTH = "ln-pna-chat-width";
 const LS_LAYOUT = "ln-pna-layout";
@@ -141,6 +145,7 @@ export default function PNAShellPage() {
   const [popoutSize, setPopoutSize] = useState({ w: 440, h: 640 });
   const [contextRef, setContextRef] = useState<NexusContextRef | null>(null);
   const [contextSuggestion, setContextSuggestion] = useState<NexusContextSuggestion | null>(null);
+  const [chatTheme, setChatTheme] = useState<PnaChatThemeId>(() => readPnaChatTheme());
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -167,9 +172,14 @@ export default function PNAShellPage() {
   const setActiveSkin = trpc.keeper.setActiveSkin.useMutation({
     onSuccess: () => {
       utils.keeper.getProfile.invalidate();
-      toast.success("Avatar skin activated.");
     },
     onError: (e) => toast.error(e.message ?? "Could not activate skin."),
+  });
+  const unlockSkin = trpc.keeper.unlockSkin.useMutation({
+    onSuccess: () => {
+      utils.keeper.getProfile.invalidate();
+    },
+    onError: (e) => toast.error(e.message ?? "Could not unlock avatar."),
   });
 
   const currentMode = PNA_MODES.find(m => m.id === activeMode) ?? PNA_MODES[0];
@@ -184,6 +194,9 @@ export default function PNAShellPage() {
     activeSkinId === "custom" && customImageUrl
       ? customImageUrl
       : SKIN_IMAGES[activeSkinId] ?? SKIN_IMAGES["hooded-scholar"];
+  const activeAvatar = pnaAvatarById(activeSkinId);
+  const { hue, saturation } = useHarmonicSignature(nowPlaying?.wid ?? null, null);
+  const avatarBusy = setActiveSkin.isPending || unlockSkin.isPending;
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -371,7 +384,7 @@ export default function PNAShellPage() {
         return;
       }
       const result = await chatMutation.mutateAsync({
-        message: text,
+        message: bindNowPlayingContext(text, nowPlaying),
         persona: currentMode.persona,
         history: messages.slice(-8).map(m => ({
           role: m.role === "user" ? "user" as const : "assistant" as const,
@@ -391,7 +404,7 @@ export default function PNAShellPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [input, isLoading, activeMode, currentMode, messages, chatMutation, generateArtwork, user]);
+  }, [input, isLoading, activeMode, currentMode, messages, chatMutation, generateArtwork, user, nowPlaying]);
 
   const handleSaveVisualProposal = useCallback(async (messageId: string) => {
     const message = messages.find(candidate => candidate.id === messageId);
@@ -419,12 +432,28 @@ export default function PNAShellPage() {
   };
 
   const handleActivateSkin = async (skinId: string) => {
-    if (skinId !== "hooded-scholar" && !ownedSkins.has(skinId) && skinId !== "custom") {
-      toast.info("Unlock this skin in Keeper or Avatar Registry.");
-      navigate("/keeper");
-      return;
+    if (avatarBusy) return;
+    try {
+      const catalog = pnaAvatarById(skinId);
+      const owned = ownedSkins.has(skinId) || skinId === "hooded-scholar" || skinId === "custom";
+      if (!owned && catalog) {
+        await unlockSkin.mutateAsync({ skinId: catalog.id });
+      }
+      await setActiveSkin.mutateAsync({ skinId });
+      if (catalog) setActiveMode(catalog.mode);
+      toast.success(
+        catalog
+          ? `${catalog.name} · ${catalog.capability}`
+          : "Avatar activated.",
+      );
+    } catch (e: any) {
+      toast.error(e.message ?? "Could not activate avatar.");
     }
-    await setActiveSkin.mutateAsync({ skinId });
+  };
+
+  const handleChatTheme = (id: PnaChatThemeId) => {
+    setChatTheme(id);
+    persistPnaChatTheme(id);
   };
 
   // ── Auth gate ──────────────────────────────────────────────────────────────
@@ -624,33 +653,43 @@ export default function PNAShellPage() {
   );
 
   const modeTabs = (
-    <div
-      className="flex items-center gap-1 px-3 py-2 flex-shrink-0 overflow-x-auto"
-      style={{ borderBottom: `1px solid ${PANEL_BORDER}`, background: "color-mix(in srgb, var(--ln-panel) 80%, transparent)" }}
-    >
-      {PNA_MODES.map(mode => {
-        const active = activeMode === mode.id;
-        return (
-          <button
-            key={mode.id}
-            type="button"
-            onClick={() => setActiveMode(mode.id)}
-            className="flex items-center gap-1 px-2.5 py-1 rounded-full flex-shrink-0"
-            style={{
-              background: active ? "color-mix(in srgb, var(--ln-gold) 18%, transparent)" : "transparent",
-              border: active ? `1px solid color-mix(in srgb, var(--ln-gold) 45%, transparent)` : `1px solid transparent`,
-              color: active ? ACCENT : INK_MUTED,
-              fontFamily: "'Space Mono', monospace",
-              fontSize: "0.45rem",
-              letterSpacing: "0.06em",
-            }}
-            title={mode.desc}
-          >
-            <mode.icon size={10} />
-            {mode.label.toUpperCase()}
-          </button>
-        );
-      })}
+    <div className="flex-shrink-0" style={{ borderBottom: `1px solid ${PANEL_BORDER}`, background: "color-mix(in srgb, var(--ln-panel) 80%, transparent)" }}>
+      <div className="flex items-center gap-1 px-3 py-2 overflow-x-auto">
+        {PNA_MODES.map(mode => {
+          const active = activeMode === mode.id;
+          return (
+            <button
+              key={mode.id}
+              type="button"
+              onClick={() => setActiveMode(mode.id)}
+              className="flex items-center gap-1 px-2.5 py-1 rounded-full flex-shrink-0"
+              style={{
+                background: active ? "color-mix(in srgb, var(--ln-gold) 18%, transparent)" : "transparent",
+                border: active ? `1px solid color-mix(in srgb, var(--ln-gold) 45%, transparent)` : `1px solid transparent`,
+                color: active ? ACCENT : INK_MUTED,
+                fontFamily: "'Space Mono', monospace",
+                fontSize: "0.45rem",
+                letterSpacing: "0.06em",
+              }}
+              title={mode.desc}
+            >
+              <mode.icon size={10} />
+              {mode.label.toUpperCase()}
+            </button>
+          );
+        })}
+      </div>
+      <div className="flex items-center justify-between gap-3 px-4 pb-2">
+        <p style={{ fontSize: "0.42rem", color: INK_MUTED, fontFamily: "'Space Mono', monospace", lineHeight: 1.5 }}>
+          {currentMode.desc}
+          {activeAvatar ? ` · ${activeAvatar.name}: ${activeAvatar.capability}` : ""}
+        </p>
+        {nowPlaying?.title ? (
+          <span className="shrink-0" style={{ fontSize: "0.38rem", color: ACCENT, letterSpacing: "0.08em", fontFamily: "'Space Mono', monospace" }}>
+            FIELD · {nowPlaying.title}
+          </span>
+        ) : null}
+      </div>
     </div>
   );
 
@@ -678,7 +717,7 @@ export default function PNAShellPage() {
               {PNA_PRODUCT.fullName}
             </div>
             <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "0.9rem", color: INK_MUTED, lineHeight: 1.7 }}>
-              Traditional chat · music dock · avatar skins. Ask, witness, and seal the thread.
+              Chat stays free. Pick an avatar to switch its capability. The field breathes with whatever is playing.
             </div>
           </div>
           <div className="w-full grid grid-cols-2 gap-2">
@@ -788,11 +827,7 @@ export default function PNAShellPage() {
           {isLoading && (
             <div className="flex items-center gap-2.5 mb-3">
               <img src={activeSkinImg} alt="" className="w-8 h-8 rounded-full object-cover" style={{ border: "1px solid color-mix(in srgb, var(--ln-gold) 28%, transparent)" }} />
-              <div className="flex gap-1 px-3 py-2 rounded-2xl" style={{ background: SURFACE, border: `1px solid ${PANEL_BORDER}` }}>
-                {[0, 1, 2].map(i => (
-                  <div key={i} className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: ACCENT, opacity: 0.55, animationDelay: `${i * 0.15}s` }} />
-                ))}
-              </div>
+              <PnaStreamSeal streaming logoUrl={PNA_LOGO_URL} />
             </div>
           )}
           <div ref={messagesEndRef} />
@@ -839,44 +874,69 @@ export default function PNAShellPage() {
           {isLoading ? <Loader2 size={15} className="animate-spin" /> : <Send size={15} />}
         </button>
       </div>
-      <div className="flex items-center justify-between mt-1.5 px-0.5">
+      <div className="flex items-center justify-between mt-1.5 px-0.5 gap-2">
         <span style={{ fontSize: "0.38rem", color: INK_MUTED, fontFamily: "'Space Mono', monospace" }}>
           Enter to send · Shift+Enter newline
         </span>
-        <span style={{ fontSize: "0.38rem", color: INK_MUTED, fontFamily: "'Space Mono', monospace" }}>
-          {"theme"} skin
-        </span>
+        <div className="flex items-center gap-1">
+          {PNA_CHAT_THEMES.map((theme) => {
+            const active = chatTheme === theme.id;
+            return (
+              <button
+                key={theme.id}
+                type="button"
+                onClick={() => handleChatTheme(theme.id)}
+                className="px-1.5 py-0.5 rounded"
+                style={{
+                  fontSize: "0.38rem",
+                  letterSpacing: "0.08em",
+                  fontFamily: "'Space Mono', monospace",
+                  color: active ? ACCENT : INK_MUTED,
+                  border: `1px solid ${active ? "color-mix(in srgb, var(--ln-gold) 45%, transparent)" : PANEL_BORDER}`,
+                  background: active ? "color-mix(in srgb, var(--ln-gold) 12%, transparent)" : "transparent",
+                }}
+                title={theme.desc}
+              >
+                {theme.label.toUpperCase()}{theme.paid ? " · PAID" : ""}
+              </button>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
 
   const chatColumn = (
-    <div
-      className="flex flex-col min-h-0 h-full overflow-hidden"
-      style={{ background: PANEL }}
+    <PnaChatAtmosphere
+      theme={chatTheme}
+      playing={playerState.isPlaying}
+      hue={hue}
+      saturation={saturation}
     >
-      {chatHeader}
-      {modeTabs}
-      {(cinematic || nowPlaying) && (
-        <div
-          className="flex items-center gap-3 px-4 py-2 flex-shrink-0"
-          style={{
-            background: cinematic
-              ? "linear-gradient(90deg, color-mix(in srgb, var(--ln-gold) 12%, transparent), transparent)"
-              : "transparent",
-            borderBottom: `1px solid ${PANEL_BORDER}`,
-          }}
-        >
-          <Music size={12} style={{ color: ACCENT }} />
-          <div className="min-w-0 flex-1 truncate" style={{ fontSize: "0.55rem", color: INK, fontFamily: "'Space Mono', monospace" }}>
-            {nowPlaying ? `${playerState.isPlaying ? "▶" : "❚❚"} ${nowPlaying.title}` : "Cinematic ready — start playback"}
+      <div className="flex flex-col min-h-0 h-full overflow-hidden" style={{ background: "transparent" }}>
+        {chatHeader}
+        {modeTabs}
+        {(cinematic || nowPlaying) && (
+          <div
+            className="flex items-center gap-3 px-4 py-2 flex-shrink-0"
+            style={{
+              background: cinematic
+                ? "linear-gradient(90deg, color-mix(in srgb, var(--ln-gold) 12%, transparent), transparent)"
+                : "transparent",
+              borderBottom: `1px solid ${PANEL_BORDER}`,
+            }}
+          >
+            <Music size={12} style={{ color: ACCENT }} />
+            <div className="min-w-0 flex-1 truncate" style={{ fontSize: "0.55rem", color: INK, fontFamily: "'Space Mono', monospace" }}>
+              {nowPlaying ? `${playerState.isPlaying ? "▶" : "❚❚"} ${nowPlaying.title}` : "Cinematic ready — start playback"}
+            </div>
           </div>
-        </div>
-      )}
-      {messagesPane}
-      {musicDock}
-      {composer}
-    </div>
+        )}
+        {messagesPane}
+        {musicDock}
+        {composer}
+      </div>
+    </PnaChatAtmosphere>
   );
 
   const leftDrawer = (
@@ -921,12 +981,17 @@ export default function PNAShellPage() {
               style={{ background: "linear-gradient(transparent, rgba(0,0,0,0.85))" }}
             >
               <div style={{ fontFamily: "'Cinzel', serif", fontSize: "0.65rem", color: "#C9A84C" }}>
-                {AVATAR_SKINS.find(s => s.id === activeSkinId)?.name
+                {activeAvatar?.name
                   ?? (activeSkinId === "custom" ? "Custom Portrait" : "Avatar")}
               </div>
               <div style={{ fontSize: "0.4rem", color: "rgba(255,255,255,0.45)", fontFamily: "'Space Mono', monospace" }}>
                 ACTIVE · {currentMode.label.toUpperCase()}
               </div>
+              {activeAvatar && (
+                <div style={{ fontSize: "0.38rem", color: "rgba(201,168,76,0.75)", fontFamily: "'Space Mono', monospace", marginTop: 2 }}>
+                  {activeAvatar.capability}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -939,26 +1004,60 @@ export default function PNAShellPage() {
             AVATARS
           </div>
         )}
-        <div className={sidebarCollapsed ? "flex flex-col items-center gap-1.5" : "grid grid-cols-3 gap-1.5 px-1"}>
-          {AVATAR_SKINS.map(skin => {
+        <div className={sidebarCollapsed ? "flex flex-col items-center gap-1.5" : "flex flex-col gap-1.5 px-1"}>
+          {PNA_AVATARS.map(skin => {
             const img = SKIN_IMAGES[skin.id];
-            const owned = ownedSkins.has(skin.id) || skin.id === "hooded-scholar";
+            const owned = ownedSkins.has(skin.id) || !skin.locked;
             const active = activeSkinId === skin.id;
+            const status = active ? "ACTIVE" : owned ? "USE" : "UNLOCK";
             return (
               <button
                 key={skin.id}
                 type="button"
                 onClick={() => handleActivateSkin(skin.id)}
-                title={skin.name}
-                className="relative overflow-hidden rounded-lg transition-all hover:opacity-90"
+                disabled={avatarBusy}
+                title={`${skin.name} · ${skin.capability}`}
+                className={`relative overflow-hidden rounded-lg transition-all hover:opacity-90 ${sidebarCollapsed ? "" : "flex items-center gap-2 text-left p-1"}`}
                 style={{
-                  aspectRatio: sidebarCollapsed ? "1" : "3/4",
+                  aspectRatio: sidebarCollapsed ? "1" : undefined,
                   width: sidebarCollapsed ? 40 : "100%",
                   border: active ? `2px solid ${ACCENT}` : `1px solid ${PANEL_BORDER}`,
-                  opacity: owned ? 1 : 0.45,
+                  opacity: owned || active ? 1 : 0.72,
                 }}
               >
-                <img src={img} alt={skin.name} className="w-full h-full object-cover" />
+                <img
+                  src={img}
+                  alt={skin.name}
+                  className="object-cover flex-shrink-0"
+                  style={{
+                    width: sidebarCollapsed ? "100%" : 36,
+                    height: sidebarCollapsed ? "100%" : 48,
+                    borderRadius: 6,
+                  }}
+                />
+                {!sidebarCollapsed && (
+                  <div className="min-w-0 flex-1 py-0.5 pr-1">
+                    <div style={{ fontSize: "0.48rem", color: active ? ACCENT : INK, fontFamily: "'Space Mono', monospace" }}>
+                      {skin.name}
+                    </div>
+                    <div style={{ fontSize: "0.38rem", color: INK_MUTED, fontFamily: "'Space Mono', monospace" }}>
+                      {skin.capability}
+                    </div>
+                    <div
+                      className="inline-flex items-center gap-1"
+                      style={{
+                        fontSize: "0.36rem",
+                        letterSpacing: "0.08em",
+                        color: active ? ACCENT : owned ? INK_BODY : "rgba(201,168,76,0.85)",
+                        fontFamily: "'Space Mono', monospace",
+                        marginTop: 2,
+                      }}
+                    >
+                      {!owned && <Lock size={8} />}
+                      {status}
+                    </div>
+                  </div>
+                )}
               </button>
             );
           })}
@@ -1005,6 +1104,9 @@ export default function PNAShellPage() {
               <div className="min-w-0 text-left">
                 <div style={{ fontSize: "0.5rem", color: activeMode === mode.id ? ACCENT : INK_BODY, letterSpacing: "0.04em", fontFamily: "'Space Mono', monospace" }}>
                   {mode.label}
+                </div>
+                <div style={{ fontSize: "0.36rem", color: INK_MUTED, fontFamily: "'Space Mono', monospace" }}>
+                  {PNA_AVATARS.find(avatar => avatar.mode === mode.id)?.capability ?? mode.desc}
                 </div>
               </div>
             )}
