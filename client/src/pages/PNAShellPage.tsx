@@ -28,6 +28,13 @@ import { SKIN_IMAGES } from "@/components/FloatingAvatar";
 import { PNA_PRODUCT } from "@/lib/loopProduct";
 import { consumePnaDiaryReload } from "@/lib/pnaDiary";
 import {
+  getVisionPromptErrorMessage,
+  getVisionPromptLength,
+  getVisionPromptLimitMessage,
+  isVisionPromptOverLimit,
+  VISION_PROMPT_MAX_LENGTH,
+} from "@/lib/visionPrompt";
+import {
   contextRoute,
   createContextSuggestion,
   type NexusContextRef,
@@ -351,6 +358,10 @@ export default function PNAShellPage() {
   const handleSend = useCallback(async () => {
     const text = input.trim();
     if (!text || isLoading || !user) return;
+    if (activeMode === "vision" && isVisionPromptOverLimit(text)) {
+      toast.error(getVisionPromptLimitMessage(text));
+      return;
+    }
 
     const userMsg: Message = { id: `u-${Date.now()}`, role: "user", content: text, mode: activeMode, timestamp: new Date() };
     setMessages(prev => [...prev, userMsg]);
@@ -387,7 +398,7 @@ export default function PNAShellPage() {
         timestamp: new Date(),
       }]);
     } catch (e: any) {
-      toast.error(e.message ?? "PNA unavailable");
+      toast.error(activeMode === "vision" ? getVisionPromptErrorMessage(e) : (e.message ?? "PNA unavailable"));
     } finally {
       setIsLoading(false);
     }
@@ -813,6 +824,8 @@ export default function PNAShellPage() {
           onChange={e => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={activeMode === "vision" ? "Describe private cover art…" : `Message ${currentMode.label}…`}
+          aria-label={activeMode === "vision" ? "Private cover art prompt" : `Message ${currentMode.label}`}
+          aria-invalid={activeMode === "vision" && isVisionPromptOverLimit(input)}
           rows={1}
           className="flex-1 bg-transparent outline-none resize-none"
           style={{
@@ -832,7 +845,7 @@ export default function PNAShellPage() {
         <button
           type="button"
           onClick={handleSend}
-          disabled={!input.trim() || isLoading}
+          disabled={!input.trim() || isLoading || (activeMode === "vision" && isVisionPromptOverLimit(input))}
           className="flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center transition-all hover:opacity-80 disabled:opacity-30"
           style={{ background: ACCENT, color: VOID }}
         >
@@ -843,6 +856,14 @@ export default function PNAShellPage() {
         <span style={{ fontSize: "0.38rem", color: INK_MUTED, fontFamily: "'Space Mono', monospace" }}>
           Enter to send · Shift+Enter newline
         </span>
+        {activeMode === "vision" && (
+          <span
+            aria-live="polite"
+            style={{ fontSize: "0.38rem", color: isVisionPromptOverLimit(input) ? "var(--ln-gold-hot)" : INK_MUTED, fontFamily: "'Space Mono', monospace" }}
+          >
+            {getVisionPromptLength(input).toLocaleString()} / {VISION_PROMPT_MAX_LENGTH.toLocaleString()}
+          </span>
+        )}
         <span style={{ fontSize: "0.38rem", color: INK_MUTED, fontFamily: "'Space Mono', monospace" }}>
           {"theme"} skin
         </span>

@@ -66,6 +66,15 @@ describe("PNA private visual generation", () => {
     expect(imageService.generateImage).not.toHaveBeenCalled();
   });
 
+  it("rejects an over-limit prompt before image generation or protected storage", async () => {
+    const caller = appRouter.createCaller(contextFor(creator(42)));
+    await expect(caller.keeper.generateArtwork({ prompt: "x".repeat(1_001) })).rejects.toMatchObject({
+      code: "BAD_REQUEST",
+    });
+    expect(imageService.generateImage).not.toHaveBeenCalled();
+    expect(storage.storagePut).not.toHaveBeenCalled();
+  });
+
   it("contains a provider failure without creating stored artwork or a Quiver asset", async () => {
     imageService.generateImage.mockRejectedValueOnce(new Error("provider unavailable"));
     const caller = appRouter.createCaller(contextFor(creator(42)));
@@ -87,6 +96,8 @@ describe("PNA private visual generation", () => {
       expect(source).toContain('activeMode === "vision"');
       expect(source).toContain("generateArtwork.mutateAsync");
       expect(source).toContain("saveQuiverAsset.mutateAsync");
+      expect(source).toContain("isVisionPromptOverLimit");
+      expect(source).toContain("VISION_PROMPT_MAX_LENGTH");
     }
     expect(card).toContain("SAVE TO QUIVER PRIVATELY");
     expect(card).toContain("Nothing has been attached, registered, or published.");

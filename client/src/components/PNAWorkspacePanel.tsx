@@ -12,6 +12,13 @@ import { useLocation } from "wouter";
 import { toast } from "sonner";
 import { PNAVisualProposalCard, type PNAVisualProposal } from "@/components/PNAVisualProposalCard";
 import {
+  getVisionPromptErrorMessage,
+  getVisionPromptLength,
+  getVisionPromptLimitMessage,
+  isVisionPromptOverLimit,
+  VISION_PROMPT_MAX_LENGTH,
+} from "@/lib/visionPrompt";
+import {
   X, Send, Loader2, ChevronDown, ChevronRight,
   Zap, Eye, Layers, Archive, Sparkles, BookOpen,
   Hash, Shield, Plus, ExternalLink, Save,
@@ -294,6 +301,10 @@ export default function PNAWorkspacePanel({ open, onClose }: PNAWorkspacePanelPr
   const handleSend = useCallback(async () => {
     const text = input.trim();
     if (!text || isLoading) return;
+    if (activeMode === "vision" && isVisionPromptOverLimit(text)) {
+      toast.error(getVisionPromptLimitMessage(text));
+      return;
+    }
 
     const userMsg: Message = {
       id: `u-${Date.now()}`,
@@ -334,7 +345,7 @@ export default function PNAWorkspacePanel({ open, onClose }: PNAWorkspacePanelPr
       };
       setMessages(prev => [...prev, pnaMsg]);
     } catch (e: any) {
-      toast.error(e.message ?? "PNA unavailable");
+      toast.error(activeMode === "vision" ? getVisionPromptErrorMessage(e) : (e.message ?? "PNA unavailable"));
     } finally {
       setIsLoading(false);
     }
@@ -635,6 +646,8 @@ export default function PNAWorkspacePanel({ open, onClose }: PNAWorkspacePanelPr
                 onChange={e => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder={activeMode === "vision" ? "Describe private cover art..." : `Ask your ${currentMode.displayLabel}...`}
+                aria-label={activeMode === "vision" ? "Private cover art prompt" : `Ask your ${currentMode.displayLabel}`}
+                aria-invalid={activeMode === "vision" && isVisionPromptOverLimit(input)}
                 rows={1}
                 className="flex-1 bg-transparent outline-none resize-none"
                 style={{
@@ -653,7 +666,7 @@ export default function PNAWorkspacePanel({ open, onClose }: PNAWorkspacePanelPr
               />
               <button
                 onClick={handleSend}
-                disabled={!input.trim() || isLoading}
+                disabled={!input.trim() || isLoading || (activeMode === "vision" && isVisionPromptOverLimit(input))}
                 className="flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center transition-all hover:opacity-80 disabled:opacity-30"
                 style={{ background: currentMode.accentColor, color: "#0A0806" }}
               >
@@ -665,9 +678,18 @@ export default function PNAWorkspacePanel({ open, onClose }: PNAWorkspacePanelPr
             <span style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.38rem", color: "rgba(255,255,255,0.2)" }}>
               Enter to send · Shift+Enter for new line
             </span>
+            {activeMode === "vision" ? (
+              <span
+                aria-live="polite"
+                style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.38rem", color: isVisionPromptOverLimit(input) ? "var(--ln-gold-hot)" : "var(--ln-smoke)" }}
+              >
+                {getVisionPromptLength(input).toLocaleString()} / {VISION_PROMPT_MAX_LENGTH.toLocaleString()}
+              </span>
+            ) : (
             <span style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.38rem", color: "rgba(196,154,40,0.3)" }}>
               PNA · Living Nexus
             </span>
+            )}
           </div>
         </div>
       </div>
