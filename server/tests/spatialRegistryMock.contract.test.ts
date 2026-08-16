@@ -60,6 +60,9 @@ describe("Spatial Registry Mock isolation", () => {
       "player",
     ]);
     expect(VISUAL_LANGUAGE.principle).toContain("One central work");
+    expect(VISUAL_LANGUAGE.accents.creator).toContain("violet");
+    expect(SPATIAL_REGISTRY_MOCK.nodes.find((node) => node.id === "profile")?.color).toBe("#c77dff");
+    expect(SPATIAL_REGISTRY_MOCK.nodes.find((node) => node.id === "edit")?.color).toBe("#29b6f6");
     expect(SPATIAL_REGISTRY_MOCK.attribution.label).toBe("View Attribution");
   });
 
@@ -72,13 +75,14 @@ describe("Spatial Registry Mock isolation", () => {
     expect(appSource).toContain('path="/prototype/spatial-registry"');
     expect(pageSource).toContain("SPATIAL_REGISTRY_MOCK");
     expect(pageSource).toContain("Return to constellation");
-    expect(pageSource).toContain("One visual language");
+    expect(pageSource).toContain("VISUAL_LANGUAGE");
     expect(pageSource).toContain("Cover Art Studio");
     expect(pageSource).toContain("My AI");
     expect(pageSource).toContain("View Attribution");
     expect(pageSource).toContain("Registration capacity");
     expect(sceneSource).toContain("three");
     expect(sceneSource).toContain("Visualization only");
+    expect(sceneSource).toContain("cyber-celestial");
 
     for (const source of [pageSource, sceneSource, fixtureSource]) {
       expect(source).not.toContain("trpc.");

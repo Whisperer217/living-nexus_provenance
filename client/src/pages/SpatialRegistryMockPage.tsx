@@ -31,6 +31,7 @@ import {
   DEFAULT_COVER_ART,
   SPATIAL_REGISTRY_MOCK,
   SPATIAL_REGISTRY_NODES_BY_ID,
+  VISUAL_LANGUAGE,
   type SpatialRegistryNodeId,
   type SpatialView,
 } from "@/lib/spatialRegistryMock";
@@ -305,7 +306,7 @@ export default function SpatialRegistryMockPage() {
         <section className="sr-pathway-card">
           <Kicker>{selected.form}</Kicker>
           <h2 className="mt-2 font-display text-2xl">{selected.shortLabel}</h2>
-          <p className="mt-2 text-xs tracking-[0.16em] uppercase text-[var(--sr-gold)]">{selected.language}</p>
+          <p className="mt-2 text-xs tracking-[0.16em] uppercase" style={{ color: selected.color }}>{selected.language}</p>
           <p className="sr-copy">{selected.description}</p>
           {view === "work" && (
             <ol className="sr-steps">
@@ -393,11 +394,11 @@ export default function SpatialRegistryMockPage() {
           <Kicker>Six spatial pathways</Kicker>
           <h2 className="mt-2 font-display text-xl">The work is the center</h2>
           <p className="sr-copy">Each node is an environment, not a page. Enter it. The registry remains the source of truth; this is how it becomes visible.</p>
-          <p className="mt-3 text-[10px] tracking-[0.16em] uppercase text-[var(--sr-gold)]">One visual language · six domains · one work</p>
+          <p className="mt-3 text-[10px] tracking-[0.16em] uppercase text-[var(--sr-gold)]">{VISUAL_LANGUAGE.principle}</p>
           <div className="sr-dl mt-4">
             {SPATIAL_REGISTRY_MOCK.nodes.filter((node) => node.id !== "work").map((node) => (
               <button key={node.id} className="sr-text-btn text-left" onClick={() => enter(node.id)}>
-                <span className="block text-[var(--sr-gold)]">{node.shortLabel}</span>
+                <span className="block" style={{ color: node.color }}>{node.shortLabel}</span>
                 <b className="block font-normal text-[11px] tracking-normal normal-case text-[var(--sr-muted)]">{node.form}</b>
               </button>
             ))}
