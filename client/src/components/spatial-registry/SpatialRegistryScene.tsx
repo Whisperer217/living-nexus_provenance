@@ -224,7 +224,7 @@ function makeLabel(title: string, caption: string, work = false) {
 function backdrop(loader: THREE.TextureLoader, url: string, size: number, opacity: number) {
   const plane = new THREE.Mesh(
     new THREE.PlaneGeometry(size, size),
-    new THREE.MeshBasicMaterial({ map: loadMap(loader, url), transparent: true, opacity, depthWrite: false, side: THREE.DoubleSide }),
+    new THREE.MeshBasicMaterial({ map: loadMap(loader, url), transparent: true, opacity: Math.min(opacity, 0.32), depthWrite: false, side: THREE.DoubleSide }),
   );
   return plane;
 }
@@ -470,15 +470,21 @@ export const SpatialRegistryScene = forwardRef<SpatialSceneHandle, SpatialRegist
 
     const creatorChamber = new THREE.Group();
     creatorChamber.visible = false;
-    const creatorField = backdrop(loader, ASSET.pathways.profile, 3.4, 0.5);
-    creatorField.position.set(-2.4, 1.05, -1.2);
+    const creatorField = backdrop(loader, ASSET.pathways.profile, 4.2, 0.28);
+    creatorField.position.set(0, 0.85, -2.4);
     creatorChamber.add(creatorField);
     const octa = new THREE.Mesh(new THREE.OctahedronGeometry(0.72, 0), wire(VIOLET, 0.95));
-    octa.position.set(0.15, 0.85, 0.2);
+    octa.position.set(1.15, 0.95, 0.35);
     creatorChamber.add(octa);
     const bust = makeWireBust(VIOLET);
-    bust.position.set(-1.85, 0.15, 0.15);
+    bust.position.set(-1.15, 0.2, 0.25);
+    bust.scale.setScalar(1.55);
     creatorChamber.add(bust);
+    const { wrap: identityWrap } = makeLabel("Identity", "Jake / Weave & Breathe");
+    identityWrap.style.pointerEvents = "none";
+    const identityLabel = new CSS2DObject(identityWrap);
+    identityLabel.position.set(-1.15, 2.05, 0.25);
+    creatorChamber.add(identityLabel);
     creatorChamber.add(makeRipples(VIOLET, 5, -1.45));
     SPATIAL_REGISTRY_MOCK.creatorStages.forEach((stage, index) => {
       const angle = -0.35 + index * 0.52;
