@@ -124,7 +124,7 @@ export function SpatialRegistryScene({
     if (!mount) return;
 
     const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x050403, 0.048);
+    scene.fog = new THREE.FogExp2(0x050403, 0.032);
     scene.background = new THREE.Color(0x050403);
 
     const camera = new THREE.PerspectiveCamera(46, 1, 0.1, 80);

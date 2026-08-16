@@ -262,14 +262,14 @@
   pointer-events: auto;
   border: 0;
   background: transparent;
-  color: rgba(237, 229, 208, 0.52);
+  color: rgba(237, 229, 208, 0.78);
   font-family: "Cinzel", serif;
   font-size: 10px;
   letter-spacing: 0.28em;
   text-transform: uppercase;
   white-space: nowrap;
   cursor: pointer;
-  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.9);
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.95), 0 0 12px rgba(5, 4, 3, 0.9);
 }
 
 .sr-node-label.is-work {
