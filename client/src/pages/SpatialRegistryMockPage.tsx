@@ -27,22 +27,24 @@ import {
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { SpatialRegistryScene, type SpatialCeremony, type SpatialSceneHandle } from "@/components/spatial-registry/SpatialRegistryScene";
 import {
+  ARTIFACT_FORMS,
   ASSET,
   DEFAULT_COVER_ART,
   SPATIAL_REGISTRY_MOCK,
   SPATIAL_REGISTRY_NODES_BY_ID,
   VISUAL_LANGUAGE,
+  type SpatialArtifact,
   type SpatialRegistryNodeId,
   type SpatialView,
 } from "@/lib/spatialRegistryMock";
 import "./spatial-registry-mock.css";
 
-const { creator, work, attribution, versions, creatorStages, lineageSequence, derivedArtifacts } = SPATIAL_REGISTRY_MOCK;
-const NAV: { id: "nexus" | "works" | "lineage" | "registry"; label: string; node: SpatialRegistryNodeId }[] = [
-  { id: "nexus", label: "NEXUS", node: "work" },
-  { id: "works", label: "WORKS", node: "work" },
-  { id: "lineage", label: "LINEAGE", node: "lineage" },
-  { id: "registry", label: "REGISTRY", node: "register" },
+const { creator, work, attribution, versions, creatorStages, lineageSequence, derivedArtifacts, exploreArtifacts } = SPATIAL_REGISTRY_MOCK;
+const NAV: { id: "nexus" | "works" | "lineage" | "registry"; label: string; view: SpatialView }[] = [
+  { id: "nexus", label: "NEXUS", view: "overview" },
+  { id: "works", label: "WORKS", view: "explore" },
+  { id: "lineage", label: "LINEAGE", view: "lineage" },
+  { id: "registry", label: "REGISTRY", view: "register" },
 ];
 
 function formatClock(seconds: number) {
@@ -101,17 +103,22 @@ export default function SpatialRegistryMockPage() {
   const [aiOpen, setAiOpen] = useState(false);
   const [attributionOpen, setAttributionOpen] = useState(false);
   const [coverArtUrl, setCoverArtUrl] = useState<string>(DEFAULT_COVER_ART);
+  const [loadedWorkId, setLoadedWorkId] = useState<string | null>(null);
+  const [grabbing, setGrabbing] = useState<SpatialArtifact | null>(null);
+  const [dropHot, setDropHot] = useState(false);
+  const [inspectFile, setInspectFile] = useState<{ name: string; size: number; type: string } | null>(null);
   const [shuffle, setShuffle] = useState(false);
   const [repeat, setRepeat] = useState(false);
   const selected = SPATIAL_REGISTRY_NODES_BY_ID[selectedNode];
+  const loaded = exploreArtifacts.find((item) => item.id === loadedWorkId) ?? null;
 
   useEffect(() => {
-    if (!isPlaying) return;
+    if (!isPlaying || !loaded) return;
     const timer = window.setInterval(() => {
-      setElapsed((value) => (value >= work.durationSeconds ? 0 : value + 1));
+      setElapsed((value) => (value >= loaded.durationSeconds ? 0 : value + 1));
     }, 1000);
     return () => window.clearInterval(timer);
-  }, [isPlaying]);
+  }, [isPlaying, loaded]);
 
   useEffect(() => {
     if (!ceremony || ceremonyPhase !== "done") return;
@@ -140,8 +147,14 @@ export default function SpatialRegistryMockPage() {
     setView(nodeId);
     if (nodeId === "lineage") setNav("lineage");
     else if (nodeId === "register") setNav("registry");
-    else if (nodeId === "work") setNav("works");
+    else if (nodeId === "work" || nodeId === "player") setNav("works");
     else setNav("nexus");
+  }, []);
+
+  const openExplore = useCallback(() => {
+    setView("explore");
+    setNav("works");
+    setSelectedNode("work");
   }, []);
 
   const returnToConstellation = useCallback(() => {
@@ -158,6 +171,15 @@ export default function SpatialRegistryMockPage() {
     window.setTimeout(() => setCeremonyPhase("done"), reducedMotion ? 0 : 900);
   }, [enter, reducedMotion]);
 
+  const loadWork = useCallback((artifact: SpatialArtifact) => {
+    setLoadedWorkId(artifact.id);
+    setCoverArtUrl(artifact.cover);
+    setElapsed(0);
+    setIsPlaying(true);
+    setGrabbing(null);
+    setDropHot(false);
+  }, []);
+
   const witness = useCallback(() => {
     setWitnessCount((count) => count + 1);
     enter("witness");
@@ -166,13 +188,29 @@ export default function SpatialRegistryMockPage() {
     window.setTimeout(() => setCeremonyPhase("done"), reducedMotion ? 0 : 700);
   }, [enter, reducedMotion]);
 
+  const onFileInspect = useCallback((file: File) => {
+    setInspectFile({ name: file.name, size: file.size, type: file.type || "audio" });
+    enter("register");
+  }, [enter]);
+
   const wave = useMemo(
     () => Array.from({ length: 18 }, (_, index) => 6 + ((index * 37) % 16)),
     [],
   );
 
   return (
-    <main className={`spatial-registry-mock${view !== "overview" ? " is-entered" : ""}`}>
+    <main
+      className={`spatial-registry-mock${view !== "overview" ? " is-entered" : ""}${grabbing ? " is-grabbing" : ""}${dropHot ? " is-drop-hot" : ""}`}
+      onDragOver={(event) => {
+        event.preventDefault();
+        event.dataTransfer.dropEffect = "copy";
+      }}
+      onDrop={(event) => {
+        event.preventDefault();
+        const file = event.dataTransfer.files[0];
+        if (file) onFileInspect(file);
+      }}
+    >
       <header className="sr-header">
         <button className="sr-brand" onClick={() => navigate("/")}>
           <span className="sr-mark">LN</span>
@@ -188,8 +226,9 @@ export default function SpatialRegistryMockPage() {
               className={nav === item.id ? "is-active" : ""}
               onClick={() => {
                 setNav(item.id);
-                if (item.id === "nexus") returnToConstellation();
-                else enter(item.node);
+                if (item.view === "overview") returnToConstellation();
+                else if (item.view === "explore") openExplore();
+                else enter(item.view as SpatialRegistryNodeId);
               }}
             >
               {item.label}
@@ -274,10 +313,16 @@ export default function SpatialRegistryMockPage() {
           witnessCount={witnessCount}
           isPlaying={isPlaying}
           coverArtUrl={coverArtUrl}
+          loadedWorkId={loadedWorkId}
           ceremony={ceremony}
           reducedMotion={reducedMotion}
           onSelect={enter}
           onHover={setHoveredNode}
+          onLoadWork={loadWork}
+          onGrab={(artifact, hot) => {
+            setGrabbing(artifact);
+            setDropHot(hot);
+          }}
         />
       </div>
 
@@ -304,6 +349,23 @@ export default function SpatialRegistryMockPage() {
 
       {view !== "overview" && (
         <section className="sr-pathway-card">
+          {view === "explore" ? (
+            <>
+              <Kicker>Explore → Player</Kicker>
+              <h2 className="mt-2 font-display text-2xl">Grab a work</h2>
+              <p className="mt-2 text-xs tracking-[0.16em] uppercase text-[var(--sr-electric)]">Load this registered artifact into my experience</p>
+              <p className="sr-copy">Works are physical objects. Grab a record, drag it to the player, drop it. The platter takes the registered work. Playback begins without leaving the registry.</p>
+              <ol className="sr-steps">
+                {exploreArtifacts.map((artifact) => (
+                  <li key={artifact.id}>
+                    <b>{ARTIFACT_FORMS[artifact.medium].object}</b>
+                    <span>{artifact.title}</span>
+                  </li>
+                ))}
+              </ol>
+            </>
+          ) : (
+            <>
           <Kicker>{selected.form}</Kicker>
           <h2 className="mt-2 font-display text-2xl">{selected.shortLabel}</h2>
           <p className="mt-2 text-xs tracking-[0.16em] uppercase" style={{ color: selected.color }}>{selected.language}</p>
@@ -365,7 +427,10 @@ export default function SpatialRegistryMockPage() {
             </div>
           )}
           {view === "register" && (
-            <button className="sr-gold-btn mt-4" onClick={register}>Simulate register</button>
+            <>
+              <p className="sr-copy">Drag a local file into this chamber to inspect it, then establish the record. Same gesture as loading a work into the player, reversed.</p>
+              <button className="sr-gold-btn mt-4" onClick={register}>Simulate register</button>
+            </>
           )}
           {view === "witness" && (
             <button className="sr-gold-btn mt-4" onClick={witness}>Simulate witness · {witnessCount}</button>
@@ -375,18 +440,28 @@ export default function SpatialRegistryMockPage() {
               View Attribution
             </button>
           )}
+            </>
+          )}
         </section>
       )}
 
       <p className="sr-hint">
         <MousePointer2 size={13} />
-        {view === "overview"
-          ? hoveredNode
-            ? `Enter ${SPATIAL_REGISTRY_NODES_BY_ID[hoveredNode].shortLabel}`
-            : isPlaying
-              ? "THE REGISTRY IS RESONATING"
-              : "ENTER A PATHWAY"
-          : selected.language}
+        {grabbing
+          ? dropHot
+            ? grabbing.medium === "music"
+              ? "RELEASE TO LOAD"
+              : "THIS MEDIUM IS NOT PLAYABLE"
+            : `CARRYING ${grabbing.title.toUpperCase()}`
+          : view === "overview"
+            ? hoveredNode
+              ? `Enter ${SPATIAL_REGISTRY_NODES_BY_ID[hoveredNode].shortLabel}`
+              : "WORKS · GRAB A RECORD"
+            : view === "explore"
+              ? "GRAB A WORK · DROP ON THE PLAYER"
+              : view === "register"
+                ? "DROP A LOCAL FILE TO ESTABLISH IT"
+                : selected.language}
       </p>
 
       {view === "overview" && (
@@ -395,6 +470,9 @@ export default function SpatialRegistryMockPage() {
           <h2 className="mt-2 font-display text-xl">The work is the center</h2>
           <p className="sr-copy">Each node is an environment, not a page. Enter it. The registry remains the source of truth; this is how it becomes visible.</p>
           <p className="mt-3 text-[10px] tracking-[0.16em] uppercase text-[var(--sr-gold)]">{VISUAL_LANGUAGE.principle}</p>
+          <button className="sr-gold-btn mt-4" onClick={openExplore}>
+            Works · grab a record
+          </button>
           <div className="sr-dl mt-4">
             {SPATIAL_REGISTRY_MOCK.nodes.filter((node) => node.id !== "work").map((node) => (
               <button key={node.id} className="sr-text-btn text-left" onClick={() => enter(node.id)}>
@@ -406,14 +484,22 @@ export default function SpatialRegistryMockPage() {
         </aside>
       )}
 
-      <section className="sr-player" aria-label="Canonical global player">
+      <section className={`sr-player${dropHot ? " is-drop-hot" : ""}`} aria-label="Canonical global player">
         <div className="sr-now">
-          <img src={coverArtUrl} alt="" />
+          <img src={loaded ? coverArtUrl : DEFAULT_COVER_ART} alt="" />
           <div className="min-w-0">
-            <p className="truncate">{work.title}</p>
+            <p className="truncate">{loaded ? loaded.title : "Awaiting a work"}</p>
             <span>
-              {work.artist} · {work.wid}
+              {loaded
+                ? `${loaded.artist} · ${loaded.wid ?? "Unregistered"}`
+                : "Grab a record in Works"}
             </span>
+            {loaded && (
+              <em className="sr-registered">
+                {loaded.status.toUpperCase()}
+                {loaded.witnessed ? " · WITNESSED" : ""}
+              </em>
+            )}
           </div>
         </div>
         <div className="sr-transport">
@@ -424,7 +510,12 @@ export default function SpatialRegistryMockPage() {
             <button className="sr-icon-btn" aria-label="Previous">
               <SkipBack size={15} />
             </button>
-            <button className="sr-icon-btn sr-play" onClick={() => setIsPlaying((value) => !value)} aria-label={isPlaying ? "Pause fictional track" : "Play fictional track"}>
+            <button
+              className="sr-icon-btn sr-play"
+              onClick={() => loaded && setIsPlaying((value) => !value)}
+              aria-label={isPlaying ? "Pause fictional track" : "Play fictional track"}
+              disabled={!loaded}
+            >
               {isPlaying ? <Pause size={16} /> : <Play size={16} />}
             </button>
             <button className="sr-icon-btn" aria-label="Next">
@@ -440,12 +531,13 @@ export default function SpatialRegistryMockPage() {
               className="sr-slider"
               type="range"
               min={0}
-              max={work.durationSeconds}
+              max={loaded?.durationSeconds || work.durationSeconds}
               value={elapsed}
               aria-label="Playback progress"
               onChange={(event) => setElapsed(Number(event.target.value))}
+              disabled={!loaded}
             />
-            <span>{work.duration}</span>
+            <span>{loaded?.duration || work.duration}</span>
           </div>
         </div>
         <div className="sr-player-extra">
@@ -489,6 +581,37 @@ export default function SpatialRegistryMockPage() {
         </div>
       )}
 
+      {inspectFile && (
+        <div className="sr-modal-scrim" onClick={() => setInspectFile(null)}>
+          <section className="sr-modal max-w-md" onClick={(event) => event.stopPropagation()}>
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <Kicker>Local file → Registry</Kicker>
+                <h2 className="mt-2 font-display text-3xl">Inspect</h2>
+              </div>
+              <button className="sr-text-btn" onClick={() => setInspectFile(null)}>
+                Close
+              </button>
+            </div>
+            <ol className="sr-steps">
+              <li><b>File</b><span>{inspectFile.name}</span></li>
+              <li><b>Size</b><span>{Math.max(1, Math.round(inspectFile.size / 1024))} KB</span></li>
+              <li><b>Type</b><span>{inspectFile.type || "unknown"}</span></li>
+              <li><b>Next</b><span>Metadata → Register → WID</span></li>
+            </ol>
+            <p className="sr-copy">The file never leaves this prototype. Dropping it into Register is the same spatial verb as dropping a record onto the Player: you are moving a work through the Nexus.</p>
+            <button
+              className="sr-gold-btn mt-5"
+              onClick={() => {
+                setInspectFile(null);
+                register();
+              }}
+            >
+              Establish the record
+            </button>
+          </section>
+        </div>
+      )}
       {studioOpen && (
         <CoverArtStudio
           coverArtUrl={coverArtUrl}

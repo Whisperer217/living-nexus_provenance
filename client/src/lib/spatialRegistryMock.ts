@@ -16,7 +16,31 @@ export type SpatialRegistryNodeId =
   | "lineage"
   | "player";
 
-export type SpatialView = "overview" | SpatialRegistryNodeId;
+export type SpatialView = "overview" | "explore" | SpatialRegistryNodeId;
+
+export type WorkMedium = "music" | "image" | "video" | "document" | "code";
+
+export const ARTIFACT_FORMS: Record<WorkMedium, { object: string; verb: string }> = {
+  music: { object: "record / disc", verb: "play" },
+  image: { object: "canvas / frame", verb: "view" },
+  video: { object: "film reel", verb: "watch" },
+  document: { object: "folio", verb: "read" },
+  code: { object: "module / crystalline artifact", verb: "run" },
+};
+
+export type SpatialArtifact = {
+  id: string;
+  title: string;
+  artist: string;
+  wid: string | null;
+  status: "Registered" | "Working" | "Sketch";
+  witnessed: boolean;
+  medium: WorkMedium;
+  cover: string;
+  duration: string;
+  durationSeconds: number;
+  position: [number, number, number];
+};
 
 export type SpatialRegistryNode = {
   id: SpatialRegistryNodeId;
@@ -128,6 +152,73 @@ export const SPATIAL_REGISTRY_MOCK = {
     { title: "Registration seal", kind: "record" },
     { title: "Canonical stream", kind: "playback" },
   ],
+  exploreArtifacts: [
+    {
+      id: "yahweh",
+      title: "Yahweh Lights My Way",
+      artist: "Weave & Breathe",
+      wid: "LN-00017",
+      status: "Registered",
+      witnessed: true,
+      medium: "music",
+      cover: ASSET.cover,
+      duration: "04:12",
+      durationSeconds: 252,
+      position: [0, 0.9, 0.35],
+    },
+    {
+      id: "field-hymn",
+      title: "Field Hymn",
+      artist: "Weave & Breathe",
+      wid: null,
+      status: "Working",
+      witnessed: false,
+      medium: "music",
+      cover: ASSET.nebula,
+      duration: "03:40",
+      durationSeconds: 220,
+      position: [-2.45, 1.2, -0.55],
+    },
+    {
+      id: "quiet-path",
+      title: "Quiet Path",
+      artist: "Weave & Breathe",
+      wid: null,
+      status: "Sketch",
+      witnessed: false,
+      medium: "music",
+      cover: ASSET.pathways.player,
+      duration: "02:18",
+      durationSeconds: 138,
+      position: [2.35, 1.05, -0.4],
+    },
+    {
+      id: "night-window",
+      title: "Night Window",
+      artist: "Weave & Breathe",
+      wid: "LN-00011",
+      status: "Registered",
+      witnessed: true,
+      medium: "image",
+      cover: ASSET.pathways.work,
+      duration: "",
+      durationSeconds: 0,
+      position: [-1.7, -0.15, -1.35],
+    },
+    {
+      id: "doctrine-folio",
+      title: "Living Record",
+      artist: "Weave & Breathe",
+      wid: null,
+      status: "Sketch",
+      witnessed: false,
+      medium: "document",
+      cover: ASSET.pathways.register,
+      duration: "",
+      durationSeconds: 0,
+      position: [1.75, -0.1, -1.25],
+    },
+  ] satisfies SpatialArtifact[],
   creatorStages: [
     { id: "identity", label: "Identity", caption: "Jake / Weave & Breathe" },
     { id: "works", label: "Works", caption: "7 registered" },
@@ -252,6 +343,7 @@ export const SPATIAL_REGISTRY_NODES_BY_ID = Object.fromEntries(
 
 export const CAMERA_PRESETS: Record<SpatialView, { position: [number, number, number]; target: [number, number, number] }> = {
   overview: { position: [0.2, 2.6, 11.6], target: [0, 0.4, 0] },
+  explore: { position: [0.15, 3.05, 9.2], target: [0, 0.15, 0.55] },
   work: { position: [0.35, 1.05, 5.2], target: [0, 0.55, 0] },
   profile: { position: [-1.8, 1.45, 4.6], target: [-1.4, 0.85, 0] },
   edit: { position: [2.4, 0.95, 5.1], target: [0.5, 0.55, -0.6] },

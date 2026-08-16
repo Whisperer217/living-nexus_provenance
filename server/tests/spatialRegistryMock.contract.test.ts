@@ -63,7 +63,14 @@ describe("Spatial Registry Mock isolation", () => {
     expect(VISUAL_LANGUAGE.accents.creator).toContain("violet");
     expect(SPATIAL_REGISTRY_MOCK.nodes.find((node) => node.id === "profile")?.color).toBe("#c77dff");
     expect(SPATIAL_REGISTRY_MOCK.nodes.find((node) => node.id === "edit")?.color).toBe("#29b6f6");
-    expect(SPATIAL_REGISTRY_MOCK.attribution.label).toBe("View Attribution");
+    expect(SPATIAL_REGISTRY_MOCK.exploreArtifacts.map((artifact) => artifact.id)).toContain("yahweh");
+    expect(SPATIAL_REGISTRY_MOCK.exploreArtifacts.find((artifact) => artifact.id === "yahweh")).toMatchObject({
+      title: "Yahweh Lights My Way",
+      wid: "LN-00017",
+      medium: "music",
+      witnessed: true,
+    });
+    expect(SPATIAL_REGISTRY_MOCK.exploreArtifacts.some((artifact) => artifact.medium === "image")).toBe(true);
   });
 
   it("mounts on a dedicated prototype route and remains local-only", () => {
@@ -79,7 +86,11 @@ describe("Spatial Registry Mock isolation", () => {
     expect(pageSource).toContain("Cover Art Studio");
     expect(pageSource).toContain("My AI");
     expect(pageSource).toContain("View Attribution");
-    expect(pageSource).toContain("Registration capacity");
+    expect(pageSource).toContain("Grab a work");
+    expect(pageSource).toContain("WITNESSED");
+    expect(pageSource).toContain("Drag a local file");
+    expect(sceneSource).toContain("Drop a registered work");
+    expect(sceneSource).toContain("makeArtifactObject");
     expect(sceneSource).toContain("three");
     expect(sceneSource).toContain("Visualization only");
     expect(sceneSource).toContain("cyber-celestial");

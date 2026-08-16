@@ -472,6 +472,25 @@
   pointer-events: none;
 }
 
+.spatial-registry-mock.is-grabbing {
+  cursor: grabbing;
+}
+
+.spatial-registry-mock.is-drop-hot .sr-player,
+.sr-player.is-drop-hot {
+  box-shadow: 0 0 32px rgba(41, 182, 246, 0.35);
+  border-top-color: var(--sr-electric);
+}
+
+.sr-registered {
+  display: block;
+  margin-top: 3px;
+  font-style: normal;
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  color: var(--sr-gold);
+}
+
 .sr-player {
   position: absolute;
   z-index: 22;

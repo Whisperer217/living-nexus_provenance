@@ -12,10 +12,12 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { CSS2DObject, CSS2DRenderer } from "three/examples/jsm/renderers/CSS2DRenderer.js";
 import {
+  ARTIFACT_FORMS,
   ASSET,
   CAMERA_PRESETS,
   SPATIAL_REGISTRY_MOCK,
   SPATIAL_REGISTRY_NODES_BY_ID,
+  type SpatialArtifact,
   type SpatialRegistryNodeId,
   type SpatialView,
 } from "@/lib/spatialRegistryMock";
@@ -33,10 +35,13 @@ type SpatialRegistrySceneProps = {
   witnessCount: number;
   isPlaying: boolean;
   coverArtUrl: string;
+  loadedWorkId: string | null;
   ceremony: SpatialCeremony;
   reducedMotion: boolean;
   onSelect: (nodeId: SpatialRegistryNodeId) => void;
   onHover: (nodeId: SpatialRegistryNodeId | null) => void;
+  onLoadWork: (artifact: SpatialArtifact) => void;
+  onGrab: (artifact: SpatialArtifact | null, dropHot: boolean) => void;
 };
 
 type EdgeVisual = {
@@ -189,6 +194,64 @@ function makeWaveform(count = 28) {
   return group;
 }
 
+function makeArtifactObject(artifact: SpatialArtifact, loader: THREE.TextureLoader) {
+  const group = new THREE.Group();
+  group.position.set(...artifact.position);
+  group.userData.artifactId = artifact.id;
+  group.userData.medium = artifact.medium;
+  group.userData.playable = artifact.medium === "music";
+  group.userData.home = new THREE.Vector3(...artifact.position);
+
+  if (artifact.medium === "music") {
+    const disc = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.64, 0.64, 0.048, 48),
+      new THREE.MeshStandardMaterial({ color: 0x0c0c0c, metalness: 0.7, roughness: 0.28, emissive: GOLD, emissiveIntensity: 0.12 }),
+    );
+    disc.userData.artifactId = artifact.id;
+    const grooves = new THREE.Mesh(
+      new THREE.TorusGeometry(0.5, 0.01, 8, 64),
+      new THREE.MeshBasicMaterial({ color: GOLD, transparent: true, opacity: 0.5 }),
+    );
+    grooves.rotation.x = Math.PI / 2;
+    const labelRing = new THREE.Mesh(
+      new THREE.CircleGeometry(0.3, 40),
+      new THREE.MeshBasicMaterial({ map: loadMap(loader, artifact.cover), side: THREE.DoubleSide }),
+    );
+    labelRing.rotation.x = -Math.PI / 2;
+    labelRing.position.y = 0.03;
+    labelRing.userData.artifactId = artifact.id;
+    group.add(disc, grooves, labelRing);
+  } else if (artifact.medium === "image") {
+    const frame = new THREE.Mesh(new THREE.BoxGeometry(0.98, 0.98, 0.07), wire(GOLD, 0.88));
+    const canvas = new THREE.Mesh(
+      new THREE.PlaneGeometry(0.84, 0.84),
+      new THREE.MeshBasicMaterial({ map: loadMap(loader, artifact.cover), side: THREE.DoubleSide }),
+    );
+    canvas.position.z = 0.045;
+    frame.userData.artifactId = artifact.id;
+    canvas.userData.artifactId = artifact.id;
+    group.add(frame, canvas);
+  } else {
+    const folio = new THREE.Mesh(new THREE.BoxGeometry(0.72, 0.98, 0.09), wire(GOLD, 0.92));
+    folio.userData.artifactId = artifact.id;
+    group.add(folio);
+  }
+
+  const { wrap } = makeLabel(artifact.title, artifact.wid ?? ARTIFACT_FORMS[artifact.medium].object);
+  wrap.style.pointerEvents = "none";
+  const label = new CSS2DObject(wrap);
+  label.position.y = 0.88;
+  group.add(label);
+  return group;
+}
+
+function hudContains(event: PointerEvent) {
+  const hud = document.querySelector(".sr-player");
+  if (!hud) return false;
+  const rect = hud.getBoundingClientRect();
+  return event.clientX >= rect.left && event.clientX <= rect.right && event.clientY >= rect.top && event.clientY <= rect.bottom;
+}
+
 function makeArc(from: THREE.Vector3, to: THREE.Vector3) {
   const mid = from.clone().lerp(to, 0.5);
   mid.y += from.distanceTo(to) * 0.12;
@@ -230,7 +293,7 @@ function backdrop(loader: THREE.TextureLoader, url: string, size: number, opacit
 }
 
 export const SpatialRegistryScene = forwardRef<SpatialSceneHandle, SpatialRegistrySceneProps>(function SpatialRegistryScene(
-  { view, selectedNode, witnessCount, isPlaying, coverArtUrl, ceremony, reducedMotion, onSelect, onHover },
+  { view, selectedNode, witnessCount, isPlaying, coverArtUrl, loadedWorkId, ceremony, reducedMotion, onSelect, onHover, onLoadWork, onGrab },
   ref,
 ) {
   const mountRef = useRef<HTMLDivElement>(null);
@@ -239,10 +302,13 @@ export const SpatialRegistryScene = forwardRef<SpatialSceneHandle, SpatialRegist
   const witnessRef = useRef(witnessCount);
   const playingRef = useRef(isPlaying);
   const coverRef = useRef(coverArtUrl);
+  const loadedRef = useRef(loadedWorkId);
   const ceremonyRef = useRef(ceremony);
   const reducedRef = useRef(reducedMotion);
   const onSelectRef = useRef(onSelect);
   const onHoverRef = useRef(onHover);
+  const onLoadWorkRef = useRef(onLoadWork);
+  const onGrabRef = useRef(onGrab);
   const controlBox = useRef<{ camera: THREE.PerspectiveCamera | null; controls: OrbitControls | null }>({
     camera: null,
     controls: null,
@@ -270,11 +336,14 @@ export const SpatialRegistryScene = forwardRef<SpatialSceneHandle, SpatialRegist
     witnessRef.current = witnessCount;
     playingRef.current = isPlaying;
     coverRef.current = coverArtUrl;
+    loadedRef.current = loadedWorkId;
     ceremonyRef.current = ceremony;
     reducedRef.current = reducedMotion;
     onSelectRef.current = onSelect;
     onHoverRef.current = onHover;
-  }, [view, selectedNode, witnessCount, isPlaying, coverArtUrl, ceremony, reducedMotion, onSelect, onHover]);
+    onLoadWorkRef.current = onLoadWork;
+    onGrabRef.current = onGrab;
+  }, [view, selectedNode, witnessCount, isPlaying, coverArtUrl, loadedWorkId, ceremony, reducedMotion, onSelect, onHover, onLoadWork, onGrab]);
 
   useEffect(() => {
     const mount = mountRef.current;
@@ -741,24 +810,153 @@ export const SpatialRegistryScene = forwardRef<SpatialSceneHandle, SpatialRegist
     });
     chambers.add(playerChamber);
 
+    const exploreChamber = new THREE.Group();
+    exploreChamber.visible = false;
+    const artifactPickables: THREE.Object3D[] = [];
+    const artifactGroups = new Map<string, THREE.Group>();
+    SPATIAL_REGISTRY_MOCK.exploreArtifacts.forEach((artifact) => {
+      const object = makeArtifactObject(artifact, loader);
+      exploreChamber.add(object);
+      artifactGroups.set(artifact.id, object);
+      object.traverse((child) => {
+        if ((child as THREE.Mesh).isMesh && child.userData.artifactId) artifactPickables.push(child);
+      });
+    });
+    chambers.add(exploreChamber);
+
+    const turntable = new THREE.Group();
+    turntable.visible = false;
+    const platter = new THREE.Mesh(
+      new THREE.CylinderGeometry(1.05, 1.12, 0.08, 64),
+      new THREE.MeshStandardMaterial({ color: 0x101418, metalness: 0.72, roughness: 0.22, emissive: ELECTRIC, emissiveIntensity: 0.18 }),
+    );
+    platter.userData.dropZone = true;
+    const platterRing = new THREE.Mesh(
+      new THREE.TorusGeometry(1.18, 0.018, 8, 80),
+      new THREE.MeshBasicMaterial({ color: ELECTRIC, transparent: true, opacity: 0.45 }),
+    );
+    platterRing.rotation.x = Math.PI / 2;
+    const dropHalo = new THREE.Mesh(
+      new THREE.RingGeometry(1.22, 1.55, 64),
+      new THREE.MeshBasicMaterial({ color: ELECTRIC, transparent: true, opacity: 0.12, side: THREE.DoubleSide, depthWrite: false }),
+    );
+    dropHalo.rotation.x = -Math.PI / 2;
+    dropHalo.position.y = 0.05;
+    const dropZone = new THREE.Mesh(
+      new THREE.CylinderGeometry(1.55, 1.55, 0.55, 24),
+      new THREE.MeshBasicMaterial({ visible: false }),
+    );
+    dropZone.userData.dropZone = true;
+    const { wrap: platterWrap, caption: platterCaption } = makeLabel("PLAYER", "Drop a registered work");
+    platterWrap.style.pointerEvents = "none";
+    const platterLabel = new CSS2DObject(platterWrap);
+    platterLabel.position.set(0, 0.55, 0);
+    turntable.add(platter, platterRing, dropHalo, dropZone, platterLabel);
+    scene.add(turntable);
+
+    const EXPLORE_PLATTER = new THREE.Vector3(0, -1.22, 2.45);
+    const PLAYER_PLATTER = new THREE.Vector3(0, -1.28, 0);
+
     const raycaster = new THREE.Raycaster();
     const pointer = new THREE.Vector2();
     const pointerState = { x: 0, y: 0, dragged: false };
     let hovered: SpatialRegistryNodeId | null = null;
-    const hitNode = (event: PointerEvent) => {
+    const dragPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+    const dragHit = new THREE.Vector3();
+    const camDir = new THREE.Vector3();
+    let drag: {
+      group: THREE.Group;
+      artifact: SpatialArtifact;
+      active: boolean;
+      dropHot: boolean;
+    } | null = null;
+    let snap: { group: THREE.Group; artifact: SpatialArtifact; t: number } | null = null;
+    let seated: THREE.Group | null = null;
+    const setPointer = (event: PointerEvent) => {
       const rect = renderer.domElement.getBoundingClientRect();
       pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
       pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
       raycaster.setFromCamera(pointer, camera);
+    };
+    const hitNode = (event: PointerEvent) => {
+      setPointer(event);
       return (raycaster.intersectObjects(pickables, false)[0]?.object.userData.nodeId as SpatialRegistryNodeId | undefined) ?? null;
+    };
+    const hitArtifact = (event: PointerEvent) => {
+      setPointer(event);
+      const id = raycaster.intersectObjects(artifactPickables, false)[0]?.object.userData.artifactId as string | undefined;
+      return id ? SPATIAL_REGISTRY_MOCK.exploreArtifacts.find((item) => item.id === id) ?? null : null;
+    };
+    const platterWorld = new THREE.Vector3();
+    const isDropHot = (event: PointerEvent, group: THREE.Group) => {
+      turntable.getWorldPosition(platterWorld);
+      const nearPlatter = group.position.distanceTo(platterWorld) < 1.85;
+      return nearPlatter || hudContains(event);
+    };
+    const returnHome = (group: THREE.Group) => {
+      const home = group.userData.home as THREE.Vector3;
+      group.position.copy(home);
+      group.rotation.set(0, 0, 0);
+      exploreChamber.attach(group);
+    };
+    const seatOnPlatter = (group: THREE.Group) => {
+      if (seated && seated !== group) returnHome(seated);
+      turntable.attach(group);
+      group.position.set(0, 0.08, 0);
+      group.rotation.set(0, 0, 0);
+      seated = group;
     };
     const onPointerDown = (event: PointerEvent) => {
       pointerState.x = event.clientX;
       pointerState.y = event.clientY;
       pointerState.dragged = false;
+      if (viewRef.current === "explore" || viewRef.current === "player") {
+        const artifact = hitArtifact(event);
+        if (artifact) {
+          const group = artifactGroups.get(artifact.id);
+          if (group) {
+            drag = { group, artifact, active: false, dropHot: false };
+            renderer.domElement.setPointerCapture(event.pointerId);
+          }
+        }
+      }
     };
     const onPointerMove = (event: PointerEvent) => {
-      if (Math.hypot(event.clientX - pointerState.x, event.clientY - pointerState.y) > 5) pointerState.dragged = true;
+      if (Math.hypot(event.clientX - pointerState.x, event.clientY - pointerState.y) > 7) pointerState.dragged = true;
+      if (drag) {
+        if (!drag.active && pointerState.dragged) {
+          drag.active = true;
+          controls.enabled = false;
+          if (seated === drag.group) seated = null;
+          exploreChamber.attach(drag.group);
+          drag.group.position.y += 0.35;
+          camera.getWorldDirection(camDir);
+          dragPlane.setFromNormalAndCoplanarPoint(camDir.clone().negate(), drag.group.position);
+          onGrabRef.current(drag.artifact, false);
+        }
+        if (drag.active) {
+          setPointer(event);
+          camera.getWorldDirection(camDir);
+          dragPlane.setFromNormalAndCoplanarPoint(camDir.clone().negate(), drag.group.position);
+          if (raycaster.ray.intersectPlane(dragPlane, dragHit)) {
+            drag.group.position.lerp(dragHit, 0.55);
+          }
+          drag.group.rotation.y += 0.08;
+          drag.group.rotation.z = Math.sin(performance.now() * 0.004) * 0.12;
+          const hot = drag.artifact.medium === "music" && isDropHot(event, drag.group);
+          if (hot !== drag.dropHot) {
+            drag.dropHot = hot;
+            onGrabRef.current(drag.artifact, hot);
+          }
+          renderer.domElement.style.cursor = hot ? "copy" : "grabbing";
+          return;
+        }
+      }
+      if (viewRef.current === "explore") {
+        const artifact = hitArtifact(event);
+        renderer.domElement.style.cursor = artifact ? "grab" : "grab";
+        return;
+      }
       const nodeId = hitNode(event);
       if (nodeId !== hovered) {
         hovered = nodeId;
@@ -768,7 +966,24 @@ export const SpatialRegistryScene = forwardRef<SpatialSceneHandle, SpatialRegist
     };
     const onPointerUp = (event: PointerEvent) => {
       renderer.domElement.style.cursor = "grab";
-      if (pointerState.dragged) return;
+      controls.enabled = true;
+      if (drag?.active) {
+        const playable = drag.artifact.medium === "music";
+        const hot = playable && isDropHot(event, drag.group);
+        if (hot) {
+          snap = { group: drag.group, artifact: drag.artifact, t: 0 };
+        } else {
+          returnHome(drag.group);
+        }
+        onGrabRef.current(null, false);
+        drag = null;
+        return;
+      }
+      const wasDragAttempt = Boolean(drag);
+      drag = null;
+      onGrabRef.current(null, false);
+      if (pointerState.dragged || wasDragAttempt) return;
+      if (viewRef.current === "explore") return;
       const nodeId = hitNode(event);
       if (nodeId) onSelectRef.current(nodeId);
     };
@@ -807,7 +1022,9 @@ export const SpatialRegistryScene = forwardRef<SpatialSceneHandle, SpatialRegist
       const preset = CAMERA_PRESETS[currentView];
       desiredPos.set(...preset.position);
       desiredTarget.set(...preset.target);
-      if (reduced) {
+      if (drag?.active) {
+        /* keep camera still while carrying a work */
+      } else if (reduced) {
         camera.position.copy(desiredPos);
         controls.target.copy(desiredTarget);
       } else {
@@ -842,6 +1059,32 @@ export const SpatialRegistryScene = forwardRef<SpatialSceneHandle, SpatialRegist
       witnessChamber.visible = currentView === "witness";
       lineageChamber.visible = currentView === "lineage";
       playerChamber.visible = currentView === "player";
+      exploreChamber.visible = currentView === "explore";
+      turntable.visible = currentView === "explore" || currentView === "player";
+      turntable.position.copy(currentView === "player" ? PLAYER_PLATTER : EXPLORE_PLATTER);
+      artifactGroups.forEach((group) => {
+        group.visible = currentView === "explore" || group === seated;
+      });
+      (dropHalo.material as THREE.MeshBasicMaterial).opacity = drag?.dropHot ? 0.55 : seated ? 0.22 : 0.12;
+      (platter.material as THREE.MeshStandardMaterial).emissiveIntensity = drag?.dropHot ? 0.85 : playing ? 0.4 : 0.18;
+      platterCaption.textContent = seated ? "Now playing" : drag?.dropHot ? "Release to load" : "Drop a registered work";
+
+      if (snap) {
+        turntable.getWorldPosition(platterWorld);
+        const target = platterWorld.clone();
+        target.y += 0.08;
+        snap.t = reduced ? 1 : Math.min(1, snap.t + 0.08);
+        snap.group.position.lerp(target, snap.t);
+        snap.group.rotation.x *= 1 - snap.t;
+        snap.group.rotation.z *= 1 - snap.t;
+        if (snap.t >= 1) {
+          seatOnPlatter(snap.group);
+          onLoadWorkRef.current(snap.artifact);
+          snap = null;
+        }
+      }
+      if (seated && playing && !reduced) seated.rotation.y += 0.045;
+      else if (seated && !playing) seated.rotation.y += reduced ? 0 : 0.004;
 
       if (coverRef.current !== appliedCover) {
         appliedCover = coverRef.current;
@@ -906,7 +1149,7 @@ export const SpatialRegistryScene = forwardRef<SpatialSceneHandle, SpatialRegist
       beams.forEach((beam, index) => {
         (beam.material as THREE.MeshBasicMaterial).opacity = playing ? 0.35 + Math.sin(frame * 0.1 + index) * 0.2 : 0.12;
       });
-      waveform.children.forEach((child) => {
+      waveform.children.forEach((child: THREE.Object3D) => {
         const i = child.userData.wave as number;
         const height = playing ? 0.25 + Math.abs(Math.sin(frame * 0.12 + i * 0.45)) * 0.9 : 0.18;
         child.scale.y = height;
@@ -950,7 +1193,7 @@ export const SpatialRegistryScene = forwardRef<SpatialSceneHandle, SpatialRegist
       ref={mountRef}
       className="absolute inset-0"
       role="application"
-      aria-label="Enter a pathway in the fictional spatial registry. Drag to look around. Select a node to enter its environment."
+      aria-label="Spatial registry. In Works, grab a record and drop it on the player to load the registered work."
     />
   );
 });
