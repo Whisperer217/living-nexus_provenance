@@ -82,7 +82,7 @@ const DOCTRINE_RULES: DoctrineRule[] = [
     question: "provenance",
     label: "Does provenance feel tangible?",
     description:
-      "The provenance chain, WID, registration date, and custody path should be visible or one click away.",
+      "The provenance chain, WID, registration date, and custody path should be visible or one click away. Motion and controls must communicate the life of the work (Law VII), not decorate it.",
     passSignals: [
       "provenanceChain",
       "witnessId",

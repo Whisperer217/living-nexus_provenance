@@ -6,7 +6,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { ASSET, SPATIAL_REGISTRY_MOCK, VISUAL_LANGUAGE } from "../../client/src/lib/spatialRegistryMock";
+import { ASSET, INTERACTION_DOCTRINE, SPATIAL_REGISTRY_MOCK, VISUAL_LANGUAGE } from "../../client/src/lib/spatialRegistryMock";
 
 describe("Spatial Registry Mock isolation", () => {
   it("uses the supplied fictional music work and complete provenance loop", () => {
@@ -59,7 +59,9 @@ describe("Spatial Registry Mock isolation", () => {
       "lineage",
       "player",
     ]);
-    expect(VISUAL_LANGUAGE.principle).toContain("One central work");
+    expect(INTERACTION_DOCTRINE.standard).toContain("Nothing exists merely for decoration");
+    expect(INTERACTION_DOCTRINE.loop).toEqual(["Profile", "Edit", "Register", "Witness"]);
+    expect(INTERACTION_DOCTRINE.grammar.map((row) => row.act)).toContain("Load into Player");
     expect(VISUAL_LANGUAGE.accents.creator).toContain("violet");
     expect(SPATIAL_REGISTRY_MOCK.nodes.find((node) => node.id === "profile")?.color).toBe("#c77dff");
     expect(SPATIAL_REGISTRY_MOCK.nodes.find((node) => node.id === "edit")?.color).toBe("#29b6f6");
@@ -82,7 +84,10 @@ describe("Spatial Registry Mock isolation", () => {
     expect(appSource).toContain('path="/prototype/spatial-registry"');
     expect(pageSource).toContain("SPATIAL_REGISTRY_MOCK");
     expect(pageSource).toContain("Return to constellation");
-    expect(pageSource).toContain("VISUAL_LANGUAGE");
+    expect(pageSource).toContain("INTERACTION_DOCTRINE");
+    expect(sceneSource).toContain("Law VII");
+    const lawSource = readFileSync(resolve(process.cwd(), "ARCHITECTURAL_LAWS.md"), "utf8");
+    expect(lawSource).toContain("Law VII — Intentional Representation");
     expect(pageSource).toContain("Cover Art Studio");
     expect(pageSource).toContain("My AI");
     expect(pageSource).toContain("View Attribution");

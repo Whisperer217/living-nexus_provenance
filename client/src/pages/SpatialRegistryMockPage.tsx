@@ -32,6 +32,7 @@ import {
   DEFAULT_COVER_ART,
   SPATIAL_REGISTRY_MOCK,
   SPATIAL_REGISTRY_NODES_BY_ID,
+  INTERACTION_DOCTRINE,
   VISUAL_LANGUAGE,
   type SpatialArtifact,
   type SpatialRegistryNodeId,
@@ -470,6 +471,12 @@ export default function SpatialRegistryMockPage() {
           <h2 className="mt-2 font-display text-xl">The work is the center</h2>
           <p className="sr-copy">Each node is an environment, not a page. Enter it. The registry remains the source of truth; this is how it becomes visible.</p>
           <p className="mt-3 text-[10px] tracking-[0.16em] uppercase text-[var(--sr-gold)]">{VISUAL_LANGUAGE.principle}</p>
+          <p className="sr-copy">{INTERACTION_DOCTRINE.standard}</p>
+          <ol className="sr-steps">
+            {INTERACTION_DOCTRINE.grammar.slice(0, 5).map((row) => (
+              <li key={row.act}><b>{row.act}</b><span>{row.means}</span></li>
+            ))}
+          </ol>
           <button className="sr-gold-btn mt-4" onClick={openExplore}>
             Works · grab a record
           </button>

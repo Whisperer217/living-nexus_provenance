@@ -444,7 +444,7 @@ The ten domain nodes and their children:
 | **The Registry** | Witness Registry, WID Verification, Public Ledger |
 | **The Living Graph** | Constellation, Work Relationships, Creator Graph, Full Graph |
 | **The Keeper** | Archetype, ◈ Economy, PPG, Celestial Codex, Marketplace |
-| **The Doctrine** | Manifesto, Lexicon, WID Specification, Design System, Architectural Laws |
+| **The Doctrine** | Manifesto, Lexicon, WID Specification, Design System, Architectural Laws, Intentional Interface |
 
 ---
 
@@ -534,3 +534,50 @@ The Registry never owns the artifact. The creator's domain owns the artifact. Th
 - Presenting a "dashboard" as the post-login destination
 - Any navigation structure that makes the platform feel like the home
 - Discovery surfaces that lead with platform content rather than creator domains
+
+---
+
+## Law VII — Intentional Representation
+
+*Enacted 16 August 2026. Source: Keeper direction during the Spatial Registry rebuild. Full text: `docs/INTENTIONAL_INTERFACE_DOCTRINE.md`.*
+
+> **Nothing exists merely for decoration. Every object, movement, transition, relationship, and control must communicate the state, history, ownership, or experience of a registered work.**
+
+The domain is the truth. The interface is testimony. Three.js, animation, lighting, sound, and conventional controls are instruments. They serve the life of a work. They do not exist to impress.
+
+### Rationale
+
+Profile → Edit → Register → Witness are not UI sections. They are actions in the life of a work. A spatial interface is justified only when it makes those actions tangible.
+
+The failure mode is beauty without meaning: a constellation that looks expensive and explains nothing. The success mode is recognition: the viewer understands what they are looking at because the structure *is* the provenance.
+
+### The Keep / Cut Test
+
+- Cool but mute animation → cut.
+- Unusual interaction that clarifies provenance → keep.
+- Conventional control more intuitive than a spatial one in that case → use the conventional control.
+
+Intentional does not mean complicated. It means nothing accidental.
+
+### Spatial Grammar (non-exhaustive)
+
+| Act | Meaning |
+|---|---|
+| Drag a work | Moving an artifact |
+| Drop into Register | Declaring it |
+| Witness appears | Attestation of an event |
+| Follow lineage | Traversing history |
+| Load into Player | Experiencing the registered artifact |
+| Work revolves | Active / in playback |
+| Camera approaches a node | Entering that record or domain |
+| Camera pulls back | Seeing the larger lineage |
+| Connection illuminates | A relationship is revealed |
+| A version branches | Change without erasure |
+
+### Prohibited
+
+- Animation for animation's sake
+- 3D because 3D is fashionable
+- Buttons because SaaS platforms have buttons
+- Treating the visualization layer as the registry
+

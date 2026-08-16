@@ -98,6 +98,27 @@ export const VISUAL_LANGUAGE = {
   materials: ["thin wireframe", "emissive glow", "holographic panes", "dark nebula"],
 } as const;
 
+/** Law VII — bound into the spatial prototype so the visualization cannot drift into decoration. */
+export const INTERACTION_DOCTRINE = {
+  standard:
+    "Nothing exists merely for decoration. Every object, movement, transition, relationship, and control must communicate the state, history, ownership, or experience of a registered work.",
+  want: "Oh. I understand what I'm looking at.",
+  refuse: "Whoa, cool Three.js.",
+  loop: ["Profile", "Edit", "Register", "Witness"],
+  grammar: [
+    { act: "Drag a work", means: "You are moving an artifact." },
+    { act: "Drop into Register", means: "You are declaring it." },
+    { act: "Witness appears", means: "Someone attested to that event." },
+    { act: "Follow lineage", means: "You are traversing history." },
+    { act: "Load into Player", means: "You are experiencing the registered artifact." },
+    { act: "Work revolves", means: "It is active / in playback." },
+    { act: "Camera approaches", means: "You are entering that record." },
+    { act: "Camera pulls back", means: "You are seeing the larger lineage." },
+    { act: "Connection illuminates", means: "A relationship is being revealed." },
+    { act: "A version branches", means: "The work changed without erasing its history." },
+  ],
+} as const;
+
 export const SPATIAL_REGISTRY_MOCK = {
   creator: {
     name: "Jake",

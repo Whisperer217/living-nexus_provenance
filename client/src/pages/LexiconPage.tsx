@@ -620,6 +620,16 @@ const SECTIONS: LexSection[] = [
         core: true,
       },
       {
+        term: "Intentional Interface",
+        meaning: "The design law that nothing on the platform exists merely for decoration. Every object, movement, transition, relationship, and control must communicate the state, history, ownership, or experience of a registered work. Beauty emerges from meaningful structure. Cool but mute animation is cut. A unusual interaction that clarifies provenance is kept. A conventional control is used when it is more intuitive than a spatial one. Intentional does not mean complicated. It means nothing accidental.",
+        core: true,
+      },
+      {
+        term: "Spatial Grammar",
+        meaning: "The provenance meaning of spatial acts: drag a work and you are moving an artifact; drop it into Register and you are declaring it; a Witness appears and someone attested; follow lineage and you are traversing history; load the work into Player and you are experiencing the registered artifact. Camera approach is entry. Camera pull-back is the larger lineage. Revolution is playback. An illuminated connection is a revealed relationship. A branching version is change without erasure.",
+        core: true,
+      },
+      {
         term: "Doctrine Phrases Canonized",
         meaning: "Platform language that has been formally adopted into the Living Nexus doctrine — terms that have been tested, refined, and declared as part of the platform's permanent vocabulary.",
       },

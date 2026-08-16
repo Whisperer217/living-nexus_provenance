@@ -5,6 +5,7 @@
  * Visualization only. If this layer disappeared, the mock registry would still exist.
  * Overview is a constellation. Each pathway is a small 3D environment you enter.
  * Visual language: cyber-celestial wireframes, holographic panes, dark nebula.
+ * Law VII: nothing here is decoration. Motion and objects must communicate the work.
  */
 
 import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";

@@ -62,6 +62,8 @@ This platform was built by a person whose core doctrine is: *words have power, p
 
 The platform's aesthetic — cathedral architecture, sacred geometry, gold on black — is not a design choice. It is a statement that the creative record of a human being deserves to be held with reverence, not processed with indifference.
 
+That statement has a hard edge: **nothing exists merely for decoration.** If a motion, object, or control does not communicate the state, history, ownership, or experience of a registered work, it is cut. See Law VII and `docs/INTENTIONAL_INTERFACE_DOCTRINE.md`.
+
 ---
 
 ## The Ethical Position
