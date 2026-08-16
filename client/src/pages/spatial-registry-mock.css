@@ -1,0 +1,420 @@
+.spatial-registry-mock {
+  --sr-void: #050403;
+  --sr-gold: #c49a28;
+  --sr-gold-hot: #e8b840;
+  --sr-gold-pearl: #f5cc5a;
+  --sr-parchment: #ede5d0;
+  --sr-smoke: #6b6555;
+  --sr-stone: #c9b896;
+  --ln-gold: #c49a28;
+  --ln-parchment: #ede5d0;
+  --ln-smoke: #6b6555;
+  --ln-coal: #050403;
+  position: relative;
+  isolation: isolate;
+  min-height: 100dvh;
+  overflow: hidden;
+  background: var(--sr-void);
+  color: var(--sr-parchment);
+  font-family: "DM Sans", sans-serif;
+  color-scheme: dark;
+}
+
+.spatial-registry-mock::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background:
+    radial-gradient(ellipse at 50% 42%, transparent 18%, rgba(5, 4, 3, 0.55) 72%, rgba(5, 4, 3, 0.88) 100%),
+    linear-gradient(to top, rgba(5, 4, 3, 0.72), transparent 28%);
+}
+
+.sr-hud {
+  position: relative;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.sr-hud > * {
+  pointer-events: auto;
+}
+
+.sr-kicker {
+  margin: 0;
+  font-family: "Space Mono", ui-monospace, monospace;
+  font-size: 9px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--sr-gold);
+}
+
+.sr-title {
+  margin: 0.35rem 0 0;
+  font-family: "Cinzel", serif;
+  font-size: clamp(1.6rem, 3vw, 2.35rem);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+
+.sr-whisper {
+  margin: 0.55rem 0 0;
+  max-width: 22rem;
+  color: var(--sr-smoke);
+  font-size: 0.75rem;
+  line-height: 1.65;
+}
+
+.sr-ghost-btn,
+.sr-gold-btn,
+.sr-text-btn {
+  appearance: none;
+  border: 1px solid rgba(196, 154, 40, 0.32);
+  background: rgba(5, 4, 3, 0.55);
+  color: var(--sr-parchment);
+  font-family: "Cinzel", serif;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color 160ms ease, background 160ms ease, color 160ms ease;
+}
+
+.sr-ghost-btn {
+  padding: 0.55rem 0.85rem;
+}
+
+.sr-gold-btn {
+  padding: 0.7rem 0.9rem;
+  width: 100%;
+  background: transparent;
+  color: var(--sr-gold-hot);
+  border-color: var(--sr-gold);
+}
+
+.sr-text-btn {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: var(--sr-smoke);
+}
+
+.sr-ghost-btn:hover,
+.sr-gold-btn:hover,
+.sr-text-btn:hover {
+  border-color: var(--sr-gold-hot);
+  color: var(--sr-parchment);
+}
+
+.sr-gold-btn:hover {
+  background: var(--sr-gold);
+  color: #050403;
+}
+
+.sr-plate {
+  border: 1px solid rgba(222, 197, 126, 0.22);
+  background: rgba(8, 7, 6, 0.78);
+  backdrop-filter: blur(16px);
+  padding: 1.05rem 1.1rem 1.15rem;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.42);
+  max-height: min(46dvh, 28rem);
+  overflow: auto;
+}
+
+.sr-plate h2 {
+  margin: 0.35rem 0 0;
+  font-family: "Cinzel", serif;
+  font-size: 1.35rem;
+  line-height: 1.15;
+}
+
+.sr-meta {
+  display: grid;
+  gap: 0.45rem 1rem;
+  margin-top: 1rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid rgba(237, 229, 208, 0.08);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  color: var(--sr-smoke);
+}
+
+.sr-meta strong {
+  display: block;
+  color: var(--sr-parchment);
+  font-family: "Space Mono", ui-monospace, monospace;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+}
+
+.sr-avatar {
+  display: grid;
+  place-items: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  border: 1px solid var(--sr-gold);
+  background:
+    radial-gradient(circle at 35% 30%, rgba(245, 204, 90, 0.28), transparent 36%),
+    #120f0a;
+  color: var(--sr-gold-hot);
+  font-family: "Cinzel", serif;
+  font-size: 1.05rem;
+}
+
+.sr-cover {
+  width: 4.5rem;
+  height: 4.5rem;
+  flex-shrink: 0;
+  object-fit: cover;
+  border: 1px solid rgba(196, 154, 40, 0.45);
+  background: #120f0a;
+}
+
+.sr-player {
+  position: absolute;
+  z-index: 8;
+  left: 1rem;
+  right: 1rem;
+  bottom: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.8rem 0.95rem;
+  border: 1px solid rgba(196, 154, 40, 0.34);
+  background: rgba(7, 6, 5, 0.92);
+  backdrop-filter: blur(18px);
+}
+
+.sr-play {
+  width: 2.75rem;
+  height: 2.75rem;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--sr-gold);
+  background: transparent;
+  color: var(--sr-gold-hot);
+  cursor: pointer;
+}
+
+.sr-play:hover {
+  background: var(--sr-gold);
+  color: #050403;
+}
+
+.sr-progress {
+  height: 1px;
+  margin-top: 0.55rem;
+  background: rgba(237, 229, 208, 0.12);
+  overflow: hidden;
+}
+
+.sr-progress > span {
+  display: block;
+  height: 100%;
+  background: var(--sr-gold);
+}
+
+.sr-ribbon {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.15rem 0.35rem;
+  align-items: center;
+  font-family: "Cinzel", serif;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+}
+
+.sr-ribbon button {
+  border: 0;
+  background: transparent;
+  color: var(--sr-smoke);
+  cursor: pointer;
+  padding: 0.15rem 0.1rem;
+  font: inherit;
+  letter-spacing: inherit;
+}
+
+.sr-ribbon button.is-hot,
+.sr-ribbon button:hover {
+  color: var(--sr-gold-pearl);
+}
+
+.sr-ribbon .sr-arrow {
+  color: rgba(196, 154, 40, 0.45);
+}
+
+.sr-capacity-track {
+  margin-top: 0.7rem;
+  height: 1px;
+  background: rgba(237, 229, 208, 0.12);
+}
+
+.sr-capacity-track > span {
+  display: block;
+  height: 100%;
+  background: var(--sr-gold);
+}
+
+.sr-node-label {
+  pointer-events: auto;
+  border: 0;
+  background: transparent;
+  color: rgba(237, 229, 208, 0.52);
+  font-family: "Cinzel", serif;
+  font-size: 10px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.9);
+}
+
+.sr-node-label.is-work {
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: var(--sr-gold-hot);
+}
+
+.sr-node-label.is-active,
+.sr-node-label.is-hovered {
+  color: var(--sr-gold-pearl);
+}
+
+.sr-modal-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  padding: 0.85rem;
+  background: rgba(5, 4, 3, 0.78);
+  backdrop-filter: blur(10px);
+}
+
+.sr-modal {
+  width: min(40rem, 100%);
+  max-height: 88dvh;
+  overflow: auto;
+  border: 1px solid rgba(196, 154, 40, 0.38);
+  background: #0b0a08;
+  padding: 1.4rem 1.35rem 1.5rem;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55);
+}
+
+.sr-field {
+  display: block;
+  margin-top: 1rem;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--sr-gold);
+}
+
+.sr-field input,
+.sr-field textarea {
+  display: block;
+  width: 100%;
+  margin-top: 0.45rem;
+  border: 1px solid rgba(237, 229, 208, 0.12);
+  background: rgba(0, 0, 0, 0.35);
+  color: var(--sr-parchment);
+  font-family: "DM Sans", sans-serif;
+  font-size: 0.9rem;
+  letter-spacing: 0;
+  text-transform: none;
+  padding: 0.7rem 0.75rem;
+  outline: none;
+}
+
+.sr-field input:focus,
+.sr-field textarea:focus {
+  border-color: var(--sr-gold);
+}
+
+.sr-ref-slot {
+  position: relative;
+  aspect-ratio: 1;
+  border: 1px dashed rgba(196, 154, 40, 0.32);
+  background: rgba(0, 0, 0, 0.22);
+  color: var(--sr-smoke);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  overflow: hidden;
+}
+
+.sr-ref-slot input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.sr-ref-slot img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.sr-ceremony {
+  position: absolute;
+  z-index: 25;
+  left: 50%;
+  top: 22%;
+  transform: translateX(-50%);
+  width: min(22rem, calc(100vw - 2rem));
+  text-align: center;
+  border: 1px solid var(--sr-gold);
+  background: rgba(5, 4, 3, 0.9);
+  padding: 1.2rem 1.3rem 1.3rem;
+  box-shadow: 0 20px 70px rgba(0, 0, 0, 0.5);
+}
+
+.sr-legend {
+  display: flex;
+  gap: 0.15rem;
+  overflow-x: auto;
+  max-width: calc(100vw - 2rem);
+  padding: 0.15rem;
+  border: 1px solid rgba(237, 229, 208, 0.08);
+  background: rgba(5, 4, 3, 0.45);
+}
+
+.sr-legend button {
+  flex: 0 0 auto;
+  border: 0;
+  background: transparent;
+  color: var(--sr-smoke);
+  font-family: "Cinzel", serif;
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  padding: 0.45rem 0.6rem;
+  cursor: pointer;
+}
+
+.sr-legend button.is-active {
+  color: #050403;
+  background: var(--sr-gold);
+}
+
+@media (max-width: 720px) {
+  .sr-title {
+    font-size: 1.45rem;
+  }
+
+  .sr-player {
+    left: 0.65rem;
+    right: 0.65rem;
+    bottom: 0.55rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spatial-registry-mock * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
