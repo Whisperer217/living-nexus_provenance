@@ -32,10 +32,11 @@ import {
   SPATIAL_REGISTRY_MOCK,
   SPATIAL_REGISTRY_NODES_BY_ID,
   type SpatialRegistryNodeId,
+  type SpatialView,
 } from "@/lib/spatialRegistryMock";
 import "./spatial-registry-mock.css";
 
-const { creator, work, attribution, registrationEvent, witnesses } = SPATIAL_REGISTRY_MOCK;
+const { creator, work, attribution, versions, creatorStages, lineageSequence, derivedArtifacts } = SPATIAL_REGISTRY_MOCK;
 const NAV: { id: "nexus" | "works" | "lineage" | "registry"; label: string; node: SpatialRegistryNodeId }[] = [
   { id: "nexus", label: "NEXUS", node: "work" },
   { id: "works", label: "WORKS", node: "work" },
@@ -87,7 +88,8 @@ export default function SpatialRegistryMockPage() {
   const reducedMotion = useReducedMotion();
   const sceneRef = useRef<SpatialSceneHandle>(null);
   const [nav, setNav] = useState<(typeof NAV)[number]["id"]>("nexus");
-  const [selectedNode, setSelectedNode] = useState<SpatialRegistryNodeId>("register");
+  const [view, setView] = useState<SpatialView>("overview");
+  const [selectedNode, setSelectedNode] = useState<SpatialRegistryNodeId>("work");
   const [hoveredNode, setHoveredNode] = useState<SpatialRegistryNodeId | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [elapsed, setElapsed] = useState(68);
@@ -101,7 +103,6 @@ export default function SpatialRegistryMockPage() {
   const [shuffle, setShuffle] = useState(false);
   const [repeat, setRepeat] = useState(false);
   const selected = SPATIAL_REGISTRY_NODES_BY_ID[selectedNode];
-  const extraWitnesses = Math.max(0, witnessCount - 2);
 
   useEffect(() => {
     if (!isPlaying) return;
@@ -126,187 +127,43 @@ export default function SpatialRegistryMockPage() {
       setStudioOpen(false);
       setAiOpen(false);
       setAttributionOpen(false);
+      setView("overview");
+      setNav("nexus");
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
+  const enter = useCallback((nodeId: SpatialRegistryNodeId) => {
+    setSelectedNode(nodeId);
+    setView(nodeId);
+    if (nodeId === "lineage") setNav("lineage");
+    else if (nodeId === "register") setNav("registry");
+    else if (nodeId === "work") setNav("works");
+    else setNav("nexus");
+  }, []);
+
+  const returnToConstellation = useCallback(() => {
+    setView("overview");
+    setNav("nexus");
+    setSelectedNode("work");
+    sceneRef.current?.reset();
+  }, []);
+
   const register = useCallback(() => {
-    setSelectedNode("register");
-    setNav("registry");
+    enter("register");
     setCeremony("register");
     setCeremonyPhase("working");
     window.setTimeout(() => setCeremonyPhase("done"), reducedMotion ? 0 : 900);
-  }, [reducedMotion]);
+  }, [enter, reducedMotion]);
 
   const witness = useCallback(() => {
     setWitnessCount((count) => count + 1);
-    setSelectedNode("witness");
+    enter("witness");
     setCeremony("witness");
     setCeremonyPhase("working");
     window.setTimeout(() => setCeremonyPhase("done"), reducedMotion ? 0 : 700);
-  }, [reducedMotion]);
-
-  const inspector = useMemo(() => {
-    if (selectedNode === "register") {
-      return (
-        <>
-          <Kicker>Selected event</Kicker>
-          <h2>REGISTRATION</h2>
-          <div className="sr-dl">
-            <div>
-              <span>Event ID</span>
-              <b>{registrationEvent.id}</b>
-            </div>
-            <div>
-              <span>Status</span>
-              <b className="sr-status">
-                <i />
-                {registrationEvent.status}
-              </b>
-            </div>
-            <div>
-              <span>Created by</span>
-              <b>{registrationEvent.createdBy}</b>
-            </div>
-            <div>
-              <span>Date</span>
-              <b>{registrationEvent.date}</b>
-            </div>
-          </div>
-          <p className="sr-copy">{registrationEvent.copy}</p>
-          <Kicker>Witnesses</Kicker>
-          <div className="sr-people">
-            {witnesses.map((person) => (
-              <div className="sr-person" key={person.name}>
-                <div className="sr-mini">
-                  <img src={person.avatar} alt="" />
-                </div>
-                <div>
-                  <strong>{person.name}</strong>
-                  <span>{person.at}</span>
-                </div>
-              </div>
-            ))}
-            {Array.from({ length: extraWitnesses }).map((_, index) => (
-              <div className="sr-person" key={`extra-${index}`}>
-                <div className="sr-mini" />
-                <div>
-                  <strong>Attestation {index + 3}</strong>
-                  <span>Recorded in this mock</span>
-                </div>
-              </div>
-            ))}
-          </div>
-          <button className="sr-gold-btn mt-4" onClick={register}>
-            Simulate register
-          </button>
-          <button className="sr-text-btn mt-3" onClick={() => setAttributionOpen(true)}>
-            View full record
-          </button>
-        </>
-      );
-    }
-
-    if (selectedNode === "work") {
-      return (
-        <>
-          <Kicker>Registered work</Kicker>
-          <h2>{work.title}</h2>
-          <img src={coverArtUrl} alt="" className="mt-3 w-full border border-[rgba(212,175,55,0.35)]" />
-          <div className="sr-dl mt-4">
-            <div>
-              <span>Artist</span>
-              <b>{work.artist}</b>
-            </div>
-            <div>
-              <span>Version</span>
-              <b>{work.version}</b>
-            </div>
-            <div>
-              <span>WID</span>
-              <b>{work.wid}</b>
-            </div>
-            <div>
-              <span>Status</span>
-              <b>{work.status}</b>
-            </div>
-            <div>
-              <span>Witnesses</span>
-              <b>{witnessCount}</b>
-            </div>
-            <div>
-              <span>Registration date</span>
-              <b>
-                {work.registrationDate} · {work.registrationTime}
-              </b>
-            </div>
-          </div>
-          <div className="mt-4 grid grid-cols-2 gap-2">
-            <button className="sr-gold-btn" onClick={register}>
-              Register
-            </button>
-            <button className="sr-gold-btn" onClick={witness}>
-              Witness
-            </button>
-          </div>
-          <button className="sr-text-btn mt-3" onClick={() => setAttributionOpen(true)}>
-            View Attribution
-          </button>
-        </>
-      );
-    }
-
-    if (selectedNode === "witness") {
-      return (
-        <>
-          <Kicker>Attestation</Kicker>
-          <h2>WITNESS</h2>
-          <p className="sr-copy">A witness is an attestation of the registration event. Each new witness appears as another relation in space.</p>
-          <div className="sr-dl mt-4">
-            <div>
-              <span>Witnesses</span>
-              <b>{witnessCount}</b>
-            </div>
-          </div>
-          <button className="sr-gold-btn mt-4" onClick={witness}>
-            Simulate witness
-          </button>
-        </>
-      );
-    }
-
-    if (selectedNode === "lineage") {
-      return (
-        <>
-          <Kicker>Visible relation</Kicker>
-          <h2>LINEAGE</h2>
-          <p className="sr-copy">CREATOR → EDIT → REGISTER → WITNESS. Provenance is meant to be understood by looking at it.</p>
-        </>
-      );
-    }
-
-    if (selectedNode === "profile") {
-      return (
-        <>
-          <Kicker>Creator identity</Kicker>
-          <h2>{creator.name}</h2>
-          <p className="sr-copy">{creator.artistName}. Attribution stays with the work even when this overlay is closed.</p>
-          <button className="sr-gold-btn mt-4" onClick={() => setAttributionOpen(true)}>
-            View Attribution
-          </button>
-        </>
-      );
-    }
-
-    return (
-      <>
-        <Kicker>{selected.eyebrow}</Kicker>
-        <h2>{selected.shortLabel}</h2>
-        <p className="sr-copy">{selected.description}</p>
-      </>
-    );
-  }, [coverArtUrl, creator.artistName, creator.name, extraWitnesses, register, selected.description, selected.eyebrow, selected.shortLabel, selectedNode, witness, witnessCount]);
+  }, [enter, reducedMotion]);
 
   const wave = useMemo(
     () => Array.from({ length: 18 }, (_, index) => 6 + ((index * 37) % 16)),
@@ -314,7 +171,7 @@ export default function SpatialRegistryMockPage() {
   );
 
   return (
-    <main className="spatial-registry-mock">
+    <main className={`spatial-registry-mock${view !== "overview" ? " is-entered" : ""}`}>
       <header className="sr-header">
         <button className="sr-brand" onClick={() => navigate("/")}>
           <span className="sr-mark">LN</span>
@@ -330,7 +187,8 @@ export default function SpatialRegistryMockPage() {
               className={nav === item.id ? "is-active" : ""}
               onClick={() => {
                 setNav(item.id);
-                setSelectedNode(item.node);
+                if (item.id === "nexus") returnToConstellation();
+                else enter(item.node);
               }}
             >
               {item.label}
@@ -344,7 +202,7 @@ export default function SpatialRegistryMockPage() {
           <button className="sr-ghost" onClick={() => setStudioOpen(true)}>
             Cover Art Studio
           </button>
-          <button className="sr-avatar-btn" onClick={() => setSelectedNode("profile")} aria-label="Open creator profile">
+          <button className="sr-avatar-btn" onClick={() => enter("profile")} aria-label="Open creator profile">
             <img src={ASSET.portrait} alt="" />
           </button>
         </div>
@@ -410,18 +268,14 @@ export default function SpatialRegistryMockPage() {
       <div className="sr-scene-layer">
         <SpatialRegistryScene
           ref={sceneRef}
+          view={view}
           selectedNode={selectedNode}
           witnessCount={witnessCount}
           isPlaying={isPlaying}
           coverArtUrl={coverArtUrl}
           ceremony={ceremony}
           reducedMotion={reducedMotion}
-          onSelect={(nodeId) => {
-            setSelectedNode(nodeId);
-            if (nodeId === "lineage") setNav("lineage");
-            if (nodeId === "register") setNav("registry");
-            if (nodeId === "work") setNav("works");
-          }}
+          onSelect={enter}
           onHover={setHoveredNode}
         />
       </div>
@@ -430,7 +284,7 @@ export default function SpatialRegistryMockPage() {
         <button aria-label="Pan the spatial environment" onClick={() => sceneRef.current?.reset()}>
           <Move size={16} />
         </button>
-        <button aria-label="Recenter on the work" onClick={() => { sceneRef.current?.reset(); setSelectedNode("work"); }}>
+        <button aria-label="Return to constellation" onClick={returnToConstellation}>
           <Crosshair size={16} />
         </button>
         <button aria-label="Zoom in" onClick={() => sceneRef.current?.zoom(0.82)}>
@@ -441,14 +295,115 @@ export default function SpatialRegistryMockPage() {
         </button>
       </div>
 
+      {view !== "overview" && (
+        <button className="sr-ghost sr-return" onClick={returnToConstellation}>
+          ← Return to constellation
+        </button>
+      )}
+
+      {view !== "overview" && (
+        <section className="sr-pathway-card">
+          <Kicker>{selected.form}</Kicker>
+          <h2 className="mt-2 font-display text-2xl">{selected.shortLabel}</h2>
+          <p className="mt-2 text-xs tracking-[0.16em] uppercase text-[var(--sr-gold)]">{selected.language}</p>
+          <p className="sr-copy">{selected.description}</p>
+          {view === "work" && (
+            <ol className="sr-steps">
+              {["Creator", "Edit", "Register", "Witness", "Lineage", "Player"].map((name) => (
+                <li key={name}><b>{name}</b><span>connects here</span></li>
+              ))}
+            </ol>
+          )}
+          {view === "profile" && (
+            <ol className="sr-steps">
+              {creatorStages.map((stage) => (
+                <li key={stage.id}><b>{stage.label}</b><span>{stage.caption}</span></li>
+              ))}
+            </ol>
+          )}
+          {view === "edit" && (
+            <ol className="sr-steps">
+              {versions.map((version) => (
+                <li key={version.id}><b>{version.label}</b><span>{version.caption}</span></li>
+              ))}
+            </ol>
+          )}
+          {view === "register" && (
+            <ol className="sr-steps">
+              <li><b>Chamber</b><span>The work enters</span></li>
+              <li><b>WID</b><span>{work.wid}</span></li>
+              <li><b>Record</b><span>Registration establishes</span></li>
+              <li><b>Seal</b><span>Closes on the event</span></li>
+            </ol>
+          )}
+          {view === "witness" && (
+            <ol className="sr-steps">
+              <li><b>Witness</b><span>{witnessCount} luminous points</span></li>
+              <li><b>Event</b><span>{SPATIAL_REGISTRY_MOCK.registrationEvent.id}</span></li>
+              <li><b>Work</b><span>{work.title}</span></li>
+            </ol>
+          )}
+          {view === "lineage" && (
+            <ol className="sr-steps">
+              {lineageSequence.map((step) => (
+                <li key={step.id}><b>{step.label}</b><span>{step.caption}</span></li>
+              ))}
+            </ol>
+          )}
+          {view === "player" && (
+            <ol className="sr-steps">
+              <li><b>Playback</b><span>{isPlaying ? "Registry is resonating" : "Idle field"}</span></li>
+              <li><b>Work</b><span>{work.title}</span></li>
+              <li><b>Derived</b><span>{derivedArtifacts.map((item) => item.title).join(" · ")}</span></li>
+            </ol>
+          )}
+          {view === "work" && (
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              <button className="sr-gold-btn" onClick={register}>Register</button>
+              <button className="sr-gold-btn" onClick={witness}>Witness</button>
+            </div>
+          )}
+          {view === "register" && (
+            <button className="sr-gold-btn mt-4" onClick={register}>Simulate register</button>
+          )}
+          {view === "witness" && (
+            <button className="sr-gold-btn mt-4" onClick={witness}>Simulate witness · {witnessCount}</button>
+          )}
+          {(view === "profile" || view === "work") && (
+            <button className="sr-text-btn mt-3" onClick={() => setAttributionOpen(true)}>
+              View Attribution
+            </button>
+          )}
+        </section>
+      )}
+
       <p className="sr-hint">
         <MousePointer2 size={13} />
-        {hoveredNode ? SPATIAL_REGISTRY_NODES_BY_ID[hoveredNode].shortLabel : "CLICK ANY NODE TO EXPLORE"}
+        {view === "overview"
+          ? hoveredNode
+            ? `Enter ${SPATIAL_REGISTRY_NODES_BY_ID[hoveredNode].shortLabel}`
+            : isPlaying
+              ? "THE REGISTRY IS RESONATING"
+              : "ENTER A PATHWAY"
+          : selected.language}
       </p>
 
-      <aside className="sr-rail right is-open">
-        <div className="sr-event">{inspector}</div>
-      </aside>
+      {view === "overview" && (
+        <aside className="sr-rail right is-open">
+          <Kicker>Six spatial pathways</Kicker>
+          <h2 className="mt-2 font-display text-xl">The work is the center</h2>
+          <p className="sr-copy">Each node is an environment, not a page. Enter it. The registry remains the source of truth; this is how it becomes visible.</p>
+          <p className="mt-3 text-[10px] tracking-[0.16em] uppercase text-[var(--sr-gold)]">One visual language · six domains · one work</p>
+          <div className="sr-dl mt-4">
+            {SPATIAL_REGISTRY_MOCK.nodes.filter((node) => node.id !== "work").map((node) => (
+              <button key={node.id} className="sr-text-btn text-left" onClick={() => enter(node.id)}>
+                <span className="block text-[var(--sr-gold)]">{node.shortLabel}</span>
+                <b className="block font-normal text-[11px] tracking-normal normal-case text-[var(--sr-muted)]">{node.form}</b>
+              </button>
+            ))}
+          </div>
+        </aside>
+      )}
 
       <section className="sr-player" aria-label="Canonical global player">
         <div className="sr-now">
@@ -504,7 +459,7 @@ export default function SpatialRegistryMockPage() {
           <button className="sr-icon-btn" aria-label="Queue">
             <ListMusic size={15} />
           </button>
-          <button className="sr-icon-btn" aria-label="Expand player" onClick={() => setSelectedNode("player")}>
+          <button className="sr-icon-btn" aria-label="Enter player pathway" onClick={() => enter("player")}>
             <ChevronUp size={15} />
           </button>
         </div>

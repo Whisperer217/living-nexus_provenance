@@ -6,7 +6,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { SPATIAL_REGISTRY_MOCK } from "../../client/src/lib/spatialRegistryMock";
+import { ASSET, SPATIAL_REGISTRY_MOCK, VISUAL_LANGUAGE } from "../../client/src/lib/spatialRegistryMock";
 
 describe("Spatial Registry Mock isolation", () => {
   it("uses the supplied fictional music work and complete provenance loop", () => {
@@ -33,7 +33,33 @@ describe("Spatial Registry Mock isolation", () => {
     ]);
     expect(SPATIAL_REGISTRY_MOCK.edges).toContainEqual(["edit", "register"]);
     expect(SPATIAL_REGISTRY_MOCK.edges).toContainEqual(["register", "witness"]);
-    expect(SPATIAL_REGISTRY_MOCK.lineagePath).toEqual(["profile", "edit", "register", "witness"]);
+    expect(SPATIAL_REGISTRY_MOCK.lineageSequence.map((step) => step.id)).toEqual([
+      "creation",
+      "edits",
+      "registrations",
+      "witnesses",
+      "derived",
+    ]);
+    expect(SPATIAL_REGISTRY_MOCK.versions.map((version) => version.id)).toEqual(["01", "02", "03"]);
+    expect(SPATIAL_REGISTRY_MOCK.derivedArtifacts.map((artifact) => artifact.title)).toEqual([
+      "Cover art",
+      "Registration seal",
+      "Canonical stream",
+    ]);
+    expect(SPATIAL_REGISTRY_MOCK.collaborators.map((person) => person.name)).toEqual([
+      "Living Nexus Node",
+      "Slim Doggy",
+    ]);
+    expect(Object.keys(ASSET.pathways)).toEqual([
+      "work",
+      "profile",
+      "edit",
+      "register",
+      "witness",
+      "lineage",
+      "player",
+    ]);
+    expect(VISUAL_LANGUAGE.principle).toContain("One central work");
     expect(SPATIAL_REGISTRY_MOCK.attribution.label).toBe("View Attribution");
   });
 
@@ -45,6 +71,8 @@ describe("Spatial Registry Mock isolation", () => {
 
     expect(appSource).toContain('path="/prototype/spatial-registry"');
     expect(pageSource).toContain("SPATIAL_REGISTRY_MOCK");
+    expect(pageSource).toContain("Return to constellation");
+    expect(pageSource).toContain("One visual language");
     expect(pageSource).toContain("Cover Art Studio");
     expect(pageSource).toContain("My AI");
     expect(pageSource).toContain("View Attribution");
