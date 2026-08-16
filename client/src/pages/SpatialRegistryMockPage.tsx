@@ -11,18 +11,12 @@ import {
   ChevronUp,
   Crosshair,
   ExternalLink,
-  ListMusic,
   Minus,
   MousePointer2,
   Move,
   Pause,
   Play,
   Plus,
-  Repeat,
-  Shuffle,
-  SkipBack,
-  SkipForward,
-  Volume2,
 } from "lucide-react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { SpatialRegistryScene, type SpatialCeremony, type SpatialSceneHandle } from "@/components/spatial-registry/SpatialRegistryScene";
@@ -34,13 +28,17 @@ import {
   SPATIAL_REGISTRY_NODES_BY_ID,
   INTERACTION_DOCTRINE,
   VISUAL_LANGUAGE,
+  isDeclarable,
+  isPlayable,
+  nextRegistrationWid,
+  type DropIntent,
   type SpatialArtifact,
   type SpatialRegistryNodeId,
   type SpatialView,
 } from "@/lib/spatialRegistryMock";
 import "./spatial-registry-mock.css";
 
-const { creator, work, attribution, versions, creatorStages, lineageSequence, derivedArtifacts, exploreArtifacts } = SPATIAL_REGISTRY_MOCK;
+const { creator, work, attribution, versions, creatorStages, lineageSequence, derivedArtifacts, exploreArtifacts: initialArtifacts } = SPATIAL_REGISTRY_MOCK;
 const NAV: { id: "nexus" | "works" | "lineage" | "registry"; label: string; view: SpatialView }[] = [
   { id: "nexus", label: "NEXUS", view: "overview" },
   { id: "works", label: "WORKS", view: "explore" },
@@ -106,12 +104,19 @@ export default function SpatialRegistryMockPage() {
   const [coverArtUrl, setCoverArtUrl] = useState<string>(DEFAULT_COVER_ART);
   const [loadedWorkId, setLoadedWorkId] = useState<string | null>(null);
   const [grabbing, setGrabbing] = useState<SpatialArtifact | null>(null);
-  const [dropHot, setDropHot] = useState(false);
+  const [dropIntent, setDropIntent] = useState<DropIntent>(null);
+  const [artifacts, setArtifacts] = useState<SpatialArtifact[]>(() =>
+    initialArtifacts.map((item) => ({ ...item, position: [...item.position] as [number, number, number] })),
+  );
+  const [slotsRemaining, setSlotsRemaining] = useState<number>(creator.slotsRemaining);
   const [inspectFile, setInspectFile] = useState<{ name: string; size: number; type: string } | null>(null);
-  const [shuffle, setShuffle] = useState(false);
-  const [repeat, setRepeat] = useState(false);
+  const [lastRegistration, setLastRegistration] = useState<{ title: string; wid: string }>({ title: work.title, wid: work.wid });
   const selected = SPATIAL_REGISTRY_NODES_BY_ID[selectedNode];
-  const loaded = exploreArtifacts.find((item) => item.id === loadedWorkId) ?? null;
+  const loaded = artifacts.find((item) => item.id === loadedWorkId) ?? null;
+  const extraRegistered = artifacts.filter((item) => {
+    const origin = initialArtifacts.find((row) => row.id === item.id);
+    return item.status === "Registered" && origin?.status !== "Registered";
+  }).length;
 
   useEffect(() => {
     if (!isPlaying || !loaded) return;
@@ -173,13 +178,30 @@ export default function SpatialRegistryMockPage() {
   }, [enter, reducedMotion]);
 
   const loadWork = useCallback((artifact: SpatialArtifact) => {
+    if (!isPlayable(artifact)) return;
     setLoadedWorkId(artifact.id);
     setCoverArtUrl(artifact.cover);
     setElapsed(0);
     setIsPlaying(true);
     setGrabbing(null);
-    setDropHot(false);
+    setDropIntent(null);
   }, []);
+
+  const declareWork = useCallback((artifact: SpatialArtifact) => {
+    if (!isDeclarable(artifact) || slotsRemaining <= 0) return;
+    const wid = nextRegistrationWid(artifacts);
+    setArtifacts((list) =>
+      list.map((item) => (item.id === artifact.id ? { ...item, status: "Registered", wid, witnessed: false } : item)),
+    );
+    setSlotsRemaining((value) => value - 1);
+    setLastRegistration({ title: artifact.title, wid });
+    setGrabbing(null);
+    setDropIntent(null);
+    enter("register");
+    setCeremony("register");
+    setCeremonyPhase("working");
+    window.setTimeout(() => setCeremonyPhase("done"), reducedMotion ? 0 : 900);
+  }, [artifacts, enter, reducedMotion, slotsRemaining]);
 
   const witness = useCallback(() => {
     setWitnessCount((count) => count + 1);
@@ -201,7 +223,7 @@ export default function SpatialRegistryMockPage() {
 
   return (
     <main
-      className={`spatial-registry-mock${view !== "overview" ? " is-entered" : ""}${grabbing ? " is-grabbing" : ""}${dropHot ? " is-drop-hot" : ""}`}
+      className={`spatial-registry-mock${view !== "overview" ? " is-entered" : ""}${grabbing ? " is-grabbing" : ""}${dropIntent === "experience" ? " is-drop-hot" : ""}${dropIntent === "declare" ? " is-declare-hot" : ""}${dropIntent === "not-registered" || dropIntent === "already-declared" || dropIntent === "wrong-medium" ? " is-drop-denied" : ""}`}
       onDragOver={(event) => {
         event.preventDefault();
         event.dataTransfer.dropEffect = "copy";
@@ -260,7 +282,7 @@ export default function SpatialRegistryMockPage() {
         <div className="mt-6">
           <div className="sr-stat">
             <span>Registered works</span>
-            <b>{creator.registeredWorks}</b>
+            <b>{creator.registeredWorks + extraRegistered}</b>
           </div>
           <div className="sr-stat">
             <span>Witnessed works</span>
@@ -269,7 +291,7 @@ export default function SpatialRegistryMockPage() {
           <div className="sr-stat">
             <span>Registration slots</span>
             <b>
-              {creator.slotsRemaining} / {creator.registrationCapacity}
+              {slotsRemaining} / {creator.registrationCapacity}
             </b>
           </div>
           <div className="sr-stat">
@@ -290,11 +312,11 @@ export default function SpatialRegistryMockPage() {
               strokeWidth="8"
               strokeLinecap="round"
               strokeDasharray="163"
-              strokeDashoffset={163 * (1 - creator.slotsRemaining / creator.registrationCapacity)}
+              strokeDashoffset={163 * (1 - slotsRemaining / creator.registrationCapacity)}
             />
           </svg>
           <p>
-            {creator.slotsRemaining} / {creator.registrationCapacity} slots remaining
+            {slotsRemaining} / {creator.registrationCapacity} slots remaining
           </p>
         </div>
         <p className="sr-quote">
@@ -315,14 +337,17 @@ export default function SpatialRegistryMockPage() {
           isPlaying={isPlaying}
           coverArtUrl={coverArtUrl}
           loadedWorkId={loadedWorkId}
+          hoveredNode={hoveredNode}
           ceremony={ceremony}
           reducedMotion={reducedMotion}
+          artifacts={artifacts}
           onSelect={enter}
           onHover={setHoveredNode}
           onLoadWork={loadWork}
-          onGrab={(artifact, hot) => {
+          onDeclareWork={declareWork}
+          onGrab={(artifact, intent) => {
             setGrabbing(artifact);
-            setDropHot(hot);
+            setDropIntent(intent);
           }}
         />
       </div>
@@ -352,15 +377,15 @@ export default function SpatialRegistryMockPage() {
         <section className="sr-pathway-card">
           {view === "explore" ? (
             <>
-              <Kicker>Explore → Player</Kicker>
+              <Kicker>Same grab. Opposite destinations.</Kicker>
               <h2 className="mt-2 font-display text-2xl">Grab a work</h2>
-              <p className="mt-2 text-xs tracking-[0.16em] uppercase text-[var(--sr-electric)]">Load this registered artifact into my experience</p>
-              <p className="sr-copy">Works are physical objects. Grab a record, drag it to the player, drop it. The platter takes the registered work. Playback begins without leaving the registry.</p>
+              <p className="mt-2 text-xs tracking-[0.16em] uppercase text-[var(--sr-electric)]">State decides the verb</p>
+              <p className="sr-copy">A sealed record can be experienced. An unfinished work can be declared. Drop onto Player only if it is registered. Drop onto Register to establish the record. The object tells you what it is.</p>
               <ol className="sr-steps">
-                {exploreArtifacts.map((artifact) => (
+                {artifacts.map((artifact) => (
                   <li key={artifact.id}>
-                    <b>{ARTIFACT_FORMS[artifact.medium].object}</b>
-                    <span>{artifact.title}</span>
+                    <b>{artifact.status}{artifact.witnessed ? " · witnessed" : ""}</b>
+                    <span>{artifact.title}{artifact.wid ? ` · ${artifact.wid}` : ` · ${ARTIFACT_FORMS[artifact.medium].object}`}</span>
                   </li>
                 ))}
               </ol>
@@ -449,17 +474,23 @@ export default function SpatialRegistryMockPage() {
       <p className="sr-hint">
         <MousePointer2 size={13} />
         {grabbing
-          ? dropHot
-            ? grabbing.medium === "music"
-              ? "RELEASE TO LOAD"
-              : "THIS MEDIUM IS NOT PLAYABLE"
-            : `CARRYING ${grabbing.title.toUpperCase()}`
+          ? dropIntent === "experience"
+            ? "RELEASE TO EXPERIENCE"
+            : dropIntent === "declare"
+              ? "RELEASE TO DECLARE"
+              : dropIntent === "not-registered"
+                ? "NOT YET REGISTERED"
+                : dropIntent === "already-declared"
+                  ? "ALREADY DECLARED"
+                  : dropIntent === "wrong-medium"
+                    ? "THIS MEDIUM IS NOT PLAYABLE"
+                    : `CARRYING ${grabbing.title.toUpperCase()} · PLAYER OR REGISTER`
           : view === "overview"
             ? hoveredNode
               ? `Enter ${SPATIAL_REGISTRY_NODES_BY_ID[hoveredNode].shortLabel}`
-              : "WORKS · GRAB A RECORD"
+              : "A CONNECTION ILLUMINATES WHEN A RELATIONSHIP IS REVEALED"
             : view === "explore"
-              ? "GRAB A WORK · DROP ON THE PLAYER"
+              ? "REGISTERED → PLAYER · UNREGISTERED → REGISTER"
               : view === "register"
                 ? "DROP A LOCAL FILE TO ESTABLISH IT"
                 : selected.language}
@@ -473,8 +504,8 @@ export default function SpatialRegistryMockPage() {
           <p className="mt-3 text-[10px] tracking-[0.16em] uppercase text-[var(--sr-gold)]">{VISUAL_LANGUAGE.principle}</p>
           <p className="sr-copy">{INTERACTION_DOCTRINE.standard}</p>
           <ol className="sr-steps">
-            {INTERACTION_DOCTRINE.grammar.slice(0, 5).map((row) => (
-              <li key={row.act}><b>{row.act}</b><span>{row.means}</span></li>
+            {INTERACTION_DOCTRINE.state.map((row) => (
+              <li key={row.state}><b>{row.state}</b><span>{row.means}</span></li>
             ))}
           </ol>
           <button className="sr-gold-btn mt-4" onClick={openExplore}>
@@ -491,15 +522,15 @@ export default function SpatialRegistryMockPage() {
         </aside>
       )}
 
-      <section className={`sr-player${dropHot ? " is-drop-hot" : ""}`} aria-label="Canonical global player">
+      <section className={`sr-player${dropIntent === "experience" ? " is-drop-hot" : ""}${dropIntent === "not-registered" || dropIntent === "wrong-medium" ? " is-drop-denied" : ""}`} aria-label="Canonical global player">
         <div className="sr-now">
           <img src={loaded ? coverArtUrl : DEFAULT_COVER_ART} alt="" />
           <div className="min-w-0">
-            <p className="truncate">{loaded ? loaded.title : "Awaiting a work"}</p>
+            <p className="truncate">{loaded ? loaded.title : "Awaiting a registered work"}</p>
             <span>
               {loaded
                 ? `${loaded.artist} · ${loaded.wid ?? "Unregistered"}`
-                : "Grab a record in Works"}
+                : "Only a sealed record can be experienced"}
             </span>
             {loaded && (
               <em className="sr-registered">
@@ -511,12 +542,6 @@ export default function SpatialRegistryMockPage() {
         </div>
         <div className="sr-transport">
           <div className="sr-transport-btns">
-            <button className={`sr-icon-btn ${shuffle ? "is-on" : ""}`} aria-label="Shuffle" onClick={() => setShuffle((value) => !value)}>
-              <Shuffle size={14} />
-            </button>
-            <button className="sr-icon-btn" aria-label="Previous">
-              <SkipBack size={15} />
-            </button>
             <button
               className="sr-icon-btn sr-play"
               onClick={() => loaded && setIsPlaying((value) => !value)}
@@ -524,12 +549,6 @@ export default function SpatialRegistryMockPage() {
               disabled={!loaded}
             >
               {isPlaying ? <Pause size={16} /> : <Play size={16} />}
-            </button>
-            <button className="sr-icon-btn" aria-label="Next">
-              <SkipForward size={15} />
-            </button>
-            <button className={`sr-icon-btn ${repeat ? "is-on" : ""}`} aria-label="Repeat" onClick={() => setRepeat((value) => !value)}>
-              <Repeat size={14} />
             </button>
           </div>
           <div className="sr-progress-row">
@@ -553,12 +572,6 @@ export default function SpatialRegistryMockPage() {
               <i key={index} style={{ height, animationDelay: `${index * 0.06}s` }} />
             ))}
           </div>
-          <button className="sr-icon-btn" aria-label="Volume">
-            <Volume2 size={15} />
-          </button>
-          <button className="sr-icon-btn" aria-label="Queue">
-            <ListMusic size={15} />
-          </button>
           <button className="sr-icon-btn" aria-label="Enter player pathway" onClick={() => enter("player")}>
             <ChevronUp size={15} />
           </button>
@@ -572,8 +585,8 @@ export default function SpatialRegistryMockPage() {
           {ceremony === "register" && ceremonyPhase === "done" && (
             <>
               <p className="mt-2 font-display text-2xl">Registration Created</p>
-              <p className="mt-3 font-mono text-sm tracking-[0.18em] text-[var(--sr-gold)]">WID · {work.wid}</p>
-              <p className="mt-3 text-xs tracking-[0.16em] text-[var(--sr-muted)]">CREATOR → WORK → REGISTRATION</p>
+              <p className="mt-3 font-mono text-sm tracking-[0.18em] text-[var(--sr-gold)]">WID · {lastRegistration.wid}</p>
+              <p className="mt-3 text-xs tracking-[0.16em] text-[var(--sr-muted)]">{lastRegistration.title.toUpperCase()} · CREATOR → WORK → REGISTRATION</p>
             </>
           )}
           {ceremony === "witness" && ceremonyPhase === "working" && <p className="mt-2 font-display text-2xl">Recording witness</p>}

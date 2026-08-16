@@ -6,7 +6,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { ASSET, INTERACTION_DOCTRINE, SPATIAL_REGISTRY_MOCK, VISUAL_LANGUAGE } from "../../client/src/lib/spatialRegistryMock";
+import { ASSET, INTERACTION_DOCTRINE, SPATIAL_REGISTRY_MOCK, VISUAL_LANGUAGE, isDeclarable, isPlayable, nextRegistrationWid, resolveDropIntent } from "../../client/src/lib/spatialRegistryMock";
 
 describe("Spatial Registry Mock isolation", () => {
   it("uses the supplied fictional music work and complete provenance loop", () => {
@@ -62,6 +62,18 @@ describe("Spatial Registry Mock isolation", () => {
     expect(INTERACTION_DOCTRINE.standard).toContain("Nothing exists merely for decoration");
     expect(INTERACTION_DOCTRINE.loop).toEqual(["Profile", "Edit", "Register", "Witness"]);
     expect(INTERACTION_DOCTRINE.grammar.map((row) => row.act)).toContain("Load into Player");
+    expect(INTERACTION_DOCTRINE.state.map((row) => row.state)).toEqual(["Sketch", "Working", "Registered", "Witnessed"]);
+    const yahweh = SPATIAL_REGISTRY_MOCK.exploreArtifacts.find((artifact) => artifact.id === "yahweh")!;
+    const fieldHymn = SPATIAL_REGISTRY_MOCK.exploreArtifacts.find((artifact) => artifact.id === "field-hymn")!;
+    expect(isPlayable(yahweh)).toBe(true);
+    expect(isDeclarable(yahweh)).toBe(false);
+    expect(isPlayable(fieldHymn)).toBe(false);
+    expect(isDeclarable(fieldHymn)).toBe(true);
+    expect(resolveDropIntent(yahweh, true, false)).toBe("experience");
+    expect(resolveDropIntent(fieldHymn, true, false)).toBe("not-registered");
+    expect(resolveDropIntent(fieldHymn, false, true)).toBe("declare");
+    expect(resolveDropIntent(yahweh, false, true)).toBe("already-declared");
+    expect(nextRegistrationWid(SPATIAL_REGISTRY_MOCK.exploreArtifacts)).toBe("LN-00018");
     expect(VISUAL_LANGUAGE.accents.creator).toContain("violet");
     expect(SPATIAL_REGISTRY_MOCK.nodes.find((node) => node.id === "profile")?.color).toBe("#c77dff");
     expect(SPATIAL_REGISTRY_MOCK.nodes.find((node) => node.id === "edit")?.color).toBe("#29b6f6");
@@ -95,6 +107,11 @@ describe("Spatial Registry Mock isolation", () => {
     expect(pageSource).toContain("WITNESSED");
     expect(pageSource).toContain("Drag a local file");
     expect(sceneSource).toContain("Drop a registered work");
+    expect(sceneSource).toContain("Drop to declare");
+    expect(sceneSource).toContain("dressArtifact");
+    expect(pageSource).toContain("RELEASE TO DECLARE");
+    expect(pageSource).toContain("NOT YET REGISTERED");
+    expect(pageSource).not.toContain("aria-label=\"Shuffle\"");
     expect(sceneSource).toContain("makeArtifactObject");
     expect(sceneSource).toContain("three");
     expect(sceneSource).toContain("Visualization only");

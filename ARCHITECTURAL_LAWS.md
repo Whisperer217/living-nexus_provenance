@@ -559,6 +559,8 @@ The failure mode is beauty without meaning: a constellation that looks expensive
 
 Intentional does not mean complicated. It means nothing accidental.
 
+State determines the verb. An unregistered work can be declared. A registered work can be experienced. Player and Register refuse the wrong object. Connections illuminate only when a relationship is being revealed.
+
 ### Spatial Grammar (non-exhaustive)
 
 | Act | Meaning |

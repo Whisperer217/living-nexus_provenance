@@ -482,6 +482,15 @@
   border-top-color: var(--sr-electric);
 }
 
+.spatial-registry-mock.is-declare-hot .sr-hint {
+  color: var(--sr-gold);
+}
+
+.sr-player.is-drop-denied {
+  box-shadow: 0 0 24px rgba(176, 176, 176, 0.12);
+  border-top-color: rgba(176, 176, 176, 0.35);
+}
+
 .sr-registered {
   display: block;
   margin-top: 3px;

@@ -46,10 +46,12 @@ Intentional does not mean complicated. It means nothing accidental.
 | Interaction | Meaning |
 |---|---|
 | Drag a work | You are moving an artifact. |
-| Drop it into Register | You are declaring it. |
+| Drop into Register | You are declaring it. |
+| Drop a sealed work into Player | You are experiencing the registered artifact. |
+| Player refuses an unregistered work | The record is not yet declared. |
+| Register refuses a sealed work | The declaration already exists. |
 | A Witness appears | Someone attested to that event. |
 | Follow the lineage | You are traversing history. |
-| Load the work into Player | You are experiencing the registered artifact. |
 | The work revolves | It is active / in playback. |
 | Camera moves toward a node | You are entering that record or domain. |
 | Camera pulls back | You are seeing the larger lineage. |

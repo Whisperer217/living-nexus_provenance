@@ -28,6 +28,41 @@ export const ARTIFACT_FORMS: Record<WorkMedium, { object: string; verb: string }
   code: { object: "module / crystalline artifact", verb: "run" },
 };
 
+/** Same grab. The destination is the meaning. */
+export type DropIntent = "experience" | "declare" | "not-registered" | "already-declared" | "wrong-medium" | null;
+
+export function isPlayable(artifact: SpatialArtifact) {
+  return artifact.medium === "music" && artifact.status === "Registered";
+}
+
+export function isDeclarable(artifact: SpatialArtifact) {
+  return artifact.status !== "Registered";
+}
+
+export function nextRegistrationWid(artifacts: readonly Pick<SpatialArtifact, "wid">[]) {
+  const used = new Set(artifacts.map((item) => item.wid).filter((wid): wid is string => Boolean(wid)));
+  let n = 18;
+  while (used.has(`LN-${String(n).padStart(5, "0")}`)) n += 1;
+  return `LN-${String(n).padStart(5, "0")}`;
+}
+
+export function resolveDropIntent(
+  artifact: SpatialArtifact,
+  nearPlayer: boolean,
+  nearRegister: boolean,
+): DropIntent {
+  if (nearPlayer) {
+    if (isPlayable(artifact)) return "experience";
+    if (artifact.medium !== "music") return "wrong-medium";
+    return "not-registered";
+  }
+  if (nearRegister) {
+    if (isDeclarable(artifact)) return "declare";
+    return "already-declared";
+  }
+  return null;
+}
+
 export type SpatialArtifact = {
   id: string;
   title: string;
@@ -116,6 +151,12 @@ export const INTERACTION_DOCTRINE = {
     { act: "Camera pulls back", means: "You are seeing the larger lineage." },
     { act: "Connection illuminates", means: "A relationship is being revealed." },
     { act: "A version branches", means: "The work changed without erasing its history." },
+  ],
+  state: [
+    { state: "Sketch", means: "Incomplete. Carry it to Register to declare it." },
+    { state: "Working", means: "In formation. Not yet a sealed record." },
+    { state: "Registered", means: "Declared. Carry it to Player to experience it." },
+    { state: "Witnessed", means: "Someone attested. The mark is that fact." },
   ],
 } as const;
 

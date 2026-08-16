@@ -83,6 +83,23 @@ Sound, motion, lighting, and transitions may carry semantic meaning. If they do 
 
 ---
 
+## State determines the verb
+
+The same grab is not the same act. The object's state decides what dropping it means.
+
+| State | What the object is | The verb it allows |
+|---|---|---|
+| Sketch | Incomplete | Carry to Register to declare it. |
+| Working | In formation | Carry to Register to declare it. |
+| Registered | A sealed record | Carry to Player to experience it. |
+| Witnessed | Attested | The teal mark is that fact. |
+
+Player refuses an unregistered work. Register refuses a work already declared. That refusal is the teaching.
+
+Connections do not travel until a relationship is being revealed — hover, load, ceremony, or lineage. Perpetual motion without cause is decoration.
+
+---
+
 ## Subordination
 
 The Three.js layer visualizes the registry. It is not the registry.

@@ -13,11 +13,14 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { CSS2DObject, CSS2DRenderer } from "three/examples/jsm/renderers/CSS2DRenderer.js";
 import {
-  ARTIFACT_FORMS,
   ASSET,
   CAMERA_PRESETS,
   SPATIAL_REGISTRY_MOCK,
   SPATIAL_REGISTRY_NODES_BY_ID,
+  isDeclarable,
+  isPlayable,
+  resolveDropIntent,
+  type DropIntent,
   type SpatialArtifact,
   type SpatialRegistryNodeId,
   type SpatialView,
@@ -37,12 +40,15 @@ type SpatialRegistrySceneProps = {
   isPlaying: boolean;
   coverArtUrl: string;
   loadedWorkId: string | null;
+  hoveredNode: SpatialRegistryNodeId | null;
   ceremony: SpatialCeremony;
   reducedMotion: boolean;
   onSelect: (nodeId: SpatialRegistryNodeId) => void;
   onHover: (nodeId: SpatialRegistryNodeId | null) => void;
+  artifacts: SpatialArtifact[];
   onLoadWork: (artifact: SpatialArtifact) => void;
-  onGrab: (artifact: SpatialArtifact | null, dropHot: boolean) => void;
+  onDeclareWork: (artifact: SpatialArtifact) => void;
+  onGrab: (artifact: SpatialArtifact | null, intent: DropIntent) => void;
 };
 
 type EdgeVisual = {
@@ -195,22 +201,55 @@ function makeWaveform(count = 28) {
   return group;
 }
 
+function artifactCaption(artifact: SpatialArtifact) {
+  if (artifact.wid) return artifact.witnessed ? `${artifact.wid} · witnessed` : artifact.wid;
+  return artifact.status;
+}
+
+function dressArtifact(group: THREE.Group, artifact: SpatialArtifact) {
+  group.userData.status = artifact.status;
+  group.userData.wid = artifact.wid;
+  group.userData.witnessed = artifact.witnessed;
+  group.userData.playable = isPlayable(artifact);
+  group.userData.declarable = isDeclarable(artifact);
+  const sealed = artifact.status === "Registered";
+  const sketch = artifact.status === "Sketch";
+  const disc = group.userData.disc as THREE.Mesh | undefined;
+  if (disc) {
+    const material = disc.material as THREE.MeshStandardMaterial;
+    material.emissive = new THREE.Color(sealed ? GOLD : sketch ? 0x3a4450 : ELECTRIC);
+    material.emissiveIntensity = sealed ? 0.14 : sketch ? 0.03 : 0.08;
+  }
+  const grooves = group.userData.grooves as THREE.Mesh | undefined;
+  if (grooves) {
+    (grooves.material as THREE.MeshBasicMaterial).opacity = sealed ? 0.55 : sketch ? 0.12 : 0.28;
+    (grooves.material as THREE.MeshBasicMaterial).color.setHex(sealed ? GOLD : ELECTRIC);
+  }
+  const seal = group.userData.seal as THREE.Mesh | undefined;
+  if (seal) seal.visible = sealed;
+  const pip = group.userData.witnessPip as THREE.Mesh | undefined;
+  if (pip) pip.visible = artifact.witnessed;
+  const body = group.userData.body as THREE.Mesh | undefined;
+  if (body) (body.material as THREE.MeshBasicMaterial).opacity = sealed ? 0.92 : sketch ? 0.35 : 0.62;
+  const caption = group.userData.captionEl as HTMLSpanElement | undefined;
+  if (caption) caption.textContent = artifactCaption(artifact);
+}
+
 function makeArtifactObject(artifact: SpatialArtifact, loader: THREE.TextureLoader) {
   const group = new THREE.Group();
   group.position.set(...artifact.position);
   group.userData.artifactId = artifact.id;
   group.userData.medium = artifact.medium;
-  group.userData.playable = artifact.medium === "music";
   group.userData.home = new THREE.Vector3(...artifact.position);
 
-    const hitVol = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.78, 0.78, 0.28, 24),
-      new THREE.MeshBasicMaterial({ visible: false }),
-    );
-    hitVol.userData.artifactId = artifact.id;
-    group.add(hitVol);
+  const hitVol = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.78, 0.78, 0.28, 24),
+    new THREE.MeshBasicMaterial({ visible: false }),
+  );
+  hitVol.userData.artifactId = artifact.id;
+  group.add(hitVol);
 
-    if (artifact.medium === "music") {
+  if (artifact.medium === "music") {
     const disc = new THREE.Mesh(
       new THREE.CylinderGeometry(0.64, 0.64, 0.048, 48),
       new THREE.MeshStandardMaterial({ color: 0x0c0c0c, metalness: 0.7, roughness: 0.28, emissive: GOLD, emissiveIntensity: 0.12 }),
@@ -228,7 +267,21 @@ function makeArtifactObject(artifact: SpatialArtifact, loader: THREE.TextureLoad
     labelRing.rotation.x = -Math.PI / 2;
     labelRing.position.y = 0.03;
     labelRing.userData.artifactId = artifact.id;
-    group.add(disc, grooves, labelRing);
+    const seal = new THREE.Mesh(
+      new THREE.TorusGeometry(0.7, 0.012, 8, 48),
+      new THREE.MeshBasicMaterial({ color: GOLD, transparent: true, opacity: 0.85 }),
+    );
+    seal.rotation.x = Math.PI / 2;
+    const witnessPip = new THREE.Mesh(
+      new THREE.SphereGeometry(0.045, 10, 10),
+      new THREE.MeshBasicMaterial({ color: TEAL }),
+    );
+    witnessPip.position.set(0.52, 0.06, 0);
+    group.userData.disc = disc;
+    group.userData.grooves = grooves;
+    group.userData.seal = seal;
+    group.userData.witnessPip = witnessPip;
+    group.add(disc, grooves, labelRing, seal, witnessPip);
   } else if (artifact.medium === "image") {
     const frame = new THREE.Mesh(new THREE.BoxGeometry(0.98, 0.98, 0.07), wire(GOLD, 0.88));
     const canvas = new THREE.Mesh(
@@ -238,18 +291,22 @@ function makeArtifactObject(artifact: SpatialArtifact, loader: THREE.TextureLoad
     canvas.position.z = 0.045;
     frame.userData.artifactId = artifact.id;
     canvas.userData.artifactId = artifact.id;
+    group.userData.body = frame;
     group.add(frame, canvas);
   } else {
     const folio = new THREE.Mesh(new THREE.BoxGeometry(0.72, 0.98, 0.09), wire(GOLD, 0.92));
     folio.userData.artifactId = artifact.id;
+    group.userData.body = folio;
     group.add(folio);
   }
 
-  const { wrap } = makeLabel(artifact.title, artifact.wid ?? ARTIFACT_FORMS[artifact.medium].object);
+  const { wrap, caption } = makeLabel(artifact.title, artifactCaption(artifact));
   wrap.style.pointerEvents = "none";
+  group.userData.captionEl = caption;
   const label = new CSS2DObject(wrap);
   label.position.y = 0.88;
   group.add(label);
+  dressArtifact(group, artifact);
   return group;
 }
 
@@ -301,7 +358,7 @@ function backdrop(loader: THREE.TextureLoader, url: string, size: number, opacit
 }
 
 export const SpatialRegistryScene = forwardRef<SpatialSceneHandle, SpatialRegistrySceneProps>(function SpatialRegistryScene(
-  { view, selectedNode, witnessCount, isPlaying, coverArtUrl, loadedWorkId, ceremony, reducedMotion, onSelect, onHover, onLoadWork, onGrab },
+  { view, selectedNode, witnessCount, isPlaying, coverArtUrl, loadedWorkId, hoveredNode, ceremony, reducedMotion, artifacts, onSelect, onHover, onLoadWork, onDeclareWork, onGrab },
   ref,
 ) {
   const mountRef = useRef<HTMLDivElement>(null);
@@ -311,11 +368,14 @@ export const SpatialRegistryScene = forwardRef<SpatialSceneHandle, SpatialRegist
   const playingRef = useRef(isPlaying);
   const coverRef = useRef(coverArtUrl);
   const loadedRef = useRef(loadedWorkId);
+  const hoveredNodeRef = useRef(hoveredNode);
   const ceremonyRef = useRef(ceremony);
   const reducedRef = useRef(reducedMotion);
+  const artifactsRef = useRef(artifacts);
   const onSelectRef = useRef(onSelect);
   const onHoverRef = useRef(onHover);
   const onLoadWorkRef = useRef(onLoadWork);
+  const onDeclareWorkRef = useRef(onDeclareWork);
   const onGrabRef = useRef(onGrab);
   const controlBox = useRef<{ camera: THREE.PerspectiveCamera | null; controls: OrbitControls | null }>({
     camera: null,
@@ -345,13 +405,16 @@ export const SpatialRegistryScene = forwardRef<SpatialSceneHandle, SpatialRegist
     playingRef.current = isPlaying;
     coverRef.current = coverArtUrl;
     loadedRef.current = loadedWorkId;
+    hoveredNodeRef.current = hoveredNode;
     ceremonyRef.current = ceremony;
     reducedRef.current = reducedMotion;
+    artifactsRef.current = artifacts;
     onSelectRef.current = onSelect;
     onHoverRef.current = onHover;
     onLoadWorkRef.current = onLoadWork;
+    onDeclareWorkRef.current = onDeclareWork;
     onGrabRef.current = onGrab;
-  }, [view, selectedNode, witnessCount, isPlaying, coverArtUrl, loadedWorkId, ceremony, reducedMotion, onSelect, onHover, onLoadWork, onGrab]);
+  }, [view, selectedNode, witnessCount, isPlaying, coverArtUrl, loadedWorkId, hoveredNode, ceremony, reducedMotion, artifacts, onSelect, onHover, onLoadWork, onDeclareWork, onGrab]);
 
   useEffect(() => {
     const mount = mountRef.current;
@@ -583,9 +646,14 @@ export const SpatialRegistryScene = forwardRef<SpatialSceneHandle, SpatialRegist
     editField.position.set(-0.2, 1.1, -2.2);
     editChamber.add(editField);
     const pyramid = new THREE.Mesh(new THREE.ConeGeometry(0.7, 1.15, 4), wire(ELECTRIC, 0.95));
-    pyramid.position.set(0, 0.55, 0.15);
+    pyramid.position.set(-0.85, 0.55, 0.45);
     editChamber.add(pyramid);
     editChamber.add(makeRipples(ELECTRIC, 4, -1.45));
+    const versionAnchor: [number, number, number][] = [
+      [-0.15, 0.38, 0.35],
+      [1.55, 0.92, -0.45],
+      [2.45, 1.58, -1.25],
+    ];
     SPATIAL_REGISTRY_MOCK.versions.forEach((version, index) => {
       const panel = new THREE.Mesh(
         new THREE.PlaneGeometry(1.15, 0.72),
@@ -596,8 +664,8 @@ export const SpatialRegistryScene = forwardRef<SpatialSceneHandle, SpatialRegist
           side: THREE.DoubleSide,
         }),
       );
-      panel.position.set(1.55 + index * 0.15, 0.35 + index * 0.55, -0.35 - index * 0.55);
-      panel.rotation.y = -0.35;
+      panel.position.set(...versionAnchor[index]);
+      panel.rotation.y = -0.28 - index * 0.08;
       editChamber.add(panel);
       const { wrap } = makeLabel(version.label, version.caption);
       wrap.style.pointerEvents = "none";
@@ -605,11 +673,26 @@ export const SpatialRegistryScene = forwardRef<SpatialSceneHandle, SpatialRegist
       label.position.copy(panel.position);
       label.position.y += 0.5;
       editChamber.add(label);
-      for (let shard = 0; shard < 5; shard += 1) {
-        const fragment = new THREE.Mesh(new THREE.TetrahedronGeometry(0.09, 0), wire(ELECTRIC, 0.75));
-        fragment.position.set(Math.cos(shard + index) * (0.9 + index * 0.2), 0.4 + Math.sin(shard * 1.4) * 0.55, Math.sin(shard + index) * 0.7);
-        fragment.userData.orbit = { index, shard };
-        editChamber.add(fragment);
+      if (index > 0) {
+        const from = new THREE.Vector3(...versionAnchor[index - 1]);
+        const to = new THREE.Vector3(...versionAnchor[index]);
+        const branch = new THREE.Mesh(
+          new THREE.TubeGeometry(makeArc(from, to), 24, index === 1 ? 0.018 : 0.01, 6, false),
+          new THREE.MeshBasicMaterial({
+            color: index === 1 ? ELECTRIC : 0x4a6a7a,
+            transparent: true,
+            opacity: index === 1 ? 0.85 : 0.35,
+          }),
+        );
+        editChamber.add(branch);
+      }
+      if (version.state === "forming") {
+        for (let shard = 0; shard < 5; shard += 1) {
+          const fragment = new THREE.Mesh(new THREE.TetrahedronGeometry(0.09, 0), wire(ELECTRIC, 0.75));
+          fragment.position.set(Math.cos(shard + index) * 0.95, 0.7 + Math.sin(shard * 1.4) * 0.45, Math.sin(shard + index) * 0.55);
+          fragment.userData.orbit = { index, shard };
+          editChamber.add(fragment);
+        }
       }
     });
     chambers.add(editChamber);
@@ -798,13 +881,6 @@ export const SpatialRegistryScene = forwardRef<SpatialSceneHandle, SpatialRegist
     play.rotation.z = -Math.PI / 2;
     play.position.set(0, 1.45, 0.3);
     playerChamber.add(play);
-    const rewind = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.18, 3), new THREE.MeshBasicMaterial({ color: ELECTRIC, transparent: true, opacity: 0.7 }));
-    rewind.rotation.z = Math.PI / 2;
-    rewind.position.set(-0.55, 1.45, 0.3);
-    const forward = rewind.clone();
-    forward.rotation.z = -Math.PI / 2;
-    forward.position.set(0.55, 1.45, 0.3);
-    playerChamber.add(rewind, forward);
     const playerRings: THREE.Mesh[] = [];
     [1.15, 1.7, 2.3].forEach((radius) => {
       const ring = new THREE.Mesh(
@@ -866,7 +942,32 @@ export const SpatialRegistryScene = forwardRef<SpatialSceneHandle, SpatialRegist
     turntable.add(platter, platterRing, dropHalo, dropZone, platterLabel);
     scene.add(turntable);
 
-    const EXPLORE_PLATTER = new THREE.Vector3(0, -1.22, 2.45);
+    const registerWell = new THREE.Group();
+    registerWell.visible = false;
+    const wellInner = new THREE.Mesh(new THREE.BoxGeometry(0.52, 0.52, 0.52), wire(GOLD, 0.95));
+    wellInner.position.y = 0.42;
+    const wellOuter = new THREE.Mesh(new THREE.BoxGeometry(0.88, 0.88, 0.88), wire(GOLD, 0.5));
+    wellOuter.position.y = 0.42;
+    const wellHalo = new THREE.Mesh(
+      new THREE.RingGeometry(0.9, 1.22, 48),
+      new THREE.MeshBasicMaterial({ color: GOLD, transparent: true, opacity: 0.14, side: THREE.DoubleSide, depthWrite: false }),
+    );
+    wellHalo.rotation.x = -Math.PI / 2;
+    wellHalo.position.y = 0.04;
+    const wellZone = new THREE.Mesh(
+      new THREE.CylinderGeometry(1.28, 1.28, 0.7, 24),
+      new THREE.MeshBasicMaterial({ visible: false }),
+    );
+    wellZone.userData.registerZone = true;
+    const { wrap: wellWrap, caption: wellCaption } = makeLabel("REGISTER", "Drop to declare");
+    wellWrap.style.pointerEvents = "none";
+    const wellLabel = new CSS2DObject(wellWrap);
+    wellLabel.position.set(0, 1.05, 0);
+    registerWell.add(wellInner, wellOuter, wellHalo, wellZone, wellLabel);
+    scene.add(registerWell);
+
+    const EXPLORE_PLATTER = new THREE.Vector3(2.35, -1.22, 2.45);
+    const EXPLORE_REGISTER = new THREE.Vector3(-2.35, -1.18, 2.45);
     const PLAYER_PLATTER = new THREE.Vector3(0, -1.28, 0);
 
     const raycaster = new THREE.Raycaster();
@@ -880,9 +981,9 @@ export const SpatialRegistryScene = forwardRef<SpatialSceneHandle, SpatialRegist
       group: THREE.Group;
       artifact: SpatialArtifact;
       active: boolean;
-      dropHot: boolean;
+      intent: DropIntent;
     } | null = null;
-    let snap: { group: THREE.Group; artifact: SpatialArtifact; t: number } | null = null;
+    let snap: { group: THREE.Group; artifact: SpatialArtifact; t: number; kind: "experience" | "declare" } | null = null;
     let seated: THREE.Group | null = null;
     const setPointer = (event: PointerEvent) => {
       const rect = renderer.domElement.getBoundingClientRect();
@@ -894,16 +995,20 @@ export const SpatialRegistryScene = forwardRef<SpatialSceneHandle, SpatialRegist
       setPointer(event);
       return (raycaster.intersectObjects(pickables, false)[0]?.object.userData.nodeId as SpatialRegistryNodeId | undefined) ?? null;
     };
+    const liveArtifact = (id: string) => artifactsRef.current.find((item) => item.id === id) ?? SPATIAL_REGISTRY_MOCK.exploreArtifacts.find((item) => item.id === id) ?? null;
     const hitArtifact = (event: PointerEvent) => {
       setPointer(event);
       const id = raycaster.intersectObjects(artifactPickables, false)[0]?.object.userData.artifactId as string | undefined;
-      return id ? SPATIAL_REGISTRY_MOCK.exploreArtifacts.find((item) => item.id === id) ?? null : null;
+      return id ? liveArtifact(id) : null;
     };
     const platterWorld = new THREE.Vector3();
-    const isDropHot = (event: PointerEvent, group: THREE.Group) => {
+    const wellWorld = new THREE.Vector3();
+    const readIntent = (event: PointerEvent, group: THREE.Group, artifact: SpatialArtifact): DropIntent => {
       turntable.getWorldPosition(platterWorld);
-      const nearPlatter = group.position.distanceTo(platterWorld) < 1.85;
-      return nearPlatter || hudContains(event);
+      registerWell.getWorldPosition(wellWorld);
+      const nearRegister = viewRef.current === "explore" && registerWell.visible && group.position.distanceTo(wellWorld) < 1.7;
+      const nearPlayer = group.position.distanceTo(platterWorld) < 1.85 || (hudContains(event) && !nearRegister);
+      return resolveDropIntent(artifact, nearPlayer, nearRegister);
     };
     const returnHome = (group: THREE.Group) => {
       const home = group.userData.home as THREE.Vector3;
@@ -927,7 +1032,7 @@ export const SpatialRegistryScene = forwardRef<SpatialSceneHandle, SpatialRegist
         if (artifact) {
           const group = artifactGroups.get(artifact.id);
           if (group) {
-            drag = { group, artifact, active: false, dropHot: false };
+            drag = { group, artifact, active: false, intent: null };
             controls.enabled = false;
             renderer.domElement.setPointerCapture(event.pointerId);
             event.stopPropagation();
@@ -939,6 +1044,8 @@ export const SpatialRegistryScene = forwardRef<SpatialSceneHandle, SpatialRegist
     const onPointerMove = (event: PointerEvent) => {
       if (Math.hypot(event.clientX - pointerState.x, event.clientY - pointerState.y) > 7) pointerState.dragged = true;
       if (drag) {
+        const artifact = liveArtifact(drag.artifact.id) ?? drag.artifact;
+        drag.artifact = artifact;
         if (!drag.active) {
           drag.active = true;
           if (seated === drag.group) seated = null;
@@ -946,7 +1053,7 @@ export const SpatialRegistryScene = forwardRef<SpatialSceneHandle, SpatialRegist
           drag.group.position.y += 0.28;
           camera.getWorldDirection(camDir);
           dragPlane.setFromNormalAndCoplanarPoint(camDir.clone().negate(), drag.group.position);
-          onGrabRef.current(drag.artifact, false);
+          onGrabRef.current(artifact, null);
         }
         if (drag.active) {
           setPointer(event);
@@ -957,12 +1064,12 @@ export const SpatialRegistryScene = forwardRef<SpatialSceneHandle, SpatialRegist
           }
           drag.group.rotation.y += 0.08;
           drag.group.rotation.z = Math.sin(performance.now() * 0.004) * 0.12;
-          const hot = drag.artifact.medium === "music" && isDropHot(event, drag.group);
-          if (hot !== drag.dropHot) {
-            drag.dropHot = hot;
-            onGrabRef.current(drag.artifact, hot);
+          const intent = readIntent(event, drag.group, artifact);
+          if (intent !== drag.intent) {
+            drag.intent = intent;
+            onGrabRef.current(artifact, intent);
           }
-          renderer.domElement.style.cursor = hot ? "copy" : "grabbing";
+          renderer.domElement.style.cursor = intent === "experience" || intent === "declare" ? "copy" : "grabbing";
           return;
         }
       }
@@ -982,20 +1089,22 @@ export const SpatialRegistryScene = forwardRef<SpatialSceneHandle, SpatialRegist
       renderer.domElement.style.cursor = "grab";
       controls.enabled = true;
       if (drag?.active) {
-        const playable = drag.artifact.medium === "music";
-        const hot = playable && isDropHot(event, drag.group);
-        if (hot) {
-          snap = { group: drag.group, artifact: drag.artifact, t: 0 };
+        const artifact = liveArtifact(drag.artifact.id) ?? drag.artifact;
+        const intent = readIntent(event, drag.group, artifact);
+        if (intent === "experience") {
+          snap = { group: drag.group, artifact, t: 0, kind: "experience" };
+        } else if (intent === "declare") {
+          snap = { group: drag.group, artifact, t: 0, kind: "declare" };
         } else {
           returnHome(drag.group);
         }
-        onGrabRef.current(null, false);
+        onGrabRef.current(null, null);
         drag = null;
         return;
       }
       const wasDragAttempt = Boolean(drag);
       drag = null;
-      onGrabRef.current(null, false);
+      onGrabRef.current(null, null);
       if (pointerState.dragged || wasDragAttempt) return;
       if (viewRef.current === "explore") return;
       const nodeId = hitNode(event);
@@ -1033,7 +1142,6 @@ export const SpatialRegistryScene = forwardRef<SpatialSceneHandle, SpatialRegist
       const currentView = viewRef.current;
       const selected = selectedRef.current;
       const playing = playingRef.current;
-      const entered = currentView !== "overview";
       const preset = CAMERA_PRESETS[currentView];
       desiredPos.set(...preset.position);
       desiredTarget.set(...preset.target);
@@ -1077,24 +1185,49 @@ export const SpatialRegistryScene = forwardRef<SpatialSceneHandle, SpatialRegist
       exploreChamber.visible = currentView === "explore";
       turntable.visible = currentView === "explore" || currentView === "player";
       turntable.position.copy(currentView === "player" ? PLAYER_PLATTER : EXPLORE_PLATTER);
+      registerWell.visible = currentView === "explore";
+      registerWell.position.copy(EXPLORE_REGISTER);
+      artifactsRef.current.forEach((artifact) => {
+        const group = artifactGroups.get(artifact.id);
+        if (group) dressArtifact(group, artifact);
+      });
       artifactGroups.forEach((group) => {
         group.visible = currentView === "explore" || group === seated;
       });
-      (dropHalo.material as THREE.MeshBasicMaterial).opacity = drag?.dropHot ? 0.55 : seated ? 0.22 : 0.12;
-      (platter.material as THREE.MeshStandardMaterial).emissiveIntensity = drag?.dropHot ? 0.85 : playing ? 0.4 : 0.18;
-      platterCaption.textContent = seated ? "Now playing" : drag?.dropHot ? "Release to load" : "Drop a registered work";
+      const intent = drag?.intent ?? null;
+      (dropHalo.material as THREE.MeshBasicMaterial).opacity = intent === "experience" ? 0.55 : seated ? 0.22 : 0.12;
+      (platter.material as THREE.MeshStandardMaterial).emissiveIntensity = intent === "experience" ? 0.85 : playing ? 0.4 : 0.18;
+      platterCaption.textContent = seated ? "Now playing" : intent === "experience" ? "Release to experience" : intent === "not-registered" ? "Not yet registered" : "Drop a registered work";
+      (wellHalo.material as THREE.MeshBasicMaterial).opacity = intent === "declare" ? 0.62 : 0.14;
+      wellCaption.textContent = intent === "declare" ? "Release to declare" : intent === "already-declared" ? "Already declared" : "Drop to declare";
+      if (intent === "declare" && !reduced) {
+        wellInner.rotation.y += 0.03;
+        wellOuter.rotation.y -= 0.025;
+      }
 
       if (snap) {
-        turntable.getWorldPosition(platterWorld);
-        const target = platterWorld.clone();
-        target.y += 0.08;
+        const target = new THREE.Vector3();
+        if (snap.kind === "experience") {
+          turntable.getWorldPosition(platterWorld);
+          target.copy(platterWorld);
+          target.y += 0.08;
+        } else {
+          registerWell.getWorldPosition(wellWorld);
+          target.copy(wellWorld);
+          target.y += 0.42;
+        }
         snap.t = reduced ? 1 : Math.min(1, snap.t + 0.08);
         snap.group.position.lerp(target, snap.t);
         snap.group.rotation.x *= 1 - snap.t;
         snap.group.rotation.z *= 1 - snap.t;
         if (snap.t >= 1) {
-          seatOnPlatter(snap.group);
-          onLoadWorkRef.current(snap.artifact);
+          if (snap.kind === "experience") {
+            seatOnPlatter(snap.group);
+            onLoadWorkRef.current(snap.artifact);
+          } else {
+            returnHome(snap.group);
+            onDeclareWorkRef.current(snap.artifact);
+          }
           snap = null;
         }
       }
@@ -1113,11 +1246,22 @@ export const SpatialRegistryScene = forwardRef<SpatialSceneHandle, SpatialRegist
 
       edges.forEach((edge, index) => {
         const material = edge.mesh.material as THREE.MeshBasicMaterial;
-        const hot = edge.from === selected || edge.to === selected || currentView === "lineage";
-        material.opacity = entered && currentView !== "lineage" ? 0.12 : hot ? 0.9 : 0.4;
-        if (!reduced) edge.traveler.position.copy(edge.curve.getPointAt((frame * 0.004 + index * 0.14) % 1));
+        const focus = hoveredNodeRef.current ?? hovered;
+        const touching = edge.from === focus || edge.to === focus;
+        const loaded = Boolean(loadedRef.current);
+        const life =
+          loaded &&
+          ((edge.from === "work" && (edge.to === "profile" || edge.to === "edit" || edge.to === "register" || edge.to === "witness" || edge.to === "player" || edge.to === "lineage")) ||
+            (edge.from === "edit" && edge.to === "register") ||
+            (edge.from === "register" && edge.to === "witness"));
+        const ceremonyReveal =
+          (ceremonyRef.current === "register" && ((edge.from === "edit" && edge.to === "register") || (edge.from === "work" && edge.to === "register"))) ||
+          (ceremonyRef.current === "witness" && ((edge.from === "register" && edge.to === "witness") || (edge.from === "work" && edge.to === "witness")));
+        const revealed = currentView === "lineage" || touching || life || ceremonyReveal;
+        material.opacity = revealed ? 0.92 : 0.16;
         edge.mesh.visible = currentView === "overview" || currentView === "lineage";
-        edge.traveler.visible = edge.mesh.visible && !reduced;
+        edge.traveler.visible = edge.mesh.visible && revealed && !reduced;
+        if (edge.traveler.visible) edge.traveler.position.copy(edge.curve.getPointAt((frame * 0.006 + index * 0.14) % 1));
       });
 
       const resonance = playing ? 1 + Math.sin(frame * 0.12) * 0.045 : 1;
@@ -1209,7 +1353,7 @@ export const SpatialRegistryScene = forwardRef<SpatialSceneHandle, SpatialRegist
       ref={mountRef}
       className="absolute inset-0"
       role="application"
-      aria-label="Spatial registry. In Works, grab a record and drop it on the player to load the registered work."
+      aria-label="Spatial registry. Grab a work: drop it on Register to declare it, or on Player to experience a registered artifact."
     />
   );
 });
