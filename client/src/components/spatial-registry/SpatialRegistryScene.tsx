@@ -202,7 +202,14 @@ function makeArtifactObject(artifact: SpatialArtifact, loader: THREE.TextureLoad
   group.userData.playable = artifact.medium === "music";
   group.userData.home = new THREE.Vector3(...artifact.position);
 
-  if (artifact.medium === "music") {
+    const hitVol = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.78, 0.78, 0.28, 24),
+      new THREE.MeshBasicMaterial({ visible: false }),
+    );
+    hitVol.userData.artifactId = artifact.id;
+    group.add(hitVol);
+
+    if (artifact.medium === "music") {
     const disc = new THREE.Mesh(
       new THREE.CylinderGeometry(0.64, 0.64, 0.048, 48),
       new THREE.MeshStandardMaterial({ color: 0x0c0c0c, metalness: 0.7, roughness: 0.28, emissive: GOLD, emissiveIntensity: 0.12 }),
@@ -819,7 +826,11 @@ export const SpatialRegistryScene = forwardRef<SpatialSceneHandle, SpatialRegist
       exploreChamber.add(object);
       artifactGroups.set(artifact.id, object);
       object.traverse((child) => {
-        if ((child as THREE.Mesh).isMesh && child.userData.artifactId) artifactPickables.push(child);
+        const mesh = child as THREE.Mesh;
+        if (mesh.isMesh) {
+          mesh.userData.artifactId = artifact.id;
+          artifactPickables.push(mesh);
+        }
       });
     });
     chambers.add(exploreChamber);
@@ -916,7 +927,10 @@ export const SpatialRegistryScene = forwardRef<SpatialSceneHandle, SpatialRegist
           const group = artifactGroups.get(artifact.id);
           if (group) {
             drag = { group, artifact, active: false, dropHot: false };
+            controls.enabled = false;
             renderer.domElement.setPointerCapture(event.pointerId);
+            event.stopPropagation();
+            event.stopImmediatePropagation();
           }
         }
       }
@@ -924,12 +938,11 @@ export const SpatialRegistryScene = forwardRef<SpatialSceneHandle, SpatialRegist
     const onPointerMove = (event: PointerEvent) => {
       if (Math.hypot(event.clientX - pointerState.x, event.clientY - pointerState.y) > 7) pointerState.dragged = true;
       if (drag) {
-        if (!drag.active && pointerState.dragged) {
+        if (!drag.active) {
           drag.active = true;
-          controls.enabled = false;
           if (seated === drag.group) seated = null;
           exploreChamber.attach(drag.group);
-          drag.group.position.y += 0.35;
+          drag.group.position.y += 0.28;
           camera.getWorldDirection(camDir);
           dragPlane.setFromNormalAndCoplanarPoint(camDir.clone().negate(), drag.group.position);
           onGrabRef.current(drag.artifact, false);
@@ -988,9 +1001,10 @@ export const SpatialRegistryScene = forwardRef<SpatialSceneHandle, SpatialRegist
       if (nodeId) onSelectRef.current(nodeId);
     };
     renderer.domElement.style.cursor = "grab";
-    renderer.domElement.addEventListener("pointerdown", onPointerDown);
-    renderer.domElement.addEventListener("pointermove", onPointerMove);
-    renderer.domElement.addEventListener("pointerup", onPointerUp);
+    renderer.domElement.addEventListener("pointerdown", onPointerDown, true);
+    renderer.domElement.addEventListener("pointermove", onPointerMove, true);
+    renderer.domElement.addEventListener("pointerup", onPointerUp, true);
+    renderer.domElement.addEventListener("pointercancel", onPointerUp, true);
 
     const resize = () => {
       const { width, height } = mount.getBoundingClientRect();
@@ -1168,9 +1182,10 @@ export const SpatialRegistryScene = forwardRef<SpatialSceneHandle, SpatialRegist
     return () => {
       cancelAnimationFrame(animationFrame);
       resizeObserver.disconnect();
-      renderer.domElement.removeEventListener("pointerdown", onPointerDown);
-      renderer.domElement.removeEventListener("pointermove", onPointerMove);
-      renderer.domElement.removeEventListener("pointerup", onPointerUp);
+      renderer.domElement.removeEventListener("pointerdown", onPointerDown, true);
+      renderer.domElement.removeEventListener("pointermove", onPointerMove, true);
+      renderer.domElement.removeEventListener("pointerup", onPointerUp, true);
+      renderer.domElement.removeEventListener("pointercancel", onPointerUp, true);
       controls.dispose();
       glowTexture.dispose();
       silhouetteTexture.dispose();
