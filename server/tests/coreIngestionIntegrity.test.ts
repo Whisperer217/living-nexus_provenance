@@ -8,6 +8,7 @@ const topBarPath = path.resolve(process.cwd(), "client/src/components/layout/Top
 const songsRouterPath = path.resolve(process.cwd(), "server/routers/songs.ts");
 const visualWorkerPath = path.resolve(process.cwd(), "server/workers/visualQueue.ts");
 const visualSchedulePath = path.resolve(process.cwd(), "server/routes/visualQueueScheduleRoute.ts");
+const vitePath = path.resolve(process.cwd(), "server/_core/vite.ts");
 
 describe("Core ingestion and canonical registration integrity", () => {
   it("keeps the Batch Upload auth gate after hook declarations", () => {
@@ -49,5 +50,13 @@ describe("Core ingestion and canonical registration integrity", () => {
     expect(schedule).toContain('post("/api/scheduled/visual-queue"');
     expect(schedule).toContain("user.isCron");
     expect(schedule).toContain("processVisualQueueBatch");
+  });
+
+  it("never caches the SPA entry document across a deployment", () => {
+    const source = fs.readFileSync(vitePath, "utf8");
+
+    expect(source).toContain('path.basename(filePath) === "index.html"');
+    expect(source).toContain('"Cache-Control", "no-store, max-age=0, must-revalidate"');
+    expect(source).toContain('app.use("*", (_req, res) => {');
   });
 });

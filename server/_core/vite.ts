@@ -59,10 +59,24 @@ export function serveStatic(app: Express) {
     );
   }
 
-  app.use(express.static(distPath));
+  app.use(express.static(distPath, {
+    setHeaders: (res, filePath) => {
+      // Hash-named assets can remain cacheable, but a cached index document can
+      // reference a retired lazy chunk after a deployment. Keep the SPA entry
+      // revalidated so a new release selects its matching asset manifest.
+      if (path.basename(filePath) === "index.html") {
+        res.setHeader("Cache-Control", "no-store, max-age=0, must-revalidate");
+        res.setHeader("Pragma", "no-cache");
+        res.setHeader("Expires", "0");
+      }
+    },
+  }));
 
   // fall through to index.html if the file doesn't exist
   app.use("*", (_req, res) => {
+    res.setHeader("Cache-Control", "no-store, max-age=0, must-revalidate");
+    res.setHeader("Pragma", "no-cache");
+    res.setHeader("Expires", "0");
     res.sendFile(path.resolve(distPath, "index.html"));
   });
 }
