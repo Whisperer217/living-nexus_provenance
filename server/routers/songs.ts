@@ -683,6 +683,27 @@ export const songsRouter = router({
       const nextOrder = await getNextDisplayOrder(ctx.user.id);
       const insertResult = await createSong({ userId: ctx.user.id, title: input.title, genre: input.genre, bpm: input.bpm, keySignature: input.keySignature, moodTags: input.moodTags, coWriters: input.coWriters, albumName: input.albumName, creditsJson: input.creditsJson, releaseDate: input.releaseDate, isrc: input.isrc, officialArtistName: input.officialArtistName, aiConsent: input.aiConsent, ownershipStatus: input.ownershipStatus, lyricsText: input.lyricsText, lyricsHash: input.lyricsHash, isLyricsOnly: input.isLyricsOnly ?? false, contentType: input.contentType ?? (input.isLyricsOnly ? "lyrics" : "audio"), fileUrl, fileKey: audioKey, coverArtUrl, fileHash: input.fileHash, witnessId: input.witnessId, harmonicSignature: input.harmonicSignature, ecdsaPublicKey: input.ecdsaPublicKey, ecdsaSignature: input.ecdsaSignature, caption: input.caption, headlineCaption: input.headlineCaption, description: input.description, galleryImagesJson: input.galleryImagesJson, playerAssetType: input.playerAssetType ?? 'cover', aiToolSuno: input.aiToolSuno ?? false, aiToolUdio: input.aiToolUdio ?? false, aiToolSonato: input.aiToolSonato ?? false, aiToolOther: input.aiToolOther ?? false, aiToolOtherName: input.aiToolOtherName, durationSeconds: input.durationSeconds, sampleRate: input.sampleRate, bitDepth: input.bitDepth, aiDisclosure: input.aiDisclosure, haaiVisualConcept: input.haaiVisualConcept, haaiStyleLanguage: input.haaiStyleLanguage, haaiInstrumentation: input.haaiInstrumentation, haaiVocalConveyance: input.haaiVocalConveyance, haaiLyricalInspiration: input.haaiLyricalInspiration, haaiEmotionalTone: input.haaiEmotionalTone, haaiOriginStory: input.haaiOriginStory, haaiDeclaredAt, pagesJson: input.pagesJson, displayOrder: nextOrder, gcodeUrl: input.gcodeUrl, gcodeKey: input.gcodeKey, printStatsJson: input.printStatsJson, objectLicenseType: input.objectLicenseType, objectPriceCents: input.objectPriceCents, objectPhysicalSpecJson: input.objectPhysicalSpecJson, parentGuideWid: input.parentGuideWid, status: createStatus, participationMusic: input.participationMusic ?? "Human", participationLyrics: input.participationLyrics ?? "Human", participationVoice: input.participationVoice ?? "Human", toneProfileJson: input.toneProfileJson, waveformUrl: input.waveformUrl, waveformKey: input.waveformKey, visualSource: input.visualSource ?? (coverArtUrl ? "uploaded" : "none"), visualPrompt: input.visualPrompt, visualLineageJson: input.visualLineageJson, isPublic: createStatus === "Published" } as any);
        const songId = (insertResult as any)[0]?.insertId as number;
+      // Single registration completes the same lyrics provenance contract as batch:
+      // lyrics text receives its own owner-bound WID-LYR after song persistence.
+      if (songId && input.lyricsText?.trim()) {
+        try {
+          const { createHash: createHashLyr } = await import("crypto");
+          const lyricsHash = createHashLyr("sha256").update(input.lyricsText.trim()).digest("hex");
+          const combinedHash = createHashLyr("sha256")
+            .update(`${lyricsHash}:${input.witnessId ?? songId}:${ctx.user.id}`)
+            .digest("hex");
+          const lyricsWid = `WID-LYR-${combinedHash.slice(0, 8).toUpperCase()}-${combinedHash.slice(8, 16).toUpperCase()}`;
+          await updateSongLyricsWithWid(songId, ctx.user.id, {
+            lyricsText: input.lyricsText.trim(),
+            lyricsWid,
+            lyricsFileName: `${input.title || "lyrics"}.txt`,
+            lyricsFileHash: lyricsHash,
+            lyricsAddedAt: new Date(),
+          });
+        } catch (lyrErr) {
+          console.error("[Upload] WID-LYR generation failed for song", songId, lyrErr);
+        }
+      }
       // Guide growth: linking a work to a guide levels the guide (signal personality)
       if (input.parentGuideWid && songId) {
         void (async () => {
@@ -1736,5 +1757,4 @@ ${workType === "manuscript" || workType === "comic" ? "Category" : "Genre"}: ${i
         return { collection, tracks, creator, projectId };
       }),
   });
-
 

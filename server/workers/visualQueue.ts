@@ -13,8 +13,8 @@
  *   pending → processing → complete
  *                       → failed  (retried up to MAX_ATTEMPTS times)
  *
- * Worker runs on a setInterval inside the Express process.
- * It is non-blocking — the upload flow never waits for video generation.
+ * A durable scheduler invokes the queue callback. Uploads only enqueue records;
+ * they never wait for visual generation.
  */
 
 import { eq, and, desc, sql, or } from "drizzle-orm";
@@ -32,9 +32,6 @@ const MAX_ATTEMPTS = 3;
 
 /** How many jobs the worker processes per tick. */
 const BATCH_SIZE = 5;
-
-/** Worker poll interval in ms. */
-const WORKER_INTERVAL_MS = 10_000; // 10 seconds (reduced from 15s for higher throughput)
 
 /** Priority assigned to founder works. */
 const FOUNDER_PRIORITY = 10;
@@ -229,7 +226,7 @@ export async function requeueFailedJobs(): Promise<number> {
 
 let workerRunning = false;
 
-async function processNextBatch(): Promise<void> {
+export async function processVisualQueueBatch(): Promise<void> {
   if (workerRunning) return;
   workerRunning = true;
 
@@ -252,9 +249,15 @@ async function processNextBatch(): Promise<void> {
 
     for (const job of jobs) {
       // Mark as processing
-      await db.update(visualQueue)
+      const claim = await db.update(visualQueue)
         .set({ status: "processing", startedAt: new Date(), attempts: job.attempts + 1 })
-        .where(eq(visualQueue.id, job.id));
+        .where(and(
+          eq(visualQueue.id, job.id),
+          eq(visualQueue.status, "pending"),
+          sql`${visualQueue.attempts} = ${job.attempts}`,
+        ));
+      const claimed = (claim as any)[0]?.affectedRows ?? (claim as any).affectedRows ?? 0;
+      if (!claimed) continue;
 
       try {
         // Fetch song data (include music video fields + metadata for AI script generation)
@@ -413,21 +416,9 @@ async function sendDailyDigest(): Promise<void> {
 }
 
 /**
- * Schedule the daily digest to fire at midnight (00:00) server time.
+ * Retained for the separate scheduled digest callback. Do not invoke from the
+ * Express process: managed instances can restart or hibernate between timers.
  */
-function scheduleDailyDigest(): void {
-  const now = new Date();
-  const midnight = new Date(now);
-  midnight.setHours(24, 0, 0, 0); // next midnight
-  const msUntilMidnight = midnight.getTime() - now.getTime();
-  console.log(`[VisualQueue] Daily digest scheduled in ${Math.round(msUntilMidnight / 60000)} min`);
-  setTimeout(() => {
-    sendDailyDigest();
-    // Re-schedule every 24 hours after the first midnight fire
-    setInterval(sendDailyDigest, 24 * 60 * 60 * 1000);
-  }, msUntilMidnight);
-}
-
 /**
  * Reset any jobs stuck in 'processing' state back to 'pending'.
  * This happens when the server restarts mid-job — those jobs would be
@@ -447,23 +438,14 @@ async function resetStuckJobs(): Promise<void> {
 }
 
 /**
- * Start the background visual generation worker.
- * Call once at server startup.
+ * Initialize queue recovery at startup. Durable processing is triggered by the
+ * scheduler callback; no in-process timers are permitted on managed hosting.
  */
 export function startVisualWorker(): void {
-  console.log(`[VisualQueue] Worker started (interval=${WORKER_INTERVAL_MS}ms, batch=${BATCH_SIZE})`);
+  console.log(`[VisualQueue] Queue recovery initialized (batch=${BATCH_SIZE})`);
 
-  // Reset any jobs stuck in 'processing' from a previous server run,
-  // then immediately process the pending queue.
+  // Reset any jobs stuck in 'processing' from a previous server run. The next
+  // scheduler tick owns processing so restarts cannot create a second worker.
   resetStuckJobs()
-    .then(() => processNextBatch())
     .catch(err => console.error("[VisualQueue] Startup error:", err));
-
-  // Then run on interval
-  setInterval(() => {
-    processNextBatch().catch(err => console.error("[VisualQueue] Worker tick error:", err));
-  }, WORKER_INTERVAL_MS);
-
-  // Schedule daily digest at midnight
-  scheduleDailyDigest();
 }

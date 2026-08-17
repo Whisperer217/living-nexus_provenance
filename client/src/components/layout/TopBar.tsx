@@ -21,7 +21,6 @@ import {
 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
-import { useUploadEngine } from "@/contexts/UploadEngineContext";
 import NotificationBellDropdown from "@/components/NotificationBellDropdown";
 import { DISCORD_COMMUNITY_URL } from "@/lib/loopProduct";
 import { DiscordGlyph as SharedDiscordGlyph } from "@/components/icons/DiscordGlyph";
@@ -371,7 +370,6 @@ export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCoun
   const { user, loading: authLoading, logout } = useAuth();
   const [avatarMenuOpen, setAvatarMenuOpen] = useState(false);
   const avatarMenuRef = useRef<HTMLDivElement>(null);
-  const { openEngine } = useUploadEngine();
 
   // Close avatar dropdown when clicking outside
   useEffect(() => {
@@ -681,7 +679,13 @@ export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCoun
 
           {/* Register Work */}
           <button
-            onClick={() => { if (user) { openEngine(); } else { goTo(getLoginUrl()); } }}
+            onClick={() => {
+              if (user) {
+                goTo("/manifest");
+              } else {
+                window.location.assign(getLoginUrl("/manifest"));
+              }
+            }}
             className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-all"
             style={{
               fontSize: "clamp(9px, 0.7vw, 11px)",

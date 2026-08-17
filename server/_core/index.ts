@@ -32,6 +32,7 @@ import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { getUserByHandle } from "../utils/db";
 import { startVisualWorker, backfillVisualQueue } from "../workers/visualQueue";
+import { visualQueueScheduleRouter } from "../routes/visualQueueScheduleRoute";
 import { startSelfImprovementWorker } from "../workers/selfImprovementWorker";
 import { startPaymentIntegrityWorker } from "../workers/paymentIntegrityWorker";
 import { globalErrorHandler } from "./errorHandler";
@@ -174,6 +175,8 @@ async function startServer() {
   registerSseRoutes(app);
   // Multipart file upload endpoint (bypasses tRPC JSON body size limit)
   app.use(uploadRouter);
+  // Durable LN visual worker: managed scheduler posts here, never an in-process timer.
+  app.use(visualQueueScheduleRouter);
   // Sovereign Stamp — POST /api/stamp-song (tone injection pipeline)
   app.use(stampRouter);
   // WID-tagged audio download endpoint

@@ -17,7 +17,6 @@ import { useLocation, useRouter } from "wouter";
 import { Home, Compass, Upload, Archive, ExternalLink, Shield, LayoutGrid } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
-import { useUploadEngine } from "@/contexts/UploadEngineContext";
 import { LOOP_PRODUCT, DISCORD_COMMUNITY_URL } from "@/lib/loopProduct";
 import { DiscordGlyph } from "@/components/icons/DiscordGlyph";
 
@@ -62,7 +61,6 @@ export default function LeftRail({
 }: LeftRailProps) {
   const [location, navigate] = useLocation();
   const { user } = useAuth();
-  const { openEngine } = useUploadEngine();
 
   const isRouteActive = (path: string) => {
     if (path === "/" && (location === "/" || location === "/home")) return true;
@@ -72,6 +70,16 @@ export default function LeftRail({
   // Desktop: stopPropagation prevents ContextDrawer backdrop from closing on rail click
   const handleDesktopClick = (e: React.MouseEvent, mode: NavMode) => {
     e.stopPropagation();
+    // Register is a route, not a drawer mode. The contextual drawer still keeps
+    // batch registration as a subordinate path after the canonical studio loads.
+    if (mode === "upload") {
+      if (!user) {
+        window.location.href = getLoginUrl("/manifest");
+        return;
+      }
+      navigate("/manifest");
+      return;
+    }
     onRailClick(mode);
   };
 
@@ -81,8 +89,6 @@ export default function LeftRail({
       window.location.href = getLoginUrl(path);
       return;
     }
-    // Upload item opens the engine instead of navigating
-    if (path === "/manifest") { openEngine(); onMobileClose?.(); return; }
     navigate(path);
     onMobileClose?.();
   };

@@ -950,20 +950,6 @@ export default function BatchUploadPage() {
 
   const batchUpload = trpc.songs.batchUpload.useMutation();
 
-  if (!authLoading && !isAuthenticated) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
-        <p style={{ color: "var(--ln-smoke)" }}>Sign in to register music</p>
-        <Button
-          onClick={() => { window.location.href = getLoginUrl("/batch-upload"); }}
-          style={{ background: "var(--ln-gold)", color: "var(--ln-coal)" }}
-        >
-          Sign In
-        </Button>
-      </div>
-    );
-  }
-
   const updateCard = useCallback((id: string, patch: Partial<TrackCard>) => {
     setCards(prev => prev.map(c => c.id === id ? { ...c, ...patch } : c));
   }, []);
@@ -1214,6 +1200,23 @@ export default function BatchUploadPage() {
 
   const readyCount = cards.filter(c => c.audioStatus === "ready").length;
   const totalFilled = cards.filter(c => c.audioFile !== null).length;
+
+  // This gate must remain after every hook and callback declaration. Rendering it
+  // early caused unauthenticated users to execute a different hook count after
+  // auth hydration, which crashed the live route with React error #300.
+  if (!authLoading && !isAuthenticated) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+        <p style={{ color: "var(--ln-smoke)" }}>Sign in to register music</p>
+        <Button
+          onClick={() => { window.location.href = getLoginUrl("/batch-upload"); }}
+          style={{ background: "var(--ln-gold)", color: "var(--ln-coal)" }}
+        >
+          Sign In
+        </Button>
+      </div>
+    );
+  }
 
   // ── Collection result screen ──────────────────────────────────────────────
   if (collectionResult) {
