@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-08-15T23:00:00.000Z",
-  "totalLessons": 14,
+  "lastUpdated": "2026-08-18T04:31:00.000Z",
+  "totalLessons": 15,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -319,6 +319,29 @@
         "registry-boundary",
         "provenance-safety",
         "no-schema-change"
+      ]
+    },
+    {
+      "id": "LESSON-016",
+      "date": "2026-08-18",
+      "category": "architecture",
+      "problem": "Work preparation existed only as dispersed MusicEnvironment state. Any attempt to make the boundary explicit risked changing the JSON property order used by the current WID signature, changing the songs.upload payload, or introducing premature reseal/revision enforcement.",
+      "solution": "Keeper-approved Slice 2 added a pure PreparedWorkRegistration client model, an exact-order WID payload serializer, and a registration-payload adapter. The existing generateWID crypto path, songs.upload contract, Draft/Published values, asset uploads, WID/provenance behavior, and post-registration behavior remain unchanged. Field classes are informational only. Focused tests prove byte-identical WID serialization and value/key-order-identical upload payloads; typecheck, full regression, refinement baseline, guest registration smokes, and zero-write custody checks passed.",
+      "files": [
+        "shared/preparedWorkRegistration.ts",
+        "client/src/pages/manifestation-studio/environments/MusicEnvironment.tsx",
+        "server/tests/preparedWorkRegistration.test.ts"
+      ],
+      "score": 0,
+      "tags": [
+        "slice-2",
+        "prepared-work-registration",
+        "wid-payload",
+        "signature-compatibility",
+        "upload-contract",
+        "draft-publish",
+        "no-schema-change",
+        "provenance-safety"
       ]
     }
   ]

@@ -24,10 +24,7 @@ import {
   assistAudioMetadata,
   buildWaveformPngFromAudio,
   defaultParticipation,
-  deriveToneFromMetadata,
   extractEmbeddedCover,
-  harmonicSignatureFromAccents,
-  participationToAiDisclosure,
   type LoopParticipation,
   type ParticipationValue,
   type PublishIntent,
@@ -35,6 +32,12 @@ import {
   type VisualSource,
   PARTICIPATION_VALUES,
 } from "@shared/loopRegistration";
+import {
+  buildPreparedWorkUploadPayload,
+  createPreparedWorkRegistration,
+  derivePreparedWorkTone,
+  serializePreparedWorkWidPayload,
+} from "@shared/preparedWorkRegistration";
 
 const atmosphere = ATMOSPHERES.music;
 
@@ -158,6 +161,28 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
 
   const generateImage = trpc.guides.generateImage.useMutation();
   const remixImage = trpc.guides.remixImage.useMutation();
+
+  const prepareWorkRegistration = () =>
+    createPreparedWorkRegistration({
+      audioFile,
+      coverFile,
+      coverRemoteUrl,
+      visualSource,
+      visualPrompt,
+      visualLineage,
+      title,
+      genre,
+      bpm,
+      keySignature,
+      lyrics,
+      moodTags: selectedMoods,
+      caption,
+      originStory,
+      aiConsent,
+      participation,
+      publishIntent,
+      durationSeconds,
+    });
 
   const { data: creatorProfile } = trpc.profile.me.useQuery(undefined, { enabled: !!user });
   useEffect(() => {
@@ -291,23 +316,16 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
     }
     setGeneratingWid(true);
     try {
+      const prepared = prepareWorkRegistration();
       const buffer = await audioFile.arrayBuffer();
       const fileHash = await sha256Hex(buffer);
       const keypair = await generateECDSAKeypair();
       const timestamp = new Date().toISOString();
-      const tone = deriveToneFromMetadata({
-        genre: genre || null,
-        bpm: bpm ? parseInt(bpm, 10) : null,
-        keySignature: keySignature || null,
-        moods: selectedMoods,
-        participation,
-        emotionalHint: originStory || caption || null,
-        title,
-      });
-      const payload = JSON.stringify({
+      const tone = derivePreparedWorkTone(prepared);
+      const payload = serializePreparedWorkWidPayload({
         fileHash,
-        title,
-        participation,
+        title: prepared.metadata.title,
+        participation: prepared.metadata.participation,
         toneLabel: tone.label,
         timestamp,
       });
@@ -372,14 +390,15 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
 
     setUploadPhase("uploading");
     try {
+      const prepared = prepareWorkRegistration();
       const { url: fileUrl, key: fileKey } = await uploadFileToS3(audioFile, "audio");
-      let coverArtUrl = coverRemoteUrl || undefined;
-      let resolvedVisualSource = visualSource;
-      if (coverFile) {
-        const { url } = await uploadFileToS3(coverFile, "cover");
+      let coverArtUrl = prepared.assets.coverRemoteUrl || undefined;
+      let resolvedVisualSource = prepared.metadata.visualSource;
+      if (prepared.assets.coverFile) {
+        const { url } = await uploadFileToS3(prepared.assets.coverFile, "cover");
         coverArtUrl = url;
-        if (visualSource === "none" || visualSource === "embedded") {
-          resolvedVisualSource = visualSource === "embedded" ? "embedded" : "uploaded";
+        if (prepared.metadata.visualSource === "none" || prepared.metadata.visualSource === "embedded") {
+          resolvedVisualSource = prepared.metadata.visualSource === "embedded" ? "embedded" : "uploaded";
         }
       }
 
@@ -396,52 +415,23 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
         /* non-blocking */
       }
 
-      const tone =
-        toneProfile ||
-        deriveToneFromMetadata({
-          genre,
-          bpm: bpm ? parseInt(bpm, 10) : null,
-          keySignature,
-          moods: selectedMoods,
-          participation,
-          emotionalHint: originStory || caption || null,
-          title,
-        });
+      const tone = toneProfile || derivePreparedWorkTone(prepared);
 
-      uploadMutation.mutate({
-        fileUrl,
-        fileKey,
-        coverArtUrl,
-        title,
-        genre: genre || undefined,
-        bpm: bpm ? parseInt(bpm, 10) : undefined,
-        keySignature: keySignature || undefined,
-        aiConsent,
-        ownershipStatus: "full",
-        moodTags: selectedMoods,
-        caption: caption || undefined,
-        contentType: "audio" as any,
-        fileHash: witnessData.fileHash,
-        witnessId: witnessData.wid,
-        harmonicSignature: harmonicSignatureFromAccents(tone.accents),
-        ecdsaPublicKey: witnessData.publicKeyJWK,
-        ecdsaSignature: witnessData.signature,
-        aiDisclosure: participationToAiDisclosure(participation),
-        lyricsText: lyrics || undefined,
-        haaiOriginStory: originStory || undefined,
-        haaiEmotionalTone: selectedMoods.join(", ") || undefined,
-        durationSeconds,
-        status: publishIntent,
-        participationMusic: participation.music,
-        participationLyrics: participation.lyrics,
-        participationVoice: participation.voice,
-        toneProfileJson: JSON.stringify(tone),
-        waveformUrl,
-        waveformKey,
-        visualSource: hasVisual ? resolvedVisualSource : "none",
-        visualPrompt: visualPrompt || undefined,
-        visualLineageJson: visualLineage.length ? JSON.stringify(visualLineage) : undefined,
-      } as any);
+      uploadMutation.mutate(
+        buildPreparedWorkUploadPayload(prepared, {
+          fileUrl,
+          fileKey,
+          coverArtUrl,
+          fileHash: witnessData.fileHash,
+          witnessId: witnessData.wid,
+          publicKeyJWK: witnessData.publicKeyJWK,
+          signature: witnessData.signature,
+          tone,
+          waveformUrl,
+          waveformKey,
+          visualSource: hasVisual ? resolvedVisualSource : "none",
+        }) as any
+      );
     } catch (err: any) {
       toast.error(err.message || "Upload failed");
       setUploadPhase("idle");
