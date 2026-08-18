@@ -170,6 +170,7 @@ import { ENV } from "../_core/env";
 import { getOrGenerateEmbedVideo } from "../services/embedVideo";
 import { enqueueVisualJob } from "../workers/visualQueue";
 import { notifyOwner } from "../_core/notification";
+import { lookupExistingWorkByFileHash } from "../domains/registry/lookupExistingWorkByFileHash";
 
 const stripe = process.env.STRIPE_SECRET_KEY
   ? new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: "2024-06-20" as any })
@@ -193,29 +194,9 @@ export const songsRouter = router({
     /** Pre-upload duplicate detection — checks if a fileHash already exists in the system. */
     checkDuplicate: protectedProcedure
       .input(z.object({ fileHash: z.string().length(64) }))
-      .query(async ({ ctx, input }) => {
-        const db = await getDb();
-        const { songs } = await import("../../drizzle/schema");
-        const { eq } = await import("drizzle-orm");
-        const existing = await db.select({
-          id: songs.id,
-          title: songs.title,
-          witnessId: songs.witnessId,
-          userId: songs.userId,
-          createdAt: songs.createdAt,
-        }).from(songs).where(eq(songs.fileHash, input.fileHash)).limit(1);
-        if (existing.length === 0) return { duplicate: false as const };
-        const match = existing[0];
-        const owner = await getUserById(match.userId);
-        return {
-          duplicate: true as const,
-          isOwnWork: match.userId === ctx.user.id,
-          existingTitle: match.title,
-          existingWid: match.witnessId,
-          existingCreator: owner?.artistHandle ?? owner?.name ?? "Unknown",
-          existingCreatedAt: match.createdAt,
-        };
-      }),
+      .query(({ ctx, input }) =>
+        lookupExistingWorkByFileHash(input.fileHash, ctx.user.id)
+      ),
     /**
      * @version 1.0.0
      * Returns paginated public works in canonical FeedRow[] shape { song: SongRecord, creator: CreatorSummary }.
@@ -1757,4 +1738,3 @@ ${workType === "manuscript" || workType === "comic" ? "Category" : "Genre"}: ${i
         return { collection, tracks, creator, projectId };
       }),
   });
-

@@ -298,6 +298,28 @@
         "provenance",
         "authority-boundary"
       ]
+    },
+    {
+      "id": "LESSON-015",
+      "date": "2026-08-18",
+      "category": "architecture",
+      "problem": "The existing songsRouter is a critical compatibility façade across Work registration, Registry lookup, Explore, Player telemetry, collection behavior, media, and commerce. A broad router split would risk changing public procedure contracts or weakening creator/provenance custody before the target boundaries were proven.",
+      "solution": "Keeper-approved Slice 1 extracted only the read-only duplicate hash lookup into lookupExistingWorkByFileHash while retaining the identical protected songs.checkDuplicate façade, Zod input, response shape, no-match/own-match/other-creator behavior, and caller identity source. Added focused behavior, authorization, no-side-effect, full-suite, type, route-smoke, and database custody checks. The pattern is internal-helper-first with compatibility facades; it does not authorize further router separation.",
+      "files": [
+        "server/domains/registry/lookupExistingWorkByFileHash.ts",
+        "server/routers/songs.ts",
+        "server/tests/workDuplicateLookup.test.ts"
+      ],
+      "score": 0,
+      "tags": [
+        "slice-1",
+        "compatibility-facade",
+        "songsRouter",
+        "duplicate-check",
+        "registry-boundary",
+        "provenance-safety",
+        "no-schema-change"
+      ]
     }
   ]
 }
