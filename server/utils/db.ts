@@ -692,9 +692,13 @@ export async function updateSongStatus(
       throw new Error(`Witness-ready profile required to publish. Missing: ${missing.join(", ")}.`);
     }
   }
-  // Keep isPublic in sync: only Published songs are publicly visible in any feed
-  const isPublic = status === "Published";
+  // Keep isPublic in sync: only Published songs are publicly visible in any feed.
+  const isPublic = isPublicForSongStatus(status);
   await db.update(songs).set({ status, isPublic, updatedAt: new Date() }).where(and(eq(songs.id, songId), eq(songs.userId, userId)));
+}
+
+export function isPublicForSongStatus(status: "Draft" | "Published" | "Unlisted" | "Deleted") {
+  return status === "Published";
 }
 
 export async function getSongByWitnessId(witnessId: string) {
@@ -727,7 +731,6 @@ export async function updateSongMetadata(
     coverArtUrl?: string | null;
     aiConsent?: "prohibited" | "permitted_attribution" | "permitted";
     ownershipStatus?: "full" | "partial";
-    status?: "Draft" | "Published" | "Unlisted" | "Deleted";
     coverPositionX?: number;
     coverPositionY?: number;
     // AI Disclosure & HAAI Declaration fields
@@ -777,11 +780,6 @@ export async function updateSongMetadata(
   if (fields.coverArtUrl !== undefined) updateSet.coverArtUrl = fields.coverArtUrl;
   if (fields.aiConsent !== undefined) updateSet.aiConsent = fields.aiConsent;
   if (fields.ownershipStatus !== undefined) updateSet.ownershipStatus = fields.ownershipStatus;
-  // Enforce publish gate: partial-rights works cannot be Published or monetized
-  if (fields.status === "Published" && fields.ownershipStatus === "partial") {
-    throw new Error("This work cannot be published without full commercial ownership or a commercial license.");
-  }
-  if (fields.status !== undefined) updateSet.status = fields.status;
   if (fields.coverPositionX !== undefined) updateSet.coverPositionX = fields.coverPositionX;
   if (fields.coverPositionY !== undefined) updateSet.coverPositionY = fields.coverPositionY;
   if (fields.aiDisclosure !== undefined) updateSet.aiDisclosure = fields.aiDisclosure;

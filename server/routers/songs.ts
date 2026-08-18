@@ -1054,7 +1054,6 @@ export const songsRouter = router({
       coverArtUrl: z.string().url().nullable().optional(),
       aiConsent: z.enum(["prohibited", "permitted_attribution", "permitted"]).optional(),
       ownershipStatus: z.enum(["full", "partial"]).optional(),
-      status: z.enum(["Draft", "Published", "Unlisted", "Deleted"]).optional(),
       coverPositionX: z.number().min(0).max(100).optional(),
       coverPositionY: z.number().min(0).max(100).optional(),
       // AI Disclosure & HAAI Declaration
@@ -1094,7 +1093,7 @@ export const songsRouter = router({
       downloadTipThresholdCents: z.number().int().min(0).max(100000).optional(),
       // Guide provenance chain
       parentGuideWid: z.string().max(64).nullable().optional(),
-    })).mutation(async ({ ctx, input }) => {
+    }).strict()).mutation(async ({ ctx, input }) => {
       const { songId, creditsJson, ...fields } = input;
       // If saving a complete HAAI declaration, stamp the declared timestamp
       const haaiFields = [fields.haaiVisualConcept, fields.haaiStyleLanguage, fields.haaiInstrumentation, fields.haaiVocalConveyance, fields.haaiLyricalInspiration, fields.haaiEmotionalTone];

@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-08-18T04:31:00.000Z",
-  "totalLessons": 15,
+  "lastUpdated": "2026-08-18T12:50:00.000Z",
+  "totalLessons": 16,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -342,6 +342,31 @@
         "draft-publish",
         "no-schema-change",
         "provenance-safety"
+      ]
+    },
+    {
+      "id": "LESSON-017",
+      "date": "2026-08-18",
+      "category": "architecture",
+      "problem": "The Work lifecycle used status and isPublic as a synchronized public-projection invariant, but ordinary metadata mutation accepted status without synchronizing isPublic. Both CreativeDrawer and EditChapel exposed that path, producing the invalid but reachable Published/isPublic=false state. Public Explore/creator/guest Work readers excluded that state while canonical WID and Witness Registry readers still admitted it.",
+      "solution": "Keeper-approved Publication State Integrity Repair removed status from ordinary songs.updateMetadata input and persistence. CreativeDrawer and EditChapel now save metadata first and call the existing owner-gated songs.updateStatus authority only when lifecycle selection changes. Dedicated transition authority retains publication gates and synchronizes isPublic through isPublicForSongStatus. Focused tests prove Draft→Published, Published→Unlisted, Unlisted→Published, Draft/Published metadata saves, and status rejection through metadata. Existing divergent rows were read-only verified and deliberately not repaired.",
+      "files": [
+        "server/routers/songs.ts",
+        "server/utils/db.ts",
+        "client/src/components/CreativeDrawer.tsx",
+        "client/src/components/EditChapel.tsx",
+        "server/tests/songs.publicationStateIntegrity.test.ts"
+      ],
+      "score": 0,
+      "tags": [
+        "publication-state",
+        "status",
+        "isPublic",
+        "invariant",
+        "creative-drawer",
+        "edit-chapel",
+        "owner-authority",
+        "no-database-repair"
       ]
     }
   ]

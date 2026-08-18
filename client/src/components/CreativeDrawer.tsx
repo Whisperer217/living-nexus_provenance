@@ -243,21 +243,13 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
   const stableOnClose = useCallback(() => onClose(), [onClose]);
 
   /* ── Mutations ── */
-  const updateMetadata = trpc.songs.updateMetadata.useMutation({
-    onSuccess: () => {
-      utils.songs.mySongs.invalidate();
-      utils.songs.getById.invalidate({ id: song.id });
-      setSaving(false);
-      setSaved(true);
-      setTimeout(() => setSaved(false), 2200);
-      toast.success("Work updated");
-      onSaved();
-    },
-    onError: (err: { message?: string }) => {
-      toast.error(err.message || "Failed to save");
-      setSaving(false);
-    },
-  });
+  const updateMetadata = trpc.songs.updateMetadata.useMutation();
+  const updateStatus = trpc.songs.updateStatus.useMutation();
+
+  function refreshWorkData() {
+    utils.songs.mySongs.invalidate();
+    utils.songs.getById.invalidate({ id: song.id });
+  }
 
   const updateLyrics = trpc.songs.updateLyrics.useMutation({
     onSuccess: () => {
@@ -337,6 +329,7 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
       const { url } = await res.json();
       setCoverUrl(url);
       await updateMetadata.mutateAsync({ songId: song.id, coverArtUrl: url });
+      refreshWorkData();
       toast.success("Cover art updated");
     } catch (e: unknown) {
       toast.error((e as Error).message || "Cover upload failed");
@@ -384,24 +377,40 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
   }
 
   /* ── Save ── */
-  function handleSave() {
+  async function handleSave() {
     if (!title.trim()) { toast.error("Title is required"); return; }
     setSaving(true);
-    updateMetadata.mutate({
-      songId: song.id,
-      title: title.trim(),
-      genre: genre || null,
-      caption: caption || null,
-      description: description || null,
-      status: status as "Published" | "Draft" | "Unlisted" | "Deleted",
-      aiConsent: aiConsent as "prohibited" | "permitted_attribution" | "permitted",
-      aiDisclosure: aiDisclosure as "original" | "human_authored_ai_instrument" | "ai_assisted" | "ai_generated",
-      haaiOriginStory: originStory || null,
-      externalLinksJson: extLinks.length > 0 ? JSON.stringify(extLinks) : null,
-      releaseDate: creationDate || undefined,
-      downloadPermission,
-      downloadTipThresholdCents: downloadPermission === "tipped" ? tipThresholdCents : undefined,
-    });
+    try {
+      await updateMetadata.mutateAsync({
+        songId: song.id,
+        title: title.trim(),
+        genre: genre || null,
+        caption: caption || null,
+        description: description || null,
+        aiConsent: aiConsent as "prohibited" | "permitted_attribution" | "permitted",
+        aiDisclosure: aiDisclosure as "original" | "human_authored_ai_instrument" | "ai_assisted" | "ai_generated",
+        haaiOriginStory: originStory || null,
+        externalLinksJson: extLinks.length > 0 ? JSON.stringify(extLinks) : null,
+        releaseDate: creationDate || undefined,
+        downloadPermission,
+        downloadTipThresholdCents: downloadPermission === "tipped" ? tipThresholdCents : undefined,
+      });
+      if (status !== song.status) {
+        await updateStatus.mutateAsync({
+          songId: song.id,
+          status: status as "Published" | "Draft" | "Unlisted" | "Deleted",
+        });
+      }
+      refreshWorkData();
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2200);
+      toast.success("Work updated");
+      onSaved();
+    } catch (err: unknown) {
+      toast.error((err as Error).message || "Failed to save");
+    } finally {
+      setSaving(false);
+    }
   }
 
   /* ── Save Lyrics ── */
