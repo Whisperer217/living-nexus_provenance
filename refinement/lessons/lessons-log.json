@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-08-18T14:53:00.000Z",
-  "totalLessons": 17,
+  "lastUpdated": "2026-08-18T23:56:30.000Z",
+  "totalLessons": 18,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -391,6 +391,32 @@
         "status-authority",
         "no-wid-change",
         "no-row-repair"
+      ]
+    },
+    {
+      "id": "LESSON-019",
+      "date": "2026-08-18",
+      "category": "architecture",
+      "problem": "The existing admin router is correctly role-gated but mixes read-only administration with broad operational and mutation powers, including raw configuration, billing, work moderation, user roles, and generation controls. Making its root page the platform Control Plane would blur authority boundaries and make later safe configuration work vulnerable to scope creep.",
+      "solution": "Keeper-approved Admin Control Plane Stage 1 mounted a distinct adminControlPlane tRPC namespace whose procedures are all adminProcedure-gated queries. The new root /admin dashboard is limited to bounded health, a server-owned fixed route manifest, existing diagnostic links, and redacted existing action-log rows. Tests prove guest/non-admin server denial, zero mutation procedures, no page mutation hooks, a fixed manifest with no target input, and action-detail redaction. Existing specialized /admin/* routes remain intact and outside the new Control Plane.",
+      "files": [
+        "server/routers/adminControlPlane.ts",
+        "server/routers/index.ts",
+        "client/src/pages/admin/AdminControlPlanePage.tsx",
+        "client/src/components/DashboardLayout.tsx",
+        "client/src/App.tsx",
+        "server/tests/adminControlPlane.test.ts"
+      ],
+      "score": 0,
+      "tags": [
+        "admin-control-plane",
+        "read-only",
+        "adminProcedure",
+        "authorization",
+        "audit-redaction",
+        "route-manifest",
+        "no-mutation",
+        "authority-boundary"
       ]
     }
   ]

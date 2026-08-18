@@ -60,6 +60,7 @@ const PlaylistPage = lazy(() => import("./pages/PlaylistPage"));
 const ManifestoPage = lazy(() => import("./pages/ManifestoPage"));
 const AttributionPage = lazy(() => import("./pages/AttributionPage"));
 const AdminUsersPage = lazy(() => import("./pages/AdminUsersPage"));
+const AdminControlPlanePage = lazy(() => import("./pages/admin/AdminControlPlanePage"));
 const ModerationQueuePage = lazy(() => import("./pages/admin/ModerationQueuePage"));
 const CommentModerationPage = lazy(() => import("./pages/admin/CommentModerationPage"));
 const AuditLogPage = lazy(() => import("./pages/admin/AuditLogPage"));
@@ -272,6 +273,7 @@ function Router() {
         <Route path="/verify/:witnessId" component={VerifyPage} />
         <Route path="/download" component={DownloadPage} />
         <Route path="/prototype/spatial-registry" component={SpatialRegistryMockPage} />
+        <Route path="/admin" component={AdminControlPlanePage} />
         {/* DIAGNOSTIC — Strip to Bone: zero nav infrastructure, raw React only */}
         <Route path="/diag/strip-to-bone" component={StripToBone} />
 
@@ -324,7 +326,6 @@ function Router() {
                 <Route path="/admin/phase-ledger" component={PhaseLedgerPage} />
                 <Route path="/admin/guide-access" component={GuideAccessRequestsPage} />
                 <Route path="/admin/notifications" component={AdminNotificationsPage} />
-                <Route path="/admin" component={AdminUsersPage} />
                 <Route path="/trust" component={TrustPage} />
                 <Route path="/redeem" component={RedeemPage} />
                 <Route path="/pricing" component={PricingCovenantPage} />

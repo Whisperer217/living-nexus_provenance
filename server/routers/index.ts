@@ -62,6 +62,7 @@ import { ppgRouter }              from "./ppg";
 
 // ── Admin domain ──────────────────────────────────────────────────────────────
 import { adminRouter }   from "./admin";
+import { adminControlPlaneRouter } from "./adminControlPlane";
 import { promoRouter }   from "./promo";
 import { discordRouter } from "./discord";
 import { auditRouter }   from "./audit";
@@ -152,11 +153,12 @@ export const appRouter = router({
   ppg:              ppgRouter,
 
   // Admin domain
-  admin:   adminRouter,
-  promo:   promoRouter,
-  discord: discordRouter,
-  audit:   auditRouter,
-  worker:  workerRouter,
+  admin:              adminRouter,
+  adminControlPlane:  adminControlPlaneRouter,
+  promo:              promoRouter,
+  discord:            discordRouter,
+  audit:              auditRouter,
+  worker:             workerRouter,
 
   // Keeper / AI domain
   keeper:       keeperRouter,
