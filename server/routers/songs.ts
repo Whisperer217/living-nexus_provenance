@@ -165,6 +165,10 @@ import {
   revokeApiKey,
   getProjectIdByCollectionId,
 } from "../utils/db";
+import {
+  getPublicationReadinessMissing,
+  publicationReadinessError,
+} from "../domains/work/publicationReadiness";
 import { FOUNDER_PRICE_EARLY_CENTS, FOUNDER_PRICE_LATE_CENTS, FOUNDER_THRESHOLD, LICENSE_PRICE_CENTS, LICENSE_SLOTS, SLOT_PACKAGES, getSlotPackage, type SlotPackageId } from "../services/livingArchiveProducts";
 import { ENV } from "../_core/env";
 import { getOrGenerateEmbedVideo } from "../services/embedVideo";
@@ -644,17 +648,19 @@ export const songsRouter = router({
       // Loop publish gate on create
       const createStatus = input.status ?? "Published";
       if (createStatus === "Published") {
-        if (!coverArtUrl) {
-          throw new Error("Publish requires a bound visual. Upload or generate cover art first.");
-        }
         const testimonyCount = await getTestimonyCount(ctx.user.id);
-        const missing: string[] = [];
-        if (!user.artistHandle && !user.name) missing.push("name or handle");
-        if (!(user as any).bio && !(user as any).originStatement) missing.push("bio or origin statement");
-        if (!user.profilePhotoUrl) missing.push("profile photo");
-        if (testimonyCount < 1) missing.push("at least one testimony");
+        const missing = getPublicationReadinessMissing({
+          ownershipStatus: input.ownershipStatus,
+          coverArtUrl,
+          creatorName: user.name,
+          creatorHandle: user.artistHandle,
+          creatorBio: (user as any).bio,
+          creatorOriginStatement: (user as any).originStatement,
+          creatorProfilePhotoUrl: user.profilePhotoUrl,
+          testimonyCount,
+        });
         if (missing.length > 0) {
-          throw new Error(`Witness-ready profile required to publish. Missing: ${missing.join(", ")}. Save as Draft instead.`);
+          throw new Error(publicationReadinessError(missing));
         }
       }
       // Determine HAAI declared timestamp if all 6 fields are provided

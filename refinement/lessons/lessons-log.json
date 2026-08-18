@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-08-18T12:50:00.000Z",
-  "totalLessons": 16,
+  "lastUpdated": "2026-08-18T14:53:00.000Z",
+  "totalLessons": 17,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -367,6 +367,30 @@
         "edit-chapel",
         "owner-authority",
         "no-database-repair"
+      ]
+    },
+    {
+      "id": "LESSON-018",
+      "date": "2026-08-18",
+      "category": "creator_experience",
+      "problem": "Direct Published registration and later Draft→Published transition had parallel readiness gates that could drift. The direct registration path omitted the partial-rights ownership requirement while the dedicated status authority enforced it. A blocked creator could receive inconsistent reasons depending on when they tried to publish.",
+      "solution": "Keeper-approved Song Publication Fix introduced one pure publication-readiness evaluator shared by direct songs.upload Published registration and the existing owner-gated updateSongStatus transition. The evaluator returns one explicit, creator-actionable message listing full rights/license, bound cover, creator name/handle, bio/origin, profile photo, and testimony requirements. Existing UI error paths surface that message; WID, schema, Registry/provenance, storage, Explore predicates, routes, and existing Work rows remain unchanged.",
+      "files": [
+        "server/domains/work/publicationReadiness.ts",
+        "server/utils/db.ts",
+        "server/routers/songs.ts",
+        "server/tests/songPublicationReadiness.test.ts"
+      ],
+      "score": 0,
+      "tags": [
+        "song-publication",
+        "publication-readiness",
+        "creator-feedback",
+        "partial-rights",
+        "draft-publish",
+        "status-authority",
+        "no-wid-change",
+        "no-row-repair"
       ]
     }
   ]
