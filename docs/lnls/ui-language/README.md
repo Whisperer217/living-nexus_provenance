@@ -38,6 +38,10 @@ This document defines exactly what users see on the platform. Every label, butto
 | Ingest | Analyze, Scan, Process | Ingestion is the provenance analysis step. |
 | Archive | Delete, Remove, Hide | Archiving preserves. Deleting destroys. |
 | Disclose | Declare, Admit, Confess | Disclosure is neutral record-keeping, not an admission. |
+| Grab | Add to Player, Add to Queue | Loading a registered work is moving an artifact, not clicking a menu. |
+| Drop into Register | Upload, Import | The file enters the chamber to be declared. |
+| Enter | Open, View details | The camera approaches a record. You are inside it. |
+| Traverse lineage | View history, See versions | You are walking the chain, not opening a changelog. |
 
 ---
 

@@ -54,6 +54,7 @@ docs/lnls/
 | Never call creators users | "Creator" | "Content Creator," "User" |
 | Never call following following | "Witness" | "Follow," "Subscribe" |
 | Never call uploading uploading | "Register Work" | "Upload," "Post" |
+| Never decorate without meaning | Every object and motion must communicate state, history, ownership, or experience of a registered work | Animation for animation's sake; 3D because it is fashionable |
 | Never call metadata provenance | "Provenance" is the human record | "Metadata" is technical data |
 | Never call archiving deleting | "Archive" | "Delete," "Remove," "Hide" |
 | Never use binary authorship | "Participation Chain" | "Human-made" vs "AI-made" |
@@ -75,7 +76,7 @@ Living Nexus has four structural arms, modeled on laminin:
 
 | Version | Date | Changes |
 |---|---|---|
-| v1.0 | 2026-08-07 | Initial specification — all ten sections |
+| v1.1 | 2026-08-16 | Law VII — Intentional Representation. Spatial grammar. Keep/cut test. |
 
 ---
 
