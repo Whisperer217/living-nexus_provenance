@@ -13,24 +13,24 @@ RUN apt-get update -qq && \
 FROM base AS builder
 WORKDIR /app
 
-# Install pnpm (match the version in package.json engines field)
-RUN npm install -g pnpm@10
+# Use the project-pinned pnpm version through Corepack. The managed deploy image
+# receives no local node_modules or dist directory, so this stage owns the full
+# dependency install and application build.
+RUN npm install -g corepack@latest && corepack enable
 
 # Copy manifests AND patches dir before install — pnpm requires patches to be
 # present when reading pnpm-lock.yaml (patchedDependencies: wouter@3.7.1)
 COPY package.json pnpm-lock.yaml ./
 COPY patches/ ./patches/
-RUN pnpm install --frozen-lockfile
+RUN corepack pnpm install --frozen-lockfile
 
 # Copy source and build
 COPY . .
-RUN pnpm build
+RUN corepack pnpm build
 
 # ── Production stage ─────────────────────────────────────────────────────────
 FROM base AS runner
 WORKDIR /app
-
-RUN npm install -g pnpm@10
 
 # Copy built artefacts and production deps
 COPY --from=builder /app/dist ./dist
@@ -41,5 +41,7 @@ COPY --from=builder /app/drizzle.config.ts ./drizzle.config.ts
 
 # Expose the port the Express server listens on (injected at runtime)
 EXPOSE 3000
+
+ENV NODE_ENV=production
 
 CMD ["node", "dist/index.js"]
