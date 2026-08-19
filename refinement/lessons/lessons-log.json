@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-08-18T23:56:30.000Z",
-  "totalLessons": 18,
+  "lastUpdated": "2026-08-19T00:16:20.000Z",
+  "totalLessons": 19,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -417,6 +417,29 @@
         "route-manifest",
         "no-mutation",
         "authority-boundary"
+      ]
+    },
+    {
+      "id": "LESSON-020",
+      "date": "2026-08-19",
+      "category": "stewardship",
+      "problem": "A useful administrative control room needs operational context, but generalized metrics, health, route discovery, and audit detail can easily become invented telemetry, an arbitrary crawler, a privacy leak, or a back door into the existing broad admin router.",
+      "solution": "Keeper-approved Stage 2 keeps the Control Plane query-only. It counts only existing users, non-deleted songs, public Published songs, Draft songs, WIDs, provenance events, and collections; shows only bounded redacted existing admin activity; declares static route groups from active app routes; labels storage/build as not instrumented rather than guessing; and links existing specialized /admin surfaces without inheriting their authority. Audit area/result are transparent display derivations from existing action/target fields, not new persisted claims.",
+      "files": [
+        "server/routers/adminControlPlane.ts",
+        "client/src/pages/admin/AdminControlPlanePage.tsx",
+        "server/tests/adminControlPlane.test.ts"
+      ],
+      "score": 0,
+      "tags": [
+        "admin-control-plane",
+        "stage-2",
+        "read-only",
+        "operational-overview",
+        "aggregate-metrics",
+        "route-taxonomy",
+        "audit-redaction",
+        "instrumentation-honesty"
       ]
     }
   ]
