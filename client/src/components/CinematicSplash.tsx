@@ -124,12 +124,14 @@ function FrequencyCanvas({ active, analyserRef }: { active: boolean; analyserRef
     if (!ctx) return;
 
     const W = canvas.offsetWidth || 480;
-    const H = 72;
+    const H = 88;
     canvas.width = W;
     canvas.height = H;
 
-    const BARS = 56;
-    const barW = W / BARS;
+    const BARS = 32;
+    const waveW = W * 0.76;
+    const waveX = (W - waveW) / 2;
+    const barW = waveW / BARS;
     const phases = Array.from({ length: BARS }, (_, i) => ({
       freq: 0.8 + Math.random() * 2.4,
       phase: (i / BARS) * Math.PI * 2 + Math.random() * Math.PI,
@@ -165,13 +167,17 @@ function FrequencyCanvas({ active, analyserRef }: { active: boolean; analyserRef
           Math.sin(t * p.freq * 1.7 + p.phase * 0.6) * 0.3 +
           Math.sin(t * 0.4 + (i / BARS) * Math.PI * 4) * 0.2;
         const fallbackNormalised = (raw + 1) / 2;
-        const analysedValue = liveData ? (liveData[Math.floor((i / BARS) * liveData.length)] ?? 0) / 255 : null;
-        const normalised = analysedValue === null ? fallbackNormalised : analysedValue;
-        const barH = Math.max(3, normalised * H * 0.85 * p.amp);
-        const x = i * barW;
+        const centerDistance = Math.abs(i - (BARS - 1) / 2) / ((BARS - 1) / 2);
+        const frequencyIndex = liveData ? Math.floor((1 - centerDistance) * liveData.length * 0.72) : 0;
+        const sampledValue = liveData ? (liveData[frequencyIndex] ?? 0) / 255 : null;
+        const analysedValue = sampledValue === null ? null : Math.min(1, sampledValue * 4.2);
+        const normalised = analysedValue === null ? fallbackNormalised : Math.max(analysedValue, 0.04);
+        const visualAmp = analysedValue === null ? p.amp : 0.7 + p.amp * 0.3;
+        const barH = Math.max(6, normalised * H * 0.94 * visualAmp);
+        const x = waveX + i * barW;
         const y = (H - barH) / 2;
 
-        const alpha = active ? 0.4 + normalised * 0.6 : 0.1;
+        const alpha = active ? 0.68 + normalised * 0.32 : 0.14;
         const gradient = ctx.createLinearGradient(x, y, x, y + barH);
         gradient.addColorStop(0, `rgba(212,175,55,${alpha * 0.5})`);
         gradient.addColorStop(0.5, `rgba(212,175,55,${alpha})`);
@@ -193,7 +199,7 @@ function FrequencyCanvas({ active, analyserRef }: { active: boolean; analyserRef
   return (
     <canvas
       ref={canvasRef}
-      style={{ width: "100%", height: 72, opacity: active ? 1 : 0.25, transition: "opacity 0.8s ease" }}
+      style={{ width: "100%", height: 88, display: "block", filter: "drop-shadow(0 0 6px rgba(212,175,55,0.42))", opacity: active ? 1 : 0.25, transition: "opacity 0.8s ease" }}
     />
   );
 }
@@ -366,8 +372,8 @@ function SplashAudio({
       }
     };
 
-    const setupAnalyser = () => {
-      if (analyserRef.current) return;
+    const setupAnalyser = (): AudioContext | null => {
+      if (analyserRef.current) return audioContextRef.current;
       try {
         const context = new window.AudioContext();
         const source = context.createMediaElementSource(audio);
@@ -378,8 +384,10 @@ function SplashAudio({
         analyser.connect(context.destination);
         audioContextRef.current = context;
         analyserRef.current = analyser;
+        return context;
       } catch {
         // Cross-origin storage without CORS may block analysis; playback remains independent.
+        return null;
       }
     };
 
@@ -395,10 +403,15 @@ function SplashAudio({
       }
     };
 
-    const markPlaying = () => setPlaying(true);
+    const markPlaying = () => {
+      setPlaying(true);
+      const context = audioContextRef.current;
+      if (context?.state === "suspended") void context.resume().catch(() => undefined);
+    };
     const markPaused = () => setPlaying(false);
     audio.addEventListener("timeupdate", persistPosition);
     audio.addEventListener("play", markPlaying);
+    audio.addEventListener("playing", markPlaying);
     audio.addEventListener("pause", markPaused);
     audio.addEventListener("loadedmetadata", setupAnalyser, { once: true });
     setupAnalyser();
@@ -408,6 +421,7 @@ function SplashAudio({
       audio.pause();
       audio.removeEventListener("timeupdate", persistPosition);
       audio.removeEventListener("play", markPlaying);
+      audio.removeEventListener("playing", markPlaying);
       audio.removeEventListener("pause", markPaused);
       audio.removeEventListener("loadedmetadata", setupAnalyser);
       analyserRef.current = null;
@@ -417,17 +431,22 @@ function SplashAudio({
     };
   }, []);
 
-  const activateAudio = () => {
+  const activateAudio = async () => {
     const audio = audioRef.current;
     if (!audio) return;
-    if (audioContextRef.current?.state === "suspended") void audioContextRef.current.resume().catch(() => undefined);
-    if (audio.paused) void audio.play().catch(() => undefined);
+    const context = audioContextRef.current;
+    if (context?.state === "suspended") {
+      await context.resume().catch(() => undefined);
+    }
+    if (audio.paused) {
+      await audio.play().catch(() => undefined);
+    }
   };
 
-  const toggleMuted = () => {
+  const toggleMuted = async () => {
     const audio = audioRef.current;
     if (!audio) return;
-    activateAudio();
+    await activateAudio();
     const nextMuted = !audio.muted;
     audio.muted = nextMuted;
     setMuted(nextMuted);
@@ -444,7 +463,7 @@ function SplashAudio({
   };
 
   return (
-    <div className="ln-cinematic-splash__audio" role="group" aria-label="Entrance audio controls" onPointerDown={activateAudio}>
+    <div className="ln-cinematic-splash__audio" role="group" aria-label="Entrance audio controls" onPointerDown={() => { void activateAudio(); }}>
       <audio ref={audioRef} src={SPLASH_AUDIO_SRC} loop preload="auto" />
       <button type="button" onClick={toggleMuted} className="ln-cinematic-splash__audio-toggle" aria-pressed={muted}>
         {playing ? (muted ? "Unmute" : "Mute") : "Play sound"}
@@ -596,7 +615,10 @@ export default function CinematicSplash({ onComplete }: CinematicSplashProps) {
           loop
           muted
           playsInline
-          preload="metadata"
+          preload="auto"
+          onCanPlay={(event) => {
+            if (event.currentTarget.paused) void event.currentTarget.play().catch(() => undefined);
+          }}
           tabIndex={-1}
         >
           <source src="/manus-storage/dark-gold-vault_1238ee74.mp4" type="video/mp4" />

@@ -8,6 +8,9 @@ const audioRoute = readFileSync("server/routes/splashAudioRoute.ts", "utf-8");
 describe("CinematicSplash entrance video contract", () => {
   it("uses the approved durable asset as a decorative, non-interactive background", () => {
     expect(source).toContain('/manus-storage/dark-gold-vault_1238ee74.mp4');
+    expect(source).toContain('preload="auto"');
+    expect(source).toContain('onCanPlay={(event) =>');
+    expect(source).toContain('event.currentTarget.play().catch(() => undefined)');
     expect(source).toContain('aria-hidden="true"');
     expect(styles).toContain(".ln-cinematic-splash__vault-film");
     expect(styles).toContain("pointer-events: none");
@@ -15,7 +18,7 @@ describe("CinematicSplash entrance video contract", () => {
     expect(source).toContain("loop");
     expect(source).toContain("muted");
     expect(source).toContain("playsInline");
-    expect(source).toContain("preload=\"metadata\"");
+    expect(source).toContain('preload="auto"');
     expect(source).not.toMatch(/<video[\s\S]*?\bcontrols\b/);
   });
 
@@ -81,6 +84,9 @@ describe("CinematicSplash entrance video contract", () => {
     expect(source).toContain('localStorage.getItem(SPLASH_AUDIO_POSITION_KEY)');
     expect(source).toContain('localStorage.setItem(SPLASH_AUDIO_POSITION_KEY');
     expect(source).toContain('audio.play()');
+    expect(source).toContain('await context.resume().catch(() => undefined)');
+    expect(source).toContain('await audio.play().catch(() => undefined)');
+    expect(source).toContain('await activateAudio()');
     expect(source).toContain('audio.muted = true');
     expect(source).toContain('aria-pressed={muted}');
     expect(source).toContain('aria-label="Entrance volume"');
@@ -96,12 +102,16 @@ describe("CinematicSplash entrance video contract", () => {
     expect(source).toContain('smoothingTimeConstant = 0.82');
     expect(source).toContain('Cross-origin storage without CORS may block analysis; playback remains independent.');
     expect(source).toContain('const fallbackNormalised = (raw + 1) / 2');
-    expect(source).toContain('const analysedValue = liveData');
-    expect(source).toContain('analyserRef.current = null');
-    expect(source).toContain('const activateAudio = () =>');
-    expect(source).toContain('audioContextRef.current?.state === "suspended"');
-    expect(source).toContain('if (audio.paused) void audio.play()');
+    expect(source).toContain('const sampledValue = liveData');
+    expect(source).toContain('Math.min(1, sampledValue * 4.2)');
+    expect(source).toContain('Math.max(analysedValue, 0.04)');
+    expect(source).toContain('audioContextRef.current = null');
+    expect(source).toContain('audio.addEventListener("playing", markPlaying)');
+    expect(source).toContain('const context = audioContextRef.current');
+    expect(source).toContain('const activateAudio = async () =>');
+    expect(source).toContain('context?.state === "suspended"');
+    expect(source).toContain('if (audio.paused) {');
     expect(source).toContain('Play sound');
-    expect(source).toContain('onPointerDown={activateAudio}');
+    expect(source).toContain('onPointerDown={() => { void activateAudio(); }}');
   });
 });
