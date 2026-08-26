@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-08-19T00:16:20.000Z",
-  "totalLessons": 19,
+  "lastUpdated": "2026-08-26T02:18:00.000Z",
+  "totalLessons": 21,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -440,6 +440,29 @@
         "route-taxonomy",
         "audit-redaction",
         "instrumentation-honesty"
+      ]
+    },
+    {
+      "id": "LESSON-021",
+      "date": "2026-08-26",
+      "category": "accessibility",
+      "problem": "The existing CinematicSplash carried the Living Nexus entrance ceremony through text, waveform, particles, and manual process cards, but did not use the supplied vault atmosphere. Adding cinematic media naively could create a second interactive surface, obscure Skip Intro and keyboard controls, impose motion on visitors who request stillness, or damage mobile readability through an uncontrolled crop.",
+      "solution": "Added the supplied six-second dark-gold vault film only as a durable, muted, inline, metadata-preloaded, aria-hidden, pointer-events-none background behind the existing splash. A token-aware veil preserves contrast; the centered symmetrical focal point remains safe on mobile; and a live prefers-reduced-motion hook suppresses both film and particle motion while retaining the existing void/glow ceremony, visible Skip Intro, and keyboard/manual entry controls. The film changes no Work, WID, Registry, provenance, publication, or route behavior.",
+      "files": [
+        "client/src/components/CinematicSplash.tsx",
+        "client/src/index.css",
+        "server/tests/cinematicSplash.videoContract.test.ts"
+      ],
+      "score": 0,
+      "tags": [
+        "cinematic-splash",
+        "video-background",
+        "reduced-motion",
+        "mobile",
+        "accessibility",
+        "non-interactive",
+        "visual-hierarchy",
+        "entrance-ceremony"
       ]
     }
   ]

@@ -91,6 +91,26 @@ function ensureSplashKeyframes() {
   document.head.appendChild(style);
 }
 
+// ── Motion preference ───────────────────────────────────────────────────────
+// The entrance film is purely atmospheric. A reduced-motion preference keeps
+// the existing void/glow ceremony while never loading or playing the video.
+function usePrefersReducedMotion() {
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(() => {
+    if (typeof window === "undefined") return true;
+    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  });
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const updatePreference = () => setPrefersReducedMotion(mediaQuery.matches);
+    updatePreference();
+    mediaQuery.addEventListener("change", updatePreference);
+    return () => mediaQuery.removeEventListener("change", updatePreference);
+  }, []);
+
+  return prefersReducedMotion;
+}
+
 // ── Frequency canvas ───────────────────────────────────────────────────────
 function FrequencyCanvas({ active }: { active: boolean }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -145,7 +165,7 @@ function FrequencyCanvas({ active }: { active: boolean }) {
         ctx.fill();
       }
 
-      animRef.current = requestAnimationFrame(draw);
+      if (active) animRef.current = requestAnimationFrame(draw);
     }
 
     draw();
@@ -223,7 +243,7 @@ function ParticleField() {
     duration: 3 + Math.random() * 4,
   }));
   return (
-    <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none" }}>
+    <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none", zIndex: 2 }}>
       {particles.map((p, i) => (
         <div key={i} style={{
           position: "absolute", left: `${p.x}%`, top: `${p.y}%`,
@@ -290,6 +310,7 @@ interface CinematicSplashProps {
 export default function CinematicSplash({ onComplete }: CinematicSplashProps) {
   ensureSplashKeyframes();
 
+  const prefersReducedMotion = usePrefersReducedMotion();
   const [phase, setPhase] = useState<"awakening" | "frequency" | "process">("awakening");
   const [step, setStep] = useState(0);
   const [cardAnim, setCardAnim] = useState<"enter-right" | "enter-left" | "exit-left" | "exit-right" | "idle">("enter-right");
@@ -388,7 +409,7 @@ export default function CinematicSplash({ onComplete }: CinematicSplashProps) {
       className="ln-cinematic-splash"
       style={{
         position: "fixed", inset: 0, zIndex: 9999,
-        background: "var(--void, #050505)",
+        background: "var(--ln-void, var(--void, #050505))",
         display: "flex", flexDirection: "column",
         alignItems: "center", justifyContent: "var(--ln-splash-justify, center)",
         boxSizing: "border-box", minHeight: "100dvh", height: "100dvh",
@@ -396,15 +417,38 @@ export default function CinematicSplash({ onComplete }: CinematicSplashProps) {
         animation: dissolving ? "ln-splash-dissolve 0.9s ease forwards" : undefined,
         overflowX: "hidden", overflowY: "auto",
         userSelect: "none",
+        isolation: "isolate",
       }}
     >
-      <ParticleField />
+      {!prefersReducedMotion && (
+        <video
+          aria-hidden="true"
+          autoPlay
+          className="ln-cinematic-splash__vault-film"
+          disablePictureInPicture
+          loop
+          muted
+          playsInline
+          preload="metadata"
+          tabIndex={-1}
+        >
+          <source src="/manus-storage/dark-gold-vault_1238ee74.mp4" type="video/mp4" />
+        </video>
+      )}
+
+      <div
+        aria-hidden="true"
+        className="ln-cinematic-splash__vault-veil"
+      />
+
+      {!prefersReducedMotion && <ParticleField />}
 
       <button
         type="button"
         className="ln-cinematic-splash__skip"
         onClick={handleSkip}
         aria-label="Skip cinematic introduction and enter the archive"
+        style={{ position: "relative", zIndex: 3 }}
       >
         Skip Intro
       </button>
@@ -418,20 +462,22 @@ export default function CinematicSplash({ onComplete }: CinematicSplashProps) {
         pointerEvents: "none",
         transition: "opacity 1s ease",
         opacity: phase === "awakening" ? 0 : 1,
+        zIndex: 2,
       }} />
 
       {/* ── Logo block ── */}
       <div style={{
         display: "flex", flexDirection: "column", alignItems: "center", gap: "var(--ln-splash-logo-gap, 16px)",
-        animation: "ln-logo-rise 1.2s cubic-bezier(0.16,1,0.3,1) forwards",
-        opacity: 0,
+        animation: prefersReducedMotion ? undefined : "ln-logo-rise 1.2s cubic-bezier(0.16,1,0.3,1) forwards",
+        opacity: prefersReducedMotion ? 1 : 0,
+        position: "relative", zIndex: 3,
       }}>
         <div style={{
           width: "var(--ln-splash-seal-size, 80px)", height: "var(--ln-splash-seal-size, 80px)", borderRadius: 20,
           border: "1.5px solid rgba(212,175,55,0.5)",
           background: "rgba(212,175,55,0.06)",
           display: "flex", alignItems: "center", justifyContent: "center",
-          animation: phase !== "awakening" ? "ln-gold-pulse 2.5s ease-in-out infinite" : undefined,
+          animation: !prefersReducedMotion && phase !== "awakening" ? "ln-gold-pulse 2.5s ease-in-out infinite" : undefined,
         }}>
           <img
             src="/manus-storage/living-nexus-logo-2025_19c2d497.png"
@@ -450,15 +496,15 @@ export default function CinematicSplash({ onComplete }: CinematicSplashProps) {
             fontSize: "clamp(1.5rem, 4vw, 2.5rem)",
             fontWeight: 700, color: "rgba(240,230,210,0.95)",
             letterSpacing: "0.08em", lineHeight: 1,
-            animation: "ln-logo-rise 1.4s 0.15s cubic-bezier(0.16,1,0.3,1) forwards",
-            opacity: 0,
+            animation: prefersReducedMotion ? undefined : "ln-logo-rise 1.4s 0.15s cubic-bezier(0.16,1,0.3,1) forwards",
+            opacity: prefersReducedMotion ? 1 : 0,
           }}>Living Nexus</div>
           <div style={{
             fontFamily: "'Space Mono', monospace",
             fontSize: "0.65rem", color: "rgba(212,175,55,0.7)",
             letterSpacing: "0.22em", textTransform: "uppercase", marginTop: 8,
-            animation: "ln-tagline-fade 1.2s 0.6s ease forwards",
-            opacity: 0,
+            animation: prefersReducedMotion ? undefined : "ln-tagline-fade 1.2s 0.6s ease forwards",
+            opacity: prefersReducedMotion ? 1 : 0,
           }}>Sovereign Creative Archive</div>
         </div>
       </div>
@@ -468,8 +514,9 @@ export default function CinematicSplash({ onComplete }: CinematicSplashProps) {
         width: "min(480px, 80vw)", marginTop: "var(--ln-splash-wave-gap, 28px)",
         opacity: phase === "awakening" ? 0 : 1,
         transition: "opacity 0.8s ease",
+        position: "relative", zIndex: 3,
       }}>
-        <FrequencyCanvas active={phase !== "awakening"} />
+        <FrequencyCanvas active={!prefersReducedMotion && phase !== "awakening"} />
       </div>
 
       {/* ── Process cards section ── */}
@@ -478,6 +525,7 @@ export default function CinematicSplash({ onComplete }: CinematicSplashProps) {
         opacity: phase === "process" ? 1 : 0,
         transition: "opacity 0.6s ease",
         pointerEvents: phase === "process" ? "auto" : "none",
+        position: "relative", zIndex: 3,
       }}>
         {/* Navigation row: prev arrow + card + next arrow */}
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -577,6 +625,7 @@ export default function CinematicSplash({ onComplete }: CinematicSplashProps) {
         opacity: phase === "process" ? 1 : 0,
         transition: "opacity 0.6s 0.3s ease",
         pointerEvents: phase === "process" ? "auto" : "none",
+        position: "relative", zIndex: 3,
       }}>
         <button
           onClick={handleEnter}
@@ -622,6 +671,7 @@ export default function CinematicSplash({ onComplete }: CinematicSplashProps) {
         fontFamily: "'Space Mono', monospace",
         fontSize: "0.5rem", color: "rgba(255,255,255,0.18)",
         letterSpacing: "0.08em", textTransform: "uppercase",
+        zIndex: 3,
       }}>
         BDDT Publishing LLC · 2026
       </div>
