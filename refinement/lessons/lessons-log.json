@@ -464,6 +464,31 @@
         "visual-hierarchy",
         "entrance-ceremony"
       ]
+    },
+    {
+      "id": "LESSON-022",
+      "date": "2026-08-26",
+      "category": "media_custody",
+      "problem": "The Keeper needed a repeatable front-page song that resumes between entrance ceremonies, loops indefinitely, starts audibly when the browser permits it, and still offers a reliable mute path. Storing the audio bytes in the database would blur the platform storage boundary, while assuming audible autoplay would fail on common browsers.",
+      "solution": "Stored Vault of Gold as a durable webdev object and referenced its stable asset URL from a self-contained CinematicSplash audio controller. The controller restores local position, volume, and mute preference; targets a 40% default volume; loops without an end state; attempts audible playback and falls back to muted playback when autoplay is blocked; exposes explicit Unmute/Mute and range volume controls; persists progress; and pauses/removes the element on Skip or Archive exit. The track is entrance media only and does not become a Work, WID, provenance event, database record, or global player stream.",
+      "files": [
+        "client/src/components/CinematicSplash.tsx",
+        "client/src/index.css",
+        "server/tests/cinematicSplash.videoContract.test.ts",
+        "todo-yto2wiwz.md"
+      ],
+      "score": 0,
+      "tags": [
+        "cinematic-splash",
+        "audio",
+        "loop",
+        "resume",
+        "autoplay-fallback",
+        "mute-control",
+        "volume-control",
+        "storage-boundary",
+        "no-database-media"
+      ]
     }
   ]
 }

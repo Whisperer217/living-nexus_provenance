@@ -4015,6 +4015,65 @@ h1, h2, h3, h4, h5, h6,
   text-transform: uppercase;
 }
 
+.ln-cinematic-splash__audio {
+  position: fixed;
+  left: max(1rem, env(safe-area-inset-left, 0px) + 0.75rem);
+  bottom: max(1rem, env(safe-area-inset-bottom, 0px) + 0.75rem);
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.375rem 0.5rem;
+  border: 1px solid color-mix(in srgb, var(--ln-gold, var(--gold)) 30%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ln-void, var(--void)) 78%, transparent);
+  color: var(--ln-bone, var(--foreground));
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.ln-cinematic-splash__audio-toggle {
+  min-width: 4.75rem;
+  min-height: 2.25rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid color-mix(in srgb, var(--ln-gold, var(--gold)) 42%, transparent);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ln-parchment, var(--foreground));
+  font-family: var(--font-display);
+  font-size: var(--text-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.ln-cinematic-splash__audio-toggle:hover {
+  border-color: var(--ln-gold, var(--gold));
+  background: color-mix(in srgb, var(--ln-gold, var(--gold)) 12%, transparent);
+}
+
+.ln-cinematic-splash__audio-toggle:focus-visible,
+.ln-cinematic-splash__audio-volume input:focus-visible {
+  outline: 2px solid var(--ln-gold, var(--gold));
+  outline-offset: 2px;
+}
+
+.ln-cinematic-splash__audio-volume {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--ln-smoke, var(--muted-foreground));
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.ln-cinematic-splash__audio-volume input {
+  width: 5.75rem;
+  accent-color: var(--ln-gold, var(--gold));
+}
+
 .ln-cinematic-splash__skip:hover {
   border-color: var(--ln-gold, var(--gold));
   background: color-mix(in srgb, var(--ln-gold, var(--gold)) 16%, var(--ln-void, var(--void)));
@@ -4093,6 +4152,20 @@ h1, h2, h3, h4, h5, h6,
     align-self: flex-start;
     margin-top: 12px;
     padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .ln-cinematic-splash__audio {
+    left: max(0.75rem, env(safe-area-inset-left, 0px) + 0.5rem);
+    bottom: max(0.75rem, env(safe-area-inset-bottom, 0px) + 0.5rem);
+    max-width: calc(100vw - 1.5rem);
+  }
+
+  .ln-cinematic-splash__audio-volume span {
+    display: none;
+  }
+
+  .ln-cinematic-splash__audio-volume input {
+    width: 4.5rem;
   }
 
   .ln-cinematic-splash__skip {

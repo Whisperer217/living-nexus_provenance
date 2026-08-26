@@ -303,6 +303,97 @@ function ArrowBtn({
   );
 }
 
+// ── Splash audio ─────────────────────────────────────────────────────────────
+const SPLASH_AUDIO_SRC = "/manus-storage/VaultofGold_68340573.mp3";
+const SPLASH_AUDIO_POSITION_KEY = "ln_splash_audio_position_v1";
+const SPLASH_AUDIO_VOLUME_KEY = "ln_splash_audio_volume_v1";
+const SPLASH_AUDIO_MUTED_KEY = "ln_splash_audio_muted_v1";
+
+function SplashAudio() {
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const lastSavedSecondRef = useRef(-1);
+  const [muted, setMuted] = useState(false);
+  const [volume, setVolume] = useState(0.4);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const storedPosition = Number.parseFloat(localStorage.getItem(SPLASH_AUDIO_POSITION_KEY) ?? "");
+    const storedVolume = Number.parseFloat(localStorage.getItem(SPLASH_AUDIO_VOLUME_KEY) ?? "");
+    const storedMuted = localStorage.getItem(SPLASH_AUDIO_MUTED_KEY);
+    const initialVolume = Number.isFinite(storedVolume) ? Math.min(1, Math.max(0, storedVolume)) : 0.4;
+    const initialMuted = storedMuted === "true";
+    audio.volume = initialVolume;
+    audio.muted = initialMuted;
+    setVolume(initialVolume);
+    setMuted(initialMuted);
+    if (Number.isFinite(storedPosition) && storedPosition >= 0) {
+      audio.currentTime = storedPosition;
+    }
+
+    const persistPosition = () => {
+      const second = Math.floor(audio.currentTime);
+      if (second !== lastSavedSecondRef.current) {
+        lastSavedSecondRef.current = second;
+        localStorage.setItem(SPLASH_AUDIO_POSITION_KEY, String(audio.currentTime));
+      }
+    };
+
+    const attemptPlayback = async () => {
+      try {
+        await audio.play();
+      } catch {
+        // Browsers may block audible autoplay. Keep the requested loop alive muted.
+        audio.muted = true;
+        setMuted(true);
+        localStorage.setItem(SPLASH_AUDIO_MUTED_KEY, "true");
+        try { await audio.play(); } catch { /* User gesture required; control remains available. */ }
+      }
+    };
+
+    audio.addEventListener("timeupdate", persistPosition);
+    void attemptPlayback();
+    return () => {
+      persistPosition();
+      audio.pause();
+      audio.removeEventListener("timeupdate", persistPosition);
+    };
+  }, []);
+
+  const toggleMuted = () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    const nextMuted = !audio.muted;
+    audio.muted = nextMuted;
+    setMuted(nextMuted);
+    localStorage.setItem(SPLASH_AUDIO_MUTED_KEY, String(nextMuted));
+    if (!nextMuted) void audio.play().catch(() => undefined);
+  };
+
+  const handleVolumeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const nextVolume = Number(event.target.value);
+    const audio = audioRef.current;
+    if (!audio) return;
+    audio.volume = nextVolume;
+    setVolume(nextVolume);
+    localStorage.setItem(SPLASH_AUDIO_VOLUME_KEY, String(nextVolume));
+  };
+
+  return (
+    <div className="ln-cinematic-splash__audio" role="group" aria-label="Entrance audio controls">
+      <audio ref={audioRef} src={SPLASH_AUDIO_SRC} loop preload="auto" />
+      <button type="button" onClick={toggleMuted} className="ln-cinematic-splash__audio-toggle" aria-pressed={muted}>
+        {muted ? "Unmute" : "Mute"}
+      </button>
+      <label className="ln-cinematic-splash__audio-volume">
+        <span>Volume</span>
+        <input type="range" min="0" max="1" step="0.01" value={volume} onChange={handleVolumeChange} aria-label="Entrance volume" />
+      </label>
+    </div>
+  );
+}
+
 // ── Main CinematicSplash ───────────────────────────────────────────────────
 interface CinematicSplashProps {
   onComplete: () => void;
@@ -451,6 +542,8 @@ export default function CinematicSplash({ onComplete }: CinematicSplashProps) {
       />
 
       {!prefersReducedMotion && <ParticleField />}
+
+      <SplashAudio />
 
       <button
         type="button"

@@ -69,4 +69,18 @@ describe("CinematicSplash entrance video contract", () => {
     expect(styles).toContain('env(safe-area-inset-top, 0px) + 0.625rem');
     expect(styles).toContain('.ln-cinematic-splash__card-description');
   });
+
+  it("provides resumable looping entrance audio with explicit mute and volume controls", () => {
+    expect(source).toContain('/manus-storage/VaultofGold_68340573.mp3');
+    expect(source).toContain('loop preload="auto"');
+    expect(source).toContain('localStorage.getItem(SPLASH_AUDIO_POSITION_KEY)');
+    expect(source).toContain('localStorage.setItem(SPLASH_AUDIO_POSITION_KEY');
+    expect(source).toContain('audio.play()');
+    expect(source).toContain('audio.muted = true');
+    expect(source).toContain('aria-pressed={muted}');
+    expect(source).toContain('aria-label="Entrance volume"');
+    expect(source).toContain('className="ln-cinematic-splash__audio"');
+    expect(styles).toContain('.ln-cinematic-splash__audio');
+    expect(styles).toContain('.ln-cinematic-splash__audio-volume input');
+  });
 });
