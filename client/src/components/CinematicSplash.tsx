@@ -265,6 +265,7 @@ function ArrowBtn({
       onClick={onClick}
       disabled={disabled}
       aria-label={dir === "right" ? "Next" : "Previous"}
+      className="ln-cinematic-splash__process-arrow"
       style={{
         width: 44, height: 44, borderRadius: "50%",
         border: `1px solid ${disabled ? "rgba(255,255,255,0.08)" : "rgba(212,175,55,0.35)"}`,
@@ -311,7 +312,7 @@ export default function CinematicSplash({ onComplete }: CinematicSplashProps) {
   ensureSplashKeyframes();
 
   const prefersReducedMotion = usePrefersReducedMotion();
-  const [phase, setPhase] = useState<"awakening" | "frequency" | "process">("awakening");
+  const [phase, setPhase] = useState<"awakening" | "frequency" | "vault" | "process">("awakening");
   const [step, setStep] = useState(0);
   const [cardAnim, setCardAnim] = useState<"enter-right" | "enter-left" | "exit-left" | "exit-right" | "idle">("enter-right");
   const [dissolving, setDissolving] = useState(false);
@@ -321,13 +322,10 @@ export default function CinematicSplash({ onComplete }: CinematicSplashProps) {
   const dragStartX = useRef<number | null>(null);
   const isDragging = useRef(false);
 
-  // Phase timeline — auto-advance only through awakening → frequency → process
+  // Phase timeline — reveal the vault, then wait for the visitor to open the process.
   useEffect(() => {
     const t1 = setTimeout(() => setPhase("frequency"), 1200);
-    const t2 = setTimeout(() => {
-      setPhase("process");
-      setCardAnim("enter-right");
-    }, 3000);
+    const t2 = setTimeout(() => setPhase("vault"), 3000);
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, []);
 
@@ -347,6 +345,11 @@ export default function CinematicSplash({ onComplete }: CinematicSplashProps) {
     markSplashSeen();
     onComplete();
   }, [onComplete]);
+
+  const openProcess = useCallback(() => {
+    setPhase("process");
+    setCardAnim("enter-right");
+  }, []);
 
   const goTo = useCallback((nextStep: number, direction: "left" | "right") => {
     if (nextStep < 0 || nextStep >= PROCESS_STEPS.length) return;
@@ -380,17 +383,22 @@ export default function CinematicSplash({ onComplete }: CinematicSplashProps) {
     else if (delta > 40) goPrev();
   };
 
-  // Keyboard navigation
+  // Keyboard navigation and deliberate vault advance.
   useEffect(() => {
-    if (phase !== "process") return;
     const handler = (e: KeyboardEvent) => {
-      if (e.key === "ArrowRight") goNext();
-      else if (e.key === "ArrowLeft") goPrev();
-      else if (e.key === "Enter" || e.key === "Escape") handleEnter();
+      if (phase === "vault" && e.key === "ArrowRight") {
+        openProcess();
+      } else if (phase === "process" && e.key === "ArrowRight") {
+        goNext();
+      } else if (phase === "process" && e.key === "ArrowLeft") {
+        goPrev();
+      } else if ((phase === "vault" || phase === "process") && (e.key === "Enter" || e.key === "Escape")) {
+        handleEnter();
+      }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [phase, goNext, goPrev, handleEnter]);
+  }, [phase, goNext, goPrev, handleEnter, openProcess]);
 
   const currentStep = PROCESS_STEPS[step];
 
@@ -407,6 +415,7 @@ export default function CinematicSplash({ onComplete }: CinematicSplashProps) {
   return (
     <div
       className="ln-cinematic-splash"
+      data-phase={phase}
       style={{
         position: "fixed", inset: 0, zIndex: 9999,
         background: "var(--ln-void, var(--void, #050505))",
@@ -448,7 +457,6 @@ export default function CinematicSplash({ onComplete }: CinematicSplashProps) {
         className="ln-cinematic-splash__skip"
         onClick={handleSkip}
         aria-label="Skip cinematic introduction and enter the archive"
-        style={{ position: "relative", zIndex: 3 }}
       >
         Skip Intro
       </button>
@@ -519,16 +527,29 @@ export default function CinematicSplash({ onComplete }: CinematicSplashProps) {
         <FrequencyCanvas active={!prefersReducedMotion && phase !== "awakening"} />
       </div>
 
+      {phase === "vault" && (
+        <div className="ln-cinematic-splash__vault-actions">
+          <button
+            type="button"
+            className="ln-cinematic-splash__process-entry"
+            onClick={openProcess}
+          >
+            Explore the process
+          </button>
+          <p>Arrow right to continue · Enter to enter the archive</p>
+        </div>
+      )}
+
       {/* ── Process cards section ── */}
-      <div style={{
+      {phase === "process" && <div className="ln-cinematic-splash__process-stage" style={{
         marginTop: "var(--ln-splash-process-gap, 24px)", width: "min(620px, 92vw)",
-        opacity: phase === "process" ? 1 : 0,
+        opacity: 1,
         transition: "opacity 0.6s ease",
-        pointerEvents: phase === "process" ? "auto" : "none",
+        pointerEvents: "auto",
         position: "relative", zIndex: 3,
       }}>
         {/* Navigation row: prev arrow + card + next arrow */}
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <div className="ln-cinematic-splash__process-nav" style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <ArrowBtn dir="left" onClick={goPrev} disabled={step === 0} />
 
           {/* Swipeable card */}
@@ -555,8 +576,8 @@ export default function CinematicSplash({ onComplete }: CinematicSplashProps) {
               }}
             >
               {/* Card header */}
-              <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                <div style={{
+              <div className="ln-cinematic-splash__card-header" style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                <div className="ln-cinematic-splash__card-icon" style={{
                   flexShrink: 0, width: 60, height: 60, borderRadius: 14,
                   background: `${currentStep.accentColor}12`,
                   border: `1px solid ${currentStep.accentColor}25`,
@@ -564,23 +585,23 @@ export default function CinematicSplash({ onComplete }: CinematicSplashProps) {
                 }}>
                   {currentStep.icon}
                 </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 4 }}>
-                    <span style={{ fontFamily: "var(--font-body)", fontSize: "clamp(0.64rem, 0.6rem + 0.15vw, 0.76rem)", color: currentStep.accentColor, opacity: 0.82 }}>
+                <div className="ln-cinematic-splash__card-copy" style={{ flex: 1, minWidth: 0 }}>
+                  <div className="ln-cinematic-splash__card-title-row" style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 4 }}>
+                    <span className="ln-cinematic-splash__card-step" style={{ fontFamily: "var(--font-body)", fontSize: "clamp(0.64rem, 0.6rem + 0.15vw, 0.76rem)", color: currentStep.accentColor, opacity: 0.82 }}>
                       {currentStep.step}
                     </span>
-                    <span style={{ fontFamily: "var(--font-editorial)", fontSize: "clamp(1.6rem, 2.2vw, 2.15rem)", fontWeight: 700, color: "var(--ln-parchment, var(--foreground))", letterSpacing: "0.035em", lineHeight: 0.98 }}>
+                    <span className="ln-cinematic-splash__card-title" style={{ fontFamily: "var(--font-editorial)", fontSize: "clamp(1.6rem, 2.2vw, 2.15rem)", fontWeight: 700, color: "var(--ln-parchment, var(--foreground))", letterSpacing: "0.035em", lineHeight: 0.98 }}>
                       {currentStep.title}
                     </span>
                   </div>
-                  <p style={{ fontFamily: "var(--font-body)", fontSize: "clamp(0.68rem, 0.62rem + 0.2vw, 0.84rem)", color: currentStep.accentColor, letterSpacing: "0.04em", lineHeight: 1.35 }}>
+                  <p className="ln-cinematic-splash__card-subtitle" style={{ fontFamily: "var(--font-body)", fontSize: "clamp(0.68rem, 0.62rem + 0.2vw, 0.84rem)", color: currentStep.accentColor, letterSpacing: "0.04em", lineHeight: 1.35 }}>
                     {currentStep.subtitle}
                   </p>
                 </div>
               </div>
 
               {/* Description */}
-              <p style={{
+              <p className="ln-cinematic-splash__card-description" style={{
                 fontSize: "clamp(0.94rem, 0.88rem + 0.18vw, 1.06rem)", color: "var(--ln-bone, var(--foreground))",
                 lineHeight: 1.62, margin: 0,
               }}>
@@ -593,7 +614,7 @@ export default function CinematicSplash({ onComplete }: CinematicSplashProps) {
         </div>
 
         {/* Step dots — clickable */}
-        <div style={{ display: "flex", justifyContent: "center", gap: 10, marginTop: 18 }}>
+        <div className="ln-cinematic-splash__process-dots" style={{ display: "flex", justifyContent: "center", gap: 10, marginTop: 18 }}>
           {PROCESS_STEPS.map((s, i) => (
             <button
               key={i}
@@ -610,7 +631,7 @@ export default function CinematicSplash({ onComplete }: CinematicSplashProps) {
         </div>
 
         {/* Swipe hint */}
-        <p style={{
+        <p className="ln-cinematic-splash__process-hint" style={{
           textAlign: "center", marginTop: 10,
           fontFamily: "var(--font-body)", fontSize: "clamp(0.6rem, 0.55rem + 0.12vw, 0.72rem)",
           color: "var(--ln-smoke, var(--muted-foreground))", letterSpacing: "0.08em",
@@ -618,18 +639,19 @@ export default function CinematicSplash({ onComplete }: CinematicSplashProps) {
         }}>
           Swipe or use arrows to navigate
         </p>
-      </div>
+      </div>}
 
       {/* ── Enter button — always visible once process phase starts ── */}
-      <div style={{
+      {phase === "process" && <div style={{
         marginTop: "var(--ln-splash-enter-gap, 28px)",
-        opacity: phase === "process" ? 1 : 0,
+        opacity: 1,
         transition: "opacity 0.6s 0.3s ease",
-        pointerEvents: phase === "process" ? "auto" : "none",
+        pointerEvents: "auto",
         position: "relative", zIndex: 3,
       }}>
         <button
           onClick={handleEnter}
+          className="ln-cinematic-splash__archive-entry"
           style={{
             fontFamily: "var(--font-body)",
             fontSize: "clamp(0.72rem, 0.66rem + 0.16vw, 0.86rem)",
@@ -664,7 +686,7 @@ export default function CinematicSplash({ onComplete }: CinematicSplashProps) {
         >
           Enter the Archive →
         </button>
-      </div>
+      </div>}
 
       {/* ── Bottom attribution ── */}
       <div className="ln-cinematic-splash__attribution" style={{

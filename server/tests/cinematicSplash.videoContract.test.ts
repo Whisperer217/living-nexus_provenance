@@ -41,4 +41,32 @@ describe("CinematicSplash entrance video contract", () => {
     expect(source).toContain("var(--font-editorial)");
     expect(source).toContain("var(--font-body)");
   });
+
+  it("preserves the vault-first reference composition before manual process entry", () => {
+    expect(source).toContain('"awakening" | "frequency" | "vault" | "process"');
+    expect(source).toContain('setTimeout(() => setPhase("vault"), 3000)');
+    expect(source).toContain('data-phase={phase}');
+    expect(source).toContain('className="ln-cinematic-splash__vault-actions"');
+    expect(source).toContain('Explore the process');
+    expect(source).toContain('{phase === "process" && <div style={{');
+    expect(source).toContain('const openProcess = useCallback');
+    expect(source).not.toContain('style={{ position: "relative", zIndex: 3 }}');
+    expect(styles).toContain('.ln-cinematic-splash[data-phase="vault"]');
+    expect(styles).toContain('.ln-cinematic-splash__skip');
+    expect(styles).toContain('z-index: 4');
+  });
+
+  it("keeps the mobile foreground system compact, transparent, and separate from the film", () => {
+    expect(source).toContain('className="ln-cinematic-splash__process-stage"');
+    expect(source).toContain('className="ln-cinematic-splash__process-card"');
+    expect(source).toContain('className="ln-cinematic-splash__card-title"');
+    expect(source).toContain('className="ln-cinematic-splash__card-description"');
+    expect(source).toContain('className="ln-cinematic-splash__process-arrow"');
+    expect(source).toContain('className="ln-cinematic-splash__archive-entry"');
+    expect(styles).toContain('backdrop-filter: blur(18px) saturate(116%)');
+    expect(styles).toContain('.ln-cinematic-splash__process-card::before');
+    expect(styles).toContain('position: fixed;');
+    expect(styles).toContain('env(safe-area-inset-top, 0px) + 0.625rem');
+    expect(styles).toContain('.ln-cinematic-splash__card-description');
+  });
 });
