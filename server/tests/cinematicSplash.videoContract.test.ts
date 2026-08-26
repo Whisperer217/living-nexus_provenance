@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 
 const source = readFileSync("client/src/components/CinematicSplash.tsx", "utf-8");
 const styles = readFileSync("client/src/index.css", "utf-8");
+const audioRoute = readFileSync("server/routes/splashAudioRoute.ts", "utf-8");
 
 describe("CinematicSplash entrance video contract", () => {
   it("uses the approved durable asset as a decorative, non-interactive background", () => {
@@ -71,7 +72,11 @@ describe("CinematicSplash entrance video contract", () => {
   });
 
   it("provides resumable looping entrance audio with explicit mute and volume controls", () => {
-    expect(source).toContain('/manus-storage/VaultofGold_68340573.mp3');
+    expect(source).toContain('const SPLASH_AUDIO_SRC = "/api/splash-audio"');
+    expect(audioRoute).toContain('const SPLASH_AUDIO_KEY = "VaultofGold_68340573.mp3"');
+    expect(audioRoute).toContain('app.get("/api/splash-audio"');
+    expect(audioRoute).toContain('Range: range');
+    expect(audioRoute).toContain('Content-Type');
     expect(source).toContain('loop preload="auto"');
     expect(source).toContain('localStorage.getItem(SPLASH_AUDIO_POSITION_KEY)');
     expect(source).toContain('localStorage.setItem(SPLASH_AUDIO_POSITION_KEY');
@@ -82,5 +87,21 @@ describe("CinematicSplash entrance video contract", () => {
     expect(source).toContain('className="ln-cinematic-splash__audio"');
     expect(styles).toContain('.ln-cinematic-splash__audio');
     expect(styles).toContain('.ln-cinematic-splash__audio-volume input');
+  });
+
+  it("binds the center waveform to guarded playback analysis with a safe fallback", () => {
+    expect(source).toContain('analyserRef: React.MutableRefObject<AnalyserNode | null>');
+    expect(source).toContain('createAnalyser()');
+    expect(source).toContain('getByteFrequencyData(liveData)');
+    expect(source).toContain('smoothingTimeConstant = 0.82');
+    expect(source).toContain('Cross-origin storage without CORS may block analysis; playback remains independent.');
+    expect(source).toContain('const fallbackNormalised = (raw + 1) / 2');
+    expect(source).toContain('const analysedValue = liveData');
+    expect(source).toContain('analyserRef.current = null');
+    expect(source).toContain('const activateAudio = () =>');
+    expect(source).toContain('audioContextRef.current?.state === "suspended"');
+    expect(source).toContain('if (audio.paused) void audio.play()');
+    expect(source).toContain('Play sound');
+    expect(source).toContain('onPointerDown={activateAudio}');
   });
 });

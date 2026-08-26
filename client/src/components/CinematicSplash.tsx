@@ -112,7 +112,7 @@ function usePrefersReducedMotion() {
 }
 
 // ── Frequency canvas ───────────────────────────────────────────────────────
-function FrequencyCanvas({ active }: { active: boolean }) {
+function FrequencyCanvas({ active, analyserRef }: { active: boolean; analyserRef: React.MutableRefObject<AnalyserNode | null> }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animRef = useRef<number>(0);
   const tRef = useRef(0);
@@ -136,11 +136,27 @@ function FrequencyCanvas({ active }: { active: boolean }) {
       amp: 0.3 + Math.random() * 0.7,
     }));
 
+    let liveData: Uint8Array<ArrayBuffer> | null = null;
+    let liveAnalyser: AnalyserNode | null = null;
+
     function draw() {
       if (!ctx) return;
       ctx.clearRect(0, 0, W, H);
       tRef.current += 0.025;
       const t = tRef.current;
+      const nextAnalyser = analyserRef.current;
+      if (nextAnalyser !== liveAnalyser) {
+        liveAnalyser = nextAnalyser;
+        liveData = liveAnalyser ? new Uint8Array(new ArrayBuffer(liveAnalyser.frequencyBinCount)) : null;
+      }
+      if (liveAnalyser && liveData) {
+        try {
+          liveAnalyser.getByteFrequencyData(liveData);
+        } catch {
+          liveAnalyser = null;
+          liveData = null;
+        }
+      }
 
       for (let i = 0; i < BARS; i++) {
         const p = phases[i];
@@ -148,7 +164,9 @@ function FrequencyCanvas({ active }: { active: boolean }) {
           Math.sin(t * p.freq + p.phase) * 0.5 +
           Math.sin(t * p.freq * 1.7 + p.phase * 0.6) * 0.3 +
           Math.sin(t * 0.4 + (i / BARS) * Math.PI * 4) * 0.2;
-        const normalised = (raw + 1) / 2;
+        const fallbackNormalised = (raw + 1) / 2;
+        const analysedValue = liveData ? (liveData[Math.floor((i / BARS) * liveData.length)] ?? 0) / 255 : null;
+        const normalised = analysedValue === null ? fallbackNormalised : analysedValue;
         const barH = Math.max(3, normalised * H * 0.85 * p.amp);
         const x = i * barW;
         const y = (H - barH) / 2;
@@ -304,15 +322,23 @@ function ArrowBtn({
 }
 
 // ── Splash audio ─────────────────────────────────────────────────────────────
-const SPLASH_AUDIO_SRC = "/manus-storage/VaultofGold_68340573.mp3";
+const SPLASH_AUDIO_SRC = "/api/splash-audio";
 const SPLASH_AUDIO_POSITION_KEY = "ln_splash_audio_position_v1";
 const SPLASH_AUDIO_VOLUME_KEY = "ln_splash_audio_volume_v1";
 const SPLASH_AUDIO_MUTED_KEY = "ln_splash_audio_muted_v1";
 
-function SplashAudio() {
-  const audioRef = useRef<HTMLAudioElement>(null);
+function SplashAudio({
+  audioRef,
+  analyserRef,
+  audioContextRef,
+}: {
+  audioRef: React.MutableRefObject<HTMLAudioElement | null>;
+  analyserRef: React.MutableRefObject<AnalyserNode | null>;
+  audioContextRef: React.MutableRefObject<AudioContext | null>;
+}) {
   const lastSavedSecondRef = useRef(-1);
   const [muted, setMuted] = useState(false);
+  const [playing, setPlaying] = useState(false);
   const [volume, setVolume] = useState(0.4);
 
   useEffect(() => {
@@ -340,6 +366,23 @@ function SplashAudio() {
       }
     };
 
+    const setupAnalyser = () => {
+      if (analyserRef.current) return;
+      try {
+        const context = new window.AudioContext();
+        const source = context.createMediaElementSource(audio);
+        const analyser = context.createAnalyser();
+        analyser.fftSize = 128;
+        analyser.smoothingTimeConstant = 0.82;
+        source.connect(analyser);
+        analyser.connect(context.destination);
+        audioContextRef.current = context;
+        analyserRef.current = analyser;
+      } catch {
+        // Cross-origin storage without CORS may block analysis; playback remains independent.
+      }
+    };
+
     const attemptPlayback = async () => {
       try {
         await audio.play();
@@ -352,23 +395,43 @@ function SplashAudio() {
       }
     };
 
+    const markPlaying = () => setPlaying(true);
+    const markPaused = () => setPlaying(false);
     audio.addEventListener("timeupdate", persistPosition);
+    audio.addEventListener("play", markPlaying);
+    audio.addEventListener("pause", markPaused);
+    audio.addEventListener("loadedmetadata", setupAnalyser, { once: true });
+    setupAnalyser();
     void attemptPlayback();
     return () => {
       persistPosition();
       audio.pause();
       audio.removeEventListener("timeupdate", persistPosition);
+      audio.removeEventListener("play", markPlaying);
+      audio.removeEventListener("pause", markPaused);
+      audio.removeEventListener("loadedmetadata", setupAnalyser);
+      analyserRef.current = null;
+      const context = audioContextRef.current;
+      audioContextRef.current = null;
+      if (context) void context.close().catch(() => undefined);
     };
   }, []);
+
+  const activateAudio = () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (audioContextRef.current?.state === "suspended") void audioContextRef.current.resume().catch(() => undefined);
+    if (audio.paused) void audio.play().catch(() => undefined);
+  };
 
   const toggleMuted = () => {
     const audio = audioRef.current;
     if (!audio) return;
+    activateAudio();
     const nextMuted = !audio.muted;
     audio.muted = nextMuted;
     setMuted(nextMuted);
     localStorage.setItem(SPLASH_AUDIO_MUTED_KEY, String(nextMuted));
-    if (!nextMuted) void audio.play().catch(() => undefined);
   };
 
   const handleVolumeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -381,10 +444,10 @@ function SplashAudio() {
   };
 
   return (
-    <div className="ln-cinematic-splash__audio" role="group" aria-label="Entrance audio controls">
+    <div className="ln-cinematic-splash__audio" role="group" aria-label="Entrance audio controls" onPointerDown={activateAudio}>
       <audio ref={audioRef} src={SPLASH_AUDIO_SRC} loop preload="auto" />
       <button type="button" onClick={toggleMuted} className="ln-cinematic-splash__audio-toggle" aria-pressed={muted}>
-        {muted ? "Unmute" : "Mute"}
+        {playing ? (muted ? "Unmute" : "Mute") : "Play sound"}
       </button>
       <label className="ln-cinematic-splash__audio-volume">
         <span>Volume</span>
@@ -491,6 +554,10 @@ export default function CinematicSplash({ onComplete }: CinematicSplashProps) {
     return () => window.removeEventListener("keydown", handler);
   }, [phase, goNext, goPrev, handleEnter, openProcess]);
 
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+
   const currentStep = PROCESS_STEPS[step];
 
   const cardAnimStyle: React.CSSProperties = (() => {
@@ -543,7 +610,7 @@ export default function CinematicSplash({ onComplete }: CinematicSplashProps) {
 
       {!prefersReducedMotion && <ParticleField />}
 
-      <SplashAudio />
+      <SplashAudio audioRef={audioRef} analyserRef={analyserRef} audioContextRef={audioContextRef} />
 
       <button
         type="button"
@@ -617,7 +684,7 @@ export default function CinematicSplash({ onComplete }: CinematicSplashProps) {
         transition: "opacity 0.8s ease",
         position: "relative", zIndex: 3,
       }}>
-        <FrequencyCanvas active={!prefersReducedMotion && phase !== "awakening"} />
+        <FrequencyCanvas active={!prefersReducedMotion && phase !== "awakening"} analyserRef={analyserRef} />
       </div>
 
       {phase === "vault" && (
