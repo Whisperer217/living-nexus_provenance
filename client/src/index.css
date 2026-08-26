@@ -24,7 +24,8 @@
   height: 100%;
   object-fit: cover;
   object-position: 50% 50%;
-  opacity: 0.58;
+  opacity: 1;
+  filter: saturate(1.32) contrast(1.16) brightness(1.68);
   pointer-events: none;
   background: var(--ln-void, var(--void, #050505));
 }
@@ -35,21 +36,29 @@
   z-index: 1;
   pointer-events: none;
   background:
-    radial-gradient(circle at 50% 48%, color-mix(in srgb, var(--ln-gold, var(--gold)) 12%, transparent) 0%, transparent 44%),
-    linear-gradient(180deg, color-mix(in srgb, var(--ln-void, var(--void)) 72%, transparent) 0%, transparent 34%, color-mix(in srgb, var(--ln-void, var(--void)) 82%, transparent) 100%),
-    linear-gradient(90deg, color-mix(in srgb, var(--ln-void, var(--void)) 56%, transparent) 0%, transparent 20%, transparent 80%, color-mix(in srgb, var(--ln-void, var(--void)) 56%, transparent) 100%);
+    radial-gradient(circle at 50% 48%, color-mix(in srgb, var(--ln-gold, var(--gold)) 7%, transparent) 0%, transparent 46%),
+    linear-gradient(180deg, color-mix(in srgb, var(--ln-void, var(--void)) 22%, transparent) 0%, transparent 22%, transparent 76%, color-mix(in srgb, var(--ln-void, var(--void)) 28%, transparent) 100%),
+    linear-gradient(90deg, color-mix(in srgb, var(--ln-void, var(--void)) 12%, transparent) 0%, transparent 16%, transparent 84%, color-mix(in srgb, var(--ln-void, var(--void)) 12%, transparent) 100%);
+}
+
+.ln-cinematic-splash__logo-copy {
+  text-shadow: 0 2px 18px color-mix(in srgb, var(--ln-void, var(--void)) 74%, transparent);
+}
+
+.ln-cinematic-splash__process-card {
+  box-shadow: 0 18px 48px color-mix(in srgb, var(--ln-void, var(--void)) 54%, transparent);
 }
 
 @media (max-width: 640px) {
   .ln-cinematic-splash__vault-film {
     object-position: 50% 50%;
-    opacity: 0.44;
+    opacity: 0.9;
   }
 
   .ln-cinematic-splash__vault-veil {
     background:
-      radial-gradient(circle at 50% 44%, color-mix(in srgb, var(--ln-gold, var(--gold)) 10%, transparent) 0%, transparent 38%),
-      linear-gradient(180deg, color-mix(in srgb, var(--ln-void, var(--void)) 82%, transparent) 0%, transparent 32%, color-mix(in srgb, var(--ln-void, var(--void)) 88%, transparent) 100%);
+      radial-gradient(circle at 50% 44%, color-mix(in srgb, var(--ln-gold, var(--gold)) 6%, transparent) 0%, transparent 38%),
+      linear-gradient(180deg, color-mix(in srgb, var(--ln-void, var(--void)) 36%, transparent) 0%, transparent 24%, color-mix(in srgb, var(--ln-void, var(--void)) 44%, transparent) 100%);
   }
 }
 

@@ -31,4 +31,14 @@ describe("CinematicSplash entrance video contract", () => {
     expect(source).toContain("aria-label=\"Skip cinematic introduction and enter the archive\"");
     expect(source).toContain("zIndex: 3");
   });
+
+  it("keeps the vault visibly composed and the splash hierarchy intentionally scaled", () => {
+    expect(styles).toContain("opacity: 1;");
+    expect(styles).toContain("var(--ln-void, var(--void)) 22%");
+    expect(source).toContain("ln-cinematic-splash__logo-copy");
+    expect(source).toContain("clamp(2.15rem, 4.8vw, 3.5rem)");
+    expect(source).toContain("ln-cinematic-splash__process-card");
+    expect(source).toContain("var(--font-editorial)");
+    expect(source).toContain("var(--font-body)");
+  });
 });

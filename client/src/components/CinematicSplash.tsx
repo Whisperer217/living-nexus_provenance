@@ -490,19 +490,19 @@ export default function CinematicSplash({ onComplete }: CinematicSplashProps) {
             }}
           />
         </div>
-        <div style={{ textAlign: "center" }}>
+        <div className="ln-cinematic-splash__logo-copy" style={{ textAlign: "center" }}>
           <div style={{
-            fontFamily: "'Cormorant Garamond', serif",
-            fontSize: "clamp(1.5rem, 4vw, 2.5rem)",
+            fontFamily: "var(--font-editorial)",
+            fontSize: "clamp(2.15rem, 4.8vw, 3.5rem)",
             fontWeight: 700, color: "rgba(240,230,210,0.95)",
-            letterSpacing: "0.08em", lineHeight: 1,
+            letterSpacing: "0.06em", lineHeight: 0.96,
             animation: prefersReducedMotion ? undefined : "ln-logo-rise 1.4s 0.15s cubic-bezier(0.16,1,0.3,1) forwards",
             opacity: prefersReducedMotion ? 1 : 0,
           }}>Living Nexus</div>
           <div style={{
-            fontFamily: "'Space Mono', monospace",
-            fontSize: "0.65rem", color: "rgba(212,175,55,0.7)",
-            letterSpacing: "0.22em", textTransform: "uppercase", marginTop: 8,
+            fontFamily: "var(--font-body)",
+            fontSize: "clamp(0.625rem, 0.58rem + 0.25vw, 0.78rem)", color: "var(--ln-gold, var(--gold))",
+            letterSpacing: "0.18em", textTransform: "uppercase", marginTop: 10,
             animation: prefersReducedMotion ? undefined : "ln-tagline-fade 1.2s 0.6s ease forwards",
             opacity: prefersReducedMotion ? 1 : 0,
           }}>Sovereign Creative Archive</div>
@@ -511,7 +511,7 @@ export default function CinematicSplash({ onComplete }: CinematicSplashProps) {
 
       {/* ── Frequency waveform ── */}
       <div style={{
-        width: "min(480px, 80vw)", marginTop: "var(--ln-splash-wave-gap, 28px)",
+        width: "min(620px, 86vw)", marginTop: "var(--ln-splash-wave-gap, 28px)",
         opacity: phase === "awakening" ? 0 : 1,
         transition: "opacity 0.8s ease",
         position: "relative", zIndex: 3,
@@ -521,7 +521,7 @@ export default function CinematicSplash({ onComplete }: CinematicSplashProps) {
 
       {/* ── Process cards section ── */}
       <div style={{
-        marginTop: "var(--ln-splash-process-gap, 24px)", width: "min(520px, 90vw)",
+        marginTop: "var(--ln-splash-process-gap, 24px)", width: "min(620px, 92vw)",
         opacity: phase === "process" ? 1 : 0,
         transition: "opacity 0.6s ease",
         pointerEvents: phase === "process" ? "auto" : "none",
@@ -541,15 +541,16 @@ export default function CinematicSplash({ onComplete }: CinematicSplashProps) {
           >
             <div
               key={step}
+              className="ln-cinematic-splash__process-card"
               style={{
-                background: currentStep.bgColor,
+                background: `color-mix(in srgb, var(--ln-panel, var(--ln-void)) 88%, ${currentStep.accentColor})`,
                 border: `1px solid ${currentStep.accentColor}35`,
                 borderRadius: 18,
                 padding: "var(--ln-splash-card-padding, 24px 22px)",
                 display: "flex",
                 flexDirection: "column",
                 gap: 14,
-                minHeight: "var(--ln-splash-card-min-height, 200px)",
+                minHeight: "var(--ln-splash-card-min-height, 220px)",
                 ...cardAnimStyle,
               }}
             >
@@ -565,14 +566,14 @@ export default function CinematicSplash({ onComplete }: CinematicSplashProps) {
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 4 }}>
-                    <span style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.6rem", color: currentStep.accentColor, opacity: 0.7 }}>
+                    <span style={{ fontFamily: "var(--font-body)", fontSize: "clamp(0.64rem, 0.6rem + 0.15vw, 0.76rem)", color: currentStep.accentColor, opacity: 0.82 }}>
                       {currentStep.step}
                     </span>
-                    <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.5rem", fontWeight: 700, color: "rgba(240,230,210,0.95)", letterSpacing: "0.04em", lineHeight: 1 }}>
+                    <span style={{ fontFamily: "var(--font-editorial)", fontSize: "clamp(1.6rem, 2.2vw, 2.15rem)", fontWeight: 700, color: "var(--ln-parchment, var(--foreground))", letterSpacing: "0.035em", lineHeight: 0.98 }}>
                       {currentStep.title}
                     </span>
                   </div>
-                  <p style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.6rem", color: currentStep.accentColor, letterSpacing: "0.05em", lineHeight: 1.4 }}>
+                  <p style={{ fontFamily: "var(--font-body)", fontSize: "clamp(0.68rem, 0.62rem + 0.2vw, 0.84rem)", color: currentStep.accentColor, letterSpacing: "0.04em", lineHeight: 1.35 }}>
                     {currentStep.subtitle}
                   </p>
                 </div>
@@ -580,8 +581,8 @@ export default function CinematicSplash({ onComplete }: CinematicSplashProps) {
 
               {/* Description */}
               <p style={{
-                fontSize: "0.85rem", color: "rgba(190,178,160,0.9)",
-                lineHeight: 1.7, margin: 0,
+                fontSize: "clamp(0.94rem, 0.88rem + 0.18vw, 1.06rem)", color: "var(--ln-bone, var(--foreground))",
+                lineHeight: 1.62, margin: 0,
               }}>
                 {currentStep.description}
               </p>
@@ -611,8 +612,8 @@ export default function CinematicSplash({ onComplete }: CinematicSplashProps) {
         {/* Swipe hint */}
         <p style={{
           textAlign: "center", marginTop: 10,
-          fontFamily: "'Space Mono', monospace", fontSize: "0.55rem",
-          color: "rgba(255,255,255,0.22)", letterSpacing: "0.08em",
+          fontFamily: "var(--font-body)", fontSize: "clamp(0.6rem, 0.55rem + 0.12vw, 0.72rem)",
+          color: "var(--ln-smoke, var(--muted-foreground))", letterSpacing: "0.08em",
           textTransform: "uppercase",
         }}>
           Swipe or use arrows to navigate
@@ -630,8 +631,8 @@ export default function CinematicSplash({ onComplete }: CinematicSplashProps) {
         <button
           onClick={handleEnter}
           style={{
-            fontFamily: "'Space Mono', monospace",
-            fontSize: "0.72rem",
+            fontFamily: "var(--font-body)",
+            fontSize: "clamp(0.72rem, 0.66rem + 0.16vw, 0.86rem)",
             letterSpacing: "0.14em",
             textTransform: "uppercase",
             color: allSeen ? "#0a0a0a" : "rgba(212,175,55,0.9)",
