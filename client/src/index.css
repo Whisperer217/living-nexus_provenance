@@ -4093,6 +4093,65 @@ h1, h2, h3, h4, h5, h6,
   width: min(640px, 94vw);
 }
 
+/* Foreground-only refinement: a light glass layer inside the protected vault film. */
+.ln-cinematic-splash__process-card {
+  position: relative;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--ln-void, var(--void)) 52%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--ln-gold, var(--gold)) 36%, transparent) !important;
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--ln-parchment, var(--foreground)) 16%, transparent),
+    0 1.25rem 3rem color-mix(in srgb, var(--ln-void, var(--void)) 30%, transparent),
+    0 0 2.25rem color-mix(in srgb, var(--ln-gold, var(--gold)) 12%, transparent);
+  backdrop-filter: blur(18px) saturate(116%);
+  -webkit-backdrop-filter: blur(18px) saturate(116%);
+}
+
+.ln-cinematic-splash__process-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 12% auto;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--ln-gold-hot, var(--ln-gold, var(--gold))) 72%, transparent), transparent);
+  box-shadow: 0 0 1.25rem color-mix(in srgb, var(--ln-gold, var(--gold)) 38%, transparent);
+  opacity: 0.78;
+  pointer-events: none;
+}
+
+.ln-cinematic-splash__process-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.ln-cinematic-splash__card-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.ln-cinematic-splash__card-copy {
+  overflow: hidden;
+}
+
+.ln-cinematic-splash__card-title-row {
+  min-width: 0;
+}
+
+.ln-cinematic-splash__card-title {
+  color: var(--ln-parchment, var(--foreground)) !important;
+}
+
+.ln-cinematic-splash__card-description {
+  color: color-mix(in srgb, var(--ln-bone, var(--foreground)) 92%, transparent) !important;
+}
+
+.ln-cinematic-splash__skip {
+  min-height: 2.35rem;
+  padding: 0.5rem 0.75rem;
+  font-size: var(--text-xs);
+  letter-spacing: 0.1em;
+}
+
 .ln-cinematic-splash__card-header {
   padding-bottom: 0.875rem;
   border-bottom: 1px solid color-mix(in srgb, var(--ln-parchment, var(--foreground)) 12%, transparent);
@@ -4170,10 +4229,12 @@ h1, h2, h3, h4, h5, h6,
 
   .ln-cinematic-splash__skip {
     position: fixed;
-    top: max(0.875rem, calc(env(safe-area-inset-top, 0px) + 0.625rem));
-    right: max(0.875rem, calc(env(safe-area-inset-right, 0px) + 0.625rem));
-    min-height: 2.5rem;
-    padding: 0.5625rem 0.75rem;
+    top: max(0.75rem, calc(env(safe-area-inset-top, 0px) + 0.5rem));
+    right: max(0.75rem, calc(env(safe-area-inset-right, 0px) + 0.5rem));
+    min-height: 2.25rem;
+    padding: 0.5rem 0.625rem;
+    font-size: var(--text-xs);
+    letter-spacing: 0.08em;
   }
 
   .ln-cinematic-splash__process-stage {
@@ -4191,8 +4252,8 @@ h1, h2, h3, h4, h5, h6,
 
   .ln-cinematic-splash__process-card {
     border-radius: 1.125rem !important;
-    padding: 1rem !important;
-    gap: 0.875rem !important;
+    padding: 0.875rem !important;
+    gap: 0.75rem !important;
   }
 
   .ln-cinematic-splash__card-header {

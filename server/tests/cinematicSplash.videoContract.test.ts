@@ -70,7 +70,7 @@ describe("CinematicSplash entrance video contract", () => {
     expect(styles).toContain('backdrop-filter: blur(18px) saturate(116%)');
     expect(styles).toContain('.ln-cinematic-splash__process-card::before');
     expect(styles).toContain('position: fixed;');
-    expect(styles).toContain('env(safe-area-inset-top, 0px) + 0.625rem');
+    expect(styles).toContain('env(safe-area-inset-top, 0px) + 0.5rem');
     expect(styles).toContain('.ln-cinematic-splash__card-description');
   });
 
