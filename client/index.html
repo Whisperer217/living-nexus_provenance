@@ -13,6 +13,11 @@
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json" />
 
+    <!-- The cinematic entrance is the first visible surface. Preload the
+         decorative vault film so desktop begins its range request before
+         React hydrates and advances the splash timeline. -->
+    <link rel="preload" as="video" href="/manus-storage/dark-gold-vault_cc92b6bb.mp4" type="video/mp4" fetchpriority="high" />
+
     <!-- Favicon -->
     <link rel="icon" type="image/png" sizes="64x64" href="https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/HMNMkWUWAfVdTbRj3YmPCF/ln-favicon-64_612204fb.png" />
     <link rel="icon" type="image/png" sizes="32x32" href="https://d2xsxph8kpxj0f.cloudfront.net/310519663123503966/HMNMkWUWAfVdTbRj3YmPCF/ln-favicon-32_fab7a647.png" />

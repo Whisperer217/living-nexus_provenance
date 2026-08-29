@@ -331,8 +331,9 @@ function ArrowBtn({
 const SPLASH_AUDIO_SRC = "/api/splash-audio";
 const SPLASH_AUDIO_POSITION_KEY = "ln_splash_audio_position_v1";
 const SPLASH_AUDIO_VOLUME_KEY = "ln_splash_audio_volume_v1";
-// v2 deliberately avoids inheriting the v1 value that autoplay fallback could force to true.
-const SPLASH_AUDIO_MUTED_KEY = "ln_splash_audio_muted_v2";
+// v3 resets the v2 value because the pre-fix first-click handler could persist
+// an automatic mute as if it were an intentional user preference.
+const SPLASH_AUDIO_MUTED_KEY = "ln_splash_audio_muted_v3";
 
 function SplashAudio({
   audioRef,
@@ -452,7 +453,14 @@ function SplashAudio({
   const toggleMuted = async () => {
     const audio = audioRef.current;
     if (!audio) return;
+    const wasPaused = audio.paused;
     await activateAudio();
+    // The first trusted click is a start action, not a mute toggle. Only a
+    // click while already playing changes the user's explicit mute choice.
+    if (wasPaused) {
+      setMuted(audio.muted);
+      return;
+    }
     const nextMuted = !audio.muted;
     audio.muted = nextMuted;
     setMuted(nextMuted);

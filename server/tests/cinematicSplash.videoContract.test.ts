@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 
 const source = readFileSync("client/src/components/CinematicSplash.tsx", "utf-8");
 const styles = readFileSync("client/src/index.css", "utf-8");
+const documentHead = readFileSync("client/index.html", "utf-8");
 const audioRoute = readFileSync("server/routes/splashAudioRoute.ts", "utf-8");
 
 describe("CinematicSplash entrance video contract", () => {
@@ -20,6 +21,9 @@ describe("CinematicSplash entrance video contract", () => {
     expect(source).toContain("playsInline");
     expect(source).toContain('preload="auto"');
     expect(source).not.toMatch(/<video[\s\S]*?\bcontrols\b/);
+    expect(documentHead).toContain('rel="preload" as="video"');
+    expect(documentHead).toContain('dark-gold-vault_cc92b6bb.mp4');
+    expect(documentHead).toContain('fetchpriority="high"');
   });
 
   it("preserves reduced-motion safeguards without rendering a static image fallback", () => {
@@ -92,6 +96,7 @@ describe("CinematicSplash entrance video contract", () => {
 
   it("provides resumable looping entrance audio with explicit mute and volume controls", () => {
     expect(source).toContain('const SPLASH_AUDIO_SRC = "/api/splash-audio"');
+    expect(source).toContain('ln_splash_audio_muted_v3');
     expect(audioRoute).toContain('const SPLASH_AUDIO_KEY = "VaultofGold_68340573.mp3"');
     expect(audioRoute).toContain('app.get("/api/splash-audio"');
     expect(audioRoute).toContain('Range: range');
@@ -103,6 +108,8 @@ describe("CinematicSplash entrance video contract", () => {
     expect(source).toContain('await context.resume().catch(() => undefined)');
     expect(source).toContain('await audio.play().catch(() => undefined)');
     expect(source).toContain('await activateAudio()');
+    expect(source).toContain('const wasPaused = audio.paused');
+    expect(source).toContain('if (wasPaused)');
     expect(source).toContain('[CinematicSplash][audio] autoplay-rejected');
     expect(source).not.toContain('audio.muted = true;\n        setMuted(true);\n        localStorage.setItem(SPLASH_AUDIO_MUTED_KEY, "true");');
     expect(source).toContain('aria-pressed={muted}');
