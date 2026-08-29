@@ -7,7 +7,7 @@ const audioRoute = readFileSync("server/routes/splashAudioRoute.ts", "utf-8");
 
 describe("CinematicSplash entrance video contract", () => {
   it("uses the approved durable asset as a decorative, non-interactive background", () => {
-    expect(source).toContain('/manus-storage/dark-gold-vault_1238ee74.mp4');
+    expect(source).toContain('/manus-storage/dark-gold-vault_cc92b6bb.mp4');
     expect(source).toContain('preload="auto"');
     expect(source).toContain('onCanPlay={handleVideoCanPlay}');
     expect(source).toContain('onError={handleVideoError}');
@@ -22,13 +22,14 @@ describe("CinematicSplash entrance video contract", () => {
     expect(source).not.toMatch(/<video[\s\S]*?\bcontrols\b/);
   });
 
-  it("preserves an existing ceremonial fallback for reduced-motion visitors", () => {
+  it("preserves reduced-motion safeguards without rendering a static image fallback", () => {
     expect(source).toContain("prefers-reduced-motion: reduce");
     expect(source).toContain("!prefersReducedMotion && !videoFallbackReason && (");
     expect(source).toContain("!prefersReducedMotion && <ParticleField />");
     expect(source).toContain("var(--ln-void");
-    expect(source).toContain('className="ln-cinematic-splash__vault-static"');
-    expect(styles).toContain('.ln-cinematic-splash__vault-static');
+    expect(source).not.toContain('className="ln-cinematic-splash__vault-static"');
+    expect(styles).not.toContain('.ln-cinematic-splash__vault-static');
+    expect(styles).not.toContain('dark-gold-vault-still_239718fa.jpg');
   });
 
   it("retains existing exit and keyboard-entry surfaces above the film", () => {
@@ -86,9 +87,7 @@ describe("CinematicSplash entrance video contract", () => {
     expect(source).toContain('play-resolved');
     expect(source).toContain('play-rejected');
     expect(source).toContain('setVideoFallbackReason(reason)');
-    expect(source).toContain('data-fallback-reason={videoFallbackReason ?? "prefers-reduced-motion"}');
     expect(source).toContain('!prefersReducedMotion && !videoFallbackReason');
-    expect(styles).toContain('dark-gold-vault-still_239718fa.jpg');
   });
 
   it("provides resumable looping entrance audio with explicit mute and volume controls", () => {

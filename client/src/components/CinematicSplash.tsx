@@ -658,17 +658,10 @@ export default function CinematicSplash({ onComplete }: CinematicSplashProps) {
           onError={handleVideoError}
           tabIndex={-1}
         >
-          <source src="/manus-storage/dark-gold-vault_1238ee74.mp4" type="video/mp4" />
+          <source src="/manus-storage/dark-gold-vault_cc92b6bb.mp4" type="video/mp4" />
         </video>
       )}
 
-      {(prefersReducedMotion || videoFallbackReason) && (
-        <div
-          aria-hidden="true"
-          className="ln-cinematic-splash__vault-static"
-          data-fallback-reason={videoFallbackReason ?? "prefers-reduced-motion"}
-        />
-      )}
 
       <div
         aria-hidden="true"

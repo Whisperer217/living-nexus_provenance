@@ -236,3 +236,4 @@
 - [x] Add a read-only Home Best Played This Week projection: strict rolling-seven-day eligible public Published audio tracks, Top 3, clickable work/creator/Support actions, honest empty state, no worker or new persistence; preserve CinematicSplash and registry semantics.
 - [x] Complete and validate CinematicSplash desktop diagnostics/static fallback styling, then run full regression and visual review before any checkpoint.
 - [x] Fix CinematicSplash autoplay rejection so a browser policy failure does not force or persist mute; preserve explicit user mute preference, Play sound activation, waveform, analyser, volume, and cleanup behavior.
+- [x] Replace CinematicSplash’s vault film with the user-provided `dark-gold-vault.mp4`, remove the rendered static image fallback on desktop/mobile, preserve reduced-motion safeguards and all audio/analyser/loop/skip behavior, validate both viewports, and stop for approval before checkpointing.
