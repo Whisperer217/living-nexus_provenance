@@ -45,7 +45,10 @@ describe("CinematicSplash entrance video contract", () => {
 
   it("keeps the vault visibly composed and the splash hierarchy intentionally scaled", () => {
     expect(styles).toContain("opacity: 1;");
-    expect(styles).toContain("var(--ln-void, var(--void)) 22%");
+    expect(styles).toContain("var(--ln-gold, var(--gold)) 42%");
+    expect(styles).toContain("49.8%");
+    expect(styles).toContain("50.2%");
+    expect(styles).toContain("mix-blend-mode: screen");
     expect(source).toContain("ln-cinematic-splash__logo-copy");
     expect(source).toContain("clamp(2.15rem, 4.8vw, 3.5rem)");
     expect(source).toContain("ln-cinematic-splash__process-card");
