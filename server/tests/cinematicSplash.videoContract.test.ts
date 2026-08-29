@@ -21,9 +21,11 @@ describe("CinematicSplash entrance video contract", () => {
     expect(source).toContain("playsInline");
     expect(source).toContain('preload="auto"');
     expect(source).not.toMatch(/<video[\s\S]*?\bcontrols\b/);
-    expect(documentHead).toContain('rel="preload" as="video"');
+    expect(documentHead).toContain('rel="preload" as="fetch"');
+    expect(documentHead).not.toContain('as="video"');
     expect(documentHead).toContain('dark-gold-vault_cc92b6bb.mp4');
     expect(documentHead).toContain('fetchpriority="high"');
+    expect(documentHead).toContain('crossorigin="anonymous"');
   });
 
   it("preserves reduced-motion safeguards without rendering a static image fallback", () => {
