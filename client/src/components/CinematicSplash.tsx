@@ -504,17 +504,37 @@ export default function CinematicSplash({ onComplete }: CinematicSplashProps) {
   const [cardAnim, setCardAnim] = useState<"enter-right" | "enter-left" | "exit-left" | "exit-right" | "idle">("enter-right");
   const [dissolving, setDissolving] = useState(false);
   const [allSeen, setAllSeen] = useState(false);
+  const [videoFallbackReason, setVideoFallbackReason] = useState<string | null>(null);
+  const [videoReady, setVideoReady] = useState(prefersReducedMotion);
+  const [vaultRequested, setVaultRequested] = useState(false);
 
   // Swipe tracking
   const dragStartX = useRef<number | null>(null);
   const isDragging = useRef(false);
 
-  // Phase timeline — reveal the vault, then wait for the visitor to open the process.
+  // Phase timeline — request the vault at three seconds, then reveal it only
+  // after the decorative film has a real playing frame (or the deliberate
+  // reduced-motion/error void path is active).
   useEffect(() => {
     const t1 = setTimeout(() => setPhase("frequency"), 1200);
-    const t2 = setTimeout(() => setPhase("vault"), 3000);
+    const t2 = setTimeout(() => setVaultRequested(true), 3000);
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, []);
+
+  useEffect(() => {
+    if (!vaultRequested) return;
+    if (prefersReducedMotion || videoReady || videoFallbackReason) {
+      setPhase("vault");
+    }
+  }, [prefersReducedMotion, vaultRequested, videoFallbackReason, videoReady]);
+
+  useEffect(() => {
+    if (!vaultRequested || prefersReducedMotion || videoReady || videoFallbackReason) return;
+    const timeout = window.setTimeout(() => {
+      setVideoFallbackReason("video readiness timeout");
+    }, 6500);
+    return () => window.clearTimeout(timeout);
+  }, [prefersReducedMotion, vaultRequested, videoFallbackReason, videoReady]);
 
   // Track if user has seen all cards
   useEffect(() => {
@@ -590,7 +610,6 @@ export default function CinematicSplash({ onComplete }: CinematicSplashProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
-  const [videoFallbackReason, setVideoFallbackReason] = useState<string | null>(null);
 
   const reportVideoDiagnostic = useCallback((event: string, video: HTMLVideoElement, details?: Record<string, unknown>) => {
     if (!import.meta.env.DEV) return;
@@ -608,7 +627,10 @@ export default function CinematicSplash({ onComplete }: CinematicSplashProps) {
     const video = event.currentTarget;
     reportVideoDiagnostic("canplay", video);
     void video.play()
-      .then(() => reportVideoDiagnostic("play-resolved", video))
+      .then(() => {
+        setVideoReady(true);
+        reportVideoDiagnostic("play-resolved", video);
+      })
       .catch((error: unknown) => {
         const reason = error instanceof Error ? error.message : String(error);
         reportVideoDiagnostic("play-rejected", video, { reason });

@@ -55,7 +55,12 @@ describe("CinematicSplash entrance video contract", () => {
 
   it("preserves the vault-first reference composition before manual process entry", () => {
     expect(source).toContain('"awakening" | "frequency" | "vault" | "process"');
-    expect(source).toContain('setTimeout(() => setPhase("vault"), 3000)');
+    expect(source).toContain('setTimeout(() => setVaultRequested(true), 3000)');
+    expect(source).toContain('const [videoReady, setVideoReady]');
+    expect(source).toContain('const [vaultRequested, setVaultRequested]');
+    expect(source).toContain('if (prefersReducedMotion || videoReady || videoFallbackReason)');
+    expect(source).toContain('setVideoFallbackReason("video readiness timeout")');
+    expect(source).toContain('setVideoReady(true)');
     expect(source).toContain('data-phase={phase}');
     expect(source).toContain('className="ln-cinematic-splash__vault-actions"');
     expect(source).toContain('Explore the process');
