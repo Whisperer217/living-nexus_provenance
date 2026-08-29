@@ -22,7 +22,7 @@ import { cn } from "@/lib/utils";
 
 // ── LnCard ────────────────────────────────────────────────────────────────────
 
-type CardVariant = "museum" | "flat" | "ghost" | "panel" | "glass" | "inset";
+type CardVariant = "museum" | "flat" | "ghost" | "panel" | "inset";
 
 interface LnCardProps extends React.HTMLAttributes<HTMLDivElement> {
   /** Visual variant */
@@ -66,16 +66,6 @@ const CARD_VARIANTS: Record<CardVariant, React.CSSProperties> = {
     border: "1px solid rgba(212,175,55,0.28)",
     borderRadius: "16px",
     overflow: "hidden",
-  },
-  /** Glass — cinematic archive layer for entrance, work, and app shell surfaces */
-  glass: {
-    background: "linear-gradient(145deg, rgba(5,5,5,0.58), rgba(196,154,40,0.07))",
-    border: "1px solid rgba(196,154,40,0.36)",
-    borderRadius: "12px",
-    overflow: "hidden",
-    boxShadow: "inset 0 1px 0 rgba(237,229,208,0.16), 0 18px 48px rgba(0,0,0,0.36), 0 0 28px rgba(196,154,40,0.12)",
-    backdropFilter: "blur(18px) saturate(116%)",
-    WebkitBackdropFilter: "blur(18px) saturate(116%)",
   },
   /** Inset — sunken surface, for code blocks, origin stories */
   inset: {
