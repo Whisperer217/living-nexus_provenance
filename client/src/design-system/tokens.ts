@@ -72,6 +72,20 @@ export const COLOR_GOLD_ALPHA = {
   glow:     "rgba(196,154,40,0.22)",
 } as const;
 
+/** Cinematic archive glass — shared by entrance and authenticated app shells */
+export const COLOR_GLASS = {
+  /** Entrance/app panel glass — lets the archive environment remain visible */
+  panel: "rgba(5,5,5,0.58)",
+  /** Slightly denser glass for navigation and persistent player surfaces */
+  rail: "rgba(6,6,6,0.78)",
+  /** Fine top-edge light for sovereign glass panels */
+  highlight: "rgba(237,229,208,0.16)",
+  /** Low gold wash for provenance-aware glass interiors */
+  goldWash: "rgba(196,154,40,0.07)",
+  /** Hairline gold used where a surface becomes an authored object */
+  goldLine: "rgba(196,154,40,0.36)",
+} as const;
+
 /** Semantic status colors */
 export const COLOR_STATUS = {
   /** Verified / Published / Alive */
@@ -445,17 +459,31 @@ export const SURFACE = {
   primary:   "rgba(8,6,16,0.99)",
   /** Secondary drawer surface */
   secondary: "rgba(16,12,28,0.97)",
+  /** Cinematic glass shared across entrance, archive, and work surfaces */
+  glass:     "rgba(5,5,5,0.58)",
+  /** App rail glass — denser than panel glass, lighter than opaque nav */
+  railGlass: "rgba(6,6,6,0.78)",
   /** Muted text inside drawers */
   textMuted: "rgba(255,255,255,0.42)",
   /** Gold border inside drawers */
   goldBorder:"rgba(212,175,55,0.28)",
 } as const;
 
+/** Product-wide emotional order for page and asset review */
+export const EXPERIENCE_FEEL = [
+  "cinematic",
+  "sovereign",
+  "mysterious",
+  "premium",
+  "precise",
+] as const;
+
 // ── Type Helpers ──────────────────────────────────────────────────────────────
 
 export type ColorSurface   = keyof typeof COLOR_SURFACE;
 export type ColorText      = keyof typeof COLOR_TEXT;
 export type ColorGold      = keyof typeof COLOR_GOLD;
+export type ColorGlass     = keyof typeof COLOR_GLASS;
 export type ColorStatus    = keyof typeof COLOR_STATUS;
 export type MediumType     = keyof typeof COLOR_MEDIUM;
 export type FontFamily     = keyof typeof FONT_FAMILY;

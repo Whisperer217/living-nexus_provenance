@@ -40,6 +40,24 @@ Every design decision is evaluated against this question: *Does this feel like a
 
 ---
 
+## Cinematic Sovereign Lineage
+
+The current open-site and web-app redesign direction is recorded in
+`CINEMATIC_SOVEREIGN_LINEAGE.md`.
+
+This lineage establishes the emotional order for the experience:
+
+1. Cinematic
+2. Sovereign
+3. Mysterious
+4. Premium
+5. Precise
+
+The entrance engine is protected. App surfaces should inherit its smoked glass,
+gold witness-line, and precise provenance language without becoming decorative.
+
+---
+
 ## The Seven Audit Questions
 
 Before any screen is shipped, it must pass these seven questions:

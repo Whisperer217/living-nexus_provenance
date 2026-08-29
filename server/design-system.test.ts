@@ -48,6 +48,18 @@ describe("Design System Tokens — Shape", () => {
     expect(COLOR_TEXT).toHaveProperty("disabled");
   });
 
+  it("COLOR_GLASS has all required cinematic glass keys", async () => {
+    const { COLOR_GLASS } = await import("../client/src/design-system/tokens");
+    expect(COLOR_GLASS).toHaveProperty("panel");
+    expect(COLOR_GLASS).toHaveProperty("rail");
+    expect(COLOR_GLASS).toHaveProperty("highlight");
+    expect(COLOR_GLASS).toHaveProperty("goldWash");
+    expect(COLOR_GLASS).toHaveProperty("goldLine");
+    for (const [key, val] of Object.entries(COLOR_GLASS)) {
+      expect(val, `COLOR_GLASS.${key} must be rgba`).toMatch(/^rgba\(/);
+    }
+  });
+
   it("COLOR_STATUS has all required semantic status keys", async () => {
     const { COLOR_STATUS } = await import("../client/src/design-system/tokens");
     expect(COLOR_STATUS).toHaveProperty("green");
@@ -242,5 +254,16 @@ describe("Design System Token Values — Canonical", () => {
     for (const [key, val] of Object.entries(COLOR_GOLD_ALPHA)) {
       expect(val, `COLOR_GOLD_ALPHA.${key} must be rgba`).toMatch(/^rgba\(/);
     }
+  });
+
+  it("EXPERIENCE_FEEL preserves the redesign emotional order", async () => {
+    const { EXPERIENCE_FEEL } = await import("../client/src/design-system/tokens");
+    expect(EXPERIENCE_FEEL).toEqual([
+      "cinematic",
+      "sovereign",
+      "mysterious",
+      "premium",
+      "precise",
+    ]);
   });
 });
