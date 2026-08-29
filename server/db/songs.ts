@@ -1079,6 +1079,53 @@ export async function getTrendingWorks(opts?: { genre?: string; limit?: number; 
   return scored.slice(0, limit).map(({ score: _score, weeklyPlays: _wp, weeklyLikes: _wl, ...rest }: ScoredRow) => rest);
 }
 
+/**
+ * Returns the top playable public audio works by qualifying play events in the
+ * rolling seven-day window. This is intentionally a live projection: no worker,
+ * snapshot table, or mutation is needed for the Home porch.
+ */
+export async function getBestPlayedThisWeek(limit = 3) {
+  const db = await getDb();
+  if (!db) return [];
+
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  const weeklyPlays = sql<number>`(
+    SELECT COUNT(*) FROM playEvents
+    WHERE playEvents.songId = ${songs.id}
+    AND playEvents.createdAt >= ${sevenDaysAgo}
+  )`;
+
+  return db
+    .select({
+      song: songs,
+      creator: {
+        id: users.id,
+        name: users.name,
+        artistHandle: users.artistHandle,
+        profilePhotoUrl: users.profilePhotoUrl,
+        aiDisclosure: users.aiDisclosure,
+        primaryGenre: users.primaryGenre,
+        stripeAccountStatus: users.stripeAccountStatus,
+      },
+      weeklyPlays,
+    })
+    .from(songs)
+    .leftJoin(users, eq(songs.userId, users.id))
+    .where(and(
+      eq(songs.isPublic, true),
+      eq(songs.status, "Published"),
+      eq(songs.contentType, "audio"),
+      isNotNull(songs.fileUrl),
+      sql`EXISTS (
+        SELECT 1 FROM playEvents
+        WHERE playEvents.songId = ${songs.id}
+        AND playEvents.createdAt >= ${sevenDaysAgo}
+      )`,
+    ))
+    .orderBy(desc(weeklyPlays), desc(songs.playCount), desc(songs.createdAt), asc(songs.id))
+    .limit(Math.min(Math.max(limit, 1), 3));
+}
+
 /** Returns all published songs that don't yet have an embedVideoUrl, for batch pre-generation. */
 export async function getSongsWithoutEmbedVideo(): Promise<Array<{ id: number; coverArtUrl: string | null; fileUrl: string | null; embedVideoUrl: string | null }>> {
   const db = await getDb();

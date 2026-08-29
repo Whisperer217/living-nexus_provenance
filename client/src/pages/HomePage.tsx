@@ -38,6 +38,7 @@ type ShowcaseTrack = {
   artistName: string;
   creatorId: number | undefined;
   tipsEnabled: boolean;
+  weeklyPlays?: number;
 };
 
 /** Map canonical FeedRow { song, creator } into porch showcase shape. */
@@ -55,6 +56,13 @@ function mapWitnessedVoice(row: any): ShowcaseTrack {
     artistName: (creator?.artistHandle || creator?.name || "Creator") as string,
     creatorId: (creator?.id as number | undefined) ?? (song?.userId as number | undefined),
     tipsEnabled: song?.tipsEnabled !== false,
+  };
+}
+
+function mapBestPlayedTrack(row: any): ShowcaseTrack {
+  return {
+    ...mapWitnessedVoice(row),
+    weeklyPlays: Number(row?.weeklyPlays) || 0,
   };
 }
 
@@ -108,6 +116,10 @@ export default function HomePage() {
     staleTime: 120_000,
     refetchOnWindowFocus: false,
   });
+  const { data: bestPlayedRaw, isLoading: bestPlayedLoading } = trpc.songs.bestPlayedThisWeek.useQuery(
+    { limit: 3 },
+    { staleTime: 60_000, refetchOnWindowFocus: false },
+  );
   const { data: featuredCreators } = trpc.profile.featuredCreators.useQuery(undefined, {
     staleTime: 120_000,
     refetchOnWindowFocus: false,
@@ -121,6 +133,10 @@ export default function HomePage() {
     () => (voices ?? []).map(mapWitnessedVoice).filter((v: ShowcaseTrack) => v.id != null).slice(0, 6),
     [voices],
   );
+  const bestPlayedTracks = useMemo(
+    () => (bestPlayedRaw ?? []).map(mapBestPlayedTrack).filter((v: ShowcaseTrack) => v.id != null).slice(0, 3),
+    [bestPlayedRaw],
+  );
   const creators = useMemo(() => {
     const list = Array.isArray(featuredCreators) ? featuredCreators : [];
     return list.slice(0, 6);
@@ -130,6 +146,24 @@ export default function HomePage() {
   const registerHref = isAuthenticated ? "/manifest" : getLoginUrl("/manifest");
   const enterPnaLabel = authLoading || isAuthenticated ? "ENTER PNA" : "SIGN IN · ENTER PNA";
   const closingPnaLabel = authLoading || isAuthenticated ? "PNA WORKSPACE" : "SIGN IN";
+
+  const playTrack = (v: ShowcaseTrack) => {
+    if (!v.fileUrl) return;
+    addAndPlay({
+      id: String(v.id),
+      title: v.title,
+      artist: v.artistName,
+      artUrl: v.coverArtUrl || undefined,
+      audioUrl: v.fileUrl,
+      witnessId: v.witnessId || undefined,
+      genre: v.genre || "",
+      creatorHandle: v.artistHandle || undefined,
+      creatorId: v.creatorId,
+      tipsEnabled: v.tipsEnabled,
+    });
+  };
+
+  const creatorHref = (v: ShowcaseTrack) => v.artistHandle ? `/creator/${v.artistHandle}` : v.creatorId ? `/creator/${v.creatorId}` : "/explore";
 
   const openTip = (v: ShowcaseTrack) => {
     setTipTarget({
@@ -370,6 +404,103 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* ── Best Played This Week — live read-only projection ── */}
+        <section className="relative z-[1] px-6 py-12" style={{ borderTop: "1px solid var(--ln-panel-border)" }}>
+          <div className="max-w-5xl mx-auto">
+            <div className="flex items-end justify-between gap-4 mb-6">
+              <div>
+                <p
+                  className="font-heading text-[10px] uppercase tracking-[0.22em] mb-1"
+                  style={{ color: "var(--ln-gold)" }}
+                >
+                  Living rotation
+                </p>
+                <h2 className="font-heading" style={{ fontSize: "1.35rem", color: "var(--ln-parchment)" }}>
+                  Best Played This Week
+                </h2>
+                <p className="font-body mt-2 max-w-xl text-sm" style={{ color: "var(--ln-smoke)", lineHeight: 1.55 }}>
+                  Three public audio works with the most qualifying plays in the last seven days.
+                </p>
+              </div>
+              <Link href="/explore?mode=trending">
+                <span className="font-heading text-xs cursor-pointer" style={{ color: "var(--ln-gold)" }}>
+                  Explore rotation →
+                </span>
+              </Link>
+            </div>
+
+            {bestPlayedLoading ? (
+              <p className="font-body text-sm" style={{ color: "var(--ln-smoke)" }}>
+                Listening for this week’s rotation…
+              </p>
+            ) : bestPlayedTracks.length === 0 ? (
+              <p className="font-body text-sm" style={{ color: "var(--ln-smoke)" }}>
+                No qualifying public plays have been recorded in the last seven days yet.
+              </p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {bestPlayedTracks.map((v: ShowcaseTrack, index: number) => (
+                  <article key={v.id} className="museum-card group p-3" style={{ background: "var(--ln-obsidian)", borderColor: "var(--ln-panel-border)" }}>
+                    <div className="flex items-center gap-3">
+                      <span className="font-heading text-lg shrink-0" style={{ color: "var(--ln-gold)" }}>
+                        {String(index + 1).padStart(2, "0")}
+                      </span>
+                      <button
+                        type="button"
+                        className="w-16 h-16 shrink-0 rounded-lg overflow-hidden relative"
+                        aria-label={`Play ${v.title}`}
+                        onClick={() => playTrack(v)}
+                        style={{ background: "var(--ln-void)", border: "1px solid color-mix(in srgb, var(--ln-gold) 28%, transparent)" }}
+                      >
+                        {v.coverArtUrl ? (
+                          <img src={v.coverArtUrl} alt="" className="w-full h-full object-cover" />
+                        ) : (
+                          <span className="w-full h-full flex items-center justify-center"><Music size={18} style={{ color: "var(--ln-gold)", opacity: 0.6 }} /></span>
+                        )}
+                        <span className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: "color-mix(in srgb, var(--ln-void) 48%, transparent)", color: "var(--ln-gold-hot, var(--ln-gold))" }}>
+                          <Play size={15} fill="currentColor" />
+                        </span>
+                      </button>
+                      <div className="min-w-0 flex-1">
+                        <Link href={`/song/${v.id}`}>
+                          <span className="font-heading block truncate text-sm cursor-pointer" style={{ color: "var(--ln-parchment)" }}>
+                            {v.title}
+                          </span>
+                        </Link>
+                        <Link href={creatorHref(v)}>
+                          <span className="font-body block truncate text-xs cursor-pointer mt-1" style={{ color: "var(--ln-smoke)" }}>
+                            @{v.artistHandle || v.artistName || "creator"}
+                          </span>
+                        </Link>
+                        <span className="font-body block text-[10px] mt-1" style={{ color: "var(--ln-gold-dim, var(--ln-gold))" }}>
+                          {v.weeklyPlays} qualifying {v.weeklyPlays === 1 ? "play" : "plays"}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between gap-3 mt-3 pl-[2.35rem]">
+                      <Link href={`/song/${v.id}`}>
+                        <span className="font-heading text-[10px] uppercase tracking-[0.12em] cursor-pointer" style={{ color: "var(--ln-gold)" }}>
+                          View work →
+                        </span>
+                      </Link>
+                      {v.tipsEnabled && (
+                        <button
+                          type="button"
+                          className="font-heading inline-flex items-center gap-1 text-[10px] hover:opacity-90"
+                          style={{ color: "var(--ln-gold)" }}
+                          onClick={() => openTip(v)}
+                        >
+                          <Heart size={10} /> Support
+                        </button>
+                      )}
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+
         {/* ── Limited showcase — guests can play / support ── */}
         <section className="relative z-[1] px-6 py-12" style={{ borderTop: "1px solid var(--ln-panel-border)" }}>
           <div className="max-w-5xl mx-auto">
@@ -398,21 +529,7 @@ export default function HomePage() {
                   <button
                     type="button"
                     className="w-full text-left"
-                    onClick={() => {
-                      if (!v.fileUrl) return;
-                      addAndPlay({
-                        id: String(v.id),
-                        title: v.title,
-                        artist: v.artistName,
-                        artUrl: v.coverArtUrl || undefined,
-                        audioUrl: v.fileUrl,
-                        witnessId: v.witnessId || undefined,
-                        genre: v.genre || "",
-                        creatorHandle: v.artistHandle || undefined,
-                        creatorId: v.creatorId,
-                        tipsEnabled: v.tipsEnabled,
-                      });
-                    }}
+                    onClick={() => playTrack(v)}
                   >
                     <div
                       className="aspect-square rounded-xl overflow-hidden mb-2 relative ln-breath-cover ln-breath-cover-alive"
@@ -439,10 +556,12 @@ export default function HomePage() {
                     <div className="font-heading truncate text-xs" style={{ color: "var(--ln-parchment)" }}>
                       {v.title}
                     </div>
-                    <div className="font-body truncate text-[10px]" style={{ color: "var(--ln-smoke)" }}>
-                      @{v.artistHandle || "creator"}
-                    </div>
                   </button>
+                  <Link href={creatorHref(v)}>
+                    <span className="font-body block truncate text-[10px] cursor-pointer" style={{ color: "var(--ln-smoke)" }}>
+                      @{v.artistHandle || v.artistName || "creator"}
+                    </span>
+                  </Link>
                   {v.tipsEnabled && (
                     <button
                       type="button"

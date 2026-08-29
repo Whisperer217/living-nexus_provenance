@@ -9,8 +9,8 @@ describe("CinematicSplash entrance video contract", () => {
   it("uses the approved durable asset as a decorative, non-interactive background", () => {
     expect(source).toContain('/manus-storage/dark-gold-vault_1238ee74.mp4');
     expect(source).toContain('preload="auto"');
-    expect(source).toContain('onCanPlay={(event) =>');
-    expect(source).toContain('event.currentTarget.play().catch(() => undefined)');
+    expect(source).toContain('onCanPlay={handleVideoCanPlay}');
+    expect(source).toContain('onError={handleVideoError}');
     expect(source).toContain('aria-hidden="true"');
     expect(styles).toContain(".ln-cinematic-splash__vault-film");
     expect(styles).toContain("pointer-events: none");
@@ -24,9 +24,11 @@ describe("CinematicSplash entrance video contract", () => {
 
   it("preserves an existing ceremonial fallback for reduced-motion visitors", () => {
     expect(source).toContain("prefers-reduced-motion: reduce");
-    expect(source).toContain("!prefersReducedMotion && (");
+    expect(source).toContain("!prefersReducedMotion && !videoFallbackReason && (");
     expect(source).toContain("!prefersReducedMotion && <ParticleField />");
     expect(source).toContain("var(--ln-void");
+    expect(source).toContain('className="ln-cinematic-splash__vault-static"');
+    expect(styles).toContain('.ln-cinematic-splash__vault-static');
   });
 
   it("retains existing exit and keyboard-entry surfaces above the film", () => {
@@ -74,6 +76,21 @@ describe("CinematicSplash entrance video contract", () => {
     expect(styles).toContain('.ln-cinematic-splash__card-description');
   });
 
+  it("provides development-only video observability and graceful fallback", () => {
+    expect(source).toContain('import.meta.env.DEV');
+    expect(source).toContain('[CinematicSplash][video]');
+    expect(source).toContain('prefersReducedMotion');
+    expect(source).toContain('readyState: video.readyState');
+    expect(source).toContain('paused: video.paused');
+    expect(source).toContain('currentTime: Number(video.currentTime.toFixed(3))');
+    expect(source).toContain('play-resolved');
+    expect(source).toContain('play-rejected');
+    expect(source).toContain('setVideoFallbackReason(reason)');
+    expect(source).toContain('data-fallback-reason={videoFallbackReason ?? "prefers-reduced-motion"}');
+    expect(source).toContain('!prefersReducedMotion && !videoFallbackReason');
+    expect(styles).toContain('dark-gold-vault-still_239718fa.jpg');
+  });
+
   it("provides resumable looping entrance audio with explicit mute and volume controls", () => {
     expect(source).toContain('const SPLASH_AUDIO_SRC = "/api/splash-audio"');
     expect(audioRoute).toContain('const SPLASH_AUDIO_KEY = "VaultofGold_68340573.mp3"');
@@ -87,7 +104,8 @@ describe("CinematicSplash entrance video contract", () => {
     expect(source).toContain('await context.resume().catch(() => undefined)');
     expect(source).toContain('await audio.play().catch(() => undefined)');
     expect(source).toContain('await activateAudio()');
-    expect(source).toContain('audio.muted = true');
+    expect(source).toContain('[CinematicSplash][audio] autoplay-rejected');
+    expect(source).not.toContain('audio.muted = true;\n        setMuted(true);\n        localStorage.setItem(SPLASH_AUDIO_MUTED_KEY, "true");');
     expect(source).toContain('aria-pressed={muted}');
     expect(source).toContain('aria-label="Entrance volume"');
     expect(source).toContain('className="ln-cinematic-splash__audio"');

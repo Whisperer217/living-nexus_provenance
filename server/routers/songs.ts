@@ -15,6 +15,7 @@ import { adminProcedure, protectedProcedure, publicProcedure, router } from "../
 import { storagePut } from "../utils/storage";
 import { micronize } from "../services/imageProcessing";
 import { invokeLLM } from "../_core/llm";
+import { getBestPlayedThisWeek } from "../db/songs";
 import {
   addComment, createSong, deleteSong, hardDeleteSong, getAllCreators,
   getCommentsBySong, getPublicSongs, getSongById,
@@ -242,6 +243,14 @@ export const songsRouter = router({
      * Score: weeklyPlays * 3 + weeklyLikes * 5 + allTimePlays * 0.01 (recency-weighted).
      */
     trending: publicProcedure.input(z.object({ genre: z.string().optional(), limit: z.number().max(2000).optional(), contentType: z.enum(["audio", "lyrics", "manuscript", "comic", "written", "game", "gcode", "3dmodel"]).optional() }).optional()).query(async ({ input }) => getTrendingWorks(input as any ?? {})),
+    /**
+     * @version 1.0.0
+     * Returns up to three eligible public audio works with at least one
+     * qualifying play in the rolling seven-day window, ordered by plays.
+     */
+    bestPlayedThisWeek: publicProcedure
+      .input(z.object({ limit: z.number().int().min(1).max(3).optional() }).optional())
+      .query(async ({ input }) => getBestPlayedThisWeek(input?.limit ?? 3)),
     /**
      * @version 1.0.0
      * Returns works published within the last 90 days, newest first, in canonical FeedRow[] shape.

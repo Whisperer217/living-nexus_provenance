@@ -331,7 +331,8 @@ function ArrowBtn({
 const SPLASH_AUDIO_SRC = "/api/splash-audio";
 const SPLASH_AUDIO_POSITION_KEY = "ln_splash_audio_position_v1";
 const SPLASH_AUDIO_VOLUME_KEY = "ln_splash_audio_volume_v1";
-const SPLASH_AUDIO_MUTED_KEY = "ln_splash_audio_muted_v1";
+// v2 deliberately avoids inheriting the v1 value that autoplay fallback could force to true.
+const SPLASH_AUDIO_MUTED_KEY = "ln_splash_audio_muted_v2";
 
 function SplashAudio({
   audioRef,
@@ -394,12 +395,17 @@ function SplashAudio({
     const attemptPlayback = async () => {
       try {
         await audio.play();
-      } catch {
-        // Browsers may block audible autoplay. Keep the requested loop alive muted.
-        audio.muted = true;
-        setMuted(true);
-        localStorage.setItem(SPLASH_AUDIO_MUTED_KEY, "true");
-        try { await audio.play(); } catch { /* User gesture required; control remains available. */ }
+      } catch (error: unknown) {
+        // Audible autoplay may be blocked. Do not silently change the user's
+        // mute preference; leave the control truthful and let trusted pointer
+        // activation start playback with the requested volume.
+        if (import.meta.env.DEV) {
+          console.info("[CinematicSplash][audio] autoplay-rejected", {
+            reason: error instanceof Error ? error.message : String(error),
+            muted: audio.muted,
+            volume: audio.volume,
+          });
+        }
       }
     };
 
@@ -576,6 +582,38 @@ export default function CinematicSplash({ onComplete }: CinematicSplashProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
+  const [videoFallbackReason, setVideoFallbackReason] = useState<string | null>(null);
+
+  const reportVideoDiagnostic = useCallback((event: string, video: HTMLVideoElement, details?: Record<string, unknown>) => {
+    if (!import.meta.env.DEV) return;
+    console.info("[CinematicSplash][video]", {
+      event,
+      prefersReducedMotion,
+      readyState: video.readyState,
+      paused: video.paused,
+      currentTime: Number(video.currentTime.toFixed(3)),
+      ...details,
+    });
+  }, [prefersReducedMotion]);
+
+  const handleVideoCanPlay = useCallback((event: React.SyntheticEvent<HTMLVideoElement>) => {
+    const video = event.currentTarget;
+    reportVideoDiagnostic("canplay", video);
+    void video.play()
+      .then(() => reportVideoDiagnostic("play-resolved", video))
+      .catch((error: unknown) => {
+        const reason = error instanceof Error ? error.message : String(error);
+        reportVideoDiagnostic("play-rejected", video, { reason });
+        setVideoFallbackReason(reason);
+      });
+  }, [reportVideoDiagnostic]);
+
+  const handleVideoError = useCallback((event: React.SyntheticEvent<HTMLVideoElement>) => {
+    const video = event.currentTarget;
+    const reason = video.error?.message || `media error code ${video.error?.code ?? "unknown"}`;
+    reportVideoDiagnostic("error", video, { reason });
+    setVideoFallbackReason(reason);
+  }, [reportVideoDiagnostic]);
 
   const currentStep = PROCESS_STEPS[step];
 
@@ -606,7 +644,7 @@ export default function CinematicSplash({ onComplete }: CinematicSplashProps) {
         isolation: "isolate",
       }}
     >
-      {!prefersReducedMotion && (
+      {!prefersReducedMotion && !videoFallbackReason && (
         <video
           aria-hidden="true"
           autoPlay
@@ -616,13 +654,20 @@ export default function CinematicSplash({ onComplete }: CinematicSplashProps) {
           muted
           playsInline
           preload="auto"
-          onCanPlay={(event) => {
-            if (event.currentTarget.paused) void event.currentTarget.play().catch(() => undefined);
-          }}
+          onCanPlay={handleVideoCanPlay}
+          onError={handleVideoError}
           tabIndex={-1}
         >
           <source src="/manus-storage/dark-gold-vault_1238ee74.mp4" type="video/mp4" />
         </video>
+      )}
+
+      {(prefersReducedMotion || videoFallbackReason) && (
+        <div
+          aria-hidden="true"
+          className="ln-cinematic-splash__vault-static"
+          data-fallback-reason={videoFallbackReason ?? "prefers-reduced-motion"}
+        />
       )}
 
       <div
