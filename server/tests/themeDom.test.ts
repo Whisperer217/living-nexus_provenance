@@ -82,7 +82,7 @@ describe("theme DOM adapter", () => {
     expect(root.classes.has("dark")).toBe(false);
     expect(storage.get(THEME_STORAGE_KEY)).toBe("parchment-cream");
     expect(storage.get(LIGHTS_STORAGE_KEY)).toBe("on");
-    expect(themeMeta.content).toBe("#F7F1E6");
+    expect(themeMeta.content).toBe("#F1E5D0");
 
     applyDocumentTheme("illuminated-gold");
     expect(root.attributes).toMatchObject({
