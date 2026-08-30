@@ -18,6 +18,8 @@ describe("CinematicSplash entrance video contract", () => {
     expect(styles).toContain("pointer-events: none");
     expect(styles).toContain("object-position: 50% 44%");
     expect(styles).toContain("transform: scale(2.15) translateY(-1.35%) translateZ(0)");
+    expect(styles).toContain("--ln-vault-film-scale: 2.15");
+    expect(styles).toContain("--ln-vault-film-scale: 1");
     expect(source).toContain("autoPlay");
     expect(source).toContain("loop");
     expect(source).toContain("muted");
@@ -36,12 +38,10 @@ describe("CinematicSplash entrance video contract", () => {
     expect(videoRoute).toContain('video/mp4');
   });
 
-  it("keeps reduced-motion from suppressing the core muted film", () => {
+  it("preserves reduced-motion safeguards without rendering a static image fallback", () => {
     expect(source).toContain("prefers-reduced-motion: reduce");
-    expect(source).toContain("!videoFallbackReason && (");
-    expect(source).not.toContain("!prefersReducedMotion && !videoFallbackReason && (");
+    expect(source).toContain("!prefersReducedMotion && !videoFallbackReason && (");
     expect(source).toContain("!prefersReducedMotion && <ParticleField />");
-    expect(source).toContain("Reduced-motion suppresses particles, not the");
     expect(source).toContain("var(--ln-void");
     expect(source).not.toContain('className="ln-cinematic-splash__vault-static"');
     expect(styles).not.toContain('.ln-cinematic-splash__vault-static');
@@ -70,7 +70,7 @@ describe("CinematicSplash entrance video contract", () => {
     expect(source).toContain('setTimeout(() => setVaultRequested(true), 3000)');
     expect(source).toContain('const [videoReady, setVideoReady]');
     expect(source).toContain('const [vaultRequested, setVaultRequested]');
-    expect(source).toContain('if (videoReady || videoFallbackReason)');
+    expect(source).toContain('if (prefersReducedMotion || videoReady || videoFallbackReason)');
     expect(source).toContain('setVideoFallbackReason("video readiness timeout")');
     expect(source).toContain('setVideoReady(true)');
     expect(source).toContain('data-phase={phase}');
@@ -108,7 +108,7 @@ describe("CinematicSplash entrance video contract", () => {
     expect(source).toContain('play-resolved');
     expect(source).toContain('play-rejected');
     expect(source).toContain('setVideoFallbackReason(reason)');
-    expect(source).toContain('!videoFallbackReason && (');
+    expect(source).toContain('!prefersReducedMotion && !videoFallbackReason');
   });
 
   it("provides resumable looping entrance audio with explicit mute and volume controls", () => {
