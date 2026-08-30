@@ -5,10 +5,11 @@ const source = readFileSync("client/src/components/CinematicSplash.tsx", "utf-8"
 const styles = readFileSync("client/src/index.css", "utf-8");
 const documentHead = readFileSync("client/index.html", "utf-8");
 const audioRoute = readFileSync("server/routes/splashAudioRoute.ts", "utf-8");
+const videoRoute = readFileSync("server/routes/splashVideoRoute.ts", "utf-8");
 
 describe("CinematicSplash entrance video contract", () => {
   it("uses the approved durable asset as a decorative, non-interactive background", () => {
-    expect(source).toContain('/manus-storage/dark-gold-vault_cc92b6bb.mp4');
+    expect(source).toContain('/api/splash-video');
     expect(source).toContain('preload="auto"');
     expect(source).toContain('onCanPlay={handleVideoCanPlay}');
     expect(source).toContain('onError={handleVideoError}');
@@ -26,9 +27,14 @@ describe("CinematicSplash entrance video contract", () => {
     expect(source).not.toMatch(/<video[\s\S]*?\bcontrols\b/);
     expect(documentHead).toContain('rel="preload" as="fetch"');
     expect(documentHead).not.toContain('as="video"');
-    expect(documentHead).toContain('dark-gold-vault_cc92b6bb.mp4');
+    expect(documentHead).toContain('/api/splash-video');
     expect(documentHead).toContain('fetchpriority="high"');
     expect(documentHead).toContain('crossorigin="anonymous"');
+    expect(videoRoute).toContain('const SPLASH_VIDEO_KEY = "dark-gold-vault_cc92b6bb.mp4"');
+    expect(videoRoute).toContain('app.get("/api/splash-video"');
+    expect(videoRoute).toContain('Range: range');
+    expect(videoRoute).toContain('Content-Type');
+    expect(videoRoute).toContain('video/mp4');
   });
 
   it("preserves reduced-motion safeguards without rendering a static image fallback", () => {
