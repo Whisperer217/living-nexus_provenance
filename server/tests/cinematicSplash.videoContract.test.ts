@@ -15,6 +15,9 @@ describe("CinematicSplash entrance video contract", () => {
     expect(source).toContain('aria-hidden="true"');
     expect(styles).toContain(".ln-cinematic-splash__vault-film");
     expect(styles).toContain("pointer-events: none");
+    expect(styles).toContain("transform: scale(var(--ln-vault-film-scale, 1))");
+    expect(styles).toContain("--ln-vault-film-scale: 2.15");
+    expect(styles).toContain("--ln-vault-film-scale: 1");
     expect(source).toContain("autoPlay");
     expect(source).toContain("loop");
     expect(source).toContain("muted");

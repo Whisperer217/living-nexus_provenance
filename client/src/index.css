@@ -26,6 +26,8 @@
   object-position: 50% 50%;
   opacity: 1;
   filter: saturate(1.32) contrast(1.16) brightness(1.68);
+  transform: scale(var(--ln-vault-film-scale, 1));
+  transform-origin: 50% 50%;
   pointer-events: none;
   background: var(--ln-void, var(--void, #050505));
 }
@@ -87,6 +89,7 @@
 
 @media (max-width: 640px) {
   .ln-cinematic-splash__vault-film {
+    --ln-vault-film-scale: 1;
     object-position: 50% 50%;
     opacity: 0.9;
   }
@@ -95,6 +98,12 @@
     background:
       radial-gradient(circle at 50% 44%, color-mix(in srgb, var(--ln-gold, var(--gold)) 6%, transparent) 0%, transparent 38%),
       linear-gradient(180deg, color-mix(in srgb, var(--ln-void, var(--void)) 36%, transparent) 0%, transparent 24%, color-mix(in srgb, var(--ln-void, var(--void)) 44%, transparent) 100%);
+  }
+}
+
+@media (min-width: 1024px) {
+  .ln-cinematic-splash__vault-film {
+    --ln-vault-film-scale: 2.15;
   }
 }
 
