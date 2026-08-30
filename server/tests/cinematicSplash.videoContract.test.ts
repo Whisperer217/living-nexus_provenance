@@ -148,4 +148,12 @@ describe("CinematicSplash entrance video contract", () => {
     expect(source).toContain('Play sound');
     expect(source).toContain('onPointerDown={() => { void activateAudio(); }}');
   });
+
+  it("uses the approved tighter desktop vault framing without changing the mobile rule", () => {
+    expect(styles).toContain("@media (min-width: 641px)");
+    expect(styles).toContain("transform: scale(2.15) translateZ(0)");
+    expect(styles).toContain("will-change: transform");
+    expect(styles).toContain("@media (max-width: 640px)");
+    expect(styles).toContain("opacity: 0.9;");
+  });
 });

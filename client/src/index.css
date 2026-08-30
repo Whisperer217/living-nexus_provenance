@@ -96,6 +96,14 @@
   }
 }
 
+@media (min-width: 641px) {
+  .ln-cinematic-splash__vault-film {
+    transform: scale(2.15) translateZ(0);
+    transform-origin: 50% 50%;
+    will-change: transform;
+  }
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
