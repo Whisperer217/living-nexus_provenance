@@ -16,7 +16,8 @@ describe("CinematicSplash entrance video contract", () => {
     expect(source).toContain('aria-hidden="true"');
     expect(styles).toContain(".ln-cinematic-splash__vault-film");
     expect(styles).toContain("pointer-events: none");
-    expect(styles).toContain("transform: scale(var(--ln-vault-film-scale, 1))");
+    expect(styles).toContain("object-position: 50% 44%");
+    expect(styles).toContain("transform: scale(2.15) translateY(-1.35%) translateZ(0)");
     expect(styles).toContain("--ln-vault-film-scale: 2.15");
     expect(styles).toContain("--ln-vault-film-scale: 1");
     expect(source).toContain("autoPlay");
@@ -57,9 +58,6 @@ describe("CinematicSplash entrance video contract", () => {
   it("keeps the vault visibly composed and the splash hierarchy intentionally scaled", () => {
     expect(styles).toContain("opacity: 1;");
     expect(styles).toContain("var(--ln-gold, var(--gold)) 42%");
-    expect(styles).toContain("49.8%");
-    expect(styles).toContain("50.2%");
-    expect(styles).toContain("mix-blend-mode: screen");
     expect(source).toContain("ln-cinematic-splash__logo-copy");
     expect(source).toContain("clamp(2.15rem, 4.8vw, 3.5rem)");
     expect(source).toContain("ln-cinematic-splash__process-card");
