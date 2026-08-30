@@ -505,7 +505,7 @@ export default function CinematicSplash({ onComplete }: CinematicSplashProps) {
   const [dissolving, setDissolving] = useState(false);
   const [allSeen, setAllSeen] = useState(false);
   const [videoFallbackReason, setVideoFallbackReason] = useState<string | null>(null);
-  const [videoReady, setVideoReady] = useState(prefersReducedMotion);
+  const [videoReady, setVideoReady] = useState(false);
   const [vaultRequested, setVaultRequested] = useState(false);
 
   // Swipe tracking
@@ -514,7 +514,8 @@ export default function CinematicSplash({ onComplete }: CinematicSplashProps) {
 
   // Phase timeline — request the vault at three seconds, then reveal it only
   // after the decorative film has a real playing frame (or the deliberate
-  // reduced-motion/error void path is active).
+  // error void path is active). Reduced-motion suppresses particles, not the
+  // core muted film the entrance depends on.
   useEffect(() => {
     const t1 = setTimeout(() => setPhase("frequency"), 1200);
     const t2 = setTimeout(() => setVaultRequested(true), 3000);
@@ -523,18 +524,18 @@ export default function CinematicSplash({ onComplete }: CinematicSplashProps) {
 
   useEffect(() => {
     if (!vaultRequested) return;
-    if (prefersReducedMotion || videoReady || videoFallbackReason) {
+    if (videoReady || videoFallbackReason) {
       setPhase("vault");
     }
-  }, [prefersReducedMotion, vaultRequested, videoFallbackReason, videoReady]);
+  }, [vaultRequested, videoFallbackReason, videoReady]);
 
   useEffect(() => {
-    if (!vaultRequested || prefersReducedMotion || videoReady || videoFallbackReason) return;
+    if (!vaultRequested || videoReady || videoFallbackReason) return;
     const timeout = window.setTimeout(() => {
       setVideoFallbackReason("video readiness timeout");
     }, 6500);
     return () => window.clearTimeout(timeout);
-  }, [prefersReducedMotion, vaultRequested, videoFallbackReason, videoReady]);
+  }, [vaultRequested, videoFallbackReason, videoReady]);
 
   // Track if user has seen all cards
   useEffect(() => {
@@ -674,7 +675,7 @@ export default function CinematicSplash({ onComplete }: CinematicSplashProps) {
         isolation: "isolate",
       }}
     >
-      {!prefersReducedMotion && !videoFallbackReason && (
+      {!videoFallbackReason && (
         <video
           aria-hidden="true"
           autoPlay
