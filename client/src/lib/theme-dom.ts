@@ -33,8 +33,8 @@ export const THEME_META: Record<
   },
   "parchment-cream": {
     label: "Parchment Cream",
-    description: "Museum daylight — cream paper, espresso ink, gold vein",
-    accent: "#9A7518",
+    description: "Warm museum parchment with espresso ink and aged gold",
+    accent: "#8F6418",
     scheme: "light",
   },
 };
@@ -94,7 +94,7 @@ export function applyDocumentTheme(theme: LNTheme): void {
   }
 
   // Keep theme-color meta in sync for mobile chrome / overscroll
-  const bg = meta.scheme === "light" ? "#F7F1E6" : "#000000";
+  const bg = meta.scheme === "light" ? "#F1E5D0" : "#000000";
   document.querySelectorAll('meta[name="theme-color"]').forEach((el) => {
     el.setAttribute("content", bg);
   });
