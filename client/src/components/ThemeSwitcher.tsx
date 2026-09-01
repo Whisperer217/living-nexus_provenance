@@ -20,9 +20,9 @@ const THEME_SWATCHES: Record<LNTheme, { bg: string; accent: string; secondary: s
     secondary: "#2A2200",
   },
   "parchment-cream": {
-    bg: "#F7F1E6",
-    accent: "#9A7518",
-    secondary: "#EFE6D8",
+    bg: "#F1E5D0",
+    accent: "#8F6418",
+    secondary: "#E7D6BA",
   },
 };
 
@@ -119,11 +119,11 @@ export function ThemeSwitcher({ compact = false }: { compact?: boolean }) {
                 onClick={() => { setTheme(t); setOpen(false); }}
                 className="w-full flex items-center gap-3 px-4 py-3 transition-all text-left"
                 style={{
-                  background: isActive ? "rgba(196,154,40,0.08)" : "transparent",
+                  background: isActive ? "color-mix(in srgb, var(--ln-gold) 10%, transparent)" : "transparent",
                   borderLeft: isActive ? `2px solid ${swatch.accent}` : "2px solid transparent",
                 }}
                 onMouseEnter={e => {
-                  if (!isActive) (e.currentTarget as HTMLElement).style.background = "color-mix(in srgb, var(--ln-parchment) 6%, transparent)";
+                  if (!isActive) (e.currentTarget as HTMLElement).style.background = "color-mix(in srgb, var(--ln-gold) 8%, transparent)";
                 }}
                 onMouseLeave={e => {
                   if (!isActive) (e.currentTarget as HTMLElement).style.background = "transparent";
@@ -188,10 +188,10 @@ export function ThemeSwitcher({ compact = false }: { compact?: boolean }) {
           <div
             className="px-4 py-2 border-t"
             style={{
-              borderColor: "rgba(196,154,40,0.08)",
+              borderColor: "var(--ln-panel-border)",
               fontSize: 9,
               letterSpacing: "0.06em",
-              color: "rgba(255,255,255,0.2)",
+              color: "var(--ln-smoke)",
               fontFamily: "'DM Sans', sans-serif",
             }}
           >
