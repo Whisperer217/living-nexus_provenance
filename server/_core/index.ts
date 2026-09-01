@@ -8,7 +8,6 @@ import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
 import { registerStorageProxy } from "./storageProxy";
 import { registerSplashAudioRoute } from "../routes/splashAudioRoute";
-import { registerSplashVideoRoute } from "../routes/splashVideoRoute";
 import { registerOgRoutes } from "../services/og";
 import { registerEmbedRoutes } from "../routes/embedRoute";
 import { registerSseRoutes } from "../services/sse";
@@ -172,7 +171,6 @@ async function startServer() {
   app.use("/api/bulk-download", bulkDownloadLimit);
   // OAuth callback under /api/oauth/callback
   registerSplashAudioRoute(app);
-  registerSplashVideoRoute(app);
   registerStorageProxy(app);
   registerOAuthRoutes(app);
   // Server-Sent Events for real-time community notifications

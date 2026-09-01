@@ -5,21 +5,16 @@ const source = readFileSync("client/src/components/CinematicSplash.tsx", "utf-8"
 const styles = readFileSync("client/src/index.css", "utf-8");
 const documentHead = readFileSync("client/index.html", "utf-8");
 const audioRoute = readFileSync("server/routes/splashAudioRoute.ts", "utf-8");
-const videoRoute = readFileSync("server/routes/splashVideoRoute.ts", "utf-8");
 
 describe("CinematicSplash entrance video contract", () => {
   it("uses the approved durable asset as a decorative, non-interactive background", () => {
-    expect(source).toContain('/api/splash-video');
+    expect(source).toContain('/manus-storage/dark-gold-vault_cc92b6bb.mp4');
     expect(source).toContain('preload="auto"');
     expect(source).toContain('onCanPlay={handleVideoCanPlay}');
     expect(source).toContain('onError={handleVideoError}');
     expect(source).toContain('aria-hidden="true"');
     expect(styles).toContain(".ln-cinematic-splash__vault-film");
     expect(styles).toContain("pointer-events: none");
-    expect(styles).toContain("object-position: 50% 44%");
-    expect(styles).toContain("transform: scale(2.15) translateY(-1.35%) translateZ(0)");
-    expect(styles).toContain("--ln-vault-film-scale: 2.15");
-    expect(styles).toContain("--ln-vault-film-scale: 1");
     expect(source).toContain("autoPlay");
     expect(source).toContain("loop");
     expect(source).toContain("muted");
@@ -28,14 +23,9 @@ describe("CinematicSplash entrance video contract", () => {
     expect(source).not.toMatch(/<video[\s\S]*?\bcontrols\b/);
     expect(documentHead).toContain('rel="preload" as="fetch"');
     expect(documentHead).not.toContain('as="video"');
-    expect(documentHead).toContain('/api/splash-video');
+    expect(documentHead).toContain('dark-gold-vault_cc92b6bb.mp4');
     expect(documentHead).toContain('fetchpriority="high"');
     expect(documentHead).toContain('crossorigin="anonymous"');
-    expect(videoRoute).toContain('const SPLASH_VIDEO_KEY = "dark-gold-vault_cc92b6bb.mp4"');
-    expect(videoRoute).toContain('app.get("/api/splash-video"');
-    expect(videoRoute).toContain('Range: range');
-    expect(videoRoute).toContain('Content-Type');
-    expect(videoRoute).toContain('video/mp4');
   });
 
   it("preserves reduced-motion safeguards without rendering a static image fallback", () => {
@@ -58,6 +48,9 @@ describe("CinematicSplash entrance video contract", () => {
   it("keeps the vault visibly composed and the splash hierarchy intentionally scaled", () => {
     expect(styles).toContain("opacity: 1;");
     expect(styles).toContain("var(--ln-gold, var(--gold)) 42%");
+    expect(styles).toContain("49.8%");
+    expect(styles).toContain("50.2%");
+    expect(styles).toContain("mix-blend-mode: screen");
     expect(source).toContain("ln-cinematic-splash__logo-copy");
     expect(source).toContain("clamp(2.15rem, 4.8vw, 3.5rem)");
     expect(source).toContain("ln-cinematic-splash__process-card");
@@ -154,5 +147,13 @@ describe("CinematicSplash entrance video contract", () => {
     expect(source).toContain('if (audio.paused) {');
     expect(source).toContain('Play sound');
     expect(source).toContain('onPointerDown={() => { void activateAudio(); }}');
+  });
+
+  it("uses the approved tighter desktop vault framing without changing the mobile rule", () => {
+    expect(styles).toContain("@media (min-width: 641px)");
+    expect(styles).toContain("transform: scale(2.15) translateZ(0)");
+    expect(styles).toContain("will-change: transform");
+    expect(styles).toContain("@media (max-width: 640px)");
+    expect(styles).toContain("opacity: 0.9;");
   });
 });

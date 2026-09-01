@@ -688,7 +688,7 @@ export default function CinematicSplash({ onComplete }: CinematicSplashProps) {
           onError={handleVideoError}
           tabIndex={-1}
         >
-          <source src="/api/splash-video" type="video/mp4" />
+          <source src="/manus-storage/dark-gold-vault_cc92b6bb.mp4" type="video/mp4" />
         </video>
       )}
 

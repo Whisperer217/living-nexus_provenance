@@ -98,14 +98,9 @@
 
 @media (min-width: 641px) {
   .ln-cinematic-splash__vault-film {
-    object-position: 50% 44%;
-    transform: scale(2.15) translateY(-1.35%) translateZ(0);
+    transform: scale(2.15) translateZ(0);
     transform-origin: 50% 50%;
     will-change: transform;
-  }
-
-  .ln-cinematic-splash__vault-veil {
-    opacity: 0.72;
   }
 }
 
