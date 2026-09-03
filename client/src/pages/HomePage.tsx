@@ -31,6 +31,7 @@ type ShowcaseTrack = {
   id: number;
   title: string;
   coverArtUrl: string | null;
+  profilePhotoUrl: string | null;
   fileUrl: string | null;
   genre: string | null;
   witnessId: string | null;
@@ -49,6 +50,7 @@ function mapWitnessedVoice(row: any): ShowcaseTrack {
     id: song?.id as number,
     title: (song?.title as string) ?? "Untitled Work",
     coverArtUrl: (song?.coverArtUrl as string | null) ?? null,
+    profilePhotoUrl: (creator?.profilePhotoUrl as string | null) ?? null,
     fileUrl: (song?.fileUrl as string | null) ?? null,
     genre: (song?.genre as string | null) ?? null,
     witnessId: (song?.witnessId as string | null) ?? null,
@@ -558,8 +560,25 @@ export default function HomePage() {
                     </div>
                   </button>
                   <Link href={creatorHref(v)}>
-                    <span className="font-body block truncate text-[10px] cursor-pointer" style={{ color: "var(--ln-smoke)" }}>
-                      @{v.artistHandle || v.artistName || "creator"}
+                    <span
+                      className="font-body mt-1 inline-flex max-w-full items-center gap-1.5 truncate text-[10px] cursor-pointer transition-opacity hover:opacity-85"
+                      style={{ color: "var(--ln-smoke)" }}
+                      title={`Visit ${v.artistName}'s creator domain`}
+                    >
+                      <span
+                        className="flex h-4 w-4 shrink-0 items-center justify-center overflow-hidden rounded-full"
+                        style={{ background: "color-mix(in srgb, var(--ln-gold) 18%, var(--ln-void))", border: "1px solid color-mix(in srgb, var(--ln-gold) 44%, transparent)" }}
+                        aria-hidden="true"
+                      >
+                        {v.profilePhotoUrl ? (
+                          <img src={v.profilePhotoUrl} alt="" className="h-full w-full object-cover" />
+                        ) : (
+                          <span className="font-heading text-[8px]" style={{ color: "var(--ln-gold)" }}>
+                            {(v.artistName || "C").slice(0, 1).toUpperCase()}
+                          </span>
+                        )}
+                      </span>
+                      <span className="truncate">@{v.artistHandle || v.artistName || "creator"}</span>
                     </span>
                   </Link>
                   {v.tipsEnabled && (
@@ -597,8 +616,18 @@ export default function HomePage() {
                           fontSize: "0.75rem",
                         }}
                       >
-                        <Users size={12} style={{ color: "var(--ln-gold)" }} />
-                        @{handle || c.name || "creator"}
+                        <span
+                          className="flex h-5 w-5 shrink-0 items-center justify-center overflow-hidden rounded-full"
+                          style={{ background: "color-mix(in srgb, var(--ln-gold) 18%, var(--ln-void))", border: "1px solid color-mix(in srgb, var(--ln-gold) 44%, transparent)" }}
+                          aria-hidden="true"
+                        >
+                          {c.profilePhotoUrl ? (
+                            <img src={c.profilePhotoUrl} alt="" className="h-full w-full object-cover" />
+                          ) : (
+                            <Users size={11} style={{ color: "var(--ln-gold)" }} />
+                          )}
+                        </span>
+                        <span className="truncate">@{handle || c.name || "creator"}</span>
                       </span>
                     </Link>
                   );

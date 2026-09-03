@@ -37,4 +37,14 @@ describe("Best Played This Week projection contract", () => {
     expect(home).toContain("openTip(v)");
     expect(home).toContain("weeklyPlays");
   });
+
+  it("shows each available showcase creator as an independent public identity link without fabricating a profile", () => {
+    expect(home).toContain("profilePhotoUrl: (creator?.profilePhotoUrl as string | null) ?? null");
+    expect(home).toContain("const creatorHref = (v: ShowcaseTrack)");
+    expect(home).toContain("`/creator/${v.artistHandle}`");
+    expect(home).toContain("Visit ${v.artistName}'s creator domain");
+    expect(home).toContain("{v.profilePhotoUrl ? (");
+    expect(home).toContain("(v.artistName || \"C\").slice(0, 1).toUpperCase()");
+    expect(home).toContain("<span className=\"truncate\">@{v.artistHandle || v.artistName || \"creator\"}</span>");
+  });
 });
