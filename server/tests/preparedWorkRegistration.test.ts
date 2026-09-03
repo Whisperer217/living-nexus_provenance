@@ -184,6 +184,35 @@ describe("PreparedWorkRegistration", () => {
     }));
   });
 
+  it("carries an explicit existing album assignment as editorial payload only without changing WID serialization", () => {
+    const base = createPrepared();
+    const prepared = createPreparedWorkRegistration({
+      ...base.assets,
+      ...base.metadata,
+      collectionId: 73,
+    });
+    const tone = derivePreparedWorkTone(prepared);
+    const payload = buildPreparedWorkUploadPayload(prepared, {
+      fileUrl: "https://example.test/audio.wav",
+      fileKey: "audio/1/testimony.wav",
+      fileHash: "c".repeat(64),
+      witnessId: "WID-MUS-TESTIMON-YOFTHERO",
+      publicKeyJWK: "{\"kty\":\"EC\"}",
+      signature: "signature",
+      tone,
+      visualSource: "uploaded",
+    });
+
+    expect(payload).toMatchObject({ collectionId: 73, title: "Testimony of the Road" });
+    expect(serializePreparedWorkWidPayload({
+      fileHash: "c".repeat(64),
+      title: prepared.metadata.title,
+      participation: prepared.metadata.participation,
+      toneLabel: tone.label,
+      timestamp: "2026-09-03T00:00:00.000Z",
+    })).not.toContain("collectionId");
+  });
+
   it("exposes informational field classifications without enforcement", () => {
     const prepared = createPrepared();
     expect(prepared.fieldClassification).toBe(PREPARED_WORK_FIELD_CLASSIFICATION);
@@ -191,6 +220,7 @@ describe("PreparedWorkRegistration", () => {
     expect(prepared.fieldClassification.editorial).toContain("lyrics");
     expect(prepared.fieldClassification.editorial).toContain("releaseDate");
     expect(prepared.fieldClassification.editorial).toContain("creatorReleaseDate");
+    expect(prepared.fieldClassification.editorial).toContain("collectionId");
     expect(prepared.fieldClassification.independentComponent).toContain("coverFile");
   });
 });

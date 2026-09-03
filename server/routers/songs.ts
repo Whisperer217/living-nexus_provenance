@@ -17,6 +17,7 @@ import { storagePut } from "../utils/storage";
 import { micronize } from "../services/imageProcessing";
 import { invokeLLM } from "../_core/llm";
 import { getBestPlayedThisWeek } from "../db/songs";
+import { addToCollectionById, getCollectionById, removeFromCollectionById } from "../db/songs";
 import {
   addComment, createSong, deleteSong, hardDeleteSong, getAllCreators,
   getCommentsBySong, getPublicSongs, getSongById,
@@ -586,7 +587,7 @@ export const songsRouter = router({
       // Preferred: pre-uploaded S3 URLs from /api/upload-file
       fileUrl: z.string().url().optional(), fileKey: z.string().optional(),
       coverArtUrl: z.string().url().optional(),
-      title: z.string().min(1).max(255), genre: z.string().optional(), bpm: z.number().optional(),
+      title: z.string().min(1).max(255), collectionId: z.number().int().positive().nullable().optional(), genre: z.string().optional(), bpm: z.number().optional(),
       keySignature: z.string().optional(), moodTags: z.array(z.string()).optional(),
       coWriters: z.array(z.string()).optional(), albumName: z.string().optional(),
       /** Artist/band name from ID3 tags or manual entry — stored separately from the platform handle */
@@ -656,6 +657,12 @@ export const songsRouter = router({
         originalReleaseDate: input.creatorReleaseDate,
       });
       if (historicalDateError) throw new TRPCError({ code: "BAD_REQUEST", message: historicalDateError });
+      if (input.collectionId !== undefined && input.collectionId !== null) {
+        const collection = await getCollectionById(input.collectionId);
+        if (!collection || collection.creatorId !== ctx.user.id) {
+          throw new TRPCError({ code: "FORBIDDEN", message: "The selected album is not available to your creator account." });
+        }
+      }
       // Founders have slotLimit = null (infinite). Regular users are capped by songSlotsTotal.
       const isFounder = user.role === "founder" || user.slotLimit === null;
       if (!isFounder && user.songSlotsUsed >= user.songSlotsTotal) throw new Error("No song slots available. Please purchase more slots.");
@@ -702,6 +709,9 @@ export const songsRouter = router({
       const nextOrder = await getNextDisplayOrder(ctx.user.id);
       const insertResult = await createSong({ userId: ctx.user.id, title: input.title, genre: input.genre, bpm: input.bpm, keySignature: input.keySignature, moodTags: input.moodTags, coWriters: input.coWriters, albumName: input.albumName, creditsJson: input.creditsJson, releaseDate: input.releaseDate, creatorReleaseDate: input.creatorReleaseDate, isrc: input.isrc, officialArtistName: input.officialArtistName, aiConsent: input.aiConsent, ownershipStatus: input.ownershipStatus, lyricsText: input.lyricsText, lyricsHash: input.lyricsHash, isLyricsOnly: input.isLyricsOnly ?? false, contentType: input.contentType ?? (input.isLyricsOnly ? "lyrics" : "audio"), fileUrl, fileKey: audioKey, coverArtUrl, fileHash: input.fileHash, witnessId: input.witnessId, harmonicSignature: input.harmonicSignature, ecdsaPublicKey: input.ecdsaPublicKey, ecdsaSignature: input.ecdsaSignature, caption: input.caption, headlineCaption: input.headlineCaption, description: input.description, galleryImagesJson: input.galleryImagesJson, playerAssetType: input.playerAssetType ?? 'cover', aiToolSuno: input.aiToolSuno ?? false, aiToolUdio: input.aiToolUdio ?? false, aiToolSonato: input.aiToolSonato ?? false, aiToolOther: input.aiToolOther ?? false, aiToolOtherName: input.aiToolOtherName, durationSeconds: input.durationSeconds, sampleRate: input.sampleRate, bitDepth: input.bitDepth, aiDisclosure: input.aiDisclosure, haaiVisualConcept: input.haaiVisualConcept, haaiStyleLanguage: input.haaiStyleLanguage, haaiInstrumentation: input.haaiInstrumentation, haaiVocalConveyance: input.haaiVocalConveyance, haaiLyricalInspiration: input.haaiLyricalInspiration, haaiEmotionalTone: input.haaiEmotionalTone, haaiOriginStory: input.haaiOriginStory, haaiDeclaredAt, pagesJson: input.pagesJson, displayOrder: nextOrder, gcodeUrl: input.gcodeUrl, gcodeKey: input.gcodeKey, printStatsJson: input.printStatsJson, objectLicenseType: input.objectLicenseType, objectPriceCents: input.objectPriceCents, objectPhysicalSpecJson: input.objectPhysicalSpecJson, parentGuideWid: input.parentGuideWid, status: createStatus, participationMusic: input.participationMusic ?? "Human", participationLyrics: input.participationLyrics ?? "Human", participationVoice: input.participationVoice ?? "Human", toneProfileJson: input.toneProfileJson, waveformUrl: input.waveformUrl, waveformKey: input.waveformKey, visualSource: input.visualSource ?? (coverArtUrl ? "uploaded" : "none"), visualPrompt: input.visualPrompt, visualLineageJson: input.visualLineageJson, isPublic: createStatus === "Published" } as any);
        const songId = (insertResult as any)[0]?.insertId as number;
+      if (songId && input.collectionId) {
+        await addToCollectionById(input.collectionId, songId, ctx.user.id);
+      }
       if (songId && (input.releaseDate || input.creatorReleaseDate)) {
         await addWorkEvent({
           songId,
@@ -1101,6 +1111,7 @@ export const songsRouter = router({
     }),
     updateMetadata: protectedProcedure.input(z.object({
       songId: z.number(),
+      collectionId: z.number().int().positive().nullable().optional(),
       caption: z.string().max(2000).nullable().optional(),
       genre: z.string().nullable().optional(),
       collectionTag: z.string().max(128).nullable().optional(),
@@ -1149,10 +1160,21 @@ export const songsRouter = router({
       // Guide provenance chain
       parentGuideWid: z.string().max(64).nullable().optional(),
     }).strict()).mutation(async ({ ctx, input }) => {
-      const { songId, creditsJson, ...fields } = input;
-      const existing = fields.releaseDate !== undefined || fields.creatorReleaseDate !== undefined
+      const { songId, creditsJson, collectionId, ...fields } = input;
+      const existing = fields.releaseDate !== undefined || fields.creatorReleaseDate !== undefined || collectionId !== undefined
         ? await getSongById(songId)
         : undefined;
+      if (collectionId !== undefined) {
+        if (!existing || existing.userId !== ctx.user.id) {
+          throw new TRPCError({ code: "FORBIDDEN", message: "This Work is not available to your creator account." });
+        }
+        if (collectionId !== null) {
+          const collection = await getCollectionById(collectionId);
+          if (!collection || collection.creatorId !== ctx.user.id) {
+            throw new TRPCError({ code: "FORBIDDEN", message: "The selected album is not available to your creator account." });
+          }
+        }
+      }
       if (existing?.userId === ctx.user.id) {
         const historicalDateError = validateHistoricalDates({
           creationDate: fields.releaseDate !== undefined ? fields.releaseDate : existing.releaseDate,
@@ -1167,6 +1189,14 @@ export const songsRouter = router({
         ...fields,
         haaiDeclaredAt: isHaaiComplete ? new Date() : undefined,
       });
+      if (collectionId !== undefined && existing?.userId === ctx.user.id && collectionId !== existing.collectionId) {
+        if (existing.collectionId) {
+          await removeFromCollectionById(existing.collectionId, songId, ctx.user.id);
+        }
+        if (collectionId) {
+          await addToCollectionById(collectionId, songId, ctx.user.id);
+        }
+      }
       // Save credits separately if provided (null = clear all credits, empty string = clear)
       if (creditsJson !== undefined) {
         await updateSongCredits(songId, creditsJson ?? "");

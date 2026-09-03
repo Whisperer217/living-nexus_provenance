@@ -149,6 +149,7 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
   const coverInputRef = useRef<HTMLInputElement>(null);
 
   const [title, setTitle] = useState(keeperPrefill?.title ?? "");
+  const [collectionId, setCollectionId] = useState<number | null>(null);
   const [genre, setGenre] = useState(keeperPrefill?.genre ?? "");
   const [creationDate, setCreationDate] = useState("");
   const [creatorReleaseDate, setCreatorReleaseDate] = useState("");
@@ -189,6 +190,7 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
       visualPrompt,
       visualLineage,
       title,
+      collectionId,
       genre,
       bpm,
       keySignature,
@@ -205,6 +207,7 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
     });
 
   const { data: creatorProfile } = trpc.profile.me.useQuery(undefined, { enabled: !!user });
+  const { data: creatorAlbums = [] } = trpc.collectionStudio.listMine.useQuery(undefined, { enabled: !!user });
   useEffect(() => {
     if (creatorProfile?.primaryGenre && !genre) setGenre(creatorProfile.primaryGenre);
   }, [creatorProfile?.primaryGenre]);
@@ -692,6 +695,27 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
               className="bg-transparent"
               style={{ borderColor: "rgba(196,154,40,0.3)", color: "var(--ln-parchment)" }}
             />
+
+            <label className="block space-y-1.5">
+              <span className="text-[11px] uppercase tracking-[0.16em]" style={{ color: "var(--ln-gold)" }}>Album placement</span>
+              <select
+                aria-label="Place this Work in an existing album"
+                value={collectionId ?? ""}
+                onChange={(event) => setCollectionId(event.target.value ? Number(event.target.value) : null)}
+                className="w-full rounded-sm bg-transparent px-3 py-2 text-sm"
+                style={{ border: "1px solid rgba(196,154,40,0.3)", color: "var(--ln-parchment)" }}
+              >
+                <option value="" style={{ color: "#000" }}>No album — keep this Work unassigned</option>
+                {creatorAlbums.map((album: { id: number; name: string; trackCount: number }) => (
+                  <option key={album.id} value={album.id} style={{ color: "#000" }}>
+                    {album.name} · {album.trackCount} {album.trackCount === 1 ? "track" : "tracks"}
+                  </option>
+                ))}
+              </select>
+              <span className="block text-[11px] leading-relaxed" style={{ color: "color-mix(in srgb, var(--ln-parchment) 52%, transparent)" }}>
+                Optional creator organization. It does not change this Work’s WID, signature, dates, or publication state.
+              </span>
+            </label>
 
             <div className="grid grid-cols-2 gap-3">
               <select

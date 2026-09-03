@@ -44,6 +44,7 @@ import { DepthAtmosphere } from "@/components/atmosphere/DepthAtmosphere";
 export interface CreativeDrawerSong {
   id: number;
   title: string;
+  collectionId?: number | null;
   genre?: string | null;
   caption?: string | null;
   description?: string | null;
@@ -158,9 +159,11 @@ function RelicRings() {
 export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) {
   const utils = trpc.useUtils();
   const { removeFromQueue } = usePlayer();
+  const { data: creatorAlbums = [] } = trpc.collectionStudio.listMine.useQuery();
 
   /* ── Form state ── */
   const [title, setTitle]               = useState(song.title ?? "");
+  const [collectionId, setCollectionId] = useState<number | null>(song.collectionId ?? null);
   const [genre, setGenre]               = useState(song.genre ?? "");
   const [caption, setCaption]           = useState(song.caption ?? "");
   const [description, setDescription]   = useState(song.description ?? "");
@@ -399,6 +402,7 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
       await updateMetadata.mutateAsync({
         songId: song.id,
         title: title.trim(),
+        collectionId,
         genre: genre || null,
         caption: caption || null,
         description: description || null,
@@ -782,6 +786,32 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
                   </SelectContent>
                 </Select>
               </div>
+            </div>
+
+            <div className="mb-7">
+              <FieldLabel>Album placement</FieldLabel>
+              <Select
+                value={collectionId ? String(collectionId) : "__unassigned__"}
+                onValueChange={(value) => setCollectionId(value === "__unassigned__" ? null : Number(value))}
+              >
+                <SelectTrigger style={{ background: SURFACE2, border: `1px solid ${GOLD_BORDER}`, color: "rgba(255,255,255,0.8)" }}>
+                  <SelectValue placeholder="No album — keep this Work unassigned" />
+                </SelectTrigger>
+                <SelectContent
+                  {...(drawerContainerEl ? { container: drawerContainerEl } : {})}
+                  style={{ background: "#0c0a1c", border: `1px solid ${GOLD_BORDER}` }}
+                >
+                  <SelectItem value="__unassigned__" style={{ color: "rgba(255,255,255,0.8)" }}>No album — keep this Work unassigned</SelectItem>
+                  {creatorAlbums.map((album: { id: number; name: string; trackCount: number }) => (
+                    <SelectItem key={album.id} value={String(album.id)} style={{ color: "rgba(255,255,255,0.8)" }}>
+                      {album.name} · {album.trackCount} {album.trackCount === 1 ? "track" : "tracks"}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="mt-2 text-xs leading-relaxed" style={{ color: TEXT_MUTED }}>
+                Optional creator organization. This changes neither the Work WID nor its publication and provenance record.
+              </p>
             </div>
 
             {/* Creator-declared historical dates — WID assignment and publication times are system records. */}

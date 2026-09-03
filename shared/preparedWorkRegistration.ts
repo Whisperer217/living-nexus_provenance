@@ -28,7 +28,7 @@ export const PREPARED_WORK_FIELD_CLASSIFICATION = {
     "timestamp",
   ],
   /** Existing registration values outside the current WID-MUS signature payload. */
-  editorial: ["lyrics", "aiConsent", "publishIntent", "durationSeconds", "releaseDate", "creatorReleaseDate"],
+  editorial: ["lyrics", "aiConsent", "publishIntent", "durationSeconds", "releaseDate", "creatorReleaseDate", "collectionId"],
   /** Independently prepared media/manifestation components. */
   independentComponent: [
     "coverFile",
@@ -48,6 +48,8 @@ export interface PreparedWorkRegistrationInput<TAsset = unknown> {
   visualPrompt: string;
   visualLineage: Array<{ prompt: string; url: string; at: string }>;
   title: string;
+  /** Existing creator-owned legacy album; editorial organization only, never WID-bound. */
+  collectionId?: number | null;
   genre: string;
   bpm: string;
   keySignature: string;
@@ -161,6 +163,7 @@ export function buildPreparedWorkUploadPayload(
     fileKey: context.fileKey,
     coverArtUrl: context.coverArtUrl,
     title: metadata.title,
+    ...(metadata.collectionId ? { collectionId: metadata.collectionId } : {}),
     genre: metadata.genre || undefined,
     bpm: metadata.bpm ? parseInt(metadata.bpm, 10) : undefined,
     keySignature: metadata.keySignature || undefined,
