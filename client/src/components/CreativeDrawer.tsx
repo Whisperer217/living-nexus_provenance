@@ -24,6 +24,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { HistoricalDateField } from "@/components/HistoricalDateField";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
@@ -35,6 +36,7 @@ import {
 } from "lucide-react";
 import { EDIT_GENRES as GENRES } from "@shared/contentTypes";
 import { parseWorkGenres, toggleWorkGenre } from "@shared/workMetadata";
+import { validateHistoricalDates } from "@shared/workHistoricalDates";
 import { DepthAtmosphere } from "@/components/atmosphere/DepthAtmosphere";
 
 /* ─── Types ─────────────────────────────────────────────────────────────── */
@@ -383,6 +385,14 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
 
   /* ── Save ── */
   async function handleSave() {
+    const historicalDateError = validateHistoricalDates({
+      creationDate,
+      originalReleaseDate: creatorReleaseDate,
+    });
+    if (historicalDateError) {
+      toast.error(historicalDateError);
+      return;
+    }
     if (!title.trim()) { toast.error("Title is required"); return; }
     setSaving(true);
     try {
@@ -775,33 +785,28 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
             </div>
 
             {/* Creator-declared historical dates — WID assignment and publication times are system records. */}
-            <div className="mb-7">
-              <FieldLabel hint="When was this work created?">Creation Date</FieldLabel>
-              <Input
-                type="date"
+            <div className="mb-7 grid gap-5">
+              <HistoricalDateField
+                id="creative-drawer-creation-date"
+                label="Creation Date"
                 value={creationDate}
-                onChange={(e) => setCreationDate(e.target.value)}
-                style={{
-                  background: SURFACE2,
-                  border: `1px solid ${GOLD_BORDER}`,
-                  color: "rgba(255,255,255,0.8)",
-                  colorScheme: "dark",
-                }}
+                onChange={setCreationDate}
+                maxDate={creatorReleaseDate}
+                helpText="When this Work was created. Creator-declared; not the upload date."
+                popoverContainer={drawerContainerEl}
               />
-              <div className="mt-5">
-                <FieldLabel hint="Creator-declared first release; not the system publication timestamp">Original Release Date</FieldLabel>
-                <Input
-                  type="date"
-                  value={creatorReleaseDate}
-                  onChange={(e) => setCreatorReleaseDate(e.target.value)}
-                  style={{
-                    background: SURFACE2,
-                    border: `1px solid ${GOLD_BORDER}`,
-                    color: "rgba(255,255,255,0.8)",
-                    colorScheme: "dark",
-                  }}
-                />
-              </div>
+              <HistoricalDateField
+                id="creative-drawer-original-release-date"
+                label="Original Release Date"
+                value={creatorReleaseDate}
+                onChange={setCreatorReleaseDate}
+                minDate={creationDate}
+                helpText="Creator-declared first release; not the system publication timestamp."
+                popoverContainer={drawerContainerEl}
+              />
+              <p className="rounded border px-3 py-2 text-[11px] leading-relaxed" style={{ borderColor: GOLD_BORDER, color: TEXT_MUTED, background: GOLD_GLOW }}>
+                System record — WID assignment and publication times are recorded by Living Nexus and cannot be edited here.
+              </p>
             </div>
 
             {/* ═══ CAPTION & DESCRIPTION ═══════════════════════════════════ */}

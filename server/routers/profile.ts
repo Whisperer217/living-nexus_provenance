@@ -632,8 +632,9 @@ Rules:
      */
     creatorHub: publicProcedure
       .input(z.object({ creatorId: z.number().int().positive() }))
-      .query(async ({ input }) => {
+      .query(async ({ input, ctx }) => {
         const { creatorId } = input;
+        const isOwner = ctx.user?.id === creatorId;
 
         // All public published songs for this creator
         const allSongs = await getSongsByUser(creatorId);
@@ -651,7 +652,10 @@ Rules:
         const publicPlaylists = (playlistRows as any[]).filter((p: any) => p.isPublic !== false);
 
         // Collections (album-style)
-        const collectionRows = await getCollectionsByCreator(creatorId);
+        const allCollectionRows = await getCollectionsByCreator(creatorId);
+        const collectionRows = isOwner
+          ? allCollectionRows
+          : (allCollectionRows as any[]).filter((collection: any) => collection.visibility === 'public');
 
         // Testimony
         const testimonyCount = await getTestimonyCount(creatorId);
@@ -707,7 +711,7 @@ Rules:
         limit: z.number().int().min(1).max(500).default(200),
         offset: z.number().int().min(0).default(0),
       }))
-      .query(async ({ input }) => {
+      .query(async ({ input, ctx }) => {
         const { medium, limit, offset } = input;
         // Resolve creator from handle (string) or creatorId (number)
         let creator: Awaited<ReturnType<typeof getUserById>> | undefined;
@@ -720,7 +724,10 @@ Rules:
         const creatorId = creator.id;
 
         if (medium === 'albums') {
-          const cols = await getCollectionsByCreator(creatorId);
+          const allCollections = await getCollectionsByCreator(creatorId);
+          const cols = ctx.user?.id === creatorId
+            ? allCollections
+            : (allCollections as any[]).filter((collection: any) => collection.visibility === 'public');
           return { creator, works: [] as any[], collections: cols as any[], playlists: [] as any[] };
         }
 
@@ -761,5 +768,4 @@ Rules:
         return { creator, works: filtered, collections: [] as any[], playlists: [] as any[], totalCount };
       }),
   });
-
 

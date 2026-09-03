@@ -59,7 +59,7 @@ const MODULES: ModuleDef[] = [
   {
     key: "collections",
     label: "Albums",
-    sublabel: "Collections & albums",
+    sublabel: "Linked tracks · WID-ALB collections",
     icon: Album,
     color: "#A78BFA",
     href: (handle) => `/creator/${handle}/albums`,
@@ -188,6 +188,7 @@ function ModuleCard({
   const count = mod?.count ?? 0;
   const previews = mod?.previews ?? [];
   const isEmpty = count === 0;
+  const isAlbumModule = def.key === "collections";
   const Icon = def.icon;
 
   // Determine the navigation destination.
@@ -207,7 +208,7 @@ function ModuleCard({
 
       {/* Cover art strip — up to 3 thumbnails */}
       {previews.length > 0 && (
-        <div className="flex h-16 sm:h-20 overflow-hidden">
+        <div className={`flex overflow-hidden ${isAlbumModule ? "h-28 sm:h-36" : "h-16 sm:h-20"}`}>
           {previews.slice(0, 3).map((p, i) => (
             <div
               key={p.id}
@@ -228,6 +229,13 @@ function ModuleCard({
                   <Icon className="w-5 h-5 opacity-30" />
                 </div>
               )}
+              {isAlbumModule && (
+                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/95 via-black/70 to-transparent px-2 pb-2 pt-6">
+                  <p className="line-clamp-2 break-words text-xs font-semibold leading-tight" style={{ fontFamily: "'Cormorant Garamond', serif", color: "var(--ln-parchment)" }}>
+                    {p.title || "Untitled album"}
+                  </p>
+                </div>
+              )}
             </div>
           ))}
           {/* Fill remaining slots with tinted empty divs */}
@@ -242,7 +250,7 @@ function ModuleCard({
       )}
 
       {/* Card body */}
-      <div className="p-3 sm:p-4">
+      <div className={isAlbumModule ? "p-4 sm:p-5" : "p-3 sm:p-4"}>
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0">
             <div
@@ -253,7 +261,7 @@ function ModuleCard({
             </div>
             <div className="min-w-0">
               <div
-                className="font-heading text-xs sm:text-sm font-semibold leading-tight"
+                className={`${isAlbumModule ? "text-base sm:text-lg" : "text-xs sm:text-sm"} font-heading font-semibold leading-tight`}
                 style={{ color: "rgba(255,255,255,0.92)" }}
               >
                 {def.label}
@@ -298,12 +306,17 @@ function ModuleCard({
             {def.registerLabel}
           </p>
         )}
+        {isAlbumModule && count > 0 && (
+          <p className="mt-3 text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.58)" }}>
+            Open the album shelf to hear linked tracks in creator-defined order and inspect the collection record.
+          </p>
+        )}
       </div>
     </>
   );
 
   const cardClassName =
-    "group relative w-full text-left rounded-2xl overflow-hidden transition-all duration-200 focus:outline-none focus-visible:ring-2 active:scale-95 block";
+    `group relative w-full text-left rounded-2xl overflow-hidden transition-all duration-200 focus:outline-none focus-visible:ring-2 active:scale-95 block ${isAlbumModule ? "col-span-2 lg:col-span-2" : ""}`;
 
   const cardStyle: React.CSSProperties = {
     background: "rgba(255,255,255,0.03)",

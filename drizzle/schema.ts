@@ -1807,6 +1807,67 @@ export const pnaThreadMessages = mysqlTable("pna_thread_messages", {
 export type PnaThreadMessage = typeof pnaThreadMessages.$inferSelect;
 export type InsertPnaThreadMessage = typeof pnaThreadMessages.$inferInsert;
 
+// ─── Creative Cathedral Private Workspace ─────────────────────────────────────
+// Creator-private preparation state and non-binding AI proposals. These records
+// are exchange context beside the Chain of Record. They never issue a WID,
+// publish a Work, or become public provenance by themselves.
+export const creativeCathedralSessions = mysqlTable("creative_cathedral_sessions", {
+  id: varchar("id", { length: 64 }).primaryKey(),
+  creatorId: int("creator_id").notNull(),
+  songId: int("song_id"),
+  stage: mysqlEnum("stage", ["prepare", "review", "registered", "published"])
+    .notNull().default("prepare"),
+  draftSnapshotJson: json("draft_snapshot_json"),
+  uiStateJson: json("ui_state_json"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
+}, (t) => ({
+  creatorUpdatedIdx: index("cc_sessions_creator_updated_idx").on(t.creatorId, t.updatedAt),
+  songIdx: index("cc_sessions_song_idx").on(t.songId),
+}));
+export type CreativeCathedralSession = typeof creativeCathedralSessions.$inferSelect;
+export type InsertCreativeCathedralSession = typeof creativeCathedralSessions.$inferInsert;
+
+export const creativeCathedralSuggestions = mysqlTable("creative_cathedral_suggestions", {
+  id: varchar("id", { length: 64 }).primaryKey(),
+  sessionId: varchar("session_id", { length: 64 }).notNull(),
+  creatorId: int("creator_id").notNull(),
+  songId: int("song_id"),
+  kind: mysqlEnum("kind", ["media_facts"]).notNull().default("media_facts"),
+  proposalJson: json("proposal_json").notNull(),
+  evidenceJson: json("evidence_json"),
+  sourceManifestJson: json("source_manifest_json").notNull(),
+  modelRef: varchar("model_ref", { length: 128 }),
+  status: mysqlEnum("status", ["proposed", "applied_to_form", "dismissed", "expired"])
+    .notNull().default("proposed"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  resolvedAt: timestamp("resolved_at"),
+}, (t) => ({
+  sessionCreatedIdx: index("cc_suggestions_session_created_idx").on(t.sessionId, t.createdAt),
+  creatorStatusIdx: index("cc_suggestions_creator_status_idx").on(t.creatorId, t.status),
+  songIdx: index("cc_suggestions_song_idx").on(t.songId),
+}));
+export type CreativeCathedralSuggestion = typeof creativeCathedralSuggestions.$inferSelect;
+export type InsertCreativeCathedralSuggestion = typeof creativeCathedralSuggestions.$inferInsert;
+
+export const creativeCathedralDecisions = mysqlTable("creative_cathedral_decisions", {
+  id: varchar("id", { length: 64 }).primaryKey(),
+  sessionId: varchar("session_id", { length: 64 }).notNull(),
+  suggestionId: varchar("suggestion_id", { length: 64 }),
+  creatorId: int("creator_id").notNull(),
+  decision: mysqlEnum("decision", ["consent_context", "apply_to_form", "edit_first", "dismiss"])
+    .notNull(),
+  targetFieldsJson: json("target_fields_json"),
+  contextManifestHash: varchar("context_manifest_hash", { length: 64 }),
+  occurredAt: timestamp("occurred_at").notNull().defaultNow(),
+}, (t) => ({
+  sessionOccurredIdx: index("cc_decisions_session_occurred_idx").on(t.sessionId, t.occurredAt),
+  suggestionIdx: index("cc_decisions_suggestion_idx").on(t.suggestionId),
+  creatorOccurredIdx: index("cc_decisions_creator_occurred_idx").on(t.creatorId, t.occurredAt),
+}));
+export type CreativeCathedralDecision = typeof creativeCathedralDecisions.$inferSelect;
+export type InsertCreativeCathedralDecision = typeof creativeCathedralDecisions.$inferInsert;
+
 // ─── User Collections (Curation Folders) ─────────────────────────────────────
 // User-created named curation folders (distinct from Album WID `collections`).
 // These are the personal playlists/folders shown in the LIKED drawer BUILD tab

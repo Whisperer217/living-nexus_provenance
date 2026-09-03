@@ -34,6 +34,44 @@ export interface ToneProfile {
   sealedAt: string;
 }
 
+export interface AudioMetadataEvidence {
+  fileName: string;
+  mimeType: string;
+  sizeBytes: number;
+  lastModified?: string;
+  durationSeconds?: number;
+  bitrateKbps?: number;
+  sampleRateHz?: number;
+  bitsPerSample?: number;
+  channels?: number;
+  codec?: string;
+  title?: string;
+  artist?: string;
+  album?: string;
+  genres: string[];
+  bpm?: number;
+  keySignature?: string;
+  originalReleaseDate?: string;
+  isrc?: string;
+  lyricsExcerpt?: string;
+  comments: string[];
+  productionHints: string[];
+  embeddedArtwork?: { present: true; format: string; sizeBytes: number };
+}
+
+export interface AudioInspectionResult {
+  assistance: {
+    title?: string;
+    genre?: string;
+    bpm?: number;
+    keySignature?: string;
+    lyrics?: string;
+    durationSeconds?: number;
+  };
+  evidence: AudioMetadataEvidence;
+  embeddedCover: File | null;
+}
+
 export function defaultParticipation(): LoopParticipation {
   return { music: "Human", lyrics: "Human", voice: "Human" };
 }
@@ -169,22 +207,104 @@ export async function buildWaveformPngFromAudio(file: File, width = 1200, height
   }
 }
 
-/** Try to pull embedded cover art from audio metadata (browser) */
-export async function extractEmbeddedCover(file: File): Promise<File | null> {
+function normalizeEmbeddedDate(value: unknown): string | undefined {
+  const raw = String(value ?? "").trim();
+  if (!raw) return undefined;
+  const candidate = raw.slice(0, 10);
+  return /^\d{4}-\d{2}-\d{2}$/.test(candidate) ? candidate : undefined;
+}
+
+/** Inspect creator-selected audio locally before any optional AI review. */
+export async function inspectAudioFile(file: File): Promise<AudioInspectionResult> {
+  const baseEvidence: AudioMetadataEvidence = {
+    fileName: file.name,
+    mimeType: file.type || "application/octet-stream",
+    sizeBytes: file.size,
+    lastModified: file.lastModified ? new Date(file.lastModified).toISOString() : undefined,
+    genres: [],
+    comments: [],
+    productionHints: [],
+  };
   try {
+    const bufferModule = await import("buffer/");
+    const BrowserBuffer = bufferModule.Buffer ?? (bufferModule.default as typeof bufferModule | undefined)?.Buffer;
+    if (!BrowserBuffer) throw new Error("Browser Buffer polyfill unavailable");
+    if (!Reflect.get(globalThis, "Buffer")) Reflect.set(globalThis, "Buffer", BrowserBuffer);
     const { parseBlob } = await import("music-metadata-browser");
     const meta = await parseBlob(file);
+    const common = meta.common as any;
+    const nativeTags = Object.values(meta.native ?? {}).flat() as Array<{ id?: string; value?: unknown }>;
+    const firstNative = (...ids: string[]) => nativeTags.find((tag) => ids.includes(String(tag.id ?? "").toUpperCase()))?.value;
     const pic = meta.common.picture?.[0];
-    if (!pic?.data) return null;
-    const mime = pic.format || "image/jpeg";
-    const ext = mime.includes("png") ? "png" : "jpg";
-    const bytes = pic.data instanceof Uint8Array
-      ? new Uint8Array(pic.data)
-      : new Uint8Array(pic.data as ArrayBuffer);
-    return new File([bytes.buffer], `embedded-cover.${ext}`, { type: mime });
-  } catch {
-    return null;
+    let embeddedCover: File | null = null;
+    let embeddedArtwork: AudioMetadataEvidence["embeddedArtwork"];
+    if (pic?.data) {
+      const mime = pic.format || "image/jpeg";
+      const ext = mime.includes("png") ? "png" : "jpg";
+      const bytes = pic.data instanceof Uint8Array ? new Uint8Array(pic.data) : new Uint8Array(pic.data as ArrayBuffer);
+      embeddedCover = new File([bytes.buffer], `embedded-cover.${ext}`, { type: mime });
+      embeddedArtwork = { present: true, format: mime, sizeBytes: bytes.byteLength };
+    }
+    const lyricEntry = meta.common.lyrics?.[0];
+    const lyrics = typeof lyricEntry === "string"
+      ? lyricEntry
+      : lyricEntry && typeof (lyricEntry as any).text === "string"
+        ? (lyricEntry as any).text
+        : undefined;
+    const keyValue = common.key ?? firstNative("TKEY", "INITIALKEY");
+    const comments = (common.comment ?? [])
+      .map((entry: unknown) => typeof entry === "string" ? entry : String((entry as any)?.text ?? ""))
+      .map((entry: string) => entry.trim()).filter(Boolean).slice(0, 8);
+    const productionHints = [common.encodedby, common.encoder, firstNative("TENC", "TSSE", "ENCODER", "ENCODEDBY"), ...comments]
+      .map((value) => String(value ?? "").trim()).filter(Boolean).slice(0, 8);
+    const assistance = {
+      title: common.title || undefined,
+      genre: common.genre?.[0] || undefined,
+      bpm: common.bpm ? Math.round(Number(common.bpm)) : undefined,
+      keySignature: typeof keyValue === "string" ? keyValue : undefined,
+      lyrics,
+      durationSeconds: meta.format.duration,
+    };
+    return {
+      assistance,
+      embeddedCover,
+      evidence: {
+        ...baseEvidence,
+        durationSeconds: meta.format.duration,
+        bitrateKbps: meta.format.bitrate ? Math.round(meta.format.bitrate / 1000) : undefined,
+        sampleRateHz: meta.format.sampleRate,
+        bitsPerSample: meta.format.bitsPerSample,
+        channels: meta.format.numberOfChannels,
+        codec: meta.format.codec,
+        title: common.title || undefined,
+        artist: common.artist || undefined,
+        album: common.album || undefined,
+        genres: Array.isArray(common.genre) ? common.genre.map(String).filter(Boolean).slice(0, 8) : [],
+        bpm: assistance.bpm,
+        keySignature: assistance.keySignature,
+        originalReleaseDate: normalizeEmbeddedDate(common.date ?? common.year),
+        isrc: Array.isArray(common.isrc) ? common.isrc[0] : common.isrc,
+        lyricsExcerpt: lyrics?.trim().slice(0, 1600),
+        comments,
+        productionHints,
+        embeddedArtwork,
+      },
+    };
+  } catch (error) {
+    if (import.meta.env.DEV) {
+      console.warn("[AudioInspection] Embedded metadata extraction failed", {
+        fileName: file.name,
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      });
+    }
+    return { assistance: {}, evidence: baseEvidence, embeddedCover: null };
   }
+}
+
+/** Try to pull embedded cover art from audio metadata (browser). */
+export async function extractEmbeddedCover(file: File): Promise<File | null> {
+  return (await inspectAudioFile(file)).embeddedCover;
 }
 
 /** Assist: pull BPM/key/title/genre/lyrics from file when present */
@@ -196,38 +316,7 @@ export async function assistAudioMetadata(file: File): Promise<{
   lyrics?: string;
   durationSeconds?: number;
 }> {
-  const out: {
-    title?: string;
-    genre?: string;
-    bpm?: number;
-    keySignature?: string;
-    lyrics?: string;
-    durationSeconds?: number;
-  } = {};
-  try {
-    const { parseBlob } = await import("music-metadata-browser");
-    const meta = await parseBlob(file);
-    if (meta.common.title) out.title = meta.common.title;
-    if (meta.common.genre?.[0]) out.genre = meta.common.genre[0];
-    if (meta.common.bpm) out.bpm = Math.round(Number(meta.common.bpm));
-    const key =
-      (meta.common as any).key ||
-      meta.native?.["ID3v2.4"]?.find((t: any) => t.id === "TKEY")?.value ||
-      meta.native?.["ID3v2.3"]?.find((t: any) => t.id === "TKEY")?.value;
-    if (key && typeof key === "string") out.keySignature = key;
-    const lyricEntry = meta.common.lyrics?.[0];
-    const lyrics =
-      typeof lyricEntry === "string"
-        ? lyricEntry
-        : lyricEntry && typeof (lyricEntry as any).text === "string"
-          ? (lyricEntry as any).text
-          : undefined;
-    if (lyrics) out.lyrics = lyrics;
-    if (meta.format.duration) out.durationSeconds = meta.format.duration;
-  } catch {
-    /* ignore */
-  }
-  return out;
+  return (await inspectAudioFile(file)).assistance;
 }
 
 export function isWitnessReadyProfile(profile: {

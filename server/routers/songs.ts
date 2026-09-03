@@ -4,6 +4,7 @@
  */
 import Stripe from "stripe";
 import { z } from "zod";
+import { validateHistoricalDates } from "@shared/workHistoricalDates";
 import { generateShareArtifact } from "../services/shareArtifactService";
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "../_core/cookies";
@@ -332,6 +333,23 @@ export const songsRouter = router({
       const ownerResult = await getSongWithCreatorForOwner(input.id, userId);
       return ownerResult ?? null;
     }),
+    /** Public, deliberately narrow chronology-amendment history. */
+    getPublicCreatorDateHistory: publicProcedure.input(z.object({ songId: z.number().int().positive() })).query(async ({ input }) => {
+      const publicResult = await getSongWithCreator(input.songId);
+      if (!publicResult) return null;
+      const events = await getWorkEvents(input.songId);
+      return {
+        events: events
+          .filter((event: any) => event.eventType === "creator_historical_dates_declared" || event.eventType === "creator_historical_dates_revised")
+          .map((event: any) => ({
+            eventType: event.eventType,
+            eventLabel: event.eventLabel,
+            eventData: event.eventData,
+            occurredAt: event.occurredAt,
+            isSystemEvent: event.isSystemEvent,
+          })),
+      };
+    }),
     /**
      * @version 1.0.0
      * Returns the canonical WitnessRecord for any WID (WID-MUS-*, WID-LYR-*, WID-TST-*, PROJ-*).
@@ -633,6 +651,11 @@ export const songsRouter = router({
     })).mutation(async ({ ctx, input }) => {
       const user = await getUserById(ctx.user.id);
       if (!user) throw new Error("User not found");
+      const historicalDateError = validateHistoricalDates({
+        creationDate: input.releaseDate,
+        originalReleaseDate: input.creatorReleaseDate,
+      });
+      if (historicalDateError) throw new TRPCError({ code: "BAD_REQUEST", message: historicalDateError });
       // Founders have slotLimit = null (infinite). Regular users are capped by songSlotsTotal.
       const isFounder = user.role === "founder" || user.slotLimit === null;
       if (!isFounder && user.songSlotsUsed >= user.songSlotsTotal) throw new Error("No song slots available. Please purchase more slots.");
@@ -679,6 +702,21 @@ export const songsRouter = router({
       const nextOrder = await getNextDisplayOrder(ctx.user.id);
       const insertResult = await createSong({ userId: ctx.user.id, title: input.title, genre: input.genre, bpm: input.bpm, keySignature: input.keySignature, moodTags: input.moodTags, coWriters: input.coWriters, albumName: input.albumName, creditsJson: input.creditsJson, releaseDate: input.releaseDate, creatorReleaseDate: input.creatorReleaseDate, isrc: input.isrc, officialArtistName: input.officialArtistName, aiConsent: input.aiConsent, ownershipStatus: input.ownershipStatus, lyricsText: input.lyricsText, lyricsHash: input.lyricsHash, isLyricsOnly: input.isLyricsOnly ?? false, contentType: input.contentType ?? (input.isLyricsOnly ? "lyrics" : "audio"), fileUrl, fileKey: audioKey, coverArtUrl, fileHash: input.fileHash, witnessId: input.witnessId, harmonicSignature: input.harmonicSignature, ecdsaPublicKey: input.ecdsaPublicKey, ecdsaSignature: input.ecdsaSignature, caption: input.caption, headlineCaption: input.headlineCaption, description: input.description, galleryImagesJson: input.galleryImagesJson, playerAssetType: input.playerAssetType ?? 'cover', aiToolSuno: input.aiToolSuno ?? false, aiToolUdio: input.aiToolUdio ?? false, aiToolSonato: input.aiToolSonato ?? false, aiToolOther: input.aiToolOther ?? false, aiToolOtherName: input.aiToolOtherName, durationSeconds: input.durationSeconds, sampleRate: input.sampleRate, bitDepth: input.bitDepth, aiDisclosure: input.aiDisclosure, haaiVisualConcept: input.haaiVisualConcept, haaiStyleLanguage: input.haaiStyleLanguage, haaiInstrumentation: input.haaiInstrumentation, haaiVocalConveyance: input.haaiVocalConveyance, haaiLyricalInspiration: input.haaiLyricalInspiration, haaiEmotionalTone: input.haaiEmotionalTone, haaiOriginStory: input.haaiOriginStory, haaiDeclaredAt, pagesJson: input.pagesJson, displayOrder: nextOrder, gcodeUrl: input.gcodeUrl, gcodeKey: input.gcodeKey, printStatsJson: input.printStatsJson, objectLicenseType: input.objectLicenseType, objectPriceCents: input.objectPriceCents, objectPhysicalSpecJson: input.objectPhysicalSpecJson, parentGuideWid: input.parentGuideWid, status: createStatus, participationMusic: input.participationMusic ?? "Human", participationLyrics: input.participationLyrics ?? "Human", participationVoice: input.participationVoice ?? "Human", toneProfileJson: input.toneProfileJson, waveformUrl: input.waveformUrl, waveformKey: input.waveformKey, visualSource: input.visualSource ?? (coverArtUrl ? "uploaded" : "none"), visualPrompt: input.visualPrompt, visualLineageJson: input.visualLineageJson, isPublic: createStatus === "Published" } as any);
        const songId = (insertResult as any)[0]?.insertId as number;
+      if (songId && (input.releaseDate || input.creatorReleaseDate)) {
+        await addWorkEvent({
+          songId,
+          eventType: "creator_historical_dates_declared",
+          eventLabel: "Creator historical dates declared",
+          eventData: {
+            creationDate: input.releaseDate ?? null,
+            originalReleaseDate: input.creatorReleaseDate ?? null,
+            declaration: "creator",
+          },
+          actorId: ctx.user.id,
+          actorName: ctx.user.name ?? undefined,
+          isSystemEvent: false,
+        });
+      }
       // Single registration completes the same lyrics provenance contract as batch:
       // lyrics text receives its own owner-bound WID-LYR after song persistence.
       if (songId && input.lyricsText?.trim()) {
@@ -1115,6 +1153,13 @@ export const songsRouter = router({
       const existing = fields.releaseDate !== undefined || fields.creatorReleaseDate !== undefined
         ? await getSongById(songId)
         : undefined;
+      if (existing?.userId === ctx.user.id) {
+        const historicalDateError = validateHistoricalDates({
+          creationDate: fields.releaseDate !== undefined ? fields.releaseDate : existing.releaseDate,
+          originalReleaseDate: fields.creatorReleaseDate !== undefined ? fields.creatorReleaseDate : (existing as any).creatorReleaseDate,
+        });
+        if (historicalDateError) throw new TRPCError({ code: "BAD_REQUEST", message: historicalDateError });
+      }
       // If saving a complete HAAI declaration, stamp the declared timestamp
       const haaiFields = [fields.haaiVisualConcept, fields.haaiStyleLanguage, fields.haaiInstrumentation, fields.haaiVocalConveyance, fields.haaiLyricalInspiration, fields.haaiEmotionalTone];
       const isHaaiComplete = haaiFields.every(f => f && f.trim().length > 0);

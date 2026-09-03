@@ -32,6 +32,7 @@ import { LOOP_PRODUCT } from "@/lib/loopProduct";
 import { trpc } from "@/lib/trpc";
 import { getLoginUrl } from "@/const";
 import { parseWorkGenres } from "@shared/workMetadata";
+import { WorkProvenanceHistory } from "@/components/WorkProvenanceHistory";
 
 export default function LoopWorkPage() {
   const { id } = useParams<{ id: string }>();
@@ -558,6 +559,7 @@ export default function LoopWorkPage() {
                 </p>
               ) : null;
             })()}
+            <WorkProvenanceHistory songId={songId} />
 
             {(song as any).waveformUrl && (
               <a

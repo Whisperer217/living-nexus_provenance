@@ -15,6 +15,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { HistoricalDateField } from "@/components/HistoricalDateField";
+import { CreativeCathedralWorkspace } from "@/components/creative-cathedral/CreativeCathedralWorkspace";
+import type { CathedralSuggestionPatch } from "@shared/creativeCathedral";
 import { toast } from "sonner";
 import { addWIDSnapshot } from "@/lib/lnxCache";
 import { UPLOAD_GENRES as GENRES, MOODS } from "@shared/contentTypes";
@@ -24,7 +27,8 @@ import {
   assistAudioMetadata,
   buildWaveformPngFromAudio,
   defaultParticipation,
-  extractEmbeddedCover,
+  inspectAudioFile,
+  type AudioMetadataEvidence,
   type LoopParticipation,
   type ParticipationValue,
   type PublishIntent,
@@ -38,9 +42,18 @@ import {
   derivePreparedWorkTone,
   serializePreparedWorkWidPayload,
 } from "@shared/preparedWorkRegistration";
+import { validateHistoricalDates } from "@shared/workHistoricalDates";
 import { parseWorkGenres, toggleWorkGenre } from "@shared/workMetadata";
 
 const atmosphere = ATMOSPHERES.music;
+
+const VISUAL_SOURCE_COPY: Record<VisualSource, { label: string; detail: string }> = {
+  none: { label: "No artwork bound", detail: "Upload artwork or generate a new visual before publishing." },
+  embedded: { label: "Embedded artwork", detail: "Extracted from the selected audio file's metadata." },
+  uploaded: { label: "Creator upload", detail: "Selected directly from your device for this Work." },
+  generated: { label: "Generated visual", detail: "Created from your prompt and held in local preparation state." },
+  remixed: { label: "Remixed visual", detail: "Derived from the prior visual using your prompt." },
+};
 
 async function sha256Hex(buffer: ArrayBuffer): Promise<string> {
   const hashBuf = await crypto.subtle.digest("SHA-256", buffer);
@@ -150,6 +163,8 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
   const [attested, setAttested] = useState(false);
   const [publishIntent, setPublishIntent] = useState<PublishIntent>("Draft");
   const [durationSeconds, setDurationSeconds] = useState<number | undefined>();
+  const [audioEvidence, setAudioEvidence] = useState<AudioMetadataEvidence | null>(null);
+  const visualSourceCopy = VISUAL_SOURCE_COPY[visualSource];
 
   const [witnessData, setWitnessData] = useState<{
     wid: string;
@@ -214,7 +229,9 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
     setAudioFile(file);
     setAssisting(true);
     try {
-      const assist = await assistAudioMetadata(file);
+      const inspection = await inspectAudioFile(file);
+      const assist = inspection.assistance;
+      setAudioEvidence(inspection.evidence);
       if (assist.title && !title) setTitle(assist.title);
       if (assist.genre && !genre) setGenre(assist.genre);
       if (assist.bpm) setBpm(String(assist.bpm));
@@ -223,7 +240,7 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
       if (assist.durationSeconds) setDurationSeconds(assist.durationSeconds);
 
       if (!coverFile && !coverRemoteUrl) {
-        const embedded = await extractEmbeddedCover(file);
+        const embedded = inspection.embeddedCover;
         if (embedded) {
           setCoverFile(embedded);
           setVisualSource("embedded");
@@ -233,6 +250,15 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
         toast.success("Audio loaded — metadata suggestions applied where found");
       }
     } catch {
+      setAudioEvidence({
+        fileName: file.name,
+        mimeType: file.type || "application/octet-stream",
+        sizeBytes: file.size,
+        lastModified: file.lastModified ? new Date(file.lastModified).toISOString() : undefined,
+        genres: [],
+        comments: [],
+        productionHints: [],
+      });
       toast.success("Audio loaded");
     } finally {
       setAssisting(false);
@@ -392,6 +418,14 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
       toast.error("Publish requires a bound visual");
       return;
     }
+    const historicalDateError = validateHistoricalDates({
+      creationDate,
+      originalReleaseDate: creatorReleaseDate,
+    });
+    if (historicalDateError) {
+      toast.error(historicalDateError);
+      return;
+    }
 
     setUploadPhase("uploading");
     try {
@@ -447,6 +481,30 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
   const canAdvanceFromMeta =
     !!title.trim() && attested && participation.music && participation.lyrics && participation.voice;
 
+  const applyCathedralPatch = useCallback((patch: CathedralSuggestionPatch) => {
+    const nextCreationDate = patch.creationDate ?? creationDate;
+    const nextOriginalReleaseDate = patch.originalReleaseDate ?? creatorReleaseDate;
+    const historicalDateError = validateHistoricalDates({
+      creationDate: nextCreationDate,
+      originalReleaseDate: nextOriginalReleaseDate,
+    });
+    if (historicalDateError) {
+      toast.error(historicalDateError);
+      return;
+    }
+    if (patch.title !== undefined) setTitle(patch.title);
+    if (patch.genre !== undefined) setGenre(patch.genre);
+    if (patch.bpm !== undefined) setBpm(patch.bpm === null ? "" : String(patch.bpm));
+    if (patch.keySignature !== undefined) setKeySignature(patch.keySignature ?? "");
+    if (patch.moodTags !== undefined) setSelectedMoods(patch.moodTags);
+    if (patch.caption !== undefined) setCaption(patch.caption);
+    if (patch.creationDate !== undefined) setCreationDate(patch.creationDate);
+    if (patch.originalReleaseDate !== undefined) setCreatorReleaseDate(patch.originalReleaseDate);
+    if (patch.participationMusic !== undefined) setParticipation((previous) => ({ ...previous, music: patch.participationMusic! }));
+    if (patch.participationLyrics !== undefined) setParticipation((previous) => ({ ...previous, lyrics: patch.participationLyrics! }));
+    if (patch.participationVoice !== undefined) setParticipation((previous) => ({ ...previous, voice: patch.participationVoice! }));
+  }, [creationDate, creatorReleaseDate]);
+
   const renderLeftPanel = () => {
     switch (step) {
       case "upload":
@@ -464,25 +522,27 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
               </p>
             </div>
 
-            <div
+            <label
+              htmlFor="music-register-audio-file"
               onDragOver={(e) => e.preventDefault()}
               onDrop={(e) => {
                 e.preventDefault();
                 const f = e.dataTransfer.files[0];
                 if (f?.type.startsWith("audio/")) void ingestAudio(f);
               }}
-              onClick={() => audioInputRef.current?.click()}
-              className="cursor-pointer rounded-sm p-8 text-center"
+              className="relative min-w-0 cursor-pointer overflow-hidden rounded-sm p-8 text-center"
               style={{
                 border: `1px dashed ${audioFile ? "rgba(74,222,128,0.5)" : "rgba(196,154,40,0.35)"}`,
                 background: "rgba(196,154,40,0.03)",
               }}
             >
               <input
+                id="music-register-audio-file"
                 ref={audioInputRef}
                 type="file"
                 accept="audio/*,.mp3,.wav,.flac,.m4a,.ogg,.aac"
-                className="hidden"
+                aria-label="Choose canonical audio file"
+                className="absolute left-3 top-3 h-4 w-4 cursor-pointer opacity-20"
                 onChange={(e) => {
                   const f = e.target.files?.[0];
                   if (f) void ingestAudio(f);
@@ -493,7 +553,11 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
               ) : audioFile ? (
                 <>
                   <CheckCircle2 className="mx-auto mb-2" style={{ color: "#4ADE80" }} />
-                  <p className="text-sm" style={{ color: "var(--ln-parchment)" }}>
+                  <p
+                    className="mx-auto line-clamp-2 max-w-full break-all text-sm leading-relaxed"
+                    title={audioFile.name}
+                    style={{ color: "var(--ln-parchment)" }}
+                  >
                     {audioFile.name}
                   </p>
                 </>
@@ -505,39 +569,59 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
                   </p>
                 </>
               )}
-            </div>
+            </label>
 
             <div>
               <p className="text-[11px] uppercase tracking-[0.16em] mb-2" style={{ color: "var(--ln-gold)" }}>
-                Bound visual {visualSource !== "none" && `· ${visualSource}`}
+                Bound visual
               </p>
+              <input
+                ref={coverInputRef}
+                id="music-register-cover-file"
+                type="file"
+                accept="image/*"
+                className="sr-only"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) {
+                    setCoverFile(f);
+                    setCoverRemoteUrl(null);
+                    setVisualSource("uploaded");
+                  }
+                }}
+              />
               <div
-                onClick={() => coverInputRef.current?.click()}
-                className="cursor-pointer rounded-sm p-4 flex items-center gap-3 mb-3"
-                style={{ border: "1px solid rgba(196,154,40,0.25)" }}
+                className="mb-3 grid min-w-0 grid-cols-[4.5rem_minmax(0,1fr)] gap-3 rounded-sm p-3 sm:grid-cols-[5rem_minmax(0,1fr)_auto] sm:items-center sm:p-4"
+                style={{ border: "1px solid rgba(196,154,40,0.3)", background: "rgba(0,0,0,0.32)" }}
               >
-                <input
-                  ref={coverInputRef}
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => {
-                    const f = e.target.files?.[0];
-                    if (f) {
-                      setCoverFile(f);
-                      setCoverRemoteUrl(null);
-                      setVisualSource("uploaded");
-                    }
-                  }}
-                />
-                {coverPreview ? (
-                  <img src={coverPreview} alt="" className="w-14 h-14 object-cover rounded-sm" />
-                ) : (
-                  <ImageIcon size={20} style={{ color: "rgba(245,237,216,0.4)" }} />
-                )}
-                <div className="text-xs" style={{ color: "rgba(245,237,216,0.65)" }}>
-                  {coverPreview ? "Click to replace upload" : "Upload cover art"}
+                <div className="relative flex aspect-square w-full items-center justify-center overflow-hidden rounded-sm" style={{ background: "rgba(196,154,40,0.06)", border: "1px solid rgba(196,154,40,0.22)" }}>
+                  {coverPreview ? (
+                    <img src={coverPreview} alt={`${visualSourceCopy.label} preview`} className="h-full w-full object-cover" />
+                  ) : (
+                    <ImageIcon size={22} style={{ color: "rgba(245,237,216,0.45)" }} />
+                  )}
+                  <span className="absolute bottom-1 left-1 rounded-sm px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider" style={{ background: "rgba(0,0,0,0.82)", color: "var(--ln-gold)" }}>
+                    {visualSource === "none" ? "Unbound" : visualSource}
+                  </span>
                 </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold" style={{ color: "var(--ln-parchment)" }}>{visualSourceCopy.label}</p>
+                  <p className="mt-1 text-xs leading-relaxed" style={{ color: "rgba(245,237,216,0.68)" }}>{visualSourceCopy.detail}</p>
+                  {visualSource === "uploaded" && coverFile?.name && (
+                    <p className="mt-1 line-clamp-2 break-all text-xs" title={coverFile.name} style={{ color: "rgba(245,237,216,0.52)" }}>{coverFile.name}</p>
+                  )}
+                </div>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  className="col-span-2 min-h-10 w-full text-sm sm:col-span-1 sm:w-auto"
+                  onClick={() => coverInputRef.current?.click()}
+                  aria-describedby="music-register-artwork-source"
+                >
+                  {coverPreview ? "Replace artwork" : "Upload artwork"}
+                </Button>
+                <span id="music-register-artwork-source" className="sr-only">Current artwork source: {visualSourceCopy.label}</span>
               </div>
 
               <Textarea
@@ -657,14 +741,22 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
               style={{ borderColor: "rgba(196,154,40,0.3)", color: "var(--ln-parchment)" }}
             />
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <label className="text-xs" style={{ color: "color-mix(in srgb, var(--ln-parchment) 65%, transparent)" }}>
-                Creation Date
-                <Input type="date" value={creationDate} onChange={(e) => setCreationDate(e.target.value)} className="mt-1 bg-transparent" style={{ borderColor: "rgba(196,154,40,0.3)", color: "var(--ln-parchment)" }} />
-              </label>
-              <label className="text-xs" style={{ color: "color-mix(in srgb, var(--ln-parchment) 65%, transparent)" }}>
-                Original Release Date
-                <Input type="date" value={creatorReleaseDate} onChange={(e) => setCreatorReleaseDate(e.target.value)} className="mt-1 bg-transparent" style={{ borderColor: "rgba(196,154,40,0.3)", color: "var(--ln-parchment)" }} />
-              </label>
+              <HistoricalDateField
+                id="music-creation-date"
+                label="Creation Date"
+                value={creationDate}
+                onChange={setCreationDate}
+                maxDate={creatorReleaseDate}
+                helpText="When you created this Work. Creator-declared."
+              />
+              <HistoricalDateField
+                id="music-original-release-date"
+                label="Original Release Date"
+                value={creatorReleaseDate}
+                onChange={setCreatorReleaseDate}
+                minDate={creationDate}
+                helpText="When this Work was first released, if applicable. Creator-declared."
+              />
               <p className="sm:col-span-2 text-[11px]" style={{ color: "color-mix(in srgb, var(--ln-parchment) 45%, transparent)" }}>
                 Creator-declared work history. The WID assignment and publication timestamps are system records and cannot be edited here.
               </p>
@@ -884,7 +976,7 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
   const rightPanel = (
     <div className="space-y-4 p-4">
       <div
-        className="aspect-square rounded-sm overflow-hidden flex items-center justify-center"
+        className="relative aspect-square overflow-hidden rounded-sm flex items-center justify-center"
         style={{ background: "#111", border: "1px solid rgba(196,154,40,0.2)" }}
       >
         {coverPreview ? (
@@ -892,8 +984,15 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
         ) : (
           <Music style={{ color: "var(--ln-gold)", opacity: 0.35 }} size={48} />
         )}
+        <span className="absolute bottom-2 left-2 rounded-sm px-2 py-1 text-[10px] font-semibold uppercase tracking-wider" style={{ background: "rgba(0,0,0,0.82)", color: "var(--ln-gold)" }}>
+          {visualSourceCopy.label}
+        </span>
       </div>
-      <p className="text-lg" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>
+      <p
+        className="line-clamp-3 min-w-0 break-words text-lg leading-snug [overflow-wrap:anywhere]"
+        title={title || "Untitled work"}
+        style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}
+      >
         {title || "Untitled work"}
       </p>
       {toneProfile && (
@@ -906,6 +1005,31 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
           {witnessData.wid}
         </p>
       )}
+      <CreativeCathedralWorkspace
+        disabled={!user}
+        audioFileName={audioFile?.name}
+        audioEvidence={audioEvidence ?? undefined}
+        attachedVisual={{
+          present: Boolean(coverFile || coverRemoteUrl),
+          source: visualSource,
+          prompt: visualPrompt.trim() || undefined,
+        }}
+        wid={witnessData?.wid}
+        draft={{
+          title,
+          genre,
+          bpm,
+          keySignature,
+          moodTags: selectedMoods,
+          caption,
+          creationDate,
+          originalReleaseDate: creatorReleaseDate,
+          participationMusic: participation.music,
+          participationLyrics: participation.lyrics,
+          participationVoice: participation.voice,
+        }}
+        onApplyPatch={applyCathedralPatch}
+      />
     </div>
   );
 

@@ -29,7 +29,7 @@ export function StudioShell({
   const currentStepIdx = STUDIO_STEPS.findIndex((s) => s.id === currentStep);
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: "#000000" }}>
+    <div className="min-h-screen flex flex-col lg:h-[calc(100dvh-3rem)] lg:min-h-0" style={{ background: "#000000" }}>
       {/* ── Top Bar ── */}
       <div
         className="flex items-center gap-3 px-4 py-3 border-b flex-shrink-0"
@@ -116,13 +116,14 @@ export function StudioShell({
       </div>
 
       {/* ── Split Layout ── */}
-      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
+      <div className="min-h-0 flex-1 flex flex-col lg:flex-row overflow-hidden">
         {/* Left Panel — Guided Process */}
         <div
-          className="flex-1 lg:w-[58%] lg:flex-none overflow-y-auto"
+          className="min-h-0 flex-1 lg:w-[58%] lg:flex-none overflow-y-auto"
           style={{
             scrollbarWidth: "thin",
             scrollbarColor: `${atmosphere.colorPrimary}40 transparent`,
+            overscrollBehavior: "contain",
           }}
         >
           <div className="p-6 md:p-8 lg:p-10 max-w-2xl mx-auto">
@@ -138,15 +139,16 @@ export function StudioShell({
 
         {/* Right Panel — Live Preview */}
         <div
-          className="lg:w-[42%] lg:flex-none overflow-y-auto border-t lg:border-t-0"
+          className="min-h-0 lg:w-[42%] lg:flex-none overflow-y-auto border-t lg:border-t-0"
           style={{
             borderColor: atmosphere.colorBorder,
             background: atmosphere.gradient,
             scrollbarWidth: "thin",
             scrollbarColor: `${atmosphere.colorPrimary}40 transparent`,
+            overscrollBehavior: "contain",
           }}
         >
-          <div className="p-6 md:p-8 lg:p-10 sticky top-0">
+          <div className="p-6 md:p-8 lg:p-10">
             {rightPanel}
           </div>
         </div>

@@ -72,6 +72,7 @@ import { workerRouter }  from "./worker";
 import { keeperRouter }       from "./keeper";
 import { promptStudioRouter } from "./promptStudio";
 import { pnaThreadRouter }    from "./pnaThreads";
+import { cathedralRouter }    from "./cathedral";
 
 // ── Collection Studio domain ────────────────────────────────────────────────
 import { collectionStudioRouter } from "./collectionStudio";
@@ -164,6 +165,7 @@ export const appRouter = router({
   keeper:       keeperRouter,
   pnaThread:    pnaThreadRouter,
   promptStudio: promptStudioRouter,
+  cathedral:    cathedralRouter,
 
   // Platform domain
   platform:          platformRouter,
