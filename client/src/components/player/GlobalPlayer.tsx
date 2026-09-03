@@ -140,6 +140,7 @@ function GlobalPlayerInner() {
 
   /* ── Drag state ── */
   const containerRef = useRef<HTMLDivElement>(null);
+  const queueSectionRef = useRef<HTMLDivElement>(null);
   const dragStartY = useRef<number | null>(null);
   const dragStartHeight = useRef<number>(SNAP.MINI);
   const isDragging = useRef(false);
@@ -641,7 +642,9 @@ function GlobalPlayerInner() {
     left: "50%",
     transform: "translate(-50%, -50%)",
     width: "min(900px, 90vw)",
-    height: "min(700px, 85vh)",
+    // Leave a deliberate header/footer breathing margin while restoring enough
+    // vertical room for the lower action and provenance sections at 100% zoom.
+    height: "min(780px, calc(100dvh - 96px))",
     right: "auto",
     bottom: "auto",
   } : {};
@@ -708,6 +711,7 @@ function GlobalPlayerInner() {
         overflow: "hidden",
         display: "flex",
         flexDirection: "column",
+        minHeight: 0,
         userSelect: "none",
         // pan-y allows vertical scrolling to pass through on Android Chrome.
         // touchAction:"none" on the full container kills ALL touch events on Android,
@@ -1367,12 +1371,14 @@ function GlobalPlayerInner() {
 
             {/* Queue Panel — horizontal strip + expandable list */}
             {queueTracks.length > 0 && (
-              <PlayerQueuePanel
-                tracks={queueTracks}
-                currentIdx={state.currentIdx >= 0 ? state.currentIdx : 0}
-                isDesktop={isDesktop}
-                onPlayIdx={(idx) => playTrack(idx)}
-              />
+              <div ref={queueSectionRef} tabIndex={-1}>
+                <PlayerQueuePanel
+                  tracks={queueTracks}
+                  currentIdx={state.currentIdx >= 0 ? state.currentIdx : 0}
+                  isDesktop={isDesktop}
+                  onPlayIdx={(idx) => playTrack(idx)}
+                />
+              </div>
             )}
 
           </div>
@@ -1496,7 +1502,12 @@ function GlobalPlayerInner() {
           </button>
         );
       })()}
-      <button onClick={() => { setShowContextMenu(false); navigate("/archive"); }} className="flex items-center gap-2.5 w-full px-4 py-2.5 text-[12px] transition-colors hover:bg-white/5 text-left border-t" style={{ color: "var(--ln-parchment)", borderColor: "rgba(44,52,56,0.5)" }}>
+      <button onClick={() => {
+        setShowContextMenu(false);
+        setDragHeight(null);
+        setZone("EXPANDED");
+        window.setTimeout(() => queueSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 0);
+      }} className="flex items-center gap-2.5 w-full px-4 py-2.5 text-[12px] transition-colors hover:bg-white/5 text-left border-t" style={{ color: "var(--ln-parchment)", borderColor: "rgba(44,52,56,0.5)" }}>
         <List size={13} style={{ color: "rgba(255,255,255,0.4)" }} /> View Queue
       </button>
     </div>,

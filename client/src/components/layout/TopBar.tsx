@@ -46,10 +46,8 @@ function fmtTime(s: number): string {
 
 /* ── Inline Player (center zone) ── */
 function InlinePlayer() {
-  const { state, togglePlay, seek, nextTrack, prevTrack, setVolume, toggleMute } = usePlayer();
+  const { state, togglePlay, seek, nextTrack, prevTrack, setVolume, toggleMute, toggleShuffle, toggleRepeat } = usePlayer();
   const { expand } = useWSP();
-  const [shuffle, setShuffle] = useState(false);
-  const [repeat, setRepeat] = useState(false);
   const seekBarRef = useRef<HTMLDivElement>(null);
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
   const volumeRef = useRef<HTMLDivElement>(null);
@@ -214,9 +212,9 @@ function InlinePlayer() {
       <div className="flex items-center gap-0.5 shrink-0">
         {/* Shuffle */}
         <button
-          onClick={() => setShuffle(s => !s)}
+          onClick={toggleShuffle}
           className="p-1.5 rounded transition-all"
-          style={{ color: shuffle ? "rgba(255,215,0,0.8)" : "color-mix(in srgb, var(--ln-parchment) 30%, transparent)" }}
+          style={{ color: state.isShuffle ? "rgba(255,215,0,0.8)" : "color-mix(in srgb, var(--ln-parchment) 30%, transparent)" }}
           aria-label="Shuffle"
           title="Shuffle"
         >
@@ -260,9 +258,9 @@ function InlinePlayer() {
         </button>
         {/* Repeat */}
         <button
-          onClick={() => setRepeat(r => !r)}
+          onClick={toggleRepeat}
           className="p-1.5 rounded transition-all"
-          style={{ color: repeat ? "rgba(255,215,0,0.8)" : "color-mix(in srgb, var(--ln-parchment) 30%, transparent)" }}
+          style={{ color: state.isRepeat ? "rgba(255,215,0,0.8)" : "color-mix(in srgb, var(--ln-parchment) 30%, transparent)" }}
           aria-label="Repeat"
           title="Repeat"
         >

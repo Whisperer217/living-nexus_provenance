@@ -544,7 +544,7 @@ export default function LoopWorkPage() {
 
             {parentAlbum && creator?.artistHandle && (
               <Link
-                href={`/creator/${creator.artistHandle}/albums`}
+                href={`/album/${parentAlbum.collectionWid}`}
                 className="group mb-6 flex items-center gap-3 rounded-xl px-3 py-3 transition-colors"
                 style={{
                   border: "1px solid rgba(196,154,40,0.24)",

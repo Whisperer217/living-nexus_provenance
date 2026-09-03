@@ -20,7 +20,7 @@ describe("public Work → album continuity contract", () => {
 
     expect(workPage).toContain("trpc.songs.getCollectionForSong.useQuery");
     expect(workPage).toContain("Part of album");
-    expect(workPage).toContain("href={`/creator/${creator.artistHandle}/albums`}");
+    expect(workPage).toContain("href={`/album/${parentAlbum.collectionWid}`}");
     expect(workPage).toContain("parentAlbum.collectionWid");
   });
 

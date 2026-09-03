@@ -270,7 +270,6 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       >
         <main className="flex-1 flex overflow-hidden" style={{ overscrollBehavior: "none" }}>
           <style>{`
-            @media (min-width: 1024px) { .player-scroll-area { padding-bottom: 130px !important; } }
             @media (min-width: 768px) and (max-width: 1023px) { .player-scroll-area { padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important; } }
             @media (max-width: 767px) { .player-scroll-area { padding-bottom: var(--bottom-stack) !important; } }
           `}</style>
