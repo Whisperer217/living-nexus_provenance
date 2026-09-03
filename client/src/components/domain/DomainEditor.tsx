@@ -10,7 +10,7 @@
  *   - Preview mode toggle
  */
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { trpc } from "@/lib/trpc";
 import { DEFAULT_DOMAIN_LAYOUT, DOMAIN_BLOCK_TYPES, type DomainBlockType, type DomainBlockSize, type DomainBlockRecord } from "@shared/domainTypes";
 import {
@@ -268,7 +268,10 @@ export function DomainEditor({
   defaultLayout = DEFAULT_DOMAIN_LAYOUT,
 }: DomainEditorProps) {
   const utils = trpc.useUtils();
-  const { data: savedBlocks = [] } = trpc.domain.getLayout.useQuery({ userId });
+  const { data: savedBlocks = [] } = trpc.domain.getLayout.useQuery(
+    { userId },
+    { enabled: userId > 0 },
+  );
 
   // Initialize editor blocks from saved or default
   const initBlocks = useCallback((): EditorBlock[] => {
@@ -296,11 +299,25 @@ export function DomainEditor({
   const [panel, setPanel] = useState<"blocks" | "add" | "history">("blocks");
   const [changeNote, setChangeNote] = useState("");
   const [isDirty, setIsDirty] = useState(false);
+  const hydratedLayoutRef = useRef<string | null>(null);
+  const hydratedLayoutSignature = useMemo(
+    () => JSON.stringify(initBlocks().map(({ blockType, position, visible, size, config }) => ({
+      blockType,
+      position,
+      visible,
+      size,
+      config,
+    }))),
+    [initBlocks],
+  );
 
-  // The public layout query resolves after first render; hydrate saved blocks once available.
+  // Hydrate when the persisted layout actually changes. Query refreshes must not continuously
+  // replace an owner's local editor state while the panel is opening or being arranged.
   useEffect(() => {
-    if (!isDirty) setBlocks(initBlocks());
-  }, [initBlocks, isDirty]);
+    if (isDirty || hydratedLayoutRef.current === hydratedLayoutSignature) return;
+    hydratedLayoutRef.current = hydratedLayoutSignature;
+    setBlocks(initBlocks());
+  }, [hydratedLayoutSignature, initBlocks, isDirty]);
 
   const saveLayout = trpc.domain.saveLayout.useMutation({
     onSuccess: () => {

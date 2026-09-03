@@ -72,7 +72,8 @@ describe("Creator sanctuary + paid-download integration contract", () => {
     );
     expect(editor).toContain("Featured Tracks");
     expect(editor).toContain("Albums & Releases");
-    expect(editor).toContain("if (!isDirty) setBlocks(initBlocks())");
+    expect(editor).toContain("hydratedLayoutRef.current === hydratedLayoutSignature");
+    expect(editor).toContain("if (isDirty || hydratedLayoutRef.current === hydratedLayoutSignature) return;");
     expect(creator.indexOf("<DomainRenderer")).toBeLessThan(
       creator.indexOf("<SanctuaryWorksOrganizer"),
     );
