@@ -39,6 +39,7 @@ import {
   Eye,
 } from "lucide-react";
 import { EDIT_GENRES as GENRES } from "@shared/contentTypes";
+import { parseWorkGenres, toggleWorkGenre } from "@shared/workMetadata";
 
 /* ─── Types ─────────────────────────────────────────────────────────────── */
 
@@ -55,6 +56,7 @@ export interface ChapelSong {
   aiDisclosure?: string | null;
   contentType?: string | null;
   releaseDate?: string | null;
+  creatorReleaseDate?: string | null;
   description?: string | null;
   witnessId?: string | null;
 }
@@ -154,6 +156,9 @@ export function EditChapel({ song, onClose, onSaved }: EditChapelProps) {
   const [creationDate, setCreationDate] = useState(
     song.releaseDate ? song.releaseDate.slice(0, 10) : ""
   );
+  const [creatorReleaseDate, setCreatorReleaseDate] = useState(
+    song.creatorReleaseDate ? song.creatorReleaseDate.slice(0, 10) : ""
+  );
 
   /* ── Cover art ── */
   const [coverUrl, setCoverUrl]             = useState(song.coverArtUrl ?? "");
@@ -242,6 +247,7 @@ export function EditChapel({ song, onClose, onSaved }: EditChapelProps) {
         aiDisclosure: aiDisclosure as "original" | "ai_assisted" | "ai_generated" | "human_authored_ai_instrument",
         haaiOriginStory: originStory || null,
         releaseDate: creationDate || null,
+        creatorReleaseDate: creatorReleaseDate || null,
       });
       if (status !== song.status) {
         await updateStatus.mutateAsync({
@@ -493,7 +499,7 @@ export function EditChapel({ song, onClose, onSaved }: EditChapelProps) {
               {/* Genre */}
               <div>
                 <FieldLabel>Genre</FieldLabel>
-                <Select value={genre} onValueChange={setGenre}>
+                <Select value="" onValueChange={(value) => setGenre(toggleWorkGenre(genre, value) ?? "")}>
                   <SelectTrigger
                     style={{
                       background: SURFACE2,
@@ -501,7 +507,7 @@ export function EditChapel({ song, onClose, onSaved }: EditChapelProps) {
                       color: "rgba(255,255,255,0.8)",
                     }}
                   >
-                    <SelectValue placeholder="Select genre" />
+                    <SelectValue placeholder="Add genre" />
                   </SelectTrigger>
                   <SelectContent style={{ background: "#0d0b1a", border: `1px solid ${GOLD_BORDER}` }}>
                     {GENRES.map((g) => (
@@ -511,6 +517,15 @@ export function EditChapel({ song, onClose, onSaved }: EditChapelProps) {
                     ))}
                   </SelectContent>
                 </Select>
+                {parseWorkGenres(genre).length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mt-2" aria-label="Selected genres">
+                    {parseWorkGenres(genre).map((selectedGenre) => (
+                      <button key={selectedGenre} type="button" onClick={() => setGenre(toggleWorkGenre(genre, selectedGenre) ?? "")} className="text-[10px] px-2 py-1 rounded-full" style={{ border: `1px solid ${GOLD_BORDER}`, color: "var(--ln-gold)", background: "rgba(196,154,40,0.1)" }} aria-label={`Remove ${selectedGenre} genre`}>
+                        {selectedGenre} ×
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Status */}
@@ -538,10 +553,10 @@ export function EditChapel({ song, onClose, onSaved }: EditChapelProps) {
               </div>
             </div>
 
-            {/* Creation Date */}
+            {/* Creator-declared historical dates — WID assignment and publication times are system records. */}
             <div className="mb-6">
-              <FieldLabel hint="When was this work originally created? (Not the upload date)">
-                Original Creation Date
+              <FieldLabel hint="When was this work created? (Not the upload date)">
+                Creation Date
               </FieldLabel>
               <Input
                 type="date"
@@ -554,6 +569,22 @@ export function EditChapel({ song, onClose, onSaved }: EditChapelProps) {
                   colorScheme: "dark",
                 }}
               />
+              <div className="mt-4">
+                <FieldLabel hint="Creator-declared first release; not the system publication timestamp">
+                  Original Release Date
+                </FieldLabel>
+                <Input
+                  type="date"
+                  value={creatorReleaseDate}
+                  onChange={(e) => setCreatorReleaseDate(e.target.value)}
+                  style={{
+                    background: SURFACE2,
+                    border: `1px solid ${GOLD_BORDER}`,
+                    color: "rgba(255,255,255,0.8)",
+                    colorScheme: "dark",
+                  }}
+                />
+              </div>
             </div>
 
             {/* Caption */}

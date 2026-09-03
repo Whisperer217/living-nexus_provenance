@@ -38,6 +38,7 @@ import {
   derivePreparedWorkTone,
   serializePreparedWorkWidPayload,
 } from "@shared/preparedWorkRegistration";
+import { parseWorkGenres, toggleWorkGenre } from "@shared/workMetadata";
 
 const atmosphere = ATMOSPHERES.music;
 
@@ -136,6 +137,8 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
 
   const [title, setTitle] = useState(keeperPrefill?.title ?? "");
   const [genre, setGenre] = useState(keeperPrefill?.genre ?? "");
+  const [creationDate, setCreationDate] = useState("");
+  const [creatorReleaseDate, setCreatorReleaseDate] = useState("");
   const [bpm, setBpm] = useState("");
   const [keySignature, setKeySignature] = useState("");
   const [lyrics, setLyrics] = useState(keeperPrefill?.lyrics ?? "");
@@ -182,6 +185,8 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
       participation,
       publishIntent,
       durationSeconds,
+      releaseDate: creationDate,
+      creatorReleaseDate,
     });
 
   const { data: creatorProfile } = trpc.profile.me.useQuery(undefined, { enabled: !!user });
@@ -606,12 +611,14 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
 
             <div className="grid grid-cols-2 gap-3">
               <select
-                value={genre}
-                onChange={(e) => setGenre(e.target.value)}
+                value=""
+                onChange={(e) => {
+                  if (e.target.value) setGenre(toggleWorkGenre(genre, e.target.value) ?? "");
+                }}
                 className="bg-transparent text-sm px-3 py-2 rounded-sm"
                 style={{ border: "1px solid rgba(196,154,40,0.3)", color: "var(--ln-parchment)" }}
               >
-                <option value="">Genre (suggested)</option>
+                <option value="">Add genre</option>
                 {GENRES.map((g) => (
                   <option key={g} value={g} style={{ color: "#000" }}>
                     {g}
@@ -626,6 +633,22 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
                 style={{ borderColor: "rgba(196,154,40,0.3)", color: "var(--ln-parchment)" }}
               />
             </div>
+            {parseWorkGenres(genre).length > 0 && (
+              <div className="flex flex-wrap gap-2" aria-label="Selected genres">
+                {parseWorkGenres(genre).map((selectedGenre) => (
+                  <button
+                    key={selectedGenre}
+                    type="button"
+                    onClick={() => setGenre(toggleWorkGenre(genre, selectedGenre) ?? "")}
+                    className="text-[11px] px-2 py-1 rounded-full"
+                    style={{ border: "1px solid var(--ln-gold)", color: "var(--ln-gold)", background: "rgba(196,154,40,0.1)" }}
+                    aria-label={`Remove ${selectedGenre} genre`}
+                  >
+                    {selectedGenre} ×
+                  </button>
+                ))}
+              </div>
+            )}
             <Input
               value={keySignature}
               onChange={(e) => setKeySignature(e.target.value)}
@@ -633,6 +656,19 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
               className="bg-transparent"
               style={{ borderColor: "rgba(196,154,40,0.3)", color: "var(--ln-parchment)" }}
             />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <label className="text-xs" style={{ color: "color-mix(in srgb, var(--ln-parchment) 65%, transparent)" }}>
+                Creation Date
+                <Input type="date" value={creationDate} onChange={(e) => setCreationDate(e.target.value)} className="mt-1 bg-transparent" style={{ borderColor: "rgba(196,154,40,0.3)", color: "var(--ln-parchment)" }} />
+              </label>
+              <label className="text-xs" style={{ color: "color-mix(in srgb, var(--ln-parchment) 65%, transparent)" }}>
+                Original Release Date
+                <Input type="date" value={creatorReleaseDate} onChange={(e) => setCreatorReleaseDate(e.target.value)} className="mt-1 bg-transparent" style={{ borderColor: "rgba(196,154,40,0.3)", color: "var(--ln-parchment)" }} />
+              </label>
+              <p className="sm:col-span-2 text-[11px]" style={{ color: "color-mix(in srgb, var(--ln-parchment) 45%, transparent)" }}>
+                Creator-declared work history. The WID assignment and publication timestamps are system records and cannot be edited here.
+              </p>
+            </div>
 
             <div className="flex flex-wrap gap-2">
               {MOODS.slice(0, 12).map((m) => {

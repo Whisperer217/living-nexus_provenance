@@ -28,7 +28,7 @@ export const PREPARED_WORK_FIELD_CLASSIFICATION = {
     "timestamp",
   ],
   /** Existing registration values outside the current WID-MUS signature payload. */
-  editorial: ["lyrics", "aiConsent", "publishIntent", "durationSeconds"],
+  editorial: ["lyrics", "aiConsent", "publishIntent", "durationSeconds", "releaseDate", "creatorReleaseDate"],
   /** Independently prepared media/manifestation components. */
   independentComponent: [
     "coverFile",
@@ -59,6 +59,10 @@ export interface PreparedWorkRegistrationInput<TAsset = unknown> {
   participation: LoopParticipation;
   publishIntent: PublishIntent;
   durationSeconds?: number;
+  /** Creator-declared original creation date; not the system WID timestamp. */
+  releaseDate?: string;
+  /** Creator-declared first release date; not the system publication timestamp. */
+  creatorReleaseDate?: string;
 }
 
 export interface PreparedWorkRegistration<TAsset = unknown> {
@@ -148,6 +152,10 @@ export function buildPreparedWorkUploadPayload(
   context: PreparedWorkUploadContext
 ) {
   const { metadata } = prepared;
+  const creatorHistoricalDates = {
+    ...(metadata.releaseDate ? { releaseDate: metadata.releaseDate } : {}),
+    ...(metadata.creatorReleaseDate ? { creatorReleaseDate: metadata.creatorReleaseDate } : {}),
+  };
   return {
     fileUrl: context.fileUrl,
     fileKey: context.fileKey,
@@ -171,6 +179,7 @@ export function buildPreparedWorkUploadPayload(
     haaiOriginStory: metadata.originStory || undefined,
     haaiEmotionalTone: metadata.moodTags.join(", ") || undefined,
     durationSeconds: metadata.durationSeconds,
+    ...creatorHistoricalDates,
     status: metadata.publishIntent,
     participationMusic: metadata.participation.music,
     participationLyrics: metadata.participation.lyrics,

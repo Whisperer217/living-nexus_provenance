@@ -36,6 +36,15 @@ function TrackRedirect() {
   return null;
 }
 
+/**
+ * The cinematic ceremony belongs to a fresh canonical Home arrival.
+ * Deep links must arrive at the Work, Creator, Explore, or Register surface
+ * they were shared to; the Home ceremony remains available until completed.
+ */
+export function shouldRenderCinematicSplash(pathname: string, freshSession: boolean): boolean {
+  return freshSession && (pathname === "/" || pathname === "/home");
+}
+
 // Lazy-loaded page components — each becomes its own JS chunk
 // This cuts initial bundle size significantly; pages load on first visit only
 const HomePage = lazy(() => import("./pages/HomePage"));
@@ -408,9 +417,10 @@ function Router() {
 }
 
 export default function App() {
-  const isSpatialRegistryMock = typeof window !== "undefined" && window.location.pathname === "/prototype/spatial-registry";
+  const pathname = typeof window !== "undefined" ? window.location.pathname : "";
+  const isSpatialRegistryMock = pathname === "/prototype/spatial-registry";
   const [splashDone, setSplashDone] = useState(() => {
-    return isSpatialRegistryMock || !shouldShowSplash();
+    return isSpatialRegistryMock || !shouldRenderCinematicSplash(pathname, shouldShowSplash());
   });
 
   if (!splashDone) {

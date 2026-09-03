@@ -34,6 +34,7 @@ import {
   ExternalLink, Plus, Pencil, Download,
 } from "lucide-react";
 import { EDIT_GENRES as GENRES } from "@shared/contentTypes";
+import { parseWorkGenres, toggleWorkGenre } from "@shared/workMetadata";
 import { DepthAtmosphere } from "@/components/atmosphere/DepthAtmosphere";
 
 /* ─── Types ─────────────────────────────────────────────────────────────── */
@@ -53,6 +54,7 @@ export interface CreativeDrawerSong {
   aiDisclosure?: string | null;
   contentType?: string | null;
   releaseDate?: string | null;
+  creatorReleaseDate?: string | null;
   witnessId?: string | null;
   videoUrl?: string | null;
   videoWitnessId?: string | null;
@@ -180,6 +182,9 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
   const [lyrics, setLyrics]             = useState(song.lyricsText ?? "");
   const [creationDate, setCreationDate] = useState(
     song.releaseDate ? song.releaseDate.slice(0, 10) : ""
+  );
+  const [creatorReleaseDate, setCreatorReleaseDate] = useState(
+    song.creatorReleaseDate ? song.creatorReleaseDate.slice(0, 10) : ""
   );
 
   /* ── Download Settings ── */
@@ -392,6 +397,7 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
         haaiOriginStory: originStory || null,
         externalLinksJson: extLinks.length > 0 ? JSON.stringify(extLinks) : null,
         releaseDate: creationDate || undefined,
+        creatorReleaseDate: creatorReleaseDate || undefined,
         downloadPermission,
         downloadTipThresholdCents: downloadPermission === "tipped" ? tipThresholdCents : undefined,
       });
@@ -712,7 +718,7 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-7">
               <div>
                 <FieldLabel>Genre</FieldLabel>
-                <Select value={genre} onValueChange={setGenre}>
+                <Select value="" onValueChange={(value) => setGenre(toggleWorkGenre(genre, value) ?? "")}>
                   <SelectTrigger
                     style={{
                       background: SURFACE2,
@@ -720,7 +726,7 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
                       color: "rgba(255,255,255,0.8)",
                     }}
                   >
-                    <SelectValue placeholder="Select genre" />
+                    <SelectValue placeholder="Add genre" />
                   </SelectTrigger>
                   <SelectContent
                     {...(drawerContainerEl ? { container: drawerContainerEl } : {})}
@@ -731,6 +737,15 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
                     ))}
                   </SelectContent>
                 </Select>
+                {parseWorkGenres(genre).length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mt-2" aria-label="Selected genres">
+                    {parseWorkGenres(genre).map((selectedGenre) => (
+                      <button key={selectedGenre} type="button" onClick={() => setGenre(toggleWorkGenre(genre, selectedGenre) ?? "")} className="text-[10px] px-2 py-1 rounded-full" style={{ border: `1px solid ${GOLD_BORDER}`, color: "var(--ln-gold)", background: "rgba(196,154,40,0.1)" }} aria-label={`Remove ${selectedGenre} genre`}>
+                        {selectedGenre} ×
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
               <div>
                 <FieldLabel>Visibility</FieldLabel>
@@ -759,9 +774,9 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
               </div>
             </div>
 
-            {/* Creation Date */}
+            {/* Creator-declared historical dates — WID assignment and publication times are system records. */}
             <div className="mb-7">
-              <FieldLabel hint="When was this work originally created?">Original Creation Date</FieldLabel>
+              <FieldLabel hint="When was this work created?">Creation Date</FieldLabel>
               <Input
                 type="date"
                 value={creationDate}
@@ -773,6 +788,20 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
                   colorScheme: "dark",
                 }}
               />
+              <div className="mt-5">
+                <FieldLabel hint="Creator-declared first release; not the system publication timestamp">Original Release Date</FieldLabel>
+                <Input
+                  type="date"
+                  value={creatorReleaseDate}
+                  onChange={(e) => setCreatorReleaseDate(e.target.value)}
+                  style={{
+                    background: SURFACE2,
+                    border: `1px solid ${GOLD_BORDER}`,
+                    color: "rgba(255,255,255,0.8)",
+                    colorScheme: "dark",
+                  }}
+                />
+              </div>
             </div>
 
             {/* ═══ CAPTION & DESCRIPTION ═══════════════════════════════════ */}

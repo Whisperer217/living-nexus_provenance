@@ -574,7 +574,7 @@ export const songsRouter = router({
       /** Artist/band name from ID3 tags or manual entry — stored separately from the platform handle */
       officialArtistName: z.string().max(255).optional(),
       creditsJson: z.string().max(4096).optional(),
-      releaseDate: z.string().optional(), isrc: z.string().optional(),
+      releaseDate: z.string().optional(), creatorReleaseDate: z.string().optional(), isrc: z.string().optional(),
       aiConsent: z.enum(["prohibited", "permitted_attribution", "permitted"]),
       ownershipStatus: z.enum(["full", "partial"]).default("full"),
       lyricsText: z.string().max(20000).optional(),
@@ -677,7 +677,7 @@ export const songsRouter = router({
       const haaiDeclaredAt = (input.aiDisclosure === "human_authored_ai_instrument" && haaiFields.every(f => f && f.trim().length > 0)) ? new Date() : undefined;
       // Assign displayOrder so new songs append to the end of the creator's list
       const nextOrder = await getNextDisplayOrder(ctx.user.id);
-      const insertResult = await createSong({ userId: ctx.user.id, title: input.title, genre: input.genre, bpm: input.bpm, keySignature: input.keySignature, moodTags: input.moodTags, coWriters: input.coWriters, albumName: input.albumName, creditsJson: input.creditsJson, releaseDate: input.releaseDate, isrc: input.isrc, officialArtistName: input.officialArtistName, aiConsent: input.aiConsent, ownershipStatus: input.ownershipStatus, lyricsText: input.lyricsText, lyricsHash: input.lyricsHash, isLyricsOnly: input.isLyricsOnly ?? false, contentType: input.contentType ?? (input.isLyricsOnly ? "lyrics" : "audio"), fileUrl, fileKey: audioKey, coverArtUrl, fileHash: input.fileHash, witnessId: input.witnessId, harmonicSignature: input.harmonicSignature, ecdsaPublicKey: input.ecdsaPublicKey, ecdsaSignature: input.ecdsaSignature, caption: input.caption, headlineCaption: input.headlineCaption, description: input.description, galleryImagesJson: input.galleryImagesJson, playerAssetType: input.playerAssetType ?? 'cover', aiToolSuno: input.aiToolSuno ?? false, aiToolUdio: input.aiToolUdio ?? false, aiToolSonato: input.aiToolSonato ?? false, aiToolOther: input.aiToolOther ?? false, aiToolOtherName: input.aiToolOtherName, durationSeconds: input.durationSeconds, sampleRate: input.sampleRate, bitDepth: input.bitDepth, aiDisclosure: input.aiDisclosure, haaiVisualConcept: input.haaiVisualConcept, haaiStyleLanguage: input.haaiStyleLanguage, haaiInstrumentation: input.haaiInstrumentation, haaiVocalConveyance: input.haaiVocalConveyance, haaiLyricalInspiration: input.haaiLyricalInspiration, haaiEmotionalTone: input.haaiEmotionalTone, haaiOriginStory: input.haaiOriginStory, haaiDeclaredAt, pagesJson: input.pagesJson, displayOrder: nextOrder, gcodeUrl: input.gcodeUrl, gcodeKey: input.gcodeKey, printStatsJson: input.printStatsJson, objectLicenseType: input.objectLicenseType, objectPriceCents: input.objectPriceCents, objectPhysicalSpecJson: input.objectPhysicalSpecJson, parentGuideWid: input.parentGuideWid, status: createStatus, participationMusic: input.participationMusic ?? "Human", participationLyrics: input.participationLyrics ?? "Human", participationVoice: input.participationVoice ?? "Human", toneProfileJson: input.toneProfileJson, waveformUrl: input.waveformUrl, waveformKey: input.waveformKey, visualSource: input.visualSource ?? (coverArtUrl ? "uploaded" : "none"), visualPrompt: input.visualPrompt, visualLineageJson: input.visualLineageJson, isPublic: createStatus === "Published" } as any);
+      const insertResult = await createSong({ userId: ctx.user.id, title: input.title, genre: input.genre, bpm: input.bpm, keySignature: input.keySignature, moodTags: input.moodTags, coWriters: input.coWriters, albumName: input.albumName, creditsJson: input.creditsJson, releaseDate: input.releaseDate, creatorReleaseDate: input.creatorReleaseDate, isrc: input.isrc, officialArtistName: input.officialArtistName, aiConsent: input.aiConsent, ownershipStatus: input.ownershipStatus, lyricsText: input.lyricsText, lyricsHash: input.lyricsHash, isLyricsOnly: input.isLyricsOnly ?? false, contentType: input.contentType ?? (input.isLyricsOnly ? "lyrics" : "audio"), fileUrl, fileKey: audioKey, coverArtUrl, fileHash: input.fileHash, witnessId: input.witnessId, harmonicSignature: input.harmonicSignature, ecdsaPublicKey: input.ecdsaPublicKey, ecdsaSignature: input.ecdsaSignature, caption: input.caption, headlineCaption: input.headlineCaption, description: input.description, galleryImagesJson: input.galleryImagesJson, playerAssetType: input.playerAssetType ?? 'cover', aiToolSuno: input.aiToolSuno ?? false, aiToolUdio: input.aiToolUdio ?? false, aiToolSonato: input.aiToolSonato ?? false, aiToolOther: input.aiToolOther ?? false, aiToolOtherName: input.aiToolOtherName, durationSeconds: input.durationSeconds, sampleRate: input.sampleRate, bitDepth: input.bitDepth, aiDisclosure: input.aiDisclosure, haaiVisualConcept: input.haaiVisualConcept, haaiStyleLanguage: input.haaiStyleLanguage, haaiInstrumentation: input.haaiInstrumentation, haaiVocalConveyance: input.haaiVocalConveyance, haaiLyricalInspiration: input.haaiLyricalInspiration, haaiEmotionalTone: input.haaiEmotionalTone, haaiOriginStory: input.haaiOriginStory, haaiDeclaredAt, pagesJson: input.pagesJson, displayOrder: nextOrder, gcodeUrl: input.gcodeUrl, gcodeKey: input.gcodeKey, printStatsJson: input.printStatsJson, objectLicenseType: input.objectLicenseType, objectPriceCents: input.objectPriceCents, objectPhysicalSpecJson: input.objectPhysicalSpecJson, parentGuideWid: input.parentGuideWid, status: createStatus, participationMusic: input.participationMusic ?? "Human", participationLyrics: input.participationLyrics ?? "Human", participationVoice: input.participationVoice ?? "Human", toneProfileJson: input.toneProfileJson, waveformUrl: input.waveformUrl, waveformKey: input.waveformKey, visualSource: input.visualSource ?? (coverArtUrl ? "uploaded" : "none"), visualPrompt: input.visualPrompt, visualLineageJson: input.visualLineageJson, isPublic: createStatus === "Published" } as any);
        const songId = (insertResult as any)[0]?.insertId as number;
       // Single registration completes the same lyrics provenance contract as batch:
       // lyrics text receives its own owner-bound WID-LYR after song persistence.
@@ -1101,8 +1101,10 @@ export const songsRouter = router({
       headlineCaption: z.string().max(280).nullable().optional(),
       // Mood tags
       moodTags: z.array(z.string()).nullable().optional(),
-      // Release / creation date (ISO date string, e.g. "2024-03-15")
+      // Creator-declared historical dates. System registration/WID and publication
+      // timestamps deliberately have no editable input contract here.
       releaseDate: z.string().nullable().optional(),
+      creatorReleaseDate: z.string().nullable().optional(),
       // Download Settings
       downloadPermission: z.enum(["none", "free", "tipped"]).optional(),
       downloadTipThresholdCents: z.number().int().min(0).max(100000).optional(),
@@ -1110,6 +1112,9 @@ export const songsRouter = router({
       parentGuideWid: z.string().max(64).nullable().optional(),
     }).strict()).mutation(async ({ ctx, input }) => {
       const { songId, creditsJson, ...fields } = input;
+      const existing = fields.releaseDate !== undefined || fields.creatorReleaseDate !== undefined
+        ? await getSongById(songId)
+        : undefined;
       // If saving a complete HAAI declaration, stamp the declared timestamp
       const haaiFields = [fields.haaiVisualConcept, fields.haaiStyleLanguage, fields.haaiInstrumentation, fields.haaiVocalConveyance, fields.haaiLyricalInspiration, fields.haaiEmotionalTone];
       const isHaaiComplete = haaiFields.every(f => f && f.trim().length > 0);
@@ -1120,6 +1125,26 @@ export const songsRouter = router({
       // Save credits separately if provided (null = clear all credits, empty string = clear)
       if (creditsJson !== undefined) {
         await updateSongCredits(songId, creditsJson ?? "");
+      }
+      const dateChanges = existing?.userId === ctx.user.id
+        ? ([
+            ["originalCreationDate", existing.releaseDate ?? null, fields.releaseDate],
+            ["creatorReleaseDate", (existing as any).creatorReleaseDate ?? null, fields.creatorReleaseDate],
+          ] as const).filter(([, previous, current]) => current !== undefined && current !== previous)
+        : [];
+      if (dateChanges.length > 0) {
+        await addWorkEvent({
+          songId,
+          eventType: "creator_historical_dates_revised",
+          eventLabel: "Creator historical dates revised",
+          eventData: {
+            changedFields: dateChanges.map(([field, previous, current]) => ({ field, previous, current })),
+            witnessId: existing?.witnessId ?? null,
+          },
+          actorId: ctx.user.id,
+          actorName: ctx.user.name ?? undefined,
+          isSystemEvent: false,
+        });
       }
       return { success: true };
     }),

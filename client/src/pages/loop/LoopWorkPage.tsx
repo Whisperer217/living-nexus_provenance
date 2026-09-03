@@ -31,6 +31,7 @@ import { useHarmonicSignature } from "@/hooks/useHarmonicSignature";
 import { LOOP_PRODUCT } from "@/lib/loopProduct";
 import { trpc } from "@/lib/trpc";
 import { getLoginUrl } from "@/const";
+import { parseWorkGenres } from "@shared/workMetadata";
 
 export default function LoopWorkPage() {
   const { id } = useParams<{ id: string }>();
@@ -432,6 +433,7 @@ export default function LoopWorkPage() {
                     aiDisclosure: song.aiDisclosure ?? null,
                     contentType: "audio",
                     releaseDate: song.releaseDate ?? null,
+                    creatorReleaseDate: (song as any).creatorReleaseDate ?? null,
                     description: song.description ?? null,
                     witnessId: song.witnessId ?? null,
                     videoUrl: null,
@@ -491,8 +493,10 @@ export default function LoopWorkPage() {
                 className="flex flex-wrap gap-4 mt-8 text-xs uppercase tracking-[0.14em]"
                 style={{ color: "color-mix(in srgb, var(--ln-parchment) 45%, transparent)" }}
               >
-                {song.genre && <span>{song.genre}</span>}
+                {parseWorkGenres(song.genre).map((workGenre) => <span key={workGenre}>{workGenre}</span>)}
                 {song.bpm && <span>{song.bpm} BPM</span>}
+                {song.releaseDate && <span>Created {song.releaseDate}</span>}
+                {(song as any).creatorReleaseDate && <span>Released {(song as any).creatorReleaseDate}</span>}
               </div>
             )}
           </div>

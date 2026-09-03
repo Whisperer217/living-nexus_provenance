@@ -47,7 +47,7 @@ export async function createSong(data: {
   userId: number; title: string; genre?: string; bpm?: number; keySignature?: string;
   moodTags?: string[]; lyricsText?: string; lyricsHash?: string; coWriters?: string[]; albumName?: string;
   creditsJson?: string;
-  releaseDate?: string; isrc?: string;
+  releaseDate?: string; creatorReleaseDate?: string; isrc?: string;
   /** Artist/band name extracted from ID3 tags or manually entered — stored separately from the platform handle */
   officialArtistName?: string;
   aiConsent: "prohibited" | "permitted_attribution" | "permitted";
@@ -429,8 +429,9 @@ export async function updateSongMetadata(
     title?: string;
     description?: string | null;
     headlineCaption?: string | null;
-    // Release / creation date
+    // Creator-declared historical dates (not system timestamps)
     releaseDate?: string | null;
+    creatorReleaseDate?: string | null;
     // HAAI Origin Story
     haaiOriginStory?: string | null;
     // Mood tags
@@ -478,6 +479,7 @@ export async function updateSongMetadata(
   if (fields.description !== undefined) updateSet.description = fields.description;
   if (fields.headlineCaption !== undefined) updateSet.headlineCaption = fields.headlineCaption;
   if (fields.releaseDate !== undefined) updateSet.releaseDate = fields.releaseDate;
+  if (fields.creatorReleaseDate !== undefined) updateSet.creatorReleaseDate = fields.creatorReleaseDate;
   if (fields.haaiOriginStory !== undefined) updateSet.haaiOriginStory = fields.haaiOriginStory;
   if (fields.moodTags !== undefined) updateSet.moodTags = fields.moodTags;
   if (fields.downloadPermission !== undefined) updateSet.downloadPermission = fields.downloadPermission;

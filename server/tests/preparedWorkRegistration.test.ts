@@ -142,11 +142,55 @@ describe("PreparedWorkRegistration", () => {
     expect(published.metadata.publishIntent).toBe("Published");
   });
 
+  it("carries Other and creator-declared historical dates through Published upload without changing WID serialization", () => {
+    const prepared = createPreparedWorkRegistration({
+      ...createPrepared().assets,
+      ...createPrepared().metadata,
+      genre: "Gospel / Worship, Other",
+      publishIntent: "Published",
+      releaseDate: "2018-04-12",
+      creatorReleaseDate: "2024-11-01",
+    });
+    const tone = derivePreparedWorkTone(prepared);
+    const payload = buildPreparedWorkUploadPayload(prepared, {
+      fileUrl: "https://example.test/audio.wav",
+      fileKey: "audio/1/testimony.wav",
+      fileHash: "b".repeat(64),
+      witnessId: "WID-MUS-TESTIMON-YOFTHERO",
+      publicKeyJWK: "{\"kty\":\"EC\"}",
+      signature: "signature",
+      tone,
+      visualSource: "uploaded",
+    });
+
+    expect(payload).toMatchObject({
+      genre: "Gospel / Worship, Other",
+      releaseDate: "2018-04-12",
+      creatorReleaseDate: "2024-11-01",
+      status: "Published",
+    });
+    expect(serializePreparedWorkWidPayload({
+      fileHash: "b".repeat(64),
+      title: prepared.metadata.title,
+      participation: prepared.metadata.participation,
+      toneLabel: tone.label,
+      timestamp: "2026-08-18T00:00:00.000Z",
+    })).toBe(serializePreparedWorkWidPayload({
+      fileHash: "b".repeat(64),
+      title: prepared.metadata.title,
+      participation: prepared.metadata.participation,
+      toneLabel: tone.label,
+      timestamp: "2026-08-18T00:00:00.000Z",
+    }));
+  });
+
   it("exposes informational field classifications without enforcement", () => {
     const prepared = createPrepared();
     expect(prepared.fieldClassification).toBe(PREPARED_WORK_FIELD_CLASSIFICATION);
     expect(prepared.fieldClassification.widBound).toContain("title");
     expect(prepared.fieldClassification.editorial).toContain("lyrics");
+    expect(prepared.fieldClassification.editorial).toContain("releaseDate");
+    expect(prepared.fieldClassification.editorial).toContain("creatorReleaseDate");
     expect(prepared.fieldClassification.independentComponent).toContain("coverFile");
   });
 });

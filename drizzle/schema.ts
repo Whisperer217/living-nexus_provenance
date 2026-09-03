@@ -260,7 +260,10 @@ export const songs = mysqlTable("songs", {
   isLyricsOnly: boolean("isLyricsOnly").default(false).notNull(),
   coWriters: json("coWriters").$type<string[]>(),
   albumName: varchar("albumName", { length: 255 }),
+  // Creator-declared historical chronology. This is Work metadata, not a
+  // system timestamp and never changes the registration WID or publication log.
   releaseDate: varchar("releaseDate", { length: 32 }),
+  creatorReleaseDate: varchar("creatorReleaseDate", { length: 32 }),
   isrc: varchar("isrc", { length: 32 }),
   aiConsent: mysqlEnum("aiConsent", ["prohibited", "permitted_attribution", "permitted"]).default("prohibited").notNull(),
 
