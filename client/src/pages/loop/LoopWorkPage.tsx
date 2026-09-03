@@ -51,6 +51,10 @@ export default function LoopWorkPage() {
     { songId, genre: (songData as any)?.song?.genre ?? undefined },
     { enabled: songId > 0, staleTime: 60_000 }
   );
+  const { data: parentAlbum } = trpc.songs.getCollectionForSong.useQuery(
+    { songId },
+    { enabled: songId > 0, staleTime: 60_000 }
+  );
   const playMutation = trpc.songs.play.useMutation();
   const { liked, toggle: toggleLike } = useLike(songId);
 
@@ -536,6 +540,36 @@ export default function LoopWorkPage() {
               <p className="mb-6 text-sm font-body" style={{ color: "color-mix(in srgb, var(--ln-parchment) 50%, transparent)" }}>
                 WID pending — register completion seals this work.
               </p>
+            )}
+
+            {parentAlbum && creator?.artistHandle && (
+              <Link
+                href={`/creator/${creator.artistHandle}/albums`}
+                className="group mb-6 flex items-center gap-3 rounded-xl px-3 py-3 transition-colors"
+                style={{
+                  border: "1px solid rgba(196,154,40,0.24)",
+                  background: "rgba(196,154,40,0.06)",
+                }}
+                title={`Open ${parentAlbum.name}`}
+              >
+                <Music size={16} style={{ color: "var(--ln-gold)" }} aria-hidden="true" />
+                <span className="min-w-0">
+                  <span
+                    className="block text-[10px] uppercase tracking-[0.16em]"
+                    style={{ color: "color-mix(in srgb, var(--ln-parchment) 52%, transparent)" }}
+                  >
+                    Part of album
+                  </span>
+                  <span className="block truncate text-sm group-hover:underline" style={{ color: "var(--ln-parchment)" }}>
+                    {parentAlbum.name}
+                  </span>
+                </span>
+                {parentAlbum.collectionWid && (
+                  <code className="ml-auto max-w-[9rem] truncate font-mono text-[10px]" style={{ color: "var(--ln-gold)" }}>
+                    {parentAlbum.collectionWid}
+                  </code>
+                )}
+              </Link>
             )}
 
             <div

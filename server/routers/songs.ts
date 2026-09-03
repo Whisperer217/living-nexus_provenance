@@ -1035,7 +1035,8 @@ export const songsRouter = router({
     // ── Get collection for a song ─────────────────────────────────────────────
     getCollectionForSong: publicProcedure.input(z.object({ songId: z.number() })).query(async ({ input }) => {
       const collection = await getCollectionForSong(input.songId);
-      if (!collection) return null;
+      // A public Work must never disclose a private or unlisted parent album.
+      if (!collection || collection.visibility !== "public") return null;
       return {
         collectionWid: collection.collectionWid,
         name: collection.name,
