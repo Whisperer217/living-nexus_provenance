@@ -29,18 +29,26 @@ describe("Music Register presentation contracts", () => {
     const workspace = read("client/src/components/creative-cathedral/CreativeCathedralWorkspace.tsx");
     const gate = read("client/src/components/creative-cathedral/CathedralContextGate.tsx");
     const suggestion = read("client/src/components/creative-cathedral/CathedralSuggestionCard.tsx");
+    const statusRail = read("client/src/components/creative-cathedral/CathedralStatusRail.tsx");
+    const tokens = read("client/src/index.css");
     expect(workspace).toContain("Expand Creative Cathedral workspace");
     expect(workspace).toContain('width: desktop ? "min(760px, calc(100vw - 2rem))"');
+    expect(workspace).toContain('"calc(100vw - 1rem)"');
     expect(workspace).toContain("zIndex: 9000");
     expect(workspace).toContain('top: "3rem"');
     expect(workspace).toContain('height: "auto"');
     expect(workspace).toContain("overflow-x-hidden");
     expect(workspace).toContain("var(--font-display)");
-    expect(workspace).toContain("rgba(8,6,3,0.97)");
+    expect(workspace).toContain("var(--ln-cathedral-surface)");
     expect(gate).toContain("[overflow-wrap:anywhere]");
-    expect(gate).toContain("rgba(0,0,0,0.72)");
+    expect(gate).toContain("var(--ln-cathedral-text-muted)");
     expect(suggestion).toContain("text-base font-semibold");
-    expect(suggestion).toContain("rgba(12,10,6,0.96)");
+    expect(suggestion).toContain("var(--ln-cathedral-text)");
+    expect(suggestion).not.toContain('style={{ color: "#000" }}');
+    expect(statusRail).toContain('className="mt-1 text-[10px]');
+    expect(tokens).toContain("--ln-cathedral-surface:");
+    expect(tokens).toContain("--ln-cathedral-text-muted:");
+    expect(tokens).toContain("--ln-cathedral-border:");
   });
 
   it("keeps desktop Studio panels independently scrollable while preserving mobile document flow", () => {

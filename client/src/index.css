@@ -2211,6 +2211,17 @@ input[type="range"].volume-slider-theater::-moz-range-thumb {
   --ln-gold-hot:      #E8B840;   /* hero text accent, active states */
   --ln-gold-flame:    #F5CC5A;   /* hover on gold elements only */
 
+  /* ── Creative Cathedral protected work surface ── */
+  --ln-cathedral-surface:        #080603;
+  --ln-cathedral-surface-strong: #0C0A06;
+  --ln-cathedral-text:           #F5EDD8;
+  --ln-cathedral-text-muted:     #D2C7AF;
+  --ln-cathedral-text-soft:      #B9AD94;
+  --ln-cathedral-border:         color-mix(in srgb, var(--ln-gold) 44%, transparent);
+  --ln-cathedral-border-subtle:  color-mix(in srgb, var(--ln-gold) 22%, transparent);
+  --ln-cathedral-tint:           color-mix(in srgb, var(--ln-gold) 9%, var(--ln-cathedral-surface));
+  --ln-cathedral-action-text:    #0A0806;
+
   /* ── Semantic Accent Colors ── */
   --ln-ember:         #C4440A;   /* warnings, live indicators, error states */
   --ln-blood:         #8B1A0A;   /* deep error, destructive actions */
@@ -2244,6 +2255,25 @@ input[type="range"].volume-slider-theater::-moz-range-thumb {
   --ln-gold:          #8F6418;
   --ln-gold-hot:      #B8872C;
   --ln-gold-flame:    #D0A04A;
+  --ln-cathedral-action-text: #FFF7EA;
+}
+
+/* Reassert active dark-scheme accents after the canonical identity palette.
+   Cathedral keeps its dark evidence surface but borrows the chosen scheme's accent. */
+[data-theme="crimson"] {
+  --ln-gold-dim:      #8A3040;
+  --ln-gold:          #E8294F;
+  --ln-gold-hot:      #FF4D6D;
+  --ln-gold-flame:    #FF7A90;
+  --ln-cathedral-action-text: #080603;
+}
+
+[data-theme="illuminated-gold"] {
+  --ln-gold-dim:      #8A7230;
+  --ln-gold:          #F5C842;
+  --ln-gold-hot:      #FFD966;
+  --ln-gold-flame:    #FFE89A;
+  --ln-cathedral-action-text: #0A0806;
 }
 
 /* ── Base Typography (redesign v2.31) ── */

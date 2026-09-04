@@ -222,7 +222,9 @@ export default function PlayerBar() {
 
   const goToCreator = useCallback(() => {
     if (songDetail?.creator?.id) navigate(`/creator/${songDetail.creator.id}`);
-    else if (currentTrack?.artist) navigate(`/creator/${currentTrack.artist}`);
+    else if (currentTrack?.creatorHandle) navigate(`/creator/${currentTrack.creatorHandle}`);
+    else if (currentTrack?.creatorId) navigate(`/creator/${currentTrack.creatorId}`);
+    else toast.error("Creator profile is unavailable for this track.");
   }, [songDetail, currentTrack, navigate]);
 
   const goToVerify = useCallback(() => {

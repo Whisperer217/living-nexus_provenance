@@ -226,13 +226,13 @@ export function CreativeCathedralWorkspace({
         className="min-h-11 w-full gap-2 text-sm font-semibold"
         disabled={!consented || sources.length === 0 || !evidencePacket || requestReview.isPending}
         onClick={requestSuggestion}
-        style={{ background: "var(--ln-gold)", color: "#000" }}
+        style={{ background: "var(--ln-gold)", color: "var(--ln-cathedral-action-text)" }}
       >
         {requestReview.isPending ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
         Review extracted media facts
       </Button>
       <div className="space-y-3" aria-live="polite">
-        {suggestions.isLoading && <p className="text-sm" style={{ color: "rgba(245,237,216,0.72)" }}>Restoring private suggestions…</p>}
+        {suggestions.isLoading && <p className="text-sm" style={{ color: "var(--ln-cathedral-text-muted)" }}>Restoring private suggestions…</p>}
         {storedSuggestions.map((row) => (
           <CathedralSuggestionCard
             key={row.id}
@@ -266,7 +266,8 @@ export function CreativeCathedralWorkspace({
       <Button
         type="button"
         variant="outline"
-        className="min-h-11 w-full justify-between gap-3 border-amber-700/50 bg-black/55 px-4 text-sm"
+        className="min-h-11 w-full justify-between gap-3 px-4 text-sm"
+        style={{ borderColor: "var(--ln-cathedral-border)", background: "var(--ln-cathedral-surface-strong)", color: "var(--ln-cathedral-text)" }}
         aria-expanded={open}
         aria-controls="creative-cathedral-panel"
         onClick={() => void setWorkspaceOpen(!open)}
@@ -276,11 +277,11 @@ export function CreativeCathedralWorkspace({
       </Button>
 
       {desktop && open && !expanded && (
-        <div id="creative-cathedral-panel" className="mt-3 rounded-md p-4 shadow-2xl" style={{ border: "1px solid rgba(196,154,40,0.34)", background: "rgba(8,6,3,0.97)" }}>
+        <div id="creative-cathedral-panel" className="mt-3 rounded-md p-4 shadow-2xl" style={{ border: "1px solid var(--ln-cathedral-border)", background: "var(--ln-cathedral-surface)" }}>
           <div className="mb-4 flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <p className="text-lg font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>Prepare with a steward</p>
-              <p className="mt-1 text-sm leading-relaxed" style={{ color: "rgba(245,237,216,0.76)" }}>The creator remains the authority. Open a larger workspace whenever the evidence needs room to breathe.</p>
+              <p className="text-lg font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-cathedral-text)" }}>Prepare with a steward</p>
+              <p className="mt-1 text-sm leading-relaxed" style={{ color: "var(--ln-cathedral-text-muted)" }}>The creator remains the authority. Open a larger workspace whenever the evidence needs room to breathe.</p>
             </div>
             <Button type="button" size="sm" variant="outline" className="shrink-0 gap-1.5 text-sm" onClick={() => setExpanded(true)} aria-label="Expand Creative Cathedral workspace">
               <Maximize2 size={14} /> Expand
@@ -303,20 +304,21 @@ export function CreativeCathedralWorkspace({
           <SheetContent
             side="right"
             id="creative-cathedral-panel"
-            className="max-w-none overflow-x-hidden border-amber-800/40 p-0 shadow-2xl"
+            className="max-w-none overflow-x-hidden p-0 shadow-2xl"
             style={{
-              width: desktop ? "min(760px, calc(100vw - 2rem))" : "calc(100vw - 0.5rem)",
+              width: desktop ? "min(760px, calc(100vw - 2rem))" : "calc(100vw - 1rem)",
               maxWidth: "none",
               zIndex: 9000,
               top: "3rem",
               bottom: 0,
               height: "auto",
-              background: "var(--ln-void)",
+              background: "var(--ln-cathedral-surface)",
+              borderColor: "var(--ln-cathedral-border)",
             }}
           >
-            <SheetHeader className="border-b border-amber-800/30 px-5 py-5 pr-14 text-left">
-              <SheetTitle className="text-xl" style={{ fontFamily: "var(--font-display)", color: "var(--ln-parchment)" }}>Creative Cathedral workspace</SheetTitle>
-              <SheetDescription className="text-sm leading-relaxed" style={{ color: "rgba(245,237,216,0.72)" }}>Private preparation. Creator-approved evidence. Non-binding suggestions. You decide what enters the form.</SheetDescription>
+            <SheetHeader className="border-b px-5 py-5 pr-14 text-left" style={{ borderColor: "var(--ln-cathedral-border-subtle)" }}>
+              <SheetTitle className="text-xl" style={{ fontFamily: "var(--font-display)", color: "var(--ln-cathedral-text)" }}>Creative Cathedral workspace</SheetTitle>
+              <SheetDescription className="text-sm leading-relaxed" style={{ color: "var(--ln-cathedral-text-muted)" }}>Private preparation. Creator-approved evidence. Non-binding suggestions. You decide what enters the form.</SheetDescription>
             </SheetHeader>
             <ScrollArea className="min-h-0 flex-1 px-5 py-5 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
               {content}

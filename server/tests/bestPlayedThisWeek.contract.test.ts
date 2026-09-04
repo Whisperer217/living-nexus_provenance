@@ -66,6 +66,15 @@ describe("Best Played This Week projection contract", () => {
     expect(home).not.toContain("createHeartbeatJob");
   });
 
+  it("reveals a creator's full public identity on deliberate hover or keyboard focus without breaking the compact card grid", () => {
+    expect(home).toContain("Visit ${creator.name}'s creator domain. Handle @${creator.handle}.");
+    expect(home).toContain("group-hover:opacity-0 group-focus-visible:opacity-0");
+    expect(home).toContain("group-hover:opacity-100 group-focus-visible:opacity-100");
+    expect(home).toContain("{creator.name}");
+    expect(home).toContain("@{creator.handle}");
+    expect(home).toContain("min-h-[2.5rem] overflow-hidden");
+  });
+
   it("includes a creator only through a genuinely public Published Work", () => {
     expect(creatorDb).toContain('eq(songs.status, "Published")');
     expect(creatorDb).toContain("eq(songs.isPublic, true)");

@@ -28,11 +28,10 @@ function Status({
   value: string;
 }) {
   return (
-    <div className="rounded-md px-2 py-2" style={{ border: "1px solid rgba(196,154,40,0.18)", background: "rgba(196,154,40,0.035)" }}>
+    <div className="rounded-md px-2 py-2" style={{ border: "1px solid var(--ln-cathedral-border-subtle)", background: "var(--ln-cathedral-tint)" }}>
       <Icon size={13} aria-hidden style={{ color: "var(--ln-gold)" }} />
-      <p className="mt-1 text-[9px] uppercase tracking-[0.14em]" style={{ color: "rgba(245,237,216,0.45)" }}>{label}</p>
-      <p className="truncate text-[11px]" style={{ color: "var(--ln-parchment)" }}>{value}</p>
+      <p className="mt-1 text-[10px] uppercase tracking-[0.12em]" style={{ color: "var(--ln-cathedral-text-soft)" }}>{label}</p>
+      <p className="truncate text-xs" style={{ color: "var(--ln-cathedral-text)" }}>{value}</p>
     </div>
   );
 }
-

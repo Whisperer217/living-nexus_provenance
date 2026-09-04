@@ -55,10 +55,10 @@ export function CathedralSuggestionCard({
         <select
           value={String(value ?? "")}
           onChange={(event) => setEditedPatch((previous) => ({ ...previous, [field]: event.target.value }))}
-          className="h-10 rounded-sm border border-amber-700/40 bg-black/55 px-3 text-sm"
-          style={{ color: "var(--ln-parchment)" }}
+          className="h-10 rounded-sm px-3 text-sm"
+          style={{ color: "var(--ln-cathedral-text)", background: "var(--ln-cathedral-surface)", border: "1px solid var(--ln-cathedral-border)" }}
         >
-          {(["Human", "AI", "Both"] as const).map((option) => <option key={option} value={option} style={{ color: "#000" }}>{option}</option>)}
+          {(["Human", "AI", "Both"] as const).map((option) => <option key={option} value={option} style={{ color: "var(--ln-cathedral-text)", background: "var(--ln-cathedral-surface-strong)" }}>{option}</option>)}
         </select>
       );
     }
@@ -77,31 +77,32 @@ export function CathedralSuggestionCard({
                 : raw,
           }));
         }}
-        className="h-10 bg-black/55 text-sm"
+        className="h-10 text-sm"
+        style={{ color: "var(--ln-cathedral-text)", background: "var(--ln-cathedral-surface)", borderColor: "var(--ln-cathedral-border)" }}
       />
     );
   };
 
   return (
-    <article className="space-y-4 rounded-md p-4" style={{ border: "1px solid rgba(196,154,40,0.34)", background: "rgba(12,10,6,0.96)" }}>
+    <article className="space-y-4 rounded-md p-4" style={{ border: "1px solid var(--ln-cathedral-border)", background: "var(--ln-cathedral-surface-strong)" }}>
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-2">
           <Sparkles size={15} aria-hidden style={{ color: "var(--ln-gold)" }} />
           <div>
-            <p className="text-base font-semibold" style={{ fontFamily: "'Cormorant Garamond', serif", color: "var(--ln-parchment)" }}>Media-facts proposal</p>
-            <p className="text-xs" style={{ color: "rgba(245,237,216,0.68)" }}>Private · non-binding</p>
+            <p className="text-base font-semibold" style={{ fontFamily: "'Cormorant Garamond', serif", color: "var(--ln-cathedral-text)" }}>Media-facts proposal</p>
+            <p className="text-xs" style={{ color: "var(--ln-cathedral-text-soft)" }}>Private · non-binding</p>
           </div>
         </div>
         <Badge variant="outline" className="text-xs uppercase tracking-wider">{status.replaceAll("_", " ")}</Badge>
       </div>
 
-      <p className="text-sm leading-relaxed" style={{ color: "rgba(245,237,216,0.86)" }}>{suggestion.summary}</p>
+      <p className="text-sm leading-relaxed" style={{ color: "var(--ln-cathedral-text-muted)" }}>{suggestion.summary}</p>
 
       <div className="space-y-2">
         {fields.length === 0 ? (
-          <p className="text-sm italic" style={{ color: "rgba(245,237,216,0.68)" }}>No safe field proposals were found.</p>
+          <p className="text-sm italic" style={{ color: "var(--ln-cathedral-text-soft)" }}>No safe field proposals were found.</p>
         ) : fields.map(([field, value]) => (
-          <div key={field} className="grid grid-cols-[1.25rem_minmax(0,1fr)] gap-2 rounded-sm border border-amber-800/15 p-2">
+          <div key={field} className="grid grid-cols-[1.25rem_minmax(0,1fr)] gap-2 rounded-sm p-2" style={{ border: "1px solid var(--ln-cathedral-border-subtle)", background: "color-mix(in srgb, var(--ln-cathedral-surface) 76%, transparent)" }}>
             <Checkbox
               checked={selectedFields.includes(field)}
               disabled={resolved}
@@ -118,12 +119,12 @@ export function CathedralSuggestionCard({
                 </Badge>
               </div>
               {editing ? renderEditor(field) : (
-                <span className="block min-w-0 break-words text-base" style={{ color: "var(--ln-parchment)" }}>
+                <span className="block min-w-0 break-words text-base" style={{ color: "var(--ln-cathedral-text)" }}>
                   {Array.isArray(value) ? value.join(", ") : String(value ?? "")}
                 </span>
               )}
               {evidenceByField.get(field)?.note && (
-                <p className="text-sm leading-relaxed" style={{ color: "rgba(245,237,216,0.72)" }}>{evidenceByField.get(field)?.note}</p>
+                <p className="text-sm leading-relaxed" style={{ color: "var(--ln-cathedral-text-muted)" }}>{evidenceByField.get(field)?.note}</p>
               )}
             </div>
           </div>
@@ -133,7 +134,7 @@ export function CathedralSuggestionCard({
       {suggestion.evidence.length > 0 && (
         <details className="text-sm">
           <summary className="cursor-pointer" style={{ color: "var(--ln-gold)" }}>Why these fields?</summary>
-          <div className="mt-2 space-y-2 leading-relaxed" style={{ color: "rgba(245,237,216,0.76)" }}>
+          <div className="mt-2 space-y-2 leading-relaxed" style={{ color: "var(--ln-cathedral-text-muted)" }}>
             {suggestion.evidence.map((item, index) => <p key={`${item.field}-${index}`}><strong>{fieldLabel(item.field)} · {item.confidence}:</strong> {item.note}</p>)}
           </div>
         </details>
@@ -141,7 +142,7 @@ export function CathedralSuggestionCard({
 
       {!resolved && (
         <div className="flex flex-wrap gap-2 pt-1">
-          <Button size="sm" disabled={busy || selectedFields.length === 0} onClick={() => onApply(selectedPatch)} className="gap-1" style={{ background: "var(--ln-gold)", color: "#000" }}>
+          <Button size="sm" disabled={busy || selectedFields.length === 0} onClick={() => onApply(selectedPatch)} className="gap-1" style={{ background: "var(--ln-gold)", color: "var(--ln-cathedral-action-text)" }}>
             <Check size={13} /> Apply selected
           </Button>
           <Button size="sm" variant="outline" disabled={busy} onClick={() => { setEditing(true); onEditFirst(); }} className="gap-1">

@@ -20,6 +20,8 @@ import { useWorkEditorActions } from "./contexts/WorkEditorContext";
 import { PWAInstallBanner } from "./components/PWAInstallBanner";
 import CinematicSplash, { shouldShowSplash } from "./components/CinematicSplash";
 
+const creatorHandleDomainRoute = new RegExp("^/@(?<handle>[^/]+)/?$");
+
 /** Logs QR scan events when ?qr= param is present in the URL. */
 function QrScanLogger() {
   useQrScanLogger();
@@ -394,7 +396,7 @@ function Router() {
                 <Route path="/developers" component={DevelopersPage} />
                 {/* ── Creator Domain — Law VI: /@handle is the creator's persistent home ── */}
                 <Route path="/setup-domain" component={SetupDomainPage} />
-                <Route path="/@:handle" component={CreatorDomainShell} />
+                <Route path={creatorHandleDomainRoute} component={CreatorDomainShell} />
                 {/* ── Stability redirects — dead routes → canonical destinations ── */}
                 <Route path="/prompt-studio"><Redirect to="/manifest" /></Route>
                 <Route path="/archive/mine"><Redirect to="/archive" /></Route>

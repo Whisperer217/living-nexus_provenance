@@ -644,10 +644,15 @@ export default function HomePage() {
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
                   {creatorCards.map((creator) => (
-                    <Link key={creator.id} href={creator.href}>
+                    <Link
+                      key={creator.id}
+                      href={creator.href}
+                      className="group block focus-visible:outline-none"
+                      aria-label={`Visit ${creator.name}'s creator domain. Handle @${creator.handle}.`}
+                    >
                       <span
-                        className="group relative flex min-h-[164px] overflow-hidden rounded-2xl px-3 py-4 sm:min-h-[184px] sm:px-4 sm:py-5 cursor-pointer transition-transform duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ln-gold)]"
-                        title={`Visit ${creator.name}'s creator domain`}
+                        className="relative flex min-h-[164px] overflow-hidden rounded-2xl px-3 py-4 sm:min-h-[184px] sm:px-4 sm:py-5 cursor-pointer transition-transform duration-200 group-hover:-translate-y-0.5 group-focus-visible:ring-2 group-focus-visible:ring-[var(--ln-gold)]"
+                        title={`${creator.name} · @${creator.handle}`}
                         style={{
                           backgroundImage: creator.bannerUrl
                             ? `linear-gradient(145deg, color-mix(in srgb, var(--ln-void) 35%, transparent), color-mix(in srgb, var(--ln-void) 92%, transparent)), url(${creator.bannerUrl})`
@@ -679,11 +684,17 @@ export default function HomePage() {
                             )}
                           </span>
                           <span className="w-full min-w-0 rounded-xl px-2.5 py-2" style={{ background: "color-mix(in srgb, var(--ln-void) 76%, transparent)", border: "1px solid color-mix(in srgb, var(--ln-parchment) 16%, transparent)" }}>
-                            <span className="font-heading block truncate text-[11px] sm:text-xs tracking-[0.08em]" style={{ color: "var(--ln-parchment)" }}>
-                              @{creator.handle}
-                            </span>
-                            <span className="font-body mt-0.5 block text-[10px]" style={{ color: "var(--ln-smoke)" }}>
-                              {creator.publishedCount} public {creator.publishedCount === 1 ? "work" : "works"}
+                            <span className="relative block min-h-[2.5rem] overflow-hidden">
+                              <span className="block truncate text-[11px] tracking-[0.08em] transition-opacity duration-150 group-hover:opacity-0 group-focus-visible:opacity-0 sm:text-xs" style={{ color: "var(--ln-parchment)" }}>
+                                @{creator.handle}
+                              </span>
+                              <span className="font-heading pointer-events-none absolute inset-x-0 top-0 block break-words text-[10px] leading-snug opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-visible:opacity-100 sm:text-[11px]" style={{ color: "var(--ln-cathedral-text)" }}>
+                                {creator.name}
+                                <span className="mt-0.5 block font-body text-[9px] tracking-[0.06em]" style={{ color: "var(--ln-cathedral-text-muted)" }}>@{creator.handle}</span>
+                              </span>
+                              <span className="font-body mt-0.5 block text-[10px] transition-opacity duration-150 group-hover:opacity-0 group-focus-visible:opacity-0" style={{ color: "var(--ln-smoke)" }}>
+                                {creator.publishedCount} public {creator.publishedCount === 1 ? "work" : "works"}
+                              </span>
                             </span>
                           </span>
                         </span>
