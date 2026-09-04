@@ -265,7 +265,7 @@ export default function LoopWorkPage() {
       </Helmet>
 
       {/* Full-bleed hero plane */}
-      <section className="relative min-h-[88vh] flex flex-col justify-end overflow-hidden">
+      <section className="relative min-h-[clamp(34rem,68svh,46rem)] flex flex-col justify-center overflow-hidden py-20 sm:py-24">
         <div
           className={`absolute inset-0 ln-breath-ken ${isPlaying ? "ln-breath-ken--playing" : ""}`}
           style={{
@@ -288,7 +288,7 @@ export default function LoopWorkPage() {
           aria-hidden
         />
 
-        <div className="relative z-10 max-w-5xl mx-auto w-full px-4 sm:px-6 pb-14 pt-28">
+        <div className="relative z-10 max-w-4xl mx-auto w-full px-4 sm:px-6 text-center">
           <p
             className="text-[11px] uppercase tracking-[0.32em] mb-4 ln-breath-reveal"
             style={{ color: "var(--ln-gold-hot, var(--ln-gold))", fontFamily: "'Cinzel', serif" }}
@@ -296,7 +296,7 @@ export default function LoopWorkPage() {
             {LOOP_PRODUCT.name}
           </p>
           <h1
-            className="text-4xl sm:text-6xl md:text-7xl leading-[0.95] mb-4 max-w-4xl ln-breath-reveal ln-breath-reveal-d1"
+            className="text-4xl sm:text-6xl md:text-7xl leading-[0.95] mb-5 mx-auto max-w-4xl ln-breath-reveal ln-breath-reveal-d1"
             style={{
               fontFamily: "'Cinzel', serif",
               color: "var(--ln-parchment)",
@@ -306,7 +306,7 @@ export default function LoopWorkPage() {
             {song.title}
           </h1>
           <p
-            className="font-body text-lg sm:text-xl mb-8 max-w-xl ln-breath-reveal ln-breath-reveal-d2"
+            className="font-body text-lg sm:text-xl mb-8 mx-auto max-w-2xl ln-breath-reveal ln-breath-reveal-d2"
             style={{
               fontFamily: "'Cormorant Garamond', serif",
               color: "color-mix(in srgb, var(--ln-parchment) 88%, transparent)",
@@ -318,7 +318,7 @@ export default function LoopWorkPage() {
               : `Registered music by ${artistName}. Provenance sealed in the WID engine.`}
           </p>
 
-          <div className="flex flex-wrap items-center gap-3 ln-breath-reveal ln-breath-reveal-d3">
+          <div className="flex flex-wrap items-center justify-center gap-3 ln-breath-reveal ln-breath-reveal-d3">
             <button
               type="button"
               onClick={handlePlay}
@@ -459,8 +459,8 @@ export default function LoopWorkPage() {
       </section>
 
       {/* Three columns: Testimony | Provenance | Creator */}
-      <section className="max-w-6xl mx-auto px-4 sm:px-6 py-14 ln-breath-reveal ln-breath-reveal-d4">
-        <div className="ln-breath-accent-line mb-10" aria-hidden />
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 py-10 sm:py-12 ln-breath-reveal ln-breath-reveal-d4">
+        <div className="ln-breath-accent-line mb-7" aria-hidden />
         <div className="grid gap-10 lg:grid-cols-[1.15fr_1fr_0.9fr] lg:gap-8 xl:gap-12">
           {/* ── Left: Testimony (kept) ── */}
           <div>
@@ -471,7 +471,7 @@ export default function LoopWorkPage() {
               Testimony
             </p>
             <h2
-              className="font-heading text-2xl sm:text-3xl mb-6"
+              className="font-heading text-3xl sm:text-4xl mb-6"
               style={{ color: "var(--ln-parchment)" }}
             >
               Origin
@@ -515,7 +515,7 @@ export default function LoopWorkPage() {
               Provenance
             </p>
             <h2
-              className="font-heading text-2xl sm:text-3xl mb-4"
+              className="font-heading text-3xl sm:text-4xl mb-4"
               style={{ color: "var(--ln-parchment)" }}
             >
               Chain of record
