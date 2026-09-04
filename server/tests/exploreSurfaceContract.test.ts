@@ -21,4 +21,13 @@ describe("Explore public-surface contract", () => {
     expect(layoutSource).not.toContain("<MarketplaceDrawer");
     expect(layoutSource).toContain("not Loop chrome");
   });
+
+  it("uses a bounded normal-scale discovery plane with readable showcase cards", () => {
+    const exploreSource = fs.readFileSync(explorePagePath, "utf8");
+
+    expect(exploreSource).toContain("max-w-[1360px]");
+    expect(exploreSource).toContain('clamp(2.25rem,1.8rem + 2vw,3.25rem)');
+    expect(exploreSource).toContain("xl:w-[12rem]");
+    expect(exploreSource).toContain("text-sm font-medium leading-tight");
+  });
 });

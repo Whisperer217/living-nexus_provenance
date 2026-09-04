@@ -272,7 +272,7 @@ function GridCard({ row, queueTracks, queueIndex }: { row: FeedRow; queueTracks?
   }
 
   return (
-    <div className="group relative rounded-xl overflow-hidden bg-[var(--void-3)] border border-white/8 hover:border-[var(--gold)]/30 transition-all w-40 flex-shrink-0">
+    <div className="group relative w-40 flex-shrink-0 overflow-hidden rounded-xl border border-white/8 bg-[var(--void-3)] transition-all hover:border-[var(--gold)]/30 sm:w-44 xl:w-[12rem]">
       <div className="aspect-square relative overflow-hidden cursor-pointer" onClick={handleCardAction} title={`${action.label} ${row.song.title}`}>
         {row.song.coverArtUrl
           ? <img src={row.song.coverArtUrl} alt={row.song.title} loading="lazy" decoding="async"
@@ -294,15 +294,15 @@ function GridCard({ row, queueTracks, queueIndex }: { row: FeedRow; queueTracks?
           <span className="text-[9px] font-mono uppercase">{row.song.contentType}</span>
         </div>
       </div>
-      <div className="p-2.5">
+      <div className="p-3">
         <Link href={`/song/${row.song.id}`}>
-          <p className="text-xs font-medium text-[var(--stone-light)] truncate leading-tight hover:text-[var(--gold)] transition-colors cursor-pointer">{row.song.title}</p>
+          <p className="cursor-pointer truncate text-sm font-medium leading-tight text-[var(--stone-light)] transition-colors hover:text-[var(--gold)]">{row.song.title}</p>
         </Link>
         {row.creator ? (
           <Link href={`/creator/${row.creator.id}`}>
-            <p className="text-[10px] text-[var(--stone-shadow)] mt-0.5 truncate hover:text-[var(--gold)]/70 transition-colors cursor-pointer">{row.creator.artistHandle ?? row.creator.name ?? "Unknown"}</p>
+            <p className="mt-1 cursor-pointer truncate text-xs text-[var(--stone-shadow)] transition-colors hover:text-[var(--gold)]/70">{row.creator.artistHandle ?? row.creator.name ?? "Unknown"}</p>
           </Link>
-        ) : <p className="text-[10px] text-[var(--stone-shadow)] mt-0.5 truncate">Unknown</p>}
+        ) : <p className="mt-1 truncate text-xs text-[var(--stone-shadow)]">Unknown</p>}
       </div>
     </div>
   );
@@ -673,7 +673,7 @@ export default function ExplorePage() {
           backdropFilter: "saturate(1.1)",
         }}
       >
-        <div className="max-w-[1800px] mx-auto px-4 sm:px-6">
+        <div className="mx-auto max-w-[1360px] px-4 sm:px-6">
           {/* Row 1: Title + controls */}
           <div className="flex items-center justify-between pt-4 pb-2 gap-3 flex-wrap">
             <div className="flex-shrink-0">
@@ -683,8 +683,8 @@ export default function ExplorePage() {
               >
                 Living Nexus · Square
               </p>
-              <h1 className="font-heading font-bold tracking-[0.08em] leading-none" style={{ fontSize: "clamp(1.5rem,1.3rem+1vw,2.25rem)", color: "var(--ln-parchment)" }}>Explore</h1>
-              <p className="font-editorial italic mt-0.5 hidden sm:block" style={{ fontSize: "0.8rem", color: "var(--ln-smoke)", letterSpacing: "0.02em" }}>Songs & artists — music provenance discovery</p>
+              <h1 className="font-heading font-bold leading-none tracking-[0.08em]" style={{ fontSize: "clamp(2.25rem,1.8rem + 2vw,3.25rem)", color: "var(--ln-parchment)" }}>Explore</h1>
+              <p className="font-editorial mt-1 hidden italic sm:block" style={{ fontSize: "0.95rem", color: "var(--ln-smoke)", letterSpacing: "0.02em" }}>Songs & artists — music provenance discovery</p>
             </div>
             <div className="flex items-center gap-2 sm:gap-3 flex-wrap justify-end">
               <div className="flex items-center gap-1.5">
@@ -716,7 +716,7 @@ export default function ExplorePage() {
       </div>
 
       {/* ── Main content ──────────────────────────────────────────── */}
-      <div className="max-w-[1800px] mx-auto px-4 sm:px-6 pb-32">
+      <div className="mx-auto max-w-[1360px] px-4 pb-32 sm:px-6">
         {/* Loading state */}
         {data.isLoading && (
           <div className="pt-8 space-y-6">

@@ -5,7 +5,7 @@
    Mobile: not rendered (MainLayout handles mobile separately).
 ═══════════════════════════════════════════════════════════════════ */
 
-import { useState, useRef, useCallback, useEffect, useMemo } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
@@ -15,7 +15,7 @@ import { WhatsNewModal } from "@/components/WhatsNewModal";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useHarmonic } from "@/contexts/HarmonicContext";
 import {
-  Upload, Bell, LogIn, LogOut, CheckCircle2, Zap, Search, User, Settings,
+  Upload, Bell, LogIn, LogOut, CheckCircle2, Zap, User, Settings,
   SkipBack, SkipForward, Play, Pause, Shuffle, Repeat, PictureInPicture2,
   ChevronDown, Music, ShieldCheck, Sparkles, Download, Volume2, VolumeX,
 } from "lucide-react";
@@ -112,7 +112,7 @@ function InlinePlayer() {
   const isOnThisTrackPage = !!(songPageId && track?.id && songPageId === String(track.id));
 
   return (
-    <div className="flex-1 flex items-center gap-2 px-4 min-w-0 max-w-[700px] mx-auto">
+    <div className="flex-1 flex items-center gap-2 px-6 min-w-0 max-w-[920px] mx-auto">
       {/* Artwork — hidden when on the track's own detail page (already the page hero) */}
       {!isOnThisTrackPage && (
       <button
@@ -383,66 +383,11 @@ export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCoun
 
   const { state } = usePlayer();
   const [whatsNewOpen, setWhatsNewOpen] = useState(false);
-  const [searchFocused, setSearchFocused] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [showDropdown, setShowDropdown] = useState(false);
-  const searchRef = useRef<HTMLInputElement>(null);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-  // Debounce the query for autocomplete (300ms)
-  const [debouncedQ, setDebouncedQ] = useState("");
-  useEffect(() => {
-    const t = setTimeout(() => setDebouncedQ(searchQuery.trim()), 300);
-    return () => clearTimeout(t);
-  }, [searchQuery]);
-  const { data: acData } = trpc.search.global.useQuery(
-    { q: debouncedQ },
-    { enabled: debouncedQ.length >= 2, staleTime: 15_000 }
-  );
-  // Build flat sorted autocomplete list
-  const acItems = useMemo(() => {
-    if (!acData || debouncedQ.length < 2) return [];
-    type ACItem = { key: string; label: string; sub: string; img: string | null; href: string; isWid: boolean };
-    const items: ACItem[] = [];
-    // Creators
-    for (const c of acData.creators) {
-      items.push({ key: `c-${c.id}`, label: c.name ?? c.artistHandle ?? "Creator", sub: c.artistHandle ? `@${c.artistHandle}` : "Creator", img: c.profilePhotoUrl ?? null, href: `/creator/${c.id}`, isWid: false });
-    }
-    // Songs (all content types)
-    for (const s of acData.songs) {
-      items.push({ key: `s-${s.id}`, label: s.title, sub: s.creatorHandle ? `@${s.creatorHandle}` : (s.creatorName ?? ""), img: s.coverArtUrl ?? null, href: `/song/${s.id}`, isWid: !!s.witnessId });
-    }
-    // Guides
-    for (const g of acData.guides) {
-      items.push({ key: `g-${g.id}`, label: g.canonicalName, sub: g.archetypeType ?? "Guide", img: g.artworkUrl ?? null, href: `/guide/${g.id}`, isWid: !!g.widCode });
-    }
-    // Sort alphabetically by label
-    items.sort((a, b) => a.label.localeCompare(b.label));
-    return items.slice(0, 8);
-  }, [acData, debouncedQ]);
-  // Close dropdown on outside click
-  useEffect(() => {
-    if (!showDropdown) return;
-    const handler = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node) &&
-          searchRef.current && !searchRef.current.contains(e.target as Node)) {
-        setShowDropdown(false);
-      }
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [showDropdown]);
 
   const goTo = useCallback(
     (path: string) => { navigate(path); },
     [navigate]
   );
-
-  const handleSearch = useCallback((e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      goTo(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-    }
-  }, [searchQuery, goTo]);
 
   const displayName = user?.name || state.profileName || "Creator";
   const avatar = user?.profilePhotoUrl || state.profileAvatar;
@@ -500,107 +445,7 @@ export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCoun
           transition: "background-color 0.4s ease, border-color 0.4s ease, box-shadow 1.2s ease, background-image 1.2s ease",
         }}
       >
-        {/* LEFT: Search bar */}
-        <form
-          onSubmit={handleSearch}
-          className="flex items-center px-4 shrink-0"
-          style={{ width: 260 }}
-        >
-          <div
-            className="flex items-center gap-2 w-full px-3 py-1.5 rounded-lg transition-all"
-            style={{
-              background: searchFocused
-                ? "rgba(196,154,40,0.08)"
-                : "color-mix(in srgb, var(--ln-parchment) 4%, transparent)",
-              border: searchFocused
-                ? "1px solid rgba(196,154,40,0.30)"
-                : "1px solid color-mix(in srgb, var(--ln-parchment) 8%, transparent)",
-            }}
-          >
-            <Search size={13} style={{ color: searchFocused ? "var(--ln-gold)" : "color-mix(in srgb, var(--ln-parchment) 30%, transparent)", flexShrink: 0 }} />
-            <input
-              ref={searchRef}
-              type="text"
-              placeholder="Search works, creators, WIDs…"
-              value={searchQuery}
-              onChange={e => { setSearchQuery(e.target.value); setShowDropdown(true); }}
-              onFocus={() => { setSearchFocused(true); setShowDropdown(true); }}
-              onBlur={() => setSearchFocused(false)}
-              onKeyDown={e => { if (e.key === "Escape") { setShowDropdown(false); searchRef.current?.blur(); } }}
-              className="flex-1 bg-transparent outline-none text-white/80 placeholder:text-white/25"
-              style={{ fontSize: "12px", fontFamily: "var(--font-body)" }}
-            />
-          </div>
-          {/* Autocomplete dropdown */}
-          {showDropdown && acItems.length > 0 && (
-            <div
-              ref={dropdownRef}
-              className="absolute z-[500] rounded-xl overflow-hidden"
-              style={{
-                top: "calc(100% + 4px)",
-                left: 0,
-                width: 280,
-                background: "var(--ln-panel)",
-                border: "1px solid rgba(196,154,40,0.28)",
-                boxShadow: "0 8px 32px rgba(0,0,0,0.6)",
-                backdropFilter: "blur(16px)",
-              }}
-            >
-              {acItems.map(item => (
-                <button
-                  key={item.key}
-                  type="button"
-                  className="w-full flex items-center gap-2.5 px-3 py-2 text-left transition-colors"
-                  style={{ borderBottom: "1px solid rgba(196,154,40,0.06)" }}
-                  onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "rgba(196,154,40,0.08)"}
-                  onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "transparent"}
-                  onMouseDown={e => {
-                    e.preventDefault();
-                    setShowDropdown(false);
-                    setSearchQuery("");
-                    navigate(item.href);
-                  }}
-                >
-                  {/* Thumbnail */}
-                  <div
-                    className="shrink-0 rounded overflow-hidden flex items-center justify-center"
-                    style={{ width: 32, height: 32, background: "rgba(196,154,40,0.06)", border: "1px solid rgba(196,154,40,0.12)" }}
-                  >
-                    {item.img
-                      ? <img src={item.img} alt={item.label} className="w-full h-full object-cover" />
-                      : <Music size={12} style={{ color: "rgba(196,154,40,0.4)" }} />
-                    }
-                  </div>
-                  {/* Text */}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium truncate" style={{ color: "color-mix(in srgb, var(--ln-parchment) 88%, transparent)" }}>{item.label}</p>
-                    <p className="text-[10px] truncate" style={{ color: "var(--ln-smoke)" }}>{item.sub}</p>
-                  </div>
-                  {/* WID badge */}
-                  {item.isWid && (
-                    <ShieldCheck size={10} style={{ color: "rgba(196,154,40,0.6)", flexShrink: 0 }} />
-                  )}
-                </button>
-              ))}
-              {/* "See all results" footer */}
-              <button
-                type="button"
-                className="w-full px-3 py-2 text-center text-[10px] tracking-wider transition-colors"
-                style={{ color: "var(--ln-gold)", borderTop: "1px solid rgba(196,154,40,0.12)" }}
-                onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "rgba(196,154,40,0.06)"}
-                onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "transparent"}
-                onMouseDown={e => {
-                  e.preventDefault();
-                  setShowDropdown(false);
-                  if (searchQuery.trim()) navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-                }}
-              >
-                SEE ALL RESULTS FOR &ldquo;{debouncedQ}&rdquo;
-              </button>
-            </div>
-          )}
-        </form>
-        {/* CENTER: Inline Player */}
+        {/* CENTER: Inline Player — receives the released search zone */}
         <InlinePlayer />
 
         {/* RIGHT: CTAs + Bell + Avatar */}

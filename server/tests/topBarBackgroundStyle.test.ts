@@ -20,4 +20,13 @@ describe("TopBar harmonic background style", () => {
     expect(source).toContain('window.location.assign(getLoginUrl("/pna"))');
     expect(source).not.toContain('goTo(getLoginUrl("/pna"))');
   });
+
+  it("preserves the inline player while removing the competing TopBar search surface", () => {
+    const source = fs.readFileSync(topBarPath, "utf8");
+
+    expect(source).toContain("<InlinePlayer />");
+    expect(source).toContain("max-w-[920px]");
+    expect(source).not.toContain("Search works, creators, WIDs…");
+    expect(source).not.toContain("trpc.search.global.useQuery");
+  });
 });
