@@ -48,6 +48,14 @@ type ColumnKey = typeof COLUMNS[number]["key"];
 type SupplementalKey = typeof SUPPLEMENTAL_SECTIONS[number]["key"];
 type ViewMode = "columns" | "list" | "grid";
 
+function getInitialViewMode(): ViewMode {
+  if (typeof window === "undefined") return "columns";
+  const view = new URLSearchParams(window.location.search).get("view");
+  if (view === "creators") return "grid";
+  if (view === "list") return "list";
+  return "columns";
+}
+
 // Max works to load — always show everything the server has
 const MAX_LIMIT = 700;
 
@@ -481,7 +489,7 @@ function ViewToggle({ value, onChange }: { value: ViewMode; onChange: (v: ViewMo
   const modes: { key: ViewMode; icon: React.ReactNode; label: string }[] = [
     { key: "columns", icon: <LayoutGrid className="w-3.5 h-3.5" />, label: "Columns" },
     { key: "list",    icon: <LayoutList className="w-3.5 h-3.5" />, label: "List" },
-    { key: "grid",    icon: <Users className="w-3.5 h-3.5" />,       label: "Creators" },
+    { key: "grid",    icon: <Users className="w-3.5 h-3.5" />,       label: "Browse creators" },
   ];
   return (
     <div className="flex items-center gap-0.5 bg-[var(--void-3)] border border-white/8 rounded-xl p-0.5">
@@ -491,31 +499,6 @@ function ViewToggle({ value, onChange }: { value: ViewMode; onChange: (v: ViewMo
           {m.icon}
         </button>
       ))}
-    </div>
-  );
-}
-
-// ── Creator view (grouped by creator) ─────────────────────────────────────
-function CreatorCard({ creator, works }: { creator: NonNullable<FeedRow["creator"]>; works: FeedRow[] }) {
-  return (
-    <div className="bg-[var(--void-3)] border border-white/8 rounded-2xl overflow-hidden hover:border-[var(--gold)]/20 transition-all">
-      <div className="p-4 flex items-center gap-3 border-b border-white/5">
-        {creator.profilePhotoUrl ? <img src={creator.profilePhotoUrl} alt={creator.name ?? ""} className="w-10 h-10 rounded-full object-cover border border-[var(--gold)]/30" loading="lazy" decoding="async" /> : <div className="w-10 h-10 rounded-full bg-[var(--void-2)] border border-white/10 flex items-center justify-center"><Users className="w-5 h-5 text-[var(--stone-shadow)]" /></div>}
-        <div className="flex-1 min-w-0">
-          <Link href={`/creator/${creator.id}`}><p className="text-sm font-semibold text-[var(--stone-light)] truncate hover:text-[var(--gold)] transition-colors cursor-pointer">{creator.artistHandle ?? creator.name ?? "Unknown"}</p></Link>
-          <p className="text-xs text-[var(--stone-shadow)]">{works.length} work{works.length !== 1 ? "s" : ""}</p>
-        </div>
-      </div>
-      <div className="divide-y divide-white/5">
-        {works.slice(0, 5).map((row) => <WorkListRow key={row.song.id} item={feedRowToListItem(row)} />)}
-      </div>
-      {works.length > 5 && (
-        <Link href={`/creator/${creator.id}`}>
-          <div className="px-4 py-3 flex items-center justify-center gap-1.5 text-xs text-[var(--gold)] hover:text-[var(--gold-glow)] transition-colors cursor-pointer border-t border-white/5">
-            <span>View all {works.length} works</span><ChevronRight className="w-3 h-3" />
-          </div>
-        </Link>
-      )}
     </div>
   );
 }
@@ -564,35 +547,67 @@ function AllWorksListView({ data, search, likedMap }: { data: ReturnType<typeof 
   );
 }
 
-// ── Creator view (all works grouped by creator) ───────────────────────────
-function AllCreatorsView({ data, search }: { data: ReturnType<typeof useExploreData>; search: string }) {
-  const allRows = useMemo(() => {
-    const seen = new Set<number>();
-    const out: FeedRow[] = [];
-    COLUMNS.forEach(col => { (data[col.key] as FeedRow[]).forEach(r => { if (!seen.has(r.song.id)) { seen.add(r.song.id); out.push(r); } }); });
-    return out;
-  }, [data]);
-
-  const filtered = useMemo(() => {
-    if (!search) return allRows;
-    const q = search.toLowerCase();
-    return allRows.filter(r => r.song.title.toLowerCase().includes(q) || (r.creator?.name ?? "").toLowerCase().includes(q) || (r.creator?.artistHandle ?? "").toLowerCase().includes(q));
-  }, [allRows, search]);
-
-  const byCreator = useMemo(() => {
-    const map = new Map<number, { creator: NonNullable<FeedRow["creator"]>; works: FeedRow[] }>();
-    filtered.forEach(row => {
-      if (!row.creator) return;
-      const e = map.get(row.creator.id);
-      if (e) e.works.push(row); else map.set(row.creator.id, { creator: row.creator, works: [row] });
-    });
-    return Array.from(map.values());
-  }, [filtered]);
+// ── Creator view (public creator directory; independent of the track feed) ─
+function CreatorDirectoryCard({ creator }: { creator: CreatorSummary }) {
+  const identity = creator.artistHandle ?? creator.name ?? `Creator ${creator.id}`;
+  const routeIdentity = creator.artistHandle || creator.id;
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-      {byCreator.map(({ creator, works }) => <CreatorCard key={creator.id} creator={creator} works={works} />)}
-    </div>
+    <Link href={`/creator/${routeIdentity}`}>
+      <article className="group relative min-w-0 overflow-hidden rounded-2xl border border-white/8 bg-[var(--void-3)] p-4 transition-all hover:-translate-y-0.5 hover:border-[var(--gold)]/35 hover:bg-[var(--void-2)] focus-within:ring-2 focus-within:ring-[var(--gold)]/45">
+        <div className="flex items-center gap-3 min-w-0">
+          {creator.profilePhotoUrl ? (
+            <img src={creator.profilePhotoUrl} alt="" className="h-12 w-12 flex-shrink-0 rounded-full border border-[var(--gold)]/35 object-cover" loading="lazy" decoding="async" />
+          ) : (
+            <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full border border-[var(--gold)]/20 bg-[var(--void-2)]"><Users className="h-5 w-5 text-[var(--stone-shadow)]" /></div>
+          )}
+          <div className="min-w-0 flex-1">
+            <h2 className="truncate text-sm font-semibold text-[var(--stone-light)] transition-colors group-hover:text-[var(--gold)]" title={identity}>{identity}</h2>
+            <p className="mt-0.5 truncate text-xs text-[var(--stone-shadow)]">{creator.artistHandle ? `@${creator.artistHandle}` : "Creator domain"}</p>
+          </div>
+          <ChevronRight className="h-4 w-4 flex-shrink-0 text-[var(--stone-shadow)] transition-transform group-hover:translate-x-0.5 group-hover:text-[var(--gold)]" aria-hidden="true" />
+        </div>
+        <div className="mt-4 flex items-center justify-between border-t border-white/5 pt-3 text-[11px] text-[var(--stone-shadow)]">
+          <span>{creator.publishedCount} published work{creator.publishedCount === 1 ? "" : "s"}</span>
+          <span className="font-mono uppercase tracking-[0.14em] text-[var(--gold)]">Visit domain</span>
+        </div>
+      </article>
+    </Link>
+  );
+}
+
+function AllCreatorsView({ creators, search, selectedCreatorId }: { creators: CreatorSummary[]; search: string; selectedCreatorId: number | null }) {
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return creators.filter((creator) => {
+      if (selectedCreatorId && creator.id !== selectedCreatorId) return false;
+      if (!q) return true;
+      return (creator.name ?? "").toLowerCase().includes(q) || (creator.artistHandle ?? "").toLowerCase().includes(q);
+    });
+  }, [creators, search, selectedCreatorId]);
+
+  return (
+    <section className="pt-6" aria-labelledby="browse-creators-heading">
+      <div className="mb-4 flex flex-wrap items-end justify-between gap-2">
+        <div>
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--gold)]">Creator directory</p>
+          <h2 id="browse-creators-heading" className="font-heading mt-1 text-xl text-[var(--ln-parchment)]">Browse creators</h2>
+          <p className="mt-1 text-sm text-[var(--stone-shadow)]">Public creator domains with published works.</p>
+        </div>
+        <p className="font-mono text-[11px] text-[var(--stone-shadow)]">{filtered.length} creator{filtered.length === 1 ? "" : "s"}</p>
+      </div>
+      {filtered.length > 0 ? (
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          {filtered.map((creator) => <CreatorDirectoryCard key={creator.id} creator={creator} />)}
+        </div>
+      ) : (
+        <div className="rounded-2xl border border-white/8 bg-[var(--void-3)] px-5 py-12 text-center">
+          <Users className="mx-auto h-8 w-8 text-[var(--stone-shadow)]" />
+          <p className="mt-3 font-medium text-[var(--stone-light)]">No public creators match this search.</p>
+          <p className="mt-1 text-sm text-[var(--stone-shadow)]">Try a creator name or handle.</p>
+        </div>
+      )}
+    </section>
   );
 }
 
@@ -605,7 +620,7 @@ export default function ExplorePage() {
 
   const [seed] = useState(() => Math.floor(Math.random() * 999999));
   const [search, setSearch] = useState("");
-  const [viewMode, setViewMode] = useState<ViewMode>("columns");
+  const [viewMode, setViewMode] = useState<ViewMode>(getInitialViewMode);
   const [randomize, setRandomize] = useState(true);
   const [selectedCreatorId, setSelectedCreatorId] = useState<number | null>(null);
 
@@ -637,6 +652,14 @@ export default function ExplorePage() {
 
   const handleRefresh = useCallback(() => { window.location.reload(); }, []);
   const handleRandomizeToggle = useCallback((v: boolean) => { setRandomize(v); }, []);
+  const handleViewChange = useCallback((nextView: ViewMode) => {
+    setViewMode(nextView);
+    const url = new URL(window.location.href);
+    if (nextView === "grid") url.searchParams.set("view", "creators");
+    else if (nextView === "list") url.searchParams.set("view", "list");
+    else url.searchParams.delete("view");
+    window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
+  }, []);
 
   return (
     <DepthAtmosphere className="min-h-screen" hue={43} variant="page">
@@ -667,7 +690,7 @@ export default function ExplorePage() {
                 <span className="text-[10px] font-mono text-[var(--stone-shadow)] hidden sm:inline">{randomize ? "Random" : "Newest"}</span>
                 <RandomizeSwitch value={randomize} onChange={handleRandomizeToggle} />
               </div>
-              <ViewToggle value={viewMode} onChange={setViewMode} />
+              <ViewToggle value={viewMode} onChange={handleViewChange} />
               <button onClick={handleRefresh} title="Refresh" className="flex items-center gap-1.5 px-2.5 py-2 rounded-xl border border-white/10 text-[var(--stone-shadow)] hover:text-[var(--gold)] hover:border-[var(--gold)]/30 transition-all text-xs flex-shrink-0">
                 <RefreshCw className="w-3.5 h-3.5" /><span className="hidden sm:inline">Refresh</span>
               </button>
@@ -727,7 +750,7 @@ export default function ExplorePage() {
         {!data.isLoading && !data.error && (
           <>
             {/* ── Supplemental horizontal strips (always shown) ── */}
-            {!search && !selectedCreatorId && (
+            {!search && !selectedCreatorId && viewMode !== "grid" && (
               <div className="pt-6">
                 {SUPPLEMENTAL_SECTIONS.map(section => (
                   <SupplementalRow key={section.key} section={section} rows={data[section.key]} likedMap={likedMap} search={search} />
@@ -772,9 +795,7 @@ export default function ExplorePage() {
 
             {/* ── Creator view ── */}
             {viewMode === "grid" && (
-              <div className="pt-6">
-                <AllCreatorsView data={data} search={search} />
-              </div>
+              <AllCreatorsView creators={creators} search={search} selectedCreatorId={selectedCreatorId} />
             )}
 
             {/* Footer */}

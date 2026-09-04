@@ -277,7 +277,11 @@ export async function getAllCreators() {
       publishedCount: sql<number>`count(${songs.id})`,
     })
     .from(users)
-    .innerJoin(songs, and(eq(songs.userId, users.id), eq(songs.status, "Published")))
+    .innerJoin(songs, and(
+      eq(songs.userId, users.id),
+      eq(songs.status, "Published"),
+      eq(songs.isPublic, true),
+    ))
     .where(and(
       or(
         isNotNull(users.artistHandle),
