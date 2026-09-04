@@ -41,4 +41,10 @@ describe("Explore creator directory", () => {
     expect(creatorReader).toContain("isNotNull(users.artistHandle)");
     expect(creatorReader).toContain("count(${songs.id}) > 0");
   });
+
+  it("keeps list-mode likes on the page-level bulk map instead of mounting per-row status observers", () => {
+    expect(explore).toContain("prefetchedLiked={likedMap[row.song.id] ?? false}");
+    expect(explore).toContain("return useMemo(() => ({");
+    expect(explore).not.toContain("explore-list-static");
+  });
 });

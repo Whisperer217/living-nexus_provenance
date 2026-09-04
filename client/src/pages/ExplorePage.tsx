@@ -65,15 +65,16 @@ function useExploreData(seed: number, randomize: boolean, creatorId?: number) {
     { seed, limit: MAX_LIMIT, randomize, ...(creatorId ? { creatorId } : {}) },
     { staleTime: 2 * 60 * 1000, refetchOnWindowFocus: false }
   );
-  return {
+  return useMemo(() => ({
     featured: ((data?.featured ?? []) as FeedRow[]).filter(isAudioRow),
     newManifestations: ((data?.newManifestations ?? []) as FeedRow[]).filter(isAudioRow),
     music: ((data?.music ?? []) as FeedRow[]).filter(isAudioRow),
     recentlyWitnessed: ((data?.recentlyWitnessed ?? []) as FeedRow[]).filter(isAudioRow),
     hiddenGems: ((data?.hiddenGems ?? []) as FeedRow[]).filter(isAudioRow),
     trending: ((data?.trending ?? []) as FeedRow[]).filter(isAudioRow),
-    isLoading, error,
-  };
+    isLoading,
+    error,
+  }), [data, error, isLoading]);
 }
 
 function feedRowToListItem(row: FeedRow): WorkListRowItem {
@@ -541,7 +542,7 @@ function AllWorksListView({ data, search, likedMap }: { data: ReturnType<typeof 
     <div className="divide-y divide-white/5 rounded-xl overflow-hidden border border-white/5">
       {filtered.map((row, i) => {
         const qIdx = audioTracks.findIndex(t => t.id === String(row.song.id));
-        return <WorkListRow key={row.song.id} item={feedRowToListItem(row)} index={i} queueTracks={audioTracks} queueIndex={qIdx >= 0 ? qIdx : undefined} queueContext="EXPLORE" prefetchedLiked={likedMap[row.song.id]} />;
+        return <WorkListRow key={row.song.id} item={feedRowToListItem(row)} index={i} queueTracks={audioTracks} queueIndex={qIdx >= 0 ? qIdx : undefined} queueContext="EXPLORE" prefetchedLiked={likedMap[row.song.id] ?? false} />;
       })}
     </div>
   );
