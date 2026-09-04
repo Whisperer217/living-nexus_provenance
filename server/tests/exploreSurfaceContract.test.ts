@@ -10,7 +10,8 @@ describe("Explore public-surface contract", () => {
     const exploreSource = fs.readFileSync(explorePagePath, "utf8");
     const layoutSource = fs.readFileSync(mainLayoutPath, "utf8");
 
-    expect(exploreSource).toContain('title: "Songs"');
+    expect(exploreSource).toContain('type ViewMode = "list" | "creators"');
+    expect(exploreSource).toContain('viewMode === "list"');
     expect(exploreSource).toContain("Songs & artists");
     expect(exploreSource).not.toContain('title: "Books"');
     expect(exploreSource).not.toContain('title: "Film"');

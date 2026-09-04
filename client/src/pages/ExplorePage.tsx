@@ -8,7 +8,7 @@ import { trpc } from "@/lib/trpc";
 import { Link, useLocation, useParams } from "wouter";
 import {
   Search, RefreshCw, Shield, Music, Eye, Flame,
-  Sparkles, Star, ChevronRight, ChevronLeft, LayoutList, LayoutGrid,
+  Sparkles, Star, ChevronRight, ChevronLeft, LayoutList,
   FileText, Users, X, Lock,
   Play, FileAudio, File,
 } from "lucide-react";
@@ -22,19 +22,8 @@ function isAudioRow(row: FeedRow): boolean {
   return (row.song.contentType ?? "audio") === "audio";
 }
 
-// ── Columns — music only (§9) ─────────────────────────────────────────────
-const COLUMNS = [
-  {
-    key: "music" as const,
-    title: "Songs",
-    subtitle: "Witnessed tracks & compositions",
-    icon: <Music className="w-4 h-4" />,
-    accentColor: "text-emerald-400",
-    borderColor: "border-emerald-400/30",
-    glowColor: "rgba(52,211,153,0.12)",
-    emptyMessage: "No songs registered yet",
-  },
-];
+// ── Discoverable work collections ─────────────────────────────────────────
+const WORK_COLLECTION_KEYS = ["music"] as const;
 
 // ── Supplemental rows (not columns — shown above the column rail) ─────────
 const SUPPLEMENTAL_SECTIONS = [
@@ -44,16 +33,15 @@ const SUPPLEMENTAL_SECTIONS = [
   { key: "hiddenGems" as const, title: "Hidden Gems", icon: <Star className="w-4 h-4" />, accentColor: "text-yellow-400" },
 ];
 
-type ColumnKey = typeof COLUMNS[number]["key"];
 type SupplementalKey = typeof SUPPLEMENTAL_SECTIONS[number]["key"];
-type ViewMode = "columns" | "list" | "grid";
+type ViewMode = "list" | "creators";
 
 function getInitialViewMode(): ViewMode {
-  if (typeof window === "undefined") return "columns";
+  if (typeof window === "undefined") return "list";
   const view = new URLSearchParams(window.location.search).get("view");
-  if (view === "creators") return "grid";
-  if (view === "list") return "list";
-  return "columns";
+  if (view === "creators") return "creators";
+  // Legacy grid links intentionally resolve to the retained list view.
+  return "list";
 }
 
 // Max works to load — always show everything the server has
@@ -325,113 +313,6 @@ function ColumnSkeleton() {
   );
 }
 
-// ── Content Column ─────────────────────────────────────────────────────────
-// A single vertically-scrollable column for one content type.
-function ContentColumn({
-  col, rows, search, likedMap, isLoading,
-}: {
-  col: typeof COLUMNS[number];
-  rows: FeedRow[];
-  search: string;
-  likedMap: Record<number, boolean>;
-  isLoading: boolean;
-}) {
-  const [showAll, setShowAll] = useState(false);
-  const INITIAL_SHOW = 40;
-
-  const filtered = useMemo(() => {
-    if (!search) return rows;
-    const q = search.toLowerCase();
-    return rows.filter(r =>
-      r.song.title.toLowerCase().includes(q) ||
-      (r.creator?.name ?? "").toLowerCase().includes(q) ||
-      (r.creator?.artistHandle ?? "").toLowerCase().includes(q) ||
-      (r.song.genre ?? "").toLowerCase().includes(q)
-    );
-  }, [rows, search]);
-
-  const displayed = showAll ? filtered : filtered.slice(0, INITIAL_SHOW);
-  const hasMore = filtered.length > INITIAL_SHOW && !showAll;
-
-  const audioTracks = useMemo(() => filtered.filter(r => !!r.song.fileUrl).map(feedRowToTrack), [filtered]);
-
-  return (
-    <div
-      className="flex flex-col flex-shrink-0"
-      style={{
-        width: "clamp(280px, 22vw, 340px)",
-        minHeight: 0,
-      }}
-    >
-      {/* Column header */}
-      <div
-        className={`flex items-center gap-2 mb-3 pb-3 border-b ${col.borderColor}`}
-        style={{ borderBottomColor: col.glowColor.replace("0.12", "0.35") }}
-      >
-        <div
-          className={`flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center ${col.accentColor}`}
-          style={{ background: col.glowColor }}
-        >
-          {col.icon}
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-baseline gap-2">
-            <h2 className={`font-heading font-bold text-sm tracking-wide ${col.accentColor}`}>{col.title}</h2>
-            {!isLoading && filtered.length > 0 && (
-              <span className="text-[10px] font-mono text-[var(--stone-shadow)]">{filtered.length}</span>
-            )}
-          </div>
-          <p className="text-[10px] text-[var(--stone-shadow)] truncate">{col.subtitle}</p>
-        </div>
-      </div>
-
-      {/* Works list */}
-      {isLoading ? (
-        <div className="space-y-2 animate-pulse">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="h-14 rounded-lg" style={{ background: "var(--void-3)" }} />
-          ))}
-        </div>
-      ) : filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-12 text-center">
-          <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 ${col.accentColor}`} style={{ background: col.glowColor }}>
-            {col.icon}
-          </div>
-          <p className="text-xs text-[var(--stone-shadow)]">{col.emptyMessage}</p>
-        </div>
-      ) : (
-        <div className="flex-1 overflow-y-auto" style={{ maxHeight: "calc(100vh - 220px)", scrollbarWidth: "thin", scrollbarColor: "rgba(255,255,255,0.1) transparent" }}>
-          <div className="divide-y divide-white/5 rounded-xl overflow-hidden border border-white/5">
-            {displayed.map((row, i) => {
-              const qIdx = audioTracks.findIndex(t => t.id === String(row.song.id));
-              return (
-                <WorkListRow
-                  key={row.song.id}
-                  item={feedRowToListItem(row)}
-                  index={i}
-                  queueTracks={audioTracks}
-                  queueIndex={qIdx >= 0 ? qIdx : undefined}
-                  queueContext="EXPLORE"
-                  prefetchedLiked={likedMap[row.song.id]}
-                />
-              );
-            })}
-          </div>
-          {hasMore && (
-            <button
-              onClick={() => setShowAll(true)}
-              className={`w-full mt-2 py-2.5 rounded-xl text-xs font-medium border transition-all ${col.accentColor} border-white/10 hover:border-current/40`}
-              style={{ background: col.glowColor }}
-            >
-              Load {filtered.length - INITIAL_SHOW} more
-            </button>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
-
 // ── Supplemental row (horizontal scroll strip) ────────────────────────────
 function SupplementalRow({
   section, rows, likedMap, search,
@@ -485,12 +366,11 @@ function SupplementalRow({
   );
 }
 
-// ── View Toggle (columns / list / grid) ───────────────────────────────────
+// ── View Toggle (list / creators) ─────────────────────────────────────────
 function ViewToggle({ value, onChange }: { value: ViewMode; onChange: (v: ViewMode) => void }) {
   const modes: { key: ViewMode; icon: React.ReactNode; label: string }[] = [
-    { key: "columns", icon: <LayoutGrid className="w-3.5 h-3.5" />, label: "Columns" },
     { key: "list",    icon: <LayoutList className="w-3.5 h-3.5" />, label: "List" },
-    { key: "grid",    icon: <Users className="w-3.5 h-3.5" />,       label: "Browse creators" },
+    { key: "creators", icon: <Users className="w-3.5 h-3.5" />,       label: "Browse creators" },
   ];
   return (
     <div className="flex items-center gap-0.5 bg-[var(--void-3)] border border-white/8 rounded-xl p-0.5">
@@ -509,8 +389,8 @@ function AllWorksListView({ data, search, likedMap }: { data: ReturnType<typeof 
   const allRows = useMemo(() => {
     const seen = new Set<number>();
     const out: FeedRow[] = [];
-    COLUMNS.forEach(col => {
-      (data[col.key] as FeedRow[]).forEach(r => { if (!seen.has(r.song.id)) { seen.add(r.song.id); out.push(r); } });
+    WORK_COLLECTION_KEYS.forEach(key => {
+      (data[key] as FeedRow[]).forEach(r => { if (!seen.has(r.song.id)) { seen.add(r.song.id); out.push(r); } });
     });
     return out;
   }, [data]);
@@ -616,7 +496,7 @@ function AllCreatorsView({ creators, search, selectedCreatorId }: { creators: Cr
 export default function ExplorePage() {
   const params = useParams<{ medium?: string }>();
   const mediumParam = params.medium?.toLowerCase();
-  // Map URL segment to column key
+  // Legacy medium segments redirect to the music-first Explore surface.
   void mediumParam; // /explore/:medium redirects to /explore in App
 
   const [seed] = useState(() => Math.floor(Math.random() * 999999));
@@ -633,7 +513,7 @@ export default function ExplorePage() {
   // ── Bulk like status fetch ────────────────────────────────────────
   const allSongIds = useMemo(() => {
     const ids = new Set<number>();
-    COLUMNS.forEach(col => { (data[col.key] as FeedRow[]).forEach(r => ids.add(r.song.id)); });
+    WORK_COLLECTION_KEYS.forEach(key => { (data[key] as FeedRow[]).forEach(r => ids.add(r.song.id)); });
     SUPPLEMENTAL_SECTIONS.forEach(s => { (data[s.key] as FeedRow[]).forEach(r => ids.add(r.song.id)); });
     return Array.from(ids).slice(0, 500);
   }, [data]);
@@ -656,9 +536,8 @@ export default function ExplorePage() {
   const handleViewChange = useCallback((nextView: ViewMode) => {
     setViewMode(nextView);
     const url = new URL(window.location.href);
-    if (nextView === "grid") url.searchParams.set("view", "creators");
-    else if (nextView === "list") url.searchParams.set("view", "list");
-    else url.searchParams.delete("view");
+    if (nextView === "creators") url.searchParams.set("view", "creators");
+    else url.searchParams.set("view", "list");
     window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
   }, []);
 
@@ -727,13 +606,10 @@ export default function ExplorePage() {
                 <div className="flex gap-3 overflow-hidden"><ColumnSkeleton /></div>
               </div>
             ))}
-            {/* Column skeletons */}
-            <div className="flex gap-5 overflow-hidden pt-4">
-              {COLUMNS.map(col => (
-                <div key={col.key} className="flex-shrink-0" style={{ width: "clamp(280px, 22vw, 340px)" }}>
-                  <div className="h-12 rounded-lg mb-3 animate-pulse" style={{ background: "var(--void-3)" }} />
-                  <ColumnSkeleton />
-                </div>
+            {/* List-view skeleton */}
+            <div className="space-y-2 rounded-xl border border-white/5 p-3">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="h-14 rounded-lg" style={{ background: "var(--void-3)" }} />
               ))}
             </div>
           </div>
@@ -751,38 +627,10 @@ export default function ExplorePage() {
         {!data.isLoading && !data.error && (
           <>
             {/* ── Supplemental horizontal strips (always shown) ── */}
-            {!search && !selectedCreatorId && viewMode !== "grid" && (
+            {!search && !selectedCreatorId && viewMode === "list" && (
               <div className="pt-6">
                 {SUPPLEMENTAL_SECTIONS.map(section => (
                   <SupplementalRow key={section.key} section={section} rows={data[section.key]} likedMap={likedMap} search={search} />
-                ))}
-              </div>
-            )}
-
-            {/* ── Divider before columns ── */}
-            {!search && !selectedCreatorId && viewMode === "columns" && (
-              <div className="flex items-center gap-4 my-6">
-                <div className="h-px flex-1 bg-gradient-to-r from-transparent via-[var(--gold)]/30 to-transparent" />
-                <span className="text-[10px] font-mono text-[var(--gold)] uppercase tracking-widest px-2">Songs</span>
-                <div className="h-px flex-1 bg-gradient-to-l from-transparent via-[var(--gold)]/30 to-transparent" />
-              </div>
-            )}
-
-            {/* ── Column view ── */}
-            {viewMode === "columns" && (
-              <div
-                className="flex gap-5 overflow-x-auto pb-4"
-                style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(212,175,55,0.2) transparent", alignItems: "flex-start" }}
-              >
-                {COLUMNS.map(col => (
-                  <ContentColumn
-                    key={col.key}
-                    col={col}
-                    rows={data[col.key]}
-                    search={search}
-                    likedMap={likedMap}
-                    isLoading={false}
-                  />
                 ))}
               </div>
             )}
@@ -795,7 +643,7 @@ export default function ExplorePage() {
             )}
 
             {/* ── Creator view ── */}
-            {viewMode === "grid" && (
+            {viewMode === "creators" && (
               <AllCreatorsView creators={creators} search={search} selectedCreatorId={selectedCreatorId} />
             )}
 

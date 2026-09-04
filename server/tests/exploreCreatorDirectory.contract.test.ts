@@ -17,7 +17,7 @@ describe("Explore creator directory", () => {
     expect(explore).toContain('label: "Browse creators"');
     expect(explore).toContain('view === "creators"');
     expect(explore).toContain('url.searchParams.set("view", "creators")');
-    expect(explore).toContain('!search && !selectedCreatorId && viewMode !== "grid"');
+    expect(explore).toContain('!search && !selectedCreatorId && viewMode === "list"');
     expect(directory).toContain("function AllCreatorsView({ creators, search, selectedCreatorId }");
     expect(directory).toContain("Browse creators");
     expect(directory).not.toContain("data: ReturnType<typeof useExploreData>");
@@ -46,5 +46,15 @@ describe("Explore creator directory", () => {
     expect(explore).toContain("prefetchedLiked={likedMap[row.song.id] ?? false}");
     expect(explore).toContain("return useMemo(() => ({");
     expect(explore).not.toContain("explore-list-static");
+  });
+
+  it("removes the legacy Columns control and routes old grid URLs into the retained list mode", () => {
+    expect(explore).toContain('type ViewMode = "list" | "creators"');
+    expect(explore).toContain('if (view === "creators") return "creators"');
+    expect(explore).toContain('return "list"');
+    expect(explore).not.toContain('label: "Columns"');
+    expect(explore).not.toContain('key: "columns"');
+    expect(explore).not.toContain('viewMode === "columns"');
+    expect(explore).not.toContain("LayoutGrid");
   });
 });
