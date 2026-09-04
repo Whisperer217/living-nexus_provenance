@@ -323,6 +323,8 @@ export async function getAllCreators() {
     .from(users)
     .innerJoin(songs, and(eq(songs.userId, users.id), eq(songs.status, "Published")))
     .where(and(
+      // Home identity eligibility is public-only; a legacy Published-but-private Work is not discoverable.
+      eq(songs.isPublic, true),
       // Must have a real name or artistHandle — exclude auto-generated "Creator {digits}" placeholders
       or(
         isNotNull(users.artistHandle),

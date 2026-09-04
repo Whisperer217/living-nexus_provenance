@@ -123,8 +123,12 @@ export default function HomePage() {
     { staleTime: 60_000, refetchOnWindowFocus: false },
   );
   const { data: featuredCreators } = trpc.profile.featuredCreators.useQuery(undefined, {
-    staleTime: 120_000,
-    refetchOnWindowFocus: false,
+    // This is a read-only projection of already-public creator profiles. Refresh only
+    // while Home is open so newly eligible creators appear without a worker or curation job.
+    staleTime: 30_000,
+    refetchOnWindowFocus: true,
+    refetchInterval: 60_000,
+    refetchIntervalInBackground: false,
   });
 
   useEffect(() => {
@@ -143,6 +147,27 @@ export default function HomePage() {
     const list = Array.isArray(featuredCreators) ? featuredCreators : [];
     return list.slice(0, 6);
   }, [featuredCreators]);
+  const creatorCards = useMemo(() => creators.map((creator: any, index: number) => {
+    const handle = creator.artistHandle || creator.handle || creator.name || "creator";
+    const creatorId = Number(creator.id) || index + 1;
+    const publishedCount = Math.max(0, Number(creator.publishedCount ?? 0));
+    // Stable hue distinguishes creators; public published-work count alone controls
+    // the aura strength so no private engagement data is disclosed or inferred.
+    const auraHue = [43, 138, 208, 276, 336, 18][Math.abs(creatorId) % 6];
+    const auraStrength = Math.min(0.72, 0.28 + Math.log2(publishedCount + 1) * 0.1);
+    return {
+      id: creator.id || handle,
+      href: creator.artistHandle || creator.handle ? `/creator/${creator.artistHandle || creator.handle}` : creator.id ? `/creator/${creator.id}` : "/explore",
+      handle,
+      name: creator.name || handle,
+      profilePhotoUrl: creator.profilePhotoUrl || null,
+      bannerUrl: creator.bannerUrl || null,
+      publishedCount,
+      initial: handle.slice(0, 1).toUpperCase(),
+      auraColor: `hsl(${auraHue} 72% 60%)`,
+      auraStrength,
+    };
+  }), [creators]);
 
   const enterPnaHref = isAuthenticated ? "/pna" : getLoginUrl("/pna");
   const registerHref = isAuthenticated ? "/manifest" : getLoginUrl("/manifest");
@@ -600,39 +625,73 @@ export default function HomePage() {
               )}
             </div>
 
-            {creators.length > 0 && (
-              <div className="flex flex-wrap gap-3">
-                {creators.map((c: any) => {
-                  const handle = c.artistHandle || c.handle;
-                  const href = handle ? `/creator/${handle}` : c.id ? `/creator/${c.id}` : "/explore";
-                  return (
-                    <Link key={c.id || handle} href={href}>
+            {creatorCards.length > 0 && (
+              <section className="mt-10" aria-labelledby="home-creator-identities">
+                <div className="flex items-end justify-between gap-4 mb-4">
+                  <div>
+                    <p className="font-heading text-[10px] uppercase tracking-[0.22em] mb-1" style={{ color: "var(--ln-gold)" }}>
+                      Creator identities
+                    </p>
+                    <h3 id="home-creator-identities" className="font-heading" style={{ fontSize: "1.08rem", color: "var(--ln-parchment)" }}>
+                      Meet the creators behind the works
+                    </h3>
+                  </div>
+                  <Link href="/explore?mode=creators">
+                    <span className="font-heading text-[10px] uppercase tracking-[0.1em] cursor-pointer" style={{ color: "var(--ln-gold)" }}>
+                      All creators →
+                    </span>
+                  </Link>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+                  {creatorCards.map((creator) => (
+                    <Link key={creator.id} href={creator.href}>
                       <span
-                        className="font-body inline-flex items-center gap-2 px-3 py-2 rounded-full cursor-pointer"
+                        className="group relative flex min-h-[164px] overflow-hidden rounded-2xl px-3 py-4 sm:min-h-[184px] sm:px-4 sm:py-5 cursor-pointer transition-transform duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ln-gold)]"
+                        title={`Visit ${creator.name}'s creator domain`}
                         style={{
-                          background: "var(--ln-obsidian)",
-                          border: "1px solid var(--ln-panel-border)",
-                          color: "var(--ln-parchment)",
-                          fontSize: "0.75rem",
+                          backgroundImage: creator.bannerUrl
+                            ? `linear-gradient(145deg, color-mix(in srgb, var(--ln-void) 35%, transparent), color-mix(in srgb, var(--ln-void) 92%, transparent)), url(${creator.bannerUrl})`
+                            : `radial-gradient(circle at 50% 0%, color-mix(in srgb, ${creator.auraColor} ${Math.round(creator.auraStrength * 100)}%, transparent), transparent 60%), var(--ln-obsidian)`,
+                          backgroundSize: "cover",
+                          backgroundPosition: "center",
+                          border: `1px solid color-mix(in srgb, ${creator.auraColor} 58%, var(--ln-panel-border))`,
+                          boxShadow: `0 12px 34px color-mix(in srgb, ${creator.auraColor} ${Math.round(creator.auraStrength * 42)}%, transparent), inset 0 1px 0 color-mix(in srgb, var(--ln-parchment) 11%, transparent)`,
+                          textDecoration: "none",
                         }}
                       >
-                        <span
-                          className="flex h-5 w-5 shrink-0 items-center justify-center overflow-hidden rounded-full"
-                          style={{ background: "color-mix(in srgb, var(--ln-gold) 18%, var(--ln-void))", border: "1px solid color-mix(in srgb, var(--ln-gold) 44%, transparent)" }}
-                          aria-hidden="true"
-                        >
-                          {c.profilePhotoUrl ? (
-                            <img src={c.profilePhotoUrl} alt="" className="h-full w-full object-cover" />
-                          ) : (
-                            <Users size={11} style={{ color: "var(--ln-gold)" }} />
-                          )}
+                        <span className="absolute inset-0 pointer-events-none" style={{ background: "linear-gradient(180deg, transparent 20%, color-mix(in srgb, var(--ln-void) 88%, transparent) 100%)" }} aria-hidden="true" />
+                        <span className="relative z-[1] flex w-full flex-col items-center justify-between gap-3 text-center">
+                          <span
+                            className="flex h-16 w-16 sm:h-[76px] sm:w-[76px] shrink-0 items-center justify-center overflow-hidden rounded-full transition-transform duration-200 group-hover:scale-[1.04]"
+                            style={{
+                              background: `radial-gradient(circle at 35% 25%, color-mix(in srgb, ${creator.auraColor} 82%, white), color-mix(in srgb, ${creator.auraColor} 34%, var(--ln-void)))`,
+                              border: `2px solid color-mix(in srgb, ${creator.auraColor} 80%, var(--ln-parchment))`,
+                              boxShadow: `0 0 ${18 + Math.round(creator.auraStrength * 24)}px color-mix(in srgb, ${creator.auraColor} ${Math.round(creator.auraStrength * 72)}%, transparent)`,
+                            }}
+                            aria-hidden="true"
+                          >
+                            {creator.profilePhotoUrl ? (
+                              <img src={creator.profilePhotoUrl} alt="" className="h-full w-full object-cover" />
+                            ) : (
+                              <span className="font-display text-2xl sm:text-3xl" style={{ color: "var(--ln-void)", textShadow: "0 1px 12px rgba(255,255,255,0.35)" }}>
+                                {creator.initial}
+                              </span>
+                            )}
+                          </span>
+                          <span className="w-full min-w-0 rounded-xl px-2.5 py-2" style={{ background: "color-mix(in srgb, var(--ln-void) 76%, transparent)", border: "1px solid color-mix(in srgb, var(--ln-parchment) 16%, transparent)" }}>
+                            <span className="font-heading block truncate text-[11px] sm:text-xs tracking-[0.08em]" style={{ color: "var(--ln-parchment)" }}>
+                              @{creator.handle}
+                            </span>
+                            <span className="font-body mt-0.5 block text-[10px]" style={{ color: "var(--ln-smoke)" }}>
+                              {creator.publishedCount} public {creator.publishedCount === 1 ? "work" : "works"}
+                            </span>
+                          </span>
                         </span>
-                        <span className="truncate">@{handle || c.name || "creator"}</span>
                       </span>
                     </Link>
-                  );
-                })}
-              </div>
+                  ))}
+                </div>
+              </section>
             )}
           </div>
         </section>

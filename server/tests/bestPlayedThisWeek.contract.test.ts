@@ -3,6 +3,8 @@ import { describe, expect, it } from "vitest";
 
 const songsDb = readFileSync("server/db/songs.ts", "utf-8");
 const songsRouter = readFileSync("server/routers/songs.ts", "utf-8");
+const profileRouter = readFileSync("server/routers/profile.ts", "utf-8");
+const creatorDb = readFileSync("server/utils/db.ts", "utf-8");
 const home = readFileSync("client/src/pages/HomePage.tsx", "utf-8");
 
 describe("Best Played This Week projection contract", () => {
@@ -46,5 +48,27 @@ describe("Best Played This Week projection contract", () => {
     expect(home).toContain("{v.profilePhotoUrl ? (");
     expect(home).toContain("(v.artistName || \"C\").slice(0, 1).toUpperCase()");
     expect(home).toContain("<span className=\"truncate\">@{v.artistHandle || v.artistName || \"creator\"}</span>");
+  });
+
+  it("elevates public creator identity through larger linked sigils without inventing profiles or requiring a worker", () => {
+    expect(profileRouter).toContain("featuredCreators: publicProcedure");
+    expect(profileRouter).toContain("getAllCreators()");
+    expect(profileRouter).toContain("publishedCount");
+    expect(home).toContain("const creatorCards = useMemo");
+    expect(home).toContain("Creator identities");
+    expect(home).toContain("Meet the creators behind the works");
+    expect(home).toContain("refetchInterval: 60_000");
+    expect(home).toContain("refetchIntervalInBackground: false");
+    expect(home).toContain("creator.profilePhotoUrl ? (");
+    expect(home).toContain("creator.initial");
+    expect(home).toContain("creator.publishedCount");
+    expect(home).toContain("/creator/${creator.artistHandle || creator.handle}");
+    expect(home).not.toContain("createHeartbeatJob");
+  });
+
+  it("includes a creator only through a genuinely public Published Work", () => {
+    expect(creatorDb).toContain('eq(songs.status, "Published")');
+    expect(creatorDb).toContain("eq(songs.isPublic, true)");
+    expect(home).toContain("const creatorCards = useMemo");
   });
 });
