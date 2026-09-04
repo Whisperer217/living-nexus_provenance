@@ -35,7 +35,7 @@ function useNow(intervalMs = 30_000) {
 }
 
 function SignalIcon({ type }: { type: string }) {
-  const style = { color: "#D4AF37", marginTop: 2, flexShrink: 0 } as const;
+  const style = { color: "var(--ln-gold)", marginTop: 2, flexShrink: 0 } as const;
   if (type === "tip") return <DollarSign size={12} style={style} />;
   if (type === "comment") return <MessageSquare size={12} style={style} />;
   if (type === "like") return <Heart size={12} style={style} />;
@@ -124,17 +124,17 @@ export default function RightRail() {
           transform: "translateY(-50%)",
           width: 20,
           height: 48,
-          background: "var(--ln-panel)",
-          border: "1px solid rgba(212,175,55,0.18)",
-          borderRight: isOpen ? "none" : "1px solid rgba(212,175,55,0.18)",
+          background: "var(--ln-surface-rail)",
+          border: "1px solid var(--ln-border-subtle)",
+          borderRight: isOpen ? "none" : "1px solid var(--ln-border-subtle)",
           borderRadius: isOpen ? "6px 0 0 6px" : "0 6px 6px 0",
           color: "rgba(212,175,55,0.7)",
           cursor: "pointer",
           zIndex: 81,
           transition: "right 0.3s ease",
         }}
-        onMouseEnter={e => (e.currentTarget.style.color = "#D4AF37")}
-        onMouseLeave={e => (e.currentTarget.style.color = "rgba(212,175,55,0.7)")}
+        onMouseEnter={e => (e.currentTarget.style.color = "var(--ln-gold)")}
+        onMouseLeave={e => (e.currentTarget.style.color = "color-mix(in srgb, var(--ln-gold) 70%, transparent)")}
       >
         {isOpen ? <ChevronRight size={12} /> : <ChevronLeft size={12} />}
       </button>
@@ -147,8 +147,8 @@ export default function RightRail() {
           right: isOpen ? 0 : -300,
           bottom: 0,
           width: 300,
-          background: "var(--ln-panel)",
-          borderLeft: "1px solid rgba(212,175,55,0.08)",
+          background: "var(--ln-surface-rail)",
+          borderLeft: "1px solid var(--ln-border-subtle)",
           /* z-index: 80 — below ContextDrawer (300) and LeftRail (310),
              but above page content so it never disappears behind it */
           zIndex: 80,
@@ -264,7 +264,7 @@ export default function RightRail() {
               onClick={() => navigate("/witness-registry")}
               className="text-[10px] transition-colors"
               style={{ color: "rgba(212,175,55,0.45)" }}
-              onMouseEnter={e => (e.currentTarget.style.color = "#D4AF37")}
+              onMouseEnter={e => (e.currentTarget.style.color = "var(--ln-gold)")}
               onMouseLeave={e => (e.currentTarget.style.color = "rgba(212,175,55,0.45)")}
             >
               VIEW ALL
@@ -291,8 +291,8 @@ export default function RightRail() {
                   style={{
                     padding: "10px",
                     borderRadius: 10,
-                    background: "rgba(255,215,0,0.03)",
-                    border: "1px solid rgba(255,215,0,0.08)",
+                    background: "var(--ln-surface-card)",
+                    border: "1px solid var(--ln-border-subtle)",
                     transition: "background 0.2s ease, transform 0.2s ease",
                   }}
                   onClick={() => {
@@ -311,11 +311,11 @@ export default function RightRail() {
                     }
                   }}
                   onMouseEnter={e => {
-                    (e.currentTarget as HTMLDivElement).style.background = "rgba(255,215,0,0.06)";
+                    (e.currentTarget as HTMLDivElement).style.background = "var(--ln-surface-rail-hover)";
                     (e.currentTarget as HTMLDivElement).style.transform = "translateX(2px)";
                   }}
                   onMouseLeave={e => {
-                    (e.currentTarget as HTMLDivElement).style.background = "rgba(255,215,0,0.03)";
+                    (e.currentTarget as HTMLDivElement).style.background = "var(--ln-surface-card)";
                     (e.currentTarget as HTMLDivElement).style.transform = "translateX(0)";
                   }}
                 >
@@ -334,7 +334,7 @@ export default function RightRail() {
                       <p className="text-[11px] font-medium leading-tight" style={{ color: "color-mix(in srgb, var(--ln-parchment) 88%, transparent)", overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>
                         {w.title}
                       </p>
-                      <CheckCircle2 size={11} style={{ color: "#D4AF37", flexShrink: 0, marginTop: 1 }} />
+                      <CheckCircle2 size={11} style={{ color: "var(--ln-gold)", flexShrink: 0, marginTop: 1 }} />
                     </div>
 
                     {/* Creator handle */}
@@ -394,10 +394,10 @@ export default function RightRail() {
 
           <div
             className="rounded-xl p-3 cursor-pointer transition-opacity hover:opacity-80"
-            style={{ background: "rgba(212,175,55,0.05)", border: "1px solid rgba(212,175,55,0.12)" }}
+            style={{ background: "var(--ln-surface-card)", border: "1px solid var(--ln-border-subtle)" }}
             onClick={() => navigate("/witness-registry")}
           >
-            <p className="text-2xl font-bold" style={{ color: "#D4AF37" }}>
+            <p className="text-2xl font-bold" style={{ color: "var(--ln-gold)" }}>
               {registryItems.length > 0 ? (totalWitnesses ?? registryItems.length).toLocaleString() : "—"}
             </p>
             <p className="text-[10px] mt-0.5" style={{ color: "color-mix(in srgb, var(--ln-parchment) 40%, transparent)" }}>

@@ -617,6 +617,25 @@
   --ln-gold:          #F5C842;
   --ln-gold-hot:      #FFD966;
   --ln-gold-flame:    #FFE89A;
+  --ln-surface-page:      var(--ln-void);
+  --ln-surface-rail:      var(--ln-panel);
+  --ln-surface-rail-hover: color-mix(in srgb, var(--ln-gold) 10%, transparent);
+  --ln-surface-rail-active: color-mix(in srgb, var(--ln-gold) 15%, transparent);
+  --ln-surface-card:      var(--ln-coal);
+  --ln-surface-elevated:  var(--ln-panel);
+  --ln-surface-field:     color-mix(in srgb, var(--ln-parchment) 5%, transparent);
+  --ln-text-primary:      var(--ln-parchment);
+  --ln-text-secondary:    var(--ln-bone);
+  --ln-text-muted:        var(--ln-smoke);
+  --ln-border-subtle:     var(--ln-panel-border);
+  --ln-ambient-page:
+    radial-gradient(circle at 16% 10%, color-mix(in srgb, var(--ln-gold) 18%, transparent), transparent 30%),
+    radial-gradient(circle at 82% 24%, color-mix(in srgb, var(--ln-gold-hot) 10%, transparent), transparent 34%),
+    linear-gradient(180deg, var(--ln-void), var(--ln-obsidian));
+  --ln-ambient-overlay: rgba(0,0,0,0.55);
+  --ln-ambient-shadow: 0 20px 52px rgba(0,0,0,0.58);
+  --ln-breath-hue: 43;
+  --ln-breath-sat: 62%;
 }
 [data-theme="illuminated-gold"] body,
 [data-theme="illuminated-gold"] html {
@@ -694,6 +713,25 @@
   --ln-gold:          #8F6418;
   --ln-gold-hot:      #B8872C;
   --ln-gold-flame:    #D0A04A;
+  --ln-surface-page:      #F1E5D0;
+  --ln-surface-rail:      rgba(246, 236, 217, 0.98);
+  --ln-surface-rail-hover: rgba(143, 100, 24, 0.10);
+  --ln-surface-rail-active: #E4CFAB;
+  --ln-surface-card:      #F8EEDC;
+  --ln-surface-elevated:  #FFF7EA;
+  --ln-surface-field:     rgba(255, 247, 234, 0.72);
+  --ln-text-primary:      #24170F;
+  --ln-text-secondary:    #3A281A;
+  --ln-text-muted:        #66513C;
+  --ln-border-subtle:     rgba(143, 100, 24, 0.24);
+  --ln-ambient-page:
+    radial-gradient(circle at 18% 12%, rgba(143, 100, 24, 0.14), transparent 30%),
+    radial-gradient(circle at 86% 18%, rgba(58, 40, 26, 0.08), transparent 34%),
+    linear-gradient(180deg, #F6ECD9 0%, #F1E5D0 42%, #E7D6BA 100%);
+  --ln-ambient-overlay: rgba(58, 40, 26, 0.22);
+  --ln-ambient-shadow: 0 18px 42px rgba(78, 52, 24, 0.18);
+  --ln-breath-hue: 38;
+  --ln-breath-sat: 46%;
 }
 [data-theme="parchment-cream"] body,
 [data-theme="parchment-cream"] html,
@@ -775,7 +813,7 @@
     min-height: 100dvh; /* dvh = true mobile viewport height, not browser-lied vh */
     display: flex;
     flex-direction: column;
-    background-color: var(--background, #000000); /* theme-aware seal */
+    background: var(--ln-ambient-page, var(--background, #000000)); /* theme-aware seal */
     color: var(--foreground, #EDE5D0);
   }
   /* scroll-lock override moved outside @layer base — see below */
@@ -2256,6 +2294,48 @@ input[type="range"].volume-slider-theater::-moz-range-thumb {
   --ln-gold-hot:      #B8872C;
   --ln-gold-flame:    #D0A04A;
   --ln-cathedral-action-text: #FFF7EA;
+  --ln-surface-page:      #F1E5D0;
+  --ln-surface-rail:      rgba(246, 236, 217, 0.98);
+  --ln-surface-rail-hover: rgba(143, 100, 24, 0.10);
+  --ln-surface-rail-active: #E4CFAB;
+  --ln-surface-card:      #F8EEDC;
+  --ln-surface-elevated:  #FFF7EA;
+  --ln-surface-field:     rgba(255, 247, 234, 0.72);
+  --ln-text-primary:      #24170F;
+  --ln-text-secondary:    #3A281A;
+  --ln-text-muted:        #66513C;
+  --ln-border-subtle:     rgba(143, 100, 24, 0.24);
+  --ln-ambient-page:
+    radial-gradient(circle at 18% 12%, rgba(143, 100, 24, 0.14), transparent 30%),
+    radial-gradient(circle at 86% 18%, rgba(58, 40, 26, 0.08), transparent 34%),
+    linear-gradient(180deg, #F6ECD9 0%, #F1E5D0 42%, #E7D6BA 100%);
+  --ln-ambient-overlay: rgba(58, 40, 26, 0.22);
+  --ln-ambient-shadow: 0 18px 42px rgba(78, 52, 24, 0.18);
+  --ln-breath-hue: 38;
+  --ln-breath-sat: 46%;
+}
+
+[data-theme="parchment-cream"] .noise-overlay,
+[data-theme="warm"] .noise-overlay {
+  background: var(--ln-ambient-page);
+}
+
+[data-theme="parchment-cream"] .ln-sidebar,
+[data-theme="warm"] .ln-sidebar {
+  background: var(--ln-surface-rail);
+  border-color: var(--ln-border-subtle);
+}
+
+[data-theme="parchment-cream"] .ln-modal-backdrop,
+[data-theme="warm"] .ln-modal-backdrop {
+  background: var(--ln-ambient-overlay);
+}
+
+[data-theme="parchment-cream"] .ln-modal,
+[data-theme="warm"] .ln-modal,
+[data-theme="parchment-cream"] [data-sonner-toast],
+[data-theme="warm"] [data-sonner-toast] {
+  box-shadow: var(--ln-ambient-shadow) !important;
 }
 
 /* Reassert active dark-scheme accents after the canonical identity palette.

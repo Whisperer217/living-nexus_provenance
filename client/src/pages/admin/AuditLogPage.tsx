@@ -16,11 +16,11 @@ import {
 } from "lucide-react";
 
 const GOLD = "var(--ln-gold)";
-const BG = "var(--ln-parchment)";
-const CARD = "var(--ln-coal)";
-const BORDER = "var(--ln-coal)";
-const TEXT = "#E2E8F0";
-const SUBTEXT = "#94A3B8";
+const BG = "var(--ln-surface-page)";
+const CARD = "var(--ln-surface-card)";
+const BORDER = "var(--ln-border-subtle)";
+const TEXT = "var(--ln-text-primary)";
+const SUBTEXT = "var(--ln-text-muted)";
 const GREEN = "var(--ln-seal-bright)";
 const YELLOW = "var(--ln-gold)";
 const RED = "var(--ln-ember)";

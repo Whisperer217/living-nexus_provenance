@@ -279,7 +279,7 @@ export default function ContextDrawer({
           right: 0,
           bottom: 0,
           zIndex: 299,
-          background: "rgba(0,0,0,0.40)",
+          background: "var(--ln-ambient-overlay)",
           opacity: open ? 1 : 0,
           pointerEvents: open ? "auto" : "none",
           transition: "opacity 220ms cubic-bezier(0.22,1,0.36,1)",
@@ -299,13 +299,13 @@ export default function ContextDrawer({
           bottom: 0,
           width: 300,
           zIndex: 300,
-          background: "rgba(0,0,0,0.99)",
-          borderRight: "1px solid rgba(196,154,40,0.14)",
+          background: "var(--ln-surface-rail)",
+          borderRight: "1px solid var(--ln-border-subtle)",
           backdropFilter: "blur(20px)",
           /* Close: push fully off-screen left past the rail so no artifact bleeds into the 72px rail zone */
           transform: open ? "translateX(0)" : "translateX(calc(-100% - 72px))",
           transition: "transform 220ms cubic-bezier(0.22,1,0.36,1)",
-          boxShadow: open ? "8px 0 40px rgba(0,0,0,0.65)" : "none",
+          boxShadow: open ? "var(--ln-ambient-shadow)" : "none",
           pointerEvents: open ? "auto" : "none",
           overflowY: "auto",
           scrollbarWidth: "none",
@@ -316,7 +316,7 @@ export default function ContextDrawer({
             {/* Mode header */}
             <div
               className="flex items-center justify-between px-5 pt-5 pb-4 flex-shrink-0"
-              style={{ borderBottom: "1px solid rgba(212,175,55,0.10)" }}
+              style={{ borderBottom: "1px solid var(--ln-border-subtle)" }}
             >
               <div className="flex items-center gap-3">
                 <span style={{ color: "rgba(212,175,55,0.80)" }}>{panel.icon}</span>
@@ -327,7 +327,7 @@ export default function ContextDrawer({
                   >
                     {panel.title}
                   </div>
-                  <div className="text-[10px] mt-0.5" style={{ color: "color-mix(in srgb, var(--ln-parchment) 35%, transparent)" }}>
+                  <div className="text-[10px] mt-0.5" style={{ color: "var(--ln-text-muted)" }}>
                     {panel.subtitle}
                   </div>
                 </div>
@@ -369,7 +369,7 @@ export default function ContextDrawer({
                           onClick={() => handleLinkClick(link.path)}
                           className="w-full flex items-start gap-3 px-5 py-3 text-left transition-colors"
                           style={{
-                            background: active ? "rgba(212,175,55,0.07)" : "transparent",
+                            background: active ? "var(--ln-surface-rail-active)" : "transparent",
                             borderLeft: active
                               ? "2px solid rgba(212,175,55,0.65)"
                               : "2px solid transparent",
@@ -377,7 +377,7 @@ export default function ContextDrawer({
                           onMouseEnter={e => {
                             if (!active)
                               (e.currentTarget as HTMLElement).style.background =
-                                "color-mix(in srgb, var(--ln-parchment) 4%, transparent)";
+                                "var(--ln-surface-rail-hover)";
                           }}
                           onMouseLeave={e => {
                             if (!active)
@@ -393,7 +393,7 @@ export default function ContextDrawer({
                                 ? "rgba(255,80,80,0.55)"
                                 : link.gold
                                 ? "rgba(212,175,55,0.60)"
-                                : "color-mix(in srgb, var(--ln-parchment) 32%, transparent)",
+                                : "var(--ln-text-muted)",
                             }}
                           >
                             {link.icon}
@@ -408,7 +408,7 @@ export default function ContextDrawer({
                                   ? "rgba(255,100,100,0.75)"
                                   : link.gold
                                   ? "rgba(212,175,55,0.85)"
-                                  : "color-mix(in srgb, var(--ln-parchment) 72%, transparent)",
+                                  : "var(--ln-text-secondary)",
                               }}
                             >
                               {link.label}
@@ -416,7 +416,7 @@ export default function ContextDrawer({
                             {link.description && (
                               <div
                                 className="text-[11px] mt-0.5 truncate"
-                                style={{ color: "color-mix(in srgb, var(--ln-parchment) 28%, transparent)" }}
+                                style={{ color: "var(--ln-text-muted)" }}
                               >
                                 {link.description}
                               </div>
@@ -433,7 +433,7 @@ export default function ContextDrawer({
             {/* Footer — What's New + sign-in prompt for guests */}
             <div
               className="flex-shrink-0 px-3 pb-5 pt-2"
-              style={{ borderTop: "1px solid rgba(212,175,55,0.08)" }}
+              style={{ borderTop: "1px solid var(--ln-border-subtle)" }}
             >
               <button
                 onClick={handleWhatsNew}

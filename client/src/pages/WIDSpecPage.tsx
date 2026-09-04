@@ -40,14 +40,14 @@ const interopRows = [
 
 export default function WIDSpecPage() {
   return (
-    <div className="min-h-screen" style={{ background: "var(--ln-coal)" }}>
+    <div className="min-h-screen" style={{ background: "var(--ln-ambient-page)" }}>
       {/* Hero */}
       <div className="relative overflow-hidden">
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
             background:
-              "radial-gradient(ellipse 80% 60% at 50% 0%, rgba(44,52,56,0.35) 0%, transparent 70%)",
+              "radial-gradient(ellipse 80% 60% at 50% 0%, color-mix(in srgb, var(--ln-gold) 14%, transparent) 0%, transparent 70%)",
           }}
         />
         <div className="relative max-w-4xl mx-auto px-6 pt-16 pb-12 text-center">
@@ -55,8 +55,8 @@ export default function WIDSpecPage() {
           <div
             className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-mono tracking-widest mb-6"
             style={{
-              background: "rgba(44,52,56,0.6)",
-              border: "1px solid rgba(196,154,40,0.3)",
+              background: "var(--ln-surface-elevated)",
+              border: "1px solid var(--ln-border-subtle)",
               color: "var(--ln-gold)",
             }}
           >
@@ -126,8 +126,8 @@ export default function WIDSpecPage() {
               key={title}
               className="rounded-xl p-5"
               style={{
-                background: "rgba(44,52,56,0.8)",
-                border: "1px solid rgba(44,52,56,0.6)",
+                background: "var(--ln-surface-card)",
+                border: "1px solid var(--ln-border-subtle)",
               }}
             >
               <div className="flex items-center gap-3 mb-3">
@@ -162,11 +162,11 @@ export default function WIDSpecPage() {
         </h3>
         <div
           className="rounded-xl overflow-hidden"
-          style={{ border: "1px solid rgba(44,52,56,0.6)" }}
+          style={{ border: "1px solid var(--ln-border-subtle)" }}
         >
           <table className="w-full text-sm">
             <thead>
-              <tr style={{ background: "rgba(44,52,56,0.8)" }}>
+              <tr style={{ background: "var(--ln-surface-card)" }}>
                 <th
                   className="text-left px-5 py-3 text-xs font-mono tracking-wider"
                   style={{ color: "var(--ln-gold)" }}
@@ -188,9 +188,9 @@ export default function WIDSpecPage() {
                   style={{
                     background:
                       i % 2 === 0
-                        ? "rgba(44,52,56,0.5)"
-                        : "rgba(44,52,56,0.3)",
-                    borderTop: "1px solid rgba(44,52,56,0.4)",
+                        ? "var(--ln-surface-elevated)"
+                        : "var(--ln-surface-card)",
+                    borderTop: "1px solid var(--ln-border-subtle)",
                   }}
                 >
                   <td
@@ -214,8 +214,8 @@ export default function WIDSpecPage() {
         <div
           className="p-8 text-center"
           style={{
-            background: "rgba(44,52,56,0.8)",
-            border: "1px solid rgba(196,154,40,0.17)",
+            background: "var(--ln-surface-card)",
+            border: "1px solid var(--ln-border-subtle)",
           }}
         >
           <p className="text-base leading-relaxed mb-6" style={{ color: "var(--ln-parchment)" }}>

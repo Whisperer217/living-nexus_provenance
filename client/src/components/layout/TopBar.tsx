@@ -412,7 +412,7 @@ export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCoun
     : null;
 
   const NAV_BG = isWarm
-    ? "color-mix(in srgb, var(--ln-coal) 92%, transparent)"
+    ? "var(--ln-surface-rail)"
     : harmonicPlaying
       ? `rgba(0,0,0,0.97)`  // keep base dark; tint is layered via pseudo-element below
       : `rgba(0,0,0,0.97)`;
@@ -452,7 +452,7 @@ export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCoun
         <div
           className="flex items-center gap-1.5 px-3 shrink-0"
           style={{
-            borderLeft: "1px solid rgba(46,43,34,0.80)",
+            borderLeft: "1px solid var(--ln-border-subtle)",
             height: "100%",
           }}
         >
@@ -564,7 +564,7 @@ export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCoun
                 <div
                   className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white overflow-hidden"
                   style={{
-                    background: "linear-gradient(135deg, #111111, #1A1A1A)",
+                    background: "linear-gradient(135deg, var(--ln-surface-card), var(--ln-surface-elevated))",
                     boxShadow: hasWid
                       ? "0 0 0 2px var(--ln-gold), 0 0 10px rgba(196,154,40,0.25)"
                       : avatarMenuOpen
@@ -596,7 +596,7 @@ export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCoun
               {avatarMenuOpen && (
                 <div
                   className="absolute right-0 top-full mt-2 min-w-[160px] rounded-xl overflow-hidden shadow-2xl py-1 z-[500]"
-                  style={{ background: "#1A1710", border: "1px solid rgba(196,154,40,0.25)" }}
+                  style={{ background: "var(--ln-surface-elevated)", border: "1px solid var(--ln-border-subtle)" }}
                 >
                   <div className="px-4 py-2 border-b" style={{ borderColor: "rgba(196,154,40,0.12)" }}>
                     <p className="text-[11px] font-semibold truncate" style={{ color: "var(--ln-parchment)" }}>{displayName}</p>

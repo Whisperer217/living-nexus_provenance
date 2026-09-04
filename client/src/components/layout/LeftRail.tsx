@@ -115,8 +115,8 @@ export default function LeftRail({
         style={{
           width: isMobile ? 72 : 60,
           height: 56,
-          background: active ? "rgba(212,175,55,0.10)" : "transparent",
-          color: active ? "var(--ln-gold)" : "var(--ln-smoke)",
+          background: active ? "var(--ln-surface-rail-active)" : "transparent",
+          color: active ? "var(--ln-gold)" : "var(--ln-text-muted)",
           boxShadow: active
             ? "0 0 12px color-mix(in srgb, var(--ln-gold) 20%, transparent), inset 0 0 8px color-mix(in srgb, var(--ln-gold) 5%, transparent)"
             : "none",
@@ -125,12 +125,12 @@ export default function LeftRail({
         onMouseEnter={e => {
           if (!active) {
             (e.currentTarget as HTMLElement).style.color = "var(--ln-gold)";
-            (e.currentTarget as HTMLElement).style.background = "color-mix(in srgb, var(--ln-gold) 8%, transparent)";
+            (e.currentTarget as HTMLElement).style.background = "var(--ln-surface-rail-hover)";
           }
         }}
         onMouseLeave={e => {
           if (!active) {
-            (e.currentTarget as HTMLElement).style.color = "var(--ln-smoke)";
+            (e.currentTarget as HTMLElement).style.color = "var(--ln-text-muted)";
             (e.currentTarget as HTMLElement).style.background = "transparent";
           }
         }}
@@ -179,7 +179,7 @@ export default function LeftRail({
           ? () => handleMobileClick("/")
           : (e) => handleDesktopClick(e as React.MouseEvent, activeMode ?? "home")
         }
-        className="mb-3 flex items-center justify-center rounded-xl transition-all hover:bg-white/[0.04]"
+        className="mb-3 flex items-center justify-center rounded-xl transition-all"
         title="Navigation"
         aria-label={`${LOOP_PRODUCT.name} home`}
         style={{ width: 56, height: 48, WebkitTapHighlightColor: "transparent" }}
@@ -188,13 +188,13 @@ export default function LeftRail({
       </button>
 
       {/* Divider */}
-      <div className="w-8 h-px mb-2" style={{ background: "rgba(196,154,40,0.12)" }} />
+      <div className="w-8 h-px mb-2" style={{ background: "var(--ln-border-subtle)" }} />
 
       {/* Nav items */}
       {RAIL_ITEMS.map(item => renderItem(item, isMobile))}
 
       {/* Divider before companion tools */}
-      <div className="w-8 h-px mt-2 mb-2" style={{ background: "rgba(196,154,40,0.12)" }} />
+      <div className="w-8 h-px mt-2 mb-2" style={{ background: "var(--ln-border-subtle)" }} />
 
       {/* Discord community */}
       <a
@@ -238,17 +238,17 @@ export default function LeftRail({
         style={{
           width: isMobile ? 72 : 60,
           height: 56,
-          color: "rgba(212,175,55,0.65)",
+          color: "color-mix(in srgb, var(--ln-gold) 72%, transparent)",
           background: "transparent",
           textDecoration: "none",
           WebkitTapHighlightColor: "transparent",
         }}
         onMouseEnter={e => {
-          (e.currentTarget as HTMLElement).style.color = "rgba(212,175,55,0.80)";
-          (e.currentTarget as HTMLElement).style.background = "rgba(212,175,55,0.06)";
+          (e.currentTarget as HTMLElement).style.color = "var(--ln-gold)";
+          (e.currentTarget as HTMLElement).style.background = "var(--ln-surface-rail-hover)";
         }}
         onMouseLeave={e => {
-          (e.currentTarget as HTMLElement).style.color = "rgba(212,175,55,0.65)";
+          (e.currentTarget as HTMLElement).style.color = "color-mix(in srgb, var(--ln-gold) 72%, transparent)";
           (e.currentTarget as HTMLElement).style.background = "transparent";
         }}
       >
@@ -272,7 +272,7 @@ export default function LeftRail({
           left: 0,
           bottom: 0,
           width: 72,
-          background: "var(--ln-panel)",
+          background: "var(--ln-surface-rail)",
           borderRight: "1px solid var(--ln-panel-border)",
           zIndex: 310,
           overflowY: "auto",
@@ -291,7 +291,7 @@ export default function LeftRail({
         style={{
           position: "fixed",
           inset: 0,
-          background: "rgba(0,0,0,0.55)",
+          background: "var(--ln-ambient-overlay)",
           zIndex: 299,
           opacity: mobileOpen ? 1 : 0,
           pointerEvents: mobileOpen ? "auto" : "none",
@@ -311,7 +311,7 @@ export default function LeftRail({
           left: 0,
           bottom: 0,
           width: 72,
-          background: "var(--ln-panel)",
+          background: "var(--ln-surface-rail)",
           borderRight: "1px solid var(--ln-panel-border)",
           zIndex: 300,
           overflowY: "auto",

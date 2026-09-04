@@ -144,14 +144,14 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   const { scheme } = useTheme();
   const isWarm = scheme === "light";
   const MOBILE_HEADER_BG = isWarm
-    ? "color-mix(in srgb, var(--ln-coal) 92%, transparent)"
+    ? "var(--ln-surface-rail)"
     : "rgba(0,0,0,0.97)";
   const MOBILE_HEADER_BORDER = isWarm ? "var(--ln-panel-border)" : "rgba(196,154,40,0.16)";
 
   return (
     <div
       className="noise-overlay flex flex-col h-dvh overflow-hidden bg-background relative"
-      style={{ overscrollBehavior: "none" }}
+      style={{ overscrollBehavior: "none", background: "var(--ln-ambient-page, var(--background))" }}
     >
       {/* ── LeftRail — unified navigation authority (desktop + mobile) ── */}
       <LeftRail
@@ -185,14 +185,15 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           zIndex: Z.MOBILE_HEADER,
           background: MOBILE_HEADER_BG,
           borderBottom: `1px solid ${MOBILE_HEADER_BORDER}`,
-          transition: "background 0.4s ease",
+          boxShadow: isWarm ? "var(--ln-ambient-shadow)" : undefined,
+          transition: "background 0.4s ease, box-shadow 0.4s ease",
         }}
       >
         {/* Hamburger — toggles LeftRail mobile state only */}
         <button
           onClick={mobileMenuOpen ? closeMobileMenu : openMobileMenu}
           className="p-2 rounded-lg transition-all"
-          style={{ color: "rgba(255,255,255,0.6)", WebkitTapHighlightColor: "transparent" }}
+          style={{ color: "var(--ln-text-muted)", WebkitTapHighlightColor: "transparent" }}
           aria-label={mobileMenuOpen ? "Close navigation" : "Open navigation"}
           aria-expanded={mobileMenuOpen}
           aria-controls="mobile-nav-rail"
@@ -224,7 +225,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           <button
             onClick={() => navigate("/keeper-compose")}
             className="flex items-center justify-center rounded-lg transition-all"
-            style={{ minWidth: 44, minHeight: 44, color: "rgba(255,255,255,0.4)", WebkitTapHighlightColor: "transparent" }}
+            style={{ minWidth: 44, minHeight: 44, color: "var(--ln-text-muted)", WebkitTapHighlightColor: "transparent" }}
             aria-label="Compose"
           >
             <Sparkles size={18} />
@@ -239,7 +240,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           <button
             onClick={() => navigate("/notifications")}
             className="relative flex items-center justify-center rounded-lg transition-all"
-            style={{ minWidth: 44, minHeight: 44, color: "rgba(255,255,255,0.4)", WebkitTapHighlightColor: "transparent" }}
+            style={{ minWidth: 44, minHeight: 44, color: "var(--ln-text-muted)", WebkitTapHighlightColor: "transparent" }}
             aria-label="Notifications"
           >
             <Bell size={18} />

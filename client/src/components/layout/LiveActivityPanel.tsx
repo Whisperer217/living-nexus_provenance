@@ -84,8 +84,8 @@ function TabHandle({
         top: topOffset,
         zIndex: 54,
         background: isActive && isOpen
-          ? "rgba(196,154,40,0.18)"
-          : "var(--ln-panel)",
+          ? "var(--ln-surface-rail-active)"
+          : "var(--ln-surface-rail)",
         borderTop: "1px solid var(--ln-panel-border)",
         borderLeft: "1px solid var(--ln-panel-border)",
         borderBottom: "1px solid var(--ln-panel-border)",
@@ -103,18 +103,18 @@ function TabHandle({
         height: `${TAB_HEIGHT}px`,
         width: "28px",
         transition: "right 0.3s cubic-bezier(0.4,0,0.2,1), background 0.15s, border-right 0.15s",
-        color: isActive && isOpen ? "var(--ln-gold)" : "rgba(255,255,255,0.45)",
+        color: isActive && isOpen ? "var(--ln-gold)" : "var(--ln-text-muted)",
       }}
       onMouseEnter={e => {
         if (!(isActive && isOpen)) {
-          (e.currentTarget as HTMLElement).style.background = "rgba(196,154,40,0.08)";
-          (e.currentTarget as HTMLElement).style.color = "rgba(196,154,40,0.8)";
+          (e.currentTarget as HTMLElement).style.background = "var(--ln-surface-rail-hover)";
+          (e.currentTarget as HTMLElement).style.color = "var(--ln-gold)";
         }
       }}
       onMouseLeave={e => {
         if (!(isActive && isOpen)) {
-          (e.currentTarget as HTMLElement).style.background = "var(--ln-panel)";
-          (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.45)";
+          (e.currentTarget as HTMLElement).style.background = "var(--ln-surface-rail)";
+          (e.currentTarget as HTMLElement).style.color = "var(--ln-text-muted)";
         }
       }}
     >

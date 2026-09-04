@@ -35,20 +35,20 @@ import { PlayerQueuePanel, type QueueTrack } from "./PlayerQueuePanel";
 import { toast } from "sonner";
 
 /* ── Gold design tokens ─────────────────────────────────────────── */
-const GOLD = "#D4AF37";
-const GOLD_HL = "#F5E6B3";
-const GOLD_GLOW = "rgba(212,175,55,0.6)";
+const GOLD = "var(--ln-gold)";
+const GOLD_HL = "var(--ln-gold-hot)";
+const GOLD_GLOW = "color-mix(in srgb, var(--ln-gold) 60%, transparent)";
 /* Mobile glass — Nebula & Crystal deep space */
-const GLASS_BG_MOBILE = "linear-gradient(180deg, #0a0415 0%, #0d0520 35%, #060212 100%)";
+const GLASS_BG_MOBILE = "linear-gradient(180deg, var(--ln-surface-rail) 0%, var(--ln-surface-card) 55%, var(--ln-surface-page) 100%)";
 const GLASS_BLUR_MOBILE = "blur(20px)";
 /* Desktop glass — slightly stronger separation (decision #8) */
-const GLASS_BG_DESKTOP = "rgba(0,0,0,0.75)";
+const GLASS_BG_DESKTOP = "color-mix(in srgb, var(--ln-surface-elevated) 88%, transparent)";
 const GLASS_BLUR_DESKTOP = "blur(18px)";
 /* Mobile glow: nebula purple upward glow */
-const GOLD_SHADOW_MOBILE = `0 -4px 32px rgba(138,43,226,0.40), 0 0 18px rgba(138,43,226,0.20), 0 -2px 8px rgba(192,132,252,0.15)`;
+const GOLD_SHADOW_MOBILE = `0 -4px 32px color-mix(in srgb, var(--ln-gold) 34%, transparent), 0 -2px 8px color-mix(in srgb, var(--ln-gold-hot) 16%, transparent)`;
 /* Desktop glow: directional — upward light + depth (decision #9) */
-const GOLD_SHADOW_DESKTOP = `0 -8px 24px rgba(212,175,55,0.45), 0 12px 32px rgba(0,0,0,0.9)`;
-const GOLD_BORDER = `1px solid rgba(212,175,55,0.45)`;
+const GOLD_SHADOW_DESKTOP = `0 -8px 24px color-mix(in srgb, var(--ln-gold) 38%, transparent), var(--ln-ambient-shadow)`;
+const GOLD_BORDER = `1px solid var(--ln-border-subtle)`;
 /* Nebula palette — mobile only */
 const NEBULA = "rgba(138,43,226,0.85)";
 const NEBULA_BORDER = "1px solid rgba(138,43,226,0.30)";
@@ -596,8 +596,8 @@ function GlobalPlayerInner() {
   //    When toggling off, the hook's useEffect clears the DOM boxShadow — but the React
   //    activeShadow was still including GOLD_SHADOW_MOBILE as baseShadow, so the border
   //    retained a static glow. Fixed by separating structural shadow from ambient glow.
-  const STRUCTURAL_SHADOW_MOBILE = `0 -2px 8px rgba(0,0,0,0.55), 0 0 0 1px rgba(212,175,55,0.10)`;
-  const STRUCTURAL_SHADOW_DESKTOP = `0 -4px 16px rgba(0,0,0,0.7), 0 12px 32px rgba(0,0,0,0.9)`;
+  const STRUCTURAL_SHADOW_MOBILE = `0 -2px 8px color-mix(in srgb, var(--ln-text-primary) 16%, transparent), 0 0 0 1px var(--ln-border-subtle)`;
+  const STRUCTURAL_SHADOW_DESKTOP = `var(--ln-ambient-shadow)`;
   // baseShadow = structural only (no color glow) — always applied
   const baseShadow = isDesktop ? STRUCTURAL_SHADOW_DESKTOP : STRUCTURAL_SHADOW_MOBILE;
   // ambientGlow = the colored glow layer — only applied when glowEnabled is true
@@ -702,7 +702,7 @@ function GlobalPlayerInner() {
         // "shorthand vs longhand conflict" warning when the style object is updated.
         borderWidth: "1px",
         borderStyle: "solid",
-        borderColor: isExpanded ? harmonicSig.borderColor : "rgba(212,175,55,0.45)",
+        borderColor: isExpanded ? harmonicSig.borderColor : "var(--ln-border-subtle)",
         borderRadius: isExpanded ? "20px 20px 0 0" : isDesktop ? "20px" : "12px 12px 0 0",
         boxShadow: activeShadow,
         // Spring-physics transition: overshoot + settle for zone changes; none during active drag

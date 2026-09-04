@@ -19,7 +19,7 @@ import {
 // ─── Icon config ──────────────────────────────────────────────────────────────
 
 const ICON_OPTIONS = [
-  { value: "announcement", label: "Announcement", icon: Megaphone, color: "#C9A84C" },
+  { value: "announcement", label: "Announcement", icon: Megaphone, color: "var(--ln-gold)" },
   { value: "feature", label: "New Feature", icon: Sparkles, color: "#8B5CF6" },
   { value: "alert", label: "Alert", icon: AlertTriangle, color: "#EF4444" },
   { value: "milestone", label: "Milestone", icon: Trophy, color: "#F59E0B" },
@@ -50,9 +50,9 @@ function NotificationPreview({ title, body, ctaLabel, iconType }: {
   return (
     <div
       className="rounded-xl p-4"
-      style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(196,154,40,0.15)" }}
+      style={{ background: "var(--ln-surface-card)", border: "1px solid var(--ln-border-subtle)" }}
     >
-      <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.4rem", color: "rgba(196,154,40,0.5)", letterSpacing: "0.1em", marginBottom: 8 }}>
+      <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.4rem", color: "color-mix(in srgb, var(--ln-gold) 60%, transparent)", letterSpacing: "0.1em", marginBottom: 8 }}>
         PREVIEW
       </div>
       <div className="flex items-start gap-3">
@@ -63,23 +63,23 @@ function NotificationPreview({ title, body, ctaLabel, iconType }: {
           <IconComp size={14} style={{ color: iconConfig.color }} />
         </div>
         <div className="flex-1 min-w-0">
-          <p style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.55rem", color: "#E8D5A3", fontWeight: 600, marginBottom: 4 }}>
+          <p style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.55rem", color: "var(--ln-text-primary)", fontWeight: 600, marginBottom: 4 }}>
             {title || "Notification title..."}
           </p>
           {body && (
-            <p style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.45rem", color: "rgba(255,255,255,0.5)", lineHeight: 1.6 }}>
+            <p style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.45rem", color: "var(--ln-text-muted)", lineHeight: 1.6 }}>
               {body}
             </p>
           )}
           {ctaLabel && (
             <div
               className="inline-flex items-center gap-1 mt-2 px-2.5 py-1 rounded"
-              style={{ background: "rgba(196,154,40,0.12)", border: "1px solid rgba(196,154,40,0.25)", fontFamily: "'Space Mono', monospace", fontSize: "0.4rem", color: "#C9A84C" }}
+              style={{ background: "var(--ln-surface-rail-hover)", border: "1px solid var(--ln-border-subtle)", fontFamily: "'Space Mono', monospace", fontSize: "0.4rem", color: "var(--ln-gold)" }}
             >
               {ctaLabel}
             </div>
           )}
-          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.38rem", color: "rgba(255,255,255,0.2)", marginTop: 4 }}>
+          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.38rem", color: "color-mix(in srgb, var(--ln-text-muted) 70%, transparent)", marginTop: 4 }}>
             just now
           </div>
         </div>
@@ -97,7 +97,7 @@ function SentRow({ notif }: { notif: any }) {
   return (
     <div
       className="flex items-start gap-3 py-3"
-      style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}
+      style={{ borderBottom: "1px solid var(--ln-border-subtle)" }}
     >
       <div
         className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0"
@@ -107,7 +107,7 @@ function SentRow({ notif }: { notif: any }) {
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-2">
-          <p style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.5rem", color: "#E8D5A3" }} className="truncate">
+          <p style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.5rem", color: "var(--ln-text-primary)" }} className="truncate">
             {notif.title}
           </p>
           <span
@@ -118,10 +118,10 @@ function SentRow({ notif }: { notif: any }) {
           </span>
         </div>
         <div className="flex items-center gap-3 mt-1">
-          <span style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.4rem", color: "rgba(255,255,255,0.3)" }}>
+          <span style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.4rem", color: "var(--ln-text-muted)" }}>
             → {notif.targetSegment.toUpperCase()}
           </span>
-          <span style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.38rem", color: "rgba(255,255,255,0.2)" }}>
+          <span style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.38rem", color: "color-mix(in srgb, var(--ln-text-muted) 70%, transparent)" }}>
             {notif.sentAt ? new Date(notif.sentAt).toLocaleString() : "Pending"}
           </span>
         </div>
@@ -166,7 +166,7 @@ export default function AdminNotificationsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="animate-spin" style={{ color: "#C9A84C" }} />
+        <Loader2 className="animate-spin" style={{ color: "var(--ln-gold)" }} />
       </div>
     );
   }
@@ -175,7 +175,7 @@ export default function AdminNotificationsPage() {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
         <Shield size={32} style={{ color: "rgba(196,154,40,0.3)" }} />
-        <p style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.6rem", color: "rgba(255,255,255,0.4)" }}>
+        <p style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.6rem", color: "var(--ln-text-muted)" }}>
           Access restricted to platform administrators.
         </p>
       </div>
@@ -212,15 +212,15 @@ export default function AdminNotificationsPage() {
         <div className="flex items-center gap-3 mb-2">
           <div
             className="w-8 h-8 rounded-full flex items-center justify-center"
-            style={{ background: "rgba(196,154,40,0.12)", border: "1px solid rgba(196,154,40,0.3)" }}
+            style={{ background: "var(--ln-surface-rail-hover)", border: "1px solid var(--ln-border-subtle)" }}
           >
-            <Bell size={15} style={{ color: "#C9A84C" }} />
+            <Bell size={15} style={{ color: "var(--ln-gold)" }} />
           </div>
-          <h1 style={{ fontFamily: "'Cinzel', serif", fontSize: "1.1rem", color: "#C9A84C", letterSpacing: "0.06em" }}>
+          <h1 style={{ fontFamily: "'Cinzel', serif", fontSize: "1.1rem", color: "var(--ln-gold)", letterSpacing: "0.06em" }}>
             Notification Composer
           </h1>
         </div>
-        <p style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.5rem", color: "rgba(255,255,255,0.4)" }}>
+        <p style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.5rem", color: "var(--ln-text-muted)" }}>
           Compose and send custom notifications to platform users. All notifications appear in the user's Signal inbox.
         </p>
       </div>
