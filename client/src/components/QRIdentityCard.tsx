@@ -35,6 +35,14 @@ export interface QRCardEntity {
   subtitle?: string;
   description?: string;
   thumbnailUrl?: string;
+  thumbnailPositionX?: number;
+  thumbnailPositionY?: number;
+  /**
+   * A direct canonical destination for read-only identity artifacts. This
+   * intentionally avoids minting a QR-share record when scan attribution is
+   * not part of the creator-card contract.
+   */
+  canonicalUrl?: string;
   verifiedBadge?: boolean;
   // Resonance data (optional — shown in signature row if provided)
   playCount?: number;
@@ -178,8 +186,10 @@ async function renderCardToCanvas(
         const scale = Math.max(thumbW / img.naturalWidth, thumbH / img.naturalHeight);
         const sw = img.naturalWidth * scale;
         const sh = img.naturalHeight * scale;
-        const sx = thumbX + (thumbW - sw) / 2;
-        const sy = thumbY + (thumbH - sh) / 2;
+        const cropX = Math.min(100, Math.max(0, entity.thumbnailPositionX ?? 50)) / 100;
+        const cropY = Math.min(100, Math.max(0, entity.thumbnailPositionY ?? 50)) / 100;
+        const sx = thumbX + (thumbW - sw) * cropX;
+        const sy = thumbY + (thumbH - sh) * cropY;
         ctx.drawImage(img, sx, sy, sw, sh);
       }
     } catch (_) { /* placeholder already drawn */ }
@@ -288,6 +298,36 @@ async function renderCardToCanvas(
   ctx.textAlign = "center";
   ctx.fillText("WITNESSED ON LIVING NEXUS · PROVENANCE PRESERVED", CARD_W / 2, sealY + 18);
 
+  // ── 7.5 Creator/public statement ─────────────────────────────────────────
+  // This is intentionally limited to existing creator-declared copy. It is not
+  // a provenance, ownership, or legal assertion authored by the card system.
+  if (entity.description) {
+    const statement = entity.description.replace(/\s+/g, " ").trim();
+    const maxLineWidth = CARD_W - 88;
+    const words = statement.split(" ");
+    const lines: string[] = [];
+    let line = "";
+    for (const word of words) {
+      const candidate = line ? `${line} ${word}` : word;
+      if (ctx.measureText(candidate).width > maxLineWidth && line) {
+        lines.push(line);
+        line = word;
+        if (lines.length === 2) break;
+      } else {
+        line = candidate;
+      }
+    }
+    if (line && lines.length < 2) lines.push(line);
+    const consumed = lines.join(" ");
+    if (consumed.length < statement.length && lines.length > 0) {
+      lines[lines.length - 1] = `${lines[lines.length - 1].replace(/[.,;:!?]?$/, "")}…`;
+    }
+    ctx.fillStyle = "rgba(255,255,255,0.62)";
+    ctx.font = "11px 'Arial', sans-serif";
+    ctx.textAlign = "center";
+    lines.forEach((copy, index) => ctx.fillText(copy, CARD_W / 2, sealY + 50 + index * 16));
+  }
+
   // ── 8. QR Code ────────────────────────────────────────────────────────────
   const qrSize = 148;
   const qrX = (CARD_W - qrSize) / 2;
@@ -353,6 +393,17 @@ export function QRIdentityCard({ entity, campaign, tag, onClose }: QRIdentityCar
   const rc = RARITY_CONFIG[rarity];
 
   useEffect(() => {
+    if (entity.canonicalUrl) {
+      setShareUrl(entity.canonicalUrl);
+      setIsGenerating(false);
+      if (canvasRef.current) {
+        renderCardToCanvas(canvasRef.current, entity, entity.canonicalUrl).catch(() => {
+          toast.error("Failed to render Creator Witness Card");
+        });
+      }
+      return;
+    }
+
     const origin = window.location.origin;
     generateMutation.mutate(
       { entityType: entity.type, entityId: entity.id, entitySlug: entity.slug, campaign, tag, origin },
@@ -449,7 +500,7 @@ export function QRIdentityCard({ entity, campaign, tag, onClose }: QRIdentityCar
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 z-10 gap-3">
             <Loader2 className="w-8 h-8 animate-spin" style={{ color: rc.primary }} />
             <span className="text-xs tracking-widest uppercase" style={{ color: `${rc.primary}88` }}>
-              Minting Card…
+              Preparing card…
             </span>
           </div>
         )}
@@ -548,7 +599,9 @@ export function QRShareModal({ entity, campaign, tag, trigger }: QRShareModalPro
           {/* Header */}
           <div className="flex items-center justify-between px-5 pt-5 pb-3" style={{ borderBottom: `1px solid ${rc.primary}22` }}>
             <div>
-              <h2 className="font-bold text-lg" style={{ color: rc.primary }}>Identity Card</h2>
+              <h2 className="font-bold text-lg" style={{ color: rc.primary }}>
+                {entity.type === "creator" ? "Creator Witness Card" : "Identity Card"}
+              </h2>
               <p className="text-white/40 text-xs mt-0.5">
                 Ceremonial provenance artifact · {rc.label} class
               </p>

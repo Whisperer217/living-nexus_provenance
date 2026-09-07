@@ -11,6 +11,7 @@ import {
   LayoutGrid,
   Loader2,
   Play,
+  QrCode,
   Settings,
   Share2,
   UserPlus,
@@ -23,6 +24,7 @@ import { SanctuaryWorksOrganizer } from "@/components/creator/SanctuaryWorksOrga
 import { DomainEditor } from "@/components/domain/DomainEditor";
 import { DomainRenderer } from "@/components/domain/DomainRenderer";
 import { SupportCreatorDrawer } from "@/components/SupportCreatorDrawer";
+import { QRShareModal } from "@/components/QRIdentityCard";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { useHarmonicSignature } from "@/hooks/useHarmonicSignature";
 import { LOOP_PRODUCT } from "@/lib/loopProduct";
@@ -133,6 +135,22 @@ export default function LoopCreatorPage() {
     publicWitnessCount.data?.count ??
     (data as any)?.witnessCount ??
     "—";
+
+  const canonicalCreatorPath = `/creator/${encodeURIComponent(creator.artistHandle || String(creator.id))}`;
+  const creatorCardEntity = {
+    type: "creator" as const,
+    id: creator.id,
+    slug: creator.artistHandle || String(creator.id),
+    name: displayName,
+    subtitle: creator.artistHandle ? `@${creator.artistHandle}` : undefined,
+    description: why || bio || `${displayName} on ${LOOP_PRODUCT.name}`,
+    thumbnailUrl: creator.bannerUrl || creator.profilePhotoUrl || undefined,
+    thumbnailPositionX: creator.bannerPositionX ?? 50,
+    thumbnailPositionY: creator.bannerPositionY ?? 50,
+    canonicalUrl: `${window.location.origin}${canonicalCreatorPath}`,
+    verifiedBadge: witnessed > 0,
+    witnessCount: typeof witnessCount === "number" ? witnessCount : undefined,
+  };
 
   const anyPlaying = playerState.isPlaying && songs.some((s) => String(s.id) === currentTrackId);
 
@@ -347,6 +365,23 @@ export default function LoopCreatorPage() {
             >
               <Share2 size={16} />
             </button>
+            <QRShareModal
+              entity={creatorCardEntity}
+              trigger={
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-2 px-5 py-3 rounded-full text-sm"
+                  style={{
+                    border: "1px solid rgba(196,154,40,0.4)",
+                    color: "var(--ln-gold)",
+                    background: "rgba(196,154,40,0.08)",
+                  }}
+                  aria-label={`Open ${displayName} Creator Witness Card`}
+                >
+                  <QrCode size={15} /> Creator card
+                </button>
+              }
+            />
             {isOwner && (
               <>
                 <button
