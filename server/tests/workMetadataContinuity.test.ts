@@ -67,6 +67,22 @@ describe("Work metadata continuity", () => {
     expect(editChapel).toContain('useState(song.genre ?? "")');
   });
 
+  it("lets a creator clear only the current Work genre selection and return to optional profile suggestions", () => {
+    const musicEnvironment = read("client/src/pages/manifestation-studio/environments/MusicEnvironment.tsx");
+    const creativeDrawer = read("client/src/components/CreativeDrawer.tsx");
+    const editChapel = read("client/src/components/EditChapel.tsx");
+
+    expect(musicEnvironment).toContain("Selected for this Work");
+    expect(musicEnvironment).toContain("Clear All");
+    expect(musicEnvironment).toContain('onClick={() => setGenre("")}');
+    expect(musicEnvironment).toContain('aria-label="Clear all selected genres for this Work"');
+    expect(musicEnvironment).toContain("Genre suggestions from your profile");
+    expect(creativeDrawer).toContain("Clear All");
+    expect(creativeDrawer).toContain('onClick={() => setGenre("")}');
+    expect(editChapel).toContain("Clear All");
+    expect(editChapel).toContain('onClick={() => setGenre("")}');
+  });
+
   it("keeps creator-declared Origin separate from editorial description, caption, classification, and participation display", () => {
     const publicWork = read("client/src/pages/loop/LoopWorkPage.tsx");
 

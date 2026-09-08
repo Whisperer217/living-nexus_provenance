@@ -532,12 +532,20 @@ export function EditChapel({ song, onClose, onSaved }: EditChapelProps) {
                   </SelectContent>
                 </Select>
                 {parseWorkGenres(genre).length > 0 && (
-                  <div className="flex flex-wrap gap-1.5 mt-2" aria-label="Selected genres">
-                    {parseWorkGenres(genre).map((selectedGenre) => (
-                      <button key={selectedGenre} type="button" onClick={() => setGenre(toggleWorkGenre(genre, selectedGenre) ?? "")} className="text-[10px] px-2 py-1 rounded-full" style={{ border: `1px solid ${GOLD_BORDER}`, color: "var(--ln-gold)", background: "rgba(196,154,40,0.1)" }} aria-label={`Remove ${selectedGenre} genre`}>
-                        {selectedGenre} ×
+                  <div className="space-y-2 mt-2" aria-label="Selected genres">
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-[10px]" style={{ color: TEXT_MUTED }}>Selected for this Work</span>
+                      <button type="button" onClick={() => setGenre("")} className="text-[10px] underline underline-offset-4 transition-colors" style={{ color: GOLD }} aria-label="Clear all selected genres for this Work">
+                        Clear All
                       </button>
-                    ))}
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {parseWorkGenres(genre).map((selectedGenre) => (
+                        <button key={selectedGenre} type="button" onClick={() => setGenre(toggleWorkGenre(genre, selectedGenre) ?? "")} className="text-[10px] px-2 py-1 rounded-full" style={{ border: `1px solid ${GOLD_BORDER}`, color: "var(--ln-gold)", background: "rgba(196,154,40,0.1)" }} aria-label={`Remove ${selectedGenre} genre`}>
+                          {selectedGenre} ×
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>

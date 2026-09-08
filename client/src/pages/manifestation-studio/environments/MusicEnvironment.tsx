@@ -743,19 +743,35 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
               />
             </div>
             {parseWorkGenres(genre).length > 0 && (
-              <div className="flex flex-wrap gap-2" aria-label="Selected genres">
-                {parseWorkGenres(genre).map((selectedGenre) => (
+              <div className="space-y-2" aria-label="Selected genres">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-[11px]" style={{ color: "color-mix(in srgb, var(--ln-parchment) 58%, transparent)" }}>
+                    Selected for this Work
+                  </span>
                   <button
-                    key={selectedGenre}
                     type="button"
-                    onClick={() => setGenre(toggleWorkGenre(genre, selectedGenre) ?? "")}
-                    className="text-[11px] px-2 py-1 rounded-full"
-                    style={{ border: "1px solid var(--ln-gold)", color: "var(--ln-gold)", background: "rgba(196,154,40,0.1)" }}
-                    aria-label={`Remove ${selectedGenre} genre`}
+                    onClick={() => setGenre("")}
+                    className="text-[11px] underline underline-offset-4 transition-colors"
+                    style={{ color: "var(--ln-gold)" }}
+                    aria-label="Clear all selected genres for this Work"
                   >
-                    {selectedGenre} ×
+                    Clear All
                   </button>
-                ))}
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {parseWorkGenres(genre).map((selectedGenre) => (
+                    <button
+                      key={selectedGenre}
+                      type="button"
+                      onClick={() => setGenre(toggleWorkGenre(genre, selectedGenre) ?? "")}
+                      className="text-[11px] px-2 py-1 rounded-full"
+                      style={{ border: "1px solid var(--ln-gold)", color: "var(--ln-gold)", background: "rgba(196,154,40,0.1)" }}
+                      aria-label={`Remove ${selectedGenre} genre`}
+                    >
+                      {selectedGenre} ×
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
             {creatorGenreSuggestions.length > 0 && (

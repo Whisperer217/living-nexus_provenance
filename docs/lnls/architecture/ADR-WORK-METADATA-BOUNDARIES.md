@@ -12,6 +12,8 @@ The Music Register currently applies a creator profile’s `primaryGenre` direct
 
 Work classification, participation, and Origin are distinct data planes. A Work genre selector initializes only from its own persisted/prefilled Work genre value. A creator profile’s primary genre may be shown as a non-binding suggestion, but it is never selected or serialized for the Work unless the creator explicitly selects it.
 
+Where a Work has selected genres, Register and the two existing Work-edit surfaces expose a local **Clear All** control. It clears only in-memory selection state. It does not mutate profile preferences, Origin, WID, provenance, or any persisted Work data until the creator performs the existing save or publish action.
+
 | Data plane | Source of authority | Presentation rule | WID / provenance effect |
 |---|---|---|---|
 | Work classification | Work `genre` metadata | Selected Work tags and explicit suggestion controls | Editorial; existing semantics retained |
