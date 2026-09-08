@@ -16,6 +16,7 @@ import ProvenanceUploadEngine from "./components/ProvenanceUploadEngine";
 import { useQrScanLogger } from "./hooks/useQrScanLogger";
 import { useScrollRestoration } from "./hooks/useScrollRestoration";
 import { overlayCloseAll } from "@/lib/overlayController";
+import { playbackDiag } from "@/lib/playbackDiag";
 import { useWorkEditorActions } from "./contexts/WorkEditorContext";
 import { PWAInstallBanner } from "./components/PWAInstallBanner";
 import CinematicSplash, { shouldShowSplash } from "./components/CinematicSplash";
@@ -206,6 +207,7 @@ function OverlayRouteGuard() {
 function OEmbedUpdater() {
   const [location] = useLocation();
   useEffect(() => {
+    playbackDiag("ROUTE_CHANGE", { location });
     const CANONICAL_ORIGIN = "https://www.livingnexus.org";
     const pageUrl = `${CANONICAL_ORIGIN}${location}`;
     const oembedUrl = `/api/oembed?url=${encodeURIComponent(pageUrl)}`;

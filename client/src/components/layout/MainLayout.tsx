@@ -39,6 +39,7 @@ import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { Z } from "@/lib/viewportLayers";
 import { DISCORD_COMMUNITY_URL } from "@/lib/loopProduct";
 import { DiscordGlyph as SharedDiscordGlyph } from "@/components/icons/DiscordGlyph";
+import { playbackDiag } from "@/lib/playbackDiag";
 
 const LOGO_URL = "/manus-storage/living-nexus-logo-2025_19c2d497.png";
 
@@ -133,6 +134,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       await new Promise<void>((resolve) => {
         // Brief pause so the spinner is visible before reload
         setTimeout(() => {
+          playbackDiag("PULL_TO_REFRESH_RELOAD");
           window.location.reload();
           resolve();
         }, 300);

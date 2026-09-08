@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import { AlertTriangle, ChevronDown, ChevronUp, RotateCcw } from "lucide-react";
 import { Component, ReactNode } from "react";
+import { playbackDiag } from "@/lib/playbackDiag";
 
 interface Props {
   children: ReactNode;
@@ -73,6 +74,7 @@ class ErrorBoundary extends Component<Props, State> {
       const alreadyReloaded = sessionStorage.getItem(reloadKey);
       if (!alreadyReloaded) {
         sessionStorage.setItem(reloadKey, "1");
+        playbackDiag("CHUNK_LOAD_AUTO_RELOAD", { message: error.message });
         console.warn("[ErrorBoundary] Chunk load failure detected — reloading for fresh deploy");
         window.location.reload();
         return;

@@ -21,6 +21,7 @@
 
 import { useEffect, useState } from "react";
 import { Download, RefreshCw, X } from "lucide-react";
+import { playbackDiag } from "@/lib/playbackDiag";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -99,11 +100,18 @@ export function PWAInstallBanner() {
   };
 
   const handleReload = () => {
-    // Tell the waiting SW to take control immediately, then reload
+    // Tell a waiting worker to take control only after the listener explicitly
+    // chooses to update. main.tsx reloads upon that controller change.
+    playbackDiag("PWA_UPDATE_RELOAD_CLICK");
     navigator.serviceWorker?.getRegistration().then((reg) => {
-      reg?.waiting?.postMessage({ type: "SKIP_WAITING" });
+      if (reg?.waiting) {
+        reg.waiting.postMessage({ type: "SKIP_WAITING" });
+        return;
+      }
+      // The update is no longer waiting (or SW is unavailable); this is a
+      // listener-approved manual refresh rather than an unsolicited takeover.
+      window.location.reload();
     });
-    window.location.reload();
   };
 
   // ── Update banner (higher priority — show above install banner) ──────────

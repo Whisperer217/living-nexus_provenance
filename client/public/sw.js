@@ -10,7 +10,7 @@
  *
  * Features:
  *   ✓ Versioned caches — old caches purged on activate
- *   ✓ skipWaiting + clientsClaim — instant activation on deploy
+ *   ✓ Listener-approved activation — updates wait until the existing update action
  *   ✓ Background sync — offline tip/upload queuing via IndexedDB
  *   ✓ Update detection — postMessage SW_UPDATED to all clients
  *   ✓ Branded offline page — /offline.html
@@ -32,7 +32,8 @@ self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(STATIC_CACHE).then((cache) => cache.addAll(PRECACHE_URLS))
   );
-  self.skipWaiting();
+  // Do not take over a tab that may be actively playing a Work. The existing
+  // update banner sends SKIP_WAITING only after a listener chooses Reload.
 });
 
 // ─── Activate ─────────────────────────────────────────────────────────────────

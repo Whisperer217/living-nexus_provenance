@@ -17,6 +17,7 @@ import { WorkEditorProvider } from "./contexts/WorkEditorContext";
 import { UploadEngineProvider } from "./contexts/UploadEngineContext";
 import { getLoginUrl } from "./const";
 import { hadSession } from "./lib/sessionFlags";
+import { playbackDiag } from "./lib/playbackDiag";
 import "./index.css";
 
 const queryClient = new QueryClient({
@@ -79,6 +80,7 @@ const redirectToLoginIfUnauthorized = (
   // Only redirect if this tab previously had an authenticated session.
   // A fresh guest visitor has never set the flag, so we skip the redirect.
   if (!hadSession()) return;
+  playbackDiag("AUTH_REDIRECT_TO_LOGIN", { queryKey: queryKey ? JSON.stringify(queryKey) : null });
   window.location.href = getLoginUrl();
 };
 
@@ -128,9 +130,11 @@ const trpcClient = trpc.createClient({
 // These do NOT suppress the errors; they only ensure they are logged before React
 // catches them (or before they silently disappear in production).
 window.addEventListener("error", (e) => {
+  playbackDiag("GLOBAL_ERROR", { message: e.error?.message ?? e.message });
   console.error("[global-error]", e.error ?? e.message);
 });
 window.addEventListener("unhandledrejection", (e) => {
+  playbackDiag("GLOBAL_UNHANDLED_REJECTION", { message: e.reason instanceof Error ? e.reason.message : String(e.reason) });
   console.error("[global-unhandled-promise]", e.reason);
 });
 
@@ -183,6 +187,7 @@ if ("serviceWorker" in navigator) {
       }
       // Genuine update: a waiting SW was told SKIP_WAITING and took over.
       // Reload so the browser fetches fresh chunk hashes.
+      playbackDiag("SERVICE_WORKER_CONTROLLER_RELOAD");
       console.log("[SW] Controller changed after update — reloading for fresh chunks");
       window.location.reload();
     });

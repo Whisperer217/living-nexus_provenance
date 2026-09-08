@@ -15,6 +15,7 @@
 import React, { createContext, useContext, useRef, useState, useCallback, useEffect, useMemo } from "react";
 import { safeAudioUrl } from "@shared/const";
 import { getCache, setCache, CACHE_KEYS, TTL } from "@/lib/lnxCache";
+import { audioDiagnosticDetails, playbackDiag } from "@/lib/playbackDiag";
 import { trpc } from "@/lib/trpc";
 import { hadSession } from "@/lib/sessionFlags";
 
@@ -236,10 +237,12 @@ function getOrCreateAudio(): HTMLAudioElement {
   if (!_globalAudio) {
     _globalAudio = new Audio();
     _globalAudio.crossOrigin = "anonymous";
+    playbackDiag("AUDIO_SINGLETON_CREATED", audioDiagnosticDetails(_globalAudio));
     // Stop audio cleanly on page unload to prevent ghost audio after navigation
     if (typeof window !== "undefined") {
       window.addEventListener("beforeunload", () => {
         if (_globalAudio) {
+          playbackDiag("DOCUMENT_BEFOREUNLOAD_AUDIO_TEARDOWN", audioDiagnosticDetails(_globalAudio));
           _globalAudio.pause();
           _globalAudio.src = "";
         }
@@ -247,6 +250,7 @@ function getOrCreateAudio(): HTMLAudioElement {
       // Also stop on pagehide (mobile Safari / bfcache)
       window.addEventListener("pagehide", () => {
         if (_globalAudio) {
+          playbackDiag("DOCUMENT_PAGEHIDE_AUDIO_TEARDOWN", audioDiagnosticDetails(_globalAudio));
           _globalAudio.pause();
           _globalAudio.src = "";
         }
@@ -370,6 +374,19 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   // Keep a stable ref to current state for use inside the audio engine
   const stateRef = useRef(state);
   useEffect(() => { stateRef.current = state; }, [state]);
+
+  useEffect(() => {
+    playbackDiag("PLAYER_PROVIDER_MOUNT", {
+      queueId: stateRef.current.queueId,
+      ...audioDiagnosticDetails(audioRef.current),
+    });
+    return () => playbackDiag("PLAYER_PROVIDER_CLEANUP", {
+      queueId: stateRef.current.queueId,
+      ...audioDiagnosticDetails(audioRef.current),
+    });
+  // The provider mount boundary—not live player state—is the evidence target.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Restore audio.src on mount after page reload
   useEffect(() => {
@@ -517,7 +534,10 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       ...s,
       duration: isFinite(audio.duration) && !isNaN(audio.duration) ? audio.duration : 0,
     }));
-    const onCanPlay = () => setState(s => ({ ...s, isReady: true }));
+    const onCanPlay = () => {
+      playbackDiag("AUDIO_CANPLAY", audioDiagnosticDetails(audio));
+      setState(s => ({ ...s, isReady: true }));
+    };
 
     /** Advance to the next track, applying crossfade/gapless/standard transition */
     const advanceToNext = (s: typeof stateRef.current, fromEnded: boolean) => {
@@ -642,30 +662,52 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     // Re-enable by setting localStorage.debug = 'ln:player' in DevTools.
     const _dbg = typeof localStorage !== 'undefined' && localStorage.getItem('debug')?.includes('ln:player');
     const onVisibilityChange = () => {
+      playbackDiag("DOCUMENT_VISIBILITY_CHANGE", {
+        ...audioDiagnosticDetails(audioRef.current),
+        isPlaying: stateRef.current.isPlaying,
+      });
       if (!_dbg) return;
       const a = audioRef.current;
       const s = stateRef.current;
       console.log(`[LN-PLAYER] visibilitychange → ${document.visibilityState} | isPlaying=${s.isPlaying} | paused=${a?.paused} | src=${(a?.src ?? '').slice(-40)} | readyState=${a?.readyState}`);
     };
     const onPageShow = (e: PageTransitionEvent) => {
+      playbackDiag("DOCUMENT_PAGESHOW", {
+        persisted: e.persisted,
+        ...audioDiagnosticDetails(audioRef.current),
+        isPlaying: stateRef.current.isPlaying,
+      });
       if (!_dbg) return;
       const a = audioRef.current;
       const s = stateRef.current;
       console.log(`[LN-PLAYER] pageshow | persisted=${e.persisted} | isPlaying=${s.isPlaying} | paused=${a?.paused} | readyState=${a?.readyState}`);
     };
     const onPageHide = (e: PageTransitionEvent) => {
+      playbackDiag("DOCUMENT_PAGEHIDE", {
+        persisted: e.persisted,
+        ...audioDiagnosticDetails(audioRef.current),
+        isPlaying: stateRef.current.isPlaying,
+      });
       if (!_dbg) return;
       const a = audioRef.current;
       const s = stateRef.current;
       console.log(`[LN-PLAYER] pagehide | persisted=${e.persisted} | isPlaying=${s.isPlaying} | paused=${a?.paused}`);
     };
     const onFreeze = () => {
+      playbackDiag("DOCUMENT_FREEZE", {
+        ...audioDiagnosticDetails(audioRef.current),
+        isPlaying: stateRef.current.isPlaying,
+      });
       if (!_dbg) return;
       const a = audioRef.current;
       const s = stateRef.current;
       console.log(`[LN-PLAYER] freeze (Page Lifecycle) | isPlaying=${s.isPlaying} | paused=${a?.paused}`);
     };
     const onResume = () => {
+      playbackDiag("DOCUMENT_RESUME", {
+        ...audioDiagnosticDetails(audioRef.current),
+        isPlaying: stateRef.current.isPlaying,
+      });
       if (!_dbg) return;
       const a = audioRef.current;
       const s = stateRef.current;
@@ -678,6 +720,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     document.addEventListener('resume', onResume);
 
     const onEnded = () => {
+      playbackDiag("AUDIO_ENDED", audioDiagnosticDetails(audio));
       // MOBILE AUTOPLAY FIX: The `ended` event fires in a trusted browser event context.
       // We MUST perform audio side effects (src assignment, load, play) synchronously
       // HERE — before any React setState batching — to preserve the browser's autoplay
@@ -775,6 +818,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     };
 
     const onError = () => {
+      playbackDiag("AUDIO_ERROR", audioDiagnosticDetails(audio));
       setState(s => {
         // Only auto-advance on error if the player was actively playing.
         // If paused (e.g. restored from sessionStorage on page reload), do NOT
@@ -800,8 +844,18 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       });
     };
 
-    const onPlay = () => setState(s => ({ ...s, isPlaying: true }));
-    const onPause = () => setState(s => ({ ...s, isPlaying: false }));
+    const onPlay = () => {
+      playbackDiag("AUDIO_PLAY", audioDiagnosticDetails(audio));
+      setState(s => ({ ...s, isPlaying: true }));
+    };
+    const onPause = () => {
+      playbackDiag("AUDIO_PAUSE", audioDiagnosticDetails(audio));
+      setState(s => ({ ...s, isPlaying: false }));
+    };
+    const onLoadStart = () => playbackDiag("AUDIO_LOAD_START", audioDiagnosticDetails(audio));
+    const onEmptied = () => playbackDiag("AUDIO_EMPTIED", audioDiagnosticDetails(audio));
+    const onStalled = () => playbackDiag("AUDIO_STALLED", audioDiagnosticDetails(audio));
+    const onAbort = () => playbackDiag("AUDIO_ABORT", audioDiagnosticDetails(audio));
 
     audio.addEventListener("timeupdate", onTimeUpdate);
     audio.addEventListener("durationchange", onDurationChange);
@@ -810,6 +864,10 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     audio.addEventListener("play", onPlay);
     audio.addEventListener("pause", onPause);
     audio.addEventListener("error", onError);
+    audio.addEventListener("loadstart", onLoadStart);
+    audio.addEventListener("emptied", onEmptied);
+    audio.addEventListener("stalled", onStalled);
+    audio.addEventListener("abort", onAbort);
     return () => {
       audio.removeEventListener("timeupdate", onTimeUpdate);
       audio.removeEventListener("durationchange", onDurationChange);
@@ -818,6 +876,10 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       audio.removeEventListener("play", onPlay);
       audio.removeEventListener("pause", onPause);
       audio.removeEventListener("error", onError);
+      audio.removeEventListener("loadstart", onLoadStart);
+      audio.removeEventListener("emptied", onEmptied);
+      audio.removeEventListener("stalled", onStalled);
+      audio.removeEventListener("abort", onAbort);
       document.removeEventListener('visibilitychange', onVisibilityChange);
       window.removeEventListener('pageshow', onPageShow);
       window.removeEventListener('pagehide', onPageHide);
