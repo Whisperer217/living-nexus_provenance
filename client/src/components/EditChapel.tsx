@@ -179,10 +179,20 @@ export function EditChapel({ song, onClose, onSaved }: EditChapelProps) {
   const [saved, setSaved]                           = useState(false);
   const [lyricsSaving, setLyricsSaving]             = useState(false);
   const [coverHovered, setCoverHovered]             = useState(false);
+  const [clearingGenres, setClearingGenres]         = useState(false);
 
   /* ── Mutations ── */
   const updateMetadata = trpc.songs.updateMetadata.useMutation();
   const updateStatus = trpc.songs.updateStatus.useMutation();
+
+  function clearWorkGenres() {
+    if (!window.confirm("Clear all selected genres for this Work? This only resets the current form until you Save.")) return;
+    setClearingGenres(true);
+    window.setTimeout(() => {
+      setGenre("");
+      setClearingGenres(false);
+    }, 180);
+  }
 
   function refreshWorkData() {
     utils.songs.mySongs.invalidate();
@@ -535,11 +545,11 @@ export function EditChapel({ song, onClose, onSaved }: EditChapelProps) {
                   <div className="space-y-2 mt-2" aria-label="Selected genres">
                     <div className="flex items-center justify-between gap-3">
                       <span className="text-[10px]" style={{ color: TEXT_MUTED }}>Selected for this Work</span>
-                      <button type="button" onClick={() => setGenre("")} className="text-[10px] underline underline-offset-4 transition-colors" style={{ color: GOLD }} aria-label="Clear all selected genres for this Work">
+                      <button type="button" onClick={clearWorkGenres} disabled={clearingGenres} className="text-[10px] underline underline-offset-4 transition-colors disabled:opacity-60" style={{ color: GOLD }} aria-label="Clear all selected genres for this Work">
                         Clear All
                       </button>
                     </div>
-                    <div className="flex flex-wrap gap-1.5">
+                    <div className={`flex flex-wrap gap-1.5 ${clearingGenres ? "work-genre-selection-clearing" : ""}`} aria-live="polite">
                       {parseWorkGenres(genre).map((selectedGenre) => (
                         <button key={selectedGenre} type="button" onClick={() => setGenre(toggleWorkGenre(genre, selectedGenre) ?? "")} className="text-[10px] px-2 py-1 rounded-full" style={{ border: `1px solid ${GOLD_BORDER}`, color: "var(--ln-gold)", background: "rgba(196,154,40,0.1)" }} aria-label={`Remove ${selectedGenre} genre`}>
                           {selectedGenre} ×

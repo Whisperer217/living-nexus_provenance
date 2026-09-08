@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
-import { getSuggestedWorkGenres, parseWorkGenres, serializeWorkGenres, toggleWorkGenre } from "@shared/workMetadata";
+import { applySuggestedWorkGenres, getSuggestedWorkGenres, parseWorkGenres, serializeWorkGenres, toggleWorkGenre } from "@shared/workMetadata";
 import { formatHistoricalDateValue, parseHistoricalDate, validateHistoricalDates } from "@shared/workHistoricalDates";
 
 const root = resolve(import.meta.dirname, "../..");
@@ -72,15 +72,39 @@ describe("Work metadata continuity", () => {
     const creativeDrawer = read("client/src/components/CreativeDrawer.tsx");
     const editChapel = read("client/src/components/EditChapel.tsx");
 
+    expect(applySuggestedWorkGenres("Pop, Faith", "Alternative")).toBe("Alternative, Pop, Faith");
+    expect(applySuggestedWorkGenres("Pop, Faith", "Pop")).toBe("Pop, Faith");
     expect(musicEnvironment).toContain("Selected for this Work");
     expect(musicEnvironment).toContain("Clear All");
-    expect(musicEnvironment).toContain('onClick={() => setGenre("")}');
+    expect(musicEnvironment).toContain("clearWorkGenres");
+    expect(musicEnvironment).toContain("window.confirm(\"Clear all selected genres for this Work?");
+    expect(musicEnvironment).toContain("if (!window.confirm(\"Clear all selected genres for this Work?");
+    expect(musicEnvironment).toContain("setClearingGenres(true);");
+    expect(musicEnvironment).toContain("window.setTimeout(() => {");
+    expect(musicEnvironment).toContain("work-genre-selection-clearing");
+    expect(musicEnvironment).toContain("Select All Suggested");
+    expect(musicEnvironment).toContain("applySuggestedWorkGenres(creatorProfile?.primaryGenre, genre)");
     expect(musicEnvironment).toContain('aria-label="Clear all selected genres for this Work"');
     expect(musicEnvironment).toContain("Genre suggestions from your profile");
     expect(creativeDrawer).toContain("Clear All");
-    expect(creativeDrawer).toContain('onClick={() => setGenre("")}');
+    expect(creativeDrawer).toContain("clearWorkGenres");
+    expect(creativeDrawer).toContain("if (!window.confirm(\"Clear all selected genres for this Work?");
+    expect(creativeDrawer).toContain("setClearingGenres(true);");
+    expect(creativeDrawer).toContain("work-genre-selection-clearing");
     expect(editChapel).toContain("Clear All");
-    expect(editChapel).toContain('onClick={() => setGenre("")}');
+    expect(editChapel).toContain("clearWorkGenres");
+    expect(editChapel).toContain("if (!window.confirm(\"Clear all selected genres for this Work?");
+    expect(editChapel).toContain("setClearingGenres(true);");
+    expect(editChapel).toContain("work-genre-selection-clearing");
+  });
+
+  it("uses opacity and transform only for post-confirmation genre clear feedback and disables it for reduced motion", () => {
+    const styles = read("client/src/index.css");
+
+    expect(styles).toContain("@keyframes work-genre-selection-clear");
+    expect(styles).toContain("opacity: 0; transform: translateY(-4px);");
+    expect(styles).toContain(".work-genre-selection-clearing");
+    expect(styles).toContain("animation: none;");
   });
 
   it("keeps creator-declared Origin separate from editorial description, caption, classification, and participation display", () => {

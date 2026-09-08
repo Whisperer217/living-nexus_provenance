@@ -207,6 +207,7 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
   const [coverUrl, setCoverUrl]             = useState(song.coverArtUrl ?? "");
   const [coverUploading, setCoverUploading] = useState(false);
   const [coverHovered, setCoverHovered]     = useState(false);
+  const [clearingGenres, setClearingGenres] = useState(false);
   const coverInputRef                       = useRef<HTMLInputElement>(null);
 
   /* ── Video ── */
@@ -219,6 +220,15 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
   /* ── Drawer container ref — used for Radix portal targeting ── */
   const drawerRootRef                                       = useRef<HTMLDivElement>(null);
   const [drawerContainerEl, setDrawerContainerEl]           = useState<HTMLDivElement | null>(null);
+
+  const clearWorkGenres = useCallback(() => {
+    if (!window.confirm("Clear all selected genres for this Work? This only resets the current form until you Save.")) return;
+    setClearingGenres(true);
+    window.setTimeout(() => {
+      setGenre("");
+      setClearingGenres(false);
+    }, 180);
+  }, []);
 
   /* ── AI Caption ── */
   const [captionGenerating, setCaptionGenerating] = useState(false);
@@ -755,11 +765,11 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
                   <div className="space-y-2 mt-2" aria-label="Selected genres">
                     <div className="flex items-center justify-between gap-3">
                       <span className="text-[10px]" style={{ color: TEXT_MUTED }}>Selected for this Work</span>
-                      <button type="button" onClick={() => setGenre("")} className="text-[10px] underline underline-offset-4 transition-colors" style={{ color: GOLD }} aria-label="Clear all selected genres for this Work">
+                      <button type="button" onClick={clearWorkGenres} disabled={clearingGenres} className="text-[10px] underline underline-offset-4 transition-colors disabled:opacity-60" style={{ color: GOLD }} aria-label="Clear all selected genres for this Work">
                         Clear All
                       </button>
                     </div>
-                    <div className="flex flex-wrap gap-1.5">
+                    <div className={`flex flex-wrap gap-1.5 ${clearingGenres ? "work-genre-selection-clearing" : ""}`} aria-live="polite">
                       {parseWorkGenres(genre).map((selectedGenre) => (
                         <button key={selectedGenre} type="button" onClick={() => setGenre(toggleWorkGenre(genre, selectedGenre) ?? "")} className="text-[10px] px-2 py-1 rounded-full" style={{ border: `1px solid ${GOLD_BORDER}`, color: "var(--ln-gold)", background: "rgba(196,154,40,0.1)" }} aria-label={`Remove ${selectedGenre} genre`}>
                           {selectedGenre} ×

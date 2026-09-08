@@ -41,3 +41,14 @@ export function getSuggestedWorkGenres(
   const selected = new Set(parseWorkGenres(workGenres));
   return parseWorkGenres(profileGenres).filter((genre) => !selected.has(genre));
 }
+
+/** Apply every currently unselected profile suggestion to the in-progress Work. */
+export function applySuggestedWorkGenres(
+  profileGenres: string | null | undefined,
+  workGenres: string | null | undefined
+): string | undefined {
+  return serializeWorkGenres([
+    ...parseWorkGenres(workGenres),
+    ...getSuggestedWorkGenres(profileGenres, workGenres),
+  ]);
+}

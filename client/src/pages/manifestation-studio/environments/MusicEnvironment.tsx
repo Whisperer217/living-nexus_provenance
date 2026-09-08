@@ -43,7 +43,7 @@ import {
   serializePreparedWorkWidPayload,
 } from "@shared/preparedWorkRegistration";
 import { validateHistoricalDates } from "@shared/workHistoricalDates";
-import { getSuggestedWorkGenres, parseWorkGenres, toggleWorkGenre } from "@shared/workMetadata";
+import { applySuggestedWorkGenres, getSuggestedWorkGenres, parseWorkGenres, toggleWorkGenre } from "@shared/workMetadata";
 
 const atmosphere = ATMOSPHERES.music;
 
@@ -177,6 +177,7 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
   const [toneProfile, setToneProfile] = useState<ToneProfile | null>(null);
   const [generatingWid, setGeneratingWid] = useState(false);
   const [uploadPhase, setUploadPhase] = useState<"idle" | "uploading" | "done">("idle");
+  const [clearingGenres, setClearingGenres] = useState(false);
 
   const generateImage = trpc.guides.generateImage.useMutation();
   const remixImage = trpc.guides.remixImage.useMutation();
@@ -212,6 +213,15 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
     () => getSuggestedWorkGenres(creatorProfile?.primaryGenre, genre),
     [creatorProfile?.primaryGenre, genre]
   );
+
+  const clearWorkGenres = useCallback(() => {
+    if (!window.confirm("Clear all selected genres for this Work? This only resets the current form until you Save or Publish.")) return;
+    setClearingGenres(true);
+    window.setTimeout(() => {
+      setGenre("");
+      setClearingGenres(false);
+    }, 180);
+  }, []);
 
   useEffect(() => {
     if (coverFile) {
@@ -750,15 +760,16 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
                   </span>
                   <button
                     type="button"
-                    onClick={() => setGenre("")}
-                    className="text-[11px] underline underline-offset-4 transition-colors"
+                    onClick={clearWorkGenres}
+                    disabled={clearingGenres}
+                    className="text-[11px] underline underline-offset-4 transition-colors disabled:opacity-60"
                     style={{ color: "var(--ln-gold)" }}
                     aria-label="Clear all selected genres for this Work"
                   >
                     Clear All
                   </button>
                 </div>
-                <div className="flex flex-wrap gap-2">
+                <div className={`flex flex-wrap gap-2 ${clearingGenres ? "work-genre-selection-clearing" : ""}`} aria-live="polite">
                   {parseWorkGenres(genre).map((selectedGenre) => (
                     <button
                       key={selectedGenre}
@@ -776,9 +787,20 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
             )}
             {creatorGenreSuggestions.length > 0 && (
               <div className="space-y-2" aria-label="Genre suggestions from your profile">
-                <p className="text-[11px] leading-relaxed" style={{ color: "color-mix(in srgb, var(--ln-parchment) 52%, transparent)" }}>
-                  From your creator profile — optional suggestions. Select only what describes this Work.
-                </p>
+                <div className="flex items-start justify-between gap-3">
+                  <p className="text-[11px] leading-relaxed" style={{ color: "color-mix(in srgb, var(--ln-parchment) 52%, transparent)" }}>
+                    From your creator profile — optional suggestions. Select only what describes this Work.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setGenre(applySuggestedWorkGenres(creatorProfile?.primaryGenre, genre) ?? "")}
+                    className="shrink-0 text-[11px] underline underline-offset-4 transition-colors"
+                    style={{ color: "var(--ln-gold)" }}
+                    aria-label="Add all suggested profile genres to this Work"
+                  >
+                    Select All Suggested
+                  </button>
+                </div>
                 <div className="flex flex-wrap gap-2">
                   {creatorGenreSuggestions.map((suggestedGenre) => (
                       <button
