@@ -12,6 +12,7 @@ describe("playback continuity diagnostics", () => {
     expect(source).toContain("if (!import.meta.env.DEV || typeof window === \"undefined\") return;");
     expect(source).toContain('localStorage.getItem(ENABLED_KEY) !== "1"');
     expect(source).toContain("window.__LN_PLAYBACK_LOG");
+    expect(source).toContain("window.__LN_PLAYBACK_AUDIO");
     expect(source).not.toContain("fetch(");
   });
 
@@ -28,6 +29,12 @@ describe("playback continuity diagnostics", () => {
     expect(player).toContain("DOCUMENT_PAGEHIDE_AUDIO_TEARDOWN");
     expect(player).toContain("DOCUMENT_VISIBILITY_CHANGE");
     expect(player).toContain("DOCUMENT_PAGEHIDE");
+    expect(player).toContain("BACKGROUND_RECOVERY_ATTEMPT");
+    expect(player).toContain("BACKGROUND_RECOVERY_SUCCESS");
+    expect(player).toContain("BACKGROUND_RECOVERY_REJECTED");
+    expect(player).toContain("BACKGROUND_AUDIO_PAUSE");
+    expect(player).toContain("listenerPausedRef.current = true;");
+    expect(player).toContain("document.hidden && backgroundPlaybackIntentRef.current");
     expect(player).not.toContain("document.createElement(\"audio\")");
   });
 

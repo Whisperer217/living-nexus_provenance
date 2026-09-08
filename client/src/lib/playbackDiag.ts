@@ -9,6 +9,7 @@ export type PlaybackDiagnosticEvent = {
 declare global {
   interface Window {
     __LN_PLAYBACK_LOG?: PlaybackDiagnosticEvent[];
+    __LN_PLAYBACK_AUDIO?: HTMLAudioElement | null;
   }
 }
 
@@ -46,4 +47,11 @@ export function audioDiagnosticDetails(audio: HTMLAudioElement | null) {
     src: audio?.currentSrc || audio?.src || null,
     errorCode: audio?.error?.code ?? null,
   };
+}
+
+/** Development-only access to the existing singleton for local lifecycle probes. */
+export function exposePlaybackAudioForDiagnostics(audio: HTMLAudioElement | null) {
+  if (!import.meta.env.DEV || typeof window === "undefined") return;
+  if (localStorage.getItem(ENABLED_KEY) !== "1") return;
+  window.__LN_PLAYBACK_AUDIO = audio;
 }

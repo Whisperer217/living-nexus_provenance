@@ -15,7 +15,7 @@
 import React, { createContext, useContext, useRef, useState, useCallback, useEffect, useMemo } from "react";
 import { safeAudioUrl } from "@shared/const";
 import { getCache, setCache, CACHE_KEYS, TTL } from "@/lib/lnxCache";
-import { audioDiagnosticDetails, playbackDiag } from "@/lib/playbackDiag";
+import { audioDiagnosticDetails, exposePlaybackAudioForDiagnostics, playbackDiag } from "@/lib/playbackDiag";
 import { trpc } from "@/lib/trpc";
 import { hadSession } from "@/lib/sessionFlags";
 
@@ -376,14 +376,18 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => { stateRef.current = state; }, [state]);
 
   useEffect(() => {
+    exposePlaybackAudioForDiagnostics(audioRef.current);
     playbackDiag("PLAYER_PROVIDER_MOUNT", {
       queueId: stateRef.current.queueId,
       ...audioDiagnosticDetails(audioRef.current),
     });
-    return () => playbackDiag("PLAYER_PROVIDER_CLEANUP", {
-      queueId: stateRef.current.queueId,
-      ...audioDiagnosticDetails(audioRef.current),
-    });
+    return () => {
+      playbackDiag("PLAYER_PROVIDER_CLEANUP", {
+        queueId: stateRef.current.queueId,
+        ...audioDiagnosticDetails(audioRef.current),
+      });
+      exposePlaybackAudioForDiagnostics(null);
+    };
   // The provider mount boundary—not live player state—is the evidence target.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -415,6 +419,10 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   }, [state.tracks, state.currentIdx, state.queueContext, state.queueId, state.sourceType]);
 
   const pendingAudioAction = useRef<{ src: string; play: boolean } | null>(null);
+  /** A direct listener pause must never be mistaken for a browser background interruption. */
+  const listenerPausedRef = useRef(false);
+  const backgroundPlaybackIntentRef = useRef(false);
+  const backgroundInterruptionRef = useRef<"pause" | "stall" | "error" | null>(null);
 
   useEffect(() => {
     if (pendingAudioAction.current) {
@@ -661,11 +669,54 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     // These handlers are intentionally silent in production to avoid console spam.
     // Re-enable by setting localStorage.debug = 'ln:player' in DevTools.
     const _dbg = typeof localStorage !== 'undefined' && localStorage.getItem('debug')?.includes('ln:player');
+    const attemptBackgroundRecovery = () => {
+      const reason = backgroundInterruptionRef.current;
+      if (!reason || document.hidden || listenerPausedRef.current || !backgroundPlaybackIntentRef.current) return;
+
+      // One resume attempt when the listener returns. We never reload the page,
+      // replace the queue, or reattempt after a rejected browser policy decision.
+      backgroundInterruptionRef.current = null;
+      backgroundPlaybackIntentRef.current = false;
+      const resumeAt = audio.currentTime;
+      const resume = () => {
+        if (Number.isFinite(resumeAt) && audio.duration > 0) {
+          audio.currentTime = Math.min(resumeAt, Math.max(0, audio.duration - 0.05));
+        }
+        playbackDiag("BACKGROUND_RECOVERY_ATTEMPT", {
+          reason,
+          ...audioDiagnosticDetails(audio),
+        });
+        audio.play().then(() => {
+          playbackDiag("BACKGROUND_RECOVERY_SUCCESS", {
+            reason,
+            ...audioDiagnosticDetails(audio),
+          });
+        }).catch((error: unknown) => {
+          playbackDiag("BACKGROUND_RECOVERY_REJECTED", {
+            reason,
+            message: error instanceof Error ? error.message : String(error),
+            ...audioDiagnosticDetails(audio),
+          });
+        });
+      };
+
+      if (reason === "stall" || reason === "error") {
+        audio.addEventListener("canplay", resume, { once: true });
+        audio.load();
+        return;
+      }
+      resume();
+    };
     const onVisibilityChange = () => {
       playbackDiag("DOCUMENT_VISIBILITY_CHANGE", {
         ...audioDiagnosticDetails(audioRef.current),
         isPlaying: stateRef.current.isPlaying,
       });
+      if (document.hidden) {
+        backgroundPlaybackIntentRef.current = !audio.paused && stateRef.current.isPlaying;
+      } else {
+        attemptBackgroundRecovery();
+      }
       if (!_dbg) return;
       const a = audioRef.current;
       const s = stateRef.current;
@@ -819,6 +870,10 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
 
     const onError = () => {
       playbackDiag("AUDIO_ERROR", audioDiagnosticDetails(audio));
+      if (document.hidden && backgroundPlaybackIntentRef.current && !listenerPausedRef.current) {
+        backgroundInterruptionRef.current = "error";
+        return;
+      }
       setState(s => {
         // Only auto-advance on error if the player was actively playing.
         // If paused (e.g. restored from sessionStorage on page reload), do NOT
@@ -846,15 +901,25 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
 
     const onPlay = () => {
       playbackDiag("AUDIO_PLAY", audioDiagnosticDetails(audio));
+      listenerPausedRef.current = false;
       setState(s => ({ ...s, isPlaying: true }));
     };
     const onPause = () => {
       playbackDiag("AUDIO_PAUSE", audioDiagnosticDetails(audio));
+      if (document.hidden && backgroundPlaybackIntentRef.current && !listenerPausedRef.current && !audio.ended) {
+        backgroundInterruptionRef.current = "pause";
+        playbackDiag("BACKGROUND_AUDIO_PAUSE", audioDiagnosticDetails(audio));
+      }
       setState(s => ({ ...s, isPlaying: false }));
     };
     const onLoadStart = () => playbackDiag("AUDIO_LOAD_START", audioDiagnosticDetails(audio));
     const onEmptied = () => playbackDiag("AUDIO_EMPTIED", audioDiagnosticDetails(audio));
-    const onStalled = () => playbackDiag("AUDIO_STALLED", audioDiagnosticDetails(audio));
+    const onStalled = () => {
+      playbackDiag("AUDIO_STALLED", audioDiagnosticDetails(audio));
+      if (document.hidden && backgroundPlaybackIntentRef.current && !listenerPausedRef.current) {
+        backgroundInterruptionRef.current = "stall";
+      }
+    };
     const onAbort = () => playbackDiag("AUDIO_ABORT", audioDiagnosticDetails(audio));
 
     audio.addEventListener("timeupdate", onTimeUpdate);
@@ -931,8 +996,17 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const togglePlay = useCallback(() => {
     const audio = audioRef.current;
     if (!audio) return;
-    if (audio.paused) audio.play().catch(() => {});
-    else audio.pause();
+    if (audio.paused) {
+      listenerPausedRef.current = false;
+      backgroundPlaybackIntentRef.current = false;
+      backgroundInterruptionRef.current = null;
+      audio.play().catch(() => {});
+    } else {
+      listenerPausedRef.current = true;
+      backgroundPlaybackIntentRef.current = false;
+      backgroundInterruptionRef.current = null;
+      audio.pause();
+    }
   }, []);
 
   const nextTrack = useCallback(() => {

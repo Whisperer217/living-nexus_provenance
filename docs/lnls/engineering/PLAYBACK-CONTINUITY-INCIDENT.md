@@ -26,6 +26,12 @@ The production service worker had an automatic takeover path: `skipWaiting()` ra
 
 The repair removes automatic `skipWaiting()` from installation. An update now waits until the existing Update Available control explicitly sends `SKIP_WAITING`; the controller-change reload remains correct only in that listener-approved flow. Playback remains streamed from its durable audio URL through the existing app-wide singleton—no audio storage or streaming architecture change is required.
 
+## Follow-on background-tab observation
+
+A listener reported that the page and address remain unchanged on desktop Chrome, but a previously playing Work cuts out after switching to Suno, Discord, or another application. This rules out the service-worker document reload as the sole explanation for that occurrence. A local controlled background-tab probe retained playback and advanced the stream position through the visibility change, so normal Chrome tab de-prioritization alone is not enough to reproduce the failure.
+
+The bounded resilience treatment is therefore not a new audio owner or a background autoplay loop. The current singleton retains the listener’s playback intent only while the document is hidden. If the media element then reports a pause, stall, or error, the player records one pending background interruption. When the listener returns to the visible Living Nexus tab, it makes one best-effort resume of the existing source and position. A listener-initiated pause clears that pending recovery intent. A failed best-effort resume leaves the existing play control available; it never reloads the document or rewrites the queue.
+
 ## Boundaries
 
 This investigation must not alter WIDs, provenance, Work/album data, playlists, storage, payments, or audio source custody. No “mount instead of stream” migration is indicated at this stage: the engine is already app-wide and playback still streams from its durable source. The remaining work is to distinguish a true document reload from a player-state failure, then remove only the evidenced interrupting path.
