@@ -29,3 +29,15 @@ export function toggleWorkGenre(value: string | null | undefined, genre: string)
       : [...selected, genre]
   );
 }
+
+/**
+ * Profile classification can guide a creator, but it never becomes Work
+ * metadata until the creator deliberately adds it to that Work.
+ */
+export function getSuggestedWorkGenres(
+  profileGenres: string | null | undefined,
+  workGenres: string | null | undefined
+): string[] {
+  const selected = new Set(parseWorkGenres(workGenres));
+  return parseWorkGenres(profileGenres).filter((genre) => !selected.has(genre));
+}

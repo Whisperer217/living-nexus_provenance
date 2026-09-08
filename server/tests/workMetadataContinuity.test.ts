@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
-import { parseWorkGenres, serializeWorkGenres, toggleWorkGenre } from "@shared/workMetadata";
+import { getSuggestedWorkGenres, parseWorkGenres, serializeWorkGenres, toggleWorkGenre } from "@shared/workMetadata";
 import { formatHistoricalDateValue, parseHistoricalDate, validateHistoricalDates } from "@shared/workHistoricalDates";
 
 const root = resolve(import.meta.dirname, "../..");
@@ -47,6 +47,34 @@ describe("Work metadata continuity", () => {
     expect(musicEnvironment).toContain("toggleWorkGenre");
     expect(publicWork).toContain("parseWorkGenres(song.genre)");
     expect(publicWork).toContain("Released {(song as any).creatorReleaseDate}");
+  });
+
+  it("starts a new Work classification cleanly and treats profile genres as optional suggestions", () => {
+    const musicEnvironment = read("client/src/pages/manifestation-studio/environments/MusicEnvironment.tsx");
+    const creativeDrawer = read("client/src/components/CreativeDrawer.tsx");
+    const editChapel = read("client/src/components/EditChapel.tsx");
+
+    expect(getSuggestedWorkGenres("Pop, Faith", "")).toEqual(["Pop", "Faith"]);
+    expect(getSuggestedWorkGenres("Pop, Faith", "Pop")).toEqual(["Faith"]);
+    expect(getSuggestedWorkGenres("Pop, Faith", "Gospel, Pop")).toEqual(["Faith"]);
+    expect(musicEnvironment).toContain('const [genre, setGenre] = useState(keeperPrefill?.genre ?? "")');
+    expect(musicEnvironment).toContain("const creatorGenreSuggestions = useMemo(");
+    expect(musicEnvironment).toContain("getSuggestedWorkGenres(creatorProfile?.primaryGenre, genre)");
+    expect(musicEnvironment).toContain("Genre suggestions from your profile");
+    expect(musicEnvironment).toContain("optional suggestions. Select only what describes this Work.");
+    expect(musicEnvironment).not.toContain("if (creatorProfile?.primaryGenre && !genre) setGenre(creatorProfile.primaryGenre)");
+    expect(creativeDrawer).toContain('useState(song.genre ?? "")');
+    expect(editChapel).toContain('useState(song.genre ?? "")');
+  });
+
+  it("keeps creator-declared Origin separate from editorial description, caption, classification, and participation display", () => {
+    const publicWork = read("client/src/pages/loop/LoopWorkPage.tsx");
+
+    expect(publicWork).toContain('const origin = song.haaiOriginStory?.trim() || ""');
+    expect(publicWork).toContain("Origin is a creator-declared provenance field");
+    expect(publicWork).not.toContain("song.haaiOriginStory || song.description || song.caption");
+    expect(publicWork).toContain("No origin testimony recorded for this work yet.");
+    expect(publicWork).toContain("Music · {(song as any).participationMusic");
   });
 
   it("validates creator chronology as date-only editorial metadata", () => {

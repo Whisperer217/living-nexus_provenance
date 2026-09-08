@@ -4,7 +4,7 @@
    Flow: Audio+Visual → Details+Participation → Seal → Draft/Publish
 ═══════════════════════════════════════════════════════════════════ */
 
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -43,7 +43,7 @@ import {
   serializePreparedWorkWidPayload,
 } from "@shared/preparedWorkRegistration";
 import { validateHistoricalDates } from "@shared/workHistoricalDates";
-import { parseWorkGenres, toggleWorkGenre } from "@shared/workMetadata";
+import { getSuggestedWorkGenres, parseWorkGenres, toggleWorkGenre } from "@shared/workMetadata";
 
 const atmosphere = ATMOSPHERES.music;
 
@@ -208,9 +208,10 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
 
   const { data: creatorProfile } = trpc.profile.me.useQuery(undefined, { enabled: !!user });
   const { data: creatorAlbums = [] } = trpc.collectionStudio.listMine.useQuery(undefined, { enabled: !!user });
-  useEffect(() => {
-    if (creatorProfile?.primaryGenre && !genre) setGenre(creatorProfile.primaryGenre);
-  }, [creatorProfile?.primaryGenre]);
+  const creatorGenreSuggestions = useMemo(
+    () => getSuggestedWorkGenres(creatorProfile?.primaryGenre, genre),
+    [creatorProfile?.primaryGenre, genre]
+  );
 
   useEffect(() => {
     if (coverFile) {
@@ -755,6 +756,31 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
                     {selectedGenre} ×
                   </button>
                 ))}
+              </div>
+            )}
+            {creatorGenreSuggestions.length > 0 && (
+              <div className="space-y-2" aria-label="Genre suggestions from your profile">
+                <p className="text-[11px] leading-relaxed" style={{ color: "color-mix(in srgb, var(--ln-parchment) 52%, transparent)" }}>
+                  From your creator profile — optional suggestions. Select only what describes this Work.
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {creatorGenreSuggestions.map((suggestedGenre) => (
+                      <button
+                        key={suggestedGenre}
+                        type="button"
+                        onClick={() => setGenre(toggleWorkGenre(genre, suggestedGenre) ?? "")}
+                        className="text-[11px] px-2 py-1 rounded-full"
+                        style={{
+                          border: "1px solid rgba(196,154,40,0.42)",
+                          color: "color-mix(in srgb, var(--ln-parchment) 72%, transparent)",
+                          background: "rgba(196,154,40,0.04)",
+                        }}
+                        aria-label={`Add suggested ${suggestedGenre} genre for this Work`}
+                      >
+                        + {suggestedGenre}
+                      </button>
+                  ))}
+                </div>
               </div>
             )}
             <Input

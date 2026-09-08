@@ -199,7 +199,9 @@ export default function LoopWorkPage() {
   const artistName = creator?.artistHandle || creator?.name || "Unknown creator";
   const cover = song.coverArtUrl;
   const audioUrl = song.fileUrl || "";
-  const origin = song.haaiOriginStory || song.description || song.caption || "";
+  // Origin is a creator-declared provenance field. Editorial description and
+  // caption remain separate and must never be promoted into testimony.
+  const origin = song.haaiOriginStory?.trim() || "";
   const wid = song.witnessId as string | null;
 
   const handlePlay = () => {
