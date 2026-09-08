@@ -30,6 +30,12 @@ The card is an identity artifact, not a banner with decorative copy beneath it. 
 
 The card-rendered testimony is a labelled excerpt for print hierarchy only. The complete creator-declared testimony is retained as selectable, readable text below the card preview within the modal. No card change may truncate, remove, rewrite, infer, or subordinate that statement to visual treatment.
 
+### Showcase art and Origin-summary refinement
+
+Public creator banner and avatar assets may depict a character, symbol, environment, or portrait. The card must therefore label the image as **Creator-provided art** and must never assert that the depicted subject is the creator. Creator identity is established by the declared name and handle, not by the image.
+
+The compact canvas copy defaults to an exact, source-labelled **Creator-declared Origin excerpt**. An optional AI-assisted Origin summary may be introduced only from creator-approved declared Origin/testimony context, must carry the explicit **AI-assisted Origin summary** label, and may never replace, conceal, or revise the complete original declaration presented beneath the card. It remains presentation copy, not a provenance, legal, authorship, or likeness claim.
+
 ## Consequences
 
 The QR card becomes available wherever the active public creator page renders, while retaining existing creator-page routing, ownership, domain arrangement, player, and testimony behavior. The visual artifact may be downloaded for creator-controlled print use, including T-shirt preparation, but Living Nexus does not certify commercial rights or manufacture claims through the card.

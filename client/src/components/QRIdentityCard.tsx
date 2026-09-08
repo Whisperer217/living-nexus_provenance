@@ -218,6 +218,9 @@ async function renderCardToCanvas(
   ctx.font = "bold 9px 'Arial', sans-serif";
   ctx.textAlign = "left";
   ctx.fillText("LIVING NEXUS", 28, 44);
+  ctx.fillStyle = "rgba(255,255,255,0.58)";
+  ctx.font = "bold 8px 'Arial', sans-serif";
+  ctx.fillText("CREATOR-PROVIDED ART", 28, 58);
 
   // ── 4. Identity plane ─────────────────────────────────────────────────────
   const nameY = 334;
@@ -287,16 +290,17 @@ async function renderCardToCanvas(
   ctx.textAlign = "center";
   ctx.fillText("WITNESSED ON LIVING NEXUS · PROVENANCE PRESERVED", CARD_W / 2, sealY + 18);
 
-  // ── 6.5 Creator-declared testimony excerpt ───────────────────────────────
-  // This is intentionally limited to existing creator-declared copy. It is not
-  // a provenance, ownership, or legal assertion authored by the card system.
+  // ── 6.5 Creator-declared Origin excerpt ──────────────────────────────────
+  // This exact excerpt gives the print plane room to breathe. The unabridged,
+  // selectable declaration remains below the card in the modal.
   if (entity.description) {
     const statement = entity.description.replace(/\s+/g, " ").trim();
     const maxLineWidth = CARD_W - 88;
-    const testimonyLineLimit = hasResonance ? 2 : 3;
+    const testimonyLineLimit = 1;
     const words = statement.split(" ");
     const lines: string[] = [];
     let line = "";
+    ctx.font = "13px 'Arial', sans-serif";
     for (const word of words) {
       const candidate = line ? `${line} ${word}` : word;
       if (ctx.measureText(candidate).width > maxLineWidth && line) {
@@ -315,11 +319,11 @@ async function renderCardToCanvas(
     ctx.fillStyle = `${rc.primary}CC`;
     ctx.font = "bold 8px 'Arial', sans-serif";
     ctx.textAlign = "center";
-    ctx.fillText("CREATOR-DECLARED TESTIMONY", CARD_W / 2, sealY + 50);
+    ctx.fillText("CREATOR-DECLARED ORIGIN · EXCERPT", CARD_W / 2, sealY + 50);
     ctx.fillStyle = "rgba(255,255,255,0.78)";
-    ctx.font = "11px 'Arial', sans-serif";
+    ctx.font = "13px 'Arial', sans-serif";
     ctx.textAlign = "center";
-    lines.forEach((copy, index) => ctx.fillText(copy, CARD_W / 2, sealY + 68 + index * 16));
+    lines.forEach((copy) => ctx.fillText(copy, CARD_W / 2, sealY + 72));
   }
 
   // ── 7. QR Code — protected quiet plane ────────────────────────────────────

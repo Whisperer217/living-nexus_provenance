@@ -41,10 +41,12 @@ describe("Creator Witness Card contract", () => {
     expect(card).not.toContain("generateImage");
   });
 
-  it("keeps the full creator-declared testimony readable in the modal while using only a labelled canvas excerpt", () => {
+  it("keeps the full creator declaration readable in the modal while using an exact, labelled Origin excerpt on the canvas", () => {
     const card = read("client/src/components/QRIdentityCard.tsx");
 
-    expect(card).toContain("CREATOR-DECLARED TESTIMONY");
+    expect(card).toContain("CREATOR-PROVIDED ART");
+    expect(card).toContain("CREATOR-DECLARED ORIGIN · EXCERPT");
+    expect(card).toContain("const testimonyLineLimit = 1");
     expect(card).toContain("Creator-declared testimony");
     expect(card).toContain("whitespace-pre-wrap break-words");
     expect(card).toContain("{entity.description}");
