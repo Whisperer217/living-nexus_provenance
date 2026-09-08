@@ -111,7 +111,8 @@ const RARITY_CONFIG = {
 async function renderCardToCanvas(
   canvas: HTMLCanvasElement,
   entity: QRCardEntity,
-  shareUrl: string
+  shareUrl: string,
+  renderMode: "preview" | "export" = "preview"
 ): Promise<void> {
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
@@ -122,16 +123,51 @@ async function renderCardToCanvas(
   const rarity = computeRarity(entity);
   const rc = RARITY_CONFIG[rarity];
 
-  // ── 1. Background ─────────────────────────────────────────────────────────
-  const bg = ctx.createLinearGradient(0, 0, 0, CARD_H);
-  bg.addColorStop(0, "#1a1508");
-  bg.addColorStop(0.4, "#0e0e0e");
-  bg.addColorStop(1, "#080808");
-  ctx.fillStyle = bg;
+  // ── 1. Full-vertical creator art field ───────────────────────────────────
+  // Preview motion lives in the DOM layer below this canvas. Exports render a
+  // static cover crop into the same geometry so downloaded/print artifacts stay
+  // stable and scan-ready.
+  if (renderMode === "export" || !entity.thumbnailUrl) {
+    const bg = ctx.createLinearGradient(0, 0, 0, CARD_H);
+    bg.addColorStop(0, "#1a1508");
+    bg.addColorStop(0.48, "#0e0e0e");
+    bg.addColorStop(1, "#080808");
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, CARD_W, CARD_H);
+  }
+
+  if (renderMode === "export" && entity.thumbnailUrl) {
+    try {
+      const img = new Image();
+      await new Promise<void>((resolve) => {
+        img.onload = () => resolve();
+        img.onerror = () => resolve();
+        img.crossOrigin = "anonymous";
+        img.src = entity.thumbnailUrl!;
+      });
+      if (img.complete && img.naturalWidth > 0) {
+        const scale = Math.max(CARD_W / img.naturalWidth, CARD_H / img.naturalHeight);
+        const drawnW = img.naturalWidth * scale;
+        const drawnH = img.naturalHeight * scale;
+        const cropX = Math.min(100, Math.max(0, entity.thumbnailPositionX ?? 50)) / 100;
+        const cropY = Math.min(100, Math.max(0, entity.thumbnailPositionY ?? 42)) / 100;
+        ctx.drawImage(img, (CARD_W - drawnW) * cropX, (CARD_H - drawnH) * cropY, drawnW, drawnH);
+      }
+    } catch (_) { /* dark fallback remains */ }
+  }
+
+  // Contrast protection keeps visual art present while never consuming the
+  // creator's declared identity, testimony, or QR quiet zone.
+  const veil = ctx.createLinearGradient(0, 0, 0, CARD_H);
+  veil.addColorStop(0, "rgba(5,5,5,0.10)");
+  veil.addColorStop(0.34, "rgba(5,5,5,0.18)");
+  veil.addColorStop(0.56, "rgba(5,5,5,0.66)");
+  veil.addColorStop(0.78, "rgba(5,5,5,0.86)");
+  veil.addColorStop(1, "rgba(5,5,5,0.96)");
+  ctx.fillStyle = veil;
   ctx.fillRect(0, 0, CARD_W, CARD_H);
 
-  // Ambient radial glow (rarity-colored)
-  const radial = ctx.createRadialGradient(CARD_W / 2, CARD_H * 0.35, 0, CARD_W / 2, CARD_H * 0.35, CARD_W * 0.7);
+  const radial = ctx.createRadialGradient(CARD_W / 2, CARD_H * 0.32, 0, CARD_W / 2, CARD_H * 0.32, CARD_W * 0.7);
   radial.addColorStop(0, rc.glow);
   radial.addColorStop(1, "transparent");
   ctx.fillStyle = radial;
@@ -156,54 +192,7 @@ async function renderCardToCanvas(
   ctx.roundRect(12, 12, CARD_W - 24, CARD_H - 24, r - 4);
   ctx.stroke();
 
-  // ── 3. Artwork ────────────────────────────────────────────────────────────
-  const thumbH = 230;
-  const thumbX = 18;
-  const thumbY = 18;
-  const thumbW = CARD_W - 36;
-
-  // Placeholder gradient
-  const ph = ctx.createLinearGradient(thumbX, thumbY, thumbX + thumbW, thumbY + thumbH);
-  ph.addColorStop(0, "#1e1a0e");
-  ph.addColorStop(1, "#2a2010");
-  ctx.save();
-  ctx.beginPath();
-  ctx.roundRect(thumbX, thumbY, thumbW, thumbH, [r - 2, r - 2, 0, 0]);
-  ctx.clip();
-  ctx.fillStyle = ph;
-  ctx.fillRect(thumbX, thumbY, thumbW, thumbH);
-
-  if (entity.thumbnailUrl) {
-    try {
-      const img = new Image();
-      await new Promise<void>((resolve) => {
-        img.onload = () => resolve();
-        img.onerror = () => resolve();
-        img.crossOrigin = "anonymous";
-        img.src = entity.thumbnailUrl!;
-      });
-      if (img.complete && img.naturalWidth > 0) {
-        const scale = Math.max(thumbW / img.naturalWidth, thumbH / img.naturalHeight);
-        const sw = img.naturalWidth * scale;
-        const sh = img.naturalHeight * scale;
-        const cropX = Math.min(100, Math.max(0, entity.thumbnailPositionX ?? 50)) / 100;
-        const cropY = Math.min(100, Math.max(0, entity.thumbnailPositionY ?? 50)) / 100;
-        const sx = thumbX + (thumbW - sw) * cropX;
-        const sy = thumbY + (thumbH - sh) * cropY;
-        ctx.drawImage(img, sx, sy, sw, sh);
-      }
-    } catch (_) { /* placeholder already drawn */ }
-  }
-
-  // Bottom gradient fade on artwork
-  const thumbFade = ctx.createLinearGradient(0, thumbY + thumbH - 100, 0, thumbY + thumbH);
-  thumbFade.addColorStop(0, "rgba(8,8,8,0)");
-  thumbFade.addColorStop(1, "rgba(8,8,8,0.98)");
-  ctx.fillStyle = thumbFade;
-  ctx.fillRect(thumbX, thumbY, thumbW, thumbH);
-  ctx.restore();
-
-  // ── 4. Rarity badge (top-right) ───────────────────────────────────────────
+  // ── 3. Rarity badge (top-right) ───────────────────────────────────────────
   const badgeW = rarity === "genesis" ? 100 : 90;
   const badgeH = 24;
   const badgeX = CARD_W - 20 - badgeW;
@@ -230,8 +219,8 @@ async function renderCardToCanvas(
   ctx.textAlign = "left";
   ctx.fillText("LIVING NEXUS", 28, 44);
 
-  // ── 5. Entity name + subtitle ─────────────────────────────────────────────
-  const nameY = thumbY + thumbH + 30;
+  // ── 4. Identity plane ─────────────────────────────────────────────────────
+  const nameY = 334;
   ctx.fillStyle = "#F0D080";
   ctx.font = "bold 26px 'Georgia', serif";
   ctx.textAlign = "center";
@@ -251,7 +240,7 @@ async function renderCardToCanvas(
   }
 
   // Gold divider
-  const divY = nameY + (entity.subtitle ? 44 : 20);
+  const divY = nameY + (entity.subtitle ? 44 : 22);
   const divGrad = ctx.createLinearGradient(40, 0, CARD_W - 40, 0);
   divGrad.addColorStop(0, "transparent");
   divGrad.addColorStop(0.3, rc.primary);
@@ -264,7 +253,7 @@ async function renderCardToCanvas(
   ctx.lineTo(CARD_W - 40, divY);
   ctx.stroke();
 
-  // ── 6. Resonance signature row ────────────────────────────────────────────
+  // ── 5. Resonance signature row ────────────────────────────────────────────
   const sigY = divY + 22;
   const hasResonance = (entity.playCount ?? 0) > 0 || (entity.witnessCount ?? 0) > 0 || (entity.totalFundingCents ?? 0) > 0;
 
@@ -287,7 +276,7 @@ async function renderCardToCanvas(
     });
   }
 
-  // ── 7. Creator seal ───────────────────────────────────────────────────────
+  // ── 6. Creator seal ───────────────────────────────────────────────────────
   const sealY = hasResonance ? sigY + 42 : sigY + 4;
   ctx.fillStyle = `${rc.primary}44`;
   ctx.beginPath();
@@ -298,12 +287,13 @@ async function renderCardToCanvas(
   ctx.textAlign = "center";
   ctx.fillText("WITNESSED ON LIVING NEXUS · PROVENANCE PRESERVED", CARD_W / 2, sealY + 18);
 
-  // ── 7.5 Creator/public statement ─────────────────────────────────────────
+  // ── 6.5 Creator-declared testimony excerpt ───────────────────────────────
   // This is intentionally limited to existing creator-declared copy. It is not
   // a provenance, ownership, or legal assertion authored by the card system.
   if (entity.description) {
     const statement = entity.description.replace(/\s+/g, " ").trim();
     const maxLineWidth = CARD_W - 88;
+    const testimonyLineLimit = hasResonance ? 2 : 3;
     const words = statement.split(" ");
     const lines: string[] = [];
     let line = "";
@@ -312,26 +302,30 @@ async function renderCardToCanvas(
       if (ctx.measureText(candidate).width > maxLineWidth && line) {
         lines.push(line);
         line = word;
-        if (lines.length === 2) break;
+        if (lines.length === testimonyLineLimit) break;
       } else {
         line = candidate;
       }
     }
-    if (line && lines.length < 2) lines.push(line);
+    if (line && lines.length < testimonyLineLimit) lines.push(line);
     const consumed = lines.join(" ");
     if (consumed.length < statement.length && lines.length > 0) {
       lines[lines.length - 1] = `${lines[lines.length - 1].replace(/[.,;:!?]?$/, "")}…`;
     }
-    ctx.fillStyle = "rgba(255,255,255,0.62)";
+    ctx.fillStyle = `${rc.primary}CC`;
+    ctx.font = "bold 8px 'Arial', sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("CREATOR-DECLARED TESTIMONY", CARD_W / 2, sealY + 50);
+    ctx.fillStyle = "rgba(255,255,255,0.78)";
     ctx.font = "11px 'Arial', sans-serif";
     ctx.textAlign = "center";
-    lines.forEach((copy, index) => ctx.fillText(copy, CARD_W / 2, sealY + 50 + index * 16));
+    lines.forEach((copy, index) => ctx.fillText(copy, CARD_W / 2, sealY + 68 + index * 16));
   }
 
-  // ── 8. QR Code ────────────────────────────────────────────────────────────
-  const qrSize = 148;
+  // ── 7. QR Code — protected quiet plane ────────────────────────────────────
+  const qrSize = 140;
   const qrX = (CARD_W - qrSize) / 2;
-  const qrY = CARD_H - qrSize - 90;
+  const qrY = CARD_H - qrSize - 78;
 
   ctx.fillStyle = "#ffffff";
   ctx.beginPath();
@@ -356,7 +350,7 @@ async function renderCardToCanvas(
   });
   ctx.drawImage(qrCanvas, qrX, qrY, qrSize, qrSize);
 
-  // ── 9. Scan instruction ───────────────────────────────────────────────────
+  // ── 8. Scan instruction ───────────────────────────────────────────────────
   ctx.fillStyle = `${rc.primary}CC`;
   ctx.font = "bold 11px 'Arial', sans-serif";
   ctx.textAlign = "center";
@@ -367,7 +361,7 @@ async function renderCardToCanvas(
   const shortUrl = shareUrl.length > 55 ? shareUrl.slice(0, 52) + "…" : shareUrl;
   ctx.fillText(shortUrl, CARD_W / 2, qrY + qrSize + 40);
 
-  // ── 10. Bottom provenance strip ───────────────────────────────────────────
+  // ── 9. Bottom provenance strip ────────────────────────────────────────────
   const stripY = CARD_H - 26;
   ctx.fillStyle = `${rc.primary}11`;
   ctx.fillRect(18, stripY - 8, CARD_W - 36, 22);
@@ -397,7 +391,7 @@ export function QRIdentityCard({ entity, campaign, tag, onClose }: QRIdentityCar
       setShareUrl(entity.canonicalUrl);
       setIsGenerating(false);
       if (canvasRef.current) {
-        renderCardToCanvas(canvasRef.current, entity, entity.canonicalUrl).catch(() => {
+          renderCardToCanvas(canvasRef.current, entity, entity.canonicalUrl, "preview").catch(() => {
           toast.error("Failed to render Creator Witness Card");
         });
       }
@@ -413,7 +407,7 @@ export function QRIdentityCard({ entity, campaign, tag, onClose }: QRIdentityCar
           setShareId(data.share.id);
           setIsGenerating(false);
           if (canvasRef.current) {
-            await renderCardToCanvas(canvasRef.current, entity, data.url);
+            await renderCardToCanvas(canvasRef.current, entity, data.url, "preview");
           }
         },
         onError: (err) => {
@@ -425,14 +419,21 @@ export function QRIdentityCard({ entity, campaign, tag, onClose }: QRIdentityCar
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleDownloadPng = useCallback(() => {
-    if (!canvasRef.current) return;
+  const handleDownloadPng = useCallback(async () => {
+    if (!canvasRef.current || !shareUrl) return;
     const filename = `living-nexus-${entity.type}-${entity.slug}.png`;
-    canvasRef.current.toBlob((blob) => {
+    const exportCanvas = document.createElement("canvas");
+    try {
+      await renderCardToCanvas(exportCanvas, entity, shareUrl, "export");
+    } catch (_) {
+      toast.error("Failed to prepare print-safe card export.");
+      return;
+    }
+    exportCanvas.toBlob((blob) => {
       if (!blob) {
         const link = document.createElement("a");
         link.download = filename;
-        link.href = canvasRef.current!.toDataURL("image/png");
+        link.href = exportCanvas.toDataURL("image/png");
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -448,7 +449,7 @@ export function QRIdentityCard({ entity, campaign, tag, onClose }: QRIdentityCar
       }
       toast.success("Card downloaded — PNG saved to your device.");
     }, "image/png");
-  }, [entity]);
+  }, [entity, shareUrl]);
 
   const handleCopyLink = useCallback(async () => {
     if (!shareUrl) return;
@@ -496,6 +497,16 @@ export function QRIdentityCard({ entity, campaign, tag, onClose }: QRIdentityCar
           border: `2px solid ${rc.primary}44`,
         }}
       >
+        {entity.thumbnailUrl && (
+          <div
+            aria-hidden="true"
+            className="creator-witness-card-preview-art absolute -inset-[8%] bg-cover bg-no-repeat"
+            style={{
+              backgroundImage: `url(${entity.thumbnailUrl})`,
+              backgroundPosition: `${entity.thumbnailPositionX ?? 50}% ${entity.thumbnailPositionY ?? 42}%`,
+            }}
+          />
+        )}
         {isGenerating && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 z-10 gap-3">
             <Loader2 className="w-8 h-8 animate-spin" style={{ color: rc.primary }} />
@@ -504,8 +515,22 @@ export function QRIdentityCard({ entity, campaign, tag, onClose }: QRIdentityCar
             </span>
           </div>
         )}
-        <canvas ref={canvasRef} style={{ width: "100%", height: "100%", display: "block" }} />
+        <canvas ref={canvasRef} className="relative z-[1]" style={{ width: "100%", height: "100%", display: "block" }} />
       </div>
+
+      {entity.description && (
+        <section
+          className="w-full max-w-sm rounded-xl border px-4 py-3 text-left"
+          style={{ borderColor: `${rc.primary}33`, background: "rgba(0,0,0,0.35)" }}
+        >
+          <p className="text-[10px] font-semibold tracking-[0.16em] uppercase" style={{ color: `${rc.primary}CC` }}>
+            Creator-declared testimony
+          </p>
+          <p className="mt-2 text-sm leading-6 text-white/80 whitespace-pre-wrap break-words">
+            {entity.description}
+          </p>
+        </section>
+      )}
 
       {/* Share URL */}
       {shareUrl && (

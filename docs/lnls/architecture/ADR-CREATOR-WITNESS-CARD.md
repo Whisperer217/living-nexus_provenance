@@ -24,6 +24,12 @@ The card uses the following public asset order: creator banner, creator avatar, 
 | WID/provenance | No WID is created, copied, or claimed by the card |
 | Tracking | Direct canonical creator QR does not require a new QR-share database record |
 
+### Full-vertical composition refinement
+
+The card is an identity artifact, not a banner with decorative copy beneath it. The creator-owned visual therefore occupies the complete vertical canvas as a `cover` field with the declared crop position as its focal point. Identity, testimony, and QR each occupy protected contrast planes over that field. The visible preview may slowly drift the underlying art only; it must respect `prefers-reduced-motion` and never move text or the QR. The downloaded PNG remains a still composition.
+
+The card-rendered testimony is a labelled excerpt for print hierarchy only. The complete creator-declared testimony is retained as selectable, readable text below the card preview within the modal. No card change may truncate, remove, rewrite, infer, or subordinate that statement to visual treatment.
+
 ## Consequences
 
 The QR card becomes available wherever the active public creator page renders, while retaining existing creator-page routing, ownership, domain arrangement, player, and testimony behavior. The visual artifact may be downloaded for creator-controlled print use, including T-shirt preparation, but Living Nexus does not certify commercial rights or manufacture claims through the card.

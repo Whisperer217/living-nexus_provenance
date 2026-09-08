@@ -4596,3 +4596,23 @@ h1, h2, h3, h4, h5, h6,
     animation: none !important;
   }
 }
+
+/* ── Creator Witness Card: preview-only art drift ───────────────────────────
+   The animation belongs solely to the creator-owned background visual. Canvas
+   identity/testimony/QR layers remain static; PNG export renders a still. */
+@keyframes creator-witness-art-drift {
+  0%, 100% { transform: scale(1.06) translate3d(0, -1.5%, 0); }
+  50% { transform: scale(1.12) translate3d(0, -6%, 0); }
+}
+
+.creator-witness-card-preview-art {
+  animation: creator-witness-art-drift 18s ease-in-out infinite;
+  transform-origin: center center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .creator-witness-card-preview-art {
+    animation: none;
+    transform: scale(1.06);
+  }
+}

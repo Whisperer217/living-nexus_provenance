@@ -394,6 +394,11 @@
 - [x] Add a creator-page card with a scannable QR code resolving to the canonical creator domain and a concise source-labelled identity/testimony explanation. Every Loop creator hero now exposes **Creator card**, which opens the refined existing artifact and encodes `${origin}/creator/${handle-or-id}` directly.
 - [x] Add robust image/sigil fallback and validate QR payloads, desktop/mobile print composition, accessibility, and all public creator routes before checkpointing. Creator-card and route contracts passed 8/8; typecheck, build, and diff hygiene passed. Public creator desktop/mobile captures show the control in the existing action hierarchy. Full regression reached 584 passed and 1 skipped, retaining only the known pre-existing CinematicSplash marker assertion.
 - [x] Save the verified Creator Witness Card refinement as a checkpoint and hold public promotion for the project Publish action.
+- [x] Measure the current Creator Witness Card source-image crop, text/QR balance, and mobile modal framing before changing composition.
+- [x] Define a centered, full-bleed creator-owned art treatment that preserves QR quiet zone, creator identity, declared testimony, and print-safe frame.
+- [x] Preserve the complete creator-declared testimony in a protected readable plane and retain full-text access; do not truncate, obscure, replace, or subordinate it to image motion.
+- [x] Refine existing card canvas cropping and modal preview geometry so visual art fills its block with a deliberate centered focal point rather than passive banner scaling.
+- [ ] Validate scannable QR contrast, identity/testimony readability, print composition, and mobile card containment before checkpointing the visual refinement.
 - [x] Inventory only verified Living Nexus identity, Work, WID, provenance, attribution, AI-disclosure, and lineage facts needed for a separate NEX-ARK Bridge handoff.
 - [x] Define mock-first Nexus Bridge provider interfaces, stable reference identifiers, errors, privacy/consent rules, and replacement criteria without inventing Living Nexus production endpoints.
 - [x] Write a repository-ready NEX-ARK handoff brief defining separate-application boundaries, domain models, Connected Identity prototype flow, adapter contracts, and phased implementation plan.
