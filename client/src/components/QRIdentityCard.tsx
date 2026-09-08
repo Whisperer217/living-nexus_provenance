@@ -607,13 +607,13 @@ export function QRShareModal({ entity, campaign, tag, trigger }: QRShareModalPro
 
   const modalContent = open ? (
     <div
-      className="fixed inset-0 overflow-y-auto bg-black/75 backdrop-blur-sm"
+      className="creator-witness-modal-backdrop fixed inset-0 overflow-y-auto bg-black/75 backdrop-blur-sm"
       style={{ zIndex: 99999 }}
       onClick={(e) => { if (e.target === e.currentTarget) setOpen(false); }}
     >
       <div className="flex min-h-full items-center justify-center p-4 py-8">
         <div
-          className="bg-[#0a0a0a] rounded-2xl shadow-2xl w-full"
+          className="creator-witness-modal-surface bg-[#0a0a0a] rounded-2xl shadow-2xl w-full"
           style={{
             maxWidth: "min(520px, calc(100vw - 2rem))",
             border: `1.5px solid ${rc.primary}44`,

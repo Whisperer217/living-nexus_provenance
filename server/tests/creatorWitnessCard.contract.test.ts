@@ -63,6 +63,19 @@ describe("Creator Witness Card contract", () => {
     expect(card).toContain("ctx.drawImage(img, (CARD_W - drawnW) * cropX, (CARD_H - drawnH) * cropY, drawnW, drawnH)");
   });
 
+  it("opens the modal with a restrained fade and static subtle backdrop blur while honoring reduced motion", () => {
+    const card = read("client/src/components/QRIdentityCard.tsx");
+    const styles = read("client/src/index.css");
+
+    expect(card).toContain("creator-witness-modal-backdrop");
+    expect(card).toContain("backdrop-blur-sm");
+    expect(card).toContain("creator-witness-modal-surface");
+    expect(styles).toContain("creator-witness-modal-backdrop-in 180ms");
+    expect(styles).toContain("creator-witness-modal-surface-in 260ms");
+    expect(styles).toContain("transform: translateY(8px) scale(0.985)");
+    expect(styles).toContain(".creator-witness-modal-backdrop,");
+  });
+
   it("keeps the QR on an opaque quiet plane above the art field", () => {
     const card = read("client/src/components/QRIdentityCard.tsx");
 
