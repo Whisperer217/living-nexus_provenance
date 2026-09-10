@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-08-26T02:18:00.000Z",
-  "totalLessons": 21,
+  "lastUpdated": "2026-09-10T00:20:00.000Z",
+  "totalLessons": 22,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -488,6 +488,29 @@
         "volume-control",
         "storage-boundary",
         "no-database-media"
+      ]
+    },
+    {
+      "id": "LESSON-023",
+      "date": "2026-09-10",
+      "category": "stewardship",
+      "problem": "A listener-started stream can survive ordinary page rendering yet still stop after a temporary media network interruption. Treating every media error as a next-track condition loses the listener's chosen Work and position; retrying every pause risks overriding an explicit Pause.",
+      "solution": "Keep one app-wide audio owner and recover only the same current durable source after a recoverable network error or sustained stall. Preserve the last known position, use a finite 750ms/2s/5s retry budget, clear retry state on successful play, track/queue change, completion, or explicit Pause, and retain the existing Play control after exhaustion. Background stalls/errors use the same bounded policy rather than a competing reload path.",
+      "files": [
+        "client/src/contexts/PlayerContext.tsx",
+        "client/src/lib/playbackDiag.ts",
+        "server/tests/playbackContinuityDiagnostics.contract.test.ts",
+        "docs/lnls/engineering/PLAYBACK-CONTINUITY-INCIDENT.md"
+      ],
+      "score": 0,
+      "tags": [
+        "player",
+        "network-recovery",
+        "streaming",
+        "listener-intent",
+        "queue-custody",
+        "background-tab",
+        "no-reload"
       ]
     }
   ]

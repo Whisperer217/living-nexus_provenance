@@ -32,6 +32,23 @@ A listener reported that the page and address remain unchanged on desktop Chrome
 
 The bounded resilience treatment is therefore not a new audio owner or a background autoplay loop. The current singleton retains the listener’s playback intent only while the document is hidden. If the media element then reports a pause, stall, or error, the player records one pending background interruption. When the listener returns to the visible Living Nexus tab, it makes one best-effort resume of the existing source and position. A listener-initiated pause clears that pending recovery intent. A failed best-effort resume leaves the existing play control available; it never reloads the document or rewrites the queue.
 
+## Network auto-resume policy
+
+Temporary stream interruption is treated separately from queue advancement. A
+recoverable media network error, or a sustained stall that does not resume
+through the browser's ordinary buffering, must retry the **same current Work**
+from its last known position. The retry policy is bounded to three attempts,
+uses short increasing delays, and performs no document reload, queue rotation,
+next-track advance, source substitution, or write.
+
+The policy applies only while the current Work remains listener-started and a
+direct Pause has not been requested. A listener pause, track change, queue
+change, completed track, or a successful resumed `play` clears pending retry
+state. Errors other than a recoverable network failure keep the existing
+failure behavior; this slice does not pretend that an unavailable source,
+expired entitlement, unsupported media, or a browser autoplay-policy rejection
+is a temporary network condition.
+
 ## Boundaries
 
 This investigation must not alter WIDs, provenance, Work/album data, playlists, storage, payments, or audio source custody. No “mount instead of stream” migration is indicated at this stage: the engine is already app-wide and playback still streams from its durable source. The remaining work is to distinguish a true document reload from a player-state failure, then remove only the evidenced interrupting path.

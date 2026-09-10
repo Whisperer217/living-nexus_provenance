@@ -26,6 +26,9 @@ function generateId(): string {
 }
 
 const MIN_PLAY_SECONDS = 30; // must match server constant
+const NETWORK_MEDIA_ERROR_CODE = 2; // HTMLMediaElement.MEDIA_ERR_NETWORK
+const NETWORK_RECOVERY_DELAYS_MS = [750, 2_000, 5_000] as const;
+const NETWORK_RECOVERY_LOAD_TIMEOUT_MS = 6_000;
 
 export interface Comment {
   id: string;
@@ -421,8 +424,38 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const pendingAudioAction = useRef<{ src: string; play: boolean } | null>(null);
   /** A direct listener pause must never be mistaken for a browser background interruption. */
   const listenerPausedRef = useRef(false);
+  /** Persists only while the listener still expects the current Work to continue. */
+  const networkPlaybackIntentRef = useRef(false);
   const backgroundPlaybackIntentRef = useRef(false);
   const backgroundInterruptionRef = useRef<"pause" | "stall" | "error" | null>(null);
+  const networkRetryTimerRef = useRef<number | null>(null);
+  const networkRetryWatchdogRef = useRef<number | null>(null);
+  const networkRetryAttemptRef = useRef(0);
+  const networkRetryPositionRef = useRef(0);
+  const networkRetrySourceRef = useRef<string | null>(null);
+  const networkRetryInFlightRef = useRef(false);
+  const networkRetryCanPlayHandlerRef = useRef<(() => void) | null>(null);
+
+  const clearNetworkRecovery = useCallback((resetBudget = true) => {
+    if (networkRetryTimerRef.current !== null) {
+      window.clearTimeout(networkRetryTimerRef.current);
+      networkRetryTimerRef.current = null;
+    }
+    if (networkRetryWatchdogRef.current !== null) {
+      window.clearTimeout(networkRetryWatchdogRef.current);
+      networkRetryWatchdogRef.current = null;
+    }
+    if (networkRetryCanPlayHandlerRef.current) {
+      audioRef.current?.removeEventListener("canplay", networkRetryCanPlayHandlerRef.current);
+      networkRetryCanPlayHandlerRef.current = null;
+    }
+    networkRetryInFlightRef.current = false;
+    if (resetBudget) {
+      networkRetryAttemptRef.current = 0;
+      networkRetryPositionRef.current = 0;
+      networkRetrySourceRef.current = null;
+    }
+  }, []);
 
   useEffect(() => {
     if (pendingAudioAction.current) {
@@ -669,6 +702,146 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     // These handlers are intentionally silent in production to avoid console spam.
     // Re-enable by setting localStorage.debug = 'ln:player' in DevTools.
     const _dbg = typeof localStorage !== 'undefined' && localStorage.getItem('debug')?.includes('ln:player');
+    type NetworkRecoveryReason = "network-error" | "stalled" | "load-timeout" | "play-rejected";
+    const scheduleNetworkRecovery = (reason: NetworkRecoveryReason) => {
+      const snapshot = stateRef.current;
+      const track = snapshot.tracks[snapshot.currentIdx];
+      if (!networkPlaybackIntentRef.current || listenerPausedRef.current || audio.ended || !track?.audioUrl) return;
+
+      const source = safeAudioUrl(track.audioUrl);
+      if (networkRetrySourceRef.current && networkRetrySourceRef.current !== source) {
+        clearNetworkRecovery();
+      }
+      if (networkRetryTimerRef.current !== null || networkRetryInFlightRef.current) return;
+      if (networkRetryAttemptRef.current >= NETWORK_RECOVERY_DELAYS_MS.length) {
+        playbackDiag("NETWORK_RECOVERY_EXHAUSTED", {
+          reason,
+          attempts: networkRetryAttemptRef.current,
+          ...audioDiagnosticDetails(audio),
+        });
+        setState(s => ({ ...s, isPlaying: false, isReady: false }));
+        return;
+      }
+
+      networkRetrySourceRef.current = source;
+      networkRetryPositionRef.current = Number.isFinite(audio.currentTime) ? audio.currentTime : 0;
+      const attempt = networkRetryAttemptRef.current + 1;
+      networkRetryAttemptRef.current = attempt;
+      const delay = NETWORK_RECOVERY_DELAYS_MS[attempt - 1];
+      playbackDiag("NETWORK_RECOVERY_SCHEDULED", {
+        reason,
+        attempt,
+        delay,
+        resumeAt: networkRetryPositionRef.current,
+        ...audioDiagnosticDetails(audio),
+      });
+
+      networkRetryTimerRef.current = window.setTimeout(() => {
+        networkRetryTimerRef.current = null;
+        const activeTrack = stateRef.current.tracks[stateRef.current.currentIdx];
+        playbackDiag("NETWORK_RECOVERY_TIMER_FIRED", {
+          attempt,
+          intended: networkPlaybackIntentRef.current,
+          listenerPaused: listenerPausedRef.current,
+          activeSource: activeTrack?.audioUrl ? safeAudioUrl(activeTrack.audioUrl) : null,
+          ...audioDiagnosticDetails(audio),
+        });
+        if (
+          !audio.paused &&
+          audio.currentTime > networkRetryPositionRef.current + 0.5
+        ) {
+          playbackDiag("NETWORK_RECOVERY_NATURAL", {
+            attempt,
+            resumedFrom: networkRetryPositionRef.current,
+            ...audioDiagnosticDetails(audio),
+          });
+          clearNetworkRecovery();
+          return;
+        }
+        if (
+          !networkPlaybackIntentRef.current ||
+          listenerPausedRef.current ||
+          !activeTrack?.audioUrl ||
+          safeAudioUrl(activeTrack.audioUrl) !== source
+        ) {
+          playbackDiag("NETWORK_RECOVERY_CANCELLED", {
+            attempt,
+            intended: networkPlaybackIntentRef.current,
+            listenerPaused: listenerPausedRef.current,
+            ...audioDiagnosticDetails(audio),
+          });
+          clearNetworkRecovery();
+          return;
+        }
+
+        networkRetryInFlightRef.current = true;
+        const resume = () => {
+          audio.removeEventListener("canplay", resume);
+          if (networkRetryCanPlayHandlerRef.current === resume) {
+            networkRetryCanPlayHandlerRef.current = null;
+          }
+          if (networkRetryWatchdogRef.current !== null) {
+            window.clearTimeout(networkRetryWatchdogRef.current);
+            networkRetryWatchdogRef.current = null;
+          }
+          if (listenerPausedRef.current || !networkPlaybackIntentRef.current) {
+            clearNetworkRecovery();
+            return;
+          }
+          if (Number.isFinite(networkRetryPositionRef.current) && audio.duration > 0) {
+            audio.currentTime = Math.min(
+              networkRetryPositionRef.current,
+              Math.max(0, audio.duration - 0.05),
+            );
+          }
+          playbackDiag("NETWORK_RECOVERY_ATTEMPT", {
+            attempt,
+            resumeAt: networkRetryPositionRef.current,
+            ...audioDiagnosticDetails(audio),
+          });
+          audio.play().then(() => {
+            playbackDiag("NETWORK_RECOVERY_SUCCESS", {
+              attempt,
+              ...audioDiagnosticDetails(audio),
+            });
+            clearNetworkRecovery();
+          }).catch((error: unknown) => {
+            networkRetryInFlightRef.current = false;
+            const name = error instanceof Error ? error.name : "UnknownError";
+            playbackDiag("NETWORK_RECOVERY_PLAY_REJECTED", {
+              attempt,
+              name,
+              message: error instanceof Error ? error.message : String(error),
+              ...audioDiagnosticDetails(audio),
+            });
+            // Browser policy rejection is not a temporary network fault.
+            if (name === "NotAllowedError") {
+              clearNetworkRecovery();
+              return;
+            }
+            scheduleNetworkRecovery("play-rejected");
+          });
+        };
+
+        networkRetryCanPlayHandlerRef.current = resume;
+        audio.addEventListener("canplay", resume, { once: true });
+        audio.src = source;
+        audio.load();
+        networkRetryWatchdogRef.current = window.setTimeout(() => {
+          if (!networkRetryInFlightRef.current) return;
+          networkRetryInFlightRef.current = false;
+          audio.removeEventListener("canplay", resume);
+          if (networkRetryCanPlayHandlerRef.current === resume) {
+            networkRetryCanPlayHandlerRef.current = null;
+          }
+          playbackDiag("NETWORK_RECOVERY_LOAD_TIMEOUT", {
+            attempt,
+            ...audioDiagnosticDetails(audio),
+          });
+          scheduleNetworkRecovery("load-timeout");
+        }, NETWORK_RECOVERY_LOAD_TIMEOUT_MS);
+      }, delay);
+    };
     const attemptBackgroundRecovery = () => {
       const reason = backgroundInterruptionRef.current;
       if (!reason || document.hidden || listenerPausedRef.current || !backgroundPlaybackIntentRef.current) return;
@@ -701,8 +874,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       };
 
       if (reason === "stall" || reason === "error") {
-        audio.addEventListener("canplay", resume, { once: true });
-        audio.load();
+        scheduleNetworkRecovery(reason === "error" ? "network-error" : "stalled");
         return;
       }
       resume();
@@ -771,6 +943,8 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     document.addEventListener('resume', onResume);
 
     const onEnded = () => {
+      clearNetworkRecovery();
+      networkPlaybackIntentRef.current = false;
       playbackDiag("AUDIO_ENDED", audioDiagnosticDetails(audio));
       // MOBILE AUTOPLAY FIX: The `ended` event fires in a trusted browser event context.
       // We MUST perform audio side effects (src assignment, load, play) synchronously
@@ -874,6 +1048,15 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
         backgroundInterruptionRef.current = "error";
         return;
       }
+      if (
+        audio.error?.code === NETWORK_MEDIA_ERROR_CODE &&
+        networkPlaybackIntentRef.current &&
+        !listenerPausedRef.current
+      ) {
+        if (networkRetryInFlightRef.current) clearNetworkRecovery(false);
+        scheduleNetworkRecovery("network-error");
+        return;
+      }
       setState(s => {
         // Only auto-advance on error if the player was actively playing.
         // If paused (e.g. restored from sessionStorage on page reload), do NOT
@@ -902,10 +1085,13 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     const onPlay = () => {
       playbackDiag("AUDIO_PLAY", audioDiagnosticDetails(audio));
       listenerPausedRef.current = false;
+      networkPlaybackIntentRef.current = true;
+      clearNetworkRecovery();
       setState(s => ({ ...s, isPlaying: true }));
     };
     const onPause = () => {
       playbackDiag("AUDIO_PAUSE", audioDiagnosticDetails(audio));
+      if (listenerPausedRef.current) networkPlaybackIntentRef.current = false;
       if (document.hidden && backgroundPlaybackIntentRef.current && !listenerPausedRef.current && !audio.ended) {
         backgroundInterruptionRef.current = "pause";
         playbackDiag("BACKGROUND_AUDIO_PAUSE", audioDiagnosticDetails(audio));
@@ -918,6 +1104,9 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       playbackDiag("AUDIO_STALLED", audioDiagnosticDetails(audio));
       if (document.hidden && backgroundPlaybackIntentRef.current && !listenerPausedRef.current) {
         backgroundInterruptionRef.current = "stall";
+      }
+      if (networkPlaybackIntentRef.current && !listenerPausedRef.current && !audio.ended) {
+        scheduleNetworkRecovery("stalled");
       }
     };
     const onAbort = () => playbackDiag("AUDIO_ABORT", audioDiagnosticDetails(audio));
@@ -945,6 +1134,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       audio.removeEventListener("emptied", onEmptied);
       audio.removeEventListener("stalled", onStalled);
       audio.removeEventListener("abort", onAbort);
+      clearNetworkRecovery();
       document.removeEventListener('visibilitychange', onVisibilityChange);
       window.removeEventListener('pageshow', onPageShow);
       window.removeEventListener('pagehide', onPageHide);
@@ -957,6 +1147,9 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const playTrack = useCallback((idx: number) => {
     const audio = audioRef.current;
     if (!audio) return;
+    listenerPausedRef.current = false;
+    networkPlaybackIntentRef.current = false;
+    clearNetworkRecovery();
     // Cancel any in-progress crossfade/fade when manually selecting a track
     cancelFade();
     crossfadeActiveRef.current = false;
@@ -991,26 +1184,33 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       }
       return { ...s, currentIdx: idx, isPlaying: !!t.audioUrl, isReady: false, duration: 0, currentTime: 0 };
     });
-  }, [cancelFade, fadeVolume]);
+  }, [cancelFade, clearNetworkRecovery, fadeVolume]);
 
   const togglePlay = useCallback(() => {
     const audio = audioRef.current;
     if (!audio) return;
     if (audio.paused) {
       listenerPausedRef.current = false;
+      networkPlaybackIntentRef.current = true;
       backgroundPlaybackIntentRef.current = false;
       backgroundInterruptionRef.current = null;
+      clearNetworkRecovery();
       audio.play().catch(() => {});
     } else {
       listenerPausedRef.current = true;
+      networkPlaybackIntentRef.current = false;
       backgroundPlaybackIntentRef.current = false;
       backgroundInterruptionRef.current = null;
+      clearNetworkRecovery();
       audio.pause();
     }
-  }, []);
+  }, [clearNetworkRecovery]);
 
   const nextTrack = useCallback(() => {
     const audio = audioRef.current;
+    listenerPausedRef.current = false;
+    networkPlaybackIntentRef.current = false;
+    clearNetworkRecovery();
     setState(s => {
       // Navigate strictly within the frozen snapshot
       const tracks = s.tracks.filter(t => !!t.audioUrl);
@@ -1029,7 +1229,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       }
       return { ...s, currentIdx: next, isPlaying: !!t?.audioUrl, isReady: false, duration: 0, currentTime: 0 };
     });
-  }, []);
+  }, [clearNetworkRecovery]);
 
   /**
    * Previous track with 3-second restart rule:
@@ -1039,6 +1239,9 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const prevTrack = useCallback(() => {
     const audio = audioRef.current;
     if (!audio) return;
+    listenerPausedRef.current = false;
+    networkPlaybackIntentRef.current = false;
+    clearNetworkRecovery();
     // 3-second restart rule
     if (audio.currentTime > 3) {
       audio.currentTime = 0;
@@ -1058,7 +1261,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       }
       return { ...s, currentIdx: prev, isPlaying: !!t?.audioUrl, isReady: false, duration: 0, currentTime: 0 };
     });
-  }, []);
+  }, [clearNetworkRecovery]);
 
   const toggleShuffle = useCallback(() => setState(s => ({ ...s, isShuffle: !s.isShuffle })), []);
   const toggleRepeat = useCallback(() => setState(s => ({ ...s, isRepeat: !s.isRepeat })), []);
@@ -1145,11 +1348,23 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     const activeTracks = currentState.tracks.filter(tr => !!tr.audioUrl);
     const activeTrack = activeTracks[currentState.currentIdx];
     if (activeTrack && activeTrack.id === t.id) {
-      if (audio.paused) audio.play().catch(() => {});
-      else audio.pause();
+      if (audio.paused) {
+        listenerPausedRef.current = false;
+        networkPlaybackIntentRef.current = true;
+        clearNetworkRecovery();
+        audio.play().catch(() => {});
+      } else {
+        listenerPausedRef.current = true;
+        networkPlaybackIntentRef.current = false;
+        clearNetworkRecovery();
+        audio.pause();
+      }
       return;
     }
 
+    listenerPausedRef.current = false;
+    networkPlaybackIntentRef.current = false;
+    clearNetworkRecovery();
     const newQueueId = generateId();
     if (t.audioUrl) {
       audio.src = safeAudioUrl(t.audioUrl);
@@ -1212,11 +1427,23 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     const activeTrack = activeTracks[currentState.currentIdx];
     if (activeTrack && activeTrack.id === t.id) {
       // Same track: toggle instead of restart
-      if (audio.paused) audio.play().catch(() => {});
-      else audio.pause();
+      if (audio.paused) {
+        listenerPausedRef.current = false;
+        networkPlaybackIntentRef.current = true;
+        clearNetworkRecovery();
+        audio.play().catch(() => {});
+      } else {
+        listenerPausedRef.current = true;
+        networkPlaybackIntentRef.current = false;
+        clearNetworkRecovery();
+        audio.pause();
+      }
       return;
     }
 
+    listenerPausedRef.current = false;
+    networkPlaybackIntentRef.current = false;
+    clearNetworkRecovery();
     const newQueueId = generateId();
     audio.src = safeAudioUrl(t.audioUrl);
     audio.load();

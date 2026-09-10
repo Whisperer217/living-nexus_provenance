@@ -33,8 +33,21 @@ describe("playback continuity diagnostics", () => {
     expect(player).toContain("BACKGROUND_RECOVERY_SUCCESS");
     expect(player).toContain("BACKGROUND_RECOVERY_REJECTED");
     expect(player).toContain("BACKGROUND_AUDIO_PAUSE");
+    expect(player).toContain("NETWORK_RECOVERY_SCHEDULED");
+    expect(player).toContain("NETWORK_RECOVERY_TIMER_FIRED");
+    expect(player).toContain("NETWORK_RECOVERY_CANCELLED");
+    expect(player).toContain("NETWORK_RECOVERY_NATURAL");
+    expect(player).toContain("networkRetryCanPlayHandlerRef");
+    expect(player).toContain("NETWORK_RECOVERY_ATTEMPT");
+    expect(player).toContain("NETWORK_RECOVERY_SUCCESS");
+    expect(player).toContain("NETWORK_RECOVERY_EXHAUSTED");
+    expect(player).toContain("NETWORK_RECOVERY_LOAD_TIMEOUT");
+    expect(player).toContain("networkPlaybackIntentRef");
+    expect(player).toContain("NETWORK_MEDIA_ERROR_CODE = 2");
+    expect(player).toContain("NETWORK_RECOVERY_DELAYS_MS = [750, 2_000, 5_000]");
     expect(player).toContain("listenerPausedRef.current = true;");
     expect(player).toContain("document.hidden && backgroundPlaybackIntentRef.current");
+    expect(player).toContain('if (name === "NotAllowedError")');
     expect(player).not.toContain("document.createElement(\"audio\")");
   });
 
