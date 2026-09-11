@@ -191,12 +191,12 @@ const { wid, verifyUrl, badge } = await response.json();
                   onChange={(e) => setNewKeyName(e.target.value)}
                   placeholder="My Integration"
                   className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500"
-                  onKeyDown={(e) => e.key === "Enter" && newKeyName.trim() && createMutation.mutate({ name: newKeyName.trim(), tier: "free" })}
+                  onKeyDown={(e) => e.key === "Enter" && newKeyName.trim() && createMutation.mutate({ name: newKeyName.trim() })}
                 />
               </div>
               <div className="flex items-end">
                 <Button
-                  onClick={() => createMutation.mutate({ name: newKeyName.trim(), tier: "free" })}
+                  onClick={() => createMutation.mutate({ name: newKeyName.trim() })}
                   disabled={!newKeyName.trim() || createMutation.isPending}
                   className="bg-amber-600 hover:bg-amber-500 text-black font-semibold"
                 >

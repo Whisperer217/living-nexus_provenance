@@ -43,7 +43,7 @@ describe("createApiKey", () => {
     };
     vi.mocked(createApiKey).mockResolvedValue({ key: "lnk_A1B2C3D4E5F6G7H8I9J0", record: mockRecord });
 
-    const result = await createApiKey(42, "Test Key", "free");
+    const result = await createApiKey(42, "Test Key");
 
     expect(result.key).toMatch(/^lnk_/);
     expect(result.record.name).toBe("Test Key");
@@ -52,7 +52,7 @@ describe("createApiKey", () => {
     expect(result.record.isActive).toBe(true);
   });
 
-  it("sets correct daily limit for pro tier", async () => {
+  it("preserves historical pro records without allowing callers to request a tier", async () => {
     const mockRecord = {
       id: 2,
       creatorId: 42,
@@ -69,7 +69,7 @@ describe("createApiKey", () => {
     };
     vi.mocked(createApiKey).mockResolvedValue({ key: "lnk_B2C3D4E5F6G7H8I9J0K1", record: mockRecord });
 
-    const result = await createApiKey(42, "Pro Key", "pro");
+    const result = await createApiKey(42, "Pro Key");
     expect(result.record.dailyLimit).toBe(5000);
   });
 });

@@ -7,8 +7,8 @@
   ],
   "dev_command": "pnpm run dev",
   "env_vars": {
-    "DATABASE_URL": "mysql://4ArHJRmPMKBQTkw.2e571ac7914f:580udJF5SFeu3v3kSYzk@gateway02.us-east-1.prod.aws.tidbcloud.com:4000/7kHkqvMBX9Ci3pQfWTqqQr?ssl={\"rejectUnauthorized\":true}",
-    "DRIZZLE_DATABASE_URL": "mysql://4ArHJRmPMKBQTkw.2e571ac7914f:580udJF5SFeu3v3kSYzk@gateway02.us-east-1.prod.aws.tidbcloud.com:4000/7kHkqvMBX9Ci3pQfWTqqQr?ssl={\"rejectUnauthorized\":true}",
+    "DATABASE_URL": "mysql://4ArHJRmPMKBQTkw.aeab2210d229:2ypZRlZl0lvo3b0d9F3K@gateway02.us-east-1.prod.aws.tidbcloud.com:4000/7kHkqvMBX9Ci3pQfWTqqQr?ssl={\"rejectUnauthorized\":true}",
+    "DRIZZLE_DATABASE_URL": "mysql://4ArHJRmPMKBQTkw.aeab2210d229:2ypZRlZl0lvo3b0d9F3K@gateway02.us-east-1.prod.aws.tidbcloud.com:4000/7kHkqvMBX9Ci3pQfWTqqQr?ssl={\"rejectUnauthorized\":true}",
     "MANUS_WEBDEV_PROJECT_ID": "7kHkqvMBX9Ci3pQfWTqqQr"
   },
   "experiments": [
@@ -16,10 +16,10 @@
   ],
   "git_remote": {
     "repo_url": "s3://vida-prod-gitrepo/webdev-git/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr",
-    "access_key_id": "ASIAZV3A2ECZJRMIW5JE",
-    "secret_access_key": "unf6r+JChQzWLij0zT9pAeg2xcBrtRYLqXbSOJy8",
-    "session_token": "IQoJb3JpZ2luX2VjEBIaCXVzLWVhc3QtMSJHMEUCIBE/yHSHQ0OUupHkhoF/tu+gbGLYL0FSZGKptS/PSAmGAiEA8IgWZ6XKIOkvIt4DyHdhCqS5dqqZtKefoynhS09EV8Uq/gMI2///////////ARAEGgw2NjUzODYwOTg4NjYiDLttIok1dggveZQuSCrSA0pOhKbVQF+YSsVr5FmWnY+xiM/cJhctWovlkkvtpZSxu5kw/RBD4FlwEe+D15zEyis6nvaDVFSsUyIHO2XBEzJ8g5sB9HUHDvepDknC/tdF2P7f+sLexVjet49zIl0Ni8ng6oH/cGNW6xQZCHZFqDaqJCIFp03XfjMRtiilYFSVvxthN+DxnynIOPzNiWPRT+xDyZMX6IWq/a63X9i8+RJJaMziJN+NBnqb6iJ5l92WgzoqOQV58EG9pDk6i5yxblFMQ6y9a0EEszxDTIqzC3jW1biFdQSJWdlxg9daSafe9hil9CiMgS/8lJbmZd9FIgIf4/bmaxYuk/Mias+JkZc6Oh3p2hoOPqdrdUL67aKERJVENbkblZMT0v06ZysjjCNd/HkRTtlRoMv1CqajNNT/NyC3N8zinsDxUFyYnepN39EIbu3WYXZv46FvYiGxHEXqFI+blPaXxzcUKJr2umC8hBbFD7HzsAvCQVwfjBMibikvAnYg1TlxLnJNBtKS26cVTKu/iSoB3g0DNcKWXF8EaR0BVI8ReUV1UwwWX1fusMOfhz7mMURu6BKszxfA0WJve7s5GyTd2Q2tjZ+yPurieOnqpaT4THGb7q5BhKgc/Sww3bn00wY6nQF8X0qneTj2Q3UebA4LVOP+dXU7HgXN24zyXNWjWooKBHLrSOR1pa4zN/jS6LRyxAx44bKFL0E6mjamA34iLQYC1maomFi//tJG03UqUtDx0rwFjQVQW3LvkroVCi11uEfm5icBr2GcGmGE845vEkxrL2OaFA5ZA7TcraOzOoNEdrKQ2gwDVOc8pEf62x9Jza5jE6BgmcOmMcOknIGC",
-    "expiration": "2026-08-13T13:24:45.000Z",
+    "access_key_id": "ASIAZV3A2ECZGNOAON47",
+    "secret_access_key": "fYpKwt6bb5PDzNK9F06+ZSizntmka1Puippu2NES",
+    "session_token": "IQoJb3JpZ2luX2VjENz//////////wEaCXVzLWVhc3QtMSJIMEYCIQCXHictZ7zS8tDzr97ESGyCM8jrdKy2m0J7/SA8BfU99wIhAJ7YWE4XN0vXc/KEYZVMDN6HlD0FTQHIUtTTAPtv2zvsKv4DCKX//////////wEQBBoMNjY1Mzg2MDk4ODY2IgwHGhlwiiVUBfosS7oq0gNhy+Dm8FOC/Oc4VAyGlZTuqixHUBv/zc3lCDUIdFw7Wtq6Syjdv1zFC4ya1yHfwSuOniH5Q8j+Fmh9wlA15CfTBZCL7mvGdQzfW4lio5nbum0zuvzcVHBGYY6irtR+OqaOFFoP0cMopPICbE1lq28t6TVyTafnu1r9Gufe2YDoJOE9eXV1e0qIIx9YKhde0fdq6NTN0rXkAJAL/Kd1YgUn70aSMRQOJq5+PnLcGeJxgH3uKDzdGfSYhok3/Up/L8+21qZHsKmIJy9fxVqcg2zMlj0GU9TXaJbAAG0CrVMvWU7O2cy8ShVj1v/q37AutTP1ELritqtipaHeEiu3pbsPwFJXeUP4J5Lc/82Mn2Nq9j1TzzQ3VR8I4Ir/qCEexBZrTji4zGb2wXmIc4/t9uMeOdyURhxpvAh4mPmoN0OORvY8pmTkRRg2jZl1frsXC3j7yzonWWFV+1vAphZZHYrIRyx1dg+dsqN3HDBa3jv+a8SPW91jpLq9WUHW96Fts4zOCvyuQ3yQMxapfKTnefn6g+x1xgBpmPPfIRF9mFlahssJILbC7iPZM80j6uLxD3PTHCHW0dfZ60NgN475y+p+6UmxIef7e5Npj6PMb5VNApp/MPSvkdUGOpwBxEpYZqSRIoB4Koo8ryorM6QeSKvUiqGxqNkC7oweaJ/ODxYgnZh7xDbBxf3OZqzN588Pvuixi3PYGRXaaeXaGd1H/vKR927pPpDMgZt1W6Zh+B7/INU9OTMqn8cMA4cdTgdFefYdUKkffrsWmHWWWUsaMAlt1X2/csRHNvEVrWNX04Li3HTPZszR618MJv3GdNr9AcpEHAMABJNh",
+    "expiration": "2026-09-12T07:35:16.000Z",
     "backend": "GIT_BACKEND_S3"
   },
   "name": "living-nexus",
@@ -29,6 +29,7 @@
     "BUILT_IN_FORGE_API_KEY": "mpbJrJt6B8kLmQKP22kVZ9",
     "BUILT_IN_FORGE_API_URL": "https://forge.manus.ai",
     "JWT_SECRET": "aspaymfKwsHnHXqgrGeaY6",
+    "LN_REGISTRY_API_PEPPER": "Q9+4rhUmtO\u0026=}3%R:$PP,kbHb;]}_!!H",
     "LN_WORKER_SECRET": "fd1b7a915be79c5366964187e8c5674f99d95a9f262624b4465fc4b1791a038e",
     "MCP_READ_TOKEN": "pLqrJrOlf5HKI0OFw2i2nnKw7hrYKuzUTGveOMAhH3Df2BU3s3xWQJxcLjfHlU9i",
     "OAUTH_SERVER_URL": "https://api.manus.im",
@@ -36,11 +37,11 @@
     "OWNER_OPEN_ID": "JWw5hcQ8kTAsLfpBQ6HSZj",
     "SONAUTO_API_KEY": "sksonauto_agdRkwtOllrWAsctXI7JXR1F74XiKWnGmVyEvxbTL9ty7JcC",
     "STRIPE_SECRET_KEY": "sk_test_51TBf3dPGh4UIV43tLVI5v7ANHtvuWIY8hWhImLSjwDvPo07wXRtX3BzV434vVMNdHojX4C5FliBV0NfWjHgl8VFE00klSgtQHg",
-    "STRIPE_WEBHOOK_SECRET": "whsec_F2loOcvfrfiMgHeTzGwB9pTvPOPx9AeL",
+    "STRIPE_WEBHOOK_SECRET": "whsec_9BwyCCqdCB202LCpbMLpA2MgCzdTYBbG",
     "VITE_ANALYTICS_ENDPOINT": "https://manus-analytics.com",
     "VITE_ANALYTICS_WEBSITE_ID": "1ededc1f-e8b6-49da-89ca-dbb3df59fc68",
     "VITE_APP_ID": "7kHkqvMBX9Ci3pQfWTqqQr",
-    "VITE_APP_LOGO": "/manus-storage/living-nexus-logo-2025_19c2d497.png",
+    "VITE_APP_LOGO": "https://files.manuscdn.com/user_upload_by_module/web_dev_logo/310519663123503966/PSPmhqEMRMeEcXnH.webp",
     "VITE_APP_TITLE": "Living Nexus",
     "VITE_FRONTEND_FORGE_API_KEY": "jMirqkWRGmEyoB6PpjttZR",
     "VITE_FRONTEND_FORGE_API_URL": "https://forge.manus.ai",

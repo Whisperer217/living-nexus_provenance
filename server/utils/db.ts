@@ -5993,7 +5993,6 @@ export async function updateQuiverImage(
 export async function createApiKey(
   userId: number,
   name: string,
-  tier: "free" | "pro" | "enterprise" = "free"
 ): Promise<{ key: string; record: ApiKey }> {
   const db = await getDb();
   const { randomBytes } = await import("crypto");
@@ -6004,7 +6003,10 @@ export async function createApiKey(
   const keyPrefix = raw.slice(0, 11); // "ln_" + 8 chars
   const keyHash = await bcrypt.hash(raw, 10);
 
-  const dailyLimit = tier === "free" ? 100 : tier === "pro" ? 5000 : 2147483647;
+  // Legacy registration keys are always issued under the server-owned default.
+  // Elevated tiers are an administrative policy decision, never caller input.
+  const tier = "free" as const;
+  const dailyLimit = 100;
 
   await db.insert(apiKeys).values({
     userId,

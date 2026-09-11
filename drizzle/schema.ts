@@ -2334,6 +2334,102 @@ export const apiKeys = mysqlTable("apiKeys", {
 export type ApiKey = typeof apiKeys.$inferSelect;
 export type InsertApiKey = typeof apiKeys.$inferInsert;
 
+// ─── Registry API R1 Credentials ──────────────────────────────────────────────
+// These tables are intentionally separate from apiKeys. apiKeys retains its
+// legacy Work-registration behavior and receives no Registry authority by
+// implication. R1 credentials are server-issued, read-scope-only identities.
+export const registryApiClients = mysqlTable("registryApiClients", {
+  id: int("id").autoincrement().primaryKey(),
+  ownerUserId: int("ownerUserId").notNull(),
+  name: varchar("name", { length: 128 }).notNull(),
+  clientType: mysqlEnum("clientType", ["FIRST_PARTY", "PARTNER", "PERSONAL"]).notNull(),
+  environment: mysqlEnum("environment", ["TEST", "LIVE"]).notNull(),
+  status: mysqlEnum("status", ["ACTIVE", "SUSPENDED", "REVOKED"]).notNull().default("ACTIVE"),
+  dailyLimit: int("dailyLimit").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (t) => ({
+  ownerIdx: index("registryApiClients_ownerUserId_idx").on(t.ownerUserId),
+  statusIdx: index("registryApiClients_status_idx").on(t.status),
+}));
+
+export const registryApiClientScopes = mysqlTable("registryApiClientScopes", {
+  id: int("id").autoincrement().primaryKey(),
+  clientId: int("clientId").notNull(),
+  scope: varchar("scope", { length: 96 }).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (t) => ({
+  clientScopeUnique: uniqueIndex("registryApiClientScopes_client_scope_uq").on(t.clientId, t.scope),
+  clientIdx: index("registryApiClientScopes_clientId_idx").on(t.clientId),
+}));
+
+export const registryApiCredentials = mysqlTable("registryApiCredentials", {
+  id: int("id").autoincrement().primaryKey(),
+  keyId: varchar("keyId", { length: 64 }).notNull().unique(),
+  clientId: int("clientId").notNull(),
+  name: varchar("name", { length: 128 }).notNull(),
+  credentialVersion: int("credentialVersion").notNull().default(2),
+  keyPrefix: varchar("keyPrefix", { length: 32 }).notNull(),
+  secretHash: varchar("secretHash", { length: 128 }).notNull().unique(),
+  status: mysqlEnum("status", ["PENDING_APPROVAL", "ACTIVE", "ROTATING", "EXPIRED", "REVOKED", "SUSPENDED"]).notNull().default("PENDING_APPROVAL"),
+  dailyLimit: int("dailyLimit").notNull(),
+  usageToday: int("usageToday").notNull().default(0),
+  usageTotal: bigint("usageTotal", { mode: "number" }).notNull().default(0),
+  resetAt: timestamp("resetAt"),
+  expiresAt: timestamp("expiresAt").notNull(),
+  lastUsedAt: timestamp("lastUsedAt"),
+  rotationGraceExpiresAt: timestamp("rotationGraceExpiresAt"),
+  rotatedFromId: int("rotatedFromId"),
+  revokedAt: timestamp("revokedAt"),
+  createdByUserId: int("createdByUserId").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (t) => ({
+  clientIdx: index("registryApiCredentials_clientId_idx").on(t.clientId),
+  statusIdx: index("registryApiCredentials_status_idx").on(t.status),
+  expiresIdx: index("registryApiCredentials_expiresAt_idx").on(t.expiresAt),
+}));
+
+export const registryApiCredentialScopes = mysqlTable("registryApiCredentialScopes", {
+  id: int("id").autoincrement().primaryKey(),
+  credentialId: int("credentialId").notNull(),
+  scope: varchar("scope", { length: 96 }).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (t) => ({
+  credentialScopeUnique: uniqueIndex("registryApiCredentialScopes_credential_scope_uq").on(t.credentialId, t.scope),
+  credentialIdx: index("registryApiCredentialScopes_credentialId_idx").on(t.credentialId),
+}));
+
+// No raw query, IP, user-agent, response, secret, testimony, lyrics, or private
+// context is retained here. All values are route identifiers or one-way hashes.
+export const registryApiAuditEvents = mysqlTable("registryApiAuditEvents", {
+  id: int("id").autoincrement().primaryKey(),
+  eventType: mysqlEnum("eventType", ["ISSUED", "ROTATED", "REVOKED", "ACCESS_ALLOWED", "ACCESS_DENIED"]).notNull(),
+  requestId: varchar("requestId", { length: 96 }),
+  credentialId: int("credentialId"),
+  clientId: int("clientId"),
+  ownerUserId: int("ownerUserId"),
+  actorUserId: int("actorUserId"),
+  routeId: varchar("routeId", { length: 128 }),
+  requiredScope: varchar("requiredScope", { length: 96 }),
+  decision: mysqlEnum("decision", ["ALLOW", "DENY"]).notNull(),
+  reasonCode: varchar("reasonCode", { length: 96 }).notNull(),
+  httpStatus: int("httpStatus").notNull(),
+  latencyMs: int("latencyMs"),
+  rateLimitBucket: varchar("rateLimitBucket", { length: 96 }),
+  queryHash: varchar("queryHash", { length: 64 }),
+  ipHash: varchar("ipHash", { length: 64 }),
+  userAgentHash: varchar("userAgentHash", { length: 64 }),
+  occurredAt: timestamp("occurredAt").defaultNow().notNull(),
+}, (t) => ({
+  occurredIdx: index("registryApiAuditEvents_occurredAt_idx").on(t.occurredAt),
+  credentialIdx: index("registryApiAuditEvents_credentialId_idx").on(t.credentialId),
+  clientIdx: index("registryApiAuditEvents_clientId_idx").on(t.clientId),
+  routeIdx: index("registryApiAuditEvents_routeId_idx").on(t.routeId),
+}));
+
+export type RegistryApiClient = typeof registryApiClients.$inferSelect;
+export type RegistryApiCredential = typeof registryApiCredentials.$inferSelect;
+
 // ─── Track Download Grants ────────────────────────────────────────────────────
 // A creator explicitly authorises a specific user to download a specific track.
 // This is the source-of-truth for the licensed bulk download system.

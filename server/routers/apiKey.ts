@@ -12,10 +12,9 @@ export const apiKeyRouter = router({
   create: protectedProcedure
     .input(z.object({
       name: z.string().min(1).max(128),
-      tier: z.enum(["free", "pro", "enterprise"]).default("free"),
     }))
     .mutation(async ({ input, ctx }) => {
-      const { key, record } = await createApiKey(ctx.user.id, input.name, input.tier);
+      const { key, record } = await createApiKey(ctx.user.id, input.name);
       return {
         key,
         id:          record.id,

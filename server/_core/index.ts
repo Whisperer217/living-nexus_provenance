@@ -24,6 +24,7 @@ import { oembedRouter } from "../routes/oembedRoute";
 import { ogApiRouter } from "../routes/ogApiRoutes";
 import { shareRouter } from "../routes/shareRoute";
 import { workRouter } from "../routes/workRoute";
+import { registryApiRouter } from "../routes/registryApiRoute";
 import { workerCallbackRouter } from "../routes/workerCallbackRoute";
 import { mcpRouter } from "../mcp/index";
 import { sitemapRouter } from "../routes/sitemapRoute";
@@ -196,6 +197,8 @@ async function startServer() {
   app.use("/api/harmonic", harmonicRouter);
   // Public REST API v1 (Plex/Jellyfin/external clients)
   app.use(publicApiRouter);
+  // Registry API R1 — governed public/scoped read models only; no direct DB route.
+  app.use(registryApiRouter);
   // oEmbed discovery endpoint — Discord reads this to get song-specific metadata
   // Must be under /api/* so the Manus CDN forwards it to the Express server
   app.use(oembedRouter);
