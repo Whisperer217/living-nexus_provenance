@@ -54,6 +54,14 @@ function toPublicWork(row: { song: typeof songs.$inferSelect; creator: { name: s
   };
 }
 
+export function mapRegistryAiPermission(value: string | null) {
+  if (value === "permitted" || value === "permitted_attribution") {
+    return { state: "ALLOW" as const, attributionRequired: value === "permitted_attribution" };
+  }
+  if (value === "prohibited") return { state: "DENY" as const, attributionRequired: false };
+  return { state: "UNSPECIFIED" as const, attributionRequired: false };
+}
+
 async function selectPublicWorks(whereConditions: any[], limit: number, offset: number) {
   const db = await getDb();
   if (!db) throw new Error("Registry database unavailable");
@@ -169,8 +177,10 @@ export async function getPublicRegistryPermissions(wid: string) {
   const [song] = await db.select({ aiConsent: songs.aiConsent, downloadPermission: songs.downloadPermission, isPublic: songs.isPublic, status: songs.status, witnessId: songs.witnessId })
     .from(songs).where(eq(songs.witnessId, work.wid)).limit(1);
   if (!song) return null;
+  const aiPermission = mapRegistryAiPermission(song.aiConsent);
   return {
     wid: work.wid,
+    aiPermission,
     states: {
       public: song.isPublic && song.status === "Published",
       registered: Boolean(song.witnessId),
