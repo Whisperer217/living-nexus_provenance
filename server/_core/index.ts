@@ -36,6 +36,7 @@ import { serveStatic, setupVite } from "./vite";
 import { getUserByHandle } from "../utils/db";
 import { startVisualWorker, backfillVisualQueue } from "../workers/visualQueue";
 import { visualQueueScheduleRouter } from "../routes/visualQueueScheduleRoute";
+import { coreIngestionScheduleRouter } from "../routes/coreIngestionScheduleRoute";
 import { startSelfImprovementWorker } from "../workers/selfImprovementWorker";
 import { startPaymentIntegrityWorker } from "../workers/paymentIntegrityWorker";
 import { globalErrorHandler } from "./errorHandler";
@@ -181,6 +182,8 @@ async function startServer() {
   app.use(uploadRouter);
   // Durable LN visual worker: managed scheduler posts here, never an in-process timer.
   app.use(visualQueueScheduleRouter);
+  // Core Ingestion I1: scheduler-only inspection entry. No schedule is created by this slice.
+  app.use(coreIngestionScheduleRouter);
   // Sovereign Stamp — POST /api/stamp-song (tone injection pipeline)
   app.use(stampRouter);
   // WID-tagged audio download endpoint

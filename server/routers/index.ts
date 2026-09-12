@@ -37,6 +37,7 @@ import { declarationRouter }     from "./declaration";
 import { agentsRouter }          from "./agents";
 import { userCollectionsRouter } from "./userCollections";
 import { widsRouter }            from "./wids";
+import { coreIngestionRouter }   from "./coreIngestion";
 
 // ── Witness / provenance domain ───────────────────────────────────────────────
 import { witnessRouter }             from "./witness";
@@ -131,6 +132,7 @@ export const appRouter = router({
   agents:          agentsRouter,
   userCollections: userCollectionsRouter,
   wids:            widsRouter,
+  coreIngestion:   coreIngestionRouter,
 
   // Witness / provenance domain
   witness:             witnessRouter,

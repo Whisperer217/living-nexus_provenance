@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-09-10T00:20:00.000Z",
-  "totalLessons": 22,
+  "lastUpdated": "2026-09-12T23:19:00.000Z",
+  "totalLessons": 23,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -511,6 +511,33 @@
         "queue-custody",
         "background-tab",
         "no-reload"
+      ]
+    },
+    {
+      "id": "LESSON-024",
+      "date": "2026-09-12",
+      "category": "architecture",
+      "problem": "A new AI-adjacent ingestion path could easily become an implicit registration, WID, publication, PNA-context, or provider pipeline if its worker writes directly into existing Work or provenance models. A process restart could also strand or duplicate background work if job state were held in memory.",
+      "solution": "I1 establishes a Core-owned, additive Ingestion Commission with isolated Commission, job, and inspection-receipt tables; creator scope and idempotency; storage-verified audio inspection; deterministic hash/receipt evidence; optimistic durable job claims, finite retries, lease recovery, and scheduler-only execution. The initial procedures cannot create a Work, issue a WID, add provenance, publish, invoke a model/provider, access PNA/Quiver/avatar data, or activate a scheduler.",
+      "files": [
+        "drizzle/schema.ts",
+        "drizzle/0139_core_ingestion_commission_i1.sql",
+        "server/services/coreIngestion.ts",
+        "server/routers/coreIngestion.ts",
+        "server/routes/coreIngestionScheduleRoute.ts",
+        "server/tests/coreIngestionCommissionI1.test.ts"
+      ],
+      "score": 0,
+      "tags": [
+        "core-ingestion",
+        "commission",
+        "durable-worker",
+        "idempotency",
+        "creator-confirmation",
+        "no-provider",
+        "no-wid-change",
+        "pna-preservation",
+        "authority-boundary"
       ]
     }
   ]

@@ -231,6 +231,79 @@ export type AgentCapabilityAuthority = typeof agentCapabilityAuthorities.$inferS
 export type AgentCommission = typeof agentCommissions.$inferSelect;
 export type AgentLedgerEntry = typeof agentLedgerEntries.$inferSelect;
 
+// ─── Core Ingestion Commission (I1 deterministic foundation) ──────────────────
+// These tables are deliberately isolated from songs, WIDs, provenance, PNA,
+// Quiver, Keeper, Guides, and marketplace records. They model creator-owned
+// inspection work only; an I1 Commission cannot register, seal, publish, or
+// transfer a record to another product surface.
+export const coreIngestionCommissions = mysqlTable("coreIngestionCommissions", {
+  commissionId: varchar("commissionId", { length: 64 }).primaryKey(),
+  creatorId: int("creatorId").notNull(),
+  requestedOutcome: mysqlEnum("requestedOutcome", ["private_draft", "registration_review"]).notNull().default("private_draft"),
+  status: mysqlEnum("status", ["awaiting_asset", "asset_received", "queued", "inspecting", "inspection_ready", "failed", "cancelled"]).notNull().default("awaiting_asset"),
+  assetStorageKey: varchar("assetStorageKey", { length: 512 }),
+  assetContentType: varchar("assetContentType", { length: 191 }),
+  assetSizeBytes: int("assetSizeBytes"),
+  assetSha256: varchar("assetSha256", { length: 64 }),
+  idempotencyKey: varchar("idempotencyKey", { length: 128 }).notNull(),
+  inspectionReceiptId: varchar("inspectionReceiptId", { length: 64 }),
+  failureCode: varchar("failureCode", { length: 96 }),
+  failureMessage: varchar("failureMessage", { length: 512 }),
+  cancelledAt: timestamp("cancelledAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (t) => ({
+  creatorIdx: index("coreIngestionCommissions_creatorId_idx").on(t.creatorId),
+  statusIdx: index("coreIngestionCommissions_status_idx").on(t.status),
+  creatorIdempotencyUnique: uniqueIndex("coreIngestionCommissions_creator_idempotency_uq").on(t.creatorId, t.idempotencyKey),
+  assetHashIdx: index("coreIngestionCommissions_assetSha256_idx").on(t.assetSha256),
+}));
+
+export const coreIngestionJobs = mysqlTable("coreIngestionJobs", {
+  jobId: varchar("jobId", { length: 64 }).primaryKey(),
+  commissionId: varchar("commissionId", { length: 64 }).notNull(),
+  stage: mysqlEnum("stage", ["verify_asset", "inspect_asset", "assemble_receipt"]).notNull(),
+  status: mysqlEnum("status", ["queued", "processing", "complete", "failed", "cancelled"]).notNull().default("queued"),
+  rootAssetHash: varchar("rootAssetHash", { length: 64 }),
+  idempotencyKey: varchar("idempotencyKey", { length: 128 }).notNull(),
+  attempts: int("attempts").notNull().default(0),
+  maxAttempts: int("maxAttempts").notNull().default(3),
+  leaseExpiresAt: timestamp("leaseExpiresAt"),
+  startedAt: timestamp("startedAt"),
+  completedAt: timestamp("completedAt"),
+  errorCode: varchar("errorCode", { length: 96 }),
+  errorMessage: varchar("errorMessage", { length: 512 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (t) => ({
+  commissionIdx: index("coreIngestionJobs_commissionId_idx").on(t.commissionId),
+  statusIdx: index("coreIngestionJobs_status_idx").on(t.status),
+  claimIdx: index("coreIngestionJobs_claim_idx").on(t.status, t.createdAt),
+  commissionStageIdempotencyUnique: uniqueIndex("coreIngestionJobs_commission_stage_idempotency_uq").on(t.commissionId, t.stage, t.idempotencyKey),
+}));
+
+export const coreIngestionInspectionReceipts = mysqlTable("coreIngestionInspectionReceipts", {
+  receiptId: varchar("receiptId", { length: 64 }).primaryKey(),
+  commissionId: varchar("commissionId", { length: 64 }).notNull(),
+  jobId: varchar("jobId", { length: 64 }).notNull(),
+  rootAssetHash: varchar("rootAssetHash", { length: 64 }).notNull(),
+  inspectionVersion: varchar("inspectionVersion", { length: 64 }).notNull().default("core.ingestion.v1"),
+  resultStatus: mysqlEnum("resultStatus", ["succeeded", "partial", "failed"]).notNull(),
+  measuredFacts: json("measuredFacts").$type<Record<string, unknown>>().notNull(),
+  derivedAssetRefs: json("derivedAssetRefs").$type<Array<{ key: string; sha256: string; kind: string }>>().notNull(),
+  warningCodes: json("warningCodes").$type<string[]>().notNull(),
+  receiptHash: varchar("receiptHash", { length: 64 }).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (t) => ({
+  commissionIdx: index("coreIngestionInspectionReceipts_commissionId_idx").on(t.commissionId),
+  jobIdx: uniqueIndex("coreIngestionInspectionReceipts_jobId_uq").on(t.jobId),
+  rootAssetHashIdx: index("coreIngestionInspectionReceipts_rootAssetHash_idx").on(t.rootAssetHash),
+}));
+
+export type CoreIngestionCommission = typeof coreIngestionCommissions.$inferSelect;
+export type CoreIngestionJob = typeof coreIngestionJobs.$inferSelect;
+export type CoreIngestionInspectionReceipt = typeof coreIngestionInspectionReceipts.$inferSelect;
+
 // ─── WIDs (Witness IDs — provenance anchors) ──────────────────────────────────
 export const wids = mysqlTable("wids", {
   wid: varchar("wid", { length: 64 }).primaryKey(),
