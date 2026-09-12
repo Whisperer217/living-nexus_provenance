@@ -14,7 +14,7 @@ export const ENV = {
   registryApiTimeoutMs: process.env.LN_REGISTRY_API_TIMEOUT_MS ?? "",
   registryApiKeyVersion: process.env.LN_REGISTRY_API_KEY_VERSION ?? "",
   nexusAssertionPrivateKey: process.env.LN_NEXUS_ASSERTION_PRIVATE_KEY ?? "",
-  nexusAssertionIssuer: process.env.LN_NEXUS_ASSERTION_ISSUER ?? "https://livingnexus.manus.space",
+  nexusAssertionIssuer: process.env.LN_NEXUS_ASSERTION_ISSUER ?? "https://www.livingnexus.org",
   nexusAssertionAudience: process.env.LN_NEXUS_ASSERTION_AUDIENCE ?? "nexus-staging",
   cloudWorkerUrl: process.env.CLOUD_WORKER_URL ?? "",
   mcpReadToken: process.env.MCP_READ_TOKEN ?? "",
