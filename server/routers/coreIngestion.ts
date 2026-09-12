@@ -3,8 +3,12 @@ import { protectedProcedure, router } from "../_core/trpc";
 import {
   attachCoreIngestionAsset,
   cancelCoreIngestionCommission,
+  confirmCoreIngestionPrivateDraft,
+  dismissCoreIngestionDraftProposal,
   getCoreIngestionCommission,
+  issueCoreIngestionDraftConfirmation,
   listCoreIngestionCommissions,
+  offerCoreIngestionDraftProposal,
   startCoreIngestionCommission,
 } from "../services/coreIngestion";
 
@@ -39,5 +43,20 @@ export const coreIngestionRouter = router({
   list: protectedProcedure
     .input(z.object({ limit: z.number().int().min(1).max(100).optional() }).optional())
     .query(({ ctx, input }) => listCoreIngestionCommissions(ctx.user.id, input?.limit)),
+  offerPrivateDraftProposal: protectedProcedure
+    .input(z.object({ commissionId }))
+    .mutation(({ ctx, input }) => offerCoreIngestionDraftProposal(ctx.user.id, input.commissionId)),
+  issuePrivateDraftConfirmation: protectedProcedure
+    .input(z.object({ proposalId: z.string().uuid() }))
+    .mutation(({ ctx, input }) => issueCoreIngestionDraftConfirmation(ctx.user.id, input.proposalId)),
+  confirmPrivateDraft: protectedProcedure
+    .input(z.object({
+      proposalId: z.string().uuid(),
+      confirmationId: z.string().uuid(),
+      confirmationToken: z.string().min(32).max(128),
+    }))
+    .mutation(({ ctx, input }) => confirmCoreIngestionPrivateDraft({ creatorId: ctx.user.id, ...input })),
+  dismissPrivateDraftProposal: protectedProcedure
+    .input(z.object({ proposalId: z.string().uuid() }))
+    .mutation(({ ctx, input }) => dismissCoreIngestionDraftProposal(ctx.user.id, input.proposalId)),
 });
-

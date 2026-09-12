@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-09-12T23:19:00.000Z",
-  "totalLessons": 23,
+  "lastUpdated": "2026-09-12T23:34:00.000Z",
+  "totalLessons": 24,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -537,6 +537,34 @@
         "no-provider",
         "no-wid-change",
         "pna-preservation",
+        "authority-boundary"
+      ]
+    },
+    {
+      "id": "LESSON-025",
+      "date": "2026-09-12",
+      "category": "architecture",
+      "problem": "A deterministic inspection receipt can be mistaken for authorization to create a canonical Work. A browser-side confirmation value can also become a durable secret or a replayable authority if it is displayed, stored as plaintext, insufficiently bound to a reviewed proposal, or valid indefinitely.",
+      "solution": "I2 creates only creator-private review records: an exact receipt-and-asset-bound proposal, a 15-minute one-time confirmation whose SHA-256 digest is stored server-side and checked with constant-time comparison, and one private Commission Draft. The review page holds the opaque value only in page-session memory and does not render it. It provides no model/provider, scheduler, PNA, avatar, canonical Work, WID, provenance, or publication operation; later registration remains an explicit separate choice through the existing path.",
+      "files": [
+        "drizzle/schema.ts",
+        "drizzle/0140_core_ingestion_review_i2.sql",
+        "server/services/coreIngestion.ts",
+        "server/routers/coreIngestion.ts",
+        "client/src/pages/CoreIngestionReviewPage.tsx",
+        "client/src/App.tsx",
+        "server/tests/coreIngestionReviewI2.test.ts"
+      ],
+      "score": 0,
+      "tags": [
+        "core-ingestion",
+        "private-draft",
+        "creator-confirmation",
+        "one-time-token",
+        "receipt-binding",
+        "no-canonical-work",
+        "no-wid-change",
+        "no-provider",
         "authority-boundary"
       ]
     }

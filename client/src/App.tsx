@@ -150,6 +150,7 @@ const ManifestationWorkspacePage = lazy(() => import("./pages/ManifestationWorks
 const SessionsListPage = lazy(() => import("./pages/SessionsListPage"));
 const SharedPlaylistPage = lazy(() => import("./pages/SharedPlaylistPage"));
 const SpatialRegistryMockPage = lazy(() => import("./pages/SpatialRegistryMockPage"));
+const CoreIngestionReviewPage = lazy(() => import("./pages/CoreIngestionReviewPage"));
 // UploadVNextPage removed — replaced by ProvenanceUploadEngine (persistent panel)
 
 // Minimal fallback shown while a page chunk loads (typically <200ms on CDN)
@@ -304,6 +305,7 @@ function Router() {
                 <Route path="/search" component={SearchResultsPage} />
                <Route path="/upload"><Redirect to="/manifest" /></Route>
                 <Route path="/manifest" component={ManifestationStudio} />
+                <Route path="/ingestion/review" component={CoreIngestionReviewPage} />
                 <Route path="/batch-upload" component={BatchUploadPage} />
                 <Route path="/liked" component={LikedPage} />
                 <Route path="/archive" component={ArchivePage} />

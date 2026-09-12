@@ -304,6 +304,76 @@ export type CoreIngestionCommission = typeof coreIngestionCommissions.$inferSele
 export type CoreIngestionJob = typeof coreIngestionJobs.$inferSelect;
 export type CoreIngestionInspectionReceipt = typeof coreIngestionInspectionReceipts.$inferSelect;
 
+// ─── Core Ingestion Review (I2 private Commission Draft) ──────────────────────
+// I2 stores a reviewable technical proposal, a single-use creator confirmation,
+// and a creator-private Commission Draft. These are not `songs` rows and cannot
+// issue/revise a WID, write provenance, publish, or transfer data into PNA,
+// Quiver, Keeper, Guide, or marketplace/avatar authority.
+export const coreIngestionDraftProposals = mysqlTable("coreIngestionDraftProposals", {
+  proposalId: varchar("proposalId", { length: 64 }).primaryKey(),
+  commissionId: varchar("commissionId", { length: 64 }).notNull(),
+  creatorId: int("creatorId").notNull(),
+  receiptId: varchar("receiptId", { length: 64 }).notNull(),
+  rootAssetHash: varchar("rootAssetHash", { length: 64 }).notNull(),
+  receiptHash: varchar("receiptHash", { length: 64 }).notNull(),
+  proposalVersion: varchar("proposalVersion", { length: 64 }).notNull().default("core.ingestion.review.v1"),
+  status: mysqlEnum("status", ["offered", "confirmed", "expired", "dismissed", "superseded"]).notNull().default("offered"),
+  technicalSnapshot: json("technicalSnapshot").$type<Record<string, unknown>>().notNull(),
+  proposalHash: varchar("proposalHash", { length: 64 }).notNull(),
+  expiresAt: timestamp("expiresAt").notNull(),
+  confirmedAt: timestamp("confirmedAt"),
+  dismissedAt: timestamp("dismissedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (t) => ({
+  commissionIdx: index("coreIngestionDraftProposals_commissionId_idx").on(t.commissionId),
+  creatorIdx: index("coreIngestionDraftProposals_creatorId_idx").on(t.creatorId),
+  receiptIdx: index("coreIngestionDraftProposals_receiptId_idx").on(t.receiptId),
+  statusExpiryIdx: index("coreIngestionDraftProposals_status_expiresAt_idx").on(t.status, t.expiresAt),
+  commissionReceiptUnique: uniqueIndex("coreIngestionDraftProposals_commission_receipt_uq").on(t.commissionId, t.receiptId),
+}));
+
+export const coreIngestionDraftConfirmations = mysqlTable("coreIngestionDraftConfirmations", {
+  confirmationId: varchar("confirmationId", { length: 64 }).primaryKey(),
+  proposalId: varchar("proposalId", { length: 64 }).notNull(),
+  commissionId: varchar("commissionId", { length: 64 }).notNull(),
+  creatorId: int("creatorId").notNull(),
+  tokenHash: varchar("tokenHash", { length: 64 }).notNull(),
+  status: mysqlEnum("status", ["issued", "consumed", "expired", "revoked"]).notNull().default("issued"),
+  expiresAt: timestamp("expiresAt").notNull(),
+  consumedAt: timestamp("consumedAt"),
+  revokedAt: timestamp("revokedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (t) => ({
+  proposalIdx: index("coreIngestionDraftConfirmations_proposalId_idx").on(t.proposalId),
+  creatorIdx: index("coreIngestionDraftConfirmations_creatorId_idx").on(t.creatorId),
+  tokenUnique: uniqueIndex("coreIngestionDraftConfirmations_tokenHash_uq").on(t.tokenHash),
+  statusExpiryIdx: index("coreIngestionDraftConfirmations_status_expiresAt_idx").on(t.status, t.expiresAt),
+}));
+
+export const coreIngestionPrivateDrafts = mysqlTable("coreIngestionPrivateDrafts", {
+  privateDraftId: varchar("privateDraftId", { length: 64 }).primaryKey(),
+  commissionId: varchar("commissionId", { length: 64 }).notNull(),
+  proposalId: varchar("proposalId", { length: 64 }).notNull(),
+  confirmationId: varchar("confirmationId", { length: 64 }).notNull(),
+  creatorId: int("creatorId").notNull(),
+  rootAssetHash: varchar("rootAssetHash", { length: 64 }).notNull(),
+  receiptHash: varchar("receiptHash", { length: 64 }).notNull(),
+  draftState: mysqlEnum("draftState", ["private_review"]).notNull().default("private_review"),
+  technicalSnapshot: json("technicalSnapshot").$type<Record<string, unknown>>().notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (t) => ({
+  creatorIdx: index("coreIngestionPrivateDrafts_creatorId_idx").on(t.creatorId),
+  commissionUnique: uniqueIndex("coreIngestionPrivateDrafts_commissionId_uq").on(t.commissionId),
+  proposalUnique: uniqueIndex("coreIngestionPrivateDrafts_proposalId_uq").on(t.proposalId),
+  confirmationUnique: uniqueIndex("coreIngestionPrivateDrafts_confirmationId_uq").on(t.confirmationId),
+}));
+
+export type CoreIngestionDraftProposal = typeof coreIngestionDraftProposals.$inferSelect;
+export type CoreIngestionDraftConfirmation = typeof coreIngestionDraftConfirmations.$inferSelect;
+export type CoreIngestionPrivateDraft = typeof coreIngestionPrivateDrafts.$inferSelect;
+
 // ─── WIDs (Witness IDs — provenance anchors) ──────────────────────────────────
 export const wids = mysqlTable("wids", {
   wid: varchar("wid", { length: 64 }).primaryKey(),

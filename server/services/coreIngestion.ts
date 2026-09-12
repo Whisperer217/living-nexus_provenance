@@ -7,19 +7,25 @@
  */
 import { TRPCError } from "@trpc/server";
 import { and, asc, desc, eq, inArray, lt, sql } from "drizzle-orm";
-import { createHash, randomUUID } from "node:crypto";
+import { createHash, randomBytes, randomUUID, timingSafeEqual } from "node:crypto";
 import {
   coreIngestionCommissions,
+  coreIngestionDraftConfirmations,
+  coreIngestionDraftProposals,
   coreIngestionInspectionReceipts,
   coreIngestionJobs,
+  coreIngestionPrivateDrafts,
 } from "../../drizzle/schema";
 import { storageGet } from "../utils/storage";
 import { getDb } from "../utils/db";
 
 export const CORE_INGESTION_POLICY_VERSION = "core.ingestion.v1";
+export const CORE_INGESTION_REVIEW_VERSION = "core.ingestion.review.v1";
 const CORE_INGESTION_MAX_BYTES = 64 * 1024 * 1024;
 const CORE_INGESTION_BATCH_SIZE = 3;
 const CORE_INGESTION_LEASE_MS = 90_000;
+const CORE_INGESTION_PROPOSAL_TTL_MS = 24 * 60 * 60 * 1000;
+const CORE_INGESTION_CONFIRMATION_TTL_MS = 15 * 60 * 1000;
 
 type RequestedOutcome = "private_draft" | "registration_review";
 
@@ -35,6 +41,46 @@ class IngestionFailure extends Error {
 
 function sha256hex(value: Buffer | string) {
   return createHash("sha256").update(value).digest("hex");
+}
+
+function sameDigest(left: string, right: string) {
+  const leftBuffer = Buffer.from(left, "hex");
+  const rightBuffer = Buffer.from(right, "hex");
+  return leftBuffer.length === rightBuffer.length && timingSafeEqual(leftBuffer, rightBuffer);
+}
+
+function proposalSnapshot(receipt: typeof coreIngestionInspectionReceipts.$inferSelect) {
+  return {
+    source: "core_ingestion_inspection_receipt",
+    inspectionVersion: receipt.inspectionVersion,
+    resultStatus: receipt.resultStatus,
+    asset: {
+      sha256: receipt.rootAssetHash,
+      measuredFacts: receipt.measuredFacts,
+    },
+    inspectionReceipt: {
+      receiptId: receipt.receiptId,
+      receiptHash: receipt.receiptHash,
+      createdAt: receipt.createdAt.toISOString(),
+    },
+  };
+}
+
+function proposalDigest(input: {
+  commissionId: string;
+  receiptId: string;
+  rootAssetHash: string;
+  receiptHash: string;
+  technicalSnapshot: Record<string, unknown>;
+}) {
+  return sha256hex(JSON.stringify({
+    commissionId: input.commissionId,
+    receiptId: input.receiptId,
+    rootAssetHash: input.rootAssetHash,
+    receiptHash: input.receiptHash,
+    proposalVersion: CORE_INGESTION_REVIEW_VERSION,
+    technicalSnapshot: input.technicalSnapshot,
+  }));
 }
 
 function assertOwnedStorageKey(creatorId: number, storageKey: string) {
@@ -167,11 +213,19 @@ export async function getCoreIngestionCommission(creatorId: number, commissionId
   const db = await getDb();
   if (!db) throw new Error("Database unavailable");
   const commission = await getOwnedCommission(db, creatorId, commissionId);
-  const [jobs, receipts] = await Promise.all([
+  const [jobs, receipts, proposals, privateDrafts] = await Promise.all([
     db.select().from(coreIngestionJobs).where(eq(coreIngestionJobs.commissionId, commissionId)).orderBy(asc(coreIngestionJobs.createdAt)),
     db.select().from(coreIngestionInspectionReceipts).where(eq(coreIngestionInspectionReceipts.commissionId, commissionId)).orderBy(desc(coreIngestionInspectionReceipts.createdAt)),
+    db.select().from(coreIngestionDraftProposals).where(and(
+      eq(coreIngestionDraftProposals.commissionId, commissionId),
+      eq(coreIngestionDraftProposals.creatorId, creatorId),
+    )).orderBy(desc(coreIngestionDraftProposals.createdAt)),
+    db.select().from(coreIngestionPrivateDrafts).where(and(
+      eq(coreIngestionPrivateDrafts.commissionId, commissionId),
+      eq(coreIngestionPrivateDrafts.creatorId, creatorId),
+    )).limit(1),
   ]);
-  return { commission: toPublicCommission(commission), jobs, receipts };
+  return { commission: toPublicCommission(commission), jobs, receipts, proposals, privateDraft: privateDrafts[0] ?? null };
 }
 
 export async function listCoreIngestionCommissions(creatorId: number, limit = 50) {
@@ -182,6 +236,214 @@ export async function listCoreIngestionCommissions(creatorId: number, limit = 50
     .orderBy(desc(coreIngestionCommissions.createdAt))
     .limit(Math.min(Math.max(limit, 1), 100));
   return rows.map(toPublicCommission);
+}
+
+export async function offerCoreIngestionDraftProposal(creatorId: number, commissionId: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+
+  return db.transaction(async (tx: any) => {
+    const commission = await getOwnedCommission(tx, creatorId, commissionId);
+    if (commission.status !== "inspection_ready" || !commission.inspectionReceiptId || !commission.assetSha256) {
+      throw new TRPCError({
+        code: "PRECONDITION_FAILED",
+        message: "A successful deterministic inspection is required before a private Commission Draft can be proposed.",
+      });
+    }
+    const receiptRows = await tx.select().from(coreIngestionInspectionReceipts).where(and(
+      eq(coreIngestionInspectionReceipts.receiptId, commission.inspectionReceiptId),
+      eq(coreIngestionInspectionReceipts.commissionId, commission.commissionId),
+    )).limit(1);
+    const receipt = receiptRows[0];
+    if (!receipt || receipt.resultStatus !== "succeeded" || receipt.rootAssetHash !== commission.assetSha256) {
+      throw new TRPCError({ code: "PRECONDITION_FAILED", message: "The inspection receipt cannot support a private Draft proposal." });
+    }
+
+    const now = new Date();
+    const technicalSnapshot = proposalSnapshot(receipt);
+    const proposalHash = proposalDigest({
+      commissionId: commission.commissionId,
+      receiptId: receipt.receiptId,
+      rootAssetHash: receipt.rootAssetHash,
+      receiptHash: receipt.receiptHash,
+      technicalSnapshot,
+    });
+    const expiresAt = new Date(now.getTime() + CORE_INGESTION_PROPOSAL_TTL_MS);
+    const existingRows = await tx.select().from(coreIngestionDraftProposals).where(and(
+      eq(coreIngestionDraftProposals.commissionId, commission.commissionId),
+      eq(coreIngestionDraftProposals.receiptId, receipt.receiptId),
+    )).limit(1);
+    const existing = existingRows[0];
+    if (existing) {
+      if (existing.status === "confirmed" || (existing.status === "offered" && existing.expiresAt > now)) {
+        return { proposal: existing, idempotent: true };
+      }
+      await tx.update(coreIngestionDraftProposals).set({
+        status: "offered",
+        technicalSnapshot,
+        proposalHash,
+        expiresAt,
+        confirmedAt: null,
+        dismissedAt: null,
+      }).where(eq(coreIngestionDraftProposals.proposalId, existing.proposalId));
+      const renewedRows = await tx.select().from(coreIngestionDraftProposals)
+        .where(eq(coreIngestionDraftProposals.proposalId, existing.proposalId)).limit(1);
+      return { proposal: renewedRows[0], idempotent: false };
+    }
+
+    const proposalId = randomUUID();
+    await tx.insert(coreIngestionDraftProposals).values({
+      proposalId,
+      commissionId: commission.commissionId,
+      creatorId,
+      receiptId: receipt.receiptId,
+      rootAssetHash: receipt.rootAssetHash,
+      receiptHash: receipt.receiptHash,
+      proposalVersion: CORE_INGESTION_REVIEW_VERSION,
+      status: "offered",
+      technicalSnapshot,
+      proposalHash,
+      expiresAt,
+    });
+    const proposalRows = await tx.select().from(coreIngestionDraftProposals)
+      .where(eq(coreIngestionDraftProposals.proposalId, proposalId)).limit(1);
+    return { proposal: proposalRows[0], idempotent: false };
+  });
+}
+
+async function getOwnedDraftProposal(db: any, creatorId: number, proposalId: string) {
+  const rows = await db.select().from(coreIngestionDraftProposals).where(and(
+    eq(coreIngestionDraftProposals.proposalId, proposalId),
+    eq(coreIngestionDraftProposals.creatorId, creatorId),
+  )).limit(1);
+  const proposal = rows[0];
+  if (!proposal) throw new TRPCError({ code: "NOT_FOUND", message: "Private Commission Draft proposal not found." });
+  return proposal;
+}
+
+export async function issueCoreIngestionDraftConfirmation(creatorId: number, proposalId: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+
+  return db.transaction(async (tx: any) => {
+    const proposal = await getOwnedDraftProposal(tx, creatorId, proposalId);
+    const now = new Date();
+    if (proposal.status === "offered" && proposal.expiresAt <= now) {
+      await tx.update(coreIngestionDraftProposals).set({ status: "expired" })
+        .where(eq(coreIngestionDraftProposals.proposalId, proposal.proposalId));
+      throw new TRPCError({ code: "PRECONDITION_FAILED", message: "This private Draft proposal has expired. Review the Commission again to create a new proposal." });
+    }
+    if (proposal.status !== "offered") {
+      throw new TRPCError({ code: "CONFLICT", message: "This private Draft proposal is no longer available for confirmation." });
+    }
+
+    await tx.update(coreIngestionDraftConfirmations).set({ status: "revoked", revokedAt: now })
+      .where(and(
+        eq(coreIngestionDraftConfirmations.proposalId, proposal.proposalId),
+        eq(coreIngestionDraftConfirmations.status, "issued"),
+      ));
+    const confirmationId = randomUUID();
+    const confirmationToken = randomBytes(32).toString("base64url");
+    const expiresAt = new Date(now.getTime() + CORE_INGESTION_CONFIRMATION_TTL_MS);
+    await tx.insert(coreIngestionDraftConfirmations).values({
+      confirmationId,
+      proposalId: proposal.proposalId,
+      commissionId: proposal.commissionId,
+      creatorId,
+      tokenHash: sha256hex(confirmationToken),
+      status: "issued",
+      expiresAt,
+    });
+    return { confirmationId, confirmationToken, expiresAt, proposalId: proposal.proposalId };
+  });
+}
+
+export async function confirmCoreIngestionPrivateDraft(input: {
+  creatorId: number;
+  proposalId: string;
+  confirmationId: string;
+  confirmationToken: string;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+
+  return db.transaction(async (tx: any) => {
+    const proposal = await getOwnedDraftProposal(tx, input.creatorId, input.proposalId);
+    const confirmationRows = await tx.select().from(coreIngestionDraftConfirmations).where(and(
+      eq(coreIngestionDraftConfirmations.confirmationId, input.confirmationId),
+      eq(coreIngestionDraftConfirmations.proposalId, proposal.proposalId),
+      eq(coreIngestionDraftConfirmations.creatorId, input.creatorId),
+    )).limit(1);
+    const confirmation = confirmationRows[0];
+    if (!confirmation || !sameDigest(confirmation.tokenHash, sha256hex(input.confirmationToken))) {
+      throw new TRPCError({ code: "NOT_FOUND", message: "The private Draft confirmation is invalid or unavailable." });
+    }
+    const now = new Date();
+    if (confirmation.status === "consumed") {
+      const existingRows = await tx.select().from(coreIngestionPrivateDrafts).where(eq(
+        coreIngestionPrivateDrafts.confirmationId,
+        confirmation.confirmationId,
+      )).limit(1);
+      if (existingRows[0]) return { privateDraft: existingRows[0], idempotent: true };
+      throw new TRPCError({ code: "CONFLICT", message: "This private Draft confirmation has already been consumed." });
+    }
+    if (confirmation.status !== "issued" || confirmation.expiresAt <= now || proposal.expiresAt <= now || proposal.status !== "offered") {
+      if (confirmation.status === "issued" && confirmation.expiresAt <= now) {
+        await tx.update(coreIngestionDraftConfirmations).set({ status: "expired" })
+          .where(eq(coreIngestionDraftConfirmations.confirmationId, confirmation.confirmationId));
+      }
+      if (proposal.status === "offered" && proposal.expiresAt <= now) {
+        await tx.update(coreIngestionDraftProposals).set({ status: "expired" })
+          .where(eq(coreIngestionDraftProposals.proposalId, proposal.proposalId));
+      }
+      throw new TRPCError({ code: "PRECONDITION_FAILED", message: "This private Draft confirmation is no longer valid. Review the Commission again before confirming." });
+    }
+
+    const existingByCommission = await tx.select().from(coreIngestionPrivateDrafts).where(eq(
+      coreIngestionPrivateDrafts.commissionId,
+      proposal.commissionId,
+    )).limit(1);
+    if (existingByCommission[0]) {
+      throw new TRPCError({ code: "CONFLICT", message: "This Commission already has a private Draft." });
+    }
+    const privateDraftId = randomUUID();
+    await tx.insert(coreIngestionPrivateDrafts).values({
+      privateDraftId,
+      commissionId: proposal.commissionId,
+      proposalId: proposal.proposalId,
+      confirmationId: confirmation.confirmationId,
+      creatorId: input.creatorId,
+      rootAssetHash: proposal.rootAssetHash,
+      receiptHash: proposal.receiptHash,
+      draftState: "private_review",
+      technicalSnapshot: proposal.technicalSnapshot,
+    });
+    await tx.update(coreIngestionDraftConfirmations).set({ status: "consumed", consumedAt: now })
+      .where(eq(coreIngestionDraftConfirmations.confirmationId, confirmation.confirmationId));
+    await tx.update(coreIngestionDraftProposals).set({ status: "confirmed", confirmedAt: now })
+      .where(eq(coreIngestionDraftProposals.proposalId, proposal.proposalId));
+    const privateDraftRows = await tx.select().from(coreIngestionPrivateDrafts)
+      .where(eq(coreIngestionPrivateDrafts.privateDraftId, privateDraftId)).limit(1);
+    return { privateDraft: privateDraftRows[0], idempotent: false };
+  });
+}
+
+export async function dismissCoreIngestionDraftProposal(creatorId: number, proposalId: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  return db.transaction(async (tx: any) => {
+    const proposal = await getOwnedDraftProposal(tx, creatorId, proposalId);
+    if (proposal.status !== "offered") return { proposalId, status: proposal.status, idempotent: true };
+    const now = new Date();
+    await tx.update(coreIngestionDraftProposals).set({ status: "dismissed", dismissedAt: now })
+      .where(eq(coreIngestionDraftProposals.proposalId, proposal.proposalId));
+    await tx.update(coreIngestionDraftConfirmations).set({ status: "revoked", revokedAt: now })
+      .where(and(
+        eq(coreIngestionDraftConfirmations.proposalId, proposal.proposalId),
+        eq(coreIngestionDraftConfirmations.status, "issued"),
+      ));
+    return { proposalId, status: "dismissed" as const, idempotent: false };
+  });
 }
 
 async function inspectQueuedJob(job: typeof coreIngestionJobs.$inferSelect) {
