@@ -47,4 +47,36 @@ describe("Living Nexus Nexus assertion identity boundary", () => {
     expect(jwks.status).toBe(200);
     expect(JSON.stringify(jwks.body)).not.toContain(process.env.LN_NEXUS_ASSERTION_PRIVATE_KEY ?? "not-configured");
   });
+
+  it("permits signed browser assertion handoff only to the branded Nexus origins", async () => {
+    const app = express();
+    app.use(nexusIdentityRouter);
+
+    const denied = await request(app)
+      .post("/api/nexus/v1/identity/assertion")
+      .set("Origin", "https://untrusted.example");
+    expect(denied.status).toBe(403);
+    expect(denied.body.error).toBe("NEXUS_ASSERTION_ORIGIN_DENIED");
+
+    const allowed = await request(app)
+      .post("/api/nexus/v1/identity/assertion")
+      .set("Origin", "https://ai.livingnexus.org");
+    expect(allowed.status).toBe(401);
+    expect(allowed.headers["access-control-allow-origin"]).toBe("https://ai.livingnexus.org");
+    expect(allowed.headers["access-control-allow-credentials"]).toBe("true");
+  });
+
+  it("fails closed for untrusted or nonce-free signed-launch targets without rendering an assertion", async () => {
+    const app = express();
+    app.use(nexusIdentityRouter);
+
+    const untrusted = await request(app).get("/api/nexus/v1/identity/launch?returnOrigin=https%3A%2F%2Fevil.example&nonce=123456789012345678901234");
+    expect(untrusted.status).toBe(400);
+    expect(untrusted.body.error).toBe("NEXUS_ASSERTION_LAUNCH_INVALID");
+
+    const nonceFree = await request(app).get("/api/nexus/v1/identity/launch?returnOrigin=https%3A%2F%2Fai.livingnexus.org");
+    expect(nonceFree.status).toBe(400);
+    expect(nonceFree.text).not.toContain("BEGIN PRIVATE KEY");
+    expect(nonceFree.text).not.toContain("assertion");
+  });
 });
