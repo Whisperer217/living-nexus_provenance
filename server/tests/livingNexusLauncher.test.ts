@@ -27,4 +27,11 @@ describe("Living Nexus launcher destinations", () => {
     }
     expect(LAUNCHER_ITEMS.find(item => item.id === "player")?.destination).toBe("player");
   });
+
+  it("shows only the mobile header below the desktop layout breakpoint", () => {
+    const topBar = fs.readFileSync(path.resolve(process.cwd(), "client/src/components/layout/TopBar.tsx"), "utf8");
+    const mainLayout = fs.readFileSync(path.resolve(process.cwd(), "client/src/components/layout/MainLayout.tsx"), "utf8");
+    expect(topBar).toContain('className="hidden lg:block"');
+    expect(mainLayout).toContain('className="lg:hidden fixed top-0');
+  });
 });

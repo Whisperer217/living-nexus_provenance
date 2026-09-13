@@ -3,7 +3,7 @@
  * user's ◆ / @ / ♪ / ◇ / ⛓ / ✦ visual vocabulary (2026-09-12).
  * Route targets are existing site contracts; unavailable products stay inert.
  */
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
@@ -43,6 +43,7 @@ function loadFavorites(key: string): string[] {
 }
 
 export default function LivingNexusLauncher() {
+  const panelId = useId();
   const [location, navigate] = useLocation();
   const { user } = useAuth();
   const { state } = usePlayer();
@@ -106,10 +107,10 @@ export default function LivingNexusLauncher() {
   const otherItems = LAUNCHER_ITEMS.filter(item => !favorites.includes(item.id));
 
   return <div className="ln-launcher-root" ref={rootRef} style={{ zIndex: Z.TOOLTIP }}>
-    <button ref={triggerRef} type="button" className="ln-launcher-trigger" aria-label="Open Living Nexus launcher" aria-expanded={open} aria-controls="ln-launcher-panel" onClick={() => setOpen(value => !value)} title="Living Nexus launcher">
+    <button ref={triggerRef} type="button" className="ln-launcher-trigger" aria-label="Open Living Nexus launcher" aria-expanded={open} aria-controls={panelId} onClick={() => setOpen(value => !value)} title="Living Nexus launcher">
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><path d="M3 3h5v5H3zM10 3h4v5h-4zM16 3h5v5h-5zM3 10h5v4H3zM10 10h4v4h-4zM16 10h5v4h-5zM3 16h5v5H3zM10 16h4v5h-4zM16 16h5v5h-5z"/><path d="M12 10v4M10 12h4" stroke="var(--ln-gold)"/></svg>
     </button>
-    {open && <div id="ln-launcher-panel" className="ln-launcher-panel" role="dialog" aria-label="Living Nexus launcher">
+    {open && <div id={panelId} className="ln-launcher-panel" role="dialog" aria-label="Living Nexus launcher">
       <div className="ln-launcher-heading"><span className="ln-launcher-heading-mark">◆</span><div><strong>LIVING NEXUS</strong><span>Find your place in the field</span></div></div>
       {favoriteItems.length > 0 && <section aria-label="Favorites"><div className="ln-launcher-section-title">FAVORITES</div><div className="ln-launcher-grid">{favoriteItems.map(renderItem)}</div></section>}
       {otherItems.length > 0 && <section aria-label="All destinations"><div className="ln-launcher-section-title">{favoriteItems.length ? "ALL DESTINATIONS" : "DESTINATIONS"}</div><div className="ln-launcher-grid">{otherItems.map(renderItem)}</div></section>}

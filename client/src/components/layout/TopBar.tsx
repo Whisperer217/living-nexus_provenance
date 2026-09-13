@@ -421,7 +421,7 @@ export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCoun
     ?? (isWarm ? "var(--ln-panel-border)" : "rgba(196,154,40,0.18)");
 
   return (
-    <div className="hidden md:block">
+    <div className="hidden lg:block">
       {/* ── Integrated TopBar + Player ─────────────────────────────── */}
       <header
         className="fixed top-0 z-[400] flex items-center"
