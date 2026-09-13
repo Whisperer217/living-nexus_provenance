@@ -473,6 +473,13 @@
   --ln-gold:          #C49A28;
   --ln-gold-hot:      #E8B840;
   --ln-gold-flame:    #F5CC5A;
+  /* Atmosphere compatibility layer — semantic values resolve per active theme. */
+  --ln-atmosphere-ink:    var(--ln-parchment);
+  --ln-atmosphere-body:   var(--ln-bone);
+  --ln-atmosphere-muted:  var(--ln-smoke);
+  --ln-atmosphere-field:  color-mix(in srgb, var(--ln-parchment) 6%, transparent);
+  --ln-atmosphere-rule:   color-mix(in srgb, var(--ln-gold) 22%, transparent);
+  --ln-atmosphere-glow:   color-mix(in srgb, var(--ln-gold-hot) 28%, transparent);
 }
 
 /* ═══════════════════════════════════════════════════════════════════

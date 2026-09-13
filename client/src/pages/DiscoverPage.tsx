@@ -236,7 +236,7 @@ export default function DiscoverPage() {
                       onMouseEnter={(e) => (e.currentTarget.style.borderColor = "rgba(196,154,40,0.4)")}
                       onMouseLeave={(e) => (e.currentTarget.style.borderColor = "rgba(196,154,40,0.12)")}
                     >
-                      <div className="w-12 h-12 rounded-full mx-auto mb-3 overflow-hidden flex items-center justify-center" style={{ background: "#1C1A14", border: "2px solid rgba(196,154,40,0.3)" }}>
+                      <div className="w-12 h-12 rounded-full mx-auto mb-3 overflow-hidden flex items-center justify-center" style={{ background: "var(--ln-iron)", border: "2px solid color-mix(in srgb, var(--ln-gold) 30%, transparent)" }}>
                         {creator.profilePhotoUrl ? (
                           <img src={creator.profilePhotoUrl} alt={displayName} className="w-full h-full object-cover" />
                         ) : (
@@ -246,7 +246,7 @@ export default function DiscoverPage() {
                         )}
                       </div>
                       <p className="text-xs font-semibold truncate text-center" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>{displayName}</p>
-                      <p className="text-xs mt-1 text-center" style={{ color: "rgba(196,154,40,0.6)" }}>
+                      <p className="text-xs mt-1 text-center" style={{ color: "color-mix(in srgb, var(--ln-gold) 60%, transparent)" }}>
                         {artifactCount} artifact{artifactCount !== 1 ? "s" : ""}
                       </p>
                     </div>

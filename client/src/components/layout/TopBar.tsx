@@ -99,7 +99,7 @@ function InlinePlayer() {
     return (
       <div className="flex-1 flex items-center justify-center gap-3 px-6 min-w-0 max-w-[640px] mx-auto">
         <div className="flex items-center gap-2 opacity-20">
-          <div className="w-8 h-8 rounded" style={{ background: "rgba(255,215,0,0.1)", border: "1px solid rgba(255,215,0,0.15)" }} />
+          <div className="w-8 h-8 rounded" style={{ background: "color-mix(in srgb, var(--ln-gold) 10%, transparent)", border: "1px solid var(--ln-atmosphere-rule)" }} />
           <div>
             <div className="h-2 w-24 rounded" style={{ background: "color-mix(in srgb, var(--ln-parchment) 12%, transparent)" }} />
             <div className="h-1.5 w-16 rounded mt-1" style={{ background: "color-mix(in srgb, var(--ln-parchment) 6%, transparent)" }} />
@@ -119,7 +119,7 @@ function InlinePlayer() {
       <button
         onClick={expand}
         className="shrink-0 rounded overflow-hidden transition-transform hover:scale-105"
-        style={{ width: 36, height: 36, background: "rgba(255,215,0,0.08)" }}
+        style={{ width: 36, height: 36, background: "color-mix(in srgb, var(--ln-gold) 8%, transparent)" }}
         aria-label="Expand player"
       >
         {track.artUrl ? (
@@ -153,7 +153,7 @@ function InlinePlayer() {
         </span>
         <span
           className="truncate text-[10px] leading-tight mt-0.5"
-          style={{ color: "rgba(255,215,0,0.65)", maxWidth: 140 }}
+          style={{ color: "color-mix(in srgb, var(--ln-gold) 65%, transparent)", maxWidth: 140 }}
         >
           {track.artist}
         </span>
@@ -185,7 +185,7 @@ function InlinePlayer() {
               style={{
                 height: "100%",
                 width: `${progress}%`,
-                background: "linear-gradient(90deg, rgba(255,215,0,0.9), rgba(255,165,0,0.7))",
+                background: "linear-gradient(90deg, var(--ln-gold), color-mix(in srgb, var(--ln-gold-hot) 76%, transparent))",
                 transition: "width 0.25s linear",
               }}
             />
@@ -197,7 +197,7 @@ function InlinePlayer() {
               left: `${progress}%`,
               transform: `translateX(-50%) translateY(-50%)`,
               background: "var(--ln-gold)",
-              boxShadow: "0 0 6px rgba(196,154,40,0.5)",
+              boxShadow: "0 0 6px var(--ln-atmosphere-glow)",
             }}
           />
         </div>
@@ -215,7 +215,7 @@ function InlinePlayer() {
         <button
           onClick={toggleShuffle}
           className="p-1.5 rounded transition-all"
-          style={{ color: state.isShuffle ? "rgba(255,215,0,0.8)" : "color-mix(in srgb, var(--ln-parchment) 30%, transparent)" }}
+          style={{ color: state.isShuffle ? "color-mix(in srgb, var(--ln-gold) 80%, transparent)" : "color-mix(in srgb, var(--ln-parchment) 30%, transparent)" }}
           aria-label="Shuffle"
           title="Shuffle"
         >
@@ -237,9 +237,9 @@ function InlinePlayer() {
           style={{
             width: 34,
             height: 34,
-            background: "rgba(255,215,0,0.18)",
-            border: "1px solid rgba(255,215,0,0.35)",
-            color: "rgba(255,215,0,0.95)",
+            background: "color-mix(in srgb, var(--ln-gold) 18%, transparent)",
+            border: "1px solid color-mix(in srgb, var(--ln-gold) 35%, transparent)",
+            color: "color-mix(in srgb, var(--ln-gold-hot) 95%, transparent)",
           }}
           aria-label={state.isPlaying ? "Pause" : "Play"}
         >
@@ -261,7 +261,7 @@ function InlinePlayer() {
         <button
           onClick={toggleRepeat}
           className="p-1.5 rounded transition-all"
-          style={{ color: state.isRepeat ? "rgba(255,215,0,0.8)" : "color-mix(in srgb, var(--ln-parchment) 30%, transparent)" }}
+          style={{ color: state.isRepeat ? "color-mix(in srgb, var(--ln-gold) 80%, transparent)" : "color-mix(in srgb, var(--ln-parchment) 30%, transparent)" }}
           aria-label="Repeat"
           title="Repeat"
         >

@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-09-13T01:59:00.000Z",
-  "totalLessons": 28,
+  "lastUpdated": "2026-09-13T23:56:00.000Z",
+  "totalLessons": 29,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -644,6 +644,31 @@
         "local-preference",
         "explicit-ai-context",
         "authority-boundary"
+      ]
+    },
+    {
+      "id": "LESSON-029",
+      "date": "2026-09-13",
+      "category": "design-system",
+      "problem": "An older theme patch can be visually useful while being structurally unsafe: direct application may overwrite later player, cinematic, responsive, launcher, and multi-theme work. Hard-coded gold, white, and near-black values also make a theme direction drift across Black Gold, Crimson, Illuminated Gold, and Parchment Cream.",
+      "solution": "Treat historical theme work as art direction, not as patch authority. Introduce semantic atmosphere values derived from the current `--ln-*` palette, then port selected shared-chrome and route seams to those tokens. Protect audio/video/waveform mechanics, PlayerProvider/WSPProvider ownership, data queries, routing, mobile layout, and provenance behavior. Validate the existing protected contracts plus desktop/mobile screens before checkpointing.",
+      "files": [
+        "client/src/index.css",
+        "client/src/components/layout/TopBar.tsx",
+        "client/src/components/layout/RightRail.tsx",
+        "client/src/pages/DiscoverPage.tsx",
+        "client/src/pages/ArchivePage.tsx",
+        "docs/lnls/architecture/PR-11-HANDOFF-REVIEW.md"
+      ],
+      "score": 0,
+      "tags": [
+        "theme-system",
+        "semantic-tokens",
+        "atmosphere",
+        "player-preservation",
+        "cinematic-preservation",
+        "responsive-validation",
+        "no-functional-change"
       ]
     }
   ]

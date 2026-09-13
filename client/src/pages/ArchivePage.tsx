@@ -1291,14 +1291,14 @@ export default function ArchivePage() {
 
           return (
             <div className="text-center py-24 rounded-2xl flex flex-col items-center"
-              style={{ background: "linear-gradient(135deg, rgba(0,0,0,0.95) 0%, rgba(10,10,10,0.90) 100%)", border: "1px dashed rgba(212,175,55,0.25)", boxShadow: "inset 0 0 60px rgba(212,175,55,0.03)" }}>
-              <div className="mb-6" style={{ width: 72, height: 72, borderRadius: "50%", background: "radial-gradient(circle, rgba(212,175,55,0.12) 0%, transparent 70%)", border: "1px solid rgba(212,175,55,0.18)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <Music style={{ color: "rgba(212,175,55,0.45)", width: 28, height: 28 }} />
+              style={{ background: "linear-gradient(135deg, var(--ln-panel) 0%, color-mix(in srgb, var(--ln-coal) 88%, var(--ln-void)) 100%)", border: "1px dashed var(--ln-atmosphere-rule)", boxShadow: "inset 0 0 60px color-mix(in srgb, var(--ln-gold) 3%, transparent)" }}>
+              <div className="mb-6" style={{ width: 72, height: 72, borderRadius: "50%", background: "radial-gradient(circle, color-mix(in srgb, var(--ln-gold) 12%, transparent) 0%, transparent 70%)", border: "1px solid color-mix(in srgb, var(--ln-gold) 18%, transparent)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <Music style={{ color: "color-mix(in srgb, var(--ln-gold) 45%, transparent)", width: 28, height: 28 }} />
               </div>
-              <p className="text-base font-semibold mb-2" style={{ color: "rgba(212,175,55,0.75)", fontFamily: "'Cinzel', serif", letterSpacing: "0.06em" }}>
+              <p className="text-base font-semibold mb-2" style={{ color: "color-mix(in srgb, var(--ln-gold) 75%, transparent)", fontFamily: "'Cinzel', serif", letterSpacing: "0.06em" }}>
                 No manifestations archived yet.
               </p>
-              <p className="text-sm mb-6" style={{ color: "rgba(255,255,255,0.38)", fontFamily: "'DM Sans', sans-serif" }}>
+              <p className="text-sm mb-6" style={{ color: "color-mix(in srgb, var(--ln-parchment) 38%, transparent)", fontFamily: "'DM Sans', sans-serif" }}>
                 {ctaSubtext}
               </p>
               {/* Manifestation type selector — quick-pick before routing */}
@@ -1314,7 +1314,7 @@ export default function ArchivePage() {
                   <Link key={type} href={`${uploadHref}?type=${type}`}>
                     <button
                       className="px-3 py-1.5 rounded-full text-xs transition-all"
-                      style={{ background: "rgba(212,175,55,0.08)", border: "1px solid rgba(212,175,55,0.20)", color: "rgba(212,175,55,0.65)", fontFamily: "'DM Sans', sans-serif", cursor: "pointer" }}
+                      style={{ background: "color-mix(in srgb, var(--ln-gold) 8%, transparent)", border: "1px solid color-mix(in srgb, var(--ln-gold) 20%, transparent)", color: "color-mix(in srgb, var(--ln-gold) 65%, transparent)", fontFamily: "'DM Sans', sans-serif", cursor: "pointer" }}
                     >
                       <span className="mr-1.5">{icon}</span>{label}
                     </button>
@@ -1322,7 +1322,7 @@ export default function ArchivePage() {
                 ))}
               </div>
               <Link href={uploadHref}>
-                <Button style={{ background: "linear-gradient(135deg, rgba(212,175,55,0.18) 0%, rgba(212,175,55,0.10) 100%)", color: "#D4AF37", border: "1px solid rgba(212,175,55,0.30)", fontFamily: "'Cinzel', serif", letterSpacing: "0.10em", fontSize: "11px" }}>
+                <Button style={{ background: "linear-gradient(135deg, color-mix(in srgb, var(--ln-gold) 18%, transparent) 0%, color-mix(in srgb, var(--ln-gold) 10%, transparent) 100%)", color: "var(--ln-gold)", border: "1px solid color-mix(in srgb, var(--ln-gold) 30%, transparent)", fontFamily: "'Cinzel', serif", letterSpacing: "0.10em", fontSize: "11px" }}>
                   {ctaLabel}
                 </Button>
               </Link>
@@ -1334,7 +1334,7 @@ export default function ArchivePage() {
         {activeTab === "tracks" && !songsLoading && displaySongs.length > 0 && (
           <div className="space-y-2">
             {filteredSongs.length === 0 && (
-              <div className="text-center py-10 rounded-xl" style={{ background: "var(--ln-coal)", border: "1px dashed rgba(255,255,255,0.08)" }}>
+              <div className="text-center py-10 rounded-xl" style={{ background: "var(--ln-coal)", border: "1px dashed color-mix(in srgb, var(--ln-parchment) 8%, transparent)" }}>
                 {trackSearch.trim() ? (
                   <>
                     <p className="text-sm mb-1" style={{ color: "var(--ln-smoke)" }}>No works found for “{trackSearch.trim()}”</p>

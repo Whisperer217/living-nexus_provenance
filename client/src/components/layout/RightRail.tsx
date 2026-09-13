@@ -128,7 +128,7 @@ export default function RightRail() {
           border: "1px solid var(--ln-border-subtle)",
           borderRight: isOpen ? "none" : "1px solid var(--ln-border-subtle)",
           borderRadius: isOpen ? "6px 0 0 6px" : "0 6px 6px 0",
-          color: "rgba(212,175,55,0.7)",
+          color: "color-mix(in srgb, var(--ln-gold) 70%, transparent)",
           cursor: "pointer",
           zIndex: 81,
           transition: "right 0.3s ease",
@@ -161,16 +161,16 @@ export default function RightRail() {
         {/* ── Signals ─────────────────────────────────────────────── */}
         <section>
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] font-bold tracking-widest" style={{ color: "rgba(212,175,55,0.6)" }}>
+            <span className="text-[10px] font-bold tracking-widest" style={{ color: "color-mix(in srgb, var(--ln-gold) 60%, transparent)" }}>
               {user ? "SIGNALS" : "LIVE ACTIVITY"}
             </span>
             {user && (
               <button
                 onClick={() => navigate("/notifications")}
                 className="text-[10px] transition-colors"
-                style={{ color: "rgba(212,175,55,0.45)" }}
-                onMouseEnter={e => (e.currentTarget.style.color = "#D4AF37")}
-                onMouseLeave={e => (e.currentTarget.style.color = "rgba(212,175,55,0.45)")}
+                style={{ color: "color-mix(in srgb, var(--ln-gold) 45%, transparent)" }}
+                onMouseEnter={e => (e.currentTarget.style.color = "var(--ln-gold)")}
+                onMouseLeave={e => (e.currentTarget.style.color = "color-mix(in srgb, var(--ln-gold) 45%, transparent)")}
               >
                 VIEW ALL
               </button>
@@ -386,8 +386,8 @@ export default function RightRail() {
         {/* ── Witness Registry Stats ───────────────────────────────── */}
         <section>
           <div className="flex items-center gap-1.5 mb-2">
-            <Eye size={11} style={{ color: "rgba(212,175,55,0.6)" }} />
-            <span className="text-[10px] font-bold tracking-widest" style={{ color: "rgba(212,175,55,0.6)" }}>
+            <Eye size={11} style={{ color: "color-mix(in srgb, var(--ln-gold) 60%, transparent)" }} />
+            <span className="text-[10px] font-bold tracking-widest" style={{ color: "color-mix(in srgb, var(--ln-gold) 60%, transparent)" }}>
               WITNESS REGISTRY
             </span>
           </div>
