@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-09-13T00:57:00.000Z",
-  "totalLessons": 26,
+  "lastUpdated": "2026-09-13T01:59:00.000Z",
+  "totalLessons": 28,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -617,6 +617,32 @@
         "disabled-by-default",
         "non-content-audit",
         "no-platform-task-creation",
+        "authority-boundary"
+      ]
+    },
+    {
+      "id": "LESSON-028",
+      "date": "2026-09-13",
+      "category": "architecture",
+      "problem": "A launcher can easily become a shadow navigation or audio system when it guesses product routes, creates its own audio engine, or treats a currently playing Work as available AI context. Copying a reviewed UI without preserving its declared route and ownership boundaries would fragment the Living Nexus surface.",
+      "solution": "Treat the launcher as a presentation and handoff layer only. Declare every destination centrally; keep unavailable products visibly inert; retain user favorites as browser-local preference; delegate playback exclusively to the existing PlayerProvider and WSPProvider; and refresh an already-mounted Explore surface from its query string. The launcher never loads audio, edits the queue, issues a WID, creates provenance, or attaches AI context merely because the listener opens playback.",
+      "files": [
+        "client/src/components/layout/LivingNexusLauncher.tsx",
+        "client/src/components/layout/launcherDestinations.ts",
+        "client/src/components/layout/living-nexus-launcher.css",
+        "client/src/components/layout/MainLayout.tsx",
+        "client/src/components/layout/TopBar.tsx",
+        "client/src/pages/ExplorePage.tsx",
+        "server/tests/livingNexusLauncher.test.ts"
+      ],
+      "score": 0,
+      "tags": [
+        "launcher",
+        "player-isolation",
+        "route-contract",
+        "accessibility",
+        "local-preference",
+        "explicit-ai-context",
         "authority-boundary"
       ]
     }

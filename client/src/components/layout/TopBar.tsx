@@ -24,6 +24,7 @@ import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import NotificationBellDropdown from "@/components/NotificationBellDropdown";
 import { DISCORD_COMMUNITY_URL } from "@/lib/loopProduct";
 import { DiscordGlyph as SharedDiscordGlyph } from "@/components/icons/DiscordGlyph";
+import LivingNexusLauncher from "@/components/layout/LivingNexusLauncher";
 
 const LOGO_URL =
   "/manus-storage/living-nexus-logo-2025_19c2d497.png";
@@ -420,7 +421,7 @@ export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCoun
     ?? (isWarm ? "var(--ln-panel-border)" : "rgba(196,154,40,0.18)");
 
   return (
-    <div className="hidden md:block">
+    <div className="hidden lg:block">
       {/* ── Integrated TopBar + Player ─────────────────────────────── */}
       <header
         className="fixed top-0 z-[400] flex items-center"
@@ -552,6 +553,9 @@ export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCoun
           {user && (
             <NotificationBellDropdown unreadCount={unreadCount as number} />
           )}
+
+          {/* Shared Living Nexus destinations; the player remains mounted in MainLayout. */}
+          <LivingNexusLauncher />
 
           {/* Avatar / Sign In */}
           {!authLoading && user ? (

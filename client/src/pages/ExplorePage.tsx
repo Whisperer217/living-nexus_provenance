@@ -5,7 +5,7 @@
 import React, { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { trpc } from "@/lib/trpc";
-import { Link, useLocation, useParams } from "wouter";
+import { Link, useLocation, useParams, useSearch } from "wouter";
 import {
   Search, RefreshCw, Shield, Music, Eye, Flame,
   Sparkles, Star, ChevronRight, ChevronLeft, LayoutList,
@@ -495,6 +495,7 @@ function AllCreatorsView({ creators, search, selectedCreatorId }: { creators: Cr
 // ── Main ExplorePage ───────────────────────────────────────────────────────
 export default function ExplorePage() {
   const params = useParams<{ medium?: string }>();
+  const routeSearch = useSearch();
   const mediumParam = params.medium?.toLowerCase();
   // Legacy medium segments redirect to the music-first Explore surface.
   void mediumParam; // /explore/:medium redirects to /explore in App
@@ -502,6 +503,11 @@ export default function ExplorePage() {
   const [seed] = useState(() => Math.floor(Math.random() * 999999));
   const [search, setSearch] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>(getInitialViewMode);
+  // Launcher deep links may change the query while Explore stays mounted.
+  useEffect(() => {
+    const view = new URLSearchParams(routeSearch ?? "").get("view");
+    if (view === "creators" || view === "list") setViewMode(view);
+  }, [routeSearch]);
   const [randomize, setRandomize] = useState(true);
   const [selectedCreatorId, setSelectedCreatorId] = useState<number | null>(null);
 
