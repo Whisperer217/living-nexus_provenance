@@ -1,0 +1,4 @@
+{
+  "install": "pnpm install\nsudo DEBIAN_FRONTEND=noninteractive apt-get update -qq\nsudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq mariadb-server mariadb-client",
+  "start": "bash scripts/cloud-env-start.sh"
+}
