@@ -31,6 +31,7 @@ import TheaterPlayer from "@/components/player/TheaterPlayer";
 import ScrollToTopButton from "@/components/layout/ScrollToTopButton";
 import SiteFooter from "@/components/layout/SiteFooter";
 import TopBar from "@/components/layout/TopBar";
+import LivingNexusLauncher from "@/components/layout/LivingNexusLauncher";
 import { WhatsNewModal } from "@/components/WhatsNewModal";
 import { trpc } from "@/lib/trpc";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -206,7 +207,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         {/* Logo + wordmark */}
         <div className="flex items-center gap-2 flex-1">
           <img src={LOGO_URL} alt="LN" className="w-7 h-7 object-contain" />
-          <span className="font-display text-base gold-shimmer">Living Nexus</span>
+          <span className="ln-mobile-wordmark font-display text-base gold-shimmer">Living Nexus</span>
         </div>
 
         {/* Discord — always available on mobile */}
@@ -236,6 +237,9 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
         {/* Theme Switcher — mobile */}
         <ThemeSwitcher compact />
+
+        {/* Same launcher model on mobile; it does not own navigation or audio state. */}
+        <LivingNexusLauncher />
 
         {/* Bell */}
         {!!user && (
