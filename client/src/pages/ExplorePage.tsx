@@ -44,8 +44,9 @@ function getInitialViewMode(): ViewMode {
   return "list";
 }
 
-// Max works to load — always show everything the server has
+// Keep every returned work available for local search and the playback queue.
 const MAX_LIMIT = 700;
+const WORKS_BATCH_SIZE = 32;
 
 // ── Data hook ──────────────────────────────────────────────────────────────
 function useExploreData(seed: number, randomize: boolean, creatorId?: number) {
@@ -333,9 +334,10 @@ function SupplementalRow({
     );
   }, [rows, search]);
 
-  if (filtered.length === 0) return null;
-
   const audioTracks = useMemo(() => filtered.filter(r => !!r.song.fileUrl).map(feedRowToTrack), [filtered]);
+  const queuePositions = useMemo(() => new Map(audioTracks.map((track, index) => [track.id, index])), [audioTracks]);
+
+  if (filtered.length === 0) return null;
 
   const scroll = (dir: "left" | "right") => {
     if (!scrollRef.current) return;
@@ -358,8 +360,8 @@ function SupplementalRow({
       </div>
       <div ref={scrollRef} className="flex gap-3 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
         {filtered.map((row) => {
-          const qIdx = audioTracks.findIndex(t => t.id === String(row.song.id));
-          return <GridCard key={row.song.id} row={row} queueTracks={audioTracks} queueIndex={qIdx >= 0 ? qIdx : undefined} />;
+          const qIdx = queuePositions.get(String(row.song.id));
+          return <GridCard key={row.song.id} row={row} queueTracks={audioTracks} queueIndex={qIdx} />;
         })}
       </div>
     </div>
@@ -407,6 +409,25 @@ function AllWorksListView({ data, search, likedMap }: { data: ReturnType<typeof 
   }, [allRows, search]);
 
   const audioTracks = useMemo(() => filtered.filter(r => !!r.song.fileUrl).map(feedRowToTrack), [filtered]);
+  const queuePositions = useMemo(() => new Map(audioTracks.map((track, index) => [track.id, index])), [audioTracks]);
+  const [range, setRange] = useState({ search, count: WORKS_BATCH_SIZE });
+  const visibleCount = range.search === search ? range.count : WORKS_BATCH_SIZE;
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const target = loadMoreRef.current;
+    if (!target || filtered.length <= visibleCount || typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setRange(previous => ({
+          search,
+          count: Math.min(filtered.length, (previous.search === search ? previous.count : WORKS_BATCH_SIZE) + WORKS_BATCH_SIZE),
+        }));
+      }
+    }, { root: document.querySelector("#main-scroll"), rootMargin: "600px 0px" });
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, [filtered.length, search, visibleCount]);
 
   if (filtered.length === 0) {
     return (
@@ -419,11 +440,21 @@ function AllWorksListView({ data, search, likedMap }: { data: ReturnType<typeof 
   }
 
   return (
-    <div className="divide-y divide-white/5 rounded-xl overflow-hidden border border-white/5">
-      {filtered.map((row, i) => {
-        const qIdx = audioTracks.findIndex(t => t.id === String(row.song.id));
-        return <WorkListRow key={row.song.id} item={feedRowToListItem(row)} index={i} queueTracks={audioTracks} queueIndex={qIdx >= 0 ? qIdx : undefined} queueContext="EXPLORE" prefetchedLiked={likedMap[row.song.id] ?? false} />;
+    <div className="divide-y divide-white/5 rounded-xl border border-white/5">
+      {filtered.slice(0, visibleCount).map((row, i) => {
+        const qIdx = queuePositions.get(String(row.song.id));
+        return <div key={row.song.id} style={{ contentVisibility: "auto", containIntrinsicSize: "auto 91px" }}>
+          <WorkListRow item={feedRowToListItem(row)} index={i} queueTracks={audioTracks} queueIndex={qIdx} queueContext="EXPLORE" prefetchedLiked={likedMap[row.song.id] ?? false} />
+        </div>;
       })}
+      {filtered.length > visibleCount && (
+        <div ref={loadMoreRef} className="flex justify-center py-5">
+          <button type="button" onClick={() => setRange({ search, count: Math.min(filtered.length, visibleCount + WORKS_BATCH_SIZE) })}
+            className="rounded-lg border border-white/15 px-4 py-2 text-xs text-[var(--stone-light)] hover:border-[var(--gold)]/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--gold)]">
+            Show more works ({visibleCount} of {filtered.length})
+          </button>
+        </div>
+      )}
     </div>
   );
 }
