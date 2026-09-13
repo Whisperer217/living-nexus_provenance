@@ -15,6 +15,7 @@ import {
   coreIngestionInspectionReceipts,
   coreIngestionJobs,
   coreIngestionPrivateDrafts,
+  coreIngestionSchedulerConfigs,
   songs,
 } from "../../drizzle/schema";
 import { storageGet } from "../utils/storage";
@@ -27,8 +28,19 @@ const CORE_INGESTION_BATCH_SIZE = 3;
 const CORE_INGESTION_LEASE_MS = 90_000;
 const CORE_INGESTION_PROPOSAL_TTL_MS = 24 * 60 * 60 * 1000;
 const CORE_INGESTION_CONFIRMATION_TTL_MS = 15 * 60 * 1000;
+export const CORE_INGESTION_SCHEDULER_CONFIG_KEY = "core_ingestion_primary";
+export const CORE_INGESTION_OPTION_B_CADENCE = "0 */5 * * * *";
+export const CORE_INGESTION_SCHEDULER_CALLBACK_PATH = "/api/scheduled/core-ingestion";
 
 type RequestedOutcome = "private_draft" | "registration_review";
+
+type CoreIngestionBatchResult = {
+  completed: number;
+  retried: number;
+  failed: number;
+  cancelled: number;
+  skipped: number;
+};
 
 export type CoreIngestionOwnedAudioAsset = {
   sourceSongId: number;
@@ -57,6 +69,131 @@ function sameDigest(left: string, right: string) {
   const leftBuffer = Buffer.from(left, "hex");
   const rightBuffer = Buffer.from(right, "hex");
   return leftBuffer.length === rightBuffer.length && timingSafeEqual(leftBuffer, rightBuffer);
+}
+
+function schedulerSummary(config: typeof coreIngestionSchedulerConfigs.$inferSelect) {
+  return {
+    configKey: config.configKey,
+    taskUidBound: Boolean(config.scheduleCronTaskUid),
+    scheduleCronTaskUid: config.scheduleCronTaskUid,
+    cadence: config.cadence,
+    callbackPath: config.callbackPath,
+    enabled: config.enabled,
+    boundByUserId: config.boundByUserId,
+    boundAt: config.boundAt,
+    lastStartedAt: config.lastStartedAt,
+    lastFinishedAt: config.lastFinishedAt,
+    lastResult: config.lastResult,
+    lastErrorCode: config.lastErrorCode,
+    lastErrorMessage: config.lastErrorMessage,
+  };
+}
+
+async function ensureCoreIngestionSchedulerConfig(db: any) {
+  const existingRows = await db.select().from(coreIngestionSchedulerConfigs).where(eq(
+    coreIngestionSchedulerConfigs.configKey,
+    CORE_INGESTION_SCHEDULER_CONFIG_KEY,
+  )).limit(1);
+  if (existingRows[0]) return existingRows[0];
+  try {
+    await db.insert(coreIngestionSchedulerConfigs).values({
+      configKey: CORE_INGESTION_SCHEDULER_CONFIG_KEY,
+      cadence: CORE_INGESTION_OPTION_B_CADENCE,
+      callbackPath: CORE_INGESTION_SCHEDULER_CALLBACK_PATH,
+      enabled: false,
+    });
+  } catch {
+    // A concurrent status request may have already seeded the singleton.
+  }
+  const rows = await db.select().from(coreIngestionSchedulerConfigs).where(eq(
+    coreIngestionSchedulerConfigs.configKey,
+    CORE_INGESTION_SCHEDULER_CONFIG_KEY,
+  )).limit(1);
+  if (!rows[0]) throw new Error("Core Ingestion scheduler configuration could not be initialized.");
+  return rows[0];
+}
+
+export async function getCoreIngestionSchedulerStatus() {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  return schedulerSummary(await ensureCoreIngestionSchedulerConfig(db));
+}
+
+export async function bindCoreIngestionSchedulerTask(adminUserId: number, taskUid: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  const config = await ensureCoreIngestionSchedulerConfig(db);
+  if (config.enabled) {
+    throw new TRPCError({ code: "CONFLICT", message: "Disable the Core Ingestion scheduler before changing its task binding." });
+  }
+  if (config.scheduleCronTaskUid && config.scheduleCronTaskUid !== taskUid) {
+    throw new TRPCError({ code: "CONFLICT", message: "A different scheduler task is already bound. Pause and retire it through the approved rollback procedure first." });
+  }
+  if (config.scheduleCronTaskUid === taskUid) return schedulerSummary(config);
+  await db.update(coreIngestionSchedulerConfigs).set({
+    scheduleCronTaskUid: taskUid,
+    boundByUserId: adminUserId,
+    boundAt: new Date(),
+    enabled: false,
+    lastErrorCode: null,
+    lastErrorMessage: null,
+  }).where(eq(coreIngestionSchedulerConfigs.configKey, CORE_INGESTION_SCHEDULER_CONFIG_KEY));
+  return getCoreIngestionSchedulerStatus();
+}
+
+export async function getEnabledCoreIngestionSchedulerConfig(taskUid: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  const rows = await db.select().from(coreIngestionSchedulerConfigs).where(and(
+    eq(coreIngestionSchedulerConfigs.configKey, CORE_INGESTION_SCHEDULER_CONFIG_KEY),
+    eq(coreIngestionSchedulerConfigs.scheduleCronTaskUid, taskUid),
+  )).limit(1);
+  const config = rows[0];
+  if (!config) return { state: "unbound" as const };
+  if (!config.enabled) return { state: "disabled" as const, config: schedulerSummary(config) };
+  return { state: "enabled" as const, config: schedulerSummary(config) };
+}
+
+export async function recordCoreIngestionSchedulerStarted(taskUid: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  await db.update(coreIngestionSchedulerConfigs).set({
+    lastStartedAt: new Date(),
+    lastErrorCode: null,
+    lastErrorMessage: null,
+  }).where(and(
+    eq(coreIngestionSchedulerConfigs.configKey, CORE_INGESTION_SCHEDULER_CONFIG_KEY),
+    eq(coreIngestionSchedulerConfigs.scheduleCronTaskUid, taskUid),
+    eq(coreIngestionSchedulerConfigs.enabled, true),
+  ));
+}
+
+export async function recordCoreIngestionSchedulerCompletion(taskUid: string, result: CoreIngestionBatchResult) {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  await db.update(coreIngestionSchedulerConfigs).set({
+    lastFinishedAt: new Date(),
+    lastResult: result,
+    lastErrorCode: null,
+    lastErrorMessage: null,
+  }).where(and(
+    eq(coreIngestionSchedulerConfigs.configKey, CORE_INGESTION_SCHEDULER_CONFIG_KEY),
+    eq(coreIngestionSchedulerConfigs.scheduleCronTaskUid, taskUid),
+    eq(coreIngestionSchedulerConfigs.enabled, true),
+  ));
+}
+
+export async function recordCoreIngestionSchedulerFailure(taskUid: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  await db.update(coreIngestionSchedulerConfigs).set({
+    lastFinishedAt: new Date(),
+    lastErrorCode: "SCHEDULER_BATCH_FAILED",
+    lastErrorMessage: "The deterministic batch did not complete. Review non-content server diagnostics.",
+  }).where(and(
+    eq(coreIngestionSchedulerConfigs.configKey, CORE_INGESTION_SCHEDULER_CONFIG_KEY),
+    eq(coreIngestionSchedulerConfigs.scheduleCronTaskUid, taskUid),
+  ));
 }
 
 function proposalSnapshot(receipt: typeof coreIngestionInspectionReceipts.$inferSelect) {

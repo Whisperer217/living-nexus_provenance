@@ -1,11 +1,17 @@
 import { z } from "zod";
-import { protectedProcedure, router } from "../_core/trpc";
+import { TRPCError } from "@trpc/server";
+import { adminProcedure, protectedProcedure, router } from "../_core/trpc";
+import { listHeartbeatJobs } from "../_core/heartbeat";
 import {
+  CORE_INGESTION_OPTION_B_CADENCE,
+  CORE_INGESTION_SCHEDULER_CALLBACK_PATH,
+  bindCoreIngestionSchedulerTask,
   attachCoreIngestionAsset,
   cancelCoreIngestionCommission,
   confirmCoreIngestionPrivateDraft,
   dismissCoreIngestionDraftProposal,
   getCoreIngestionCommission,
+  getCoreIngestionSchedulerStatus,
   issueCoreIngestionDraftConfirmation,
   listCoreIngestionCommissions,
   listOwnedCoreIngestionAudioAssets,
@@ -71,4 +77,17 @@ export const coreIngestionRouter = router({
   dismissPrivateDraftProposal: protectedProcedure
     .input(z.object({ proposalId: z.string().uuid() }))
     .mutation(({ ctx, input }) => dismissCoreIngestionDraftProposal(ctx.user.id, input.proposalId)),
+  schedulerStatus: adminProcedure
+    .query(() => getCoreIngestionSchedulerStatus()),
+  bindOptionBSchedulerTask: adminProcedure
+    .input(z.object({ taskUid: z.string().trim().min(1).max(65) }))
+    .mutation(async ({ ctx, input }) => {
+      const tasks = await listHeartbeatJobs("");
+      const task = tasks.jobs.find((candidate) => candidate.taskUid === input.taskUid);
+      if (!task) throw new TRPCError({ code: "NOT_FOUND", message: "The requested project scheduler task was not found." });
+      if (task.name !== "core-ingestion-option-b" || task.cronExpression !== CORE_INGESTION_OPTION_B_CADENCE || task.callbackPath !== CORE_INGESTION_SCHEDULER_CALLBACK_PATH || task.callbackMethod !== "POST") {
+        throw new TRPCError({ code: "PRECONDITION_FAILED", message: "The scheduler task does not match the approved Option B Core Ingestion contract." });
+      }
+      return bindCoreIngestionSchedulerTask(ctx.user.id, input.taskUid);
+    }),
 });

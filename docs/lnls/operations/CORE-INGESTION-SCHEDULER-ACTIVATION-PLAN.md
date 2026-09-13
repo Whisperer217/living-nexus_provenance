@@ -1,6 +1,6 @@
 # Core Ingestion Scheduler Activation Plan
 
-**Status:** Planning complete; no schedule created or activated  
+**Status:** Control plane implemented and unarmed; no schedule created or activated
 **Date:** 2026-09-13  
 **Scope:** Deterministic processing of already queued I1 Core Ingestion jobs.  
 **Out of scope:** Upload transport changes, canonical Work registration, WID issuance, provenance/publication changes, I3 handoff implementation, models/providers, Nexus context, PNA/archive/avatar records, and any high-frequency always-on worker.
@@ -18,7 +18,7 @@ The Creator Commission interface can now start a Commission and queue an inspect
 | Creator entry | Available at `/ingestion/review` | A creator can select an owned audio asset and queue a Commission. |
 | Worker callback | Implemented at `/api/scheduled/core-ingestion` | It accepts only managed cron identities and calls the bounded I1 batch processor. |
 | Durable job controls | Implemented | Batch size is 3; job leases expire after 90 seconds; retry count is finite; audio inspection is capped at 64 MiB. |
-| Scheduler configuration | Not yet implemented | No task UID is durably bound to the global Core Ingestion scheduler. |
+| Scheduler configuration | Implemented but unarmed | A disabled-by-default singleton `coreIngestionSchedulerConfigs` record can bind one verified task UID; no task UID is currently bound. |
 | Heartbeat schedule | Not created | No queued Commission will be inspected automatically. |
 | Deployment requirement | Mandatory before activation | The callback must be in a deployed build before a platform scheduler can reach it. |
 
@@ -33,18 +33,18 @@ Both choices use the platform-managed project-level scheduler and the existing H
 
 No schedule is selected by this plan. Doc must choose **A** or **B** in the separate activation approval. The schedule’s six-field expression is UTC and executes only after a deployed callback build is reachable.[^periodic]
 
-## Required control-plane hardening before creation
+## Control-plane hardening completed before creation
 
-The callback currently validates that the caller is a cron identity. Before any platform task is created, a small additive scheduler-configuration boundary must be implemented and checkpointed.
+The callback now validates both managed cron identity and an exact task-UID binding. It returns a successful no-op when it is unbound or disabled, and only the enabled matching task may invoke the bounded batch. The configuration remains disabled and unbound in this checkpoint.
 
 | Requirement | Required implementation | Why it is necessary |
 |---|---|---|
-| Durable task binding | Add one project-level `coreIngestionSchedulerConfig` record with a stable key, `scheduleCronTaskUid`, configured cadence, enabled flag, last-run summary, and timestamps. | The platform task UID becomes durable operational evidence and the callback cannot trust request body data. |
-| Task-UID lookup | Callback authenticates the managed cron identity and loads configuration only by `user.taskUid`. | A different cron identity cannot trigger Core Ingestion merely by calling the known endpoint. |
-| Explicit enable flag | Callback returns a successful no-op while the config is disabled. | Pause is safe, reversible, and does not produce retry storms. |
-| No caller-controlled work selection | Callback ignores body fields and only invokes the fixed bounded batch. | Prevents a cron payload from naming a creator, storage key, asset, or Work. |
-| Execution accounting | Persist non-content aggregate result (`completed`, `retried`, `failed`, `cancelled`, `skipped`), last start/finish, and sanitized error code. | Supports observation without storing audio bytes, prompts, raw content, or secrets. |
-| Single active project scheduler | Enforce a unique stable config key and task UID. | Prevents duplicate schedules processing the same queue concurrently. |
+| Durable task binding | Add one project-level `coreIngestionSchedulerConfig` record with a stable key, `scheduleCronTaskUid`, configured cadence, enabled flag, last-run summary, and timestamps. | **Completed.** The platform task UID becomes durable operational evidence and the callback cannot trust request body data. |
+| Task-UID lookup | Callback authenticates the managed cron identity and loads configuration only by `user.taskUid`. | **Completed.** A different cron identity cannot trigger Core Ingestion merely by calling the known endpoint. |
+| Explicit enable flag | Callback returns a successful no-op while the config is disabled. | **Completed.** Pause is safe, reversible, and does not produce retry storms. |
+| No caller-controlled work selection | Callback ignores body fields and only invokes the fixed bounded batch. | **Completed.** Prevents a cron payload from naming a creator, storage key, asset, or Work. |
+| Execution accounting | Persist non-content aggregate result (`completed`, `retried`, `failed`, `cancelled`, `skipped`), last start/finish, and sanitized error code. | **Completed.** Supports observation without storing audio bytes, prompts, raw content, or secrets. |
+| Single active project scheduler | Enforce a unique stable config key and task UID. | **Completed.** Prevents duplicate schedules processing the same queue concurrently. |
 | Pause and delete path | Use platform task UID to pause/resume/delete; clear or archive configuration only after the task is disabled/deleted. | Makes rollback deterministic. |
 
 The required control-plane record is operational metadata, not a creator record and not a canonical Work/provenance table. It must not attach task UID values to individual Commission rows, because the scheduler owns the **global bounded queue**, not any one creator’s asset.
@@ -53,7 +53,7 @@ The required control-plane record is operational metadata, not a creator record 
 
 | Step | Action | Required evidence | Stop condition |
 |---:|---|---|---|
-| 1 | Implement and test scheduler configuration lookup/enable guard. | Protected callback rejects an unknown task UID and returns a no-op for a disabled config. | Any direct/unknown cron request can process a batch. |
+| 1 | Implement and test scheduler configuration lookup/enable guard. | **Completed locally.** Protected callback rejects an unknown task UID and returns a no-op for a disabled config. | Any direct/unknown cron request can process a batch. |
 | 2 | Save a checkpoint with callback/control-plane hardening. | TypeScript, focused scheduler/worker tests, build, and diff hygiene pass. | Callback exists only in local preview. |
 | 3 | Doc deploys the approved checkpoint. | Production callback responds through the deployed Living Nexus domain. | Deployment not complete or callback cannot be reached. |
 | 4 | Create exactly one project-level scheduler at the chosen cadence and save returned task UID in the configuration record. | Task UID, cadence, callback path, and enabled state are recorded without secrets. | Multiple active Core Ingestion tasks or missing task UID binding. |
@@ -91,9 +91,9 @@ The immediate kill switch is a platform pause using the durable task UID; the se
 
 To proceed from this plan, Doc must state all three choices explicitly:
 
-1. **Cadence:** Option **A** (approximately one-minute intake) or **B** (approximately five-minute intake).
-2. **Implementation authority:** approval to add the scheduler configuration/guard and its tests.
-3. **Operational authority:** after that checkpoint is deployed and externally verified, approval to create and enable exactly one project-level schedule.
+1. **Cadence:** Option **B** (approximately five-minute intake) is selected.
+2. **Implementation authority:** completed in the disabled/unbound state.
+3. **Operational authority:** after this checkpoint is deployed and the callback is externally verified, approval to create and enable exactly one project-level schedule remains required.
 
 This plan itself creates no schedule and changes no runtime behavior.
 

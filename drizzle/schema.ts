@@ -374,6 +374,32 @@ export type CoreIngestionDraftProposal = typeof coreIngestionDraftProposals.$inf
 export type CoreIngestionDraftConfirmation = typeof coreIngestionDraftConfirmations.$inferSelect;
 export type CoreIngestionPrivateDraft = typeof coreIngestionPrivateDrafts.$inferSelect;
 
+// ─── Core Ingestion Scheduler Control Plane (Option B) ────────────────────────
+// Project-level operational metadata for the scheduler-only I1 callback. This
+// singleton does not own creator records and it cannot create a Heartbeat task,
+// Work, WID, provenance event, publication, PNA/avatar record, or provider call.
+export const coreIngestionSchedulerConfigs = mysqlTable("coreIngestionSchedulerConfigs", {
+  configKey: varchar("configKey", { length: 64 }).primaryKey(),
+  scheduleCronTaskUid: varchar("scheduleCronTaskUid", { length: 65 }),
+  cadence: varchar("cadence", { length: 64 }).notNull().default("0 */5 * * * *"),
+  callbackPath: varchar("callbackPath", { length: 128 }).notNull().default("/api/scheduled/core-ingestion"),
+  enabled: boolean("enabled").notNull().default(false),
+  boundByUserId: int("boundByUserId"),
+  boundAt: timestamp("boundAt"),
+  lastStartedAt: timestamp("lastStartedAt"),
+  lastFinishedAt: timestamp("lastFinishedAt"),
+  lastResult: json("lastResult").$type<Record<string, number>>(),
+  lastErrorCode: varchar("lastErrorCode", { length: 96 }),
+  lastErrorMessage: varchar("lastErrorMessage", { length: 512 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (t) => ({
+  taskUidUnique: uniqueIndex("coreIngestionSchedulerConfigs_taskUid_uq").on(t.scheduleCronTaskUid),
+  enabledIdx: index("coreIngestionSchedulerConfigs_enabled_idx").on(t.enabled),
+}));
+
+export type CoreIngestionSchedulerConfig = typeof coreIngestionSchedulerConfigs.$inferSelect;
+
 // ─── WIDs (Witness IDs — provenance anchors) ──────────────────────────────────
 export const wids = mysqlTable("wids", {
   wid: varchar("wid", { length: 64 }).primaryKey(),

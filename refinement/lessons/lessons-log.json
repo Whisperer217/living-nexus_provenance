@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-09-13T00:42:00.000Z",
-  "totalLessons": 25,
+  "lastUpdated": "2026-09-13T00:57:00.000Z",
+  "totalLessons": 26,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -590,6 +590,33 @@
         "existing-upload",
         "no-canonical-mutation",
         "scheduler-plan",
+        "authority-boundary"
+      ]
+    },
+    {
+      "id": "LESSON-027",
+      "date": "2026-09-13",
+      "category": "operations",
+      "problem": "A scheduler callback that recognizes only a generic cron identity can be reached by the wrong managed task, and an unauthenticated request that becomes a 500 can trigger wasteful retry behavior. A browser-facing or administrative mutation must not be able to create or silently enable a worker schedule while it is still undergoing deployment validation.",
+      "solution": "Option B uses an isolated disabled-by-default scheduler singleton with a fixed five-minute cadence and callback path. The callback now requires both managed-cron identity and an exact bound task UID; unbound or disabled tasks return a successful no-op before worker execution, while direct unauthenticated requests return a non-retryable cron-only denial. Only an administrator may bind an already-created platform task, and that binding verifies the exact approved name, cadence, callback path, and method. Binding never creates, updates, or enables a task. Aggregate execution outcomes are retained without creator content, secrets, asset URLs, or canonical authority changes.",
+      "files": [
+        "drizzle/schema.ts",
+        "drizzle/0141_core_ingestion_scheduler_control_plane.sql",
+        "server/services/coreIngestion.ts",
+        "server/routes/coreIngestionScheduleRoute.ts",
+        "server/routers/coreIngestion.ts",
+        "server/tests/coreIngestionSchedulerOptionB.test.ts",
+        "docs/lnls/operations/CORE-INGESTION-SCHEDULER-ACTIVATION-PLAN.md"
+      ],
+      "score": 0,
+      "tags": [
+        "core-ingestion",
+        "scheduler",
+        "heartbeat",
+        "task-identity",
+        "disabled-by-default",
+        "non-content-audit",
+        "no-platform-task-creation",
         "authority-boundary"
       ]
     }
