@@ -28,7 +28,7 @@ export const PREPARED_WORK_FIELD_CLASSIFICATION = {
     "timestamp",
   ],
   /** Existing registration values outside the current WID-MUS signature payload. */
-  editorial: ["lyrics", "aiConsent", "publishIntent", "durationSeconds", "releaseDate", "creatorReleaseDate", "collectionId"],
+  editorial: ["lyrics", "aiConsent", "publishIntent", "durationSeconds", "releaseDate", "creatorReleaseDate", "collectionId", "creativeProcessNotes"],
   /** Independently prepared media/manifestation components. */
   independentComponent: [
     "coverFile",
@@ -56,6 +56,8 @@ export interface PreparedWorkRegistrationInput<TAsset = unknown> {
   lyrics: string;
   moodTags: string[];
   caption: string;
+  /** Creator-authored process notes; editorial metadata, not WID-bound or AI consent. */
+  creativeProcessNotes?: string;
   originStory: string;
   aiConsent: "prohibited" | "permitted_attribution" | "permitted";
   participation: LoopParticipation;
@@ -171,6 +173,7 @@ export function buildPreparedWorkUploadPayload(
     ownershipStatus: "full" as const,
     moodTags: metadata.moodTags,
     caption: metadata.caption || undefined,
+    ...(metadata.creativeProcessNotes ? { creativeProcessNotes: metadata.creativeProcessNotes } : {}),
     contentType: "audio" as const,
     fileHash: context.fileHash,
     witnessId: context.witnessId,

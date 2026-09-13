@@ -204,6 +204,7 @@ export default function UploadPage() {
   // Enriched editorial fields
   const [headlineCaption, setHeadlineCaption] = useState("");
   const [description, setDescription] = useState("");
+  const [creativeProcessNotes, setCreativeProcessNotes] = useState("");
   const [galleryImages, setGalleryImages] = useState<{ url: string; key: string; caption: string }[]>([]);
   const [playerAssetType, setPlayerAssetType] = useState<"cover" | "video">("cover");
   // AI Tool Disclosure toggles
@@ -308,6 +309,7 @@ export default function UploadPage() {
     if (draftData.caption) setCaption(draftData.caption);
     if (draftData.headlineCaption) setHeadlineCaption(draftData.headlineCaption);
     if (draftData.description) setDescription(draftData.description);
+    if (draftData.creativeProcessNotes) setCreativeProcessNotes(draftData.creativeProcessNotes);
     if (draftData.playerAssetType) setPlayerAssetType(draftData.playerAssetType as "cover" | "video");
     if (draftData.aiToolSuno) setAiToolSuno(draftData.aiToolSuno);
     if (draftData.aiToolUdio) setAiToolUdio(draftData.aiToolUdio);
@@ -726,6 +728,7 @@ export default function UploadPage() {
           caption: caption || undefined,
           headlineCaption: headlineCaption || undefined,
           description: description || undefined,
+          creativeProcessNotes: creativeProcessNotes || undefined,
           galleryImagesJson: galleryImages.length > 0 ? JSON.stringify(galleryImages) : undefined,
           playerAssetType,
           aiToolSuno, aiToolUdio, aiToolSonato, aiToolOther,
@@ -762,6 +765,7 @@ export default function UploadPage() {
           caption: caption || undefined,
           headlineCaption: headlineCaption || undefined,
           description: description || undefined,
+          creativeProcessNotes: creativeProcessNotes || undefined,
           galleryImagesJson: galleryImages.length > 0 ? JSON.stringify(galleryImages) : undefined,
           contentType: "game",
           gameUrl: gameUrl || undefined,
@@ -805,6 +809,7 @@ export default function UploadPage() {
           caption: caption || undefined,
           headlineCaption: headlineCaption || undefined,
           description: description || undefined,
+          creativeProcessNotes: creativeProcessNotes || undefined,
           galleryImagesJson: galleryImages.length > 0 ? JSON.stringify(galleryImages) : undefined,
           playerAssetType,
           aiToolSuno, aiToolUdio, aiToolSonato, aiToolOther,
@@ -847,6 +852,7 @@ export default function UploadPage() {
         caption: caption || undefined,
         headlineCaption: headlineCaption || undefined,
         description: description || undefined,
+        creativeProcessNotes: creativeProcessNotes || undefined,
         galleryImagesJson: galleryImages.length > 0 ? JSON.stringify(galleryImages) : undefined,
         playerAssetType,
         aiToolSuno, aiToolUdio, aiToolSonato, aiToolOther,
@@ -1571,6 +1577,21 @@ export default function UploadPage() {
                   className="text-sm resize-none"
                   style={{ background: "#1E1B12", border: "1px solid rgba(196,154,40,0.25)", color: "var(--ln-parchment)" }}
                 />
+              </div>
+
+              <div>
+                <label htmlFor="creative-process-notes-upload" className="text-xs font-medium" style={{ color: "#B8A88A" }}>
+                  Creative Process Notes <span style={{ color: "rgba(232,223,200,0.45)" }}>(optional · creator-authored)</span>
+                </label>
+                <p className="mt-1 mb-2 text-xs" style={{ color: "rgba(232,223,200,0.55)" }}>
+                  Style prompt, instrumentation, production notes, or creative direction. Paste your own notes; AI generation is not required.
+                </p>
+                <Textarea id="creative-process-notes-upload" value={creativeProcessNotes}
+                  onChange={e => setCreativeProcessNotes(e.target.value)} maxLength={10000} rows={6}
+                  placeholder="Style prompt…\nInstrumentation…\nProduction notes…\nCreative direction…"
+                  className="text-sm resize-y whitespace-pre-wrap"
+                  style={{ background: "#1E1B12", border: "1px solid rgba(196,154,40,0.25)", color: "var(--ln-parchment)" }} />
+                <p className="mt-1 text-right text-[10px]" style={{ color: "rgba(232,223,200,0.45)" }}>{creativeProcessNotes.length}/10,000</p>
               </div>
 
               {/* ── Gallery Images ── */}

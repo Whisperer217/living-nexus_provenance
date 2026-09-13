@@ -159,6 +159,7 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
   const [selectedMoods, setSelectedMoods] = useState<string[]>(keeperPrefill?.moodTags ?? []);
   const [caption, setCaption] = useState(keeperPrefill?.caption ?? "");
   const [originStory, setOriginStory] = useState(keeperPrefill?.haaiOriginStory ?? "");
+  const [creativeProcessNotes, setCreativeProcessNotes] = useState("");
   const [aiConsent, setAiConsent] = useState<"prohibited" | "permitted_attribution" | "permitted">("prohibited");
   const [participation, setParticipation] = useState<LoopParticipation>(defaultParticipation());
   const [attested, setAttested] = useState(false);
@@ -198,6 +199,7 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
       lyrics,
       moodTags: selectedMoods,
       caption,
+      creativeProcessNotes,
       originStory,
       aiConsent,
       participation,
@@ -907,6 +909,21 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
               className="min-h-[72px] bg-transparent text-sm"
               style={{ borderColor: "rgba(196,154,40,0.25)", color: "var(--ln-parchment)" }}
             />
+
+            <div>
+              <label htmlFor="music-creative-process-notes" className="block text-[11px] uppercase tracking-[0.16em] mb-2" style={{ color: "var(--ln-gold)" }}>
+                Creative Process Notes <span className="normal-case tracking-normal opacity-60">(optional)</span>
+              </label>
+              <p className="mb-2 text-xs" style={{ color: "color-mix(in srgb, var(--ln-parchment) 55%, transparent)" }}>
+                Paste creator-authored style prompts, instrumentation, production notes, and creative direction. No AI generation required.
+              </p>
+              <Textarea id="music-creative-process-notes" value={creativeProcessNotes}
+                onChange={(e) => setCreativeProcessNotes(e.target.value)} maxLength={10000} rows={6}
+                placeholder="Style prompt…\nInstrumentation…\nProduction notes…\nCreative direction…"
+                className="min-h-[140px] resize-y bg-transparent text-sm"
+                style={{ borderColor: "rgba(196,154,40,0.25)", color: "var(--ln-parchment)" }} />
+              <p className="mt-1 text-right text-[10px]" style={{ color: "color-mix(in srgb, var(--ln-parchment) 45%, transparent)" }}>{creativeProcessNotes.length}/10,000</p>
+            </div>
 
             <label className="flex items-start gap-3 cursor-pointer">
               <input

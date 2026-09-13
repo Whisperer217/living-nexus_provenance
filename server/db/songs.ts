@@ -59,6 +59,7 @@ export async function createSong(data: {
   isLyricsOnly?: boolean;
   contentType?: "audio" | "lyrics" | "manuscript" | "comic" | "game" | "gcode" | "3dmodel";
   caption?: string | null;
+  creativeProcessNotes?: string | null;
   displayOrder?: number;
   // G-code / 3D model fields
   gcodeUrl?: string;
@@ -428,6 +429,7 @@ export async function updateSongMetadata(
     // Core metadata
     title?: string;
     description?: string | null;
+    creativeProcessNotes?: string | null;
     headlineCaption?: string | null;
     // Creator-declared historical dates (not system timestamps)
     releaseDate?: string | null;
@@ -477,6 +479,7 @@ export async function updateSongMetadata(
   if (fields.soundtrackCuesJson !== undefined) updateSet.soundtrackCuesJson = fields.soundtrackCuesJson;
   if (fields.title !== undefined) updateSet.title = fields.title;
   if (fields.description !== undefined) updateSet.description = fields.description;
+  if (fields.creativeProcessNotes !== undefined) updateSet.creativeProcessNotes = fields.creativeProcessNotes;
   if (fields.headlineCaption !== undefined) updateSet.headlineCaption = fields.headlineCaption;
   if (fields.releaseDate !== undefined) updateSet.releaseDate = fields.releaseDate;
   if (fields.creatorReleaseDate !== undefined) updateSet.creatorReleaseDate = fields.creatorReleaseDate;
