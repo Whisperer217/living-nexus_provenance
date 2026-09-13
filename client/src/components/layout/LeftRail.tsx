@@ -302,9 +302,11 @@ export default function LeftRail({
 
       {/* Sidebar panel — transform only, GPU-composited, no layout reflow */}
       <aside
+        id="mobile-nav-rail"
         className="lg:hidden flex flex-col items-center py-3 gap-1"
         aria-label="Mobile navigation"
         aria-hidden={!mobileOpen}
+        inert={!mobileOpen}
         style={{
           position: "fixed",
           top: 0,
