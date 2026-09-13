@@ -444,6 +444,9 @@ export const songs = mysqlTable("songs", {
   // Long-form description — the story, process, and intent behind the work
   // Supports markdown; can be AI-drafted from uploaded images at upload time
   description: text("description"),
+  // Creator-authored style prompt, instrumentation, production and direction notes.
+  // Separate from description and HAAI disclosure; this does not grant AI consent.
+  creativeProcessNotes: text("creativeProcessNotes"),
   // Gallery images — JSON array of { url: string; key: string; caption?: string }
   // Additional images uploaded alongside the work (process photos, artwork, notes, etc.)
   // These are separate from the player asset (coverArtUrl / videoUrl)
