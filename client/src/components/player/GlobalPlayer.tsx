@@ -1060,9 +1060,6 @@ function GlobalPlayerInner() {
                 <DollarSign size={14} />
               </button>
             )}
-            <button ref={volumeBtnRef} onClick={e => { e.stopPropagation(); openVolumePopup(); }} className="p-1.5 transition-colors" style={{ color: state.isMuted ? (isDesktop ? "rgba(212,175,55,0.3)" : "rgba(192,132,252,0.25)") : (isDesktop ? "rgba(212,175,55,0.65)" : "rgba(192,132,252,0.6)") }} aria-label={state.isMuted ? "Volume: muted" : "Volume"} aria-pressed={state.isMuted}>
-              {state.isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
-            </button>
             <button onClick={e => { e.stopPropagation(); toggleGlow(); }} className="p-1.5 transition-all rounded" style={{ color: glowEnabled ? "#C084FC" : (isDesktop ? "rgba(212,175,55,0.4)" : "rgba(192,132,252,0.4)"), background: glowEnabled ? "rgba(192,132,252,0.08)" : "transparent" }} title={glowEnabled ? "Glow: ON" : "Glow: OFF"} aria-label={glowEnabled ? "Glow effect: on" : "Glow effect: off"} aria-pressed={glowEnabled}><Waves size={14} /></button>
             {/* Phase 164: Cinematic mode — deliberate button, not triggered by artwork tap */}
             <button onClick={e => { e.stopPropagation(); setCinematic(true); }} className="p-1.5 transition-all rounded" style={{ color: cinematic ? (isDesktop ? GOLD : "rgba(192,132,252,0.9)") : (isDesktop ? "rgba(212,175,55,0.65)" : "rgba(192,132,252,0.5)"), background: cinematic ? (isDesktop ? "rgba(212,175,55,0.08)" : "rgba(138,43,226,0.08)") : "transparent" }} title="Cinematic View" aria-label="Cinematic view"><Maximize2 size={14} /></button>
@@ -1070,6 +1067,10 @@ function GlobalPlayerInner() {
             {/* Collapse button: EXPANDED → MINI (FLOAT zone removed) */}
             <button onClick={e => { e.stopPropagation(); setZone(z => z === "EXPANDED" ? "MINI" : "EXPANDED"); setDragHeight(null); }} className="p-1.5 transition-colors" style={{ color: isDesktop ? GOLD : "rgba(192,132,252,0.8)", filter: isDesktop ? `drop-shadow(0 0 6px rgba(212,175,55,0.5))` : `drop-shadow(0 0 6px rgba(138,43,226,0.5))` }} title={isExpanded ? "Collapse" : "Expand player"} aria-label={isExpanded ? "Collapse player" : "Expand player"} aria-expanded={isExpanded}>
               {isExpanded ? <ChevronDown size={15} /> : <ChevronUp size={15} />}
+            </button>
+            {/* Keep volume distal from the central transport cluster. */}
+            <button ref={volumeBtnRef} onClick={e => { e.stopPropagation(); openVolumePopup(); }} className="p-1.5 transition-colors" style={{ color: state.isMuted ? "rgba(212,175,55,0.3)" : "rgba(212,175,55,0.65)" }} aria-label={state.isMuted ? "Volume: muted" : "Volume"} aria-pressed={state.isMuted}>
+              {state.isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
             </button>
           </div>
         </div>
@@ -1224,17 +1225,14 @@ function GlobalPlayerInner() {
               </>
             )}
 
-            {/* ── Inline volume slider — mobile only, spec section 6 ── */}
+            {/* ── Inline volume slider — mobile only; one distal mute control ── */}
             {!isDesktop && (
               <div className="flex items-center gap-3 px-2">
-                <button onClick={e => { e.stopPropagation(); toggleMute(); }} style={{ color: state.isMuted ? "rgba(192,132,252,0.25)" : "rgba(192,132,252,0.6)", flexShrink: 0 }}>
-                  {state.isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
-                </button>
-                <div className="flex-1 relative" style={{ height: "6px" }}>
+                <div className="flex-1 relative" style={{ height: "40px" }}>
                   {/* Track background */}
-                  <div className="absolute inset-0 rounded-full" style={{ background: "rgba(138,43,226,0.15)" }} />
+                  <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-[6px] rounded-full" style={{ background: "rgba(138,43,226,0.15)" }} />
                   {/* Filled portion */}
-                  <div className="absolute left-0 top-0 h-full rounded-full" style={{ width: `${state.isMuted ? 0 : state.volume * 100}%`, background: "linear-gradient(90deg, rgba(138,43,226,0.85) 0%, rgba(192,132,252,0.8) 60%, rgba(212,175,55,0.75) 100%)" }} />
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 h-[6px] rounded-full" style={{ width: `${state.isMuted ? 0 : state.volume * 100}%`, background: "linear-gradient(90deg, rgba(138,43,226,0.85) 0%, rgba(192,132,252,0.8) 60%, rgba(212,175,55,0.75) 100%)" }} />
                   {/* Diamond knob */}
                   <div
                     className="absolute top-1/2"
@@ -1250,14 +1248,14 @@ function GlobalPlayerInner() {
                   {/* Invisible range input for interaction */}
                   <input
                     type="range" min={0} max={1} step={0.01}
+                    aria-label="Volume"
                     value={state.isMuted ? 0 : state.volume}
                     onChange={e => { e.stopPropagation(); setVolume(parseFloat(e.target.value)); }}
-                    className="absolute inset-0 w-full opacity-0 cursor-pointer"
-                    style={{ height: "100%" }}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                   />
                 </div>
-                <button onClick={e => { e.stopPropagation(); toggleMute(); }} style={{ color: state.isMuted ? "rgba(192,132,252,0.25)" : "rgba(192,132,252,0.6)", flexShrink: 0 }}>
-                  <Volume2 size={16} />
+                <button onClick={e => { e.stopPropagation(); toggleMute(); }} className="w-10 h-10 flex items-center justify-center" style={{ color: state.isMuted ? "rgba(192,132,252,0.25)" : "rgba(192,132,252,0.6)", flexShrink: 0 }} aria-label={state.isMuted ? "Unmute" : "Mute"} aria-pressed={state.isMuted}>
+                  {state.isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
                 </button>
               </div>
             )}
