@@ -25,9 +25,11 @@ function StatusMark({ value }: { value: string }) {
 export default function CoreIngestionReviewPage() {
   const [commissionId, setCommissionId] = useState("");
   const [submittedCommissionId, setSubmittedCommissionId] = useState("");
+  const [selectedAssetId, setSelectedAssetId] = useState<number | null>(null);
   const [confirmation, setConfirmation] = useState<{ id: string; token: string; expiresAt: Date | string } | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const utils = trpc.useUtils();
+  const ownedAssetsQuery = trpc.coreIngestion.listOwnedAudioAssets.useQuery({ limit: 24 });
   const isValidCommissionId = UUID_PATTERN.test(submittedCommissionId);
   const commissionQuery = trpc.coreIngestion.get.useQuery(
     { commissionId: submittedCommissionId },
@@ -59,12 +61,24 @@ export default function CoreIngestionReviewPage() {
       await utils.coreIngestion.get.invalidate({ commissionId: submittedCommissionId });
     },
   });
+  const startFromAsset = trpc.coreIngestion.startFromOwnedAudioAsset.useMutation({
+    onSuccess: async (result) => {
+      setSubmittedCommissionId(result.commissionId);
+      setCommissionId(result.commissionId);
+      setConfirmation(null);
+      setNotice("Commission queued. Deterministic inspection will begin only after the separately approved worker schedule is activated.");
+      await Promise.all([
+        utils.coreIngestion.get.invalidate({ commissionId: result.commissionId }),
+        utils.coreIngestion.list.invalidate(),
+      ]);
+    },
+  });
 
   const detail = commissionQuery.data;
   const proposal = detail?.proposals[0] ?? null;
   const receipt = detail?.receipts[0] ?? null;
   const technicalFacts = useMemo(() => receipt?.measuredFacts ?? null, [receipt]);
-  const actionBusy = offerProposal.isPending || issueConfirmation.isPending || confirmDraft.isPending || dismissProposal.isPending;
+  const actionBusy = startFromAsset.isPending || offerProposal.isPending || issueConfirmation.isPending || confirmDraft.isPending || dismissProposal.isPending;
 
   function loadCommission(event: FormEvent) {
     event.preventDefault();
@@ -73,7 +87,18 @@ export default function CoreIngestionReviewPage() {
     setSubmittedCommissionId(commissionId.trim());
   }
 
-  const actionError = offerProposal.error ?? issueConfirmation.error ?? confirmDraft.error ?? dismissProposal.error;
+  function beginCommissionFromAsset() {
+    if (!selectedAssetId) return;
+    setConfirmation(null);
+    setNotice(null);
+    startFromAsset.mutate({
+      sourceSongId: selectedAssetId,
+      requestedOutcome: "private_draft",
+      idempotencyKey: crypto.randomUUID(),
+    });
+  }
+
+  const actionError = startFromAsset.error ?? offerProposal.error ?? issueConfirmation.error ?? confirmDraft.error ?? dismissProposal.error;
 
   return (
     <main className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6 lg:py-14" aria-labelledby="ingestion-review-title">
@@ -84,6 +109,27 @@ export default function CoreIngestionReviewPage() {
           Review a storage-verified technical receipt, then decide whether to create a private Commission Draft. This does not register a Work, issue a Witness ID, publish, or provide AI context.
         </p>
       </div>
+
+      <section className="museum-card mb-6 p-5 sm:p-6" aria-labelledby="begin-commission-title">
+        <p className="text-xs tracking-[0.20em] uppercase" style={{ color: "rgba(196,154,40,0.62)", fontFamily: "var(--font-display)" }}>Step 1 · private preparation</p>
+        <h2 id="begin-commission-title" className="mt-2 text-[length:var(--text-h4)]" style={{ color: "var(--ln-parchment)", fontFamily: "var(--font-editorial)" }}>Start from your existing audio</h2>
+        <p className="mt-2 max-w-2xl text-sm leading-relaxed" style={{ color: "var(--ln-bone)" }}>
+          Select an audio asset already owned in your Creator Domain. Living Nexus will queue a private deterministic inspection of the asset only. It will not alter that Work, create a new Work, issue a WID, publish, or grant AI context.
+        </p>
+        {ownedAssetsQuery.isLoading ? <p className="mt-4 text-sm" style={{ color: "var(--ln-smoke)" }}>Finding your owned audio assets…</p> : ownedAssetsQuery.error ? <p className="mt-4 text-sm" role="alert" style={{ color: "var(--ln-gold-hot)" }}>{ownedAssetsQuery.error.message}</p> : !ownedAssetsQuery.data?.length ? <p className="mt-4 text-sm" style={{ color: "var(--ln-smoke)" }}>No eligible owned audio asset is available yet. Upload audio through the existing Register flow first; this screen will never upload or mutate it for you.</p> : <>
+          <fieldset className="mt-4 space-y-2" aria-label="Owned audio assets">
+            {ownedAssetsQuery.data.map((asset) => {
+              const selected = selectedAssetId === asset.sourceSongId;
+              return <label key={asset.sourceSongId} className="flex cursor-pointer items-start gap-3 rounded-md border p-3 transition-colors" style={{ borderColor: selected ? "var(--ln-gold)" : "rgba(196,154,40,0.18)", background: selected ? "rgba(196,154,40,0.07)" : "rgba(0,0,0,0.12)" }}>
+                <input type="radio" name="owned-audio-asset" value={asset.sourceSongId} checked={selected} onChange={() => setSelectedAssetId(asset.sourceSongId)} className="mt-1 accent-[var(--ln-gold)]" />
+                <span className="min-w-0 flex-1"><span className="block truncate text-sm" style={{ color: "var(--ln-parchment)" }}>{asset.title}</span><span className="mt-1 block text-xs" style={{ color: "var(--ln-smoke)" }}>{asset.status} · {asset.durationSeconds ? `${Math.round(asset.durationSeconds)} seconds` : "duration pending"} · added {displayDate(asset.createdAt)}</span></span>
+              </label>;
+            })}
+          </fieldset>
+          <button type="button" onClick={beginCommissionFromAsset} disabled={!selectedAssetId || actionBusy} className="mt-4 rounded-md border px-4 py-2 text-sm tracking-[0.12em] uppercase disabled:opacity-50" style={{ borderColor: "var(--ln-gold)", color: "var(--ln-gold)", fontFamily: "var(--font-display)" }}>Queue private inspection</button>
+          <p className="mt-3 text-xs leading-relaxed" style={{ color: "var(--ln-smoke)" }}>The worker schedule is intentionally inactive. You can select and queue an asset now; processing requires the separate activation decision and deployment verification.</p>
+        </>}
+      </section>
 
       <section className="museum-card p-5 sm:p-6" aria-labelledby="commission-lookup-title">
         <h2 id="commission-lookup-title" className="text-[length:var(--text-h4)]" style={{ color: "var(--ln-parchment)", fontFamily: "var(--font-editorial)" }}>Open a Commission</h2>

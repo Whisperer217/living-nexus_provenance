@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-09-12T23:34:00.000Z",
-  "totalLessons": 24,
+  "lastUpdated": "2026-09-13T00:42:00.000Z",
+  "totalLessons": 25,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -565,6 +565,31 @@
         "no-canonical-work",
         "no-wid-change",
         "no-provider",
+        "authority-boundary"
+      ]
+    },
+    {
+      "id": "LESSON-026",
+      "date": "2026-09-13",
+      "category": "creator-experience",
+      "problem": "A technically correct creator-private Commission API is not usable when it requires a creator to know an opaque Commission identifier before selecting the audio they already own. Directly reusing a Work asset also risks silently mutating or reclassifying the canonical Work that stores it.",
+      "solution": "Expose a creator-private selector that reads only the authenticated creator’s persisted audio rows with valid `audio/{creatorId}/` keys, then starts and attaches an I1 Commission through the existing idempotent boundaries. The source Work remains untouched. The interface labels the action as private preparation and states that no Work, WID, publication, or AI context changes. Queue processing stays separate: a scheduler plan requires a task-UID-bound configuration, deployed callback verification, explicit cadence choice, safe no-op pause, and a separate operational authorization before any schedule exists.",
+      "files": [
+        "server/services/coreIngestion.ts",
+        "server/routers/coreIngestion.ts",
+        "client/src/pages/CoreIngestionReviewPage.tsx",
+        "server/tests/coreIngestionUsabilityBridge.test.ts",
+        "docs/lnls/operations/CORE-INGESTION-SCHEDULER-ACTIVATION-PLAN.md"
+      ],
+      "score": 0,
+      "tags": [
+        "core-ingestion",
+        "creator-experience",
+        "asset-selection",
+        "owner-scope",
+        "existing-upload",
+        "no-canonical-mutation",
+        "scheduler-plan",
         "authority-boundary"
       ]
     }

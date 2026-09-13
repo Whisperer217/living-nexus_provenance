@@ -15,6 +15,7 @@ import {
   coreIngestionInspectionReceipts,
   coreIngestionJobs,
   coreIngestionPrivateDrafts,
+  songs,
 } from "../../drizzle/schema";
 import { storageGet } from "../utils/storage";
 import { getDb } from "../utils/db";
@@ -28,6 +29,15 @@ const CORE_INGESTION_PROPOSAL_TTL_MS = 24 * 60 * 60 * 1000;
 const CORE_INGESTION_CONFIRMATION_TTL_MS = 15 * 60 * 1000;
 
 type RequestedOutcome = "private_draft" | "registration_review";
+
+export type CoreIngestionOwnedAudioAsset = {
+  sourceSongId: number;
+  title: string;
+  durationSeconds: number | null;
+  status: string;
+  assetHashHint: string | null;
+  createdAt: Date;
+};
 
 class IngestionFailure extends Error {
   constructor(
@@ -148,6 +158,95 @@ export async function startCoreIngestionCommission(
 
   const commission = await getOwnedCommission(db, creatorId, commissionId);
   return { ...toPublicCommission(commission), idempotent: false };
+}
+
+/**
+ * A creator-private projection of already-owned audio assets. This reads only
+ * the minimal source-selection fields; it does not alter the canonical Work,
+ * status, WID, provenance, visibility, AI permission, or upload record.
+ */
+export async function listOwnedCoreIngestionAudioAssets(creatorId: number, limit = 30): Promise<CoreIngestionOwnedAudioAsset[]> {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  const rows = await db.select({
+    sourceSongId: songs.id,
+    title: songs.title,
+    fileKey: songs.fileKey,
+    fileHash: songs.fileHash,
+    durationSeconds: songs.durationSeconds,
+    status: songs.status,
+    createdAt: songs.createdAt,
+  }).from(songs).where(and(
+    eq(songs.userId, creatorId),
+    eq(songs.contentType, "audio"),
+  )).orderBy(desc(songs.createdAt)).limit(Math.min(Math.max(limit, 1), 50));
+
+  const candidates = rows as Array<{
+    sourceSongId: number;
+    title: string;
+    fileKey: string | null;
+    fileHash: string | null;
+    durationSeconds: number | null;
+    status: string;
+    createdAt: Date;
+  }>;
+  return candidates.filter((row) => Boolean(row.fileKey) && row.fileKey!.startsWith(`audio/${creatorId}/`)).map((row) => ({
+    sourceSongId: row.sourceSongId,
+    title: row.title,
+    durationSeconds: row.durationSeconds,
+    status: row.status,
+    assetHashHint: row.fileHash ?? null,
+    createdAt: row.createdAt,
+  }));
+}
+
+async function getOwnedCoreIngestionAudioAsset(db: any, creatorId: number, sourceSongId: number) {
+  const rows = await db.select({
+    sourceSongId: songs.id,
+    fileKey: songs.fileKey,
+    title: songs.title,
+  }).from(songs).where(and(
+    eq(songs.id, sourceSongId),
+    eq(songs.userId, creatorId),
+    eq(songs.contentType, "audio"),
+  )).limit(1);
+  const asset = rows[0];
+  if (!asset || !asset.fileKey || !asset.fileKey.startsWith(`audio/${creatorId}/`)) {
+    throw new TRPCError({ code: "NOT_FOUND", message: "Owned audio asset not found for this Creator Domain." });
+  }
+  return asset;
+}
+
+/**
+ * Starts a Commission and attaches exactly one pre-existing, creator-owned
+ * audio source. It never writes to the source Work; source selection is only
+ * a convenience bridge into I1's existing storage-key inspection boundary.
+ */
+export async function startCoreIngestionFromOwnedAudioAsset(
+  creatorId: number,
+  input: { sourceSongId: number; requestedOutcome: RequestedOutcome; idempotencyKey: string },
+) {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  const asset = await getOwnedCoreIngestionAudioAsset(db, creatorId, input.sourceSongId);
+  const commission = await startCoreIngestionCommission(creatorId, {
+    requestedOutcome: input.requestedOutcome,
+    idempotencyKey: input.idempotencyKey,
+  });
+  if (commission.assetStorageKey) {
+    if (commission.assetStorageKey !== asset.fileKey) {
+      throw new TRPCError({
+        code: "CONFLICT",
+        message: "This idempotency key already belongs to a Commission with a different selected audio asset.",
+      });
+    }
+    return { commissionId: commission.commissionId, status: commission.status, idempotent: true };
+  }
+  const attachment = await attachCoreIngestionAsset(creatorId, {
+    commissionId: commission.commissionId,
+    storageKey: asset.fileKey,
+  });
+  return { commissionId: attachment.commissionId, status: attachment.status, idempotent: commission.idempotent };
 }
 
 export async function attachCoreIngestionAsset(

@@ -8,8 +8,10 @@ import {
   getCoreIngestionCommission,
   issueCoreIngestionDraftConfirmation,
   listCoreIngestionCommissions,
+  listOwnedCoreIngestionAudioAssets,
   offerCoreIngestionDraftProposal,
   startCoreIngestionCommission,
+  startCoreIngestionFromOwnedAudioAsset,
 } from "../services/coreIngestion";
 
 const commissionId = z.string().uuid();
@@ -26,6 +28,16 @@ export const coreIngestionRouter = router({
       idempotencyKey: z.string().trim().min(12).max(128),
     }))
     .mutation(({ ctx, input }) => startCoreIngestionCommission(ctx.user.id, input)),
+  listOwnedAudioAssets: protectedProcedure
+    .input(z.object({ limit: z.number().int().min(1).max(50).optional() }).optional())
+    .query(({ ctx, input }) => listOwnedCoreIngestionAudioAssets(ctx.user.id, input?.limit)),
+  startFromOwnedAudioAsset: protectedProcedure
+    .input(z.object({
+      sourceSongId: z.number().int().positive(),
+      requestedOutcome: z.enum(["private_draft", "registration_review"]).default("private_draft"),
+      idempotencyKey: z.string().trim().min(12).max(128),
+    }))
+    .mutation(({ ctx, input }) => startCoreIngestionFromOwnedAudioAsset(ctx.user.id, input)),
   attachAsset: protectedProcedure
     .input(z.object({
       commissionId,
