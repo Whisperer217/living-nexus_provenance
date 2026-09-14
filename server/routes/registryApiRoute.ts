@@ -169,10 +169,22 @@ registryApiRouter.get(`${BASE_PATH}/works/:wid`, requireRegistryScopes(["registr
 });
 
 registryApiRouter.get(`${BASE_PATH}/works/:wid/provenance`, requireRegistryScopes(["registry:provenance:read"], "optional"), async (req: RegistryRequest, res) => {
-  const provenance = await getPublicRegistryProvenance(req.params.wid);
-  if (!provenance) return respond(req, res, 404, null, { error: { code: "NOT_FOUND", message: "Public Registry provenance not found." } });
-  if (req.registry?.principal) await audit(req, "ACCESS_ALLOWED", "ALLOW", "public_provenance_read", 200);
-  return respond(req, res, 200, provenance, { provenanceRefs: [`https://www.livingnexus.org/verify/${provenance.wid}`] });
+  try {
+    const provenance = await getPublicRegistryProvenance(req.params.wid);
+    if (!provenance) return respond(req, res, 404, null, { error: { code: "NOT_FOUND", message: "Public Registry provenance not found." } });
+    if (req.registry?.principal) await audit(req, "ACCESS_ALLOWED", "ALLOW", "public_provenance_read", 200);
+    return respond(req, res, 200, provenance, { provenanceRefs: [`https://www.livingnexus.org/verify/${provenance.wid}`] });
+  } catch {
+    // Do not misrepresent a Registry read-model outage as missing provenance,
+    // leak the underlying schema error, or permit an unhandled route rejection.
+    console.error("[Registry API] Public provenance read is unavailable.");
+    return respond(req, res, 503, null, {
+      error: {
+        code: "REGISTRY_READ_UNAVAILABLE",
+        message: "Public Registry provenance is temporarily unavailable.",
+      },
+    });
+  }
 });
 
 registryApiRouter.get(`${BASE_PATH}/works/:wid/permissions`, requireRegistryScopes(["registry:permissions:read"]), async (req: RegistryRequest, res) => {

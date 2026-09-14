@@ -79,6 +79,10 @@ import {
   getPublicationReadinessMissing,
   publicationReadinessError,
 } from "../domains/work/publicationReadiness";
+import {
+  classifyPublicWitnessCandidates,
+  type PublicWitnessProjection,
+} from "../domains/registry/publicWitnessProjection";
 export type { SearchResults } from "../../shared/searchTypes";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -727,6 +731,42 @@ export async function getSongByWitnessId(witnessId: string) {
     .where(eq(songs.witnessId, witnessId))
     .limit(1);
   return result.length > 0 ? result[0] : undefined;
+}
+
+type PublicWitnessSongRecord = NonNullable<Awaited<ReturnType<typeof getSongByWitnessId>>>;
+
+/**
+ * Public WID projection only. Historical, private, deleted, and unlisted rows
+ * are excluded before candidate selection. Multiple public candidates are
+ * reported as ambiguity rather than silently choosing a Work owner.
+ */
+export async function getPublicSongByWitnessId(
+  witnessId: string
+): Promise<PublicWitnessProjection<PublicWitnessSongRecord>> {
+  const db = await getDb();
+  if (!db) throw new Error("Registry database unavailable");
+
+  const candidates = await db
+    .select({
+      song: songs,
+      creator: {
+        id: users.id,
+        name: users.name,
+        artistHandle: users.artistHandle,
+        profilePhotoUrl: users.profilePhotoUrl,
+      },
+    })
+    .from(songs)
+    .leftJoin(users, eq(songs.userId, users.id))
+    .where(and(
+      eq(songs.witnessId, witnessId.trim().toUpperCase()),
+      eq(songs.status, "Published"),
+      eq(songs.isPublic, true),
+    ))
+    .orderBy(asc(songs.createdAt), asc(songs.id))
+    .limit(2);
+
+  return classifyPublicWitnessCandidates(candidates);
 }
 
 export async function updateSongMetadata(

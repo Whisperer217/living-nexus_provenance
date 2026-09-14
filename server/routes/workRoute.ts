@@ -15,7 +15,7 @@
  */
 
 import { Router } from "express";
-import { getSongByWitnessId } from "../utils/db";
+import { getPublicSongByWitnessId } from "../utils/db";
 
 export const workRouter = Router();
 
@@ -32,26 +32,26 @@ workRouter.get("/:wid", async (req, res) => {
   }
 
   try {
-    const record = await getSongByWitnessId(wid.trim());
+    const selection = await getPublicSongByWitnessId(wid.trim());
 
-    if (!record) {
+    if (selection.state === "not_found") {
       return res.status(404).json({
         error: "Not Found",
-        message: `No work registered under WID: ${wid}`,
+        message: "No publicly accessible Work is registered under this WID.",
         protocol: "WID/1.0",
       });
     }
 
-    const { song, creator } = record;
-
-    // Only serve publicly visible works
-    if (song.status === "Deleted" || (!song.isPublic && song.status !== "Published")) {
-      return res.status(404).json({
-        error: "Not Found",
-        message: `Work is not publicly accessible.`,
+    if (selection.state === "ambiguous") {
+      return res.status(409).json({
+        error: "Conflict",
+        code: "WID_AMBIGUOUS",
+        message: "This WID currently has multiple public Work projections and requires Registry adjudication.",
         protocol: "WID/1.0",
       });
     }
+
+    const { song, creator } = selection.record;
 
     const artistName = creator?.artistHandle || creator?.name || "Unknown Artist";
     const creatorProfileUrl = creator?.id
