@@ -65,6 +65,8 @@ Before source or schema changes, run only bounded aggregate checks. Confirm the 
 | `fileHash` completeness | Aggregate only. | Project absent hash as absent; no backfill. |
 | Event linkage evidence | Aggregate on independently stored key only. | Do not derive event ID from content/title/creator. |
 
+**C0.1 result (2026-09-14):** the deployed `wids` and `provenanceEvents` tables are both empty. All 702 public-published Works have a non-empty `songs.witnessId`, but zero values join to `wids.widCode`. Consequently, timestamp units, anchor file-hash completeness, and provenance-link values cannot be established from this environment. **C0 compatibility implementation is held:** it cannot return any Registry provenance fact without inventing it. The typed unavailable response remains correct. [6]
+
 ### Gate C0.2 — Source-only compatibility implementation
 
 Subject to a separate explicit authorization, add an isolated `legacyWidAnchorReadService` or equivalent local adapter. The Registry provenance projection should return a controlled fact set:
@@ -131,3 +133,4 @@ The next permitted action is a choice between:
 [3]: `REGISTRY-INTEGRITY-DIAGNOSTIC-2026-09-14.md` — prior preservation-first diagnostic and anomaly classification.
 [4]: `drizzle/meta/*_snapshot.json`, `drizzle/migrations/` — managed migration lineage inventory and no-match inspection for a tracked `wids` DDL declaration, 2026-09-14.
 [5]: `server/routers/wids.ts` and `server/registry/readService.ts` — current writer and reader dependency inspection, 2026-09-14.
+[6]: `REGISTRY-C0-1-COMPATIBILITY-PREFLIGHT-2026-09-14.md` — C0.1 aggregate evidence and hold decision.
