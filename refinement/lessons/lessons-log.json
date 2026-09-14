@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-09-14T00:36:00.000Z",
-  "totalLessons": 31,
+  "lastUpdated": "2026-09-14T15:25:00.000Z",
+  "totalLessons": 32,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -714,6 +714,31 @@
         "mutation-order",
         "accessibility",
         "ux-reliability"
+      ]
+    },
+    {
+      "id": "LESSON-032",
+      "date": "2026-09-14",
+      "category": "prototype-integrity",
+      "problem": "A visually compelling spatial prototype can still imply production authority when browser-local interactions simulate WID issuance, registration, witness records, playback/progress, AI context, creator identity, or asset generation. Committing large prototype media under application source also violates managed static-asset custody and deployment discipline.",
+      "solution": "Retain the spatial-language principle while separating representation from authority. The current-source study uses neutral illustrative nodes, local orientation state only, semantic CSS/SVG geometry, and explicit no-read/no-write language. It contains no tRPC/auth/player/provider/Registry/PNA dependency, no audio/timer/file APIs, no WID-shaped fixture, no mock ceremony, no source-tree media, and gates all nonessential movement under reduced-motion preference. A real production projection requires its own Core/Registry read contract and canonical-player delegation approval.",
+      "files": [
+        "client/src/lib/spatialRegistryMock.ts",
+        "client/src/pages/SpatialRegistryMockPage.tsx",
+        "client/src/pages/spatial-registry-mock.css",
+        "server/tests/spatialRegistryMock.contract.test.ts",
+        "docs/lnls/architecture/SPATIAL-REGISTRY-VISUAL-STUDY-CONTRACT.md"
+      ],
+      "score": 0,
+      "tags": [
+        "spatial-registry",
+        "noncanonical-study",
+        "authority-boundary",
+        "player-isolation",
+        "registry-integrity",
+        "asset-custody",
+        "reduced-motion",
+        "accessibility"
       ]
     }
   ]

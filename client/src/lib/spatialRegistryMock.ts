@@ -1,102 +1,84 @@
 export type SpatialRegistryNodeId =
-  | "profile"
+  | "creator"
   | "work"
-  | "edit"
+  | "prepare"
   | "register"
-  | "witness"
+  | "verify"
   | "lineage"
-  | "player";
+  | "listen";
 
 export type SpatialRegistryNode = {
   id: SpatialRegistryNodeId;
   label: string;
   eyebrow: string;
-  position: [number, number, number];
-  color: string;
   description: string;
+  position: { x: number; y: number };
 };
 
-export const SPATIAL_REGISTRY_MOCK = {
-  creator: {
-    name: "Jake",
-    artistName: "Weave & Breathe",
-    registeredWorks: 1,
-    registrationCapacity: 10,
-    witnessActivity: 1,
-  },
-  work: {
-    title: "Yahweh Lights My Way",
-    artist: "Weave & Breathe",
-    version: "01",
-    wid: "LN-00017",
-    status: "Registered",
-    registrationDate: "2026-08-15",
-    duration: "04:12",
-  },
+/**
+ * An intentionally noncanonical orientation map. It holds no creator, Work,
+ * WID, player, Registry, or provider state and must remain presentation-only.
+ */
+export const SPATIAL_REGISTRY_STUDY = {
+  label: "Illustrative spatial study",
+  disclaimer: "No creator, Work, WID, player, Registry, or AI context is read or created here.",
   nodes: [
     {
-      id: "profile",
-      label: "PROFILE",
-      eyebrow: "Creator identity",
-      position: [-4.8, 1.5, -1.8],
-      color: "#9480d8",
-      description: "Jake / Weave & Breathe — the attributed creator domain.",
+      id: "creator",
+      label: "CREATOR",
+      eyebrow: "A distinct domain",
+      description: "A creator’s identity belongs to the creator. A future visual surface may only display a governed Core projection.",
+      position: { x: 20, y: 31 },
     },
     {
       id: "work",
-      label: "YAHWEH LIGHTS MY WAY",
-      eyebrow: "Central work",
-      position: [0, 0.7, 0],
-      color: "#d6ad4a",
-      description: "Version 01. The work is the central object of this fictional registry.",
+      label: "WORK",
+      eyebrow: "The orienting object",
+      description: "A creative object is not assumed to be registered, public, playable, or available to AI. This study draws no conclusion about any actual Work.",
+      position: { x: 50, y: 46 },
     },
     {
-      id: "edit",
-      label: "EDIT",
-      eyebrow: "Working version",
-      position: [-2.8, -2.7, 1.4],
-      color: "#6e9fc6",
-      description: "A deliberate version step before registration.",
+      id: "prepare",
+      label: "PREPARE",
+      eyebrow: "Creator-held details",
+      description: "Preparation is a private, creator-directed act. It can lead to a governed Register flow, but it neither issues a record nor changes a Work here.",
+      position: { x: 28, y: 73 },
     },
     {
       id: "register",
       label: "REGISTER",
-      eyebrow: "Provenance event",
-      position: [3.5, 2.3, -0.8],
-      color: "#d6ad4a",
-      description: "A durable registration event shown only in this mock.",
+      eyebrow: "A governed pathway",
+      description: "Registration is a separate consequential process. It occurs only in the canonical flow after deliberate creator confirmation, never from this visual study.",
+      position: { x: 76, y: 30 },
     },
     {
-      id: "witness",
-      label: "WITNESS",
-      eyebrow: "Attestation",
-      position: [4.7, -1.7, 1.1],
-      color: "#a4714f",
-      description: "A witness is an attestation of a registration event.",
+      id: "verify",
+      label: "VERIFY",
+      eyebrow: "Read an existing proof",
+      description: "Verification can read an existing proof through a governed surface. A typed label or a visual node is not proof and does not establish a seal.",
+      position: { x: 80, y: 68 },
     },
     {
       id: "lineage",
       label: "LINEAGE",
-      eyebrow: "Visible relation",
-      position: [0.8, 3.8, 1.1],
-      color: "#dfc57e",
-      description: "Creator → Edit → Register → Witness made inspectable in space.",
+      eyebrow: "Declared relations only",
+      description: "Lineage is shown only when declared records establish a relation. It is not inferred from appearance, listening, a filename, or a client-side graph.",
+      position: { x: 49, y: 14 },
     },
     {
-      id: "player",
-      label: "PLAYER",
-      eyebrow: "Canonical playback",
-      position: [-4.4, -1.5, -1.1],
-      color: "#d4ded3",
-      description: "One canonical player stays present while the registry is explored.",
+      id: "listen",
+      label: "LISTEN",
+      eyebrow: "One canonical player",
+      description: "Listening belongs to the existing Living Nexus player when a real Work is deliberately selected. Playback never becomes AI context by itself.",
+      position: { x: 67, y: 82 },
     },
   ] satisfies SpatialRegistryNode[],
   edges: [
-    ["profile", "work"],
-    ["work", "edit"],
-    ["edit", "register"],
-    ["register", "witness"],
+    ["creator", "work"],
+    ["work", "prepare"],
+    ["prepare", "register"],
+    ["register", "verify"],
     ["work", "lineage"],
-    ["work", "player"],
+    ["work", "listen"],
   ] satisfies [SpatialRegistryNodeId, SpatialRegistryNodeId][],
 } as const;
