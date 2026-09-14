@@ -70,6 +70,10 @@ import {
   trackDownloadGrants,
 } from "../../drizzle/schema";
 import { ENV } from "../_core/env";
+import {
+  serializeOnboardingProgressPatch,
+  type OnboardingProgressPatch,
+} from "../domains/onboarding/progressSerialization";
 import type { SearchResults } from "../../shared/searchTypes";
 import {
   getPublicationReadinessMissing,
@@ -5555,15 +5559,16 @@ export async function getOnboardingProgress(userId: number): Promise<OnboardingP
 
 export async function upsertOnboardingProgress(
   userId: number,
-  patch: Partial<Omit<InsertOnboardingProgress, 'id' | 'userId' | 'startedAt'>>
+  patch: OnboardingProgressPatch,
 ): Promise<OnboardingProgress | null> {
   const db = await getDb();
   if (!db) throw new Error("Database unavailable");
   const existing = await getOnboardingProgress(userId);
+  const persistencePatch = serializeOnboardingProgressPatch(patch);
   if (!existing) {
-    await db.insert(onboardingProgress).values({ userId, ...patch });
+    await db.insert(onboardingProgress).values({ userId, ...persistencePatch });
   } else {
-    await db.update(onboardingProgress).set(patch).where(eq(onboardingProgress.userId, userId));
+    await db.update(onboardingProgress).set(persistencePatch).where(eq(onboardingProgress.userId, userId));
   }
   return getOnboardingProgress(userId);
 }

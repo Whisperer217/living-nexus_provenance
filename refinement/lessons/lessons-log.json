@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-09-13T23:56:00.000Z",
-  "totalLessons": 29,
+  "lastUpdated": "2026-09-14T00:25:00.000Z",
+  "totalLessons": 30,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -669,6 +669,28 @@
         "cinematic-preservation",
         "responsive-validation",
         "no-functional-change"
+      ]
+    },
+    {
+      "id": "LESSON-030",
+      "date": "2026-09-14",
+      "category": "data-integrity",
+      "problem": "The onboarding router passed `completedSteps` as a JavaScript array into an `onboardingProgress.completedSteps` schema column intentionally defined as text. Drizzle/MySQL expanded that array into multiple SQL values during an update, causing TiDB syntax failure and preventing authenticated onboarding progress from saving.",
+      "solution": "Keep the UI and router contract ergonomic (`string[]`), but normalize at the database boundary. `serializeOnboardingProgressPatch` converts arrays into one JSON text scalar before every insert or update, while preserving already-serialized text, null, and unrelated fields. This protects both creation and update paths without changing creator profile data, onboarding step semantics, Works, WIDs, provenance, player behavior, or Nexus boundaries.",
+      "files": [
+        "server/domains/onboarding/progressSerialization.ts",
+        "server/utils/db.ts",
+        "server/tests/onboardingProgressSerialization.test.ts"
+      ],
+      "score": 0,
+      "tags": [
+        "onboarding",
+        "tidb",
+        "drizzle",
+        "serialization",
+        "data-integrity",
+        "regression-test",
+        "no-creator-mutation"
       ]
     }
   ]
