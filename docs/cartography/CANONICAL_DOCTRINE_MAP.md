@@ -7,8 +7,8 @@
 | Tier | Doctrine family | Primary source | Status | Distinct responsibility |
 |---|---|---|---|---|
 | 1 | Mission and Prime Directive | `ARCHITECTURE.md` §§Purpose–Prime Directive | Reference architecture | Preserve, attribute, discover, and support human creative contribution. |
-| 1 | Architectural Laws | `ARCHITECTURAL_LAWS.md` Laws I–VI | Canonical doctrine | Domain identity, domain supremacy, explicit declaration, Chain immutability, and Creator Domain primacy. |
-| 1 | Loop Product Law | `docs/LOOP_PRODUCT_SPEC.md` | Solid implementation authority | Music-first public spine, non-destructive retention, and PNA/Guide insulation. |
+| 1 | Architectural Laws | `ARCHITECTURAL_LAWS.md` Laws I–VII | Canonical doctrine | Domain identity, domain supremacy, explicit declaration, Chain immutability, Creator Domain primacy, and intentional representation. |
+| 1 | Intentional Interface | `docs/INTENTIONAL_INTERFACE_DOCTRINE.md` · Law VII | Canonical design law | Nothing decorative. Spatial and conventional controls must communicate the life of a registered work. |
 | 1 | Authorized Agent Doctrine | `docs/AUTHORIZED_AGENT_DOCTRINE.md` | Solid implementation authority | Creator-scoped authority, replaceable agents, Commission, capability, and ledger law. |
 | 2 | LNLS language and ontology | `docs/lnls/README.md` and children | Canonical vocabulary/reference | Keeps the platform’s language from collapsing domain identity into software jargon. |
 | 2 | Public policy surfaces | `TermsPage.tsx`, `PrivacyPage.tsx`, `AttributionPage.tsx` | Public policy/claim surfaces | State current user-facing promises and limitations. They require claim-boundary review. |
@@ -54,6 +54,7 @@ The Architectural Laws explicitly subordinate software ontology to domain ontolo
 
 - `ARCHITECTURE.md`
 - `ARCHITECTURAL_LAWS.md`
+- `docs/INTENTIONAL_INTERFACE_DOCTRINE.md`
 - `docs/LOOP_PRODUCT_SPEC.md`
 - `docs/AUTHORIZED_AGENT_DOCTRINE.md`
 - `docs/lnls/README.md`

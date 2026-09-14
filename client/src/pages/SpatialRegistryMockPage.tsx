@@ -1,291 +1,802 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import * as THREE from "three";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+/**
+ * @domain   The Registry → Spatial Prototype → Living Nexus Engine Mock
+ * @impl     Page Component — Isolated visual prototype for the spatial registry experience
+ *
+ * Fictional data only. No production registry, auth, player, storage, or payments.
+ */
+
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import {
+  ChevronUp,
+  Crosshair,
+  ExternalLink,
+  Minus,
+  MousePointer2,
+  Move,
+  Pause,
+  Play,
+  Plus,
+} from "lucide-react";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { SpatialRegistryScene, type SpatialCeremony, type SpatialSceneHandle } from "@/components/spatial-registry/SpatialRegistryScene";
+import {
+  ARTIFACT_FORMS,
+  ASSET,
+  DEFAULT_COVER_ART,
   SPATIAL_REGISTRY_MOCK,
-  type SpatialRegistryNode,
+  SPATIAL_REGISTRY_NODES_BY_ID,
+  INTERACTION_DOCTRINE,
+  VISUAL_LANGUAGE,
+  isDeclarable,
+  isPlayable,
+  nextRegistrationWid,
+  type DropIntent,
+  type SpatialArtifact,
   type SpatialRegistryNodeId,
+  type SpatialView,
 } from "@/lib/spatialRegistryMock";
+import "./spatial-registry-mock.css";
 
-const nodesById = Object.fromEntries(
-  SPATIAL_REGISTRY_MOCK.nodes.map((node) => [node.id, node]),
-) as Record<SpatialRegistryNodeId, SpatialRegistryNode>;
+const { creator, work, attribution, versions, creatorStages, lineageSequence, derivedArtifacts, exploreArtifacts: initialArtifacts } = SPATIAL_REGISTRY_MOCK;
+const NAV: { id: "nexus" | "works" | "lineage" | "registry"; label: string; view: SpatialView }[] = [
+  { id: "nexus", label: "NEXUS", view: "overview" },
+  { id: "works", label: "WORKS", view: "explore" },
+  { id: "lineage", label: "LINEAGE", view: "lineage" },
+  { id: "registry", label: "REGISTRY", view: "register" },
+];
 
-function SpatialScene({
-  selectedNode,
-  witnessCount,
-  onSelect,
-}: {
-  selectedNode: SpatialRegistryNodeId;
-  witnessCount: number;
-  onSelect: (nodeId: SpatialRegistryNodeId) => void;
-}) {
-  const mountRef = useRef<HTMLDivElement>(null);
-  const selectedRef = useRef(selectedNode);
-  const witnessRef = useRef(witnessCount);
-  const onSelectRef = useRef(onSelect);
-
-  useEffect(() => {
-    selectedRef.current = selectedNode;
-    witnessRef.current = witnessCount;
-    onSelectRef.current = onSelect;
-  }, [selectedNode, witnessCount, onSelect]);
-
-  useEffect(() => {
-    const mount = mountRef.current;
-    if (!mount) return;
-
-    const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2("#060606", 0.075);
-    const camera = new THREE.PerspectiveCamera(48, 1, 0.1, 100);
-    camera.position.set(0, 0.9, 11.5);
-
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75));
-    renderer.outputColorSpace = THREE.SRGBColorSpace;
-    mount.appendChild(renderer.domElement);
-
-    const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.06;
-    controls.enablePan = true;
-    controls.minDistance = 7;
-    controls.maxDistance = 16;
-    controls.target.set(0, 0.3, 0);
-
-    const starsGeometry = new THREE.BufferGeometry();
-    const stars = new Float32Array(480 * 3);
-    for (let index = 0; index < 480; index += 1) {
-      stars[index * 3] = (Math.random() - 0.5) * 36;
-      stars[index * 3 + 1] = (Math.random() - 0.5) * 22;
-      stars[index * 3 + 2] = (Math.random() - 0.5) * 18;
-    }
-    starsGeometry.setAttribute("position", new THREE.BufferAttribute(stars, 3));
-    scene.add(new THREE.Points(starsGeometry, new THREE.PointsMaterial({ color: "#dfc57e", size: 0.028, transparent: true, opacity: 0.65 })));
-
-    const registryGroup = new THREE.Group();
-    registryGroup.rotation.x = -0.12;
-    scene.add(registryGroup);
-
-    const workGlow = new THREE.Mesh(
-      new THREE.RingGeometry(1.15, 1.22, 96),
-      new THREE.MeshBasicMaterial({ color: "#d6ad4a", transparent: true, opacity: 0.8, side: THREE.DoubleSide }),
-    );
-    workGlow.position.set(0, 0.7, -0.12);
-    registryGroup.add(workGlow);
-
-    const objectById = new Map<SpatialRegistryNodeId, THREE.Mesh>();
-    SPATIAL_REGISTRY_MOCK.nodes.forEach((node) => {
-      const isWork = node.id === "work";
-      const geometry = isWork ? new THREE.IcosahedronGeometry(0.82, 3) : new THREE.SphereGeometry(0.3, 28, 28);
-      const material = new THREE.MeshStandardMaterial({
-        color: node.color,
-        emissive: node.color,
-        emissiveIntensity: isWork ? 0.82 : 0.28,
-        roughness: 0.32,
-        metalness: isWork ? 0.63 : 0.42,
-      });
-      const mesh = new THREE.Mesh(geometry, material);
-      mesh.position.set(...node.position);
-      mesh.userData.nodeId = node.id;
-      objectById.set(node.id, mesh);
-      registryGroup.add(mesh);
-
-      const halo = new THREE.Mesh(
-        new THREE.RingGeometry(isWork ? 1.0 : 0.43, isWork ? 1.035 : 0.455, 48),
-        new THREE.MeshBasicMaterial({ color: node.color, transparent: true, opacity: isWork ? 0.34 : 0.16, side: THREE.DoubleSide }),
-      );
-      halo.position.copy(mesh.position);
-      halo.position.z -= 0.08;
-      halo.userData.nodeId = node.id;
-      registryGroup.add(halo);
-    });
-
-    const edgeMaterial = new THREE.LineBasicMaterial({ color: "#887144", transparent: true, opacity: 0.46 });
-    SPATIAL_REGISTRY_MOCK.edges.forEach(([from, to]) => {
-      const fromNode = nodesById[from];
-      const toNode = nodesById[to];
-      const geometry = new THREE.BufferGeometry().setFromPoints([
-        new THREE.Vector3(...fromNode.position),
-        new THREE.Vector3(...toNode.position),
-      ]);
-      registryGroup.add(new THREE.Line(geometry, edgeMaterial));
-    });
-
-    const accentLight = new THREE.PointLight("#d6ad4a", 22, 20, 2);
-    accentLight.position.set(0, 3.2, 5);
-    scene.add(accentLight);
-    const fillLight = new THREE.PointLight("#8f78d1", 9, 18, 2);
-    fillLight.position.set(-6, -2, 3);
-    scene.add(fillLight);
-    scene.add(new THREE.AmbientLight("#e9dec4", 0.85));
-
-    const raycaster = new THREE.Raycaster();
-    const pointer = new THREE.Vector2();
-    const selectFromPointer = (event: PointerEvent) => {
-      const rect = renderer.domElement.getBoundingClientRect();
-      pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-      pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-      raycaster.setFromCamera(pointer, camera);
-      const hit = raycaster.intersectObjects(Array.from(objectById.values()), false)[0];
-      if (hit?.object.userData.nodeId) onSelectRef.current(hit.object.userData.nodeId as SpatialRegistryNodeId);
-    };
-    renderer.domElement.addEventListener("pointerup", selectFromPointer);
-
-    const resize = () => {
-      const { width, height } = mount.getBoundingClientRect();
-      renderer.setSize(Math.max(width, 1), Math.max(height, 1), false);
-      camera.aspect = Math.max(width, 1) / Math.max(height, 1);
-      camera.updateProjectionMatrix();
-    };
-    const resizeObserver = new ResizeObserver(resize);
-    resizeObserver.observe(mount);
-    resize();
-
-    let frame = 0;
-    let animationFrame = 0;
-    const render = () => {
-      frame += 1;
-      const selectedMesh = objectById.get(selectedRef.current);
-      objectById.forEach((mesh, id) => {
-        const selected = id === selectedRef.current;
-        const material = mesh.material as THREE.MeshStandardMaterial;
-        material.emissiveIntensity = selected ? 1.25 : id === "work" ? 0.82 : 0.28;
-        const baseScale = id === "work" ? 1 : 1;
-        const pulse = selected ? 1 + Math.sin(frame * 0.065) * 0.06 : baseScale;
-        mesh.scale.setScalar(pulse);
-      });
-      if (selectedMesh) workGlow.material.opacity = selectedRef.current === "work" ? 0.95 : 0.38;
-      registryGroup.rotation.y += 0.0013;
-      controls.update();
-      renderer.render(scene, camera);
-      animationFrame = requestAnimationFrame(render);
-    };
-    render();
-
-    return () => {
-      cancelAnimationFrame(animationFrame);
-      resizeObserver.disconnect();
-      renderer.domElement.removeEventListener("pointerup", selectFromPointer);
-      controls.dispose();
-      starsGeometry.dispose();
-      registryGroup.traverse((object) => {
-        const candidate = object as THREE.Mesh;
-        candidate.geometry?.dispose?.();
-        const material = candidate.material as THREE.Material | THREE.Material[] | undefined;
-        if (Array.isArray(material)) material.forEach((item) => item.dispose());
-        else material?.dispose?.();
-      });
-      renderer.dispose();
-      renderer.domElement.remove();
-    };
-  }, []);
-
-  return <div ref={mountRef} className="absolute inset-0 cursor-grab active:cursor-grabbing" aria-label="Interactive fictional spatial registry. Drag to rotate and tap a node to inspect it." />;
+function formatClock(seconds: number) {
+  const whole = Math.max(0, Math.floor(seconds));
+  return `${Math.floor(whole / 60).toString().padStart(2, "0")}:${(whole % 60).toString().padStart(2, "0")}`;
 }
 
-function Glyph({ children }: { children: string }) {
-  return <span className="font-mono text-[10px] tracking-[0.22em] text-[var(--ln-gold)]">{children}</span>;
+function generateMockCoverArt(seed: number, direction: string, feedback: string) {
+  const canvas = document.createElement("canvas");
+  canvas.width = 768;
+  canvas.height = 768;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return DEFAULT_COVER_ART;
+  ctx.fillStyle = "#000000";
+  ctx.fillRect(0, 0, 768, 768);
+  const gx = 420 + Math.sin(seed * 0.7) * 90;
+  const gy = 270 + Math.cos(seed * 0.5) * 70;
+  const glow = ctx.createRadialGradient(gx, gy, 16, gx, gy, 430);
+  glow.addColorStop(0, "rgba(212,175,55,0.58)");
+  glow.addColorStop(0.38, "rgba(79,195,247,0.1)");
+  glow.addColorStop(1, "rgba(5,4,3,0)");
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, 768, 768);
+  ctx.beginPath();
+  ctx.arc(384, 384, 220, 0, Math.PI * 2);
+  ctx.strokeStyle = "rgba(212,175,55,0.85)";
+  ctx.lineWidth = 3;
+  ctx.stroke();
+  ctx.fillStyle = "rgba(255,255,255,0.5)";
+  ctx.font = "22px Cinzel, serif";
+  ctx.fillText(work.title, 48, 724);
+  ctx.fillStyle = "rgba(212,175,55,0.45)";
+  ctx.font = "12px DM Sans, sans-serif";
+  ctx.fillText((feedback || direction).slice(0, 64), 48, 748);
+  return canvas.toDataURL("image/jpeg", 0.92);
+}
+
+function Kicker({ children }: { children: string }) {
+  return <p className="sr-kicker">{children}</p>;
 }
 
 export default function SpatialRegistryMockPage() {
   const [, navigate] = useLocation();
+  const reducedMotion = useReducedMotion();
+  const sceneRef = useRef<SpatialSceneHandle>(null);
+  const [nav, setNav] = useState<(typeof NAV)[number]["id"]>("nexus");
+  const [view, setView] = useState<SpatialView>("overview");
   const [selectedNode, setSelectedNode] = useState<SpatialRegistryNodeId>("work");
+  const [hoveredNode, setHoveredNode] = useState<SpatialRegistryNodeId | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [progress, setProgress] = useState(34);
-  const [witnessCount, setWitnessCount] = useState(1);
-  const [registrationNotice, setRegistrationNotice] = useState<string | null>(null);
+  const [elapsed, setElapsed] = useState(68);
+  const [witnessCount, setWitnessCount] = useState(2);
+  const [ceremony, setCeremony] = useState<SpatialCeremony>(null);
+  const [ceremonyPhase, setCeremonyPhase] = useState<"working" | "done" | null>(null);
   const [studioOpen, setStudioOpen] = useState(false);
   const [aiOpen, setAiOpen] = useState(false);
-  const [coverSelected, setCoverSelected] = useState(false);
-  const [generated, setGenerated] = useState(false);
-  const selected = nodesById[selectedNode];
+  const [attributionOpen, setAttributionOpen] = useState(false);
+  const [coverArtUrl, setCoverArtUrl] = useState<string>(DEFAULT_COVER_ART);
+  const [loadedWorkId, setLoadedWorkId] = useState<string | null>(null);
+  const [grabbing, setGrabbing] = useState<SpatialArtifact | null>(null);
+  const [dropIntent, setDropIntent] = useState<DropIntent>(null);
+  const [artifacts, setArtifacts] = useState<SpatialArtifact[]>(() =>
+    initialArtifacts.map((item) => ({ ...item, position: [...item.position] as [number, number, number] })),
+  );
+  const [slotsRemaining, setSlotsRemaining] = useState<number>(creator.slotsRemaining);
+  const [inspectFile, setInspectFile] = useState<{ name: string; size: number; type: string } | null>(null);
+  const [lastRegistration, setLastRegistration] = useState<{ title: string; wid: string }>({ title: work.title, wid: work.wid });
+  const selected = SPATIAL_REGISTRY_NODES_BY_ID[selectedNode];
+  const loaded = artifacts.find((item) => item.id === loadedWorkId) ?? null;
+  const extraRegistered = artifacts.filter((item) => {
+    const origin = initialArtifacts.find((row) => row.id === item.id);
+    return item.status === "Registered" && origin?.status !== "Registered";
+  }).length;
 
   useEffect(() => {
-    if (!isPlaying) return;
-    const timer = window.setInterval(() => setProgress((value) => (value >= 100 ? 0 : value + 0.45)), 1_000);
+    if (!isPlaying || !loaded) return;
+    const timer = window.setInterval(() => {
+      setElapsed((value) => (value >= loaded.durationSeconds ? 0 : value + 1));
+    }, 1000);
     return () => window.clearInterval(timer);
-  }, [isPlaying]);
+  }, [isPlaying, loaded]);
+
+  useEffect(() => {
+    if (!ceremony || ceremonyPhase !== "done") return;
+    const timer = window.setTimeout(() => {
+      setCeremony(null);
+      setCeremonyPhase(null);
+    }, 3200);
+    return () => window.clearTimeout(timer);
+  }, [ceremony, ceremonyPhase]);
+
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      setStudioOpen(false);
+      setAiOpen(false);
+      setAttributionOpen(false);
+      setView("overview");
+      setNav("nexus");
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  const enter = useCallback((nodeId: SpatialRegistryNodeId) => {
+    setSelectedNode(nodeId);
+    setView(nodeId);
+    if (nodeId === "lineage") setNav("lineage");
+    else if (nodeId === "register") setNav("registry");
+    else if (nodeId === "work" || nodeId === "player") setNav("works");
+    else setNav("nexus");
+  }, []);
+
+  const openExplore = useCallback(() => {
+    setView("explore");
+    setNav("works");
+    setSelectedNode("work");
+  }, []);
+
+  const returnToConstellation = useCallback(() => {
+    setView("overview");
+    setNav("nexus");
+    setSelectedNode("work");
+    sceneRef.current?.reset();
+  }, []);
 
   const register = useCallback(() => {
-    setRegistrationNotice("Registration Created · LN-00017");
-    setSelectedNode("register");
+    enter("register");
+    setCeremony("register");
+    setCeremonyPhase("working");
+    window.setTimeout(() => setCeremonyPhase("done"), reducedMotion ? 0 : 900);
+  }, [enter, reducedMotion]);
+
+  const loadWork = useCallback((artifact: SpatialArtifact) => {
+    if (!isPlayable(artifact)) return;
+    setLoadedWorkId(artifact.id);
+    setCoverArtUrl(artifact.cover);
+    setElapsed(0);
+    setIsPlaying(true);
+    setGrabbing(null);
+    setDropIntent(null);
   }, []);
+
+  const declareWork = useCallback((artifact: SpatialArtifact) => {
+    if (!isDeclarable(artifact) || slotsRemaining <= 0) return;
+    const wid = nextRegistrationWid(artifacts);
+    setArtifacts((list) =>
+      list.map((item) => (item.id === artifact.id ? { ...item, status: "Registered", wid, witnessed: false } : item)),
+    );
+    setSlotsRemaining((value) => value - 1);
+    setLastRegistration({ title: artifact.title, wid });
+    setGrabbing(null);
+    setDropIntent(null);
+    enter("register");
+    setCeremony("register");
+    setCeremonyPhase("working");
+    window.setTimeout(() => setCeremonyPhase("done"), reducedMotion ? 0 : 900);
+  }, [artifacts, enter, reducedMotion, slotsRemaining]);
 
   const witness = useCallback(() => {
     setWitnessCount((count) => count + 1);
-    setSelectedNode("witness");
-  }, []);
+    enter("witness");
+    setCeremony("witness");
+    setCeremonyPhase("working");
+    window.setTimeout(() => setCeremonyPhase("done"), reducedMotion ? 0 : 700);
+  }, [enter, reducedMotion]);
+
+  const onFileInspect = useCallback((file: File) => {
+    setInspectFile({ name: file.name, size: file.size, type: file.type || "audio" });
+    enter("register");
+  }, [enter]);
+
+  const wave = useMemo(
+    () => Array.from({ length: 18 }, (_, index) => 6 + ((index * 37) % 16)),
+    [],
+  );
 
   return (
-    <main className="min-h-dvh overflow-hidden bg-[#060606] text-[var(--ln-parchment)] selection:bg-[color:var(--ln-gold)] selection:text-black">
-      <div className="relative min-h-dvh overflow-hidden bg-[radial-gradient(circle_at_52%_38%,rgba(177,135,45,0.13),transparent_25%),radial-gradient(circle_at_14%_8%,rgba(105,75,163,0.14),transparent_26%),#060606]">
-        <SpatialScene selectedNode={selectedNode} witnessCount={witnessCount} onSelect={setSelectedNode} />
-
-        <header className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-start justify-between p-4 sm:p-7">
-          <div className="pointer-events-auto max-w-[18rem]">
-            <button onClick={() => navigate("/")} className="mb-4 flex items-center gap-2 rounded-full border border-[color:rgba(214,173,74,0.28)] bg-black/35 px-3 py-1.5 text-[10px] tracking-[0.2em] text-[var(--ln-parchment)] backdrop-blur-md transition hover:border-[var(--ln-gold)]">
-              ← LIVING NEXUS
+    <main
+      className={`spatial-registry-mock${view !== "overview" ? " is-entered" : ""}${grabbing ? " is-grabbing" : ""}${dropIntent === "experience" ? " is-drop-hot" : ""}${dropIntent === "declare" ? " is-declare-hot" : ""}${dropIntent === "not-registered" || dropIntent === "already-declared" || dropIntent === "wrong-medium" ? " is-drop-denied" : ""}`}
+      onDragOver={(event) => {
+        event.preventDefault();
+        event.dataTransfer.dropEffect = "copy";
+      }}
+      onDrop={(event) => {
+        event.preventDefault();
+        const file = event.dataTransfer.files[0];
+        if (file) onFileInspect(file);
+      }}
+    >
+      <header className="sr-header">
+        <button className="sr-brand" onClick={() => navigate("/")}>
+          <span className="sr-mark">LN</span>
+          <span>
+            <strong>LIVING NEXUS</strong>
+            <span>SPATIAL REGISTRY</span>
+          </span>
+        </button>
+        <nav className="sr-nav" aria-label="Prototype surfaces">
+          {NAV.map((item) => (
+            <button
+              key={item.id}
+              className={nav === item.id ? "is-active" : ""}
+              onClick={() => {
+                setNav(item.id);
+                if (item.view === "overview") returnToConstellation();
+                else if (item.view === "explore") openExplore();
+                else enter(item.view as SpatialRegistryNodeId);
+              }}
+            >
+              {item.label}
             </button>
-            <p className="font-mono text-[9px] uppercase tracking-[0.28em] text-[var(--ln-gold)]">Prototype · fictional registry</p>
-            <h1 className="mt-2 font-display text-2xl leading-none sm:text-4xl">Spatial Registry</h1>
-            <p className="mt-2 text-xs leading-relaxed text-[var(--ln-smoke)]">A visual demonstration only. The 3D environment represents registry relationships; it is not the registry.</p>
-          </div>
-          <div className="pointer-events-auto flex gap-2">
-            <button onClick={() => setAiOpen(true)} className="rounded-full border border-[color:rgba(214,173,74,0.24)] bg-black/40 px-3 py-2 text-[10px] tracking-[0.16em] transition hover:border-[var(--ln-gold)]">MY AI</button>
-            <button onClick={() => setStudioOpen(true)} className="rounded-full bg-[var(--ln-gold)] px-3 py-2 text-[10px] font-semibold tracking-[0.16em] text-black transition hover:brightness-110">COVER ART STUDIO</button>
-          </div>
-        </header>
-
-        <aside className="pointer-events-none absolute left-4 top-40 z-10 hidden w-56 sm:block sm:left-7 sm:top-48">
-          <div className="pointer-events-auto border-l border-[color:rgba(214,173,74,0.55)] bg-black/25 px-4 py-3 backdrop-blur-sm">
-            <Glyph>CREATOR DOMAIN</Glyph>
-            <p className="mt-2 font-display text-xl">Jake</p>
-            <p className="text-sm text-[var(--ln-smoke)]">Weave & Breathe</p>
-            <div className="mt-4 grid grid-cols-2 gap-3 border-t border-white/10 pt-3 text-xs">
-              <span><strong className="block text-[var(--ln-parchment)]">1</strong><span className="text-[var(--ln-smoke)]">registered work</span></span>
-              <span><strong className="block text-[var(--ln-parchment)]">{witnessCount}</strong><span className="text-[var(--ln-smoke)]">witnesses</span></span>
-            </div>
-          </div>
-        </aside>
-
-        <section className="pointer-events-none absolute inset-x-4 bottom-28 z-10 sm:inset-x-auto sm:right-7 sm:bottom-32 sm:w-80">
-          <div className="pointer-events-auto border border-[color:rgba(222,197,126,0.25)] bg-[color:rgba(8,8,8,0.82)] p-4 shadow-[0_24px_60px_rgba(0,0,0,0.45)] backdrop-blur-md">
-            <Glyph>{selected.eyebrow}</Glyph>
-            <h2 className="mt-2 font-display text-xl leading-tight">{selected.label}</h2>
-            <p className="mt-2 text-sm leading-relaxed text-[var(--ln-smoke)]">{selected.description}</p>
-            {selectedNode === "work" && <div className="mt-4 border-t border-white/10 pt-3 text-xs text-[var(--ln-smoke)]"><span className="text-[var(--ln-parchment)]">LN-00017</span> · Version 01 · Registered · {witnessCount} witness{witnessCount === 1 ? "" : "es"}</div>}
-            {selectedNode === "register" && <button onClick={register} className="mt-4 w-full border border-[var(--ln-gold)] px-3 py-2 text-xs tracking-[0.18em] text-[var(--ln-gold)] transition hover:bg-[var(--ln-gold)] hover:text-black">SIMULATE REGISTER</button>}
-            {selectedNode === "witness" && <button onClick={witness} className="mt-4 w-full border border-[var(--ln-gold)] px-3 py-2 text-xs tracking-[0.18em] text-[var(--ln-gold)] transition hover:bg-[var(--ln-gold)] hover:text-black">SIMULATE WITNESS</button>}
-          </div>
-        </section>
-
-        <nav className="pointer-events-auto absolute bottom-28 left-4 z-10 flex max-w-[calc(100vw-2rem)] gap-1 overflow-x-auto rounded-full border border-white/10 bg-black/45 p-1 backdrop-blur-md sm:bottom-32 sm:left-7">
-          {SPATIAL_REGISTRY_MOCK.nodes.map((node) => (
-            <button key={node.id} onClick={() => setSelectedNode(node.id)} className={`shrink-0 rounded-full px-3 py-2 text-[9px] tracking-[0.14em] transition ${selectedNode === node.id ? "bg-[var(--ln-gold)] text-black" : "text-[var(--ln-smoke)] hover:text-[var(--ln-parchment)]"}`}>{node.label === "YAHWEH LIGHTS MY WAY" ? "WORK" : node.label}</button>
           ))}
         </nav>
+        <div className="sr-header-tools">
+          <button className="sr-ghost" onClick={() => setAiOpen(true)}>
+            My AI
+          </button>
+          <button className="sr-ghost" onClick={() => setStudioOpen(true)}>
+            Cover Art Studio
+          </button>
+          <button className="sr-avatar-btn" onClick={() => enter("profile")} aria-label="Open creator profile">
+            <img src={ASSET.portrait} alt="" />
+          </button>
+        </div>
+      </header>
 
-        <section className="pointer-events-auto absolute inset-x-3 bottom-3 z-20 border border-[color:rgba(214,173,74,0.32)] bg-[color:rgba(7,7,7,0.9)] px-4 py-3 backdrop-blur-xl sm:inset-x-7 sm:bottom-6 sm:px-5">
-          <div className="flex items-center gap-3">
-            <div className={`grid h-12 w-12 shrink-0 place-items-center border border-[color:rgba(214,173,74,0.7)] bg-[radial-gradient(circle_at_65%_35%,#f0d78e,transparent_18%),linear-gradient(145deg,#1f170b,#503312_48%,#070707)] ${coverSelected ? "ring-1 ring-[var(--ln-gold)]" : ""}`}><span className="font-display text-lg text-[var(--ln-gold)]">Y</span></div>
-            <div className="min-w-0 flex-1">
-              <p className="truncate font-display text-base">Yahweh Lights My Way</p>
-              <p className="text-xs text-[var(--ln-smoke)]">Weave & Breathe · LN-00017</p>
-              <div className="mt-2 h-px overflow-hidden bg-white/10"><div className="h-full bg-[var(--ln-gold)] transition-[width] duration-500" style={{ width: `${progress}%` }} /></div>
-            </div>
-            <span className="hidden font-mono text-[10px] text-[var(--ln-smoke)] sm:block">{Math.floor((progress / 100) * 4).toString().padStart(2, "0")}:{Math.floor((progress * 12) % 60).toString().padStart(2, "0")} / 04:12</span>
-            <button onClick={() => setIsPlaying((value) => !value)} className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-[var(--ln-gold)] text-lg text-black transition hover:brightness-110" aria-label={isPlaying ? "Pause fictional track" : "Play fictional track"}>{isPlaying ? "Ⅱ" : "▶"}</button>
+      <aside className="sr-rail">
+        <div className="sr-portrait-wrap">
+          <div className="sr-portrait">
+            <img src={ASSET.portrait} alt="Jake" />
           </div>
-        </section>
+          <h2>JAKE</h2>
+          <p className="artist">WEAVE & BREATHE</p>
+        </div>
+        <div className="mt-6">
+          <div className="sr-stat">
+            <span>Registered works</span>
+            <b>{creator.registeredWorks + extraRegistered}</b>
+          </div>
+          <div className="sr-stat">
+            <span>Witnessed works</span>
+            <b>{creator.witnessedWorks}</b>
+          </div>
+          <div className="sr-stat">
+            <span>Registration slots</span>
+            <b>
+              {slotsRemaining} / {creator.registrationCapacity}
+            </b>
+          </div>
+          <div className="sr-stat">
+            <span>Member since</span>
+            <b>{creator.memberSince}</b>
+          </div>
+        </div>
+        <button className="sr-gold-btn mt-5" onClick={() => setAttributionOpen(true)}>
+          View Attribution <ExternalLink size={12} className="ml-1 inline" />
+        </button>
+        <div className="sr-gauge" aria-label="Registration capacity">
+          <svg viewBox="0 0 140 82" role="img">
+            <path d="M18 72 A 52 52 0 0 1 122 72" fill="none" stroke="rgba(212,175,55,0.18)" strokeWidth="8" strokeLinecap="round" />
+            <path
+              d="M18 72 A 52 52 0 0 1 122 72"
+              fill="none"
+              stroke="#d4af37"
+              strokeWidth="8"
+              strokeLinecap="round"
+              strokeDasharray="163"
+              strokeDashoffset={163 * (1 - slotsRemaining / creator.registrationCapacity)}
+            />
+          </svg>
+          <p>
+            {slotsRemaining} / {creator.registrationCapacity} slots remaining
+          </p>
+        </div>
+        <p className="sr-quote">
+          “{creator.quote}”
+          <span>— {creator.quoteAttribution}</span>
+        </p>
+        <p className="mt-4 text-[10px] leading-relaxed tracking-[0.04em] text-[rgba(176,176,176,0.55)]">
+          Prototype · fictional registry. The 3D environment visualizes relationships; it is not the source of truth.
+        </p>
+      </aside>
 
-        {registrationNotice && <div className="absolute inset-x-0 top-28 z-20 mx-auto w-fit border border-[var(--ln-gold)] bg-black/85 px-5 py-3 text-center shadow-xl backdrop-blur-md"><Glyph>PROVENANCE EVENT</Glyph><p className="mt-1 font-display text-lg">{registrationNotice}</p><p className="mt-1 text-xs text-[var(--ln-smoke)]">Creator → Work → Registration</p></div>}
-
-        {studioOpen && <div className="fixed inset-0 z-30 grid place-items-center bg-black/75 p-3 backdrop-blur-sm"><section className="max-h-[88dvh] w-full max-w-2xl overflow-y-auto border border-[color:rgba(214,173,74,0.38)] bg-[var(--ln-coal)] p-5 shadow-2xl sm:p-7"><div className="flex items-start justify-between gap-4"><div><Glyph>OPTIONAL CREATOR TOOL · MOCK</Glyph><h2 className="mt-2 font-display text-3xl">Cover Art Studio</h2><p className="mt-2 text-sm text-[var(--ln-smoke)]">Reference Images → Direction → Generation → Feedback → Revision → Final Artwork</p></div><button onClick={() => setStudioOpen(false)} className="text-sm text-[var(--ln-smoke)] hover:text-[var(--ln-parchment)]">CLOSE</button></div><div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">{[1, 2, 3, 4].map((slot) => <div key={slot} className="grid aspect-square place-items-center border border-dashed border-[color:rgba(214,173,74,0.32)] bg-black/20 text-center text-[10px] tracking-[0.14em] text-[var(--ln-smoke)]">REFERENCE<br />{slot}</div>)}</div><label className="mt-5 block text-xs tracking-[0.15em] text-[var(--ln-gold)]">CREATIVE DIRECTION<textarea defaultValue="A quiet nocturnal path illuminated by gold, artistically bound to Yahweh Lights My Way." className="mt-2 min-h-24 w-full border border-white/10 bg-black/35 p-3 text-sm normal-case tracking-normal text-[var(--ln-parchment)] outline-none focus:border-[var(--ln-gold)]" /></label><label className="mt-4 block text-xs tracking-[0.15em] text-[var(--ln-gold)]">FEEDBACK<input className="mt-2 w-full border border-white/10 bg-black/35 p-3 text-sm normal-case tracking-normal text-[var(--ln-parchment)] outline-none focus:border-[var(--ln-gold)]" placeholder="Make the path more intimate and the light warmer" /></label><div className="mt-5 flex flex-wrap gap-3"><button onClick={() => setGenerated(true)} className="bg-[var(--ln-gold)] px-4 py-3 text-xs font-semibold tracking-[0.14em] text-black">GENERATE MOCK</button>{generated && <><div className="h-20 w-20 border border-[var(--ln-gold)] bg-[radial-gradient(circle_at_70%_20%,#f4d98a,transparent_15%),linear-gradient(145deg,#050505,#2e1e0b_45%,#704a1d)]" /><button onClick={() => { setCoverSelected(true); setStudioOpen(false); }} className="border border-[var(--ln-gold)] px-4 py-3 text-xs tracking-[0.14em] text-[var(--ln-gold)]">SELECT AS COVER ART</button></>}</div></section></div>}
-
-        {aiOpen && <div className="fixed inset-0 z-30 grid place-items-center bg-black/75 p-3 backdrop-blur-sm"><section className="w-full max-w-md border border-[color:rgba(214,173,74,0.38)] bg-[var(--ln-coal)] p-6 shadow-2xl"><div className="flex items-start justify-between"><div><Glyph>OPTIONAL CREATOR TOOL · MOCK</Glyph><h2 className="mt-2 font-display text-3xl">My AI</h2></div><button onClick={() => setAiOpen(false)} className="text-sm text-[var(--ln-smoke)]">CLOSE</button></div><div className="mt-6 space-y-4 text-sm"><p><span className="text-[var(--ln-smoke)]">Name</span><br />Orison</p><p><span className="text-[var(--ln-smoke)]">Personality</span><br />Attentive, quiet, creator-directed.</p><p><span className="text-[var(--ln-smoke)]">Creator context</span><br />Weave & Breathe · music work and provenance only.</p></div><button onClick={() => setAiOpen(false)} className="mt-6 border border-[var(--ln-gold)] px-4 py-3 text-xs tracking-[0.14em] text-[var(--ln-gold)]">SAVE MOCK CONFIGURATION</button></section></div>}
+      <div className="sr-scene-layer">
+        <SpatialRegistryScene
+          ref={sceneRef}
+          view={view}
+          selectedNode={selectedNode}
+          witnessCount={witnessCount}
+          isPlaying={isPlaying}
+          coverArtUrl={coverArtUrl}
+          loadedWorkId={loadedWorkId}
+          hoveredNode={hoveredNode}
+          ceremony={ceremony}
+          reducedMotion={reducedMotion}
+          artifacts={artifacts}
+          onSelect={enter}
+          onHover={setHoveredNode}
+          onLoadWork={loadWork}
+          onDeclareWork={declareWork}
+          onGrab={(artifact, intent) => {
+            setGrabbing(artifact);
+            setDropIntent(intent);
+          }}
+        />
       </div>
+
+      <div className="sr-toolbar">
+        <button aria-label="Pan the spatial environment" onClick={() => sceneRef.current?.reset()}>
+          <Move size={16} />
+        </button>
+        <button aria-label="Return to constellation" onClick={returnToConstellation}>
+          <Crosshair size={16} />
+        </button>
+        <button aria-label="Zoom in" onClick={() => sceneRef.current?.zoom(0.82)}>
+          <Plus size={16} />
+        </button>
+        <button aria-label="Zoom out" onClick={() => sceneRef.current?.zoom(1.22)}>
+          <Minus size={16} />
+        </button>
+      </div>
+
+      {view !== "overview" && (
+        <button className="sr-ghost sr-return" onClick={returnToConstellation}>
+          ← Return to constellation
+        </button>
+      )}
+
+      {view !== "overview" && (
+        <section className="sr-pathway-card">
+          {view === "explore" ? (
+            <>
+              <Kicker>Same grab. Opposite destinations.</Kicker>
+              <h2 className="mt-2 font-display text-2xl">Grab a work</h2>
+              <p className="mt-2 text-xs tracking-[0.16em] uppercase text-[var(--sr-electric)]">State decides the verb</p>
+              <p className="sr-copy">A sealed record can be experienced. An unfinished work can be declared. Drop onto Player only if it is registered. Drop onto Register to establish the record. The object tells you what it is.</p>
+              <ol className="sr-steps">
+                {artifacts.map((artifact) => (
+                  <li key={artifact.id}>
+                    <b>{artifact.status}{artifact.witnessed ? " · witnessed" : ""}</b>
+                    <span>{artifact.title}{artifact.wid ? ` · ${artifact.wid}` : ` · ${ARTIFACT_FORMS[artifact.medium].object}`}</span>
+                  </li>
+                ))}
+              </ol>
+            </>
+          ) : (
+            <>
+          <Kicker>{selected.form}</Kicker>
+          <h2 className="mt-2 font-display text-2xl">{selected.shortLabel}</h2>
+          <p className="mt-2 text-xs tracking-[0.16em] uppercase" style={{ color: selected.color }}>{selected.language}</p>
+          <p className="sr-copy">{selected.description}</p>
+          {view === "work" && (
+            <ol className="sr-steps">
+              {["Creator", "Edit", "Register", "Witness", "Lineage", "Player"].map((name) => (
+                <li key={name}><b>{name}</b><span>connects here</span></li>
+              ))}
+            </ol>
+          )}
+          {view === "profile" && (
+            <ol className="sr-steps">
+              {creatorStages.map((stage) => (
+                <li key={stage.id}><b>{stage.label}</b><span>{stage.caption}</span></li>
+              ))}
+            </ol>
+          )}
+          {view === "edit" && (
+            <ol className="sr-steps">
+              {versions.map((version) => (
+                <li key={version.id}><b>{version.label}</b><span>{version.caption}</span></li>
+              ))}
+            </ol>
+          )}
+          {view === "register" && (
+            <ol className="sr-steps">
+              <li><b>Chamber</b><span>The work enters</span></li>
+              <li><b>WID</b><span>{work.wid}</span></li>
+              <li><b>Record</b><span>Registration establishes</span></li>
+              <li><b>Seal</b><span>Closes on the event</span></li>
+            </ol>
+          )}
+          {view === "witness" && (
+            <ol className="sr-steps">
+              <li><b>Witness</b><span>{witnessCount} luminous points</span></li>
+              <li><b>Event</b><span>{SPATIAL_REGISTRY_MOCK.registrationEvent.id}</span></li>
+              <li><b>Work</b><span>{work.title}</span></li>
+            </ol>
+          )}
+          {view === "lineage" && (
+            <ol className="sr-steps">
+              {lineageSequence.map((step) => (
+                <li key={step.id}><b>{step.label}</b><span>{step.caption}</span></li>
+              ))}
+            </ol>
+          )}
+          {view === "player" && (
+            <ol className="sr-steps">
+              <li><b>Playback</b><span>{isPlaying ? "Registry is resonating" : "Idle field"}</span></li>
+              <li><b>Work</b><span>{work.title}</span></li>
+              <li><b>Derived</b><span>{derivedArtifacts.map((item) => item.title).join(" · ")}</span></li>
+            </ol>
+          )}
+          {view === "work" && (
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              <button className="sr-gold-btn" onClick={register}>Register</button>
+              <button className="sr-gold-btn" onClick={witness}>Witness</button>
+            </div>
+          )}
+          {view === "register" && (
+            <>
+              <p className="sr-copy">Drag a local file into this chamber to inspect it, then establish the record. Same gesture as loading a work into the player, reversed.</p>
+              <button className="sr-gold-btn mt-4" onClick={register}>Simulate register</button>
+            </>
+          )}
+          {view === "witness" && (
+            <button className="sr-gold-btn mt-4" onClick={witness}>Simulate witness · {witnessCount}</button>
+          )}
+          {(view === "profile" || view === "work") && (
+            <button className="sr-text-btn mt-3" onClick={() => setAttributionOpen(true)}>
+              View Attribution
+            </button>
+          )}
+            </>
+          )}
+        </section>
+      )}
+
+      <p className="sr-hint">
+        <MousePointer2 size={13} />
+        {grabbing
+          ? dropIntent === "experience"
+            ? "RELEASE TO EXPERIENCE"
+            : dropIntent === "declare"
+              ? "RELEASE TO DECLARE"
+              : dropIntent === "not-registered"
+                ? "NOT YET REGISTERED"
+                : dropIntent === "already-declared"
+                  ? "ALREADY DECLARED"
+                  : dropIntent === "wrong-medium"
+                    ? "THIS MEDIUM IS NOT PLAYABLE"
+                    : `CARRYING ${grabbing.title.toUpperCase()} · PLAYER OR REGISTER`
+          : view === "overview"
+            ? hoveredNode
+              ? `Enter ${SPATIAL_REGISTRY_NODES_BY_ID[hoveredNode].shortLabel}`
+              : "A CONNECTION ILLUMINATES WHEN A RELATIONSHIP IS REVEALED"
+            : view === "explore"
+              ? "REGISTERED → PLAYER · UNREGISTERED → REGISTER"
+              : view === "register"
+                ? "DROP A LOCAL FILE TO ESTABLISH IT"
+                : selected.language}
+      </p>
+
+      {view === "overview" && (
+        <aside className="sr-rail right is-open">
+          <Kicker>Six spatial pathways</Kicker>
+          <h2 className="mt-2 font-display text-xl">The work is the center</h2>
+          <p className="sr-copy">Each node is an environment, not a page. Enter it. The registry remains the source of truth; this is how it becomes visible.</p>
+          <p className="mt-3 text-[10px] tracking-[0.16em] uppercase text-[var(--sr-gold)]">{VISUAL_LANGUAGE.principle}</p>
+          <p className="sr-copy">{INTERACTION_DOCTRINE.standard}</p>
+          <ol className="sr-steps">
+            {INTERACTION_DOCTRINE.state.map((row) => (
+              <li key={row.state}><b>{row.state}</b><span>{row.means}</span></li>
+            ))}
+          </ol>
+          <button className="sr-gold-btn mt-4" onClick={openExplore}>
+            Works · grab a record
+          </button>
+          <div className="sr-dl mt-4">
+            {SPATIAL_REGISTRY_MOCK.nodes.filter((node) => node.id !== "work").map((node) => (
+              <button key={node.id} className="sr-text-btn text-left" onClick={() => enter(node.id)}>
+                <span className="block" style={{ color: node.color }}>{node.shortLabel}</span>
+                <b className="block font-normal text-[11px] tracking-normal normal-case text-[var(--sr-muted)]">{node.form}</b>
+              </button>
+            ))}
+          </div>
+        </aside>
+      )}
+
+      <section className={`sr-player${dropIntent === "experience" ? " is-drop-hot" : ""}${dropIntent === "not-registered" || dropIntent === "wrong-medium" ? " is-drop-denied" : ""}`} aria-label="Canonical global player">
+        <div className="sr-now">
+          <img src={loaded ? coverArtUrl : DEFAULT_COVER_ART} alt="" />
+          <div className="min-w-0">
+            <p className="truncate">{loaded ? loaded.title : "Awaiting a registered work"}</p>
+            <span>
+              {loaded
+                ? `${loaded.artist} · ${loaded.wid ?? "Unregistered"}`
+                : "Only a sealed record can be experienced"}
+            </span>
+            {loaded && (
+              <em className="sr-registered">
+                {loaded.status.toUpperCase()}
+                {loaded.witnessed ? " · WITNESSED" : ""}
+              </em>
+            )}
+          </div>
+        </div>
+        <div className="sr-transport">
+          <div className="sr-transport-btns">
+            <button
+              className="sr-icon-btn sr-play"
+              onClick={() => loaded && setIsPlaying((value) => !value)}
+              aria-label={isPlaying ? "Pause fictional track" : "Play fictional track"}
+              disabled={!loaded}
+            >
+              {isPlaying ? <Pause size={16} /> : <Play size={16} />}
+            </button>
+          </div>
+          <div className="sr-progress-row">
+            <span>{formatClock(elapsed)}</span>
+            <input
+              className="sr-slider"
+              type="range"
+              min={0}
+              max={loaded?.durationSeconds || work.durationSeconds}
+              value={elapsed}
+              aria-label="Playback progress"
+              onChange={(event) => setElapsed(Number(event.target.value))}
+              disabled={!loaded}
+            />
+            <span>{loaded?.duration || work.duration}</span>
+          </div>
+        </div>
+        <div className="sr-player-extra">
+          <div className={`sr-wave ${isPlaying ? "is-playing" : ""}`} aria-hidden="true">
+            {wave.map((height, index) => (
+              <i key={index} style={{ height, animationDelay: `${index * 0.06}s` }} />
+            ))}
+          </div>
+          <button className="sr-icon-btn" aria-label="Enter player pathway" onClick={() => enter("player")}>
+            <ChevronUp size={15} />
+          </button>
+        </div>
+      </section>
+
+      {ceremony && ceremonyPhase && (
+        <div className="sr-ceremony" role="status" aria-live="polite">
+          <Kicker>{ceremony === "register" ? "Provenance event" : "Attestation"}</Kicker>
+          {ceremony === "register" && ceremonyPhase === "working" && <p className="mt-2 font-display text-2xl">Recording registration</p>}
+          {ceremony === "register" && ceremonyPhase === "done" && (
+            <>
+              <p className="mt-2 font-display text-2xl">Registration Created</p>
+              <p className="mt-3 font-mono text-sm tracking-[0.18em] text-[var(--sr-gold)]">WID · {lastRegistration.wid}</p>
+              <p className="mt-3 text-xs tracking-[0.16em] text-[var(--sr-muted)]">{lastRegistration.title.toUpperCase()} · CREATOR → WORK → REGISTRATION</p>
+            </>
+          )}
+          {ceremony === "witness" && ceremonyPhase === "working" && <p className="mt-2 font-display text-2xl">Recording witness</p>}
+          {ceremony === "witness" && ceremonyPhase === "done" && (
+            <>
+              <p className="mt-2 font-display text-2xl">Witness recorded</p>
+              <p className="mt-3 text-sm text-[var(--sr-muted)]">
+                Witnesses: {witnessCount}. Registration is the event. Witness is the attestation.
+              </p>
+            </>
+          )}
+        </div>
+      )}
+
+      {inspectFile && (
+        <div className="sr-modal-scrim" onClick={() => setInspectFile(null)}>
+          <section className="sr-modal max-w-md" onClick={(event) => event.stopPropagation()}>
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <Kicker>Local file → Registry</Kicker>
+                <h2 className="mt-2 font-display text-3xl">Inspect</h2>
+              </div>
+              <button className="sr-text-btn" onClick={() => setInspectFile(null)}>
+                Close
+              </button>
+            </div>
+            <ol className="sr-steps">
+              <li><b>File</b><span>{inspectFile.name}</span></li>
+              <li><b>Size</b><span>{Math.max(1, Math.round(inspectFile.size / 1024))} KB</span></li>
+              <li><b>Type</b><span>{inspectFile.type || "unknown"}</span></li>
+              <li><b>Next</b><span>Metadata → Register → WID</span></li>
+            </ol>
+            <p className="sr-copy">The file never leaves this prototype. Dropping it into Register is the same spatial verb as dropping a record onto the Player: you are moving a work through the Nexus.</p>
+            <button
+              className="sr-gold-btn mt-5"
+              onClick={() => {
+                setInspectFile(null);
+                register();
+              }}
+            >
+              Establish the record
+            </button>
+          </section>
+        </div>
+      )}
+      {studioOpen && (
+        <CoverArtStudio
+          coverArtUrl={coverArtUrl}
+          onClose={() => setStudioOpen(false)}
+          onSelect={(url) => {
+            setCoverArtUrl(url);
+            setStudioOpen(false);
+            setSelectedNode("work");
+          }}
+        />
+      )}
+      {aiOpen && <MyAiMock onClose={() => setAiOpen(false)} />}
+      {attributionOpen && (
+        <div className="sr-modal-scrim" onClick={() => setAttributionOpen(false)}>
+          <section className="sr-modal max-w-md" onClick={(event) => event.stopPropagation()}>
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <Kicker>External attribution</Kicker>
+                <h2 className="mt-2 font-display text-3xl">Attribution</h2>
+              </div>
+              <button className="sr-text-btn" onClick={() => setAttributionOpen(false)}>
+                Close
+              </button>
+            </div>
+            <p className="mt-4 text-sm leading-relaxed text-[var(--sr-muted)]">{attribution.note}</p>
+            <p className="mt-4 font-mono text-xs tracking-[0.12em] text-[var(--sr-gold)]">{attribution.destinationHost}</p>
+            <p className="mt-2 text-sm">
+              {creator.name} / {creator.artistName}
+              <br />
+              {work.title} · {work.wid}
+            </p>
+            <a className="sr-gold-btn mt-6 inline-block text-center no-underline" href={`https://${attribution.destinationHost}`} target="_blank" rel="noreferrer">
+              Open destination
+            </a>
+          </section>
+        </div>
+      )}
     </main>
+  );
+}
+
+function CoverArtStudio({
+  coverArtUrl,
+  onClose,
+  onSelect,
+}: {
+  coverArtUrl: string;
+  onClose: () => void;
+  onSelect: (url: string) => void;
+}) {
+  const [refs, setRefs] = useState<(string | null)[]>([null, null, null, null]);
+  const [direction, setDirection] = useState("A quiet nocturnal path illuminated by gold, bound to Yahweh Lights My Way.");
+  const [feedback, setFeedback] = useState("");
+  const [generated, setGenerated] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  const onFile = (index: number, file?: File) => {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      setRefs((current) => current.map((value, slot) => (slot === index ? String(reader.result) : value)));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  return (
+    <div className="sr-modal-scrim" onClick={onClose}>
+      <section className="sr-modal" onClick={(event) => event.stopPropagation()}>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <Kicker>Optional creator tool · mock</Kicker>
+            <h2 className="mt-2 font-display text-3xl">Cover Art Studio</h2>
+            <p className="mt-2 text-sm text-[var(--sr-muted)]">Reference Images → Direction → Generation → Feedback → Revision → Final Artwork</p>
+          </div>
+          <button className="sr-text-btn" onClick={onClose}>
+            Close
+          </button>
+        </div>
+        <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {refs.map((src, index) => (
+            <label key={index} className="sr-ref-slot grid place-items-center text-center">
+              {src ? <img src={src} alt="" /> : <span>Reference {index + 1}</span>}
+              <input type="file" accept="image/*" aria-label={`Reference image ${index + 1}`} onChange={(event) => onFile(index, event.target.files?.[0])} />
+            </label>
+          ))}
+        </div>
+        <label className="sr-field">
+          Creative direction
+          <textarea value={direction} onChange={(event) => setDirection(event.target.value)} rows={3} />
+        </label>
+        <label className="sr-field">
+          Feedback
+          <input value={feedback} onChange={(event) => setFeedback(event.target.value)} placeholder="Make the path more intimate and the light warmer" />
+        </label>
+        <div className="mt-5 flex flex-wrap items-end gap-3">
+          <button
+            className="sr-gold-btn w-auto px-5"
+            onClick={() => {
+              setBusy(true);
+              window.setTimeout(() => {
+                setGenerated(generateMockCoverArt(Date.now(), direction, feedback));
+                setBusy(false);
+              }, 700);
+            }}
+            disabled={busy}
+          >
+            {busy ? "Generating…" : generated ? "Revise" : "Generate"}
+          </button>
+          {(generated || coverArtUrl) && <img src={generated ?? coverArtUrl} alt="Generated cover art" className="h-20 w-20 object-cover" />}
+          {generated && (
+            <button className="sr-ghost" onClick={() => onSelect(generated)}>
+              Select as Cover Art
+            </button>
+          )}
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function MyAiMock({ onClose }: { onClose: () => void }) {
+  const [name, setName] = useState("Orison");
+  const [personality, setPersonality] = useState("Attentive, quiet, creator-directed.");
+  const [instructions, setInstructions] = useState("Stay with the work. Speak only from the creator's context.");
+  const [context, setContext] = useState("Jake / Weave & Breathe. Music. Yahweh Lights My Way, WID LN-00017.");
+  const [saved, setSaved] = useState(false);
+
+  return (
+    <div className="sr-modal-scrim" onClick={onClose}>
+      <section className="sr-modal max-w-md" onClick={(event) => event.stopPropagation()}>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <Kicker>Optional creator tool · mock</Kicker>
+            <h2 className="mt-2 font-display text-3xl">My AI</h2>
+          </div>
+          <button className="sr-text-btn" onClick={onClose}>
+            Close
+          </button>
+        </div>
+        <label className="sr-field">
+          Name
+          <input value={name} onChange={(event) => setName(event.target.value)} />
+        </label>
+        <label className="sr-field">
+          Personality
+          <input value={personality} onChange={(event) => setPersonality(event.target.value)} />
+        </label>
+        <label className="sr-field">
+          Instructions
+          <textarea value={instructions} onChange={(event) => setInstructions(event.target.value)} rows={3} />
+        </label>
+        <label className="sr-field">
+          Creator context
+          <textarea value={context} onChange={(event) => setContext(event.target.value)} rows={3} />
+        </label>
+        <button
+          className="sr-gold-btn mt-5"
+          onClick={() => {
+            setSaved(true);
+            window.setTimeout(onClose, 700);
+          }}
+        >
+          {saved ? "Saved" : "Save mock configuration"}
+        </button>
+      </section>
+    </div>
   );
 }
