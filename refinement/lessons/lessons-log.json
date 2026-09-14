@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-09-14T15:25:00.000Z",
-  "totalLessons": 32,
+  "lastUpdated": "2026-09-14T16:05:00.000Z",
+  "totalLessons": 33,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -739,6 +739,28 @@
         "asset-custody",
         "reduced-motion",
         "accessibility"
+      ]
+    },
+    {
+      "id": "LESSON-033",
+      "date": "2026-09-14",
+      "category": "structured-publication-integrity",
+      "problem": "Public MusicRecording output mapped the system-created Work timestamp to `datePublished`, conflating platform record establishment or registration-adjacent time with a creator’s original release declaration. A public audit surfaced 639 affected public records, alongside separate Registry projection conflicts and missing creator/technical metadata that must not be fabricated.",
+      "solution": "Render historical date semantics from their existing creator-controlled fields only: `releaseDate` becomes `dateCreated` and `creatorReleaseDate` becomes `datePublished`. Preserve the exact persisted calendar day, omit unknown declarations, and show the system record date under an explicitly different label. Keep WID as an identifier; do not rewrite a Work, backfill metadata, change a Registry record, or treat audit media enrichment as a data mutation. Handle duplicate WIDs, 404s, Registry/page mismatches, and missing metadata through separate governed diagnostics.",
+      "files": [
+        "server/services/og.ts",
+        "server/tests/structuredPublicationDates.test.ts",
+        "docs/lnls/architecture/STRUCTURED-PUBLICATION-REPAIR-AUDIT.md"
+      ],
+      "score": 0,
+      "tags": [
+        "structured-data",
+        "schema-org",
+        "creator-declared-date",
+        "publication-semantics",
+        "wid-integrity",
+        "registry-boundary",
+        "regression-test"
       ]
     }
   ]

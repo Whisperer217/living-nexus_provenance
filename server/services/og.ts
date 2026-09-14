@@ -198,24 +198,27 @@ function buildWitnessBodyBlock(opts: {
   genre?: string | null;
   witnessId: string | null;
   witnessDate?: Date | string | null;
+  /** Creator-declared historical creation date; never a system timestamp. */
+  creationDate?: Date | string | null;
+  /** Creator-declared original release date; never a registration timestamp. */
+  originalReleaseDate?: Date | string | null;
   verifyUrl: string;
   lyrics?: string | null;
   playCount?: number;
   moodTags?: string | null;
   bpm?: number | null;
   keySignature?: string | null;
-  releaseDate?: Date | string | null;
   isrc?: string | null;
   coverArtUrl?: string | null;
   songUrl?: string | null;
 }): string {
-  const { title, artistName, artistId, genre, witnessId, witnessDate, verifyUrl, lyrics } = opts;
+  const { title, artistName, artistId, genre, witnessId, witnessDate, creationDate, originalReleaseDate, verifyUrl, lyrics } = opts;
   const artistHref = artistId
     ? `${CANONICAL_ORIGIN}/creator/${artistId}`
     : `${CANONICAL_ORIGIN}/explore`;
-  const dateStr = witnessDate
-    ? new Date(witnessDate).toISOString().split("T")[0]
-    : "";
+  const recordDate = calendarDate(witnessDate);
+  const declaredCreationDate = calendarDate(creationDate);
+  const declaredReleaseDate = calendarDate(originalReleaseDate);
   const lyricsBlock =
     lyrics && lyrics.trim().length > 0
       ? `\n  <pre id="ln-witness-lyrics">${escAttr(lyrics.trim())}</pre>`
@@ -227,7 +230,9 @@ function buildWitnessBodyBlock(opts: {
     `<p>Creator: <a href="${escAttr(artistHref)}">${escAttr(artistName)}</a></p>` +
     (genre ? `<p>Genre: ${escAttr(genre)}</p>` : "") +
     (witnessId ? `<p>Witness ID: ${escAttr(witnessId)}</p>` : "") +
-    (dateStr ? `<p>Witnessed: ${escAttr(dateStr)}</p>` : "") +
+    (declaredCreationDate ? `<p>Creator-declared creation date: ${escAttr(declaredCreationDate)}</p>` : "") +
+    (declaredReleaseDate ? `<p>Creator-declared original release date: ${escAttr(declaredReleaseDate)}</p>` : "") +
+    (recordDate ? `<p>Living Nexus record established: ${escAttr(recordDate)}</p>` : "") +
     (bpm ? `<p>BPM: ${bpm}</p>` : "") +
     (keySignature ? `<p>Key: ${escAttr(keySignature)}</p>` : "") +
     (moodTags ? `<p>Mood: ${escAttr(moodTags)}</p>` : "") +
@@ -239,17 +244,32 @@ function buildWitnessBodyBlock(opts: {
   );
 }
 
+function calendarDate(value: Date | string | null | undefined): string | undefined {
+  if (!value) return undefined;
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    // Creator historical dates persist as calendar-day strings. Preserve that
+    // declaration instead of letting a timezone conversion change its meaning.
+    if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return trimmed;
+  }
+  const date = value instanceof Date ? value : new Date(value);
+  return Number.isNaN(date.getTime()) ? undefined : date.toISOString().slice(0, 10);
+}
+
 /**
  * Build a schema.org/MusicRecording JSON-LD block for Google rich results.
  * Injected into <head> as <script type="application/ld+json">.
  */
-function buildSongJsonLd(opts: {
+export function buildSongJsonLd(opts: {
   title: string;
   artistName: string;
   artistId?: number | null;
   genre?: string | null;
   witnessId?: string | null;
-  witnessDate?: Date | string | null;
+  /** Creator-declared historical creation date; never a system timestamp. */
+  creationDate?: Date | string | null;
+  /** Creator-declared original release date; never a registration timestamp. */
+  originalReleaseDate?: Date | string | null;
   songUrl: string;
   coverArtUrl?: string | null;
   audioUrl?: string | null;
@@ -259,13 +279,12 @@ function buildSongJsonLd(opts: {
   isrc?: string | null;
   playCount?: number;
 }): string {
-  const { title, artistName, artistId, genre, witnessId, witnessDate, songUrl, coverArtUrl, audioUrl, duration, bpm, keySignature, isrc, playCount } = opts;
+  const { title, artistName, artistId, genre, witnessId, creationDate, originalReleaseDate, songUrl, coverArtUrl, audioUrl, duration, bpm, keySignature, isrc, playCount } = opts;
   const artistUrl = artistId
     ? `${CANONICAL_ORIGIN}/creator/${artistId}`
     : `${CANONICAL_ORIGIN}/explore`;
-  const datePublished = witnessDate
-    ? new Date(witnessDate).toISOString().split("T")[0]
-    : undefined;
+  const dateCreated = calendarDate(creationDate);
+  const datePublished = calendarDate(originalReleaseDate);
 
   // ISO 8601 duration from seconds (e.g. PT3M45S)
   const isoDuration = duration && duration > 0
@@ -283,6 +302,7 @@ function buildSongJsonLd(opts: {
     },
     url: songUrl,
     ...(genre ? { genre } : {}),
+    ...(dateCreated ? { dateCreated } : {}),
     ...(datePublished ? { datePublished } : {}),
     ...(coverArtUrl ? { image: coverArtUrl } : {}),
     ...(audioUrl ? { contentUrl: audioUrl } : {}),
@@ -552,6 +572,8 @@ export function registerOgRoutes(app: Express) {
         genre: (song as any).genre ?? null,
         witnessId: witnessId ?? null,
         witnessDate,
+        creationDate: (song as any).releaseDate ?? null,
+        originalReleaseDate: (song as any).creatorReleaseDate ?? null,
         verifyUrl: witnessId
           ? `${CANONICAL_ORIGIN}/verify/${encodeURIComponent(witnessId)}`
           : `${CANONICAL_ORIGIN}/explore`,
@@ -560,7 +582,6 @@ export function registerOgRoutes(app: Express) {
         moodTags: (song as any).moodTags ?? null,
         bpm: (song as any).bpm ?? null,
         keySignature: (song as any).keySignature ?? null,
-        releaseDate: (song as any).releaseDate ?? null,
         isrc: (song as any).isrc ?? null,
         coverArtUrl: (song as any).coverArtUrl?.trim() || null,
         songUrl: ogUrl,
@@ -573,7 +594,8 @@ export function registerOgRoutes(app: Express) {
         artistId: creatorUserId,
         genre: (song as any).genre ?? null,
         witnessId: witnessId ?? null,
-        witnessDate,
+        creationDate: (song as any).releaseDate ?? null,
+        originalReleaseDate: (song as any).creatorReleaseDate ?? null,
         songUrl: ogUrl,
         coverArtUrl: (song as any).coverArtUrl?.trim() || null,
         audioUrl: audioUrl ?? null,

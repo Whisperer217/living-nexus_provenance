@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-09-14T00:34:59.193Z",
+  "timestamp": "2026-09-14T16:01:40.176Z",
   "doctrineResults": [
     {
       "component": "client/src/pages/SongDetailPage.tsx",
@@ -482,8 +482,8 @@
     }
   ],
   "driftReport": {
-    "timestamp": "2026-09-14T00:34:58.905Z",
-    "totalFindings": 6145,
+    "timestamp": "2026-09-14T16:01:39.905Z",
+    "totalFindings": 6113,
     "byDomain": {
       "typography": [
         {
@@ -1618,70 +1618,6 @@
           "domain": "typography",
           "file": "client/src/pages/TermsPage.tsx",
           "line": 68,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/pages/SpatialRegistryMockPage.tsx",
-          "line": 189,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/pages/SpatialRegistryMockPage.tsx",
-          "line": 228,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/pages/SpatialRegistryMockPage.tsx",
-          "line": 231,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[9px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/pages/SpatialRegistryMockPage.tsx",
-          "line": 236,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/pages/SpatialRegistryMockPage.tsx",
-          "line": 237,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/pages/SpatialRegistryMockPage.tsx",
-          "line": 266,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[9px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/pages/SpatialRegistryMockPage.tsx",
-          "line": 278,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/pages/SpatialRegistryMockPage.tsx",
-          "line": 285,
           "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
           "found": "text-[10px]",
           "severity": "medium"
@@ -14360,270 +14296,6 @@
         },
         {
           "domain": "typography",
-          "file": "client/src/components/manifestation-cards/MicroManifestationCard.tsx",
-          "line": 110,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[11px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/MicroManifestationCard.tsx",
-          "line": 116,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[9px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/MicroManifestationCard.tsx",
-          "line": 129,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[8px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
-          "line": 124,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
-          "line": 130,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[11px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
-          "line": 182,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
-          "line": 198,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
-          "line": 203,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[11px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
-          "line": 248,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[9px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
-          "line": 256,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[9px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
-          "line": 267,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[7px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
-          "line": 327,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
-          "line": 333,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[11px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
-          "line": 381,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[7px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
-          "line": 399,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
-          "line": 404,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[8px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
-          "line": 411,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[11px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/MediumManifestationCard.tsx",
-          "line": 158,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/MediumManifestationCard.tsx",
-          "line": 165,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[8px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/MediumManifestationCard.tsx",
-          "line": 170,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[8px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/MediumManifestationCard.tsx",
-          "line": 175,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[8px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/MediumManifestationCard.tsx",
-          "line": 187,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[11px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/ManifestationBundle.tsx",
-          "line": 100,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/ManifestationBundle.tsx",
-          "line": 124,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/ManifestationBundle.tsx",
-          "line": 127,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[16px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/ManifestationBundle.tsx",
-          "line": 134,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[11px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/ManifestationBundle.tsx",
-          "line": 169,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[12px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/ManifestationBundle.tsx",
-          "line": 172,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/LargeManifestationCard.tsx",
-          "line": 129,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[8px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/LargeManifestationCard.tsx",
-          "line": 190,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[9px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/LargeManifestationCard.tsx",
-          "line": 195,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[9px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/LargeManifestationCard.tsx",
-          "line": 200,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[9px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/LargeManifestationCard.tsx",
-          "line": 205,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[9px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
           "file": "client/src/components/layout/TopBar.tsx",
           "line": 155,
           "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
@@ -15004,6 +14676,270 @@
           "line": 477,
           "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
           "found": "text-[12px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/MicroManifestationCard.tsx",
+          "line": 110,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[11px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/MicroManifestationCard.tsx",
+          "line": 116,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[9px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/MicroManifestationCard.tsx",
+          "line": 129,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[8px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
+          "line": 124,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[10px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
+          "line": 130,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[11px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
+          "line": 182,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[10px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
+          "line": 198,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[10px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
+          "line": 203,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[11px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
+          "line": 248,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[9px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
+          "line": 256,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[9px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
+          "line": 267,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[7px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
+          "line": 327,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[10px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
+          "line": 333,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[11px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
+          "line": 381,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[7px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
+          "line": 399,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[10px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
+          "line": 404,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[8px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
+          "line": 411,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[11px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/MediumManifestationCard.tsx",
+          "line": 158,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[10px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/MediumManifestationCard.tsx",
+          "line": 165,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[8px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/MediumManifestationCard.tsx",
+          "line": 170,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[8px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/MediumManifestationCard.tsx",
+          "line": 175,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[8px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/MediumManifestationCard.tsx",
+          "line": 187,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[11px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/ManifestationBundle.tsx",
+          "line": 100,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[10px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/ManifestationBundle.tsx",
+          "line": 124,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[10px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/ManifestationBundle.tsx",
+          "line": 127,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[16px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/ManifestationBundle.tsx",
+          "line": 134,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[11px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/ManifestationBundle.tsx",
+          "line": 169,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[12px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/ManifestationBundle.tsx",
+          "line": 172,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[10px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/LargeManifestationCard.tsx",
+          "line": 129,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[8px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/LargeManifestationCard.tsx",
+          "line": 190,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[9px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/LargeManifestationCard.tsx",
+          "line": 195,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[9px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/LargeManifestationCard.tsx",
+          "line": 200,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[9px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/LargeManifestationCard.tsx",
+          "line": 205,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[9px]",
           "severity": "medium"
         },
         {
@@ -23327,142 +23263,6 @@
           "line": 342,
           "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
           "found": "#0a0812",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/pages/SpatialRegistryMockPage.tsx",
-          "line": 40,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#060606",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/pages/SpatialRegistryMockPage.tsx",
-          "line": 65,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#dfc57e",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/pages/SpatialRegistryMockPage.tsx",
-          "line": 73,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#d6ad4a",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/pages/SpatialRegistryMockPage.tsx",
-          "line": 105,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#887144",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/pages/SpatialRegistryMockPage.tsx",
-          "line": 116,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#d6ad4a",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/pages/SpatialRegistryMockPage.tsx",
-          "line": 119,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#8f78d1",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/pages/SpatialRegistryMockPage.tsx",
-          "line": 122,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#e9dec4",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/pages/SpatialRegistryMockPage.tsx",
-          "line": 222,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#060606",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/pages/SpatialRegistryMockPage.tsx",
-          "line": 223,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#060606",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/pages/SpatialRegistryMockPage.tsx",
-          "line": 272,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#f0d78e",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/pages/SpatialRegistryMockPage.tsx",
-          "line": 272,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#1f170b",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/pages/SpatialRegistryMockPage.tsx",
-          "line": 272,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#503312",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/pages/SpatialRegistryMockPage.tsx",
-          "line": 272,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#070707",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/pages/SpatialRegistryMockPage.tsx",
-          "line": 285,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#f4d98a",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/pages/SpatialRegistryMockPage.tsx",
-          "line": 285,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#050505",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/pages/SpatialRegistryMockPage.tsx",
-          "line": 285,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#2e1e0b",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/pages/SpatialRegistryMockPage.tsx",
-          "line": 285,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#704a1d",
           "severity": "medium"
         },
         {
@@ -34131,62 +33931,6 @@
         },
         {
           "domain": "colors",
-          "file": "client/src/lib/spatialRegistryMock.ts",
-          "line": 42,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#9480d8",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/lib/spatialRegistryMock.ts",
-          "line": 50,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#d6ad4a",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/lib/spatialRegistryMock.ts",
-          "line": 58,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#6e9fc6",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/lib/spatialRegistryMock.ts",
-          "line": 66,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#d6ad4a",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/lib/spatialRegistryMock.ts",
-          "line": 74,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#a4714f",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/lib/spatialRegistryMock.ts",
-          "line": 82,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#dfc57e",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/lib/spatialRegistryMock.ts",
-          "line": 90,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#d4ded3",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
           "file": "client/src/lib/contentTypeColors.ts",
           "line": 13,
           "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
@@ -42787,6 +42531,70 @@
         },
         {
           "domain": "colors",
+          "file": "client/src/components/layout/living-nexus-launcher.css",
+          "line": 5,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#111015",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/layout/living-nexus-launcher.css",
+          "line": 12,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#76569b",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/layout/TopBar.tsx",
+          "line": 334,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#E8DFC8",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/layout/TopBar.tsx",
+          "line": 542,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#E8B840",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/layout/TopBar.tsx",
+          "line": 626,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#e05a2b",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/layout/TopBar.tsx",
+          "line": 625,
+          "expected": "Use cathedral color tokens via CSS variables",
+          "found": "bg-red-",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/layout/LiveActivityPanel.tsx",
+          "line": 269,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#ef4444",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/layout/LeftRail.tsx",
+          "line": 158,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#0A0806",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
           "file": "client/src/components/manifestation-cards/MicroManifestationCard.tsx",
           "line": 95,
           "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
@@ -43151,70 +42959,6 @@
           "line": 176,
           "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
           "found": "#F5F5F5",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/layout/living-nexus-launcher.css",
-          "line": 5,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#111015",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/layout/living-nexus-launcher.css",
-          "line": 12,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#76569b",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/layout/TopBar.tsx",
-          "line": 334,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#E8DFC8",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/layout/TopBar.tsx",
-          "line": 542,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#E8B840",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/layout/TopBar.tsx",
-          "line": 626,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#e05a2b",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/layout/TopBar.tsx",
-          "line": 625,
-          "expected": "Use cathedral color tokens via CSS variables",
-          "found": "bg-red-",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/layout/LiveActivityPanel.tsx",
-          "line": 269,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#ef4444",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/layout/LeftRail.tsx",
-          "line": 158,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#0A0806",
           "severity": "medium"
         },
         {
@@ -49485,62 +49229,6 @@
         },
         {
           "domain": "language",
-          "file": "client/src/components/manifestation-cards/types.ts",
-          "line": 20,
-          "expected": "Use 'Support', 'Witness', or 'Honor'",
-          "found": "like",
-          "severity": "high"
-        },
-        {
-          "domain": "language",
-          "file": "client/src/components/manifestation-cards/MediumManifestationCard.tsx",
-          "line": 164,
-          "expected": "Use 'Support', 'Witness', or 'Honor'",
-          "found": "like",
-          "severity": "high"
-        },
-        {
-          "domain": "language",
-          "file": "client/src/components/manifestation-cards/MediumManifestationCard.tsx",
-          "line": 166,
-          "expected": "Use 'Support', 'Witness', or 'Honor'",
-          "found": "like",
-          "severity": "high"
-        },
-        {
-          "domain": "language",
-          "file": "client/src/components/manifestation-cards/MediumManifestationCard.tsx",
-          "line": 3,
-          "expected": "Use 'Recently Witnessed', 'Newly Registered', or 'Discovered'",
-          "found": "trending",
-          "severity": "medium"
-        },
-        {
-          "domain": "language",
-          "file": "client/src/components/manifestation-cards/LargeManifestationCard.tsx",
-          "line": 46,
-          "expected": "Use 'Support', 'Witness', or 'Honor'",
-          "found": "like",
-          "severity": "high"
-        },
-        {
-          "domain": "language",
-          "file": "client/src/components/manifestation-cards/LargeManifestationCard.tsx",
-          "line": 194,
-          "expected": "Use 'Support', 'Witness', or 'Honor'",
-          "found": "like",
-          "severity": "high"
-        },
-        {
-          "domain": "language",
-          "file": "client/src/components/manifestation-cards/LargeManifestationCard.tsx",
-          "line": 196,
-          "expected": "Use 'Support', 'Witness', or 'Honor'",
-          "found": "like",
-          "severity": "high"
-        },
-        {
-          "domain": "language",
           "file": "client/src/components/layout/RightRail.tsx",
           "line": 86,
           "expected": "Use 'Witness Activity' or 'Registry Activity'",
@@ -49645,6 +49333,62 @@
         },
         {
           "domain": "language",
+          "file": "client/src/components/manifestation-cards/types.ts",
+          "line": 20,
+          "expected": "Use 'Support', 'Witness', or 'Honor'",
+          "found": "like",
+          "severity": "high"
+        },
+        {
+          "domain": "language",
+          "file": "client/src/components/manifestation-cards/MediumManifestationCard.tsx",
+          "line": 164,
+          "expected": "Use 'Support', 'Witness', or 'Honor'",
+          "found": "like",
+          "severity": "high"
+        },
+        {
+          "domain": "language",
+          "file": "client/src/components/manifestation-cards/MediumManifestationCard.tsx",
+          "line": 166,
+          "expected": "Use 'Support', 'Witness', or 'Honor'",
+          "found": "like",
+          "severity": "high"
+        },
+        {
+          "domain": "language",
+          "file": "client/src/components/manifestation-cards/MediumManifestationCard.tsx",
+          "line": 3,
+          "expected": "Use 'Recently Witnessed', 'Newly Registered', or 'Discovered'",
+          "found": "trending",
+          "severity": "medium"
+        },
+        {
+          "domain": "language",
+          "file": "client/src/components/manifestation-cards/LargeManifestationCard.tsx",
+          "line": 46,
+          "expected": "Use 'Support', 'Witness', or 'Honor'",
+          "found": "like",
+          "severity": "high"
+        },
+        {
+          "domain": "language",
+          "file": "client/src/components/manifestation-cards/LargeManifestationCard.tsx",
+          "line": 194,
+          "expected": "Use 'Support', 'Witness', or 'Honor'",
+          "found": "like",
+          "severity": "high"
+        },
+        {
+          "domain": "language",
+          "file": "client/src/components/manifestation-cards/LargeManifestationCard.tsx",
+          "line": 196,
+          "expected": "Use 'Support', 'Witness', or 'Honor'",
+          "found": "like",
+          "severity": "high"
+        },
+        {
+          "domain": "language",
           "file": "client/src/components/domain/DomainEditor.tsx",
           "line": 46,
           "expected": "Use 'Witnesses' or 'Stewards'",
@@ -49671,7 +49415,7 @@
   },
   "debtLedger": {
     "version": "1.0.0",
-    "lastUpdated": "2026-09-14T00:34:58.507Z",
+    "lastUpdated": "2026-09-14T16:01:39.457Z",
     "totalDebt": 13,
     "items": [
       {
@@ -49817,7 +49561,7 @@
       "overall": 77,
       "grade": "B",
       "topIssue": "Typography needs improvement (55/100)",
-      "timestamp": "2026-09-14T00:34:58.907Z"
+      "timestamp": "2026-09-14T16:01:39.908Z"
     },
     {
       "page": "client/src/pages/ExplorePage.tsx",
@@ -49834,7 +49578,7 @@
       "overall": 70,
       "grade": "C",
       "topIssue": "Typography needs improvement (55/100)",
-      "timestamp": "2026-09-14T00:34:58.909Z"
+      "timestamp": "2026-09-14T16:01:39.909Z"
     },
     {
       "page": "client/src/pages/SongDetailPage.tsx",
@@ -49851,7 +49595,7 @@
       "overall": 74,
       "grade": "C",
       "topIssue": "Creator Honor needs improvement (55/100)",
-      "timestamp": "2026-09-14T00:34:58.912Z"
+      "timestamp": "2026-09-14T16:01:39.913Z"
     },
     {
       "page": "client/src/pages/VerifyPage.tsx",
@@ -49868,7 +49612,7 @@
       "overall": 78,
       "grade": "B",
       "topIssue": "Typography needs improvement (47/100)",
-      "timestamp": "2026-09-14T00:34:58.914Z"
+      "timestamp": "2026-09-14T16:01:39.914Z"
     },
     {
       "page": "client/src/pages/CreatorProfilePage.tsx",
@@ -49885,7 +49629,7 @@
       "overall": 78,
       "grade": "B",
       "topIssue": "Typography needs improvement (63/100)",
-      "timestamp": "2026-09-14T00:34:58.919Z"
+      "timestamp": "2026-09-14T16:01:39.920Z"
     },
     {
       "page": "client/src/pages/ArchivePage.tsx",
@@ -49902,7 +49646,7 @@
       "overall": 70,
       "grade": "C",
       "topIssue": "Typography needs improvement (63/100)",
-      "timestamp": "2026-09-14T00:34:58.922Z"
+      "timestamp": "2026-09-14T16:01:39.922Z"
     },
     {
       "page": "client/src/pages/DashboardPage.tsx",
@@ -49919,7 +49663,7 @@
       "overall": 73,
       "grade": "C",
       "topIssue": "Typography needs improvement (47/100)",
-      "timestamp": "2026-09-14T00:34:58.925Z"
+      "timestamp": "2026-09-14T16:01:39.925Z"
     },
     {
       "page": "client/src/pages/UploadPage.tsx",
@@ -49936,7 +49680,7 @@
       "overall": 72,
       "grade": "C",
       "topIssue": "Support needs improvement (60/100)",
-      "timestamp": "2026-09-14T00:34:58.930Z"
+      "timestamp": "2026-09-14T16:01:39.931Z"
     },
     {
       "page": "client/src/components/WorkListRow.tsx",
@@ -49953,7 +49697,7 @@
       "overall": 74,
       "grade": "C",
       "topIssue": "Typography needs improvement (47/100)",
-      "timestamp": "2026-09-14T00:34:58.931Z"
+      "timestamp": "2026-09-14T16:01:39.931Z"
     },
     {
       "page": "client/src/components/SupportCreatorDrawer.tsx",
@@ -49970,7 +49714,7 @@
       "overall": 70,
       "grade": "C",
       "topIssue": "Typography needs improvement (55/100)",
-      "timestamp": "2026-09-14T00:34:58.931Z"
+      "timestamp": "2026-09-14T16:01:39.932Z"
     }
   ],
   "passResults": [
@@ -50024,14 +49768,14 @@
         "components/player/GiftModal.tsx: 13 hardcoded pixel font sizes (e.g. text-[11px], text-[15px], text-[12px])",
         "components/player/CinematicModeEngine.tsx: 23 hardcoded pixel font sizes (e.g. text-[96px], text-[11px], text-[11px])",
         "components/manifestation-reader/RightContextPanel.tsx: 29 hardcoded pixel font sizes (e.g. text-[9px], text-[9px], text-[9px])",
-        "components/manifestation-cards/MediumVariants.tsx: 14 hardcoded pixel font sizes (e.g. text-[10px], text-[11px], text-[10px])",
         "components/layout/RightRail.tsx: 24 hardcoded pixel font sizes (e.g. text-[10px], text-[10px], text-[11px])",
+        "components/manifestation-cards/MediumVariants.tsx: 14 hardcoded pixel font sizes (e.g. text-[10px], text-[11px], text-[10px])",
         "pages/manifestation-studio/environments/MusicEnvironment.tsx: 17 hardcoded pixel font sizes (e.g. text-[11px], text-[11px], text-[11px])",
         "pages/manifestation-studio/environments/LyricsEnvironment.tsx: 11 hardcoded pixel font sizes (e.g. text-[10px], text-[10px], text-[10px])",
         "components/manifestation-reader/canvases/ArchiveCanvas.tsx: 26 hardcoded pixel font sizes (e.g. text-[10px], text-[9px], text-[9px])"
       ],
       "recommendations": [
-        "Replace 1900 hardcoded pixel font sizes with ln-* semantic classes (ln-page-title, ln-section-header, ln-body-copy, ln-caption)",
+        "Replace 1892 hardcoded pixel font sizes with ln-* semantic classes (ln-page-title, ln-section-header, ln-body-copy, ln-caption)",
         "Replace 3 font-sans usages with font-heading (Cinzel), font-editorial (Cormorant), or font-body (EB Garamond)"
       ],
       "scoreImpact": 15,
@@ -50046,7 +49790,6 @@
         "client/src/pages/TrackPage.tsx",
         "client/src/pages/TosComparePage.tsx",
         "client/src/pages/TermsPage.tsx",
-        "client/src/pages/SpatialRegistryMockPage.tsx",
         "client/src/pages/SongDetailPage.tsx",
         "client/src/pages/SharedPromptPage.tsx",
         "client/src/pages/SharedPlaylistPage.tsx",
@@ -50150,20 +49893,14 @@
         "client/src/components/AddToMyListModal.tsx",
         "client/src/components/ActivationPanel.tsx",
         "client/src/components/AIPlatformAdvisory.tsx",
+        "client/src/pages/admin/AdminControlPlanePage.tsx",
         "client/src/pages/manifestation-studio/TypeGateway.tsx",
         "client/src/pages/manifestation-studio/StudioShell.tsx",
         "client/src/pages/manifestation-studio/ManifestationStudio.tsx",
         "client/src/pages/loop/LoopWorkPage.tsx",
         "client/src/pages/loop/LoopManagePage.tsx",
         "client/src/pages/loop/LoopCreatorPage.tsx",
-        "client/src/pages/admin/AdminControlPlanePage.tsx",
         "client/src/components/ui/kbd.tsx",
-        "client/src/components/reader/StoryboardBuilder.tsx",
-        "client/src/components/reader/ManuscriptReader.tsx",
-        "client/src/components/reader/HorizontalBookReader.tsx",
-        "client/src/components/reader/FeaturedBookModel.tsx",
-        "client/src/components/reader/CinematicComicReader.tsx",
-        "client/src/components/reader/ChildrensBookReader.tsx",
         "client/src/components/player/TheaterPlayer.tsx",
         "client/src/components/player/SaveQueueAsPlaylistModal.tsx",
         "client/src/components/player/PlayerTipModal.tsx",
@@ -50173,19 +49910,25 @@
         "client/src/components/player/GlobalPlayer.tsx",
         "client/src/components/player/GiftModal.tsx",
         "client/src/components/player/CinematicModeEngine.tsx",
+        "client/src/components/reader/StoryboardBuilder.tsx",
+        "client/src/components/reader/ManuscriptReader.tsx",
+        "client/src/components/reader/HorizontalBookReader.tsx",
+        "client/src/components/reader/FeaturedBookModel.tsx",
+        "client/src/components/reader/CinematicComicReader.tsx",
+        "client/src/components/reader/ChildrensBookReader.tsx",
         "client/src/components/manifestation-reader/RightContextPanel.tsx",
         "client/src/components/manifestation-reader/ManifestationReader.tsx",
         "client/src/components/manifestation-reader/LeftNavPanel.tsx",
-        "client/src/components/manifestation-cards/MicroManifestationCard.tsx",
-        "client/src/components/manifestation-cards/MediumVariants.tsx",
-        "client/src/components/manifestation-cards/MediumManifestationCard.tsx",
-        "client/src/components/manifestation-cards/ManifestationBundle.tsx",
-        "client/src/components/manifestation-cards/LargeManifestationCard.tsx",
         "client/src/components/layout/TopBar.tsx",
         "client/src/components/layout/SiteFooter.tsx",
         "client/src/components/layout/RightRail.tsx",
         "client/src/components/layout/QuickRefSlider.tsx",
         "client/src/components/layout/ContextDrawer.tsx",
+        "client/src/components/manifestation-cards/MicroManifestationCard.tsx",
+        "client/src/components/manifestation-cards/MediumVariants.tsx",
+        "client/src/components/manifestation-cards/MediumManifestationCard.tsx",
+        "client/src/components/manifestation-cards/ManifestationBundle.tsx",
+        "client/src/components/manifestation-cards/LargeManifestationCard.tsx",
         "client/src/components/domain/ShelfBlock.tsx",
         "client/src/components/domain/DomainRenderer.tsx",
         "client/src/components/domain/DomainEditor.tsx",
@@ -50297,10 +50040,10 @@
         "client/src/components/CinematicSongHeader.tsx: opacity-0 on action buttons — invisible on mobile touch. Use sm:opacity-0 instead — see LESSON-008",
         "client/src/components/BookCard.tsx: opacity-0 on action buttons — invisible on mobile touch. Use sm:opacity-0 instead — see LESSON-008",
         "client/src/pages/loop/LoopManagePage.tsx: opacity-0 on action buttons — invisible on mobile touch. Use sm:opacity-0 instead — see LESSON-008",
-        "client/src/components/reader/StoryboardBuilder.tsx: opacity-0 on action buttons — invisible on mobile touch. Use sm:opacity-0 instead — see LESSON-008",
-        "client/src/components/reader/FeaturedBookModel.tsx: opacity-0 on action buttons — invisible on mobile touch. Use sm:opacity-0 instead — see LESSON-008",
         "client/src/components/player/PlayerBar.tsx: opacity-0 on action buttons — invisible on mobile touch. Use sm:opacity-0 instead — see LESSON-008",
         "client/src/components/player/GlobalPlayer.tsx: opacity-0 on action buttons — invisible on mobile touch. Use sm:opacity-0 instead — see LESSON-008",
+        "client/src/components/reader/StoryboardBuilder.tsx: opacity-0 on action buttons — invisible on mobile touch. Use sm:opacity-0 instead — see LESSON-008",
+        "client/src/components/reader/FeaturedBookModel.tsx: opacity-0 on action buttons — invisible on mobile touch. Use sm:opacity-0 instead — see LESSON-008",
         "client/src/components/layout/TopBar.tsx: opacity-0 on action buttons — invisible on mobile touch. Use sm:opacity-0 instead — see LESSON-008",
         "client/src/components/layout/QuickRefSlider.tsx: opacity-0 on action buttons — invisible on mobile touch. Use sm:opacity-0 instead — see LESSON-008",
         "client/src/components/domain/ShelfBlock.tsx: opacity-0 on action buttons — invisible on mobile touch. Use sm:opacity-0 instead — see LESSON-008",
@@ -50343,10 +50086,10 @@
         "Change opacity-0 to sm:opacity-0 in components/CinematicSongHeader.tsx so buttons are always visible on mobile",
         "Change opacity-0 to sm:opacity-0 in components/BookCard.tsx so buttons are always visible on mobile",
         "Change opacity-0 to sm:opacity-0 in pages/loop/LoopManagePage.tsx so buttons are always visible on mobile",
-        "Change opacity-0 to sm:opacity-0 in components/reader/StoryboardBuilder.tsx so buttons are always visible on mobile",
-        "Change opacity-0 to sm:opacity-0 in components/reader/FeaturedBookModel.tsx so buttons are always visible on mobile",
         "Change opacity-0 to sm:opacity-0 in components/player/PlayerBar.tsx so buttons are always visible on mobile",
         "Change opacity-0 to sm:opacity-0 in components/player/GlobalPlayer.tsx so buttons are always visible on mobile",
+        "Change opacity-0 to sm:opacity-0 in components/reader/StoryboardBuilder.tsx so buttons are always visible on mobile",
+        "Change opacity-0 to sm:opacity-0 in components/reader/FeaturedBookModel.tsx so buttons are always visible on mobile",
         "Change opacity-0 to sm:opacity-0 in components/layout/TopBar.tsx so buttons are always visible on mobile",
         "Change opacity-0 to sm:opacity-0 in components/layout/QuickRefSlider.tsx so buttons are always visible on mobile",
         "Change opacity-0 to sm:opacity-0 in components/domain/ShelfBlock.tsx so buttons are always visible on mobile",
@@ -50427,11 +50170,6 @@
         "client/src/pages/loop/LoopManagePage.tsx",
         "client/src/pages/loop/LoopCreatorPage.tsx",
         "client/src/pages/admin/MissionControlPage.tsx",
-        "client/src/components/reader/StoryboardBuilder.tsx",
-        "client/src/components/reader/HorizontalBookReader.tsx",
-        "client/src/components/reader/FeaturedBookModel.tsx",
-        "client/src/components/reader/CinematicComicReader.tsx",
-        "client/src/components/reader/ChildrensBookReader.tsx",
         "client/src/components/studio/SoundtrackCueMapper.tsx",
         "client/src/components/player/TheaterPlayer.tsx",
         "client/src/components/player/PlayerTipModal.tsx",
@@ -50440,8 +50178,13 @@
         "client/src/components/player/ManifestationGestureLayer.tsx",
         "client/src/components/player/GlobalPlayer.tsx",
         "client/src/components/player/CinematicModeEngine.tsx",
-        "client/src/components/manifestation-reader/ManifestationReader.tsx",
         "client/src/components/manifestation-cards/ManifestationBundle.tsx",
+        "client/src/components/reader/StoryboardBuilder.tsx",
+        "client/src/components/reader/HorizontalBookReader.tsx",
+        "client/src/components/reader/FeaturedBookModel.tsx",
+        "client/src/components/reader/CinematicComicReader.tsx",
+        "client/src/components/reader/ChildrensBookReader.tsx",
+        "client/src/components/manifestation-reader/ManifestationReader.tsx",
         "client/src/components/layout/TopBar.tsx",
         "client/src/components/layout/QuickRefSlider.tsx",
         "client/src/components/domain/ShelfBlock.tsx",
@@ -50464,7 +50207,6 @@
         "client/src/pages/UploadVNextPage.tsx: Forbidden animation \"animate-spin\" — not cathedral",
         "client/src/pages/UploadPage.tsx: Forbidden animation \"animate-spin\" — not cathedral",
         "client/src/pages/UploadPage.tsx: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
-        "client/src/pages/SpatialRegistryMockPage.tsx: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
         "client/src/pages/SharedPromptPage.tsx: Forbidden animation \"animate-spin\" — not cathedral",
         "client/src/pages/SharedPlaylistPage.tsx: Forbidden animation \"animate-spin\" — not cathedral",
         "client/src/pages/SetupDomainPage.tsx: Forbidden animation \"animate-spin\" — not cathedral",
@@ -50515,15 +50257,15 @@
         "client/src/pages/AdminNotificationsPage.tsx: Forbidden animation \"animate-spin\" — not cathedral",
         "client/src/lib/viewportLayers.ts: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
         "client/src/lib/uploadPipeline.ts: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
+        "client/src/design-system/primitives.tsx: Forbidden animation \"animate-spin\" — not cathedral",
+        "client/src/contexts/WorkEditorContext.tsx: Forbidden animation \"animate-spin\" — not cathedral",
+        "client/src/contexts/PlayerContext.tsx: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
+        "client/src/contexts/HarmonicContext.tsx: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
         "client/src/hooks/useWaveformVisualizer.ts: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
         "client/src/hooks/useScrollRestoration.ts: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
         "client/src/hooks/useMobileAudioGlow.ts: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
         "client/src/hooks/useHarmonicSignature.ts: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
         "client/src/hooks/useFrequencyGlow.ts: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
-        "client/src/design-system/primitives.tsx: Forbidden animation \"animate-spin\" — not cathedral",
-        "client/src/contexts/WorkEditorContext.tsx: Forbidden animation \"animate-spin\" — not cathedral",
-        "client/src/contexts/PlayerContext.tsx: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
-        "client/src/contexts/HarmonicContext.tsx: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
         "client/src/components/WitnessesPanel.tsx: Forbidden animation \"animate-spin\" — not cathedral",
         "client/src/components/WhatsNewModal.tsx: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
         "client/src/components/VisionChamberRitual.tsx: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
@@ -50562,12 +50304,12 @@
         "client/src/components/AIChatBox.tsx: Forbidden animation \"animate-spin\" — not cathedral",
         "client/src/components/AIChatBox.tsx: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
         "client/src/pages/manifestation-studio/TypeGateway.tsx: Forbidden animation \"animate-spin\" — not cathedral",
-        "client/src/pages/loop/LoopWorkPage.tsx: Forbidden animation \"animate-spin\" — not cathedral",
-        "client/src/pages/loop/LoopManagePage.tsx: Forbidden animation \"animate-spin\" — not cathedral",
-        "client/src/pages/loop/LoopCreatorPage.tsx: Forbidden animation \"animate-spin\" — not cathedral",
         "client/src/pages/admin/PhysicalDistributionPage.tsx: Forbidden animation \"animate-spin\" — not cathedral",
         "client/src/pages/admin/MissionControl.tsx: Forbidden animation \"animate-spin\" — not cathedral",
         "client/src/pages/admin/CommentModerationPage.tsx: Forbidden animation \"animate-spin\" — not cathedral",
+        "client/src/pages/loop/LoopWorkPage.tsx: Forbidden animation \"animate-spin\" — not cathedral",
+        "client/src/pages/loop/LoopManagePage.tsx: Forbidden animation \"animate-spin\" — not cathedral",
+        "client/src/pages/loop/LoopCreatorPage.tsx: Forbidden animation \"animate-spin\" — not cathedral",
         "client/src/components/ui/spinner.tsx: Forbidden animation \"animate-spin\" — not cathedral",
         "client/src/components/ui/sidebar.tsx: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
         "client/src/components/reader/StoryboardBuilder.tsx: Forbidden animation \"animate-spin\" — not cathedral",
@@ -50584,8 +50326,8 @@
         "client/src/components/layout/LeftRail.tsx: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
         "client/src/components/domain/DomainEditor.tsx: Forbidden animation \"animate-spin\" — not cathedral",
         "client/src/components/creator/CreatorSanctuaryStage.tsx: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
-        "client/src/components/creative-cathedral/CreativeCathedralWorkspace.tsx: Forbidden animation \"animate-spin\" — not cathedral",
         "client/src/components/atmosphere/DepthAtmosphere.tsx: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
+        "client/src/components/creative-cathedral/CreativeCathedralWorkspace.tsx: Forbidden animation \"animate-spin\" — not cathedral",
         "client/src/pages/manifestation-studio/environments/VideoEnvironment.tsx: Forbidden animation \"animate-spin\" — not cathedral",
         "client/src/pages/manifestation-studio/environments/MusicEnvironment.tsx: Forbidden animation \"animate-spin\" — not cathedral",
         "client/src/pages/manifestation-studio/environments/ManuscriptEnvironment.tsx: Forbidden animation \"animate-spin\" — not cathedral",
@@ -50603,7 +50345,6 @@
         "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
         "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
         "Add useReducedMotion() guard to canvas animation in pages/UploadPage.tsx",
-        "Add useReducedMotion() guard to canvas animation in pages/SpatialRegistryMockPage.tsx",
         "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
         "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
         "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
@@ -50654,15 +50395,15 @@
         "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
         "Add useReducedMotion() guard to canvas animation in lib/viewportLayers.ts",
         "Add useReducedMotion() guard to canvas animation in lib/uploadPipeline.ts",
+        "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
+        "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
+        "Add useReducedMotion() guard to canvas animation in contexts/PlayerContext.tsx",
+        "Add useReducedMotion() guard to canvas animation in contexts/HarmonicContext.tsx",
         "Add useReducedMotion() guard to canvas animation in hooks/useWaveformVisualizer.ts",
         "Add useReducedMotion() guard to canvas animation in hooks/useScrollRestoration.ts",
         "Add useReducedMotion() guard to canvas animation in hooks/useMobileAudioGlow.ts",
         "Add useReducedMotion() guard to canvas animation in hooks/useHarmonicSignature.ts",
         "Add useReducedMotion() guard to canvas animation in hooks/useFrequencyGlow.ts",
-        "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
-        "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
-        "Add useReducedMotion() guard to canvas animation in contexts/PlayerContext.tsx",
-        "Add useReducedMotion() guard to canvas animation in contexts/HarmonicContext.tsx",
         "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
         "Add useReducedMotion() guard to canvas animation in components/WhatsNewModal.tsx",
         "Add useReducedMotion() guard to canvas animation in components/VisionChamberRitual.tsx",
@@ -50723,8 +50464,8 @@
         "Add useReducedMotion() guard to canvas animation in components/layout/LeftRail.tsx",
         "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
         "Add useReducedMotion() guard to canvas animation in components/creator/CreatorSanctuaryStage.tsx",
-        "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
         "Add useReducedMotion() guard to canvas animation in components/atmosphere/DepthAtmosphere.tsx",
+        "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
         "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
         "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
         "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
@@ -50733,7 +50474,7 @@
         "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
         "Add useReducedMotion() guard to canvas animation in components/manifestation-reader/adapters/index.ts"
       ],
-      "scoreImpact": 411,
+      "scoreImpact": 408,
       "filesAffected": [
         "client/src/App.tsx",
         "client/src/pages/WitnessFlowPage.tsx",
@@ -50742,7 +50483,6 @@
         "client/src/pages/VerifyPage.tsx",
         "client/src/pages/UploadVNextPage.tsx",
         "client/src/pages/UploadPage.tsx",
-        "client/src/pages/SpatialRegistryMockPage.tsx",
         "client/src/pages/SharedPromptPage.tsx",
         "client/src/pages/SharedPlaylistPage.tsx",
         "client/src/pages/SetupDomainPage.tsx",
@@ -50789,15 +50529,15 @@
         "client/src/pages/AdminNotificationsPage.tsx",
         "client/src/lib/viewportLayers.ts",
         "client/src/lib/uploadPipeline.ts",
+        "client/src/design-system/primitives.tsx",
+        "client/src/contexts/WorkEditorContext.tsx",
+        "client/src/contexts/PlayerContext.tsx",
+        "client/src/contexts/HarmonicContext.tsx",
         "client/src/hooks/useWaveformVisualizer.ts",
         "client/src/hooks/useScrollRestoration.ts",
         "client/src/hooks/useMobileAudioGlow.ts",
         "client/src/hooks/useHarmonicSignature.ts",
         "client/src/hooks/useFrequencyGlow.ts",
-        "client/src/design-system/primitives.tsx",
-        "client/src/contexts/WorkEditorContext.tsx",
-        "client/src/contexts/PlayerContext.tsx",
-        "client/src/contexts/HarmonicContext.tsx",
         "client/src/components/WitnessesPanel.tsx",
         "client/src/components/WhatsNewModal.tsx",
         "client/src/components/VisionChamberRitual.tsx",
@@ -50830,12 +50570,12 @@
         "client/src/components/AddToCollectionModal.tsx",
         "client/src/components/AIChatBox.tsx",
         "client/src/pages/manifestation-studio/TypeGateway.tsx",
-        "client/src/pages/loop/LoopWorkPage.tsx",
-        "client/src/pages/loop/LoopManagePage.tsx",
-        "client/src/pages/loop/LoopCreatorPage.tsx",
         "client/src/pages/admin/PhysicalDistributionPage.tsx",
         "client/src/pages/admin/MissionControl.tsx",
         "client/src/pages/admin/CommentModerationPage.tsx",
+        "client/src/pages/loop/LoopWorkPage.tsx",
+        "client/src/pages/loop/LoopManagePage.tsx",
+        "client/src/pages/loop/LoopCreatorPage.tsx",
         "client/src/components/ui/spinner.tsx",
         "client/src/components/ui/sidebar.tsx",
         "client/src/components/reader/StoryboardBuilder.tsx",
@@ -50852,8 +50592,8 @@
         "client/src/components/layout/LeftRail.tsx",
         "client/src/components/domain/DomainEditor.tsx",
         "client/src/components/creator/CreatorSanctuaryStage.tsx",
-        "client/src/components/creative-cathedral/CreativeCathedralWorkspace.tsx",
         "client/src/components/atmosphere/DepthAtmosphere.tsx",
+        "client/src/components/creative-cathedral/CreativeCathedralWorkspace.tsx",
         "client/src/pages/manifestation-studio/environments/VideoEnvironment.tsx",
         "client/src/pages/manifestation-studio/environments/MusicEnvironment.tsx",
         "client/src/pages/manifestation-studio/environments/ManuscriptEnvironment.tsx",
