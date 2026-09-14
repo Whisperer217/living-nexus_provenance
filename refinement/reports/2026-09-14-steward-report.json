@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-09-14T00:24:17.907Z",
+  "timestamp": "2026-09-14T00:34:59.193Z",
   "doctrineResults": [
     {
       "component": "client/src/pages/SongDetailPage.tsx",
@@ -482,7 +482,7 @@
     }
   ],
   "driftReport": {
-    "timestamp": "2026-09-14T00:24:17.635Z",
+    "timestamp": "2026-09-14T00:34:58.905Z",
     "totalFindings": 6145,
     "byDomain": {
       "typography": [
@@ -11656,6 +11656,70 @@
         },
         {
           "domain": "typography",
+          "file": "client/src/pages/manifestation-studio/TypeGateway.tsx",
+          "line": 90,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[11px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/pages/manifestation-studio/StudioShell.tsx",
+          "line": 58,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[9px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/pages/manifestation-studio/StudioShell.tsx",
+          "line": 74,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[10px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/pages/manifestation-studio/StudioShell.tsx",
+          "line": 89,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[10px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/pages/manifestation-studio/StudioShell.tsx",
+          "line": 186,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[10px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/pages/manifestation-studio/StudioShell.tsx",
+          "line": 190,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[11px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/pages/manifestation-studio/StudioShell.tsx",
+          "line": 208,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[11px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/pages/manifestation-studio/ManifestationStudio.tsx",
+          "line": 84,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[11px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
           "file": "client/src/pages/loop/LoopWorkPage.tsx",
           "line": 295,
           "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
@@ -11858,70 +11922,6 @@
           "domain": "typography",
           "file": "client/src/pages/admin/AdminControlPlanePage.tsx",
           "line": 314,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[11px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/pages/manifestation-studio/TypeGateway.tsx",
-          "line": 90,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[11px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/pages/manifestation-studio/StudioShell.tsx",
-          "line": 58,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[9px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/pages/manifestation-studio/StudioShell.tsx",
-          "line": 74,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/pages/manifestation-studio/StudioShell.tsx",
-          "line": 89,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/pages/manifestation-studio/StudioShell.tsx",
-          "line": 186,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/pages/manifestation-studio/StudioShell.tsx",
-          "line": 190,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[11px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/pages/manifestation-studio/StudioShell.tsx",
-          "line": 208,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[11px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/pages/manifestation-studio/ManifestationStudio.tsx",
-          "line": 84,
           "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
           "found": "text-[11px]",
           "severity": "medium"
@@ -12188,270 +12188,6 @@
           "line": 621,
           "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
           "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/MicroManifestationCard.tsx",
-          "line": 110,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[11px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/MicroManifestationCard.tsx",
-          "line": 116,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[9px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/MicroManifestationCard.tsx",
-          "line": 129,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[8px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
-          "line": 124,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
-          "line": 130,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[11px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
-          "line": 182,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
-          "line": 198,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
-          "line": 203,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[11px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
-          "line": 248,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[9px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
-          "line": 256,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[9px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
-          "line": 267,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[7px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
-          "line": 327,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
-          "line": 333,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[11px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
-          "line": 381,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[7px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
-          "line": 399,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
-          "line": 404,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[8px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
-          "line": 411,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[11px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/MediumManifestationCard.tsx",
-          "line": 158,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/MediumManifestationCard.tsx",
-          "line": 165,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[8px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/MediumManifestationCard.tsx",
-          "line": 170,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[8px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/MediumManifestationCard.tsx",
-          "line": 175,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[8px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/MediumManifestationCard.tsx",
-          "line": 187,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[11px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/ManifestationBundle.tsx",
-          "line": 100,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/ManifestationBundle.tsx",
-          "line": 124,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/ManifestationBundle.tsx",
-          "line": 127,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[16px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/ManifestationBundle.tsx",
-          "line": 134,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[11px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/ManifestationBundle.tsx",
-          "line": 169,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[12px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/ManifestationBundle.tsx",
-          "line": 172,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/LargeManifestationCard.tsx",
-          "line": 129,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[8px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/LargeManifestationCard.tsx",
-          "line": 190,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[9px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/LargeManifestationCard.tsx",
-          "line": 195,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[9px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/LargeManifestationCard.tsx",
-          "line": 200,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[9px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-cards/LargeManifestationCard.tsx",
-          "line": 205,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[9px]",
           "severity": "medium"
         },
         {
@@ -14288,6 +14024,606 @@
         },
         {
           "domain": "typography",
+          "file": "client/src/components/manifestation-reader/RightContextPanel.tsx",
+          "line": 41,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[9px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-reader/RightContextPanel.tsx",
+          "line": 87,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[9px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-reader/RightContextPanel.tsx",
+          "line": 99,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[9px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-reader/RightContextPanel.tsx",
+          "line": 109,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[9px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-reader/RightContextPanel.tsx",
+          "line": 122,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[9px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-reader/RightContextPanel.tsx",
+          "line": 130,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[9px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-reader/RightContextPanel.tsx",
+          "line": 140,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[9px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-reader/RightContextPanel.tsx",
+          "line": 148,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[10px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-reader/RightContextPanel.tsx",
+          "line": 149,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[9px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-reader/RightContextPanel.tsx",
+          "line": 150,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[9px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-reader/RightContextPanel.tsx",
+          "line": 161,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[9px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-reader/RightContextPanel.tsx",
+          "line": 169,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[10px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-reader/RightContextPanel.tsx",
+          "line": 170,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[8px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-reader/RightContextPanel.tsx",
+          "line": 193,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[10px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-reader/RightContextPanel.tsx",
+          "line": 200,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[9px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-reader/RightContextPanel.tsx",
+          "line": 206,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[8px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-reader/RightContextPanel.tsx",
+          "line": 211,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[8px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-reader/RightContextPanel.tsx",
+          "line": 234,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[9px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-reader/RightContextPanel.tsx",
+          "line": 240,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[9px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-reader/RightContextPanel.tsx",
+          "line": 246,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[9px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-reader/RightContextPanel.tsx",
+          "line": 253,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[9px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-reader/RightContextPanel.tsx",
+          "line": 263,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[9px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-reader/RightContextPanel.tsx",
+          "line": 271,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[9px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-reader/RightContextPanel.tsx",
+          "line": 276,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[10px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-reader/RightContextPanel.tsx",
+          "line": 277,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[10px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-reader/RightContextPanel.tsx",
+          "line": 295,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[10px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-reader/RightContextPanel.tsx",
+          "line": 302,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[9px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-reader/RightContextPanel.tsx",
+          "line": 319,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[9px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-reader/RightContextPanel.tsx",
+          "line": 326,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[9px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-reader/ManifestationReader.tsx",
+          "line": 286,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[10px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-reader/ManifestationReader.tsx",
+          "line": 293,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[9px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-reader/ManifestationReader.tsx",
+          "line": 309,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[10px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-reader/ManifestationReader.tsx",
+          "line": 328,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[11px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-reader/ManifestationReader.tsx",
+          "line": 487,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[9px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-reader/LeftNavPanel.tsx",
+          "line": 35,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[10px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-reader/LeftNavPanel.tsx",
+          "line": 42,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[9px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-reader/LeftNavPanel.tsx",
+          "line": 45,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[9px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-reader/LeftNavPanel.tsx",
+          "line": 58,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[9px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-reader/LeftNavPanel.tsx",
+          "line": 68,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[10px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-reader/LeftNavPanel.tsx",
+          "line": 84,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[9px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-reader/LeftNavPanel.tsx",
+          "line": 109,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[8px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-reader/LeftNavPanel.tsx",
+          "line": 120,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[9px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/MicroManifestationCard.tsx",
+          "line": 110,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[11px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/MicroManifestationCard.tsx",
+          "line": 116,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[9px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/MicroManifestationCard.tsx",
+          "line": 129,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[8px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
+          "line": 124,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[10px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
+          "line": 130,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[11px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
+          "line": 182,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[10px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
+          "line": 198,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[10px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
+          "line": 203,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[11px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
+          "line": 248,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[9px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
+          "line": 256,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[9px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
+          "line": 267,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[7px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
+          "line": 327,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[10px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
+          "line": 333,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[11px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
+          "line": 381,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[7px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
+          "line": 399,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[10px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
+          "line": 404,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[8px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
+          "line": 411,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[11px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/MediumManifestationCard.tsx",
+          "line": 158,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[10px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/MediumManifestationCard.tsx",
+          "line": 165,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[8px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/MediumManifestationCard.tsx",
+          "line": 170,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[8px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/MediumManifestationCard.tsx",
+          "line": 175,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[8px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/MediumManifestationCard.tsx",
+          "line": 187,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[11px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/ManifestationBundle.tsx",
+          "line": 100,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[10px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/ManifestationBundle.tsx",
+          "line": 124,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[10px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/ManifestationBundle.tsx",
+          "line": 127,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[16px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/ManifestationBundle.tsx",
+          "line": 134,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[11px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/ManifestationBundle.tsx",
+          "line": 169,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[12px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/ManifestationBundle.tsx",
+          "line": 172,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[10px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/LargeManifestationCard.tsx",
+          "line": 129,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[8px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/LargeManifestationCard.tsx",
+          "line": 190,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[9px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/LargeManifestationCard.tsx",
+          "line": 195,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[9px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/LargeManifestationCard.tsx",
+          "line": 200,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[9px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
+          "file": "client/src/components/manifestation-cards/LargeManifestationCard.tsx",
+          "line": 205,
+          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
+          "found": "text-[9px]",
+          "severity": "medium"
+        },
+        {
+          "domain": "typography",
           "file": "client/src/components/layout/TopBar.tsx",
           "line": 155,
           "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
@@ -14668,342 +15004,6 @@
           "line": 477,
           "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
           "found": "text-[12px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-reader/RightContextPanel.tsx",
-          "line": 41,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[9px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-reader/RightContextPanel.tsx",
-          "line": 87,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[9px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-reader/RightContextPanel.tsx",
-          "line": 99,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[9px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-reader/RightContextPanel.tsx",
-          "line": 109,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[9px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-reader/RightContextPanel.tsx",
-          "line": 122,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[9px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-reader/RightContextPanel.tsx",
-          "line": 130,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[9px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-reader/RightContextPanel.tsx",
-          "line": 140,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[9px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-reader/RightContextPanel.tsx",
-          "line": 148,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-reader/RightContextPanel.tsx",
-          "line": 149,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[9px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-reader/RightContextPanel.tsx",
-          "line": 150,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[9px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-reader/RightContextPanel.tsx",
-          "line": 161,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[9px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-reader/RightContextPanel.tsx",
-          "line": 169,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-reader/RightContextPanel.tsx",
-          "line": 170,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[8px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-reader/RightContextPanel.tsx",
-          "line": 193,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-reader/RightContextPanel.tsx",
-          "line": 200,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[9px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-reader/RightContextPanel.tsx",
-          "line": 206,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[8px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-reader/RightContextPanel.tsx",
-          "line": 211,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[8px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-reader/RightContextPanel.tsx",
-          "line": 234,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[9px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-reader/RightContextPanel.tsx",
-          "line": 240,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[9px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-reader/RightContextPanel.tsx",
-          "line": 246,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[9px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-reader/RightContextPanel.tsx",
-          "line": 253,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[9px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-reader/RightContextPanel.tsx",
-          "line": 263,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[9px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-reader/RightContextPanel.tsx",
-          "line": 271,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[9px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-reader/RightContextPanel.tsx",
-          "line": 276,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-reader/RightContextPanel.tsx",
-          "line": 277,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-reader/RightContextPanel.tsx",
-          "line": 295,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-reader/RightContextPanel.tsx",
-          "line": 302,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[9px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-reader/RightContextPanel.tsx",
-          "line": 319,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[9px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-reader/RightContextPanel.tsx",
-          "line": 326,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[9px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-reader/ManifestationReader.tsx",
-          "line": 286,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-reader/ManifestationReader.tsx",
-          "line": 293,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[9px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-reader/ManifestationReader.tsx",
-          "line": 309,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-reader/ManifestationReader.tsx",
-          "line": 328,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[11px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-reader/ManifestationReader.tsx",
-          "line": 487,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[9px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-reader/LeftNavPanel.tsx",
-          "line": 35,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-reader/LeftNavPanel.tsx",
-          "line": 42,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[9px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-reader/LeftNavPanel.tsx",
-          "line": 45,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[9px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-reader/LeftNavPanel.tsx",
-          "line": 58,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[9px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-reader/LeftNavPanel.tsx",
-          "line": 68,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[10px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-reader/LeftNavPanel.tsx",
-          "line": 84,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[9px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-reader/LeftNavPanel.tsx",
-          "line": 109,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[8px]",
-          "severity": "medium"
-        },
-        {
-          "domain": "typography",
-          "file": "client/src/components/manifestation-reader/LeftNavPanel.tsx",
-          "line": 120,
-          "expected": "Use ln-* semantic classes or Tailwind scale (text-sm, text-lg, etc.)",
-          "found": "text-[9px]",
           "severity": "medium"
         },
         {
@@ -19447,206 +19447,6 @@
           "line": 3297,
           "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
           "found": "#D4A84B",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/lib/theme-dom.ts",
-          "line": 25,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#E8294F",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/lib/theme-dom.ts",
-          "line": 31,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#F5C842",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/lib/theme-dom.ts",
-          "line": 37,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#8F6418",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/lib/theme-dom.ts",
-          "line": 97,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#F1E5D0",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/lib/theme-dom.ts",
-          "line": 97,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#000000",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/lib/spatialRegistryMock.ts",
-          "line": 42,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#9480d8",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/lib/spatialRegistryMock.ts",
-          "line": 50,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#d6ad4a",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/lib/spatialRegistryMock.ts",
-          "line": 58,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#6e9fc6",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/lib/spatialRegistryMock.ts",
-          "line": 66,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#d6ad4a",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/lib/spatialRegistryMock.ts",
-          "line": 74,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#a4714f",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/lib/spatialRegistryMock.ts",
-          "line": 82,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#dfc57e",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/lib/spatialRegistryMock.ts",
-          "line": 90,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#d4ded3",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/lib/contentTypeColors.ts",
-          "line": 13,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#4A9DBF",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/lib/contentTypeColors.ts",
-          "line": 14,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#C9C0A8",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/lib/contentTypeColors.ts",
-          "line": 15,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#C4440A",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/lib/contentTypeColors.ts",
-          "line": 49,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#E8B840",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/lib/contentTypeColors.ts",
-          "line": 56,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#4A9DBF",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/lib/contentTypeColors.ts",
-          "line": 59,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#7BBFD8",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/lib/contentTypeColors.ts",
-          "line": 66,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#C9C0A8",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/lib/contentTypeColors.ts",
-          "line": 69,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#E8DFC8",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/lib/contentTypeColors.ts",
-          "line": 76,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#C4440A",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/lib/contentTypeColors.ts",
-          "line": 79,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#E06030",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/lib/cardTokens.ts",
-          "line": 49,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#000000",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/lib/cardTokens.ts",
-          "line": 50,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#1C1A14",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/lib/cardTokens.ts",
-          "line": 52,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#0A0806",
           "severity": "medium"
         },
         {
@@ -26476,7 +26276,7 @@
         {
           "domain": "colors",
           "file": "client/src/pages/OnboardingManifest.tsx",
-          "line": 49,
+          "line": 54,
           "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
           "found": "#7C3AED",
           "severity": "medium"
@@ -26484,7 +26284,7 @@
         {
           "domain": "colors",
           "file": "client/src/pages/OnboardingManifest.tsx",
-          "line": 57,
+          "line": 62,
           "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
           "found": "#2563EB",
           "severity": "medium"
@@ -26492,7 +26292,7 @@
         {
           "domain": "colors",
           "file": "client/src/pages/OnboardingManifest.tsx",
-          "line": 65,
+          "line": 70,
           "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
           "found": "#059669",
           "severity": "medium"
@@ -26500,7 +26300,7 @@
         {
           "domain": "colors",
           "file": "client/src/pages/OnboardingManifest.tsx",
-          "line": 73,
+          "line": 78,
           "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
           "found": "#DC2626",
           "severity": "medium"
@@ -26508,7 +26308,7 @@
         {
           "domain": "colors",
           "file": "client/src/pages/OnboardingManifest.tsx",
-          "line": 81,
+          "line": 86,
           "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
           "found": "#D97706",
           "severity": "medium"
@@ -26516,7 +26316,7 @@
         {
           "domain": "colors",
           "file": "client/src/pages/OnboardingManifest.tsx",
-          "line": 142,
+          "line": 147,
           "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
           "found": "#A78BFA",
           "severity": "medium"
@@ -26524,7 +26324,7 @@
         {
           "domain": "colors",
           "file": "client/src/pages/OnboardingManifest.tsx",
-          "line": 160,
+          "line": 165,
           "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
           "found": "#F59E0B",
           "severity": "medium"
@@ -26532,7 +26332,7 @@
         {
           "domain": "colors",
           "file": "client/src/pages/OnboardingManifest.tsx",
-          "line": 233,
+          "line": 238,
           "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
           "found": "#34D399",
           "severity": "medium"
@@ -26540,7 +26340,7 @@
         {
           "domain": "colors",
           "file": "client/src/pages/OnboardingManifest.tsx",
-          "line": 273,
+          "line": 278,
           "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
           "found": "#7C3AED",
           "severity": "medium"
@@ -26548,7 +26348,7 @@
         {
           "domain": "colors",
           "file": "client/src/pages/OnboardingManifest.tsx",
-          "line": 418,
+          "line": 443,
           "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
           "found": "#059669",
           "severity": "medium"
@@ -26556,7 +26356,7 @@
         {
           "domain": "colors",
           "file": "client/src/pages/OnboardingManifest.tsx",
-          "line": 453,
+          "line": 488,
           "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
           "found": "#DC2626",
           "severity": "medium"
@@ -26564,7 +26364,7 @@
         {
           "domain": "colors",
           "file": "client/src/pages/OnboardingManifest.tsx",
-          "line": 508,
+          "line": 565,
           "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
           "found": "#7C3AED",
           "severity": "medium"
@@ -26572,7 +26372,7 @@
         {
           "domain": "colors",
           "file": "client/src/pages/OnboardingManifest.tsx",
-          "line": 518,
+          "line": 575,
           "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
           "found": "#2563EB",
           "severity": "medium"
@@ -26580,7 +26380,7 @@
         {
           "domain": "colors",
           "file": "client/src/pages/OnboardingManifest.tsx",
-          "line": 539,
+          "line": 597,
           "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
           "found": "#7C3AED",
           "severity": "medium"
@@ -34291,6 +34091,206 @@
         },
         {
           "domain": "colors",
+          "file": "client/src/lib/theme-dom.ts",
+          "line": 25,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#E8294F",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/lib/theme-dom.ts",
+          "line": 31,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#F5C842",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/lib/theme-dom.ts",
+          "line": 37,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#8F6418",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/lib/theme-dom.ts",
+          "line": 97,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#F1E5D0",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/lib/theme-dom.ts",
+          "line": 97,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#000000",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/lib/spatialRegistryMock.ts",
+          "line": 42,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#9480d8",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/lib/spatialRegistryMock.ts",
+          "line": 50,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#d6ad4a",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/lib/spatialRegistryMock.ts",
+          "line": 58,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#6e9fc6",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/lib/spatialRegistryMock.ts",
+          "line": 66,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#d6ad4a",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/lib/spatialRegistryMock.ts",
+          "line": 74,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#a4714f",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/lib/spatialRegistryMock.ts",
+          "line": 82,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#dfc57e",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/lib/spatialRegistryMock.ts",
+          "line": 90,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#d4ded3",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/lib/contentTypeColors.ts",
+          "line": 13,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#4A9DBF",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/lib/contentTypeColors.ts",
+          "line": 14,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#C9C0A8",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/lib/contentTypeColors.ts",
+          "line": 15,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#C4440A",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/lib/contentTypeColors.ts",
+          "line": 49,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#E8B840",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/lib/contentTypeColors.ts",
+          "line": 56,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#4A9DBF",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/lib/contentTypeColors.ts",
+          "line": 59,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#7BBFD8",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/lib/contentTypeColors.ts",
+          "line": 66,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#C9C0A8",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/lib/contentTypeColors.ts",
+          "line": 69,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#E8DFC8",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/lib/contentTypeColors.ts",
+          "line": 76,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#C4440A",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/lib/contentTypeColors.ts",
+          "line": 79,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#E06030",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/lib/cardTokens.ts",
+          "line": 49,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#000000",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/lib/cardTokens.ts",
+          "line": 50,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#1C1A14",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/lib/cardTokens.ts",
+          "line": 52,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#0A0806",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
           "file": "client/src/design-system/tokens.ts",
           "line": 22,
           "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
@@ -40179,6 +40179,94 @@
         },
         {
           "domain": "colors",
+          "file": "client/src/pages/manifestation-studio/types.ts",
+          "line": 38,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#FB923C",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/pages/manifestation-studio/types.ts",
+          "line": 80,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#F5C451",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/pages/manifestation-studio/types.ts",
+          "line": 101,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#F87171",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/pages/manifestation-studio/types.ts",
+          "line": 122,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#4ADE80",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/pages/manifestation-studio/types.ts",
+          "line": 143,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#60A5FA",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/pages/manifestation-studio/TypeGateway.tsx",
+          "line": 84,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#050505",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/pages/manifestation-studio/TypeGateway.tsx",
+          "line": 164,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#F87171",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/pages/manifestation-studio/StudioShell.tsx",
+          "line": 32,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#000000",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/pages/manifestation-studio/StudioShell.tsx",
+          "line": 81,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#000000",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/pages/manifestation-studio/ManifestationStudio.tsx",
+          "line": 82,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#000000",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/pages/manifestation-studio/ManifestationStudio.tsx",
+          "line": 98,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#000000",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
           "file": "client/src/pages/loop/LoopWorkPage.tsx",
           "line": 276,
           "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
@@ -41083,94 +41171,6 @@
         },
         {
           "domain": "colors",
-          "file": "client/src/pages/manifestation-studio/types.ts",
-          "line": 38,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#FB923C",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/pages/manifestation-studio/types.ts",
-          "line": 80,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#F5C451",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/pages/manifestation-studio/types.ts",
-          "line": 101,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#F87171",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/pages/manifestation-studio/types.ts",
-          "line": 122,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#4ADE80",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/pages/manifestation-studio/types.ts",
-          "line": 143,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#60A5FA",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/pages/manifestation-studio/TypeGateway.tsx",
-          "line": 84,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#050505",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/pages/manifestation-studio/TypeGateway.tsx",
-          "line": 164,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#F87171",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/pages/manifestation-studio/StudioShell.tsx",
-          "line": 32,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#000000",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/pages/manifestation-studio/StudioShell.tsx",
-          "line": 81,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#000000",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/pages/manifestation-studio/ManifestationStudio.tsx",
-          "line": 82,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#000000",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/pages/manifestation-studio/ManifestationStudio.tsx",
-          "line": 98,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#000000",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
           "file": "client/src/components/studio/SoundtrackCueMapper.tsx",
           "line": 102,
           "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
@@ -41695,374 +41695,6 @@
           "line": 549,
           "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
           "found": "#F5F0E8",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/manifestation-cards/MicroManifestationCard.tsx",
-          "line": 95,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#C9A84C",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/manifestation-cards/MicroManifestationCard.tsx",
-          "line": 95,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#C9A84C",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/manifestation-cards/MicroManifestationCard.tsx",
-          "line": 97,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#C9A84C",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/manifestation-cards/MicroManifestationCard.tsx",
-          "line": 97,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#C9A84C",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/manifestation-cards/MicroManifestationCard.tsx",
-          "line": 111,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#F5F5F5",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
-          "line": 78,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#0a0a08",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
-          "line": 78,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#1a1810",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
-          "line": 114,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#C9A84C",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
-          "line": 114,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#C9A84C",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
-          "line": 114,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#C9A84C",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
-          "line": 114,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#C9A84C",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
-          "line": 121,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#F5F5F5",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
-          "line": 164,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#1a1810",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
-          "line": 164,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#0d0c08",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
-          "line": 181,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#C9A84C",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
-          "line": 182,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#C9A84C",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
-          "line": 197,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#F5F5F5",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
-          "line": 241,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#F5F5F5",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
-          "line": 302,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#1a1810",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
-          "line": 302,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#0a0908",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
-          "line": 317,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#C9A84C",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
-          "line": 324,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#F5F5F5",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
-          "line": 366,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#12100a",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
-          "line": 366,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#1a1610",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
-          "line": 396,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#F5F5F5",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/manifestation-cards/MediumManifestationCard.tsx",
-          "line": 136,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#C9A84C",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/manifestation-cards/MediumManifestationCard.tsx",
-          "line": 136,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#C9A84C",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/manifestation-cards/MediumManifestationCard.tsx",
-          "line": 138,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#C9A84C",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/manifestation-cards/MediumManifestationCard.tsx",
-          "line": 138,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#C9A84C",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/manifestation-cards/MediumManifestationCard.tsx",
-          "line": 153,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#F5F5F5",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/manifestation-cards/ManifestationBundle.tsx",
-          "line": 84,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#111111",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/manifestation-cards/ManifestationBundle.tsx",
-          "line": 84,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#0A0A0A",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/manifestation-cards/ManifestationBundle.tsx",
-          "line": 112,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#F5C451",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/manifestation-cards/ManifestationBundle.tsx",
-          "line": 118,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#0a0812",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/manifestation-cards/ManifestationBundle.tsx",
-          "line": 118,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#0a0812",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/manifestation-cards/ManifestationBundle.tsx",
-          "line": 127,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#E8DFC8",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/manifestation-cards/ManifestationBundle.tsx",
-          "line": 169,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#E8DFC8",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/manifestation-cards/LargeManifestationCard.tsx",
-          "line": 128,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#C9A84C",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/manifestation-cards/LargeManifestationCard.tsx",
-          "line": 128,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#C9A84C",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/manifestation-cards/LargeManifestationCard.tsx",
-          "line": 129,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#C9A84C",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/manifestation-cards/LargeManifestationCard.tsx",
-          "line": 137,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#C9A84C",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/manifestation-cards/LargeManifestationCard.tsx",
-          "line": 158,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#C9A84C",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/manifestation-cards/LargeManifestationCard.tsx",
-          "line": 158,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#C9A84C",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/manifestation-cards/LargeManifestationCard.tsx",
-          "line": 160,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#C9A84C",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/manifestation-cards/LargeManifestationCard.tsx",
-          "line": 160,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#C9A84C",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/manifestation-cards/LargeManifestationCard.tsx",
-          "line": 176,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#F5F5F5",
           "severity": "medium"
         },
         {
@@ -42955,70 +42587,6 @@
         },
         {
           "domain": "colors",
-          "file": "client/src/components/layout/living-nexus-launcher.css",
-          "line": 5,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#111015",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/layout/living-nexus-launcher.css",
-          "line": 12,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#76569b",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/layout/TopBar.tsx",
-          "line": 334,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#E8DFC8",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/layout/TopBar.tsx",
-          "line": 542,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#E8B840",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/layout/TopBar.tsx",
-          "line": 626,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#e05a2b",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/layout/TopBar.tsx",
-          "line": 625,
-          "expected": "Use cathedral color tokens via CSS variables",
-          "found": "bg-red-",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/layout/LiveActivityPanel.tsx",
-          "line": 269,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#ef4444",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
-          "file": "client/src/components/layout/LeftRail.tsx",
-          "line": 158,
-          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
-          "found": "#0A0806",
-          "severity": "medium"
-        },
-        {
-          "domain": "colors",
           "file": "client/src/components/manifestation-reader/RightContextPanel.tsx",
           "line": 44,
           "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
@@ -43215,6 +42783,438 @@
           "line": 110,
           "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
           "found": "#C9A84C",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/manifestation-cards/MicroManifestationCard.tsx",
+          "line": 95,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#C9A84C",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/manifestation-cards/MicroManifestationCard.tsx",
+          "line": 95,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#C9A84C",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/manifestation-cards/MicroManifestationCard.tsx",
+          "line": 97,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#C9A84C",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/manifestation-cards/MicroManifestationCard.tsx",
+          "line": 97,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#C9A84C",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/manifestation-cards/MicroManifestationCard.tsx",
+          "line": 111,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#F5F5F5",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
+          "line": 78,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#0a0a08",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
+          "line": 78,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#1a1810",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
+          "line": 114,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#C9A84C",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
+          "line": 114,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#C9A84C",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
+          "line": 114,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#C9A84C",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
+          "line": 114,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#C9A84C",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
+          "line": 121,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#F5F5F5",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
+          "line": 164,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#1a1810",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
+          "line": 164,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#0d0c08",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
+          "line": 181,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#C9A84C",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
+          "line": 182,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#C9A84C",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
+          "line": 197,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#F5F5F5",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
+          "line": 241,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#F5F5F5",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
+          "line": 302,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#1a1810",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
+          "line": 302,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#0a0908",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
+          "line": 317,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#C9A84C",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
+          "line": 324,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#F5F5F5",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
+          "line": 366,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#12100a",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
+          "line": 366,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#1a1610",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/manifestation-cards/MediumVariants.tsx",
+          "line": 396,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#F5F5F5",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/manifestation-cards/MediumManifestationCard.tsx",
+          "line": 136,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#C9A84C",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/manifestation-cards/MediumManifestationCard.tsx",
+          "line": 136,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#C9A84C",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/manifestation-cards/MediumManifestationCard.tsx",
+          "line": 138,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#C9A84C",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/manifestation-cards/MediumManifestationCard.tsx",
+          "line": 138,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#C9A84C",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/manifestation-cards/MediumManifestationCard.tsx",
+          "line": 153,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#F5F5F5",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/manifestation-cards/ManifestationBundle.tsx",
+          "line": 84,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#111111",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/manifestation-cards/ManifestationBundle.tsx",
+          "line": 84,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#0A0A0A",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/manifestation-cards/ManifestationBundle.tsx",
+          "line": 112,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#F5C451",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/manifestation-cards/ManifestationBundle.tsx",
+          "line": 118,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#0a0812",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/manifestation-cards/ManifestationBundle.tsx",
+          "line": 118,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#0a0812",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/manifestation-cards/ManifestationBundle.tsx",
+          "line": 127,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#E8DFC8",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/manifestation-cards/ManifestationBundle.tsx",
+          "line": 169,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#E8DFC8",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/manifestation-cards/LargeManifestationCard.tsx",
+          "line": 128,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#C9A84C",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/manifestation-cards/LargeManifestationCard.tsx",
+          "line": 128,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#C9A84C",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/manifestation-cards/LargeManifestationCard.tsx",
+          "line": 129,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#C9A84C",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/manifestation-cards/LargeManifestationCard.tsx",
+          "line": 137,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#C9A84C",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/manifestation-cards/LargeManifestationCard.tsx",
+          "line": 158,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#C9A84C",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/manifestation-cards/LargeManifestationCard.tsx",
+          "line": 158,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#C9A84C",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/manifestation-cards/LargeManifestationCard.tsx",
+          "line": 160,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#C9A84C",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/manifestation-cards/LargeManifestationCard.tsx",
+          "line": 160,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#C9A84C",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/manifestation-cards/LargeManifestationCard.tsx",
+          "line": 176,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#F5F5F5",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/layout/living-nexus-launcher.css",
+          "line": 5,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#111015",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/layout/living-nexus-launcher.css",
+          "line": 12,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#76569b",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/layout/TopBar.tsx",
+          "line": 334,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#E8DFC8",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/layout/TopBar.tsx",
+          "line": 542,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#E8B840",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/layout/TopBar.tsx",
+          "line": 626,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#e05a2b",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/layout/TopBar.tsx",
+          "line": 625,
+          "expected": "Use cathedral color tokens via CSS variables",
+          "found": "bg-red-",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/layout/LiveActivityPanel.tsx",
+          "line": 269,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#ef4444",
+          "severity": "medium"
+        },
+        {
+          "domain": "colors",
+          "file": "client/src/components/layout/LeftRail.tsx",
+          "line": 158,
+          "expected": "Use var(--ln-gold), var(--ln-parchment), var(--ln-coal), var(--ln-smoke) etc.",
+          "found": "#0A0806",
           "severity": "medium"
         },
         {
@@ -44141,30 +44141,6 @@
         },
         {
           "domain": "language",
-          "file": "client/src/lib/parseAudioMetadata.ts",
-          "line": 29,
-          "expected": "Use 'Support', 'Witness', or 'Honor'",
-          "found": "Like",
-          "severity": "high"
-        },
-        {
-          "domain": "language",
-          "file": "client/src/lib/nexusContext.ts",
-          "line": 18,
-          "expected": "Use 'Recently Witnessed', 'Newly Registered', or 'Discovered'",
-          "found": "trending",
-          "severity": "medium"
-        },
-        {
-          "domain": "language",
-          "file": "client/src/lib/nexusContext.ts",
-          "line": 52,
-          "expected": "Use 'Recently Witnessed', 'Newly Registered', or 'Discovered'",
-          "found": "trending",
-          "severity": "medium"
-        },
-        {
-          "domain": "language",
           "file": "client/src/pages/WIDSpecPage.tsx",
           "line": 232,
           "expected": "Use 'Recently Witnessed', 'Newly Registered', or 'Discovered'",
@@ -44886,7 +44862,7 @@
         {
           "domain": "language",
           "file": "client/src/pages/OnboardingManifest.tsx",
-          "line": 455,
+          "line": 490,
           "expected": "Use 'Support', 'Witness', or 'Honor'",
           "found": "like",
           "severity": "high"
@@ -46137,6 +46113,30 @@
           "line": 2103,
           "expected": "Use 'Witnesses' or 'Stewards'",
           "found": "Followers",
+          "severity": "medium"
+        },
+        {
+          "domain": "language",
+          "file": "client/src/lib/parseAudioMetadata.ts",
+          "line": 29,
+          "expected": "Use 'Support', 'Witness', or 'Honor'",
+          "found": "Like",
+          "severity": "high"
+        },
+        {
+          "domain": "language",
+          "file": "client/src/lib/nexusContext.ts",
+          "line": 18,
+          "expected": "Use 'Recently Witnessed', 'Newly Registered', or 'Discovered'",
+          "found": "trending",
+          "severity": "medium"
+        },
+        {
+          "domain": "language",
+          "file": "client/src/lib/nexusContext.ts",
+          "line": 52,
+          "expected": "Use 'Recently Witnessed', 'Newly Registered', or 'Discovered'",
+          "found": "trending",
           "severity": "medium"
         },
         {
@@ -48205,62 +48205,6 @@
         },
         {
           "domain": "language",
-          "file": "client/src/components/manifestation-cards/types.ts",
-          "line": 20,
-          "expected": "Use 'Support', 'Witness', or 'Honor'",
-          "found": "like",
-          "severity": "high"
-        },
-        {
-          "domain": "language",
-          "file": "client/src/components/manifestation-cards/MediumManifestationCard.tsx",
-          "line": 164,
-          "expected": "Use 'Support', 'Witness', or 'Honor'",
-          "found": "like",
-          "severity": "high"
-        },
-        {
-          "domain": "language",
-          "file": "client/src/components/manifestation-cards/MediumManifestationCard.tsx",
-          "line": 166,
-          "expected": "Use 'Support', 'Witness', or 'Honor'",
-          "found": "like",
-          "severity": "high"
-        },
-        {
-          "domain": "language",
-          "file": "client/src/components/manifestation-cards/MediumManifestationCard.tsx",
-          "line": 3,
-          "expected": "Use 'Recently Witnessed', 'Newly Registered', or 'Discovered'",
-          "found": "trending",
-          "severity": "medium"
-        },
-        {
-          "domain": "language",
-          "file": "client/src/components/manifestation-cards/LargeManifestationCard.tsx",
-          "line": 46,
-          "expected": "Use 'Support', 'Witness', or 'Honor'",
-          "found": "like",
-          "severity": "high"
-        },
-        {
-          "domain": "language",
-          "file": "client/src/components/manifestation-cards/LargeManifestationCard.tsx",
-          "line": 194,
-          "expected": "Use 'Support', 'Witness', or 'Honor'",
-          "found": "like",
-          "severity": "high"
-        },
-        {
-          "domain": "language",
-          "file": "client/src/components/manifestation-cards/LargeManifestationCard.tsx",
-          "line": 196,
-          "expected": "Use 'Support', 'Witness', or 'Honor'",
-          "found": "like",
-          "severity": "high"
-        },
-        {
-          "domain": "language",
           "file": "client/src/components/player/WitnessSurfacePlayer.tsx",
           "line": 263,
           "expected": "Use 'Support', 'Witness', or 'Honor'",
@@ -49541,6 +49485,62 @@
         },
         {
           "domain": "language",
+          "file": "client/src/components/manifestation-cards/types.ts",
+          "line": 20,
+          "expected": "Use 'Support', 'Witness', or 'Honor'",
+          "found": "like",
+          "severity": "high"
+        },
+        {
+          "domain": "language",
+          "file": "client/src/components/manifestation-cards/MediumManifestationCard.tsx",
+          "line": 164,
+          "expected": "Use 'Support', 'Witness', or 'Honor'",
+          "found": "like",
+          "severity": "high"
+        },
+        {
+          "domain": "language",
+          "file": "client/src/components/manifestation-cards/MediumManifestationCard.tsx",
+          "line": 166,
+          "expected": "Use 'Support', 'Witness', or 'Honor'",
+          "found": "like",
+          "severity": "high"
+        },
+        {
+          "domain": "language",
+          "file": "client/src/components/manifestation-cards/MediumManifestationCard.tsx",
+          "line": 3,
+          "expected": "Use 'Recently Witnessed', 'Newly Registered', or 'Discovered'",
+          "found": "trending",
+          "severity": "medium"
+        },
+        {
+          "domain": "language",
+          "file": "client/src/components/manifestation-cards/LargeManifestationCard.tsx",
+          "line": 46,
+          "expected": "Use 'Support', 'Witness', or 'Honor'",
+          "found": "like",
+          "severity": "high"
+        },
+        {
+          "domain": "language",
+          "file": "client/src/components/manifestation-cards/LargeManifestationCard.tsx",
+          "line": 194,
+          "expected": "Use 'Support', 'Witness', or 'Honor'",
+          "found": "like",
+          "severity": "high"
+        },
+        {
+          "domain": "language",
+          "file": "client/src/components/manifestation-cards/LargeManifestationCard.tsx",
+          "line": 196,
+          "expected": "Use 'Support', 'Witness', or 'Honor'",
+          "found": "like",
+          "severity": "high"
+        },
+        {
+          "domain": "language",
           "file": "client/src/components/layout/RightRail.tsx",
           "line": 86,
           "expected": "Use 'Witness Activity' or 'Registry Activity'",
@@ -49671,7 +49671,7 @@
   },
   "debtLedger": {
     "version": "1.0.0",
-    "lastUpdated": "2026-09-14T00:24:17.182Z",
+    "lastUpdated": "2026-09-14T00:34:58.507Z",
     "totalDebt": 13,
     "items": [
       {
@@ -49817,7 +49817,7 @@
       "overall": 77,
       "grade": "B",
       "topIssue": "Typography needs improvement (55/100)",
-      "timestamp": "2026-09-14T00:24:17.637Z"
+      "timestamp": "2026-09-14T00:34:58.907Z"
     },
     {
       "page": "client/src/pages/ExplorePage.tsx",
@@ -49834,7 +49834,7 @@
       "overall": 70,
       "grade": "C",
       "topIssue": "Typography needs improvement (55/100)",
-      "timestamp": "2026-09-14T00:24:17.638Z"
+      "timestamp": "2026-09-14T00:34:58.909Z"
     },
     {
       "page": "client/src/pages/SongDetailPage.tsx",
@@ -49851,7 +49851,7 @@
       "overall": 74,
       "grade": "C",
       "topIssue": "Creator Honor needs improvement (55/100)",
-      "timestamp": "2026-09-14T00:24:17.642Z"
+      "timestamp": "2026-09-14T00:34:58.912Z"
     },
     {
       "page": "client/src/pages/VerifyPage.tsx",
@@ -49868,7 +49868,7 @@
       "overall": 78,
       "grade": "B",
       "topIssue": "Typography needs improvement (47/100)",
-      "timestamp": "2026-09-14T00:24:17.643Z"
+      "timestamp": "2026-09-14T00:34:58.914Z"
     },
     {
       "page": "client/src/pages/CreatorProfilePage.tsx",
@@ -49885,7 +49885,7 @@
       "overall": 78,
       "grade": "B",
       "topIssue": "Typography needs improvement (63/100)",
-      "timestamp": "2026-09-14T00:24:17.648Z"
+      "timestamp": "2026-09-14T00:34:58.919Z"
     },
     {
       "page": "client/src/pages/ArchivePage.tsx",
@@ -49902,7 +49902,7 @@
       "overall": 70,
       "grade": "C",
       "topIssue": "Typography needs improvement (63/100)",
-      "timestamp": "2026-09-14T00:24:17.650Z"
+      "timestamp": "2026-09-14T00:34:58.922Z"
     },
     {
       "page": "client/src/pages/DashboardPage.tsx",
@@ -49919,7 +49919,7 @@
       "overall": 73,
       "grade": "C",
       "topIssue": "Typography needs improvement (47/100)",
-      "timestamp": "2026-09-14T00:24:17.653Z"
+      "timestamp": "2026-09-14T00:34:58.925Z"
     },
     {
       "page": "client/src/pages/UploadPage.tsx",
@@ -49936,7 +49936,7 @@
       "overall": 72,
       "grade": "C",
       "topIssue": "Support needs improvement (60/100)",
-      "timestamp": "2026-09-14T00:24:17.658Z"
+      "timestamp": "2026-09-14T00:34:58.930Z"
     },
     {
       "page": "client/src/components/WorkListRow.tsx",
@@ -49953,7 +49953,7 @@
       "overall": 74,
       "grade": "C",
       "topIssue": "Typography needs improvement (47/100)",
-      "timestamp": "2026-09-14T00:24:17.659Z"
+      "timestamp": "2026-09-14T00:34:58.931Z"
     },
     {
       "page": "client/src/components/SupportCreatorDrawer.tsx",
@@ -49970,7 +49970,7 @@
       "overall": 70,
       "grade": "C",
       "topIssue": "Typography needs improvement (55/100)",
-      "timestamp": "2026-09-14T00:24:17.660Z"
+      "timestamp": "2026-09-14T00:34:58.931Z"
     }
   ],
   "passResults": [
@@ -50427,12 +50427,12 @@
         "client/src/pages/loop/LoopManagePage.tsx",
         "client/src/pages/loop/LoopCreatorPage.tsx",
         "client/src/pages/admin/MissionControlPage.tsx",
-        "client/src/components/studio/SoundtrackCueMapper.tsx",
         "client/src/components/reader/StoryboardBuilder.tsx",
         "client/src/components/reader/HorizontalBookReader.tsx",
         "client/src/components/reader/FeaturedBookModel.tsx",
         "client/src/components/reader/CinematicComicReader.tsx",
         "client/src/components/reader/ChildrensBookReader.tsx",
+        "client/src/components/studio/SoundtrackCueMapper.tsx",
         "client/src/components/player/TheaterPlayer.tsx",
         "client/src/components/player/PlayerTipModal.tsx",
         "client/src/components/player/PlayerBar.tsx",
@@ -50479,6 +50479,7 @@
         "client/src/pages/PNAShellPage.tsx: Forbidden animation \"animate-spin\" — not cathedral",
         "client/src/pages/PNAShellPage.tsx: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
         "client/src/pages/OnboardingManifest.tsx: Forbidden animation \"animate-spin\" — not cathedral",
+        "client/src/pages/OnboardingManifest.tsx: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
         "client/src/pages/NotificationsPage.tsx: Forbidden animation \"animate-spin\" — not cathedral",
         "client/src/pages/NewManifestationPage.tsx: Forbidden animation \"animate-spin\" — not cathedral",
         "client/src/pages/MyProjectsPage.tsx: Forbidden animation \"animate-spin\" — not cathedral",
@@ -50512,6 +50513,8 @@
         "client/src/pages/AlbumDetailPage.tsx: Forbidden animation \"animate-spin\" — not cathedral",
         "client/src/pages/AdminUsersPage.tsx: Forbidden animation \"animate-spin\" — not cathedral",
         "client/src/pages/AdminNotificationsPage.tsx: Forbidden animation \"animate-spin\" — not cathedral",
+        "client/src/lib/viewportLayers.ts: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
+        "client/src/lib/uploadPipeline.ts: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
         "client/src/hooks/useWaveformVisualizer.ts: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
         "client/src/hooks/useScrollRestoration.ts: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
         "client/src/hooks/useMobileAudioGlow.ts: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
@@ -50521,8 +50524,6 @@
         "client/src/contexts/WorkEditorContext.tsx: Forbidden animation \"animate-spin\" — not cathedral",
         "client/src/contexts/PlayerContext.tsx: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
         "client/src/contexts/HarmonicContext.tsx: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
-        "client/src/lib/viewportLayers.ts: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
-        "client/src/lib/uploadPipeline.ts: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
         "client/src/components/WitnessesPanel.tsx: Forbidden animation \"animate-spin\" — not cathedral",
         "client/src/components/WhatsNewModal.tsx: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
         "client/src/components/VisionChamberRitual.tsx: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
@@ -50582,8 +50583,8 @@
         "client/src/components/layout/MainLayout.tsx: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
         "client/src/components/layout/LeftRail.tsx: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
         "client/src/components/domain/DomainEditor.tsx: Forbidden animation \"animate-spin\" — not cathedral",
-        "client/src/components/creative-cathedral/CreativeCathedralWorkspace.tsx: Forbidden animation \"animate-spin\" — not cathedral",
         "client/src/components/creator/CreatorSanctuaryStage.tsx: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
+        "client/src/components/creative-cathedral/CreativeCathedralWorkspace.tsx: Forbidden animation \"animate-spin\" — not cathedral",
         "client/src/components/atmosphere/DepthAtmosphere.tsx: Canvas/RAF animation without prefers-reduced-motion guard — see LESSON-002",
         "client/src/pages/manifestation-studio/environments/VideoEnvironment.tsx: Forbidden animation \"animate-spin\" — not cathedral",
         "client/src/pages/manifestation-studio/environments/MusicEnvironment.tsx: Forbidden animation \"animate-spin\" — not cathedral",
@@ -50617,6 +50618,7 @@
         "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
         "Add useReducedMotion() guard to canvas animation in pages/PNAShellPage.tsx",
         "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
+        "Add useReducedMotion() guard to canvas animation in pages/OnboardingManifest.tsx",
         "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
         "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
         "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
@@ -50650,6 +50652,8 @@
         "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
         "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
         "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
+        "Add useReducedMotion() guard to canvas animation in lib/viewportLayers.ts",
+        "Add useReducedMotion() guard to canvas animation in lib/uploadPipeline.ts",
         "Add useReducedMotion() guard to canvas animation in hooks/useWaveformVisualizer.ts",
         "Add useReducedMotion() guard to canvas animation in hooks/useScrollRestoration.ts",
         "Add useReducedMotion() guard to canvas animation in hooks/useMobileAudioGlow.ts",
@@ -50659,8 +50663,6 @@
         "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
         "Add useReducedMotion() guard to canvas animation in contexts/PlayerContext.tsx",
         "Add useReducedMotion() guard to canvas animation in contexts/HarmonicContext.tsx",
-        "Add useReducedMotion() guard to canvas animation in lib/viewportLayers.ts",
-        "Add useReducedMotion() guard to canvas animation in lib/uploadPipeline.ts",
         "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
         "Add useReducedMotion() guard to canvas animation in components/WhatsNewModal.tsx",
         "Add useReducedMotion() guard to canvas animation in components/VisionChamberRitual.tsx",
@@ -50720,8 +50722,8 @@
         "Add useReducedMotion() guard to canvas animation in components/layout/MainLayout.tsx",
         "Add useReducedMotion() guard to canvas animation in components/layout/LeftRail.tsx",
         "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
-        "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
         "Add useReducedMotion() guard to canvas animation in components/creator/CreatorSanctuaryStage.tsx",
+        "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
         "Add useReducedMotion() guard to canvas animation in components/atmosphere/DepthAtmosphere.tsx",
         "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
         "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
@@ -50731,7 +50733,7 @@
         "Replace \"animate-spin\" with animate-pulse (subtle) or a custom cathedral transition",
         "Add useReducedMotion() guard to canvas animation in components/manifestation-reader/adapters/index.ts"
       ],
-      "scoreImpact": 408,
+      "scoreImpact": 411,
       "filesAffected": [
         "client/src/App.tsx",
         "client/src/pages/WitnessFlowPage.tsx",
@@ -50785,6 +50787,8 @@
         "client/src/pages/AlbumDetailPage.tsx",
         "client/src/pages/AdminUsersPage.tsx",
         "client/src/pages/AdminNotificationsPage.tsx",
+        "client/src/lib/viewportLayers.ts",
+        "client/src/lib/uploadPipeline.ts",
         "client/src/hooks/useWaveformVisualizer.ts",
         "client/src/hooks/useScrollRestoration.ts",
         "client/src/hooks/useMobileAudioGlow.ts",
@@ -50794,8 +50798,6 @@
         "client/src/contexts/WorkEditorContext.tsx",
         "client/src/contexts/PlayerContext.tsx",
         "client/src/contexts/HarmonicContext.tsx",
-        "client/src/lib/viewportLayers.ts",
-        "client/src/lib/uploadPipeline.ts",
         "client/src/components/WitnessesPanel.tsx",
         "client/src/components/WhatsNewModal.tsx",
         "client/src/components/VisionChamberRitual.tsx",
@@ -50849,8 +50851,8 @@
         "client/src/components/layout/MainLayout.tsx",
         "client/src/components/layout/LeftRail.tsx",
         "client/src/components/domain/DomainEditor.tsx",
-        "client/src/components/creative-cathedral/CreativeCathedralWorkspace.tsx",
         "client/src/components/creator/CreatorSanctuaryStage.tsx",
+        "client/src/components/creative-cathedral/CreativeCathedralWorkspace.tsx",
         "client/src/components/atmosphere/DepthAtmosphere.tsx",
         "client/src/pages/manifestation-studio/environments/VideoEnvironment.tsx",
         "client/src/pages/manifestation-studio/environments/MusicEnvironment.tsx",

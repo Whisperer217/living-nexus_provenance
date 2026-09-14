@@ -22,6 +22,11 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
+import { FieldError } from "@/components/ui/field";
+import {
+  validateOnboardingStep,
+  type OnboardingValidationErrors,
+} from "@/lib/onboardingValidation";
 import { toast } from "sonner";
 import {
   Shield, User, Globe, BookOpen, MessageSquare, CreditCard, Upload,
@@ -118,7 +123,7 @@ function useImageUpload() {
 
 // ─── Step components ──────────────────────────────────────────────────────────
 
-function CovenantStep({ onAccept }: { onAccept: () => void }) {
+function CovenantStep({ onAccept, isSaving }: { onAccept: () => void; isSaving: boolean }) {
   const [scrolled, setScrolled] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -240,7 +245,7 @@ function CovenantStep({ onAccept }: { onAccept: () => void }) {
 
       <Button
         onClick={onAccept}
-        disabled={!scrolled}
+        disabled={!scrolled || isSaving}
         className="w-full gap-2 font-semibold py-3 text-sm"
         style={{
           background: scrolled ? "rgba(196,154,40,0.15)" : "rgba(196,154,40,0.04)",
@@ -250,8 +255,8 @@ function CovenantStep({ onAccept }: { onAccept: () => void }) {
           letterSpacing: scrolled ? "0.06em" : "0",
         }}
       >
-        <Shield className="w-4 h-4" />
-        I Accept the Creator Covenant
+        {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Shield className="w-4 h-4" />}
+        {isSaving ? "Saving your acceptance…" : "I Accept the Creator Covenant"}
       </Button>
       {!scrolled && (
         <p className="text-center text-xs opacity-30">Read the full covenant above to continue</p>
@@ -306,10 +311,13 @@ function DomainStep({
   domainName, setDomainName,
   avatarUrl, setAvatarUrl,
   bannerUrl, setBannerUrl,
+  errors, clearError,
 }: {
   domainName: string; setDomainName: (v: string) => void;
   avatarUrl: string; setAvatarUrl: (v: string) => void;
   bannerUrl: string; setBannerUrl: (v: string) => void;
+  errors: OnboardingValidationErrors;
+  clearError: (field: keyof OnboardingValidationErrors) => void;
 }) {
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
@@ -339,13 +347,20 @@ function DomainStep({
       <div className="space-y-2">
         <label className="text-xs font-semibold uppercase tracking-widest" style={{ color: "var(--ln-gold)" }}>Creator Domain Name</label>
         <Input
+          id="onboarding-domain-name"
           value={domainName}
-          onChange={e => setDomainName(e.target.value.replace(/[^a-zA-Z0-9_\-. ]/g, ""))}
+          onChange={e => {
+            setDomainName(e.target.value.replace(/[^a-zA-Z0-9_\-. ]/g, ""));
+            clearError("domainName");
+          }}
           placeholder="e.g. thiiirdgenkill, Doc Seraph Mercer"
           maxLength={64}
           className="bg-transparent"
-          style={{ border: "1px solid rgba(196,154,40,0.25)", color: "var(--ln-parchment)" }}
+          aria-invalid={Boolean(errors.domainName)}
+          aria-describedby={errors.domainName ? "onboarding-domain-name-error" : undefined}
+          style={{ border: `1px solid ${errors.domainName ? "rgba(239,68,68,0.8)" : "rgba(196,154,40,0.25)"}`, color: "var(--ln-parchment)" }}
         />
+        {errors.domainName && <FieldError id="onboarding-domain-name-error">{errors.domainName}</FieldError>}
         <p className="text-xs opacity-50">This is how you'll appear in the archive. You can change it later.</p>
       </div>
 
@@ -407,7 +422,17 @@ function DomainStep({
   );
 }
 
-function PresenceStep({ originStatement, setOriginStatement }: { originStatement: string; setOriginStatement: (v: string) => void }) {
+function PresenceStep({
+  originStatement,
+  setOriginStatement,
+  error,
+  clearError,
+}: {
+  originStatement: string;
+  setOriginStatement: (v: string) => void;
+  error?: string;
+  clearError: () => void;
+}) {
   const remaining = 1000 - originStatement.length;
   return (
     <div className="space-y-4">
@@ -423,13 +448,20 @@ function PresenceStep({ originStatement, setOriginStatement }: { originStatement
       <div className="space-y-2">
         <label className="text-xs font-semibold uppercase tracking-widest" style={{ color: "var(--ln-gold)" }}>Your Origin Statement</label>
         <Textarea
+          id="onboarding-origin-statement"
           value={originStatement}
-          onChange={e => setOriginStatement(e.target.value.slice(0, 1000))}
+          onChange={e => {
+            setOriginStatement(e.target.value.slice(0, 1000));
+            clearError();
+          }}
           placeholder="I create because... / My work exists to... / The reason I make things is..."
           rows={6}
           className="resize-none bg-transparent"
-          style={{ border: "1px solid rgba(196,154,40,0.25)", color: "var(--ln-parchment)" }}
+          aria-invalid={Boolean(error)}
+          aria-describedby={error ? "onboarding-origin-statement-error" : undefined}
+          style={{ border: `1px solid ${error ? "rgba(239,68,68,0.8)" : "rgba(196,154,40,0.25)"}`, color: "var(--ln-parchment)" }}
         />
+        {error && <FieldError id="onboarding-origin-statement-error">{error}</FieldError>}
         <p className={`text-xs text-right ${remaining < 100 ? "text-amber-400" : "opacity-40"}`}>{remaining} characters remaining</p>
       </div>
     </div>
@@ -439,9 +471,12 @@ function PresenceStep({ originStatement, setOriginStatement }: { originStatement
 function TestimonyStep({
   testimonyText, setTestimonyText,
   testimonyWid, setTestimonyWid,
+  errors, clearError,
 }: {
   testimonyText: string; setTestimonyText: (v: string) => void;
   testimonyWid: string; setTestimonyWid: (v: string) => void;
+  errors: OnboardingValidationErrors;
+  clearError: (field: keyof OnboardingValidationErrors) => void;
 }) {
   const remaining = 3000 - testimonyText.length;
   return (
@@ -458,32 +493,54 @@ function TestimonyStep({
       <div className="space-y-2">
         <label className="text-xs font-semibold uppercase tracking-widest" style={{ color: "var(--ln-gold)" }}>Your Testimony</label>
         <Textarea
+          id="onboarding-testimony-text"
           value={testimonyText}
-          onChange={e => setTestimonyText(e.target.value.slice(0, 3000))}
+          onChange={e => {
+            setTestimonyText(e.target.value.slice(0, 3000));
+            clearError("testimonyText");
+          }}
           placeholder="This work was made during... / I want the archive to know... / The story behind this is..."
           rows={7}
           className="resize-none bg-transparent"
-          style={{ border: "1px solid rgba(196,154,40,0.25)", color: "var(--ln-parchment)" }}
+          aria-invalid={Boolean(errors.testimonyText)}
+          aria-describedby={errors.testimonyText ? "onboarding-testimony-text-error" : undefined}
+          style={{ border: `1px solid ${errors.testimonyText ? "rgba(239,68,68,0.8)" : "rgba(196,154,40,0.25)"}`, color: "var(--ln-parchment)" }}
         />
+        {errors.testimonyText && <FieldError id="onboarding-testimony-text-error">{errors.testimonyText}</FieldError>}
         <p className={`text-xs text-right ${remaining < 200 ? "text-amber-400" : "opacity-40"}`}>{remaining} characters remaining</p>
       </div>
 
       <div className="space-y-2">
         <label className="text-xs font-semibold uppercase tracking-widest opacity-60" style={{ color: "var(--ln-gold)" }}>Link to a WID (optional)</label>
         <Input
+          id="onboarding-testimony-wid"
           value={testimonyWid}
-          onChange={e => setTestimonyWid(e.target.value)}
+          onChange={e => {
+            setTestimonyWid(e.target.value.toUpperCase());
+            clearError("testimonyWid");
+          }}
           placeholder="WID-XXXX-XXXX-XXXX"
           className="bg-transparent font-mono text-sm"
-          style={{ border: "1px solid rgba(196,154,40,0.2)", color: "var(--ln-parchment)" }}
+          aria-invalid={Boolean(errors.testimonyWid)}
+          aria-describedby={errors.testimonyWid ? "onboarding-testimony-wid-error" : undefined}
+          style={{ border: `1px solid ${errors.testimonyWid ? "rgba(239,68,68,0.8)" : "rgba(196,154,40,0.2)"}`, color: "var(--ln-parchment)" }}
         />
+        {errors.testimonyWid && <FieldError id="onboarding-testimony-wid-error">{errors.testimonyWid}</FieldError>}
         <p className="text-xs opacity-40">If this testimony is about a specific work, enter its WID here. Leave blank for a standalone testimony.</p>
       </div>
     </div>
   );
 }
 
-function LicenseStep({ onSelectPack }: { onSelectPack: (packId: string) => void }) {
+function LicenseStep({
+  onSelectPack,
+  error,
+  clearError,
+}: {
+  onSelectPack: (packId: string) => void;
+  error?: string;
+  clearError: () => void;
+}) {
   const [selected, setSelected] = useState<string | null>(null);
   const [, navigate] = useLocation();
 
@@ -523,6 +580,7 @@ function LicenseStep({ onSelectPack }: { onSelectPack: (packId: string) => void 
   const handleSelect = (packId: string) => {
     setSelected(packId);
     onSelectPack(packId);
+    clearError();
   };
 
   return (
@@ -556,6 +614,7 @@ function LicenseStep({ onSelectPack }: { onSelectPack: (packId: string) => void 
           </button>
         ))}
       </div>
+      {error && <FieldError id="onboarding-selected-pack-error">{error}</FieldError>}
 
       <button
         onClick={() => navigate("/register")}
@@ -627,6 +686,7 @@ export default function OnboardingManifest() {
   const [testimonyText, setTestimonyText] = useState("");
   const [testimonyWid, setTestimonyWid] = useState("");
   const [selectedPackId, setSelectedPackId] = useState("");
+  const [validationErrors, setValidationErrors] = useState<OnboardingValidationErrors>({});
 
   const currentStep = STEPS[currentStepIdx];
   const progressPct = ((currentStepIdx) / (STEPS.length - 1)) * 100;
@@ -651,18 +711,42 @@ export default function OnboardingManifest() {
 
   // No hard redirect — guests see a soft sign-in gate below
 
-  const markComplete = (stepId: StepId) => {
-    setCompletedSteps(prev => prev.includes(stepId) ? prev : [...prev, stepId]);
+  const clearValidationError = (field: keyof OnboardingValidationErrors) => {
+    setValidationErrors(current => {
+      if (!current[field]) return current;
+      const next = { ...current };
+      delete next[field];
+      return next;
+    });
   };
 
-  const handleNext = async () => {
+  const handleNext = async ({ skipValidation = false }: { skipValidation?: boolean } = {}) => {
+    if (saveStepMutation.isPending) return;
     const stepId = currentStep.id;
-    markComplete(stepId);
+    if (!skipValidation) {
+      const nextErrors = validateOnboardingStep({
+        step: stepId,
+        domainName,
+        originStatement,
+        testimonyText,
+        testimonyWid,
+        selectedPackId,
+      });
+      if (Object.keys(nextErrors).length > 0) {
+        setValidationErrors(nextErrors);
+        const firstField = Object.keys(nextErrors)[0];
+        requestAnimationFrame(() => document.getElementById(`onboarding-${firstField.replace(/[A-Z]/g, letter => `-${letter.toLowerCase()}`)}`)?.focus());
+        return;
+      }
+    }
+
+    setValidationErrors({});
+    const nextCompletedSteps = completedSteps.includes(stepId) ? completedSteps : [...completedSteps, stepId];
 
     try {
       await saveStepMutation.mutateAsync({
         currentStep: stepId,
-        completedSteps: [...completedSteps, stepId],
+        completedSteps: nextCompletedSteps,
         domainName: domainName || undefined,
         avatarUrl: avatarUrl || undefined,
         bannerUrl: bannerUrl || undefined,
@@ -672,15 +756,17 @@ export default function OnboardingManifest() {
         firstWorkWid: undefined,
         isComplete: currentStepIdx === STEPS.length - 1,
       });
-    } catch (e) {
-      // Non-blocking — continue even if save fails
-    }
+      setCompletedSteps(nextCompletedSteps);
+      toast.success("Onboarding progress saved", { description: `${currentStep.label} is recorded in your creator setup.` });
 
-    if (currentStepIdx < STEPS.length - 1) {
-      setCurrentStepIdx(i => i + 1);
-    } else {
-      toast.success("Welcome to the archive — Your creator domain is established.");
-      navigate("/dashboard");
+      if (currentStepIdx < STEPS.length - 1) {
+        setCurrentStepIdx(i => i + 1);
+      } else {
+        toast.success("Welcome to the archive — Your creator domain is established.");
+        navigate("/dashboard");
+      }
+    } catch {
+      toast.error("Onboarding progress could not be saved", { description: "Please check your fields and try again. Your current step remains open." });
     }
   };
 
@@ -688,14 +774,7 @@ export default function OnboardingManifest() {
     if (currentStepIdx > 0) setCurrentStepIdx(i => i - 1);
   };
 
-  const canAdvance = () => {
-    if (currentStep.id === "covenant") return false; // handled by CovenantStep button
-    if (currentStep.id === "domain") return domainName.trim().length >= 2;
-    if (currentStep.id === "presence") return originStatement.trim().length >= 20;
-    if (currentStep.id === "testimony") return testimonyText.trim().length >= 10;
-    if (currentStep.id === "license") return selectedPackId.length > 0;
-    return true;
-  };
+  const isSaving = saveStepMutation.isPending;
 
   if (authLoading) {
     return (
@@ -803,7 +882,7 @@ export default function OnboardingManifest() {
             {/* Step body */}
             <div className="mb-8">
               {currentStep.id === "covenant" && (
-                <CovenantStep onAccept={handleNext} />
+                <CovenantStep onAccept={() => handleNext()} isSaving={isSaving} />
               )}
               {currentStep.id === "identity" && user && (
                 <IdentityStep user={user} />
@@ -813,22 +892,33 @@ export default function OnboardingManifest() {
                   domainName={domainName} setDomainName={setDomainName}
                   avatarUrl={avatarUrl} setAvatarUrl={setAvatarUrl}
                   bannerUrl={bannerUrl} setBannerUrl={setBannerUrl}
+                  errors={validationErrors} clearError={clearValidationError}
                 />
               )}
               {currentStep.id === "presence" && (
-                <PresenceStep originStatement={originStatement} setOriginStatement={setOriginStatement} />
+                <PresenceStep
+                  originStatement={originStatement}
+                  setOriginStatement={setOriginStatement}
+                  error={validationErrors.originStatement}
+                  clearError={() => clearValidationError("originStatement")}
+                />
               )}
               {currentStep.id === "testimony" && (
                 <TestimonyStep
                   testimonyText={testimonyText} setTestimonyText={setTestimonyText}
                   testimonyWid={testimonyWid} setTestimonyWid={setTestimonyWid}
+                  errors={validationErrors} clearError={clearValidationError}
                 />
               )}
               {currentStep.id === "license" && (
-                <LicenseStep onSelectPack={setSelectedPackId} />
+                <LicenseStep
+                  onSelectPack={setSelectedPackId}
+                  error={validationErrors.selectedPackId}
+                  clearError={() => clearValidationError("selectedPackId")}
+                />
               )}
               {currentStep.id === "first_work" && (
-                <FirstWorkStep onSkip={handleNext} />
+                <FirstWorkStep onSkip={() => handleNext({ skipValidation: true })} />
               )}
             </div>
 
@@ -847,18 +937,18 @@ export default function OnboardingManifest() {
                 </Button>
 
                 <Button
-                  onClick={handleNext}
-                  disabled={!canAdvance() || saveStepMutation.isPending}
+                  onClick={() => handleNext()}
+                  disabled={isSaving}
                   className="gap-2 font-semibold"
                   style={{
-                    background: canAdvance() ? "rgba(196,154,40,0.15)" : "rgba(196,154,40,0.05)",
-                    border: `1px solid ${canAdvance() ? "rgba(196,154,40,0.5)" : "rgba(196,154,40,0.15)"}`,
-                    color: canAdvance() ? "var(--ln-gold)" : "rgba(196,154,40,0.3)",
+                    background: "rgba(196,154,40,0.15)",
+                    border: "1px solid rgba(196,154,40,0.5)",
+                    color: "var(--ln-gold)",
                     transition: "all 0.3s ease",
                   }}
                 >
-                  {saveStepMutation.isPending ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
+                  {isSaving ? (
+                    <><Loader2 className="w-4 h-4 animate-spin" /> Saving progress…</>
                   ) : currentStepIdx === STEPS.length - 2 ? (
                     <>Continue <ArrowRight className="w-4 h-4" /></>
                   ) : (
@@ -871,8 +961,9 @@ export default function OnboardingManifest() {
             {/* Skip option for optional steps */}
             {(currentStep.id === "testimony" || currentStep.id === "license") && (
               <button
-                onClick={handleNext}
-                className="w-full text-center text-xs opacity-30 hover:opacity-50 transition-opacity mt-3 py-1"
+                onClick={() => handleNext({ skipValidation: true })}
+                disabled={isSaving}
+                className="w-full text-center text-xs opacity-30 hover:opacity-50 transition-opacity mt-3 py-1 disabled:cursor-wait"
               >
                 Skip this step for now
               </button>

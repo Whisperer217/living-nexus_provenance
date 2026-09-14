@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-09-14T00:25:00.000Z",
-  "totalLessons": 30,
+  "lastUpdated": "2026-09-14T00:36:00.000Z",
+  "totalLessons": 31,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -691,6 +691,29 @@
         "data-integrity",
         "regression-test",
         "no-creator-mutation"
+      ]
+    },
+    {
+      "id": "LESSON-031",
+      "date": "2026-09-14",
+      "category": "ux-reliability",
+      "problem": "Onboarding previously advanced optimistically after invoking persistence, hid field requirements behind a disabled Continue control, and gave no truthful confirmation that a creator’s progress had reached the database. This made a failed update difficult to distinguish from a completed save.",
+      "solution": "Validate the current step before the mutation, render accessible field-specific errors and focus the first invalid control, then disable the applicable submit action with a visible saving state while the mutation is pending. Advance the step and mark it complete only after `mutateAsync` resolves; show a success toast only then, and retain the current step with a recovery toast on failure. Optional testimony and license paths may deliberately skip validation rather than bypassing persistence safety.",
+      "files": [
+        "client/src/lib/onboardingValidation.ts",
+        "client/src/pages/OnboardingManifest.tsx",
+        "server/tests/onboardingValidation.test.ts",
+        "server/tests/onboardingManifestFeedback.contract.test.ts"
+      ],
+      "score": 0,
+      "tags": [
+        "onboarding",
+        "inline-validation",
+        "loading-state",
+        "success-toast",
+        "mutation-order",
+        "accessibility",
+        "ux-reliability"
       ]
     }
   ]
