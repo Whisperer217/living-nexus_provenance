@@ -4,7 +4,7 @@
  * title, genre, and AI consent. A "Batch Fill" panel pushes shared values to all
  * cards at once. Cards can be added one at a time or via multi-file drop.
  */
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { useLocation } from "wouter";
 import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
@@ -19,13 +19,13 @@ import {
 import {
   Upload, Music, X, CheckCircle, Loader2, AlertCircle,
   Plus, ChevronDown, ChevronUp, Image as ImageIcon,
-  Library, ExternalLink, Layers, Fingerprint, Sparkles, Copy,
+  Library, ExternalLink, Layers, Fingerprint, Sparkles, Copy, ShieldCheck, Ban,
 } from "lucide-react";
 
 import { EDIT_GENRES as GENRES } from "@shared/contentTypes";
 import { AIPlatformAdvisory } from "@/components/AIPlatformAdvisory";
 import { useAudioMetadata } from "@/hooks/useAudioMetadata";
-// ── WID crypto helpers ────────────────────────────────────────────────────────
+// ── Local preparation helpers ─────────────────────────────────────────────────
 async function sha256Hex(buffer: ArrayBuffer): Promise<string> {
   const hashBuf = await crypto.subtle.digest("SHA-256", buffer);
   const bytes = new Uint8Array(hashBuf);
@@ -33,32 +33,10 @@ async function sha256Hex(buffer: ArrayBuffer): Promise<string> {
   for (let i = 0; i < bytes.length; i++) hex += bytes[i].toString(16).padStart(2, "0");
   return hex;
 }
-async function generateECDSAKeypair() {
-  return crypto.subtle.generateKey({ name: "ECDSA", namedCurve: "P-256" }, true, ["sign", "verify"]);
-}
-async function signPayload(privateKey: CryptoKey, payload: string): Promise<string> {
-  const enc = new TextEncoder();
-  const sig = await crypto.subtle.sign({ name: "ECDSA", hash: "SHA-256" }, privateKey, enc.encode(payload));
-  const sigBytes = new Uint8Array(sig);
-  let binary = "";
-  for (let i = 0; i < sigBytes.length; i++) binary += String.fromCharCode(sigBytes[i]);
-  return btoa(binary);
-}
-async function exportPublicKeyJWK(key: CryptoKey): Promise<string> {
-  const jwk = await crypto.subtle.exportKey("jwk", key);
-  return JSON.stringify({ kty: jwk.kty, crv: jwk.crv, x: jwk.x, y: jwk.y });
-}
-function deriveHarmonicFrequencies(hashHex: string): number[] {
-  const BASE_FREQS = [110, 220, 330, 440, 550, 660];
-  return BASE_FREQS.map((base, i) => {
-    const chunk = parseInt(hashHex.slice(i * 8, i * 8 + 8), 16);
-    const ratio = (chunk % 1000) / 1000;
-    return Math.round(base * (0.85 + ratio * 0.3) * 10) / 10;
-  });
-}
-function formatWID(hashHex: string, mode = "audio"): string {
-  const prefix = mode === "lyrics" ? "WID-LYR" : mode === "manuscript" ? "WID-MAN" : mode === "comic" ? "WID-COM" : "WID-MUS";
-  return `${prefix}-${hashHex.slice(0, 8).toUpperCase()}-${hashHex.slice(8, 16).toUpperCase()}`;
+
+async function sha256Text(value: string): Promise<string> {
+  const bytes = new TextEncoder().encode(value);
+  return sha256Hex(bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer);
 }
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -75,11 +53,11 @@ interface TrackCard {
   audioStatus: "empty" | "hashing" | "ready" | "uploading" | "done" | "error";
   uploadProgress?: number; // 0-100 during "uploading" status
   errorMsg?: string;
-  wid?: string;
   fileHash?: string;
-  harmonicSignature?: number[];
-  ecdsaPublicKey?: string;
-  ecdsaSignature?: string;
+  storedArtifactHash?: string;
+  assetReceiptId?: string;
+  itemReceiptId?: string;
+  recoveryState?: "RECOVERED_EXISTING" | "AMBIGUOUS";
   coverFile: File | null;
   coverPreview: string | null;
   coverUrl?: string;
@@ -146,16 +124,45 @@ function makeEmptyCard(overrides?: Partial<TrackCard>): TrackCard {
 }
 
 // ── S3 upload helper ──────────────────────────────────────────────────────────
+type BatchReceiptRequest = {
+  operationId: string;
+  clientCardId: string;
+  assetKind: "audio" | "cover";
+};
+
+type UploadArtifactResult = {
+  url: string;
+  key: string;
+  evidence?: {
+    sourceSha256: string;
+    storedArtifactSha256: string;
+    storageTransformVersion: string;
+  };
+  batchReceipt?: {
+    operationId: string;
+    assetReceiptId: string;
+    itemReceiptId: string;
+    assetKind: "audio" | "cover";
+    status: string;
+  };
+};
+
 async function uploadFileToS3(
   file: File,
   type: "audio" | "cover",
-  onProgress?: (pct: number) => void
-): Promise<{ url: string; key: string }> {
+  onProgress?: (pct: number) => void,
+  batchReceipt?: BatchReceiptRequest,
+): Promise<UploadArtifactResult> {
   const formData = new FormData();
   // IMPORTANT: type and filename MUST be appended before the file binary
   // so busboy receives them before the file stream event fires.
   formData.append("type", type);
   formData.append("filename", file.name);
+  if (batchReceipt) {
+    formData.append("batchOperationId", batchReceipt.operationId);
+    formData.append("batchClientCardId", batchReceipt.clientCardId);
+    formData.append("batchAssetKind", batchReceipt.assetKind);
+  }
   formData.append("file", file);
   if (onProgress) {
     return new Promise((resolve, reject) => {
@@ -185,7 +192,7 @@ async function uploadFileToS3(
     const err = await res.json().catch(() => ({ error: res.statusText }));
     throw new Error((err as { error?: string }).error || `Upload failed (${res.status})`);
   }
-  return res.json() as Promise<{ url: string; key: string }>;
+  return res.json() as Promise<UploadArtifactResult>;
 }
 
 // ── TrackDetailPanel — slide-out drawer for per-track metadata ────────────────
@@ -269,8 +276,8 @@ function TrackDetailPanel({
             <p className="text-sm font-semibold truncate" style={{ color: "#FFFFFF", fontFamily: "'Cinzel', serif" }}>
               {card.title || "Untitled Track"}
             </p>
-            {card.wid && (
-              <p className="text-[10px] font-mono truncate" style={{ color: "rgba(196,154,40,0.7)" }}>{card.wid}</p>
+            {card.fileHash && (
+              <p className="text-[10px] font-mono truncate" style={{ color: "rgba(196,154,40,0.7)" }}>Source digest prepared</p>
             )}
           </div>
           <button
@@ -337,7 +344,15 @@ function TrackDetailPanel({
                 <button
                   onClick={e => {
                     e.stopPropagation();
-                    onChange(card.id, { audioFile: null, audioStatus: "empty", wid: undefined, fileHash: undefined });
+                    onChange(card.id, {
+                      audioFile: null,
+                      audioStatus: "empty",
+                      fileHash: undefined,
+                      storedArtifactHash: undefined,
+                      assetReceiptId: undefined,
+                      itemReceiptId: undefined,
+                      recoveryState: undefined,
+                    });
                   }}
                   className="p-1 rounded-md hover:bg-white/[0.08]"
                   style={{ color: "var(--ln-parchment)" }}
@@ -361,16 +376,16 @@ function TrackDetailPanel({
                 </div>
               </div>
             )}
-            {/* WID */}
-            {card.wid && (
+            {/* Source evidence — this is not a WID issuance. */}
+            {card.fileHash && (
               <div
                 className="mt-2 flex items-center gap-2 px-3 py-2 rounded-lg"
                 style={{ background: "rgba(196,154,40,0.04)", border: "1px solid rgba(196,154,40,0.15)" }}
               >
                 <Fingerprint size={12} style={{ color: "var(--ln-gold)" }} />
-                <span className="text-[11px] font-mono flex-1 truncate" style={{ color: "var(--ln-gold)" }}>{card.wid}</span>
+                <span className="text-[11px] font-mono flex-1 truncate" style={{ color: "var(--ln-gold)" }}>Source SHA-256 · {card.fileHash}</span>
                 <button
-                  onClick={() => { navigator.clipboard.writeText(card.wid!); toast.success("WID copied"); }}
+                  onClick={() => { navigator.clipboard.writeText(card.fileHash!); toast.success("Source digest copied"); }}
                   className="p-1 rounded hover:bg-white/[0.08]"
                   style={{ color: "var(--ln-smoke)" }}
                 >
@@ -670,14 +685,14 @@ function TrackDetailPanel({
 
 // ── TrackGridSlot — compact visual card in the grid ───────────────────────────
 function TrackCardUI({
-  card, index, total, onChange, onRemove, onGenerateWid, onAddMultiple, onOpenDetail,
+  card, index, total, onChange, onRemove, onPrepareSource, onAddMultiple, onOpenDetail,
 }: {
   card: TrackCard;
   index: number;
   total: number;
   onChange: (id: string, patch: Partial<TrackCard>) => void;
   onRemove: (id: string) => void;
-  onGenerateWid: (id: string, file: File) => void;
+  onPrepareSource: (id: string, file: File) => void;
   onAddMultiple: (files: File[]) => void;
   onOpenDetail: (id: string) => void;
 }) {
@@ -699,7 +714,7 @@ function TrackCardUI({
       nameLower.includes("drum") || nameLower.includes("perc") ? "drum_stem" :
       "full_mix";
     onChange(card.id, { audioFile: file, title: card.title || fallbackTitle, audioStatus: "hashing", fileType: detectedType });
-    onGenerateWid(card.id, file);
+    onPrepareSource(card.id, file);
     extractMetadata(file).then(meta => {
       const patch: Partial<TrackCard> = {};
       if (meta.title) patch.title = meta.title;
@@ -863,10 +878,16 @@ function TrackCardUI({
           >
             {card.title || "Untitled"}
           </p>
-          {card.wid && (
-            <p className="text-[10px] font-mono truncate" style={{ color: "rgba(196,154,40,0.7)" }}>{card.wid}</p>
+          {card.recoveryState === "RECOVERED_EXISTING" && (
+            <p className="text-[10px] truncate" style={{ color: "var(--ln-seal-bright)" }}>Existing private record recovered — no registration run</p>
           )}
-          {!card.wid && card.audioFile && card.audioStatus !== "error" && (
+          {card.recoveryState === "AMBIGUOUS" && (
+            <p className="text-[10px] truncate" style={{ color: "var(--ln-ember)" }}>Exact-hash recovery is ambiguous — review required</p>
+          )}
+          {!card.recoveryState && card.fileHash && card.audioStatus !== "error" && (
+            <p className="text-[10px] font-mono truncate" style={{ color: "rgba(196,154,40,0.7)" }}>Source digest prepared</p>
+          )}
+          {!card.fileHash && card.audioFile && card.audioStatus !== "error" && (
             <p className="text-[10px] truncate" style={{ color: "rgba(184,168,138,0.5)" }}>{card.audioFile.name}</p>
           )}
           {card.audioStatus === "error" && (
@@ -880,7 +901,7 @@ function TrackCardUI({
               onClick={e => {
                 e.stopPropagation();
                 onChange(card.id, { audioStatus: "hashing", errorMsg: undefined });
-                onGenerateWid(card.id, card.audioFile!);
+                onPrepareSource(card.id, card.audioFile!);
               }}
               className="mt-2 w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-[10px] font-heading tracking-widest uppercase transition-all"
               style={{ border: "1px solid rgba(220,60,60,0.45)", color: "var(--ln-ember)", background: "rgba(220,60,60,0.08)" }}
@@ -910,9 +931,16 @@ export default function BatchUploadPage() {
   const [, navigate] = useLocation();
 
   const [albumName, setAlbumName] = useState("");
-  const [batchPublishIntent, setBatchPublishIntent] = useState<"Draft" | "Published">("Draft");
+  const batchPublishIntent = "Draft" as const;
   const [albumCoverFile, setAlbumCoverFile] = useState<File | null>(null);
   const [albumCoverPreview, setAlbumCoverPreview] = useState<string | null>(null);
+  // Retained solely so the pre-H3 result branch stays type-safe; H3 no longer sets it.
+  const [collectionResult, setCollectionResult] = useState<{
+    collectionId: number;
+    collectionWid: string;
+    collectiveHash: string;
+    trackCount: number;
+  } | null>(null);
   const [albumCoverUrl, setAlbumCoverUrl] = useState<string | undefined>();
 
   const [batchFillOpen, setBatchFillOpen] = useState(false);
@@ -941,14 +969,47 @@ export default function BatchUploadPage() {
   const albumCoverRef = useRef<HTMLInputElement>(null);
   const { extractMetadata: extractBatchMetadata } = useAudioMetadata();
 
-  const [collectionResult, setCollectionResult] = useState<{
-    collectionId: number;
-    collectionWid: string;
-    collectiveHash: string;
-    trackCount: number;
+  const [privateOperation, setPrivateOperation] = useState<{
+    operationId: string;
+    status: string;
+    collectionName: string | null;
   } | null>(null);
+  const [privateReadiness, setPrivateReadiness] = useState<{
+    registeredItemCount: number;
+    itemCount: number;
+    readyForExplicitFinalization: boolean;
+    reason: string;
+  } | null>(null);
+  const [restoredOperationId, setRestoredOperationId] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    return window.sessionStorage.getItem("living-nexus.private-batch-operation");
+  });
+  const privateOperationCreate = trpc.batchUpload.createOperation.useMutation();
+  const privateOperationCancel = trpc.batchUpload.cancelOperation.useMutation();
+  const batchUtils = trpc.useUtils();
+  const restoredOperation = trpc.batchUpload.getOperation.useQuery(
+    { operationId: restoredOperationId ?? "not-restored" },
+    { enabled: isAuthenticated && Boolean(restoredOperationId), retry: false },
+  );
 
-  const batchUpload = trpc.songs.batchUpload.useMutation();
+  useEffect(() => {
+    if (restoredOperation.data?.operation) {
+      setPrivateOperation(restoredOperation.data.operation);
+      setPrivateReadiness({
+        itemCount: restoredOperation.data.items.length,
+        registeredItemCount: restoredOperation.data.items.filter((item: { status: string }) => item.status === "registered").length,
+        readyForExplicitFinalization: false,
+        reason: "Operation restored. Registration and collection finalization remain separate gates.",
+      });
+    }
+  }, [restoredOperation.data]);
+
+  useEffect(() => {
+    if (restoredOperation.isError && restoredOperationId) {
+      window.sessionStorage.removeItem("living-nexus.private-batch-operation");
+      setRestoredOperationId(null);
+    }
+  }, [restoredOperation.isError, restoredOperationId]);
 
   const updateCard = useCallback((id: string, patch: Partial<TrackCard>) => {
     setCards(prev => prev.map(c => c.id === id ? { ...c, ...patch } : c));
@@ -964,32 +1025,18 @@ export default function BatchUploadPage() {
     try {
       const buffer = await file.arrayBuffer();
       const fileHash = await sha256Hex(buffer);
-      // Non-blocking duplicate check
-      try {
-        const dupRes = await fetch(`/api/trpc/songs.checkDuplicate?input=${encodeURIComponent(JSON.stringify({ fileHash }))}`, { credentials: "include" });
-        if (dupRes.ok) {
-          const dupJson = await dupRes.json();
-          const dupCheck = dupJson?.result?.data as { duplicate: boolean; isOwnWork?: boolean; existingTitle?: string; existingWid?: string; existingCreator?: string } | undefined;
-          if (dupCheck?.duplicate) {
-            const msg = dupCheck.isOwnWork
-              ? `"${file.name}" already exists in your archive as "${dupCheck.existingTitle}".`
-              : `"${file.name}" matches a file registered by ${dupCheck.existingCreator} ("${dupCheck.existingTitle}").`;
-            toast.warning(msg, { duration: 7000 });
-          }
-        }
-      } catch { /* advisory */ }
-      const wid = formatWID(fileHash);
-      const harmonicSignature = deriveHarmonicFrequencies(fileHash);
-      const keypair = await generateECDSAKeypair();
-      const ecdsaPublicKey = await exportPublicKeyJWK(keypair.publicKey);
-      const payload = JSON.stringify({ wid, fileHash, timestamp: Date.now() });
-      const ecdsaSignature = await signPayload(keypair.privateKey, payload);
       setCards(p => p.map(c => c.id === cardId ? {
-        ...c, audioStatus: "ready", wid, fileHash, harmonicSignature, ecdsaPublicKey, ecdsaSignature,
+        ...c,
+        audioStatus: "ready",
+        fileHash,
+        storedArtifactHash: undefined,
+        assetReceiptId: undefined,
+        itemReceiptId: undefined,
+        recoveryState: undefined,
       } : c));
     } catch {
       setCards(p => p.map(c =>
-        c.id === cardId ? { ...c, audioStatus: "error", errorMsg: "WID generation failed" } : c
+        c.id === cardId ? { ...c, audioStatus: "error", errorMsg: "Source digest preparation failed" } : c
       ));
     }
   }, []);
@@ -1095,106 +1142,130 @@ export default function BatchUploadPage() {
     toast.success("AI disclosure repeated across all tracks");
   };
 
-  const handleSubmit = async () => {
+  const handlePrepareDraft = async () => {
     if (!albumName.trim()) { toast.error("Album / collection name is required"); return; }
-    const readyCards = cards.filter(c => c.audioStatus === "ready" && c.audioFile);
-    if (!readyCards.length) { toast.error("No tracks ready — wait for WID generation"); return; }
+    const readyCards = cards.filter(c => c.audioStatus === "ready" && c.audioFile && c.fileHash);
+    if (!readyCards.length) { toast.error("No tracks are ready — wait for source digest preparation"); return; }
+    if (privateOperation?.status === "cancelled") {
+      toast.error("This private Batch preparation was cancelled. Start a new Batch to prepare additional assets.");
+      return;
+    }
     setIsUploading(true);
     setWitnessedCount(0);
     setTotalToWitness(readyCards.length);
     try {
-      let resolvedAlbumCoverUrl = albumCoverUrl;
-      if (albumCoverFile && !resolvedAlbumCoverUrl) {
-        toast.loading("Uploading album cover...", { id: "album-cover" });
-        const { url } = await uploadFileToS3(albumCoverFile, "cover");
-        resolvedAlbumCoverUrl = url;
-        setAlbumCoverUrl(url);
-        toast.dismiss("album-cover");
+      const intendedMetadataHash = await sha256Text(JSON.stringify({
+        collectionName: albumName.trim(),
+        genre: batchGenre || null,
+        aiConsent: batchAiConsent,
+        hasCollectionArt: Boolean(albumCoverFile),
+        tracks: readyCards.map(card => ({
+          clientCardId: card.id,
+          title: card.title,
+          genre: card.genre || null,
+          creationDate: card.releaseDate || null,
+          aiConsent: card.aiConsent,
+          aiDisclosure: card.aiDisclosure,
+          aiTools: [card.aiToolSuno && "suno", card.aiToolUdio && "udio", card.aiToolSonato && "sonato", card.aiToolOther && card.aiToolOtherName].filter(Boolean),
+          hasCoverArt: Boolean(card.coverFile),
+          hasLyrics: Boolean(card.lyricsText.trim()),
+          hasOrigin: Boolean(card.haaiOriginStory?.trim()),
+          hasDescription: Boolean(card.description?.trim()),
+          hasCaption: Boolean(card.headlineCaption?.trim()),
+        })),
+      }));
+      const operation = privateOperation ?? await privateOperationCreate.mutateAsync({
+        collectionName: albumName.trim(),
+        intendedMetadataHash,
+      });
+      if (!privateOperation) {
+        setPrivateOperation(operation);
+        window.sessionStorage.setItem("living-nexus.private-batch-operation", operation.operationId);
+        setRestoredOperationId(operation.operationId);
+        toast.success("Private Batch preparation started. No Work, WID, or collection has been created.");
       }
-
-      const trackPayloads: {
-        fileUrl: string; fileKey: string; coverArtUrl?: string;
-        title: string; genre?: string; aiConsent: TrackCard["aiConsent"];
-        fileHash?: string; witnessId?: string;
-        harmonicSignature?: number[]; ecdsaPublicKey?: string; ecdsaSignature?: string;
-        releaseDate?: string;
-        aiDisclosure?: TrackCard["aiDisclosure"];
-        aiToolSuno?: boolean; aiToolUdio?: boolean; aiToolSonato?: boolean;
-        aiToolOther?: boolean; aiToolOtherName?: string;
-        fileType?: string;
-        lyricsText?: string;
-        haaiOriginStory?: string;
-        description?: string;
-        headlineCaption?: string;
-      }[] = [];
+      if (albumCoverFile) {
+        toast.message("Collection art remains local to this preparation screen until a later collection-finalization step.");
+      }
 
       for (const card of readyCards) {
         updateCard(card.id, { audioStatus: "uploading", uploadProgress: 0 });
-        const { url: audioUrl, key: audioKey } = await uploadFileToS3(
-          card.audioFile!,
-          "audio",
-          (pct) => updateCard(card.id, { uploadProgress: pct })
-        );
-        let trackCoverUrl: string | undefined;
-        if (card.coverFile) {
-          const { url } = await uploadFileToS3(card.coverFile, "cover");
-          trackCoverUrl = url;
-          updateCard(card.id, { coverUrl: url });
+        try {
+          const reconciliation = await batchUtils.batchUpload.reconcileSource.fetch({
+            operationId: operation.operationId,
+            sourceSha256: card.fileHash!,
+          });
+          if (reconciliation.state === "AMBIGUOUS") {
+            updateCard(card.id, {
+              audioStatus: "error",
+              recoveryState: "AMBIGUOUS",
+              errorMsg: "Exact-hash recovery is ambiguous. No record was selected.",
+            });
+            continue;
+          }
+          if (reconciliation.state === "RECOVERED_EXISTING") {
+            updateCard(card.id, {
+              audioStatus: "done",
+              recoveryState: "RECOVERED_EXISTING",
+              itemReceiptId: reconciliation.itemReceiptId,
+            });
+            setWitnessedCount(previous => previous + 1);
+            continue;
+          }
+
+          const audioResult = await uploadFileToS3(
+            card.audioFile!,
+            "audio",
+            pct => updateCard(card.id, { uploadProgress: pct }),
+            { operationId: operation.operationId, clientCardId: card.id, assetKind: "audio" },
+          );
+          if (!audioResult.batchReceipt || !audioResult.evidence || audioResult.evidence.sourceSha256 !== card.fileHash) {
+            throw new Error("Server evidence receipt did not match this prepared source digest.");
+          }
+          updateCard(card.id, {
+            audioStatus: "done",
+            uploadProgress: 100,
+            storedArtifactHash: audioResult.evidence.storedArtifactSha256,
+            assetReceiptId: audioResult.batchReceipt.assetReceiptId,
+            itemReceiptId: audioResult.batchReceipt.itemReceiptId,
+          });
+          if (card.coverFile) {
+            const coverResult = await uploadFileToS3(
+              card.coverFile,
+              "cover",
+              undefined,
+              { operationId: operation.operationId, clientCardId: card.id, assetKind: "cover" },
+            );
+            updateCard(card.id, { coverUrl: coverResult.url });
+          }
+          setWitnessedCount(previous => previous + 1);
+        } catch (err) {
+          updateCard(card.id, {
+            audioStatus: "error",
+            errorMsg: err instanceof Error ? err.message : "Private Batch preparation failed.",
+          });
         }
-        trackPayloads.push({
-          fileUrl: audioUrl, fileKey: audioKey,
-          coverArtUrl: trackCoverUrl,
-          title: card.title || card.audioFile!.name.replace(/\.[^.]+$/, ""),
-          genre: card.genre || undefined,
-          aiConsent: card.aiConsent,
-          fileHash: card.fileHash,
-          witnessId: card.wid,
-          harmonicSignature: card.harmonicSignature,
-          ecdsaPublicKey: card.ecdsaPublicKey,
-          ecdsaSignature: card.ecdsaSignature,
-          // New provenance fields from batch upload sketch
-          releaseDate: card.releaseDate || undefined,
-          aiDisclosure: card.aiDisclosure,
-          aiToolSuno: card.aiToolSuno,
-          aiToolUdio: card.aiToolUdio,
-          aiToolSonato: card.aiToolSonato,
-          aiToolOther: card.aiToolOther,
-          aiToolOtherName: card.aiToolOtherName || undefined,
-          fileType: card.fileType,
-          lyricsText: card.lyricsText.trim() || undefined,
-          haaiOriginStory: card.haaiOriginStory?.trim() || undefined,
-          description: card.description?.trim() || undefined,
-          headlineCaption: card.headlineCaption?.trim() || undefined,
-        });
-        setWitnessedCount(prev => prev + 1);
       }
-
-      const result = await batchUpload.mutateAsync({
-        albumName: albumName.trim(),
-        genre: batchGenre || undefined,
-        aiConsent: batchAiConsent,
-        coverArtUrl: resolvedAlbumCoverUrl,
-        status: batchPublishIntent,
-        tracks: trackPayloads,
-      });
-
-      readyCards.forEach(c => updateCard(c.id, { audioStatus: "done" }));
-      const trackCount = result.trackCount ?? result.results?.length ?? readyCards.length;
-      setCollectionResult({
-        collectionId: result.collectionId ?? 0,
-        collectionWid: result.collectionWid ?? "",
-        collectiveHash: result.collectiveHash ?? "",
-        trackCount,
-      });
-      toast.success(`${trackCount} track${trackCount > 1 ? "s" : ""} witnessed and archived`);
+      const readiness = await batchUtils.batchUpload.collectionFinalizationReadiness.fetch({ operationId: operation.operationId });
+      setPrivateReadiness(readiness);
+      toast.success("Private Batch preparation saved. Work registration and WID issuance were not run.");
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Upload failed";
-      toast.error(msg);
-      setCards(p => p.map(c =>
-        c.audioStatus === "uploading" ? { ...c, audioStatus: "error", errorMsg: "Upload failed" } : c
-      ));
+      toast.error(err instanceof Error ? err.message : "Private Batch preparation failed");
     } finally {
       setIsUploading(false);
+    }
+  };
+
+  const handleCancelPrivatePreparation = async () => {
+    if (!privateOperation || !window.confirm("Cancel this private Batch preparation? Existing Work, WID, and collection records are not affected.")) return;
+    try {
+      await privateOperationCancel.mutateAsync({ operationId: privateOperation.operationId });
+      window.sessionStorage.removeItem("living-nexus.private-batch-operation");
+      setRestoredOperationId(null);
+      setPrivateOperation(current => current ? { ...current, status: "cancelled" } : null);
+      toast.success("Private Batch preparation cancelled.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not cancel this private Batch preparation.");
     }
   };
 
@@ -1343,9 +1414,46 @@ export default function BatchUploadPage() {
           </Badge>
         </div>
         <p className="text-sm" style={{ color: "var(--ln-parchment)" }}>
-          Each track gets its own cover art, WID, and metadata. Drop multiple files anywhere to auto-fill cards.
+          Prepare creator-private audio evidence and metadata in one place. WID registration and publication remain separate steps.
         </p>
       </div>
+
+      {privateOperation && (
+        <section
+          data-testid="private-batch-operation-status"
+          className="p-4 space-y-3 rounded-2xl"
+          style={{ background: "rgba(196,154,40,0.07)", border: "1px solid rgba(196,154,40,0.35)", color: "var(--ln-parchment)" }}
+        >
+          <div className="flex items-start gap-3">
+            <ShieldCheck size={18} className="mt-0.5 flex-none" style={{ color: "var(--ln-gold)" }} />
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-heading tracking-widest uppercase" style={{ color: "var(--ln-gold)" }}>Private Batch preparation</p>
+              <p className="text-sm mt-1" style={{ color: "#FFFFFF" }}>
+                {privateOperation.status === "cancelled" ? "Cancelled — no Work, WID, or collection changed." : "Evidence receipts are creator-private. No Work, WID, collection, or public release has been created."}
+              </p>
+              <p className="text-[10px] font-mono mt-2 break-all" style={{ color: "var(--ln-smoke)" }}>Operation · {privateOperation.operationId}</p>
+            </div>
+          </div>
+          {privateReadiness && (
+            <p className="text-[11px] leading-relaxed" style={{ color: "var(--ln-parchment)" }}>
+              {privateReadiness.itemCount} item{privateReadiness.itemCount === 1 ? "" : "s"} prepared · {privateReadiness.registeredItemCount} registered · {privateReadiness.reason}
+            </p>
+          )}
+          {privateOperation.status !== "cancelled" && (
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={handleCancelPrivatePreparation}
+              disabled={isUploading || privateOperationCancel.isPending}
+              className="gap-2"
+              style={{ borderColor: "rgba(220,60,60,0.45)", color: "var(--ln-ember)" }}
+            >
+              <Ban size={13} /> Cancel private preparation
+            </Button>
+          )}
+        </section>
+      )}
 
       {/* Album info */}
       <div
@@ -1367,32 +1475,14 @@ export default function BatchUploadPage() {
             <p className="text-[10px]" style={{ color: "var(--ln-parchment)" }}>
               Shared collection name. Individual tracks can override genre and AI consent below.
             </p>
-            {/* Loop: explicit Draft / Published for the whole batch */}
+            {/* H3 is preparation-only; registration and publication remain later gates. */}
             <div className="pt-2">
-              <p className="text-[10px] uppercase tracking-widest mb-2" style={{ color: "var(--ln-gold)" }}>
-                Register as
-              </p>
-              <div className="flex gap-2">
-                {(["Draft", "Published"] as const).map((s) => (
-                  <button
-                    key={s}
-                    type="button"
-                    onClick={() => setBatchPublishIntent(s)}
-                    className="flex-1 py-2 text-xs rounded-full transition-colors"
-                    style={{
-                      border: batchPublishIntent === s ? "1px solid var(--ln-gold)" : "1px solid rgba(196,154,40,0.25)",
-                      background: batchPublishIntent === s ? "rgba(196,154,40,0.15)" : "transparent",
-                      color: batchPublishIntent === s ? "var(--ln-gold)" : "color-mix(in srgb, var(--ln-parchment) 55%, transparent)",
-                    }}
-                  >
-                    {s}
-                  </button>
-                ))}
+              <p className="text-[10px] uppercase tracking-widest mb-2" style={{ color: "var(--ln-gold)" }}>Preparation state</p>
+              <div className="rounded-full px-3 py-2 text-xs" style={{ border: "1px solid var(--ln-gold)", background: "rgba(196,154,40,0.15)", color: "var(--ln-gold)" }}>
+                Draft only · no registration or publication
               </div>
               <p className="text-[10px] mt-1.5" style={{ color: "color-mix(in srgb, var(--ln-parchment) 45%, transparent)" }}>
-                {batchPublishIntent === "Draft"
-                  ? "Tracks stay private until you publish from Manage."
-                  : "Publish requires bound visuals + witness-ready profile for each seal path."}
+                This step prepares creator-private evidence receipts. It does not create a Work, WID, collection, or public release.
               </p>
             </div>
           </div>
@@ -1429,7 +1519,6 @@ export default function BatchUploadPage() {
                     e.stopPropagation();
                     setAlbumCoverFile(null);
                     setAlbumCoverPreview(null);
-                    setAlbumCoverUrl(undefined);
                   }}
                   className="absolute top-1 right-1 w-5 h-5 rounded-full flex items-center justify-center"
                   style={{ background: "rgba(44,52,56,0.8)" }}
@@ -1675,7 +1764,7 @@ export default function BatchUploadPage() {
               total={cards.length}
               onChange={updateCard}
               onRemove={removeCard}
-              onGenerateWid={generateWID}
+              onPrepareSource={generateWID}
               onAddMultiple={handleAddMultiple}
               onOpenDetail={id => setDetailCardId(id)}
             />
@@ -1728,17 +1817,17 @@ export default function BatchUploadPage() {
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold" style={{ color: "#FFFFFF" }}>
             {isUploading
-              ? `${witnessedCount} of ${totalToWitness} track${totalToWitness > 1 ? "s" : ""} uploaded...`
+              ? `${witnessedCount} of ${totalToWitness} track${totalToWitness > 1 ? "s" : ""} prepared...`
               : readyCount > 0
-                ? `${readyCount} track${readyCount > 1 ? "s" : ""} ready to witness`
+                ? `${readyCount} track${readyCount > 1 ? "s" : ""} ready to prepare privately`
                 : "Add audio files to begin"}
           </p>
           <p className="text-[11px] mt-0.5" style={{ color: "var(--ln-parchment)" }}>
-            {albumName ? `"${albumName}" · ${batchPublishIntent}` : "Set a collection name above"}
+            {albumName ? `"${albumName}" · private Draft preparation` : "Set a collection name above"}
           </p>
         </div>
         <Button
-          onClick={handleSubmit}
+          onClick={handlePrepareDraft}
           disabled={isUploading || readyCount === 0 || !albumName.trim()}
           className="gap-2 px-6"
           style={{
@@ -1748,10 +1837,8 @@ export default function BatchUploadPage() {
         >
           {isUploading ? <Loader2 size={16} className="animate-spin" /> : <Fingerprint size={16} />}
           {isUploading
-            ? `Witnessing ${witnessedCount} of ${totalToWitness}...`
-            : batchPublishIntent === "Published"
-              ? `Publish ${readyCount > 0 ? readyCount : ""} Track${readyCount !== 1 ? "s" : ""}`
-              : `Save ${readyCount > 0 ? readyCount : ""} Draft${readyCount !== 1 ? "s" : ""}`}
+            ? `Preparing ${witnessedCount} of ${totalToWitness}...`
+            : `Prepare ${readyCount > 0 ? readyCount : ""} Private Draft${readyCount !== 1 ? "s" : ""}`}
         </Button>
       </div>
     </div>
