@@ -374,6 +374,71 @@ export type CoreIngestionDraftProposal = typeof coreIngestionDraftProposals.$inf
 export type CoreIngestionDraftConfirmation = typeof coreIngestionDraftConfirmations.$inferSelect;
 export type CoreIngestionPrivateDraft = typeof coreIngestionPrivateDrafts.$inferSelect;
 
+// ─── Batch Upload Integrity Foundation (H1) ──────────────────────────────────
+// Creator-private workflow receipts only. These rows cannot register a Work,
+// issue a WID, create a collection, or replace canonical provenance.
+export const batchUploadOperations = mysqlTable("batchUploadOperations", {
+  operationId: varchar("operationId", { length: 64 }).primaryKey(),
+  creatorId: int("creatorId").notNull(),
+  status: mysqlEnum("status", ["preparing", "assets_verified", "registering", "collection_pending", "completed", "needs_creator_review", "failed", "cancelled"]).notNull().default("preparing"),
+  policyVersion: varchar("policyVersion", { length: 64 }).notNull().default("batch-upload-integrity-v1"),
+  intendedMetadataHash: varchar("intendedMetadataHash", { length: 64 }),
+  collectionName: varchar("collectionName", { length: 255 }),
+  failureCode: varchar("failureCode", { length: 96 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (t) => ({
+  creatorStatusIdx: index("batchUploadOperations_creator_status_idx").on(t.creatorId, t.status),
+}));
+
+export const batchUploadAssets = mysqlTable("batchUploadAssets", {
+  assetReceiptId: varchar("assetReceiptId", { length: 64 }).primaryKey(),
+  operationId: varchar("operationId", { length: 64 }).notNull(),
+  creatorId: int("creatorId").notNull(),
+  assetKind: mysqlEnum("assetKind", ["audio", "cover"]).notNull(),
+  storageKey: varchar("storageKey", { length: 512 }).notNull(),
+  storageUrl: text("storageUrl").notNull(),
+  sourceSha256: varchar("sourceSha256", { length: 64 }).notNull(),
+  storedArtifactSha256: varchar("storedArtifactSha256", { length: 64 }).notNull(),
+  storageTransformVersion: varchar("storageTransformVersion", { length: 64 }).notNull(),
+  sourceBytes: bigint("sourceBytes", { mode: "number" }).notNull(),
+  storedBytes: bigint("storedBytes", { mode: "number" }).notNull(),
+  contentType: varchar("contentType", { length: 191 }).notNull(),
+  status: mysqlEnum("status", ["verified", "consumed", "revoked"]).notNull().default("verified"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  consumedAt: timestamp("consumedAt"),
+  revokedAt: timestamp("revokedAt"),
+}, (t) => ({
+  operationCreatorIdx: index("batchUploadAssets_operation_creator_idx").on(t.operationId, t.creatorId),
+  operationSourceIdx: uniqueIndex("batchUploadAssets_operation_source_uq").on(t.operationId, t.sourceSha256, t.assetKind),
+  creatorStoredHashIdx: index("batchUploadAssets_creator_stored_hash_idx").on(t.creatorId, t.storedArtifactSha256),
+}));
+
+export const batchUploadItems = mysqlTable("batchUploadItems", {
+  itemReceiptId: varchar("itemReceiptId", { length: 64 }).primaryKey(),
+  operationId: varchar("operationId", { length: 64 }).notNull(),
+  creatorId: int("creatorId").notNull(),
+  clientCardId: varchar("clientCardId", { length: 128 }).notNull(),
+  audioAssetReceiptId: varchar("audioAssetReceiptId", { length: 64 }),
+  coverAssetReceiptId: varchar("coverAssetReceiptId", { length: 64 }),
+  sourceSha256: varchar("sourceSha256", { length: 64 }),
+  intendedMetadataHash: varchar("intendedMetadataHash", { length: 64 }),
+  status: mysqlEnum("status", ["asset_pending", "asset_verified", "registered", "recovered_existing", "evidence_mismatch", "ambiguous", "failed", "cancelled"]).notNull().default("asset_pending"),
+  songId: int("songId"),
+  witnessId: varchar("witnessId", { length: 64 }),
+  failureCode: varchar("failureCode", { length: 96 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (t) => ({
+  operationCardUnique: uniqueIndex("batchUploadItems_operation_card_uq").on(t.operationId, t.clientCardId),
+  operationSourceUnique: uniqueIndex("batchUploadItems_operation_source_uq").on(t.operationId, t.sourceSha256),
+  creatorStatusIdx: index("batchUploadItems_creator_status_idx").on(t.creatorId, t.status),
+}));
+
+export type BatchUploadOperation = typeof batchUploadOperations.$inferSelect;
+export type BatchUploadAsset = typeof batchUploadAssets.$inferSelect;
+export type BatchUploadItem = typeof batchUploadItems.$inferSelect;
+
 // ─── Core Ingestion Scheduler Control Plane (Option B) ────────────────────────
 // Project-level operational metadata for the scheduler-only I1 callback. This
 // singleton does not own creator records and it cannot create a Heartbeat task,
@@ -464,7 +529,11 @@ export const songs = mysqlTable("songs", {
   fileUrl: text("fileUrl"),
   fileKey: text("fileKey"),
   coverArtUrl: text("coverArtUrl"),
+  // Storage evidence is prospective. fileHash retains the legacy creator-source
+  // hash; these fields attest to the bytes actually persisted after processing.
   fileHash: varchar("fileHash", { length: 64 }),
+  storedArtifactHash: varchar("storedArtifactHash", { length: 64 }),
+  storageTransformVersion: varchar("storageTransformVersion", { length: 64 }),
   durationSeconds: float("durationSeconds"),
   sampleRate: int("sampleRate"),
   bitDepth: int("bitDepth"),

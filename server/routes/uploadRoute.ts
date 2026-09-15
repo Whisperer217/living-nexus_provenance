@@ -28,6 +28,7 @@ import { micronize, type ImagePreset } from "../services/imageProcessing";
 import { storagePut } from "../utils/storage";
 import { stripAudioMetadata } from "../services/audioMetadataStrip";
 import { parseGcode } from "../services/gcodeParser";
+import { createStorageEvidence, type StorageEvidence } from "../domains/batchUpload/evidenceContracts";
 
 const router = Router();
 
@@ -76,7 +77,7 @@ router.post("/api/upload-file", async (req: Request, res: Response) => {
   let fileType = "audio";
   let originalName = "file";
   let mimeType = "application/octet-stream";
-  let uploadPromise: Promise<{ url: string; key: string }> | null = null;
+  let uploadPromise: Promise<{ url: string; key: string; evidence?: StorageEvidence }> | null = null;
 
   bb.on("field", (name: string, value: string) => {
     if (name === "type") fileType = value;
@@ -101,7 +102,7 @@ router.post("/api/upload-file", async (req: Request, res: Response) => {
       // IMAGE PATH: buffer the stream, micronize, then upload processed WebP
       const chunks: Buffer[] = [];
       fileStream.on("data", (chunk: Buffer) => chunks.push(chunk));
-      uploadPromise = new Promise<{ url: string; key: string }>((resolve, reject) => {
+      uploadPromise = new Promise<{ url: string; key: string; evidence?: StorageEvidence }>((resolve, reject) => {
         fileStream.on("end", async () => {
           try {
             const rawBuffer = Buffer.concat(chunks);
@@ -109,7 +110,11 @@ router.post("/api/upload-file", async (req: Request, res: Response) => {
             const webpFileName = safeFileName.replace(/\.[^.]+$/, ".webp");
             const key = `${prefix}/${user!.id}/${Date.now()}-${webpFileName}`;
             const { url } = await storagePut(key, buffer, processedMime);
-            resolve({ url, key });
+            resolve({
+              url,
+              key,
+              evidence: createStorageEvidence(rawBuffer, buffer, "cover-micronize-v1"),
+            });
           } catch (err) {
             reject(err);
           }
@@ -121,7 +126,7 @@ router.post("/api/upload-file", async (req: Request, res: Response) => {
       const key = `${prefix}/${user!.id}/${Date.now()}-${safeFileName}`;
       const chunks: Buffer[] = [];
       fileStream.on("data", (chunk: Buffer) => chunks.push(chunk));
-      uploadPromise = new Promise<{ url: string; key: string; thumbnailUrl?: string; thumbnailKey?: string; printStats?: object }>((resolve, reject) => {
+      uploadPromise = new Promise<{ url: string; key: string; thumbnailUrl?: string; thumbnailKey?: string; printStats?: object; evidence?: StorageEvidence }>((resolve, reject) => {
         fileStream.on("end", async () => {
           try {
             const buffer = Buffer.concat(chunks);
@@ -138,7 +143,14 @@ router.post("/api/upload-file", async (req: Request, res: Response) => {
               thumbnailUrl = thumbResult.url;
               thumbnailKey = thumbKey;
             }
-            resolve({ url, key, thumbnailUrl, thumbnailKey, printStats });
+            resolve({
+              url,
+              key,
+              thumbnailUrl,
+              thumbnailKey,
+              printStats,
+              evidence: createStorageEvidence(buffer, buffer, "identity-v1"),
+            });
           } catch (err) {
             reject(err);
           }
@@ -151,16 +163,25 @@ router.post("/api/upload-file", async (req: Request, res: Response) => {
       const key = `${prefix}/${user!.id}/${Date.now()}-${safeFileName}`;
       const chunks: Buffer[] = [];
       fileStream.on("data", (chunk: Buffer) => chunks.push(chunk));
-      uploadPromise = new Promise<{ url: string; key: string }>((resolve, reject) => {
+      uploadPromise = new Promise<{ url: string; key: string; evidence?: StorageEvidence }>((resolve, reject) => {
         fileStream.on("end", async () => {
           try {
-            let buffer = Buffer.concat(chunks);
+            const sourceBuffer = Buffer.concat(chunks);
+            let buffer = sourceBuffer;
             // Strip all ID3/EXIF metadata from audio files before storage
             if (isAudio) {
               buffer = Buffer.from(await stripAudioMetadata(buffer, mimeType));
             }
             const { url } = await storagePut(key, buffer, mimeType);
-            resolve({ url, key });
+            resolve({
+              url,
+              key,
+              evidence: createStorageEvidence(
+                sourceBuffer,
+                buffer,
+                isAudio ? "audio-metadata-strip-v1" : "identity-v1",
+              ),
+            });
           } catch (err) {
             reject(err);
           }
