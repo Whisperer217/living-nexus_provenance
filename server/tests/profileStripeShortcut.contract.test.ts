@@ -21,6 +21,14 @@ describe("Profile Stripe shortcut contract", () => {
     expect(profilePageSource).toContain("Open Stripe Connect setup");
   });
 
+  it("stacks the owner action cluster into a full-width mobile row", () => {
+    expect(profilePageSource).toContain("flex flex-col gap-4 py-5 sm:flex-row sm:items-start sm:gap-6 sm:py-7");
+    expect(profilePageSource).toContain("flex w-full flex-shrink-0 flex-col items-start gap-3 sm:w-auto sm:items-end sm:pt-1");
+    expect(profilePageSource).toContain("flex w-full flex-wrap items-center justify-start gap-1.5 sm:w-auto sm:justify-end");
+    expect(profilePageSource).toContain("<LayoutGrid size={13} />");
+    expect(profilePageSource).toContain("My Domain");
+  });
+
   it("does not add a public payment route or a new Stripe backend surface", () => {
     expect(profilePageSource).not.toContain('href="/stripe"');
     expect(profilePageSource).not.toContain("trpc.stripe.");

@@ -648,8 +648,8 @@ export default function ProfilePage() {
           borderBottom: "1px solid rgba(196,154,40,0.08)",
         }}
       >
-        <div className="px-6">
-          <div className="flex items-start gap-6 py-7">
+        <div className="px-4 sm:px-6">
+          <div className="flex flex-col gap-4 py-5 sm:flex-row sm:items-start sm:gap-6 sm:py-7">
 
             {/* ── Avatar — anchored left, slight pull-up ── */}
             <div className="-mt-20 flex-shrink-0">
@@ -779,7 +779,7 @@ export default function ProfilePage() {
             </div>
 
             {/* ── Right column: signals + actions ── */}
-            <div className="flex-shrink-0 flex flex-col items-end gap-3 pt-1">
+            <div className="flex w-full flex-shrink-0 flex-col items-start gap-3 sm:w-auto sm:items-end sm:pt-1">
               {/* Signals */}
               <div className="flex items-center gap-3">
                 {(profile as any)?.supporterTier && (
@@ -799,7 +799,7 @@ export default function ProfilePage() {
                 )}
               </div>
               {/* Actions */}
-              <div className="flex max-w-full flex-wrap items-center justify-end gap-1.5">
+              <div className="flex w-full flex-wrap items-center justify-start gap-1.5 sm:w-auto sm:justify-end">
                 {/* My Domain — primary CTA */}
                 <Link href="/domain">
                   <button
