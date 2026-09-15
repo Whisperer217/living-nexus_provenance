@@ -309,6 +309,10 @@ export default function ProfilePage() {
     },
     onError: (err) => toast.error(err.message),
   });
+  const stripePayoutsReady = connectData?.status === "enabled";
+  const stripeNeedsSetup = connectData?.status === "pending" || connectData?.status === "restricted";
+  const stripeShortcutLabel = stripeNeedsSetup ? "Finish payout setup" : "Get paid · Connect Stripe";
+  const openStripeConnect = () => connectMutation.mutate({ returnUrl: `${window.location.origin}/profile` });
 
   // ── Mutations ────────────────────────────────────────────────────
   const updateProfile = trpc.profile.update.useMutation({
@@ -795,7 +799,7 @@ export default function ProfilePage() {
                 )}
               </div>
               {/* Actions */}
-              <div className="flex items-center gap-1.5">
+              <div className="flex max-w-full flex-wrap items-center justify-end gap-1.5">
                 {/* My Domain — primary CTA */}
                 <Link href="/domain">
                   <button
@@ -807,6 +811,29 @@ export default function ProfilePage() {
                     My Domain
                   </button>
                 </Link>
+                {stripePayoutsReady ? (
+                  <span
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold"
+                    style={{ background: "rgba(196,154,40,0.08)", border: "1px solid rgba(196,154,40,0.22)", color: "var(--ln-gold)" }}
+                    title="Stripe payouts are connected"
+                  >
+                    <CheckCircle size={13} aria-hidden="true" />
+                    Payouts ready
+                  </span>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={openStripeConnect}
+                    disabled={connectMutation.isPending}
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all hover:opacity-90 disabled:opacity-50"
+                    style={{ background: "var(--ln-gold)", border: "1px solid var(--ln-gold)", color: "var(--ln-coal)" }}
+                    title="Open Stripe Connect setup"
+                    aria-label={stripeShortcutLabel}
+                  >
+                    <DollarSign size={13} aria-hidden="true" />
+                    {connectMutation.isPending ? "Opening Stripe…" : stripeShortcutLabel}
+                  </button>
+                )}
                 <button
                   onClick={copyProfileLink}
                   className="w-9 h-9 rounded-lg flex items-center justify-center transition-colors"
@@ -1053,22 +1080,24 @@ export default function ProfilePage() {
                   <DollarSign size={14} className="text-[#C49A28]" />
                   <span className="font-heading text-[13px] text-white/80 tracking-wide">Stripe Connect</span>
                 </div>
-                {connectData?.status === "enabled" ? (
+                {stripePayoutsReady ? (
                   <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: "rgba(74,222,128,0.12)", color: "var(--ln-seal-bright)", border: "1px solid rgba(74,222,128,0.28)" }}>Active</span>
-                ) : connectData?.status === "pending" ? (
+                ) : stripeNeedsSetup ? (
                   <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: "rgba(170,142,100,0.12)", color: "var(--ln-smoke)", border: "1px solid rgba(170,142,100,0.3)" }}>Pending</span>
                 ) : (
                   <button
-                    onClick={() => connectMutation.mutate({ returnUrl: `${window.location.origin}/profile` })}
+                    onClick={openStripeConnect}
                     disabled={connectMutation.isPending}
                     className="text-[11px] px-3 py-1 rounded-lg font-body text-black disabled:opacity-50"
                     style={{ background: "var(--ln-iron)" }}
                   >
-                    {connectMutation.isPending ? "Connecting…" : "Connect Stripe"}
+                    {connectMutation.isPending ? "Opening Stripe…" : stripeShortcutLabel}
                   </button>
                 )}
               </div>
-              <p className="text-[11px] font-body text-white/50 mt-2">Receive tips — you keep 90%</p>
+              <p className="text-[11px] font-body text-white/50 mt-2">
+                {stripePayoutsReady ? "Your gift payouts are ready." : stripeNeedsSetup ? "Stripe needs a few details before you can receive gifts." : "Receive tips — you keep 90%."}
+              </p>
             </div>
             {/* Recent activity */}
             <div>
