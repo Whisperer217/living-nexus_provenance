@@ -38,6 +38,7 @@ import { agentsRouter }          from "./agents";
 import { userCollectionsRouter } from "./userCollections";
 import { widsRouter }            from "./wids";
 import { coreIngestionRouter }   from "./coreIngestion";
+import { batchUploadRouter }     from "./batchUpload";
 
 // ── Witness / provenance domain ───────────────────────────────────────────────
 import { witnessRouter }             from "./witness";
@@ -133,6 +134,7 @@ export const appRouter = router({
   userCollections: userCollectionsRouter,
   wids:            widsRouter,
   coreIngestion:   coreIngestionRouter,
+  batchUpload:     batchUploadRouter,
 
   // Witness / provenance domain
   witness:             witnessRouter,

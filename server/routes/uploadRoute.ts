@@ -29,6 +29,7 @@ import { storagePut } from "../utils/storage";
 import { stripAudioMetadata } from "../services/audioMetadataStrip";
 import { parseGcode } from "../services/gcodeParser";
 import { createStorageEvidence, type StorageEvidence } from "../domains/batchUpload/evidenceContracts";
+import { bindVerifiedBatchAsset } from "../domains/batchUpload/service";
 
 const router = Router();
 
@@ -77,11 +78,17 @@ router.post("/api/upload-file", async (req: Request, res: Response) => {
   let fileType = "audio";
   let originalName = "file";
   let mimeType = "application/octet-stream";
+  let batchOperationId: string | undefined;
+  let batchClientCardId: string | undefined;
+  let batchAssetKind: "audio" | "cover" | undefined;
   let uploadPromise: Promise<{ url: string; key: string; evidence?: StorageEvidence }> | null = null;
 
   bb.on("field", (name: string, value: string) => {
     if (name === "type") fileType = value;
     if (name === "filename") originalName = value;
+    if (name === "batchOperationId") batchOperationId = value;
+    if (name === "batchClientCardId") batchClientCardId = value;
+    if (name === "batchAssetKind" && (value === "audio" || value === "cover")) batchAssetKind = value;
   });
 
   bb.on("file", (_fieldname: string, fileStream: NodeJS.ReadableStream, info: { filename: string; mimeType: string }) => {
@@ -198,8 +205,53 @@ router.post("/api/upload-file", async (req: Request, res: Response) => {
     }
     try {
       const result = await uploadPromise;
-      res.json(result);
+      const hasBatchFields = Boolean(batchOperationId || batchClientCardId || batchAssetKind);
+      if (!hasBatchFields) {
+        res.json(result);
+        return;
+      }
+      if (!batchOperationId || !batchClientCardId || !batchAssetKind || !result.evidence) {
+        res.status(400).json({ error: "Incomplete Batch evidence receipt request", code: "ERR_BATCH_RECEIPT" });
+        return;
+      }
+      const audioUpload = fileType === "audio" || mimeType.startsWith("audio/");
+      if ((batchAssetKind === "audio" && !audioUpload) || (batchAssetKind === "cover" && fileType !== "cover")) {
+        res.status(400).json({ error: "Batch receipt kind does not match uploaded artifact", code: "ERR_BATCH_ASSET_KIND" });
+        return;
+      }
+      const batchReceipt = await bindVerifiedBatchAsset({
+        operationId: batchOperationId,
+        creatorId: user.id,
+        clientCardId: batchClientCardId,
+        assetKind: batchAssetKind,
+        storageKey: result.key,
+        storageUrl: result.url,
+        contentType: mimeType,
+        evidence: result.evidence,
+      });
+      res.json({
+        ...result,
+        batchReceipt: {
+          operationId: batchReceipt.operationId,
+          assetReceiptId: batchReceipt.asset.assetReceiptId,
+          itemReceiptId: batchReceipt.itemReceiptId,
+          assetKind: batchReceipt.asset.assetKind,
+          status: batchReceipt.asset.status,
+        },
+      });
     } catch (err: any) {
+      if (err?.code === "NOT_FOUND") {
+        res.status(404).json({ error: "Private Batch operation not found", code: "ERR_BATCH_OPERATION_NOT_FOUND" });
+        return;
+      }
+      if (err?.code === "CONFLICT") {
+        res.status(409).json({ error: "Batch operation cannot accept this receipt", code: "ERR_BATCH_OPERATION_CONFLICT" });
+        return;
+      }
+      if (err?.code === "BAD_REQUEST") {
+        res.status(400).json({ error: "Batch evidence receipt is invalid", code: "ERR_BATCH_EVIDENCE" });
+        return;
+      }
       // err.ref is set above when we already logged; otherwise generate a new one
       const ref: string = err?.ref ?? generateRef("UPL");
       if (!err?.ref) {
