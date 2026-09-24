@@ -274,6 +274,9 @@ export const songsRouter = router({
       .query(async ({ input }) => {
         const seed = input?.seed ?? Math.floor(Math.random() * 999999);
         const sectionLimit = input?.limit ?? 20;
+        // The primary music collection may be large; horizontal discovery strips
+        // only display a short selection. Never fetch the full catalog for each strip.
+        const stripLimit = Math.min(sectionLimit, 20);
         const randomize = input?.randomize !== false; // default true
         const creatorId = input?.creatorId;
         const base = (contentType?: string) => ({
@@ -287,8 +290,8 @@ export const songsRouter = router({
           getPublicSongs({ ...base("audio"), limit: Math.min(sectionLimit, 8) }),
           getNewThisWeek({ limit: Math.min(sectionLimit, 20), contentType: "audio" }),
           getPublicSongs({ ...base("audio"), seed: seed + 1 }),
-          getPublicSongs({ ...base("audio"), randomize: false, seed: undefined }),
-          getPublicSongs({ ...base("audio"), seed: seed + 7 }),
+          getPublicSongs({ ...base("audio"), randomize: false, seed: undefined, limit: stripLimit }),
+          getPublicSongs({ ...base("audio"), seed: seed + 7, limit: stripLimit }),
           getTrendingWorks({ limit: Math.min(sectionLimit, 20), contentType: "audio" }),
         ]);
         return {
