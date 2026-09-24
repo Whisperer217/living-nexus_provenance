@@ -606,6 +606,7 @@ export const songsRouter = router({
       // Enriched editorial fields
       headlineCaption: z.string().max(280).optional(),
       description: z.string().max(10000).optional(),
+      creativeProcessNotes: z.string().max(10000).optional(),
       galleryImagesJson: z.string().max(200000).optional(), // JSON array of { url, key, caption? }
       playerAssetType: z.enum(["cover", "video"]).optional(),
       // AI Tool Disclosure
@@ -707,7 +708,7 @@ export const songsRouter = router({
       const haaiDeclaredAt = (input.aiDisclosure === "human_authored_ai_instrument" && haaiFields.every(f => f && f.trim().length > 0)) ? new Date() : undefined;
       // Assign displayOrder so new songs append to the end of the creator's list
       const nextOrder = await getNextDisplayOrder(ctx.user.id);
-      const insertResult = await createSong({ userId: ctx.user.id, title: input.title, genre: input.genre, bpm: input.bpm, keySignature: input.keySignature, moodTags: input.moodTags, coWriters: input.coWriters, albumName: input.albumName, creditsJson: input.creditsJson, releaseDate: input.releaseDate, creatorReleaseDate: input.creatorReleaseDate, isrc: input.isrc, officialArtistName: input.officialArtistName, aiConsent: input.aiConsent, ownershipStatus: input.ownershipStatus, lyricsText: input.lyricsText, lyricsHash: input.lyricsHash, isLyricsOnly: input.isLyricsOnly ?? false, contentType: input.contentType ?? (input.isLyricsOnly ? "lyrics" : "audio"), fileUrl, fileKey: audioKey, coverArtUrl, fileHash: input.fileHash, witnessId: input.witnessId, harmonicSignature: input.harmonicSignature, ecdsaPublicKey: input.ecdsaPublicKey, ecdsaSignature: input.ecdsaSignature, caption: input.caption, headlineCaption: input.headlineCaption, description: input.description, galleryImagesJson: input.galleryImagesJson, playerAssetType: input.playerAssetType ?? 'cover', aiToolSuno: input.aiToolSuno ?? false, aiToolUdio: input.aiToolUdio ?? false, aiToolSonato: input.aiToolSonato ?? false, aiToolOther: input.aiToolOther ?? false, aiToolOtherName: input.aiToolOtherName, durationSeconds: input.durationSeconds, sampleRate: input.sampleRate, bitDepth: input.bitDepth, aiDisclosure: input.aiDisclosure, haaiVisualConcept: input.haaiVisualConcept, haaiStyleLanguage: input.haaiStyleLanguage, haaiInstrumentation: input.haaiInstrumentation, haaiVocalConveyance: input.haaiVocalConveyance, haaiLyricalInspiration: input.haaiLyricalInspiration, haaiEmotionalTone: input.haaiEmotionalTone, haaiOriginStory: input.haaiOriginStory, haaiDeclaredAt, pagesJson: input.pagesJson, displayOrder: nextOrder, gcodeUrl: input.gcodeUrl, gcodeKey: input.gcodeKey, printStatsJson: input.printStatsJson, objectLicenseType: input.objectLicenseType, objectPriceCents: input.objectPriceCents, objectPhysicalSpecJson: input.objectPhysicalSpecJson, parentGuideWid: input.parentGuideWid, status: createStatus, participationMusic: input.participationMusic ?? "Human", participationLyrics: input.participationLyrics ?? "Human", participationVoice: input.participationVoice ?? "Human", toneProfileJson: input.toneProfileJson, waveformUrl: input.waveformUrl, waveformKey: input.waveformKey, visualSource: input.visualSource ?? (coverArtUrl ? "uploaded" : "none"), visualPrompt: input.visualPrompt, visualLineageJson: input.visualLineageJson, isPublic: createStatus === "Published" } as any);
+      const insertResult = await createSong({ userId: ctx.user.id, title: input.title, genre: input.genre, bpm: input.bpm, keySignature: input.keySignature, moodTags: input.moodTags, coWriters: input.coWriters, albumName: input.albumName, creditsJson: input.creditsJson, releaseDate: input.releaseDate, creatorReleaseDate: input.creatorReleaseDate, isrc: input.isrc, officialArtistName: input.officialArtistName, aiConsent: input.aiConsent, ownershipStatus: input.ownershipStatus, lyricsText: input.lyricsText, lyricsHash: input.lyricsHash, isLyricsOnly: input.isLyricsOnly ?? false, contentType: input.contentType ?? (input.isLyricsOnly ? "lyrics" : "audio"), fileUrl, fileKey: audioKey, coverArtUrl, fileHash: input.fileHash, witnessId: input.witnessId, harmonicSignature: input.harmonicSignature, ecdsaPublicKey: input.ecdsaPublicKey, ecdsaSignature: input.ecdsaSignature, caption: input.caption, headlineCaption: input.headlineCaption, description: input.description, creativeProcessNotes: input.creativeProcessNotes, galleryImagesJson: input.galleryImagesJson, playerAssetType: input.playerAssetType ?? 'cover', aiToolSuno: input.aiToolSuno ?? false, aiToolUdio: input.aiToolUdio ?? false, aiToolSonato: input.aiToolSonato ?? false, aiToolOther: input.aiToolOther ?? false, aiToolOtherName: input.aiToolOtherName, durationSeconds: input.durationSeconds, sampleRate: input.sampleRate, bitDepth: input.bitDepth, aiDisclosure: input.aiDisclosure, haaiVisualConcept: input.haaiVisualConcept, haaiStyleLanguage: input.haaiStyleLanguage, haaiInstrumentation: input.haaiInstrumentation, haaiVocalConveyance: input.haaiVocalConveyance, haaiLyricalInspiration: input.haaiLyricalInspiration, haaiEmotionalTone: input.haaiEmotionalTone, haaiOriginStory: input.haaiOriginStory, haaiDeclaredAt, pagesJson: input.pagesJson, displayOrder: nextOrder, gcodeUrl: input.gcodeUrl, gcodeKey: input.gcodeKey, printStatsJson: input.printStatsJson, objectLicenseType: input.objectLicenseType, objectPriceCents: input.objectPriceCents, objectPhysicalSpecJson: input.objectPhysicalSpecJson, parentGuideWid: input.parentGuideWid, status: createStatus, participationMusic: input.participationMusic ?? "Human", participationLyrics: input.participationLyrics ?? "Human", participationVoice: input.participationVoice ?? "Human", toneProfileJson: input.toneProfileJson, waveformUrl: input.waveformUrl, waveformKey: input.waveformKey, visualSource: input.visualSource ?? (coverArtUrl ? "uploaded" : "none"), visualPrompt: input.visualPrompt, visualLineageJson: input.visualLineageJson, isPublic: createStatus === "Published" } as any);
        const songId = (insertResult as any)[0]?.insertId as number;
       if (songId && input.collectionId) {
         await addToCollectionById(input.collectionId, songId, ctx.user.id);
@@ -1148,6 +1149,7 @@ export const songsRouter = router({
       // Title / description / headline
       title: z.string().max(255).optional(),
       description: z.string().max(10000).nullable().optional(),
+      creativeProcessNotes: z.string().max(10000).nullable().optional(),
       headlineCaption: z.string().max(280).nullable().optional(),
       // Mood tags
       moodTags: z.array(z.string()).nullable().optional(),
@@ -1162,7 +1164,8 @@ export const songsRouter = router({
       parentGuideWid: z.string().max(64).nullable().optional(),
     }).strict()).mutation(async ({ ctx, input }) => {
       const { songId, creditsJson, collectionId, ...fields } = input;
-      const existing = fields.releaseDate !== undefined || fields.creatorReleaseDate !== undefined || collectionId !== undefined
+      const existing = fields.releaseDate !== undefined || fields.creatorReleaseDate !== undefined ||
+        fields.creativeProcessNotes !== undefined || collectionId !== undefined
         ? await getSongById(songId)
         : undefined;
       if (collectionId !== undefined) {
@@ -1217,6 +1220,20 @@ export const songsRouter = router({
             changedFields: dateChanges.map(([field, previous, current]) => ({ field, previous, current })),
             witnessId: existing?.witnessId ?? null,
           },
+          actorId: ctx.user.id,
+          actorName: ctx.user.name ?? undefined,
+          isSystemEvent: false,
+        });
+      }
+      if (existing?.userId === ctx.user.id && fields.creativeProcessNotes !== undefined &&
+          (existing.creativeProcessNotes ?? null) !== (fields.creativeProcessNotes || null)) {
+        await addWorkEvent({
+          songId,
+          eventType: "creator_process_notes_revised",
+          eventLabel: "Creator process notes revised",
+          // Deliberately omit the notes themselves from the event/audit stream.
+          eventData: { field: "creativeProcessNotes", witnessId: existing.witnessId ?? null,
+            previousPresent: Boolean(existing.creativeProcessNotes), currentPresent: Boolean(fields.creativeProcessNotes) },
           actorId: ctx.user.id,
           actorName: ctx.user.name ?? undefined,
           isSystemEvent: false,

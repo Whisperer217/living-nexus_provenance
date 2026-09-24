@@ -142,6 +142,33 @@ describe("PreparedWorkRegistration", () => {
     expect(published.metadata.publishIntent).toBe("Published");
   });
 
+  it("carries creator-authored notes through Draft registration without putting them in the WID payload", () => {
+    const notes = "Style prompt: chamber folk\nInstrumentation: piano, bowed bass\nProduction: close-miked";
+    const prepared = createPreparedWorkRegistration({
+      ...createPrepared().assets, ...createPrepared().metadata, creativeProcessNotes: notes,
+    });
+    const payload = buildPreparedWorkUploadPayload(prepared, {
+      fileUrl: "https://example.test/audio.wav", fileKey: "audio/1/testimony.wav",
+      fileHash: "b".repeat(64), witnessId: "WID-MUS-TESTIMON-YOFTHERO",
+      publicKeyJWK: "{\"kty\":\"EC\"}", signature: "signature",
+      tone: derivePreparedWorkTone(prepared), visualSource: "uploaded",
+    });
+    expect(payload).toMatchObject({ status: "Draft", creativeProcessNotes: notes });
+    const seal = serializePreparedWorkWidPayload({
+      fileHash: "b".repeat(64), title: prepared.metadata.title,
+      participation: prepared.metadata.participation,
+      toneLabel: derivePreparedWorkTone(prepared).label,
+      timestamp: "2026-08-18T00:00:00.000Z",
+    });
+    expect(seal).not.toContain(notes);
+    expect(seal).toBe(serializePreparedWorkWidPayload({
+      fileHash: "b".repeat(64), title: prepared.metadata.title,
+      participation: prepared.metadata.participation,
+      toneLabel: derivePreparedWorkTone(createPrepared()).label,
+      timestamp: "2026-08-18T00:00:00.000Z",
+    }));
+  });
+
   it("carries Other and creator-declared historical dates through Published upload without changing WID serialization", () => {
     const prepared = createPreparedWorkRegistration({
       ...createPrepared().assets,

@@ -48,6 +48,7 @@ export interface CreativeDrawerSong {
   genre?: string | null;
   caption?: string | null;
   description?: string | null;
+  creativeProcessNotes?: string | null;
   coverArtUrl?: string | null;
   aiConsent?: string | null;
   status: string;
@@ -160,6 +161,12 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
   const utils = trpc.useUtils();
   const { removeFromQueue } = usePlayer();
   const { data: creatorAlbums = [] } = trpc.collectionStudio.listMine.useQuery();
+  // Most editor entry points pass a compact Work projection. Fetch the canonical
+  // Work before editing this field so saving from any entry point cannot erase it.
+  const needsNotesHydration = song.creativeProcessNotes === undefined;
+  const { data: canonicalWork, isError: notesLoadFailed } = trpc.songs.getMyDraft.useQuery(
+    { id: song.id }, { enabled: needsNotesHydration }
+  );
 
   /* ── Form state ── */
   const [title, setTitle]               = useState(song.title ?? "");
@@ -167,10 +174,19 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
   const [genre, setGenre]               = useState(song.genre ?? "");
   const [caption, setCaption]           = useState(song.caption ?? "");
   const [description, setDescription]   = useState(song.description ?? "");
+  const [creativeProcessNotes, setCreativeProcessNotes] = useState(song.creativeProcessNotes ?? "");
+  const [notesReady, setNotesReady] = useState(!needsNotesHydration);
   const [status, setStatus]             = useState<string>(song.status ?? "Published");
   const [aiConsent, setAiConsent]       = useState<string>(song.aiConsent ?? "prohibited");
   const [aiDisclosure, setAiDisclosure] = useState<string>(song.aiDisclosure ?? "original");
   const [originStory, setOriginStory]   = useState(song.haaiOriginStory ?? "");
+
+  useEffect(() => {
+    if (needsNotesHydration && canonicalWork) {
+      setCreativeProcessNotes(canonicalWork.creativeProcessNotes ?? "");
+      setNotesReady(true);
+    }
+  }, [canonicalWork, needsNotesHydration]);
 
   const parseLinks = (raw?: string | null): Array<{ platform: string; url: string }> => {
     if (!raw) return [];
@@ -416,6 +432,7 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
         genre: genre || null,
         caption: caption || null,
         description: description || null,
+        ...(notesReady ? { creativeProcessNotes: creativeProcessNotes || null } : {}),
         aiConsent: aiConsent as "prohibited" | "permitted_attribution" | "permitted",
         aiDisclosure: aiDisclosure as "original" | "human_authored_ai_instrument" | "ai_assisted" | "ai_generated",
         haaiOriginStory: originStory || null,
@@ -914,6 +931,21 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
                   lineHeight: "1.7",
                 }}
               />
+            </div>
+
+            <div className="mb-7">
+              <label htmlFor="creative-process-notes-edit" className="block text-sm font-medium mb-2" style={{ color: TEXT_MUTED }}>Creative Process Notes</label>
+              <p className="mb-2 text-xs" style={{ color: TEXT_DIM }}>
+                Your style prompt, instrumentation, production notes, or creative direction. Creator-authored notes do not require AI generation.
+              </p>
+              <Textarea id="creative-process-notes-edit" value={creativeProcessNotes}
+                onChange={(e) => setCreativeProcessNotes(e.target.value)} disabled={!notesReady}
+                maxLength={10000} rows={6} placeholder="Style prompt…\nInstrumentation…\nProduction notes…\nCreative direction…"
+                style={{ background: SURFACE2, border: `1px solid ${GOLD_BORDER}`, color: "rgba(255,255,255,0.82)", resize: "vertical", lineHeight: "1.7" }} />
+              {!notesReady && <p className="mt-1 text-xs" style={{ color: TEXT_DIM }}>
+                {notesLoadFailed ? "Notes could not load. Other changes can be saved without replacing them." : "Loading existing notes…"}
+              </p>}
+              {notesReady && <p className="mt-1 text-right text-xs" style={{ color: TEXT_DIM }}>{creativeProcessNotes.length}/10,000</p>}
             </div>
 
             {/* ═══ ADD VIDEO ═══════════════════════════════════════════════ */}
