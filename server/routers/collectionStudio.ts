@@ -12,6 +12,7 @@ import { protectedProcedure, publicProcedure, router } from "../_core/trpc";
 import { storagePut } from "../utils/storage";
 import {
   getCollectionsByCreator,
+  getCollectionById,
   getSongsByCollectionId,
   getUserById,
 } from "../utils/db";
@@ -30,9 +31,10 @@ import {
 
 /** Resolve a WID-ALB collection and verify the caller is its owner. */
 async function requireOwnedCollection(collectionId: number, callerId: number) {
-  const rows = await getCollectionsByCreator(callerId);
-  const col = (rows as any[]).find((c: any) => c.id === collectionId);
-  if (!col) {
+  // The Archive list intentionally hides empty collections; Studio must still
+  // work immediately after an album is created, before its first Work is linked.
+  const col = await getCollectionById(collectionId);
+  if (!col || col.creatorId !== callerId) {
     throw new TRPCError({
       code: "NOT_FOUND",
       message: "Collection not found or you do not own it.",

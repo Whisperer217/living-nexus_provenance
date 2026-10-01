@@ -60,6 +60,11 @@ export interface ChapelSong {
   contentType?: string | null;
   releaseDate?: string | null;
   creatorReleaseDate?: string | null;
+  externalDisplayEnabled?: boolean | null;
+  externalDisplayContext?: string | null;
+  externalDisplayRightsConfirmed?: boolean | null;
+  externalDisplayAuthorizedAt?: string | Date | null;
+  externalDisplayRevokedAt?: string | Date | null;
   description?: string | null;
   witnessId?: string | null;
 }
@@ -85,24 +90,22 @@ type ChapelFormSnapshot = {
   creationDate: string;
   creatorReleaseDate: string;
   coverUrl: string;
+  externalDisplayEnabled: boolean;
+  externalDisplayContext: string;
+  externalDisplayRightsConfirmed: boolean;
 };
 
 function snapshotFromChapelSong(song: ChapelSong): ChapelFormSnapshot {
   return {
-    id: song.id,
-    title: song.title ?? "",
-    collectionId: song.collectionId ?? null,
-    genre: song.genre ?? "",
-    caption: song.caption ?? "",
-    description: song.description ?? "",
-    status: song.status ?? "Published",
-    aiConsent: song.aiConsent ?? "prohibited",
-    aiDisclosure: song.aiDisclosure ?? "original",
-    originStory: song.haaiOriginStory ?? "",
-    lyrics: song.lyricsText ?? "",
-    creationDate: song.releaseDate ? song.releaseDate.slice(0, 10) : "",
+    id: song.id, title: song.title ?? "", collectionId: song.collectionId ?? null,
+    genre: song.genre ?? "", caption: song.caption ?? "", description: song.description ?? "",
+    status: song.status ?? "Published", aiConsent: song.aiConsent ?? "prohibited",
+    aiDisclosure: song.aiDisclosure ?? "original", originStory: song.haaiOriginStory ?? "",
+    lyrics: song.lyricsText ?? "", creationDate: song.releaseDate ? song.releaseDate.slice(0, 10) : "",
     creatorReleaseDate: song.creatorReleaseDate ? song.creatorReleaseDate.slice(0, 10) : "",
-    coverUrl: song.coverArtUrl ?? "",
+    coverUrl: song.coverArtUrl ?? "", externalDisplayEnabled: Boolean(song.externalDisplayEnabled),
+    externalDisplayContext: song.externalDisplayContext ?? "",
+    externalDisplayRightsConfirmed: Boolean(song.externalDisplayRightsConfirmed),
   };
 }
 
@@ -204,6 +207,10 @@ export function EditChapel({ song, onClose, onSaved }: EditChapelProps) {
   const [creatorReleaseDate, setCreatorReleaseDate] = useState(
     song.creatorReleaseDate ? song.creatorReleaseDate.slice(0, 10) : ""
   );
+  const [externalDisplayEnabled, setExternalDisplayEnabled] = useState(Boolean(song.externalDisplayEnabled));
+  const [externalDisplayContext, setExternalDisplayContext] = useState(song.externalDisplayContext ?? "");
+  const [externalDisplayRightsConfirmed, setExternalDisplayRightsConfirmed] = useState(Boolean(song.externalDisplayRightsConfirmed));
+
 
   /* ── Cover art ── */
   const [coverUrl, setCoverUrl]             = useState(song.coverArtUrl ?? "");
@@ -225,15 +232,13 @@ export function EditChapel({ song, onClose, onSaved }: EditChapelProps) {
 
   const currentSnapshot = (): ChapelFormSnapshot => ({
     id: song.id, title, collectionId, genre, caption, description, status,
-    aiConsent, aiDisclosure, originStory, lyrics, creationDate,
-    creatorReleaseDate, coverUrl,
+    aiConsent, aiDisclosure, originStory, lyrics, creationDate, creatorReleaseDate,
+    coverUrl, externalDisplayEnabled, externalDisplayContext, externalDisplayRightsConfirmed,
   });
-  const markCurrentFormSaved = () => {
-    syncedSnapshotRef.current = currentSnapshot();
-  };
+  const markCurrentFormSaved = () => { syncedSnapshotRef.current = currentSnapshot(); };
 
-  // Server refreshes should hydrate a clean form, while local unsaved edits
-  // remain sovereign. A changed Work always resets the form.
+  // Refetched Work data hydrates clean forms. Unsaved creator edits remain
+  // authoritative until saved; selecting a different Work always resets state.
   useEffect(() => {
     const incoming = snapshotFromChapelSong(song);
     const switchedWork = incoming.id !== incomingSnapshotRef.current.id;
@@ -243,22 +248,17 @@ export function EditChapel({ song, onClose, onSaved }: EditChapelProps) {
       incomingSnapshotRef.current = incoming;
       return;
     }
-    setTitle(incoming.title);
-    setCollectionId(incoming.collectionId);
-    setGenre(incoming.genre);
-    setCaption(incoming.caption);
-    setDescription(incoming.description);
-    setStatus(incoming.status);
-    setAiConsent(incoming.aiConsent);
-    setAiDisclosure(incoming.aiDisclosure);
-    setOriginStory(incoming.originStory);
-    setLyrics(incoming.lyrics);
-    setCreationDate(incoming.creationDate);
-    setCreatorReleaseDate(incoming.creatorReleaseDate);
-    setCoverUrl(incoming.coverUrl);
+    setTitle(incoming.title); setCollectionId(incoming.collectionId); setGenre(incoming.genre);
+    setCaption(incoming.caption); setDescription(incoming.description); setStatus(incoming.status);
+    setAiConsent(incoming.aiConsent); setAiDisclosure(incoming.aiDisclosure);
+    setOriginStory(incoming.originStory); setLyrics(incoming.lyrics);
+    setCreationDate(incoming.creationDate); setCreatorReleaseDate(incoming.creatorReleaseDate);
+    setCoverUrl(incoming.coverUrl); setExternalDisplayEnabled(incoming.externalDisplayEnabled);
+    setExternalDisplayContext(incoming.externalDisplayContext);
+    setExternalDisplayRightsConfirmed(incoming.externalDisplayRightsConfirmed);
     syncedSnapshotRef.current = incoming;
     incomingSnapshotRef.current = incoming;
-  }, [song, title, collectionId, genre, caption, description, status, aiConsent, aiDisclosure, originStory, lyrics, creationDate, creatorReleaseDate, coverUrl]);
+  }, [song, title, collectionId, genre, caption, description, status, aiConsent, aiDisclosure, originStory, lyrics, creationDate, creatorReleaseDate, coverUrl, externalDisplayEnabled, externalDisplayContext, externalDisplayRightsConfirmed]);
 
   /* ── Mutations ── */
   const updateMetadata = trpc.songs.updateMetadata.useMutation();
@@ -346,6 +346,14 @@ export function EditChapel({ song, onClose, onSaved }: EditChapelProps) {
       return;
     }
     if (!title.trim()) { toast.error("Title is required"); return; }
+    if (externalDisplayEnabled && (!externalDisplayContext.trim() || externalDisplayContext.trim().length < 20)) {
+      toast.error("Add at least 20 characters explaining why this Work exists before authorizing external display.");
+      return;
+    }
+    if (externalDisplayEnabled && !externalDisplayRightsConfirmed) {
+      toast.error("Confirm that you have the rights necessary to authorize external display.");
+      return;
+    }
     setSaving(true);
     try {
       await updateMetadata.mutateAsync({
@@ -360,6 +368,9 @@ export function EditChapel({ song, onClose, onSaved }: EditChapelProps) {
         haaiOriginStory: originStory || null,
         releaseDate: creationDate || null,
         creatorReleaseDate: creatorReleaseDate || null,
+        externalDisplayEnabled,
+        externalDisplayContext: externalDisplayContext.trim() || null,
+        externalDisplayRightsConfirmed,
       });
       if (status !== song.status) {
         await updateStatus.mutateAsync({
@@ -589,7 +600,7 @@ export function EditChapel({ song, onClose, onSaved }: EditChapelProps) {
               <FieldLabel>Title</FieldLabel>
               <Input
                 value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                onChange={(e) => { setTitle(e.target.value); }}
                 placeholder="Work title"
                 style={{
                   background: SURFACE2,
@@ -612,7 +623,7 @@ export function EditChapel({ song, onClose, onSaved }: EditChapelProps) {
               {/* Genre */}
               <div>
                 <FieldLabel>Genre</FieldLabel>
-                <Select value="" onValueChange={(value) => setGenre(toggleWorkGenre(genre, value) ?? "")}>
+                <Select value="" onValueChange={(value) => { setGenre(toggleWorkGenre(genre, value) ?? ""); }}>
                   <SelectTrigger
                     style={{
                       background: SURFACE2,
@@ -640,7 +651,7 @@ export function EditChapel({ song, onClose, onSaved }: EditChapelProps) {
                     </div>
                     <div className={`flex flex-wrap gap-1.5 ${clearingGenres ? "work-genre-selection-clearing" : ""}`} aria-live="polite">
                       {parseWorkGenres(genre).map((selectedGenre) => (
-                        <button key={selectedGenre} type="button" onClick={() => setGenre(toggleWorkGenre(genre, selectedGenre) ?? "")} className="text-[10px] px-2 py-1 rounded-full" style={{ border: `1px solid ${GOLD_BORDER}`, color: "var(--ln-gold)", background: "rgba(196,154,40,0.1)" }} aria-label={`Remove ${selectedGenre} genre`}>
+                        <button key={selectedGenre} type="button" onClick={() => { setGenre(toggleWorkGenre(genre, selectedGenre) ?? ""); }} className="text-[10px] px-2 py-1 rounded-full" style={{ border: `1px solid ${GOLD_BORDER}`, color: "var(--ln-gold)", background: "rgba(196,154,40,0.1)" }} aria-label={`Remove ${selectedGenre} genre`}>
                           {selectedGenre} ×
                         </button>
                       ))}
@@ -652,7 +663,7 @@ export function EditChapel({ song, onClose, onSaved }: EditChapelProps) {
               {/* Status */}
               <div>
                 <FieldLabel>Visibility</FieldLabel>
-                <Select value={status} onValueChange={setStatus}>
+                <Select value={status} onValueChange={(value) => { setStatus(value); }}>
                   <SelectTrigger
                     style={{
                       background: SURFACE2,
@@ -678,7 +689,7 @@ export function EditChapel({ song, onClose, onSaved }: EditChapelProps) {
               <FieldLabel>Album placement</FieldLabel>
               <Select
                 value={collectionId ? String(collectionId) : "__unassigned__"}
-                onValueChange={(value) => setCollectionId(value === "__unassigned__" ? null : Number(value))}
+                onValueChange={(value) => { setCollectionId(value === "__unassigned__" ? null : Number(value)); }}
               >
                 <SelectTrigger style={{ background: SURFACE2, border: `1px solid ${GOLD_BORDER}`, color: "rgba(255,255,255,0.8)" }}>
                   <SelectValue placeholder="No album — keep this Work unassigned" />
@@ -703,7 +714,7 @@ export function EditChapel({ song, onClose, onSaved }: EditChapelProps) {
                 id="edit-chapel-creation-date"
                 label="Creation Date"
                 value={creationDate}
-                onChange={setCreationDate}
+                onChange={(value) => { setCreationDate(value); }}
                 maxDate={creatorReleaseDate}
                 helpText="When this Work was created. Creator-declared; not the upload date."
               />
@@ -711,7 +722,7 @@ export function EditChapel({ song, onClose, onSaved }: EditChapelProps) {
                 id="edit-chapel-original-release-date"
                 label="Original Release Date"
                 value={creatorReleaseDate}
-                onChange={setCreatorReleaseDate}
+                onChange={(value) => { setCreatorReleaseDate(value); }}
                 minDate={creationDate}
                 helpText="Creator-declared first release; not the system publication timestamp."
               />
@@ -720,12 +731,73 @@ export function EditChapel({ song, onClose, onSaved }: EditChapelProps) {
               </p>
             </div>
 
+            {/* Creator-controlled external display authorization. This authorizes
+                approved display surfaces only; it does not authorize media distribution. */}
+            <div className="mb-6 rounded-lg p-4" style={{ background: GOLD_GLOW, border: `1px solid ${GOLD_BORDER}` }}>
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <FieldLabel hint="Allow Living Nexus to feature this Work on approved external display surfaces. Media distribution and monetization require separate authorization.">
+                    External Display
+                  </FieldLabel>
+                  <p className="text-xs leading-relaxed" style={{ color: TEXT_MUTED }}>
+                    Creator-controlled, Work-specific authorization. Your ownership, attribution, WID, and provenance remain attached.
+                  </p>
+                </div>
+                <label className="flex items-center gap-2 text-xs cursor-pointer" style={{ color: externalDisplayEnabled ? GOLD : TEXT_MUTED }}>
+                  <input
+                    type="checkbox"
+                    checked={externalDisplayEnabled}
+                    onChange={(e) => {
+                      const next = e.target.checked;
+                      if (next && !externalDisplayEnabled) {
+                        const confirmed = window.confirm("External Display Authorization\n\nAuthorize Living Nexus to display this specific Work on approved external display surfaces? You retain ownership. This does not authorize media distribution or unnamed platforms.");
+                        if (!confirmed) return;
+                      }
+                      setExternalDisplayEnabled(next);
+                    }}
+                    className="h-4 w-4 accent-[var(--ln-gold)]"
+                    aria-label="Authorize external display for this Work"
+                  />
+                  {externalDisplayEnabled ? "ON" : "OFF"}
+                </label>
+              </div>
+              {externalDisplayEnabled && (
+                <div className="mt-4 space-y-3">
+                  <div>
+                    <FieldLabel hint="Required. Share the origin, meaning, or intent behind this Work (20–1000 characters).">Creator Context</FieldLabel>
+                    <Textarea
+                      value={externalDisplayContext}
+                      onChange={(e) => { setExternalDisplayContext(e.target.value.slice(0, 1000)); }}
+                      rows={3}
+                      placeholder="Tell listeners why this Work exists…"
+                      maxLength={1000}
+                      style={{ background: SURFACE2, border: `1px solid ${GOLD_BORDER}`, color: "rgba(255,255,255,0.8)" }}
+                    />
+                    <p className="mt-1 text-right text-[10px]" style={{ color: TEXT_MUTED }}>{externalDisplayContext.length} / 1000</p>
+                  </div>
+                  <label className="flex items-start gap-2 text-xs leading-relaxed cursor-pointer" style={{ color: TEXT_MUTED }}>
+                    <input
+                      type="checkbox"
+                      checked={externalDisplayRightsConfirmed}
+                      onChange={(e) => { setExternalDisplayRightsConfirmed(e.target.checked); }}
+                      className="mt-0.5 h-4 w-4 accent-[var(--ln-gold)]"
+                      aria-label="Confirm rights necessary to authorize external display"
+                    />
+                    <span>I confirm I have the rights necessary to authorize this Work for external display.</span>
+                  </label>
+                  <p className="text-[11px] leading-relaxed" style={{ color: TEXT_MUTED }}>
+                    Authorization will be recorded as an immutable provenance event. Disabling it records a separate revocation event.
+                  </p>
+                </div>
+              )}
+            </div>
+
             {/* Caption */}
             <div className="mb-6">
               <FieldLabel hint="A short note visible on your work's public page">Caption</FieldLabel>
               <Textarea
                 value={caption}
-                onChange={(e) => setCaption(e.target.value)}
+                onChange={(e) => { setCaption(e.target.value); }}
                 rows={2}
                 placeholder="A brief note about this work…"
                 style={{
@@ -742,7 +814,7 @@ export function EditChapel({ song, onClose, onSaved }: EditChapelProps) {
               <FieldLabel hint="Extended description shown on the work's detail page">Description</FieldLabel>
               <Textarea
                 value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                onChange={(e) => { setDescription(e.target.value); }}
                 rows={3}
                 placeholder="Tell the story of this work in more depth…"
                 style={{
@@ -769,7 +841,7 @@ export function EditChapel({ song, onClose, onSaved }: EditChapelProps) {
               </p>
               <Textarea
                 value={originStory}
-                onChange={(e) => setOriginStory(e.target.value)}
+                onChange={(e) => { setOriginStory(e.target.value); }}
                 rows={7}
                 placeholder="Write the origin story of this work…"
                 style={{
@@ -824,7 +896,7 @@ export function EditChapel({ song, onClose, onSaved }: EditChapelProps) {
                 <div className="mt-3">
                   <Textarea
                     value={lyrics}
-                    onChange={(e) => setLyrics(e.target.value)}
+                    onChange={(e) => { setLyrics(e.target.value); }}
                     rows={14}
                     placeholder={"Verse 1\n…\n\nChorus\n…"}
                     style={{
@@ -897,7 +969,7 @@ export function EditChapel({ song, onClose, onSaved }: EditChapelProps) {
                       {DISCLOSURE_OPTIONS.map((opt) => (
                         <button
                           key={opt.value}
-                          onClick={() => setAiDisclosure(opt.value)}
+                          onClick={() => { setAiDisclosure(opt.value); }}
                           className="flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all"
                           style={{
                             background: aiDisclosure === opt.value ? GOLD_DIM : "rgba(255,255,255,0.03)",
@@ -919,7 +991,7 @@ export function EditChapel({ song, onClose, onSaved }: EditChapelProps) {
                       {AI_CONSENT_OPTIONS.map((opt) => (
                         <button
                           key={opt.value}
-                          onClick={() => setAiConsent(opt.value)}
+                          onClick={() => { setAiConsent(opt.value); }}
                           className="w-full flex items-start gap-3 px-4 py-3 rounded-xl text-left transition-all"
                           style={{
                             background: aiConsent === opt.value ? GOLD_DIM : "rgba(255,255,255,0.03)",

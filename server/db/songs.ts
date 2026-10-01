@@ -438,6 +438,12 @@ export async function updateSongMetadata(
     // Creator-declared historical dates (not system timestamps)
     releaseDate?: string | null;
     creatorReleaseDate?: string | null;
+    externalDisplayEnabled?: boolean;
+    externalDisplayContext?: string | null;
+    externalDisplayRightsConfirmed?: boolean;
+    externalDisplayAuthorizedAt?: Date | null;
+    externalDisplayRevokedAt?: Date | null;
+    externalDisplayAuthVersion?: string | null;
     // HAAI Origin Story
     haaiOriginStory?: string | null;
     // Mood tags
@@ -486,6 +492,12 @@ export async function updateSongMetadata(
   if (fields.headlineCaption !== undefined) updateSet.headlineCaption = fields.headlineCaption;
   if (fields.releaseDate !== undefined) updateSet.releaseDate = fields.releaseDate;
   if (fields.creatorReleaseDate !== undefined) updateSet.creatorReleaseDate = fields.creatorReleaseDate;
+  if (fields.externalDisplayEnabled !== undefined) updateSet.externalDisplayEnabled = fields.externalDisplayEnabled;
+  if (fields.externalDisplayContext !== undefined) updateSet.externalDisplayContext = fields.externalDisplayContext;
+  if (fields.externalDisplayRightsConfirmed !== undefined) updateSet.externalDisplayRightsConfirmed = fields.externalDisplayRightsConfirmed;
+  if (fields.externalDisplayAuthorizedAt !== undefined) updateSet.externalDisplayAuthorizedAt = fields.externalDisplayAuthorizedAt;
+  if (fields.externalDisplayRevokedAt !== undefined) updateSet.externalDisplayRevokedAt = fields.externalDisplayRevokedAt;
+  if (fields.externalDisplayAuthVersion !== undefined) updateSet.externalDisplayAuthVersion = fields.externalDisplayAuthVersion;
   if (fields.haaiOriginStory !== undefined) updateSet.haaiOriginStory = fields.haaiOriginStory;
   if (fields.moodTags !== undefined) updateSet.moodTags = fields.moodTags;
   if (fields.downloadPermission !== undefined) updateSet.downloadPermission = fields.downloadPermission;
@@ -2209,10 +2221,14 @@ export async function addToCollectionById(
     .from(songs)
     .where(eq(songs.collectionId, collectionId));
   const nextOrder = ((maxRow?.maxOrder as number) ?? 0) + 1;
-  await db
+  const updated = await db
     .update(songs)
     .set({ collectionId, trackOrder: nextOrder } as any)
     .where(and(eq(songs.id, songId), eq(songs.userId, creatorId)));
+  const affectedRows = Number((updated as any)?.[0]?.affectedRows ?? (updated as any)?.affectedRows ?? 0);
+  if (affectedRows !== 1) {
+    throw new Error("The Work could not be attached to this album.");
+  }
   await db
     .update(collections)
     .set({ trackCount: sql`trackCount + 1` })

@@ -468,7 +468,7 @@ export default function CollectionStudioPage() {
   const utils = trpc.useUtils();
   const { data, isLoading, error } = trpc.collectionStudio.getCollection.useQuery(
     { collectionId },
-    { enabled: !!user && collectionId > 0 }
+    { enabled: !!user && collectionId > 0, retry: false, refetchOnWindowFocus: false }
   );
 
   // ── Local state ──────────────────────────────────────────────────────────
