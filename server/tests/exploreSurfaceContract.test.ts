@@ -41,4 +41,13 @@ describe("Explore public-surface contract", () => {
     expect(exploreSource).toContain("setLikedMap({})");
     expect(exploreSource).toContain("{ enabled, staleTime: 2 * 60 * 1000");
   });
+
+  it("keeps Registry order visually prominent with a contrast-safe native menu", () => {
+    const exploreSource = fs.readFileSync(explorePagePath, "utf8");
+    expect(exploreSource).toContain('const isRegistryOrder = value === "curated"');
+    expect(exploreSource).toContain('text-[var(--ln-parchment)]');
+    expect(exploreSource).toContain('colorScheme: "dark"');
+    expect(exploreSource).toContain('background: "var(--ln-coal)"');
+    expect(exploreSource).toContain('color: "var(--ln-parchment)"');
+  });
 });

@@ -450,16 +450,32 @@ function ViewToggle({ value, onChange }: { value: ViewMode; onChange: (v: ViewMo
 
 function WorkSortControl({ value, onChange }: { value: WorkSort; onChange: (value: WorkSort) => void }) {
   const selected = WORK_SORT_OPTIONS.find((option) => option.value === value) ?? WORK_SORT_OPTIONS[0];
+  const isRegistryOrder = value === "curated";
   return (
-    <label className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-[var(--void-3)] px-2.5 py-1.5 text-xs text-[var(--stone-shadow)] transition-colors focus-within:border-[var(--gold)]/40">
-      <span className="text-[var(--gold)]" aria-hidden="true">{selected.icon}</span>
+    <label
+      className={`flex items-center gap-1.5 rounded-xl border px-2.5 py-1.5 text-xs transition-colors focus-within:border-[var(--ln-gold-hot)] focus-within:ring-2 focus-within:ring-[var(--ln-gold)]/25 ${
+        isRegistryOrder
+          ? "border-[var(--ln-gold)]/55 bg-[var(--ln-gold)]/15 text-[var(--ln-parchment)]"
+          : "border-white/10 bg-[var(--void-3)] text-[var(--ln-bone)]"
+      }`}
+    >
+      <span className={isRegistryOrder ? "text-[var(--ln-gold-hot)]" : "text-[var(--ln-gold)]"} aria-hidden="true">{selected.icon}</span>
       <select
         aria-label="Sort works"
         value={value}
         onChange={(event) => onChange(event.target.value as WorkSort)}
-        className="max-w-28 cursor-pointer appearance-none bg-transparent pr-1 text-xs text-[var(--stone-light)] outline-none sm:max-w-none"
+        className="max-w-28 cursor-pointer appearance-none bg-transparent pr-1 text-xs font-medium text-[var(--ln-parchment)] outline-none sm:max-w-none"
+        style={{ colorScheme: "dark" }}
       >
-        {WORK_SORT_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+        {WORK_SORT_OPTIONS.map((option) => (
+          <option
+            key={option.value}
+            value={option.value}
+            style={{ background: "var(--ln-coal)", color: "var(--ln-parchment)" }}
+          >
+            {option.label}
+          </option>
+        ))}
       </select>
     </label>
   );

@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-10-01T16:13:36.523Z",
-  "totalLessons": 36,
+  "lastUpdated": "2026-10-01T17:18:00.965Z",
+  "totalLessons": 37,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -841,6 +841,28 @@
         "creator-domain"
       ],
       "id": "LESSON-036"
+    },
+    {
+      "date": "2026-10-01",
+      "checkpointVersion": "",
+      "category": "accessibility",
+      "problem": "Explore Registry order used a native select whose popup could inherit a light system surface while retaining light cathedral option text, making the active registry order difficult to read on mobile.",
+      "solution": "Promoted the active Registry order control with cathedral gold and parchment contrast, set the native select color scheme to dark, and explicitly styled option surfaces. Audited database release readiness separately; recent schema objects exist in the live database, but SQL migrations 0134–0142 are absent from Drizzle journal metadata and require reconciliation before a reproducible public release.",
+      "files": [
+        "client/src/pages/ExplorePage.tsx",
+        "server/tests/exploreSurfaceContract.test.ts",
+        "docs/audits/2026-10-01-publication-readiness-migration-audit.md"
+      ],
+      "score": 0,
+      "tags": [
+        "explore",
+        "registry-order",
+        "native-select",
+        "contrast",
+        "mobile",
+        "migration-readiness"
+      ],
+      "id": "LESSON-037"
     }
   ]
 }
