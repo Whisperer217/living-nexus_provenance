@@ -318,7 +318,7 @@ export function WorkListRow({ item, index, prefetchedLiked, prefetchedLikeCount,
           <button
             onClick={handleSupportClick}
             aria-label="Support this creator"
-            className="hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[var(--gold)]/10 border border-[var(--gold)]/20 text-[var(--gold)] text-[10px] font-medium hover:bg-[var(--gold)]/20 transition-all sm:opacity-0 sm:group-hover:opacity-100"
+            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[var(--gold)]/10 border border-[var(--gold)]/20 text-[var(--gold)] text-xs font-medium hover:bg-[var(--gold)]/20 transition-all"
           >
             <Headphones className="w-3 h-3" />
             Support

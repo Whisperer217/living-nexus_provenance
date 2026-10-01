@@ -2,8 +2,7 @@
   "build_command": "pnpm run build",
   "capabilities": [
     "db",
-    "server",
-    "user"
+    "server"
   ],
   "dev_command": "pnpm run dev",
   "env_vars": {
@@ -16,15 +15,16 @@
   ],
   "git_remote": {
     "repo_url": "s3://vida-prod-gitrepo/webdev-git/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr",
-    "access_key_id": "ASIAZV3A2ECZKCCFRJYF",
-    "secret_access_key": "+axvcwpTJ1CdTr97GdveDGEWLlhZ862Hicxg7DYi",
-    "session_token": "IQoJb3JpZ2luX2VjEOP//////////wEaCXVzLWVhc3QtMSJHMEUCIAgaTKHGZ0iVQ3sMezHxFyE8AB3G6xaAz9RcahR69Uh3AiEAjRTVk7OGwCajN6WWu7VdRLR9n6C9MvKIcAga86/xnpEq/gMIq///////////ARAEGgw2NjUzODYwOTg4NjYiDAFEik9ctvovtMOHZirSA01WCN6Thb+lXmYHEsxufzS6az3GMyv45U5scwhz7JhO3K5ownJYWasbx1Xno+rSPaY4icm6OYuGrxxIN3Dgv4yakaovJyWpzU/RX72Chep3kcStyTUbPTn0Xcu9J/4PouBv/0sPg4jrbhlmwgOuXxIAxRL0WVLS9XkVZhcLHFZaZBhhRccZlxjRyGrXKxJ+C3f3KM7ihjw09HRf02PGSNNBOyHIk+/NQ2mEtfIo8c2QqvyDvx6M5ZPrz3OzLBjPK0vfDiK6bDRMheWoLgbs+VOj75rz5/V/k1damcnq1uOmZJdkddj7D+4Hw4jLxi0eInW965vJfAZzQCWQ2+Rk/4hDwnwPoocZYT/TxEJzFvJffWulhelFcw6zWw28uM8rkx6scJortFiG4A04tfq9P1q1oDgk8IT35SY4HZKLSuAvmMhlIARbE1mwQqkOgftEg+W4wIp4bRquRa3lKGr4dq5Dpxl5EKFpOJKDcFTNNuVou3sVphboMX3JFAwq018xY7VWb3toIAgwT31f5O5Mz1/UGrfF2Ye7FTknEdulQLezpkUk3+nfaMTU96uQjrtprGkio1xGsnzPSozL7ZSAO/EJ5b507i3vtlodUTlLR2rSZ7Qw9uqS1QY6nQGjbxOrHAhaxmcF/a6H/hgPM6ZthgmX77flixzJ6pqgBd9W6mn/aZrL83IFTdOYKfECGfp3/vQIjyzUBLIyhpApzGumS4wFyJIbcN2sub7Enp2ihyGxeK6QUKSETchtBFgZSYLTe1b3XgJF1aXoHZql09ekLdtOFDHdWRjG8Bl8q+ngbV8zzIp5K2IRuDH34/it4s9IJEqisHX2rg49",
-    "expiration": "2026-09-12T14:14:14.000Z",
+    "access_key_id": "ASIAZV3A2ECZILIOP75K",
+    "secret_access_key": "mqBPz8wbOacvMYElji37KbI/ftpWDvcu7JcV1lJ3",
+    "session_token": "IQoJb3JpZ2luX2VjELf//////////wEaCXVzLWVhc3QtMSJHMEUCIFRzrEHbb0z2VI6DIjy66JKms0uSZl/XQyf9BrH2qgrpAiEAwQT+yTFcJmEYeEhP4WtP/sNbtk7HWTXrn4FMjBC6aBgq9QMIfxAEGgw2NjUzODYwOTg4NjYiDLaSaO/QF1sxvzBmPSrSA2zob/9HY8NWwJ4S0yyDnAkyZoaUeQJf2tRNgF37paATn/i+Q4QTaN+ot+MlyIxUUSMcC7R9GhWAjk1mGZ2VMHOneCoNGvXpVTryVlnPgZMfQQiqXms1hafOfnf0i+IUtixpde2XGHnDKomyR3bg2kv/d8k6WXsjPwJl5v7scX8EukcuPcX3Gv8P316tX5samlScKokhY8mYuZdpqDB/fhfwv6J4++wRSBKRzC+XgtpBHLCHZpYhfNkrwnivZzgvhgRCpcDaEQhraa/0IDMtA5zCr0n1bpdCKUrvyHfQM5X+Zyw6YC/JETxgIl/uQsC5X4ou6Ma5mXETiAP4rggrKWTFE329ndux6ZaOE5YhMn715mlVpA5ssHiW/5GhHD1vhqPElQKQq/qi+JHESreQ8ABwnmzma7WKdhG+vh6+fsnxid4cFsXYyDdbqjyh/1JcOnEcaeA7KT1XMvzXkzkM8H2TmsVATrDZThSyrDZaoKd/9mw9geaCphY4Q6zWc1265Qm8M/DQRGo0Mlbbkq3mj+riPleaxyk1uVvougYq/J/kOxrEMyV3PfKcatnePfWZuXnHtedUiUDtjfLfD17ZTgTz+xOnwmVFFwTVM63a728kdQEw9tj51QY6nQGxb7l3wxEhU15wZkWjeTRXyGY7pAu/2AO7z610w3BI5i86/X2+iLdNf9LmCAp9PjObYzu7P1P5i78rsamoFDQjSFobd+Gr+dyqsdHMpkD9mmswiOZQ1CVDSvvVoTB6Hj9qzAOfqTkxBdL8oIapeO/seh0+Odi0/zhrH+Y9Dgf7grsxjnJ7SXtK18DlWyrdw7qrZYU5NdM7NP1Nyccv",
+    "expiration": "2026-10-02T02:21:42.000Z",
     "backend": "GIT_BACKEND_S3"
   },
   "name": "living-nexus",
   "path": "/home/ubuntu/living-nexus",
   "port": 3000,
+  "runtime_endpoints": null,
   "secrets": {
     "BUILT_IN_FORGE_API_KEY": "mpbJrJt6B8kLmQKP22kVZ9",
     "BUILT_IN_FORGE_API_URL": "https://forge.manus.ai",
@@ -36,7 +36,6 @@
     "OAUTH_SERVER_URL": "https://api.manus.im",
     "OWNER_NAME": "Doc Seraph Mercer",
     "OWNER_OPEN_ID": "JWw5hcQ8kTAsLfpBQ6HSZj",
-    "SONAUTO_API_KEY": "sksonauto_agdRkwtOllrWAsctXI7JXR1F74XiKWnGmVyEvxbTL9ty7JcC",
     "STRIPE_SECRET_KEY": "sk_test_51TBf3dPGh4UIV43tLVI5v7ANHtvuWIY8hWhImLSjwDvPo07wXRtX3BzV434vVMNdHojX4C5FliBV0NfWjHgl8VFE00klSgtQHg",
     "STRIPE_WEBHOOK_SECRET": "whsec_9BwyCCqdCB202LCpbMLpA2MgCzdTYBbG",
     "VITE_ANALYTICS_ENDPOINT": "https://manus-analytics.com",

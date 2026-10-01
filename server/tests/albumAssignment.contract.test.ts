@@ -44,4 +44,21 @@ describe("creator album assignment contracts", () => {
     expect(metadata).toContain("if (dateChanges.length > 0)");
     expect(metadata).toContain('eventType: "creator_historical_dates_revised"');
   });
+
+  it("refreshes owner Work and album projections after registration or edits without overwriting dirty forms", () => {
+    const register = read("client/src/pages/manifestation-studio/environments/MusicEnvironment.tsx");
+    const drawer = read("client/src/components/CreativeDrawer.tsx");
+    const chapel = read("client/src/components/EditChapel.tsx");
+
+    expect(register).toContain("utils.collectionStudio.listMine.invalidate()");
+    expect(register).toContain("utils.songs.mySongs.invalidate()");
+    expect(register).toContain("utils.collectionStudio.getCollection.invalidate()");
+    for (const surface of [drawer, chapel]) {
+      expect(surface).toContain("utils.collectionStudio.listMine.invalidate()");
+      expect(surface).toContain("utils.songs.getCollectionTracks.invalidate()");
+      expect(surface).toContain("markCurrentFormSaved()");
+      expect(surface).toContain("switchedWork");
+      expect(surface).toContain("incomingChanged");
+    }
+  });
 });

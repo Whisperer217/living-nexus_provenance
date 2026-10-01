@@ -71,6 +71,26 @@ interface CreativeDrawerProps {
   onSaved: () => void;
 }
 
+type CreativeDrawerFormSnapshot = {
+  id: number;
+  title: string;
+  collectionId: number | null;
+  genre: string;
+  caption: string;
+  description: string;
+  status: string;
+  aiConsent: string;
+  aiDisclosure: string;
+  originStory: string;
+  externalLinks: string;
+  lyrics: string;
+  creationDate: string;
+  creatorReleaseDate: string;
+  coverUrl: string;
+  downloadPermission: string;
+  tipThresholdCents: number;
+};
+
 /* ─── Constants ─────────────────────────────────────────────────────────── */
 
 const STATUS_OPTIONS = [
@@ -242,6 +262,69 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
   const [deleting, setDeleting]                     = useState(false);
   const [saved, setSaved]                           = useState(false);
   const [lyricsSaving, setLyricsSaving]             = useState(false);
+  const snapshotFromSong = (source: CreativeDrawerSong): CreativeDrawerFormSnapshot => ({
+    id: source.id,
+    title: source.title ?? "",
+    collectionId: source.collectionId ?? null,
+    genre: source.genre ?? "",
+    caption: source.caption ?? "",
+    description: source.description ?? "",
+    status: source.status ?? "Published",
+    aiConsent: source.aiConsent ?? "prohibited",
+    aiDisclosure: source.aiDisclosure ?? "original",
+    originStory: source.haaiOriginStory ?? "",
+    externalLinks: JSON.stringify(parseLinks(source.externalLinksJson)),
+    lyrics: source.lyricsText ?? "",
+    creationDate: source.releaseDate ? source.releaseDate.slice(0, 10) : "",
+    creatorReleaseDate: source.creatorReleaseDate ? source.creatorReleaseDate.slice(0, 10) : "",
+    coverUrl: source.coverArtUrl ?? "",
+    downloadPermission: source.downloadPermission ?? "none",
+    tipThresholdCents: source.downloadTipThresholdCents ?? 179,
+  });
+  const currentSnapshot = (): CreativeDrawerFormSnapshot => ({
+    id: song.id, title, collectionId, genre, caption, description, status,
+    aiConsent, aiDisclosure, originStory, externalLinks: JSON.stringify(extLinks),
+    lyrics, creationDate, creatorReleaseDate, coverUrl, downloadPermission,
+    tipThresholdCents,
+  });
+  const initialSnapshot = snapshotFromSong(song);
+  const syncedSnapshotRef = useRef<CreativeDrawerFormSnapshot>(initialSnapshot);
+  const incomingSnapshotRef = useRef<CreativeDrawerFormSnapshot>(initialSnapshot);
+  const markCurrentFormSaved = () => {
+    syncedSnapshotRef.current = currentSnapshot();
+  };
+
+  // Refetched Work data should hydrate clean forms. Local unsaved testimony and
+  // metadata always win until the creator saves or switches to another Work.
+  useEffect(() => {
+    const incoming = snapshotFromSong(song);
+    const switchedWork = incoming.id !== incomingSnapshotRef.current.id;
+    const incomingChanged = JSON.stringify(incoming) !== JSON.stringify(incomingSnapshotRef.current);
+    if (!switchedWork && !incomingChanged) return;
+    if (!switchedWork && JSON.stringify(currentSnapshot()) !== JSON.stringify(syncedSnapshotRef.current)) {
+      incomingSnapshotRef.current = incoming;
+      return;
+    }
+    setTitle(incoming.title);
+    setCollectionId(incoming.collectionId);
+    setGenre(incoming.genre);
+    setCaption(incoming.caption);
+    setDescription(incoming.description);
+    setStatus(incoming.status);
+    setAiConsent(incoming.aiConsent);
+    setAiDisclosure(incoming.aiDisclosure);
+    setOriginStory(incoming.originStory);
+    setExtLinks(parseLinks(song.externalLinksJson));
+    setLyrics(incoming.lyrics);
+    setCreationDate(incoming.creationDate);
+    setCreatorReleaseDate(incoming.creatorReleaseDate);
+    setCoverUrl(incoming.coverUrl);
+    setDownloadPermission(incoming.downloadPermission as "none" | "free" | "tipped");
+    setTipThresholdCents(incoming.tipThresholdCents);
+    setTipThresholdInput((incoming.tipThresholdCents / 100).toFixed(2));
+    syncedSnapshotRef.current = incoming;
+    incomingSnapshotRef.current = incoming;
+  }, [song, title, collectionId, genre, caption, description, status, aiConsent, aiDisclosure, originStory, extLinks, lyrics, creationDate, creatorReleaseDate, coverUrl, downloadPermission, tipThresholdCents]);
 
   /* ── FREEZE FIX: 120ms delay before backdrop becomes interactive ── */
   const [backdropActive, setBackdropActive] = useState(false);
@@ -267,13 +350,21 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
   const updateStatus = trpc.songs.updateStatus.useMutation();
 
   function refreshWorkData() {
-    utils.songs.mySongs.invalidate();
-    utils.songs.getById.invalidate({ id: song.id });
+    void utils.songs.mySongs.invalidate();
+    void utils.songs.getMyCollections.invalidate();
+    void utils.songs.getById.invalidate({ id: song.id });
+    void utils.songs.exploreIndex.invalidate();
+    void utils.collectionStudio.listMine.invalidate();
+    void utils.collectionStudio.getAvailableSongs.invalidate();
+    void utils.collectionStudio.getCollection.invalidate();
+    void utils.songs.getCollectionTracks.invalidate();
+    void utils.songs.getCollectionForSong.invalidate();
   }
 
   const updateLyrics = trpc.songs.updateLyrics.useMutation({
     onSuccess: () => {
-      utils.songs.getById.invalidate({ id: song.id });
+      refreshWorkData();
+      markCurrentFormSaved();
       setLyricsSaving(false);
       toast.success("Lyrics saved");
     },
@@ -350,6 +441,7 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
       setCoverUrl(url);
       await updateMetadata.mutateAsync({ songId: song.id, coverArtUrl: url });
       refreshWorkData();
+      markCurrentFormSaved();
       toast.success("Cover art updated");
     } catch (e: unknown) {
       toast.error((e as Error).message || "Cover upload failed");
@@ -432,6 +524,7 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
         });
       }
       refreshWorkData();
+      markCurrentFormSaved();
       setSaved(true);
       setTimeout(() => setSaved(false), 2200);
       toast.success("Work updated");

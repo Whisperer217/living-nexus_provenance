@@ -70,6 +70,46 @@ interface EditChapelProps {
   onSaved: () => void;
 }
 
+type ChapelFormSnapshot = {
+  id: number;
+  title: string;
+  collectionId: number | null;
+  genre: string;
+  caption: string;
+  description: string;
+  status: string;
+  aiConsent: string;
+  aiDisclosure: string;
+  originStory: string;
+  lyrics: string;
+  creationDate: string;
+  creatorReleaseDate: string;
+  coverUrl: string;
+};
+
+function snapshotFromChapelSong(song: ChapelSong): ChapelFormSnapshot {
+  return {
+    id: song.id,
+    title: song.title ?? "",
+    collectionId: song.collectionId ?? null,
+    genre: song.genre ?? "",
+    caption: song.caption ?? "",
+    description: song.description ?? "",
+    status: song.status ?? "Published",
+    aiConsent: song.aiConsent ?? "prohibited",
+    aiDisclosure: song.aiDisclosure ?? "original",
+    originStory: song.haaiOriginStory ?? "",
+    lyrics: song.lyricsText ?? "",
+    creationDate: song.releaseDate ? song.releaseDate.slice(0, 10) : "",
+    creatorReleaseDate: song.creatorReleaseDate ? song.creatorReleaseDate.slice(0, 10) : "",
+    coverUrl: song.coverArtUrl ?? "",
+  };
+}
+
+function equalChapelSnapshots(left: ChapelFormSnapshot, right: ChapelFormSnapshot) {
+  return JSON.stringify(left) === JSON.stringify(right);
+}
+
 /* ─── Constants ─────────────────────────────────────────────────────────── */
 
 const STATUS_OPTIONS = [
@@ -180,6 +220,45 @@ export function EditChapel({ song, onClose, onSaved }: EditChapelProps) {
   const [lyricsSaving, setLyricsSaving]             = useState(false);
   const [coverHovered, setCoverHovered]             = useState(false);
   const [clearingGenres, setClearingGenres]         = useState(false);
+  const syncedSnapshotRef = useRef<ChapelFormSnapshot>(snapshotFromChapelSong(song));
+  const incomingSnapshotRef = useRef<ChapelFormSnapshot>(snapshotFromChapelSong(song));
+
+  const currentSnapshot = (): ChapelFormSnapshot => ({
+    id: song.id, title, collectionId, genre, caption, description, status,
+    aiConsent, aiDisclosure, originStory, lyrics, creationDate,
+    creatorReleaseDate, coverUrl,
+  });
+  const markCurrentFormSaved = () => {
+    syncedSnapshotRef.current = currentSnapshot();
+  };
+
+  // Server refreshes should hydrate a clean form, while local unsaved edits
+  // remain sovereign. A changed Work always resets the form.
+  useEffect(() => {
+    const incoming = snapshotFromChapelSong(song);
+    const switchedWork = incoming.id !== incomingSnapshotRef.current.id;
+    const incomingChanged = !equalChapelSnapshots(incoming, incomingSnapshotRef.current);
+    if (!switchedWork && !incomingChanged) return;
+    if (!switchedWork && !equalChapelSnapshots(currentSnapshot(), syncedSnapshotRef.current)) {
+      incomingSnapshotRef.current = incoming;
+      return;
+    }
+    setTitle(incoming.title);
+    setCollectionId(incoming.collectionId);
+    setGenre(incoming.genre);
+    setCaption(incoming.caption);
+    setDescription(incoming.description);
+    setStatus(incoming.status);
+    setAiConsent(incoming.aiConsent);
+    setAiDisclosure(incoming.aiDisclosure);
+    setOriginStory(incoming.originStory);
+    setLyrics(incoming.lyrics);
+    setCreationDate(incoming.creationDate);
+    setCreatorReleaseDate(incoming.creatorReleaseDate);
+    setCoverUrl(incoming.coverUrl);
+    syncedSnapshotRef.current = incoming;
+    incomingSnapshotRef.current = incoming;
+  }, [song, title, collectionId, genre, caption, description, status, aiConsent, aiDisclosure, originStory, lyrics, creationDate, creatorReleaseDate, coverUrl]);
 
   /* ── Mutations ── */
   const updateMetadata = trpc.songs.updateMetadata.useMutation();
@@ -195,13 +274,21 @@ export function EditChapel({ song, onClose, onSaved }: EditChapelProps) {
   }
 
   function refreshWorkData() {
-    utils.songs.mySongs.invalidate();
-    utils.songs.getById.invalidate({ id: song.id });
+    void utils.songs.mySongs.invalidate();
+    void utils.songs.getMyCollections.invalidate();
+    void utils.songs.getById.invalidate({ id: song.id });
+    void utils.songs.exploreIndex.invalidate();
+    void utils.collectionStudio.listMine.invalidate();
+    void utils.collectionStudio.getAvailableSongs.invalidate();
+    void utils.collectionStudio.getCollection.invalidate();
+    void utils.songs.getCollectionTracks.invalidate();
+    void utils.songs.getCollectionForSong.invalidate();
   }
 
   const updateLyrics = trpc.songs.updateLyrics.useMutation({
     onSuccess: () => {
-      utils.songs.getById.invalidate({ id: song.id });
+      refreshWorkData();
+      markCurrentFormSaved();
       setLyricsSaving(false);
       toast.success("Lyrics saved");
     },
@@ -239,6 +326,7 @@ export function EditChapel({ song, onClose, onSaved }: EditChapelProps) {
       // Immediately persist cover art
       await updateMetadata.mutateAsync({ songId: song.id, coverArtUrl: url });
       refreshWorkData();
+      markCurrentFormSaved();
       toast.success("Cover art updated");
     } catch (e: unknown) {
       toast.error((e as Error).message || "Cover upload failed");
@@ -280,6 +368,7 @@ export function EditChapel({ song, onClose, onSaved }: EditChapelProps) {
         });
       }
       refreshWorkData();
+      markCurrentFormSaved();
       setSaved(true);
       setTimeout(() => setSaved(false), 2200);
       toast.success("Work updated");

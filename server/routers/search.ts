@@ -11,6 +11,7 @@ import { adminProcedure, protectedProcedure, publicProcedure, router } from "../
 import { storagePut } from "../utils/storage";
 import { micronize } from "../services/imageProcessing";
 import { invokeLLM } from "../_core/llm";
+import { interpretDiscoveryQuery } from "../services/discoveryQuery";
 import {
   addComment, createSong, deleteSong, getAllCreators,
   getCommentsBySong, getPublicSongs, getSongById,
@@ -175,6 +176,17 @@ const PLATFORM_FEE_PERCENT = 10;
 const BUGS_FIXED = parseInt(process.env.BUGS_FIXED ?? "222", 10);
 const TOTAL_COMMITS = parseInt(process.env.TOTAL_COMMITS ?? "554", 10);
 
+function mergeSearchResults(resultSets: SearchResults[]): SearchResults {
+  const uniqueById = <T extends { id: number }>(items: T[]) => Array.from(new Map(items.map((item) => [item.id, item])).values());
+  return {
+    creators: uniqueById(resultSets.flatMap((result) => result.creators)),
+    songs: uniqueById(resultSets.flatMap((result) => result.songs)),
+    guides: uniqueById(resultSets.flatMap((result) => result.guides)),
+    collections: uniqueById(resultSets.flatMap((result) => result.collections)),
+    widMatch: resultSets.map((result) => result.widMatch).find(Boolean) ?? null,
+  };
+}
+
 // ─── Keeper Character Sheet Presets ──────────────────────────────────────────
 const KEEPER_PRESETS = [
   { id: 'witness', name: 'The Witness', description: 'Provenance-aware creative companion. Speaks with quiet authority and poetic precision.', persona: 'witness', attributes: { voiceDepth: 95, lyricalDensity: 85, structuralLogic: 35, emotionalRange: 100, provenanceDepth: 60, corpusSize: 600 }, mediumContext: { music: 'Listens for the emotional truth behind every note.', lyrics: 'Reads lyrics as testimony. Identifies themes, metaphors, structural patterns.', book: 'Treats chapters as provenance events.', comic: 'Reads panels as visual testimony.', video: 'Frames every scene as a moment of witness.', general: 'Every creative act is a timestamp, a testimony, a record.' }, capabilities: ['testimony', 'emotional-depth', 'provenance'], accentColor: '#7C3AED', badge: 'Testimony' },
@@ -189,5 +201,33 @@ export const searchRouter = router({
       .input(z.object({ q: z.string().min(1).max(200) }))
       .query(async ({ input }): Promise<SearchResults> => {
         return globalSearch(input.q);
+      }),
+    /**
+     * Interprets a visitor phrase into a narrow, visible search plan. The plan
+     * contains no generated Registry facts; callers still use `global` for the
+     * authoritative public-record lookup.
+     */
+    interpret: publicProcedure
+      .input(z.object({ q: z.string().min(1).max(200) }))
+      .query(async ({ input }) => interpretDiscoveryQuery(input.q)),
+    /**
+     * Natural-language entry point. It merges deterministic Registry lookups for
+     * the interpreted terms, then returns the interpretation so the client can
+     * visibly apply the narrow filters. No model-generated records are returned.
+     */
+    natural: publicProcedure
+      .input(z.object({ q: z.string().min(1).max(200) }))
+      .query(async ({ input }) => {
+        const interpretation = await interpretDiscoveryQuery(input.q);
+        const terms = Array.from(new Set([
+          interpretation.query,
+          interpretation.creator,
+          interpretation.genre,
+        ].filter((term): term is string => Boolean(term?.trim())))).slice(0, 3);
+        const resultSets = await Promise.all(terms.map((term) => globalSearch(term)));
+        return {
+          interpretation,
+          results: mergeSearchResults(resultSets),
+        };
       }),
   });

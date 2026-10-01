@@ -133,6 +133,7 @@ interface MusicEnvironmentProps {
 export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEnvironmentProps) {
   const [, navigate] = useLocation();
   const { user } = useAuth();
+  const utils = trpc.useUtils();
   const [step, setStep] = useState<StudioStep>("upload");
 
   const [audioFile, setAudioFile] = useState<File | null>(null);
@@ -390,6 +391,17 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
   const uploadMutation = trpc.songs.upload.useMutation({
     onSuccess: (data: any) => {
       setUploadPhase("done");
+      // Registration can change a creator's Work lists and an assigned album's
+      // track count. Invalidate existing read surfaces before navigation so the
+      // returned view cannot present stale placement state.
+      void utils.songs.mySongs.invalidate();
+      void utils.songs.getMyCollections.invalidate();
+      void utils.songs.exploreIndex.invalidate();
+      void utils.collectionStudio.listMine.invalidate();
+      void utils.collectionStudio.getAvailableSongs.invalidate();
+      void utils.collectionStudio.getCollection.invalidate();
+      void utils.songs.getCollectionTracks.invalidate();
+      void utils.songs.getCollectionForSong.invalidate();
       if (data?.witnessId && title) {
         addWIDSnapshot({
           wid: data.witnessId,

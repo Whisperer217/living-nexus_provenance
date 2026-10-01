@@ -27,8 +27,18 @@ describe("Explore public-surface contract", () => {
     const exploreSource = fs.readFileSync(explorePagePath, "utf8");
 
     expect(exploreSource).toContain("max-w-[1360px]");
-    expect(exploreSource).toContain('clamp(2.25rem,1.8rem + 2vw,3.25rem)');
+    expect(exploreSource).toContain('className="ln-page-title"');
     expect(exploreSource).toContain("xl:w-[12rem]");
     expect(exploreSource).toContain("text-sm font-medium leading-tight");
+  });
+
+  it("does not request the full Work feed or bulk like status while browsing only creators", () => {
+    const exploreSource = fs.readFileSync(explorePagePath, "utf8");
+    expect(exploreSource).toContain("const isListView = viewMode === \"list\"");
+    expect(exploreSource).toContain("useExploreData(seed, randomize, isListView");
+    expect(exploreSource).toContain("if (!isListView) return []");
+    expect(exploreSource).toContain("if (!isListView) {");
+    expect(exploreSource).toContain("setLikedMap({})");
+    expect(exploreSource).toContain("{ enabled, staleTime: 2 * 60 * 1000");
   });
 });

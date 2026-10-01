@@ -163,16 +163,41 @@ export default function CreatorDomainShell() {
 
   // Determine if this is the owner viewing their own domain
   const isOwner = Boolean(user && creatorQuery.data && user.id === creatorQuery.data.id);
+  const isOwnerWorkSection = isOwner && (activeSection === "artifacts" || activeSection === "drafts");
+  const isAnalyticsSection = isOwner && activeSection === "analytics";
+  const isPublicWorkSection = !isOwner && activeSection === "artifacts";
 
-  // Load owner data (only when viewing own domain)
-  const meQuery = trpc.profile.me.useQuery(undefined, { enabled: isOwner });
-  const mySongsQuery = trpc.songs.mySongs.useQuery(undefined, { enabled: isOwner });
-  const analyticsQuery = trpc.profile.myAnalytics.useQuery(undefined, { enabled: isOwner });
+  // Owner identity is required for the shell header. Larger records wait until
+  // their explicit management section is opened.
+  const meQuery = trpc.profile.me.useQuery(undefined, {
+    enabled: isOwner,
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
+  });
+  const mySongsQuery = trpc.songs.mySongs.useQuery(undefined, {
+    enabled: isOwnerWorkSection,
+    staleTime: 30_000,
+    refetchOnWindowFocus: false,
+  });
+  const analyticsQuery = trpc.profile.myAnalytics.useQuery(undefined, {
+    enabled: isAnalyticsSection,
+    staleTime: 60_000,
+    refetchOnWindowFocus: false,
+  });
 
-  // Load public creator data — use discover filtered by creator via profile.getCreatorMini
+  // The home surface needs only a count. The full public record waits for Works.
   const publicSongsQuery = trpc.songs.countByCreator.useQuery(
     { creatorId: creatorQuery.data?.id || 0 },
-    { enabled: Boolean(creatorQuery.data?.id) && !isOwner }
+    { enabled: Boolean(creatorQuery.data?.id) && !isOwner, staleTime: 2 * 60 * 1000, refetchOnWindowFocus: false }
+  );
+  const publicWorksQuery = trpc.songs.discoverInfinite.useInfiniteQuery(
+    { creatorId: creatorQuery.data?.id || 0, limit: 24 },
+    {
+      enabled: Boolean(creatorQuery.data?.id) && isPublicWorkSection,
+      staleTime: 2 * 60 * 1000,
+      refetchOnWindowFocus: false,
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
+    }
   );
 
   // Redirect if handle not found
@@ -186,7 +211,15 @@ export default function CreatorDomainShell() {
   const creator = isOwner ? meQuery.data : creatorQuery.data;
   // For public view, songs list comes from the owner's public songs via discover
   // For now, public visitors see a count; full list requires the owner's mySongs
-  const songs = isOwner ? (mySongsQuery.data || []) : [];
+  const ownerSongs = mySongsQuery.data || [];
+  const publicSongs = (publicWorksQuery.data?.pages.flatMap((page) => page.items) || []).map((row: any) => ({
+    ...row.song,
+    primaryGenre: row.song.genre,
+    medium: row.song.contentType,
+    songStatus: row.song.status,
+    witnessCount: 0,
+  }));
+  const songs = isOwner ? ownerSongs : publicSongs;
   const analytics = analyticsQuery.data;
 
   const publishedSongs = songs.filter((s: any) => s.songStatus === "Published" || !s.songStatus);
@@ -310,10 +343,10 @@ export default function CreatorDomainShell() {
                 <div className="space-y-6">
                   {/* Stats */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    <StatCard label="Artifacts" value={songs.length} icon={Archive} />
-                    <StatCard label="Published" value={publishedSongs.length} icon={Globe} accent="var(--ln-status-active)" />
-                    {isOwner && <StatCard label="Drafts" value={draftSongs.length} icon={PenLine} accent="var(--ln-gold)" />}
-                    {analytics && <StatCard label="Total Plays" value={analytics.totalPlays || 0} icon={Play} accent="#60a5fa" />}
+                    <StatCard label="Artifacts" value={isOwner ? "Open Works" : publicSongsQuery.data?.count ?? 0} icon={Archive} />
+                    <StatCard label="Published" value={isOwner ? "Open Works" : publicSongsQuery.data?.count ?? 0} icon={Globe} accent="var(--ln-status-active)" />
+                    {isOwner && <StatCard label="Drafts" value="Open Drafts" icon={PenLine} accent="var(--ln-gold)" />}
+                    {isOwner && <StatCard label="Analytics" value="Open Analytics" icon={BarChart2} accent="#60a5fa" />}
                   </div>
 
                   {/* Quick actions (owner only) */}
@@ -350,31 +383,13 @@ export default function CreatorDomainShell() {
                       <h2 className="text-sm font-semibold uppercase tracking-wider" style={{ color: "var(--ln-text-muted)" }}>
                         {isOwner ? "Recent Works" : "Works"}
                       </h2>
-                      {songs.length > 5 && (
-                        <button onClick={() => setActiveSection("artifacts")} className="text-xs flex items-center gap-1" style={{ color: "var(--ln-gold)" }}>
-                          View all <ChevronRight className="w-3 h-3" />
-                        </button>
-                      )}
+                      <button onClick={() => setActiveSection("artifacts")} className="text-xs flex items-center gap-1" style={{ color: "var(--ln-gold)" }}>
+                        View works <ChevronRight className="w-3 h-3" />
+                      </button>
                     </div>
-                    <div className="space-y-2">
-                      {songs.slice(0, 5).map((song: any) => (
-                        <ArtifactRow key={song.id} song={song} isOwner={isOwner} />
-                      ))}
-                      {songs.length === 0 && (
-                        <div className="text-center py-12 rounded-xl" style={{ background: "var(--ln-surface-panel)", border: "1px solid var(--ln-border-subtle)" }}>
-                          <Archive className="w-8 h-8 mx-auto mb-3" style={{ color: "var(--ln-text-muted)" }} />
-                          <p className="text-sm" style={{ color: "var(--ln-text-muted)" }}>
-                            {isOwner ? "No works yet. Upload your first artifact." : "No published works yet."}
-                          </p>
-                          {isOwner && (
-                            <Link href="/upload">
-                              <Button size="sm" className="mt-4" style={{ background: "var(--ln-gold)", color: "var(--ln-surface-void)" }}>
-                                <Upload className="w-4 h-4 mr-2" /> Upload Work
-                              </Button>
-                            </Link>
-                          )}
-                        </div>
-                      )}
+                    <div className="rounded-xl p-6 text-center" style={{ background: "var(--ln-surface-panel)", border: "1px solid var(--ln-border-subtle)" }}>
+                      <Archive className="w-8 h-8 mx-auto mb-3" style={{ color: "var(--ln-gold)" }} />
+                      <p className="text-sm" style={{ color: "var(--ln-text-secondary)" }}>Open Works to browse the registered record without loading the full library on arrival.</p>
                     </div>
                   </div>
                 </div>
@@ -399,6 +414,16 @@ export default function CreatorDomainShell() {
                     {(isOwner ? songs : publishedSongs).map((song: any) => (
                       <ArtifactRow key={song.id} song={song} isOwner={isOwner} />
                     ))}
+                    {!isOwner && publicWorksQuery.hasNextPage && (
+                      <button
+                        onClick={() => publicWorksQuery.fetchNextPage()}
+                        disabled={publicWorksQuery.isFetchingNextPage}
+                        className="w-full rounded-lg border px-4 py-3 text-sm transition-colors disabled:opacity-50"
+                        style={{ borderColor: "var(--ln-border-gold)", color: "var(--ln-gold)" }}
+                      >
+                        {publicWorksQuery.isFetchingNextPage ? "Opening more works…" : "Continue through Registry"}
+                      </button>
+                    )}
                     {songs.length === 0 && (
                       <div className="text-center py-16 rounded-xl" style={{ background: "var(--ln-surface-panel)", border: "1px solid var(--ln-border-subtle)" }}>
                         <Archive className="w-10 h-10 mx-auto mb-4" style={{ color: "var(--ln-text-muted)" }} />

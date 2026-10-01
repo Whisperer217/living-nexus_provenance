@@ -223,6 +223,10 @@ export const songsRouter = router({
         genre: z.string().optional(),
         search: z.string().optional(),
         contentType: z.enum(["audio", "lyrics", "manuscript", "comic", "written", "game", "gcode", "3dmodel"]).optional(),
+        creatorId: z.number().int().positive().optional(),
+        randomize: z.boolean().optional(),
+        seed: z.number().int().nonnegative().optional(),
+        sort: z.enum(["newest", "title", "creator"]).optional(),
       }).optional())
       .query(async ({ input }) => {
         const limit = input?.limit ?? 24;
@@ -231,6 +235,10 @@ export const songsRouter = router({
           genre: input?.genre,
           search: input?.search,
           contentType: input?.contentType as any,
+          creatorId: input?.creatorId,
+          randomize: input?.randomize,
+          seed: input?.randomize ? input?.seed : undefined,
+          sort: input?.sort,
           limit: limit + 1, // fetch one extra to detect hasMore
           offset,
         });
@@ -267,13 +275,13 @@ export const songsRouter = router({
     exploreIndex: publicProcedure
       .input(z.object({
         seed: z.number().optional(),
-        limit: z.number().int().min(8).max(700).optional(),
+        limit: z.number().int().min(8).max(24).optional(),
         randomize: z.boolean().optional(),
         creatorId: z.number().int().positive().optional(),
       }).optional())
       .query(async ({ input }) => {
         const seed = input?.seed ?? Math.floor(Math.random() * 999999);
-        const sectionLimit = input?.limit ?? 20;
+        const sectionLimit = input?.limit ?? 16;
         const randomize = input?.randomize !== false; // default true
         const creatorId = input?.creatorId;
         const base = (contentType?: string) => ({

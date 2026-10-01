@@ -24,6 +24,17 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { usePlayer } from "@/contexts/PlayerContext";
 
+function useDebouncedValue<T>(value: T, delayMs: number): T {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => setDebouncedValue(value), delayMs);
+    return () => window.clearTimeout(timeoutId);
+  }, [delayMs, value]);
+
+  return debouncedValue;
+}
+
 /* ── Create Playlist Dialog ─────────────────────────────────────── */
 function CreatePlaylistDialog({
   open, onClose, onCreated,
@@ -108,15 +119,19 @@ function InlineSongSearch({ playlistId, existingSongIds }: { playlistId: number;
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const debouncedQuery = useDebouncedValue(query.trim(), 300);
+  const queryIsCurrent = query.trim() === debouncedQuery;
+  const canSearch = open && queryIsCurrent && debouncedQuery.length >= 2;
 
   const { data: results, isFetching } = trpc.search.global.useQuery(
-    { q: query },
-    { enabled: query.trim().length >= 2, staleTime: 5_000 }
+    { q: debouncedQuery || " " },
+    { enabled: canSearch, staleTime: 30_000, refetchOnWindowFocus: false }
   );
 
   const addTrack = trpc.playlists.addTrack.useMutation({
     onSuccess: (_d, vars) => {
       utils.playlists.getById.invalidate({ id: playlistId });
+      utils.playlists.mine.invalidate();
       const song = results?.songs.find(s => s.id === vars.songId);
       toast.success(`Added "${song?.title ?? "track"}" to playlist`);
     },
@@ -134,7 +149,9 @@ function InlineSongSearch({ playlistId, existingSongIds }: { playlistId: number;
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  const songs = results?.songs ?? [];
+  // A late response may still resolve in the network layer, but it is never
+  // rendered after the person has changed the phrase or closed the search.
+  const songs = canSearch ? results?.songs ?? [] : [];
 
   return (
     <div ref={containerRef} className="relative mb-5">
@@ -145,9 +162,12 @@ function InlineSongSearch({ playlistId, existingSongIds }: { playlistId: number;
           onChange={e => { setQuery(e.target.value); setOpen(true); }}
           onFocus={() => setOpen(true)}
           placeholder="Search songs to add..."
+          aria-label="Search registered works to add"
+          aria-expanded={open && query.trim().length >= 2}
+          aria-busy={!queryIsCurrent || isFetching}
           className="flex-1 bg-transparent text-sm text-white placeholder:text-white/35 outline-none"
         />
-        {isFetching && <Loader2 size={12} className="animate-spin text-white/30 flex-shrink-0" />}
+        {(!queryIsCurrent || isFetching) && query.trim().length >= 2 && <Loader2 size={12} className="animate-spin text-white/30 flex-shrink-0" />}
         {query && (
           <button onClick={() => { setQuery(""); setOpen(false); }} className="text-white/30 hover:text-white/60 transition-colors">
             <X size={12} />
@@ -158,7 +178,9 @@ function InlineSongSearch({ playlistId, existingSongIds }: { playlistId: number;
       {/* Results dropdown */}
       {open && query.trim().length >= 2 && (
         <div className="absolute z-50 left-0 right-0 mt-1 rounded-xl border border-white/[0.08] bg-[#000000] shadow-[0_16px_40px_rgba(0,0,0,0.85)] overflow-hidden">
-          {songs.length === 0 && !isFetching ? (
+          {!queryIsCurrent || isFetching ? (
+            <div className="px-4 py-3 text-sm text-white/40 text-center">Searching the Registry…</div>
+          ) : songs.length === 0 ? (
             <div className="px-4 py-3 text-sm text-white/40 text-center">No results for "{query}"</div>
           ) : (
             <div className="max-h-56 overflow-y-auto">

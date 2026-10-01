@@ -10,8 +10,11 @@ import { trpc } from "@/lib/trpc";
 import type { SearchResults } from "@shared/searchTypes";
 import {
   Search, Music, BookOpen, FileText, User, Layers, Zap, ExternalLink,
-  ChevronRight, AlertCircle, Loader2, ShieldCheck,
+  ChevronRight, AlertCircle, Loader2, ShieldCheck, Sparkles, RotateCcw,
+  SlidersHorizontal,
 } from "lucide-react";
+
+type SearchMode = "registry" | "guided";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function useSearchQuery(): string {
@@ -70,19 +73,103 @@ const CONTENT_TYPE_LABEL: Record<string, string> = {
   comic:      "Comic",
 };
 
+function filterResultsByInterpretation(
+  results: SearchResults,
+  interpretation: { creator: string | null; genre: string | null; contentType: string | null; sort: string },
+): SearchResults {
+  const creatorNeedle = interpretation.creator?.toLowerCase() ?? "";
+  const genreNeedle = interpretation.genre?.toLowerCase() ?? "";
+  const creatorMatches = (name: string | null, handle: string | null) => !creatorNeedle
+    || (name ?? "").toLowerCase().includes(creatorNeedle)
+    || (handle ?? "").toLowerCase().includes(creatorNeedle);
+  const songs = results.songs
+    .filter((song) => !interpretation.contentType || song.contentType === interpretation.contentType)
+    .filter((song) => !genreNeedle || (song.genre ?? "").toLowerCase().includes(genreNeedle))
+    .filter((song) => creatorMatches(song.creatorName, song.creatorHandle));
+
+  const sortedSongs = interpretation.sort === "title"
+    ? [...songs].sort((left, right) => left.title.localeCompare(right.title))
+    : interpretation.sort === "creator"
+      ? [...songs].sort((left, right) => (left.creatorHandle ?? left.creatorName ?? "").localeCompare(right.creatorHandle ?? right.creatorName ?? ""))
+      : songs;
+  const matchingCreatorIds = new Set(
+    results.creators
+      .filter((creator) => creatorMatches(creator.name, creator.artistHandle))
+      .map((creator) => creator.id),
+  );
+
+  return {
+    ...results,
+    creators: results.creators.filter((creator) => creatorMatches(creator.name, creator.artistHandle)),
+    songs: sortedSongs,
+    guides: creatorNeedle ? results.guides.filter((guide) => matchingCreatorIds.has(guide.creatorId)) : results.guides,
+    collections: creatorNeedle ? results.collections.filter((collection) => matchingCreatorIds.has(collection.creatorId)) : results.collections,
+  };
+}
+
+function GuidedSearchPlan({ interpretation }: { interpretation: { creator: string | null; genre: string | null; contentType: string | null; sort: string; explanation: string; source: string } }) {
+  const filters = [
+    interpretation.creator && `Creator: @${interpretation.creator}`,
+    interpretation.genre && `Genre: ${interpretation.genre}`,
+    interpretation.contentType && `Medium: ${CONTENT_TYPE_LABEL[interpretation.contentType] ?? interpretation.contentType}`,
+    interpretation.sort !== "relevance" && `Order: ${interpretation.sort}`,
+  ].filter(Boolean) as string[];
+
+  return (
+    <aside className="mb-6 rounded-xl border px-4 py-3" style={{ background: "rgba(196,154,40,0.06)", borderColor: "rgba(196,154,40,0.20)" }} aria-label="Keeper search interpretation">
+      <div className="flex items-start gap-3">
+        <Sparkles size={16} className="mt-0.5 shrink-0" style={{ color: "var(--ln-gold)" }} aria-hidden="true" />
+        <div className="min-w-0 flex-1">
+          <p className="text-xs font-semibold" style={{ color: "var(--ln-parchment)" }}>Keeper search interpretation</p>
+          <p className="mt-1 text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.48)" }}>{interpretation.explanation}</p>
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {(filters.length ? filters : ["Registry terms kept as written"]).map((filter) => (
+              <span key={filter} className="rounded-full border px-2 py-0.5 font-mono text-[10px]" style={{ color: "var(--ln-gold)", borderColor: "rgba(196,154,40,0.25)", background: "rgba(196,154,40,0.08)" }}>{filter}</span>
+            ))}
+            <span className="rounded-full px-2 py-0.5 text-[10px]" style={{ color: "rgba(255,255,255,0.35)", background: "rgba(255,255,255,0.04)" }}>{interpretation.source === "model" ? "Guided interpretation" : "Deterministic fallback"}</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+  );
+}
+
 // ── Main Page ─────────────────────────────────────────────────────────────────
 export default function SearchResultsPage() {
   const [, navigate] = useLocation();
   const rawQ = useSearchQuery();
+  const rawSearch = useSearch();
+  const rawParams = new URLSearchParams(rawSearch ?? "");
+  const routeMode: SearchMode = rawParams.get("mode") === "guided" ? "guided" : "registry";
   const [inputVal, setInputVal] = useState(rawQ);
+  const [searchMode, setSearchMode] = useState<SearchMode>(routeMode);
 
   // Sync input when URL changes
-  useEffect(() => { setInputVal(rawQ); }, [rawQ]);
+  useEffect(() => {
+    setInputVal(rawQ);
+    setSearchMode(routeMode);
+  }, [rawQ, routeMode]);
 
-  const { data, isLoading, error } = trpc.search.global.useQuery(
+  const registryQuery = trpc.search.global.useQuery(
     { q: rawQ },
-    { enabled: rawQ.length > 0, staleTime: 30_000 }
+    { enabled: rawQ.length > 0 && searchMode === "registry", staleTime: 30_000 }
   );
+  const guidedQuery = trpc.search.natural.useQuery(
+    { q: rawQ },
+    { enabled: rawQ.length > 0 && searchMode === "guided", staleTime: 30_000, retry: 1 }
+  );
+  const interpretation = guidedQuery.data?.interpretation;
+  const data = useMemo(() => {
+    const results = searchMode === "guided" ? guidedQuery.data?.results : registryQuery.data;
+    if (!results) return undefined;
+    return interpretation ? filterResultsByInterpretation(results, interpretation) : results;
+  }, [guidedQuery.data?.results, interpretation, registryQuery.data, searchMode]);
+  const isLoading = searchMode === "guided" ? guidedQuery.isLoading : registryQuery.isLoading;
+  const error = searchMode === "guided" ? guidedQuery.error : registryQuery.error;
+  const retrySearch = () => {
+    if (searchMode === "guided") void guidedQuery.refetch();
+    else void registryQuery.refetch();
+  };
 
   // WID direct redirect — if there's an exact WID match, navigate immediately
   useEffect(() => {
@@ -111,7 +198,7 @@ export default function SearchResultsPage() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     const q = inputVal.trim();
-    if (q) navigate(`/search?q=${encodeURIComponent(q)}`);
+    if (q) navigate(`/search?q=${encodeURIComponent(q)}${searchMode === "guided" ? "&mode=guided" : ""}`);
   };
 
   return (
@@ -135,19 +222,37 @@ export default function SearchResultsPage() {
               type="text"
               value={inputVal}
               onChange={e => setInputVal(e.target.value)}
-              placeholder="Search creators, works, WIDs…"
+              placeholder={searchMode === "guided" ? "Describe the work, creator, genre, or WID…" : "Search creators, works, WIDs…"}
               className="flex-1 bg-transparent outline-none text-white/80 placeholder:text-white/25"
               style={{ fontSize: "13px" }}
             />
           </div>
           <button
+            type="button"
+            onClick={() => setSearchMode((mode) => mode === "guided" ? "registry" : "guided")}
+            aria-pressed={searchMode === "guided"}
+            title={searchMode === "guided" ? "Use exact Registry search" : "Ask the Keeper to interpret a natural-language request"}
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border px-3 py-2 text-xs transition-all"
+            style={searchMode === "guided"
+              ? { background: "rgba(196,154,40,0.16)", borderColor: "rgba(196,154,40,0.45)", color: "var(--ln-gold)" }
+              : { background: "rgba(255,255,255,0.03)", borderColor: "rgba(196,154,40,0.18)", color: "rgba(255,255,255,0.55)" }}
+          >
+            {searchMode === "guided" ? <Sparkles size={13} /> : <SlidersHorizontal size={13} />}
+            <span className="hidden sm:inline">{searchMode === "guided" ? "Keeper guided" : "Exact search"}</span>
+          </button>
+          <button
             type="submit"
             className="px-4 py-2 rounded-lg text-xs font-semibold transition-all"
             style={{ background: "#C49A28", color: "#0A0806" }}
           >
-            Search
+            {searchMode === "guided" ? "Interpret" : "Search"}
           </button>
         </form>
+        <p className="mx-auto mt-2 max-w-2xl px-1 text-[11px]" style={{ color: "rgba(255,255,255,0.28)" }}>
+          {searchMode === "guided"
+            ? "The Keeper translates your request into visible filters. Results remain published Registry records."
+            : "Exact Registry search looks for creators, works, guides, collections, and WIDs."}
+        </p>
       </div>
 
       {/* ── Content ── */}
@@ -163,17 +268,36 @@ export default function SearchResultsPage() {
 
         {/* Loading */}
         {rawQ && isLoading && (
-          <div className="flex items-center justify-center py-24 gap-3">
-            <Loader2 size={20} className="animate-spin" style={{ color: "var(--ln-gold)" }} />
-            <span className="text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>Searching the Nexus…</span>
+          <div className="py-10" aria-live="polite" aria-busy="true">
+            <div className="mb-5 flex items-center gap-3">
+              <div className="flex h-9 w-9 items-center justify-center rounded-full border" style={{ borderColor: "rgba(196,154,40,0.35)", background: "rgba(196,154,40,0.08)" }}>
+                <Loader2 size={17} className="animate-spin" style={{ color: "var(--ln-gold)" }} />
+              </div>
+              <div>
+                <p className="text-sm" style={{ color: "var(--ln-parchment)" }}>{searchMode === "guided" ? "The Keeper is reading your request" : "Searching the Nexus"}</p>
+                <p className="mt-0.5 text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>Only public Registry records will appear.</p>
+              </div>
+            </div>
+            <div className="space-y-2">
+              {[78, 94, 68, 86].map((width, index) => (
+                <div key={index} className="flex items-center gap-3 rounded-xl border p-3 animate-pulse" style={{ borderColor: "rgba(196,154,40,0.08)", background: "rgba(255,255,255,0.025)" }}>
+                  <div className="h-10 w-10 rounded-lg" style={{ background: "rgba(196,154,40,0.10)" }} />
+                  <div className="flex-1 space-y-2"><div className="h-2.5 rounded" style={{ width: `${width}%`, background: "rgba(255,255,255,0.10)" }} /><div className="h-2 w-1/3 rounded" style={{ background: "rgba(255,255,255,0.06)" }} /></div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
         {/* Error */}
         {rawQ && error && (
-          <div className="flex items-center gap-3 py-12 justify-center">
-            <AlertCircle size={18} style={{ color: "var(--ln-ember)" }} />
-            <span className="text-sm" style={{ color: "rgba(255,255,255,0.5)" }}>Search failed. Try again.</span>
+          <div className="mx-auto my-12 max-w-xl rounded-2xl border p-6 text-center" style={{ background: "rgba(196,154,40,0.05)", borderColor: "rgba(196,154,40,0.22)" }} role="alert">
+            <AlertCircle size={22} className="mx-auto" style={{ color: "var(--ln-gold)" }} />
+            <h2 className="mt-3 font-heading text-lg" style={{ color: "var(--ln-parchment)" }}>The search request did not return</h2>
+            <p className="mt-2 text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.48)" }}>No Registry record was changed. Retry the request or switch between exact and Keeper-guided search.</p>
+            <button type="button" onClick={retrySearch} className="mt-5 inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-sm transition-colors hover:bg-white/5" style={{ borderColor: "rgba(196,154,40,0.32)", color: "var(--ln-gold)" }}>
+              <RotateCcw size={14} /> Retry search
+            </button>
           </div>
         )}
 
@@ -187,20 +311,25 @@ export default function SearchResultsPage() {
 
         {/* No results */}
         {rawQ && !isLoading && !error && data && !data.widMatch && totalResults === 0 && (
-          <div className="flex flex-col items-center justify-center py-24 gap-4">
-            <Search size={36} style={{ color: "rgba(196,154,40,0.18)" }} />
-            <p className="text-sm" style={{ color: "rgba(255,255,255,0.35)" }}>
-              No results found for <span style={{ color: "var(--ln-parchment)" }}>"{rawQ}"</span>
-            </p>
-            <p className="text-xs" style={{ color: "rgba(255,255,255,0.2)" }}>
-              Try a creator name, song title, genre, or paste a full WID (e.g. WID-MUS-XXXXXXXX-XXXXXXXX)
-            </p>
+          <div className="py-10">
+            {searchMode === "guided" && interpretation && <GuidedSearchPlan interpretation={interpretation} />}
+            <div className="flex flex-col items-center justify-center py-14 gap-4">
+              <Search size={36} style={{ color: "rgba(196,154,40,0.18)" }} />
+              <p className="text-sm" style={{ color: "rgba(255,255,255,0.35)" }}>
+                No results found for <span style={{ color: "var(--ln-parchment)" }}>"{rawQ}"</span>
+              </p>
+              <p className="text-xs text-center" style={{ color: "rgba(255,255,255,0.2)" }}>
+                Try a creator name, song title, genre, or paste a full WID (e.g. WID-MUS-XXXXXXXX-XXXXXXXX)
+              </p>
+            </div>
           </div>
         )}
 
         {/* Results */}
         {rawQ && !isLoading && data && !data.widMatch && totalResults > 0 && (
           <div className="space-y-8">
+
+            {searchMode === "guided" && interpretation && <GuidedSearchPlan interpretation={interpretation} />}
 
             {/* ── Result count ── */}
             <p className="text-xs" style={{ color: "rgba(255,255,255,0.3)" }}>

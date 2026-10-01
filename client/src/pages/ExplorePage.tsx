@@ -9,10 +9,11 @@ import { Link, useLocation, useParams, useSearch } from "wouter";
 import {
   Search, RefreshCw, Shield, Music, Eye, Flame,
   Sparkles, Star, ChevronRight, ChevronLeft, LayoutList,
-  FileText, Users, X, Lock,
-  Play, FileAudio, File,
+  FileText, Users, X, Lock, ArrowDownAZ, CalendarArrowDown, UserRound,
+  Play, FileAudio, File, Heart, Loader2,
 } from "lucide-react";
 import { WorkListRow, type WorkListRowItem } from "@/components/WorkListRow";
+import { SupportCreatorDrawer, type SupportTarget } from "@/components/SupportCreatorDrawer";
 import type { FeedRow } from "@shared/coreDataTypes";
 import { toast } from "sonner";
 import { usePlayer, type Track } from "@/contexts/PlayerContext";
@@ -35,6 +36,14 @@ const SUPPLEMENTAL_SECTIONS = [
 
 type SupplementalKey = typeof SUPPLEMENTAL_SECTIONS[number]["key"];
 type ViewMode = "list" | "creators";
+type WorkSort = "curated" | "newest" | "title" | "creator";
+
+const WORK_SORT_OPTIONS: { value: WorkSort; label: string; icon: React.ReactNode }[] = [
+  { value: "curated", label: "Registry order", icon: <Sparkles className="h-3.5 w-3.5" /> },
+  { value: "newest", label: "Newest", icon: <CalendarArrowDown className="h-3.5 w-3.5" /> },
+  { value: "title", label: "Title A–Z", icon: <ArrowDownAZ className="h-3.5 w-3.5" /> },
+  { value: "creator", label: "Creator A–Z", icon: <UserRound className="h-3.5 w-3.5" /> },
+];
 
 function getInitialViewMode(): ViewMode {
   if (typeof window === "undefined") return "list";
@@ -44,14 +53,16 @@ function getInitialViewMode(): ViewMode {
   return "list";
 }
 
-// Max works to load — always show everything the server has
-const MAX_LIMIT = 700;
+// Curated sections remain intentionally small. The complete Registry lives in
+// the cursor-based Works index below, so no route starts by mounting its archive.
+const CURATED_SECTION_LIMIT = 16;
+const WORK_PAGE_SIZE = 36;
 
 // ── Data hook ──────────────────────────────────────────────────────────────
-function useExploreData(seed: number, randomize: boolean, creatorId?: number) {
-  const { data, isLoading, error } = trpc.songs.exploreIndex.useQuery(
-    { seed, limit: MAX_LIMIT, randomize, ...(creatorId ? { creatorId } : {}) },
-    { staleTime: 2 * 60 * 1000, refetchOnWindowFocus: false }
+function useExploreData(seed: number, randomize: boolean, enabled: boolean, creatorId?: number) {
+  const { data, isLoading, error, refetch, isFetching } = trpc.songs.exploreIndex.useQuery(
+    { seed, limit: CURATED_SECTION_LIMIT, randomize, ...(creatorId ? { creatorId } : {}) },
+    { enabled, staleTime: 2 * 60 * 1000, refetchOnWindowFocus: false }
   );
   return useMemo(() => ({
     featured: ((data?.featured ?? []) as FeedRow[]).filter(isAudioRow),
@@ -62,7 +73,52 @@ function useExploreData(seed: number, randomize: boolean, creatorId?: number) {
     trending: ((data?.trending ?? []) as FeedRow[]).filter(isAudioRow),
     isLoading,
     error,
-  }), [data, error, isLoading]);
+    isRefreshing: isFetching && !isLoading,
+    refetch,
+  }), [data, error, isFetching, isLoading, refetch]);
+}
+
+function useWorksIndex({
+  creatorId,
+  randomize,
+  search,
+  seed,
+  sort,
+  enabled,
+}: {
+  creatorId?: number;
+  randomize: boolean;
+  search: string;
+  seed: number;
+  sort: WorkSort;
+  enabled: boolean;
+}) {
+  const registrySort = sort === "curated" ? undefined : sort;
+  const registryRandomize = sort === "curated" && randomize;
+  const query = trpc.songs.discoverInfinite.useInfiniteQuery(
+    {
+      contentType: "audio",
+      creatorId,
+      limit: WORK_PAGE_SIZE,
+      randomize: registryRandomize,
+      seed: registryRandomize ? seed : undefined,
+      search: search.trim() || undefined,
+      sort: registrySort,
+    },
+    {
+      enabled,
+      staleTime: 2 * 60 * 1000,
+      refetchOnWindowFocus: false,
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
+    }
+  );
+
+  const rows = useMemo(
+    () => (query.data?.pages.flatMap((page) => page.items) ?? []) as FeedRow[],
+    [query.data]
+  );
+
+  return { ...query, rows };
 }
 
 function feedRowToListItem(row: FeedRow): WorkListRowItem {
@@ -191,7 +247,15 @@ function RandomizeSwitch({ value, onChange }: { value: boolean; onChange: (v: bo
 }
 
 // ── Creator Filter (unchanged) ─────────────────────────────────────────────
-type CreatorSummary = { id: number; name: string | null; artistHandle: string | null; profilePhotoUrl: string | null; publishedCount: number };
+type CreatorSummary = {
+  id: number;
+  name: string | null;
+  artistHandle: string | null;
+  profilePhotoUrl: string | null;
+  bio: string | null;
+  stripeAccountStatus: string | null;
+  publishedCount: number;
+};
 function CreatorFilter({ creators, selected, onSelect }: { creators: CreatorSummary[]; selected: number | null; onSelect: (id: number | null) => void }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -274,12 +338,12 @@ function GridCard({ row, queueTracks, queueIndex }: { row: FeedRow; queueTracks?
         </div>
         {row.song.witnessId && (
           <div className="absolute top-2 right-2 bg-[var(--gold)]/20 border border-[var(--gold)]/40 rounded-md px-1.5 py-0.5 flex items-center gap-1">
-            <Shield className="w-2.5 h-2.5 text-[var(--gold)]" /><span className="text-[9px] font-mono text-[var(--gold)]">WID</span>
+            <Shield className="w-2.5 h-2.5 text-[var(--gold)]" /><span className="ln-mono text-[var(--gold)]">WID</span>
           </div>
         )}
         <div className="absolute bottom-2 left-2 bg-black/60 border border-white/10 rounded-md px-1.5 py-0.5 flex items-center gap-1 text-[var(--stone-shadow)]">
           <ContentTypeIcon contentType={row.song.contentType} />
-          <span className="text-[9px] font-mono uppercase">{row.song.contentType}</span>
+          <span className="ln-mono uppercase">{row.song.contentType}</span>
         </div>
       </div>
       <div className="p-3">
@@ -346,8 +410,8 @@ function SupplementalRow({
     <div className="mb-6">
       <div className="flex items-center gap-2 mb-3">
         <span className={`${section.accentColor}`}>{section.icon}</span>
-        <h3 className="font-heading font-semibold text-sm tracking-wide text-[var(--ln-parchment)]">{section.title}</h3>
-        <span className="text-[10px] font-mono text-[var(--stone-shadow)]">{filtered.length}</span>
+        <h3 className="ln-subsection-header">{section.title}</h3>
+        <span className="ln-mono text-[var(--stone-shadow)]">{filtered.length}</span>
         <div className="flex-1" />
         <button onClick={() => scroll("left")} className="w-6 h-6 rounded-full border border-white/10 flex items-center justify-center text-[var(--stone-shadow)] hover:text-[var(--gold)] hover:border-[var(--gold)]/30 transition-all">
           <ChevronLeft className="w-3 h-3" />
@@ -384,46 +448,68 @@ function ViewToggle({ value, onChange }: { value: ViewMode; onChange: (v: ViewMo
   );
 }
 
-// ── All-works list view (flat, searchable) ────────────────────────────────
-function AllWorksListView({ data, search, likedMap }: { data: ReturnType<typeof useExploreData>; search: string; likedMap: Record<number, boolean> }) {
-  const allRows = useMemo(() => {
-    const seen = new Set<number>();
-    const out: FeedRow[] = [];
-    WORK_COLLECTION_KEYS.forEach(key => {
-      (data[key] as FeedRow[]).forEach(r => { if (!seen.has(r.song.id)) { seen.add(r.song.id); out.push(r); } });
-    });
-    return out;
-  }, [data]);
+function WorkSortControl({ value, onChange }: { value: WorkSort; onChange: (value: WorkSort) => void }) {
+  const selected = WORK_SORT_OPTIONS.find((option) => option.value === value) ?? WORK_SORT_OPTIONS[0];
+  return (
+    <label className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-[var(--void-3)] px-2.5 py-1.5 text-xs text-[var(--stone-shadow)] transition-colors focus-within:border-[var(--gold)]/40">
+      <span className="text-[var(--gold)]" aria-hidden="true">{selected.icon}</span>
+      <select
+        aria-label="Sort works"
+        value={value}
+        onChange={(event) => onChange(event.target.value as WorkSort)}
+        className="max-w-28 cursor-pointer appearance-none bg-transparent pr-1 text-xs text-[var(--stone-light)] outline-none sm:max-w-none"
+      >
+        {WORK_SORT_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+      </select>
+    </label>
+  );
+}
 
-  const filtered = useMemo(() => {
-    if (!search) return allRows;
-    const q = search.toLowerCase();
-    return allRows.filter(r =>
-      r.song.title.toLowerCase().includes(q) ||
-      (r.creator?.name ?? "").toLowerCase().includes(q) ||
-      (r.creator?.artistHandle ?? "").toLowerCase().includes(q) ||
-      (r.song.genre ?? "").toLowerCase().includes(q)
-    );
-  }, [allRows, search]);
+// ── All-works list view (progressive Registry index) ───────────────────────
+function AllWorksListView({
+  rows,
+  likedMap,
+  hasNextPage,
+  isFetchingNextPage,
+  onLoadMore,
+}: {
+  rows: FeedRow[];
+  likedMap: Record<number, boolean>;
+  hasNextPage: boolean;
+  isFetchingNextPage: boolean;
+  onLoadMore: () => void;
+}) {
+  const audioTracks = useMemo(() => rows.filter(r => !!r.song.fileUrl).map(feedRowToTrack), [rows]);
 
-  const audioTracks = useMemo(() => filtered.filter(r => !!r.song.fileUrl).map(feedRowToTrack), [filtered]);
-
-  if (filtered.length === 0) {
+  if (rows.length === 0) {
     return (
       <div className="pt-24 text-center">
         <Search className="w-10 h-10 text-[var(--stone-shadow)] mx-auto mb-4" />
-        <p className="text-[var(--stone-light)] font-medium">No works found{search ? ` for "${search}"` : ""}</p>
+        <p className="text-[var(--stone-light)] font-medium">No works found</p>
         <p className="text-sm text-[var(--stone-shadow)] mt-1">Try a different title, creator, or genre.</p>
       </div>
     );
   }
 
   return (
-    <div className="divide-y divide-white/5 rounded-xl overflow-hidden border border-white/5">
-      {filtered.map((row, i) => {
-        const qIdx = audioTracks.findIndex(t => t.id === String(row.song.id));
-        return <WorkListRow key={row.song.id} item={feedRowToListItem(row)} index={i} queueTracks={audioTracks} queueIndex={qIdx >= 0 ? qIdx : undefined} queueContext="EXPLORE" prefetchedLiked={likedMap[row.song.id] ?? false} />;
-      })}
+    <div className="space-y-4">
+      <div className="divide-y divide-white/5 rounded-xl overflow-hidden border border-white/5">
+        {rows.map((row, i) => {
+          const qIdx = audioTracks.findIndex(t => t.id === String(row.song.id));
+          return <WorkListRow key={row.song.id} item={feedRowToListItem(row)} index={i} queueTracks={audioTracks} queueIndex={qIdx >= 0 ? qIdx : undefined} queueContext="EXPLORE" prefetchedLiked={likedMap[row.song.id] ?? false} />;
+        })}
+      </div>
+      {hasNextPage && (
+        <button
+          type="button"
+          onClick={onLoadMore}
+          disabled={isFetchingNextPage}
+          className="mx-auto flex items-center gap-2 rounded-xl border border-[var(--gold)]/30 bg-[var(--gold)]/10 px-4 py-2.5 text-sm text-[var(--gold)] transition-colors hover:bg-[var(--gold)]/20 disabled:cursor-wait disabled:opacity-60"
+        >
+          <ChevronRight className={`h-4 w-4 ${isFetchingNextPage ? "animate-pulse" : ""}`} aria-hidden="true" />
+          {isFetchingNextPage ? "Opening more works…" : "Continue through Registry"}
+        </button>
+      )}
     </div>
   );
 }
@@ -432,10 +518,44 @@ function AllWorksListView({ data, search, likedMap }: { data: ReturnType<typeof 
 function CreatorDirectoryCard({ creator }: { creator: CreatorSummary }) {
   const identity = creator.artistHandle ?? creator.name ?? `Creator ${creator.id}`;
   const routeIdentity = creator.artistHandle || creator.id;
+  const [supportRequested, setSupportRequested] = useState(false);
+  const [supportOpen, setSupportOpen] = useState(false);
+  const supportQuery = trpc.songs.discoverInfinite.useInfiniteQuery(
+    { creatorId: creator.id, limit: 1 },
+    {
+      enabled: supportRequested,
+      staleTime: 2 * 60 * 1000,
+      refetchOnWindowFocus: false,
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
+    }
+  );
+  const supportRow = supportQuery.data?.pages[0]?.items[0] as FeedRow | undefined;
+  const supportTarget: SupportTarget | null = supportRow ? {
+    songId: supportRow.song.id,
+    songTitle: supportRow.song.title,
+    songWid: supportRow.song.witnessId,
+    creatorId: creator.id,
+    creatorName: creator.name ?? identity,
+    creatorHandle: creator.artistHandle,
+    coverArtUrl: supportRow.song.coverArtUrl,
+    contentType: supportRow.song.contentType,
+    stripeAccountStatus: creator.stripeAccountStatus,
+  } : null;
+
+  useEffect(() => {
+    if (supportRequested && supportTarget) setSupportOpen(true);
+  }, [supportRequested, supportTarget]);
+
+  useEffect(() => {
+    if (supportRequested && supportQuery.isError) {
+      toast.error("The creator’s published work could not be opened for support.");
+      setSupportRequested(false);
+    }
+  }, [supportQuery.isError, supportRequested]);
 
   return (
-    <Link href={`/creator/${routeIdentity}`}>
-      <article className="group relative min-w-0 overflow-hidden rounded-2xl border border-white/8 bg-[var(--void-3)] p-4 transition-all hover:-translate-y-0.5 hover:border-[var(--gold)]/35 hover:bg-[var(--void-2)] focus-within:ring-2 focus-within:ring-[var(--gold)]/45">
+    <article className="group relative min-w-0 overflow-hidden rounded-2xl border border-white/8 bg-[var(--void-3)] p-4 transition-all hover:-translate-y-0.5 hover:border-[var(--gold)]/35 hover:bg-[var(--void-2)] focus-within:ring-2 focus-within:ring-[var(--gold)]/45">
+      <Link href={`/creator/${routeIdentity}`} className="block rounded-xl focus:outline-none">
         <div className="flex items-center gap-3 min-w-0">
           {creator.profilePhotoUrl ? (
             <img src={creator.profilePhotoUrl} alt="" className="h-12 w-12 flex-shrink-0 rounded-full border border-[var(--gold)]/35 object-cover" loading="lazy" decoding="async" />
@@ -443,17 +563,43 @@ function CreatorDirectoryCard({ creator }: { creator: CreatorSummary }) {
             <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full border border-[var(--gold)]/20 bg-[var(--void-2)]"><Users className="h-5 w-5 text-[var(--stone-shadow)]" /></div>
           )}
           <div className="min-w-0 flex-1">
-            <h2 className="truncate text-sm font-semibold text-[var(--stone-light)] transition-colors group-hover:text-[var(--gold)]" title={identity}>{identity}</h2>
-            <p className="mt-0.5 truncate text-xs text-[var(--stone-shadow)]">{creator.artistHandle ? `@${creator.artistHandle}` : "Creator domain"}</p>
+            <h2 className="ln-subsection-header truncate transition-colors group-hover:text-[var(--gold)]" title={identity}>{identity}</h2>
+            <p className="ln-mono mt-0.5 truncate text-[var(--stone-shadow)]">{creator.artistHandle ? `@${creator.artistHandle}` : "Creator domain"}</p>
           </div>
           <ChevronRight className="h-4 w-4 flex-shrink-0 text-[var(--stone-shadow)] transition-transform group-hover:translate-x-0.5 group-hover:text-[var(--gold)]" aria-hidden="true" />
         </div>
-        <div className="mt-4 flex items-center justify-between border-t border-white/5 pt-3 text-[11px] text-[var(--stone-shadow)]">
-          <span>{creator.publishedCount} published work{creator.publishedCount === 1 ? "" : "s"}</span>
-          <span className="font-mono uppercase tracking-[0.14em] text-[var(--gold)]">Visit domain</span>
+        {creator.bio ? (
+          <div className="mt-3">
+            <p className="ln-overline text-[var(--gold)]">Creator statement</p>
+            <p className="ln-editorial mt-1 line-clamp-3 text-[var(--stone-shadow)]">{creator.bio}</p>
+          </div>
+        ) : (
+          <p className="ln-caption mt-3 line-clamp-2 text-[var(--stone-shadow)]">Explore this creator’s registered works and provenance record.</p>
+        )}
+      </Link>
+      <div className="mt-4 flex items-center justify-between gap-3 border-t border-white/5 pt-3">
+        <span className="ln-caption text-[var(--stone-shadow)]">{creator.publishedCount} published work{creator.publishedCount === 1 ? "" : "s"}</span>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setSupportRequested(true)}
+            disabled={supportRequested && !supportTarget}
+            className="inline-flex min-h-8 items-center gap-1.5 rounded-lg border border-[var(--gold)]/30 bg-[var(--gold)]/10 px-2.5 py-1 text-xs font-medium text-[var(--gold)] transition-colors hover:bg-[var(--gold)]/20 disabled:cursor-wait disabled:opacity-60"
+            aria-label={`Support ${identity}`}
+          >
+            {supportRequested && !supportTarget ? <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" /> : <Heart className="h-3 w-3" aria-hidden="true" />}
+            Support
+          </button>
+          <Link href={`/creator/${routeIdentity}`} className="ln-mono uppercase text-[var(--gold)] hover:text-[var(--ln-gold-hot)]">Visit domain</Link>
         </div>
-      </article>
-    </Link>
+      </div>
+      {supportOpen && supportTarget && (
+        <SupportCreatorDrawer
+          target={supportTarget}
+          onClose={() => { setSupportOpen(false); setSupportRequested(false); }}
+        />
+      )}
+    </article>
   );
 }
 
@@ -471,11 +617,11 @@ function AllCreatorsView({ creators, search, selectedCreatorId }: { creators: Cr
     <section className="pt-6" aria-labelledby="browse-creators-heading">
       <div className="mb-4 flex flex-wrap items-end justify-between gap-2">
         <div>
-          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--gold)]">Creator directory</p>
-          <h2 id="browse-creators-heading" className="font-heading mt-1 text-xl text-[var(--ln-parchment)]">Browse creators</h2>
+          <p className="ln-overline">Creator directory</p>
+          <h2 id="browse-creators-heading" className="ln-section-header mt-1">Browse creators</h2>
           <p className="mt-1 text-sm text-[var(--stone-shadow)]">Public creator domains with published works.</p>
         </div>
-        <p className="font-mono text-[11px] text-[var(--stone-shadow)]">{filtered.length} creator{filtered.length === 1 ? "" : "s"}</p>
+        <p className="ln-mono text-[var(--stone-shadow)]">{filtered.length} creator{filtered.length === 1 ? "" : "s"}</p>
       </div>
       {filtered.length > 0 ? (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
@@ -510,22 +656,43 @@ export default function ExplorePage() {
   }, [routeSearch]);
   const [randomize, setRandomize] = useState(true);
   const [selectedCreatorId, setSelectedCreatorId] = useState<number | null>(null);
+  const [workSort, setWorkSort] = useState<WorkSort>("curated");
 
-  const { data: creatorsRaw } = trpc.profile.allCreators.useQuery(undefined, { staleTime: 5 * 60 * 1000, refetchOnWindowFocus: false });
-  const creators: CreatorSummary[] = (creatorsRaw ?? []).map((c: any) => ({ id: c.id, name: c.name, artistHandle: c.artistHandle, profilePhotoUrl: c.profilePhotoUrl, publishedCount: c.publishedCount ?? 0 }));
+  const creatorsQuery = trpc.profile.allCreators.useQuery(undefined, { staleTime: 5 * 60 * 1000, refetchOnWindowFocus: false });
+  const creatorsRaw = creatorsQuery.data;
+  const creators: CreatorSummary[] = (creatorsRaw ?? []).map((c: any) => ({
+    id: c.id,
+    name: c.name,
+    artistHandle: c.artistHandle,
+    profilePhotoUrl: c.profilePhotoUrl,
+    bio: c.bio ?? null,
+    stripeAccountStatus: c.stripeAccountStatus ?? null,
+    publishedCount: c.publishedCount ?? 0,
+  }));
 
-  const data = useExploreData(seed, randomize, selectedCreatorId ?? undefined);
+  const isListView = viewMode === "list";
+  const data = useExploreData(seed, randomize, isListView, selectedCreatorId ?? undefined);
+  const worksIndex = useWorksIndex({
+    creatorId: selectedCreatorId ?? undefined,
+    randomize,
+    search,
+    seed,
+    sort: workSort,
+    enabled: isListView,
+  });
 
   // ── Bulk like status fetch ────────────────────────────────────────
   const allSongIds = useMemo(() => {
-    const ids = new Set<number>();
-    WORK_COLLECTION_KEYS.forEach(key => { (data[key] as FeedRow[]).forEach(r => ids.add(r.song.id)); });
-    SUPPLEMENTAL_SECTIONS.forEach(s => { (data[s.key] as FeedRow[]).forEach(r => ids.add(r.song.id)); });
-    return Array.from(ids).slice(0, 500);
-  }, [data]);
+    if (!isListView) return [];
+    return worksIndex.rows.map((row) => row.song.id).slice(0, 500);
+  }, [isListView, worksIndex.rows]);
   const getBulkLikes = trpc.songs.getBulkLikeStatuses.useMutation();
   const [likedMap, setLikedMap] = useState<Record<number, boolean>>({});
   useEffect(() => {
+    if (!isListView) {
+      setLikedMap({});
+      return;
+    }
     if (allSongIds.length === 0) return;
     getBulkLikes.mutate({ songIds: allSongIds }, {
       onSuccess: (result) => {
@@ -535,9 +702,20 @@ export default function ExplorePage() {
       },
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allSongIds.join(",")]);
+  }, [allSongIds.join(","), isListView]);
 
-  const handleRefresh = useCallback(() => { window.location.reload(); }, []);
+  const isLoading = isListView ? data.isLoading || worksIndex.isLoading : creatorsQuery.isLoading;
+  const isRefreshing = isListView
+    ? data.isRefreshing || worksIndex.isRefetching
+    : creatorsQuery.isFetching && !creatorsQuery.isLoading;
+  const loadError = isListView ? data.error ?? worksIndex.error : creatorsQuery.error;
+  const handleRefresh = useCallback(() => {
+    if (isListView) {
+      void data.refetch();
+      void worksIndex.refetch();
+    }
+    else void creatorsQuery.refetch();
+  }, [creatorsQuery, data, isListView, worksIndex]);
   const handleRandomizeToggle = useCallback((v: boolean) => { setRandomize(v); }, []);
   const handleViewChange = useCallback((nextView: ViewMode) => {
     setViewMode(nextView);
@@ -563,22 +741,23 @@ export default function ExplorePage() {
           <div className="flex items-center justify-between pt-4 pb-2 gap-3 flex-wrap">
             <div className="flex-shrink-0">
               <p
-                className="font-heading text-[10px] uppercase tracking-[0.28em] mb-1"
+                className="ln-overline mb-1"
                 style={{ color: "var(--ln-gold)" }}
               >
                 Living Nexus · Square
               </p>
-              <h1 className="font-heading font-bold leading-none tracking-[0.08em]" style={{ fontSize: "clamp(2.25rem,1.8rem + 2vw,3.25rem)", color: "var(--ln-parchment)" }}>Explore</h1>
-              <p className="font-editorial mt-1 hidden italic sm:block" style={{ fontSize: "0.95rem", color: "var(--ln-smoke)", letterSpacing: "0.02em" }}>Songs & artists — music provenance discovery</p>
+              <h1 className="ln-page-title">Explore</h1>
+              <p className="ln-editorial mt-1 hidden sm:block">Songs & artists — music provenance discovery</p>
             </div>
             <div className="flex items-center gap-2 sm:gap-3 flex-wrap justify-end">
               <div className="flex items-center gap-1.5">
-                <span className="text-[10px] font-mono text-[var(--stone-shadow)] hidden sm:inline">{randomize ? "Random" : "Newest"}</span>
+                <span className="ln-mono hidden text-[var(--stone-shadow)] sm:inline">{randomize ? "Random" : "Newest"}</span>
                 <RandomizeSwitch value={randomize} onChange={handleRandomizeToggle} />
               </div>
+              {viewMode === "list" && <WorkSortControl value={workSort} onChange={setWorkSort} />}
               <ViewToggle value={viewMode} onChange={handleViewChange} />
-              <button onClick={handleRefresh} title="Refresh" className="flex items-center gap-1.5 px-2.5 py-2 rounded-xl border border-white/10 text-[var(--stone-shadow)] hover:text-[var(--gold)] hover:border-[var(--gold)]/30 transition-all text-xs flex-shrink-0">
-                <RefreshCw className="w-3.5 h-3.5" /><span className="hidden sm:inline">Refresh</span>
+              <button onClick={handleRefresh} disabled={isRefreshing} title="Refresh discovery" className="flex items-center gap-1.5 px-2.5 py-2 rounded-xl border border-white/10 text-[var(--stone-shadow)] hover:text-[var(--gold)] hover:border-[var(--gold)]/30 transition-all text-xs flex-shrink-0 disabled:cursor-wait disabled:opacity-60">
+                <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? "animate-spin" : ""}`} /><span className="hidden sm:inline">{isRefreshing ? "Refreshing" : "Refresh"}</span>
               </button>
             </div>
           </div>
@@ -603,7 +782,7 @@ export default function ExplorePage() {
       {/* ── Main content ──────────────────────────────────────────── */}
       <div className="mx-auto max-w-[1360px] px-4 pb-32 sm:px-6">
         {/* Loading state */}
-        {data.isLoading && (
+        {isLoading && (
           <div className="pt-8 space-y-6">
             {/* Supplemental row skeletons */}
             {[0, 1].map(i => (
@@ -622,15 +801,20 @@ export default function ExplorePage() {
         )}
 
         {/* Error state */}
-        {data.error && !data.isLoading && (
-          <div className="pt-16 text-center">
-            <p className="text-[var(--stone-shadow)] text-sm">Could not load the registry. Please try again.</p>
-            <button onClick={handleRefresh} className="mt-4 text-[var(--gold)] text-sm hover:underline">Refresh</button>
+        {loadError && !isLoading && (
+          <div className="mx-auto mt-12 max-w-lg rounded-2xl border border-[var(--gold)]/20 bg-[var(--void-3)] p-6 text-center shadow-xl">
+            <Shield className="mx-auto h-7 w-7 text-[var(--gold)]" aria-hidden="true" />
+            <h2 className="mt-3 font-heading text-lg text-[var(--ln-parchment)]">The registry could not be reached</h2>
+            <p className="mt-2 text-sm leading-relaxed text-[var(--stone-shadow)]">Your discovery controls are intact. Retry the public record request without leaving Explore.</p>
+            <button onClick={handleRefresh} disabled={isRefreshing} className="mt-5 inline-flex items-center gap-2 rounded-xl border border-[var(--gold)]/35 bg-[var(--gold)]/10 px-4 py-2 text-sm text-[var(--gold)] transition-colors hover:bg-[var(--gold)]/20 disabled:cursor-wait disabled:opacity-60">
+              <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? "animate-spin" : ""}`} />
+              {isRefreshing ? "Retrying…" : "Retry registry request"}
+            </button>
           </div>
         )}
 
         {/* Content */}
-        {!data.isLoading && !data.error && (
+        {!isLoading && !loadError && (
           <>
             {/* ── Supplemental horizontal strips (always shown) ── */}
             {!search && !selectedCreatorId && viewMode === "list" && (
@@ -644,7 +828,13 @@ export default function ExplorePage() {
             {/* ── List view (flat, all types) ── */}
             {viewMode === "list" && (
               <div className="pt-6">
-                <AllWorksListView data={data} search={search} likedMap={likedMap} />
+                <AllWorksListView
+                  rows={worksIndex.rows}
+                  likedMap={likedMap}
+                  hasNextPage={Boolean(worksIndex.hasNextPage)}
+                  isFetchingNextPage={worksIndex.isFetchingNextPage}
+                  onLoadMore={() => void worksIndex.fetchNextPage()}
+                />
               </div>
             )}
 

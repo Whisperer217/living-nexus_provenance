@@ -472,7 +472,7 @@ export async function reorderSongs(userId: number, orderedIds: number[]) {
   );
 }
 
-export async function getPublicSongs(opts?: { genre?: string; search?: string; limit?: number; offset?: number; randomize?: boolean; seed?: number; contentType?: "audio" | "lyrics" | "manuscript" | "comic" | "written" | "game" }) {
+export async function getPublicSongs(opts?: { genre?: string; search?: string; limit?: number; offset?: number; randomize?: boolean; seed?: number; contentType?: "audio" | "lyrics" | "manuscript" | "comic" | "written" | "game" | "gcode" | "3dmodel"; creatorId?: number; sort?: "newest" | "title" | "creator" }) {
   const db = await getDb();
   if (!db) return [];
   const limit = opts?.limit ?? 50;
@@ -489,15 +489,24 @@ export async function getPublicSongs(opts?: { genre?: string; search?: string; l
     conditions.push(or(
       like(songs.title, `%${opts.search}%`),
       like(songs.genre, `%${opts.search}%`),
+      like(users.name, `%${opts.search}%`),
+      like(users.artistHandle, `%${opts.search}%`),
     ) as unknown as ReturnType<typeof eq>);
+  }
+  if (opts?.creatorId) {
+    conditions.push(eq(songs.userId, opts.creatorId) as ReturnType<typeof eq>);
   }
   // When a specific creator is filtered (via creatorId option), respect their displayOrder.
   // For global/mixed feeds, sort by creator-inputted releaseDate first, fall back to createdAt.
   const orderExpr = opts?.randomize
     ? (opts.seed !== undefined ? sql`RAND(${opts.seed})` : sql`RAND()`)
-    : (opts as any)?.creatorId
-      ? sql`${songs.displayOrder} ASC, ${songs.createdAt} ASC`
-      : sql`COALESCE(${songs.releaseDate}, DATE(${songs.createdAt})) DESC, ${songs.createdAt} DESC`;
+    : opts?.sort === "title"
+      ? sql`LOWER(${songs.title}) ASC, ${songs.id} ASC`
+      : opts?.sort === "creator"
+        ? sql`COALESCE(${users.artistHandle}, ${users.name}, '') ASC, LOWER(${songs.title}) ASC, ${songs.id} ASC`
+        : opts?.creatorId
+          ? sql`${songs.displayOrder} ASC, ${songs.createdAt} ASC`
+          : sql`COALESCE(${songs.releaseDate}, DATE(${songs.createdAt})) DESC, ${songs.createdAt} DESC`;
   return db.select({
     song: songs,
     creator: { id: users.id, name: users.name, artistHandle: users.artistHandle, profilePhotoUrl: users.profilePhotoUrl, aiDisclosure: users.aiDisclosure, primaryGenre: users.primaryGenre, stripeAccountStatus: users.stripeAccountStatus, role: users.role },

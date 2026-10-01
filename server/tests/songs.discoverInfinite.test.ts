@@ -112,6 +112,31 @@ describe("songs.discoverInfinite", () => {
     );
   });
 
+  it("forwards the stable Registry constraints used by paginated Explore", async () => {
+    mockGetPublicSongs.mockResolvedValue([]);
+
+    const caller = appRouter.createCaller(createPublicContext());
+    await caller.songs.discoverInfinite({
+      limit: 36,
+      cursor: 72,
+      creatorId: 42,
+      randomize: true,
+      seed: 918273,
+      sort: "creator",
+    });
+
+    expect(mockGetPublicSongs).toHaveBeenCalledWith(
+      expect.objectContaining({
+        creatorId: 42,
+        randomize: true,
+        seed: 918273,
+        sort: "creator",
+        offset: 72,
+        limit: 37,
+      })
+    );
+  });
+
   it("rejects limit above 60", async () => {
     const caller = appRouter.createCaller(createPublicContext());
     await expect(

@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-09-14T16:05:00.000Z",
-  "totalLessons": 33,
+  "lastUpdated": "2026-10-01T16:13:36.523Z",
+  "totalLessons": 36,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -762,6 +762,85 @@
         "registry-boundary",
         "regression-test"
       ]
+    },
+    {
+      "date": "2026-10-01",
+      "category": "creator_experience",
+      "problem": "Public discovery split basic Explore matching from canonical /search and rendered loading or failure states as thin text, making it difficult to recover from a failed request or express a multi-part discovery request.",
+      "solution": "Extended the existing Explore and /search surfaces rather than introducing a parallel index. Explore now has explicit sort controls, in-place refresh, skeleton loading, and retryable Registry failure UI. /search adds an opt-in Keeper-guided interpreter that receives only the visitor phrase, returns visible bounded filters, and delegates all results to the existing public Registry search. Model failure falls back to deterministic parsing; no model generates Registry records, WIDs, or provenance claims.",
+      "files": [
+        "client/src/pages/ExplorePage.tsx",
+        "client/src/pages/SearchResultsPage.tsx",
+        "server/services/discoveryQuery.ts",
+        "server/routers/search.ts",
+        "server/tests/discoveryQuery.test.ts",
+        "docs/lnls/architecture/DISCOVERY-QUERY-INTERPRETATION-ADR.md"
+      ],
+      "score": 0,
+      "tags": [
+        "discovery",
+        "explore",
+        "search",
+        "natural-language",
+        "registry-boundary",
+        "retry",
+        "loading-state",
+        "authority-boundary"
+      ],
+      "id": "LESSON-034"
+    },
+    {
+      "date": "2026-10-01",
+      "category": "architecture",
+      "problem": "Work registration and placement editing persisted correctly but did not consistently invalidate existing owner Work and album projections. Separately, creator-only Explore still fetched the full multi-branch Work discovery payload and then requested like state it could not display.",
+      "solution": "Centralized existing query invalidation at the successful registration and edit boundaries for Work lists, album lists, track lists, collection detail, available-track selectors, and Explore. Edit Chapel and Creative Drawer hydrate only clean forms from incoming Work data, preserve local unsaved edits, and reset when the Work identity changes. Explore now gates the Work feed and bulk-like request behind list view while creator browsing queries only the public creator projection.",
+      "files": [
+        "client/src/pages/manifestation-studio/environments/MusicEnvironment.tsx",
+        "client/src/components/EditChapel.tsx",
+        "client/src/components/CreativeDrawer.tsx",
+        "client/src/pages/ExplorePage.tsx",
+        "server/tests/albumAssignment.contract.test.ts",
+        "server/tests/exploreSurfaceContract.test.ts"
+      ],
+      "score": 0,
+      "tags": [
+        "manifest",
+        "work-editing",
+        "album-sync",
+        "query-invalidation",
+        "dirty-form",
+        "explore",
+        "creator-directory",
+        "performance"
+      ],
+      "id": "LESSON-035"
+    },
+    {
+      "date": "2026-10-01",
+      "category": "performance",
+      "problem": "Explore requested up to 700 full Work records and repeated them in curated rows, creating a 13.6 MB response and 67,415-node document; playlist search queried the Registry on each keystroke; CreatorDomainShell eagerly read owner works and analytics.",
+      "solution": "Moved the complete Works index to bounded cursor pages with explicit continuation, capped curated sections at 16, gated playlist Registry search behind a 300 ms current-query debounce, refreshed playlist list state after mutation, and deferred Domain work/analytics records until their sections open.",
+      "files": [
+        "client/src/pages/ExplorePage.tsx",
+        "server/routers/songs.ts",
+        "server/utils/db.ts",
+        "client/src/pages/PlaylistsPage.tsx",
+        "client/src/pages/CreatorDomainShell.tsx",
+        "server/tests/discoveryPerformance.contract.test.ts",
+        "server/tests/playlistSearch.contract.test.ts",
+        "server/tests/creatorDomainShellPerformance.contract.test.ts"
+      ],
+      "score": 0,
+      "tags": [
+        "performance",
+        "cursor-pagination",
+        "registry-discovery",
+        "debounce",
+        "query-gating",
+        "playlist",
+        "creator-domain"
+      ],
+      "id": "LESSON-036"
     }
   ]
 }
