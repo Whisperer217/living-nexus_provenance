@@ -67,3 +67,26 @@ The Explore **Registry order** control now has a gold-emphasized active state, l
 - No migration was applied during this audit.
 - No production content rows, credentials, access settings, or data were changed.
 - No staging or public deployment was triggered.
+
+## Reconciliation update — 2026-10-01
+
+The migration-history blocker identified in this audit was resolved without replaying DDL against the live database:
+
+- A canonical active `0134_reconcile_live_schema.sql` was generated from trusted snapshot `0133` to the current schema.
+- `drizzle/meta/0134_snapshot.json` and the matching journal entry now continue the active Drizzle lineage.
+- The legacy unjournaled SQL files were preserved under `drizzle/legacy/untracked-pre-0134/` for inspection and excluded from active execution.
+- The live database was verified against the generated baseline: **30 tables, 316 columns, 77 indexes; 0 missing**.
+- The exact canonical migration hash was recorded once in `__drizzle_migrations` only after that verification, preventing duplicate DDL on the existing schema.
+
+This resolves **migration reproducibility** for the current schema baseline. It does not represent a content migration, a creator-data mutation, or a public deployment.
+
+## Registry order interaction update — 2026-10-01
+
+The native **Registry order** control on Explore was reviewed and adjusted for the reported contrast and mobile-use issue:
+
+- The selected Registry state keeps a dark native menu with parchment option text and coal option backgrounds.
+- The gold emphasis now has a restrained hover transition across the icon, border, background, and selected text.
+- At the mobile breakpoint the control has a minimum 44px height, a 140px minimum field width, and `touch-manipulation`; the existing wrapping control row preserves spacing rather than compressing adjacent actions.
+- The focused Explore contract passes with these requirements asserted.
+
+An attempted standalone Chromium screenshot capture was terminated because Chromium’s background notification process prevented completion before an image was written. This did not affect the running preview, TypeScript check, focused tests, or production build.

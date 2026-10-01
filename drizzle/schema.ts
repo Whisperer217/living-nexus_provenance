@@ -2611,12 +2611,12 @@ export const registryApiClientScopes = mysqlTable("registryApiClientScopes", {
 
 export const registryApiCredentials = mysqlTable("registryApiCredentials", {
   id: int("id").autoincrement().primaryKey(),
-  keyId: varchar("keyId", { length: 64 }).notNull().unique(),
+  keyId: varchar("keyId", { length: 64 }).notNull(),
   clientId: int("clientId").notNull(),
   name: varchar("name", { length: 128 }).notNull(),
   credentialVersion: int("credentialVersion").notNull().default(2),
   keyPrefix: varchar("keyPrefix", { length: 32 }).notNull(),
-  secretHash: varchar("secretHash", { length: 128 }).notNull().unique(),
+  secretHash: varchar("secretHash", { length: 128 }).notNull(),
   status: mysqlEnum("status", ["PENDING_APPROVAL", "ACTIVE", "ROTATING", "EXPIRED", "REVOKED", "SUSPENDED"]).notNull().default("PENDING_APPROVAL"),
   dailyLimit: int("dailyLimit").notNull(),
   usageToday: int("usageToday").notNull().default(0),
@@ -2630,6 +2630,8 @@ export const registryApiCredentials = mysqlTable("registryApiCredentials", {
   createdByUserId: int("createdByUserId").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 }, (t) => ({
+  keyIdUnique: uniqueIndex("registryApiCredentials_keyId_uq").on(t.keyId),
+  secretHashUnique: uniqueIndex("registryApiCredentials_secretHash_uq").on(t.secretHash),
   clientIdx: index("registryApiCredentials_clientId_idx").on(t.clientId),
   statusIdx: index("registryApiCredentials_status_idx").on(t.status),
   expiresIdx: index("registryApiCredentials_expiresAt_idx").on(t.expiresAt),
@@ -3044,8 +3046,8 @@ export const creatorPlatforms = mysqlTable("creatorPlatforms", {
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 }, (t) => ({
-  userIdx: index("creatorPlatforms_userId_idx").on(t.userId),
-  typeIdx: index("creatorPlatforms_type_idx").on(t.platformType),
+  userIdx: index("idx_creatorPlatforms_userId").on(t.userId),
+  typeIdx: index("idx_creatorPlatforms_type").on(t.platformType),
 }));
 export type CreatorPlatform = typeof creatorPlatforms.$inferSelect;
 export type InsertCreatorPlatform = typeof creatorPlatforms.$inferInsert;

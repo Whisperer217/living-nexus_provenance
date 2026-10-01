@@ -1,0 +1,26 @@
+{
+  "migrationPath": "drizzle/0134_reconcile_live_schema.sql",
+  "migrationHash": "46b900cf572e2651065e1531d637ae6edd0a435ebc69706f19f66c89ee255b99",
+  "journalEntry": {
+    "idx": 134,
+    "version": "5",
+    "when": 1790875719156,
+    "tag": "0134_reconcile_live_schema",
+    "breakpoints": true
+  },
+  "expected": {
+    "tables": 30,
+    "columns": 316,
+    "indexes": 77
+  },
+  "actual": {
+    "latestLedgerCreatedAt": 1790875719156,
+    "ledgerRows": 126,
+    "baselineRows": 1
+  },
+  "missing": {
+    "tables": [],
+    "columns": [],
+    "indexes": []
+  }
+}

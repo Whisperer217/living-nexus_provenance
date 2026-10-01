@@ -453,18 +453,20 @@ function WorkSortControl({ value, onChange }: { value: WorkSort; onChange: (valu
   const isRegistryOrder = value === "curated";
   return (
     <label
-      className={`flex items-center gap-1.5 rounded-xl border px-2.5 py-1.5 text-xs transition-colors focus-within:border-[var(--ln-gold-hot)] focus-within:ring-2 focus-within:ring-[var(--ln-gold)]/25 ${
+      className={`group flex min-h-11 items-center gap-2 rounded-xl border px-3 py-1.5 text-xs transition-[background-color,border-color,color,box-shadow] duration-200 hover:border-[var(--ln-gold-hot)]/75 hover:bg-[var(--ln-gold)]/20 focus-within:border-[var(--ln-gold-hot)] focus-within:ring-2 focus-within:ring-[var(--ln-gold)]/25 sm:min-h-0 sm:gap-1.5 sm:px-2.5 ${
         isRegistryOrder
           ? "border-[var(--ln-gold)]/55 bg-[var(--ln-gold)]/15 text-[var(--ln-parchment)]"
           : "border-white/10 bg-[var(--void-3)] text-[var(--ln-bone)]"
       }`}
     >
-      <span className={isRegistryOrder ? "text-[var(--ln-gold-hot)]" : "text-[var(--ln-gold)]"} aria-hidden="true">{selected.icon}</span>
+      <span className={`transition-colors duration-200 ${isRegistryOrder ? "text-[var(--ln-gold-hot)] group-hover:text-[var(--ln-gold-flame)]" : "text-[var(--ln-gold)] group-hover:text-[var(--ln-gold-hot)]"}`} aria-hidden="true">{selected.icon}</span>
       <select
         aria-label="Sort works"
         value={value}
         onChange={(event) => onChange(event.target.value as WorkSort)}
-        className="max-w-28 cursor-pointer appearance-none bg-transparent pr-1 text-xs font-medium text-[var(--ln-parchment)] outline-none sm:max-w-none"
+        className={`min-h-11 min-w-[8.75rem] cursor-pointer touch-manipulation appearance-none bg-transparent pr-1 text-xs font-medium outline-none transition-colors duration-200 group-hover:text-[var(--ln-gold-flame)] sm:min-h-0 sm:min-w-0 sm:max-w-none ${
+          isRegistryOrder ? "text-[var(--ln-parchment)]" : "text-[var(--ln-bone)]"
+        }`}
         style={{ colorScheme: "dark" }}
       >
         {WORK_SORT_OPTIONS.map((option) => (

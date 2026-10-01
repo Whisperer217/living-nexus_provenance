@@ -49,5 +49,9 @@ describe("Explore public-surface contract", () => {
     expect(exploreSource).toContain('colorScheme: "dark"');
     expect(exploreSource).toContain('background: "var(--ln-coal)"');
     expect(exploreSource).toContain('color: "var(--ln-parchment)"');
+    expect(exploreSource).toContain("group-hover:text-[var(--ln-gold-flame)]");
+    expect(exploreSource).toContain("min-h-11");
+    expect(exploreSource).toContain("min-w-[8.75rem]");
+    expect(exploreSource).toContain("touch-manipulation");
   });
 });
