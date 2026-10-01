@@ -133,6 +133,7 @@ interface MusicEnvironmentProps {
 export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEnvironmentProps) {
   const [, navigate] = useLocation();
   const { user } = useAuth();
+  const utils = trpc.useUtils();
   const [step, setStep] = useState<StudioStep>("upload");
 
   const [audioFile, setAudioFile] = useState<File | null>(null);
@@ -390,6 +391,8 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
   const uploadMutation = trpc.songs.upload.useMutation({
     onSuccess: (data: any) => {
       setUploadPhase("done");
+      void utils.collectionStudio.listMine.invalidate();
+      void utils.songs.mySongs.invalidate();
       if (data?.witnessId && title) {
         addWIDSnapshot({
           wid: data.witnessId,

@@ -20,6 +20,20 @@ describe("creator album assignment contracts", () => {
     expect(register).toContain("does not change this Work’s WID, signature, dates, or publication state");
   });
 
+  it("refreshes album options after a save and resynchronizes Edit Chapel with the canonical Work", () => {
+    const register = read("client/src/pages/manifestation-studio/environments/MusicEnvironment.tsx");
+    const drawer = read("client/src/components/CreativeDrawer.tsx");
+    const chapel = read("client/src/components/EditChapel.tsx");
+
+    expect(register).toContain("void utils.collectionStudio.listMine.invalidate();");
+    expect(register).toContain("void utils.songs.mySongs.invalidate();");
+    expect(drawer).toContain("utils.collectionStudio.listMine.invalidate();");
+    expect(chapel).toContain("setCollectionId(song.collectionId ?? null);");
+    expect(chapel).toContain("const [formDirty, setFormDirty] = useState(false);");
+    expect(chapel).toContain("if (isDifferentWork || !formDirty)");
+    expect(chapel).toContain("[song, formDirty]");
+  });
+
   it("validates selected albums against the authenticated creator and reuses existing link/unlink helpers", () => {
     const router = read("server/routers/songs.ts");
     const upload = router.slice(router.indexOf("upload: protectedProcedure"), router.indexOf("updateMetadata: protectedProcedure"));
@@ -32,6 +46,45 @@ describe("creator album assignment contracts", () => {
     expect(metadata).toContain("collection.creatorId !== ctx.user.id");
     expect(metadata).toContain("removeFromCollectionById(existing.collectionId, songId, ctx.user.id)");
     expect(metadata).toContain("addToCollectionById(collectionId, songId, ctx.user.id)");
+  });
+
+  it("keeps album counts truthful and allows Studio to open empty owner albums", () => {
+    const songsDb = read("server/db/songs.ts");
+    const studio = read("server/routers/collectionStudio.ts");
+    expect(songsDb).toContain("The Work could not be attached to this album.");
+    expect(songsDb).toContain("affectedRows");
+    expect(studio).toContain("getCollectionById");
+    expect(studio).toContain("col.creatorId !== callerId");
+    expect(studio).not.toContain("getCollectionsByCreator(callerId)");
+  });
+
+  it("keeps creator dates and Work discussion visible after publication", () => {
+    const register = read("client/src/pages/manifestation-studio/environments/MusicEnvironment.tsx");
+    const chapel = read("client/src/components/EditChapel.tsx");
+    const work = read("client/src/pages/SongDetailPage.tsx");
+    const prepared = read("shared/preparedWorkRegistration.ts");
+    expect(register).toContain("creatorReleaseDate");
+    expect(prepared).toContain("creatorReleaseDate");
+    expect(chapel).toContain("song.creatorReleaseDate ? song.creatorReleaseDate.slice(0, 10) : \"\"");
+    expect(work).toContain("comments.length");
+    expect(work).toContain('color: "var(--ln-iron)"');
+  });
+
+  it("requires explicit creator context and rights confirmation, then records authorization and revocation events", () => {
+    const router = read("server/routers/songs.ts");
+    const edit = read("client/src/components/EditChapel.tsx");
+    const schema = read("drizzle/schema.ts");
+    expect(router).toContain("EXTERNAL_DISPLAY_AUTHORIZED");
+    expect(router).toContain("EXTERNAL_DISPLAY_REVOKED");
+    expect(router).toContain("at least 20 characters");
+    expect(router).toContain("rights necessary to authorize this Work");
+    expect(router).toContain('platformScope: "approved_display_surfaces"');
+    expect(router).toContain("mediaDistribution: false");
+    expect(edit).toContain("Authorize external display for this Work");
+    expect(edit).toContain("I confirm I have the rights necessary");
+    expect(edit).toContain("Media distribution and monetization require separate authorization");
+    expect(schema).toContain("externalDisplayAuthorizedAt");
+    expect(schema).toContain("externalDisplayRightsConfirmed");
   });
 
   it("keeps collection placement out of the WID serializer and out of public provenance writing", () => {

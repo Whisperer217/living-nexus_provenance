@@ -192,6 +192,13 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
     song.creatorReleaseDate ? song.creatorReleaseDate.slice(0, 10) : ""
   );
 
+  // The detail query can refresh after an album assignment succeeds. Keep the
+  // select aligned with the canonical Work value without overwriting an
+  // in-progress user choice when the incoming value has not changed.
+  useEffect(() => {
+    setCollectionId(song.collectionId ?? null);
+  }, [song.collectionId]);
+
   /* ── Download Settings ── */
   const [downloadPermission, setDownloadPermission] = useState<"none" | "free" | "tipped">(
     (song.downloadPermission as "none" | "free" | "tipped") ?? "none"
@@ -269,6 +276,7 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
   function refreshWorkData() {
     utils.songs.mySongs.invalidate();
     utils.songs.getById.invalidate({ id: song.id });
+    utils.collectionStudio.listMine.invalidate();
   }
 
   const updateLyrics = trpc.songs.updateLyrics.useMutation({

@@ -498,6 +498,14 @@ export const songs = mysqlTable("songs", {
   // system timestamp and never changes the registration WID or publication log.
   releaseDate: varchar("releaseDate", { length: 32 }),
   creatorReleaseDate: varchar("creatorReleaseDate", { length: 32 }),
+  // Creator-controlled authorization for approved external display surfaces.
+  // This is not media distribution permission and does not imply publication.
+  externalDisplayEnabled: boolean("externalDisplayEnabled").default(false).notNull(),
+  externalDisplayAuthorizedAt: timestamp("externalDisplayAuthorizedAt"),
+  externalDisplayRevokedAt: timestamp("externalDisplayRevokedAt"),
+  externalDisplayAuthVersion: varchar("externalDisplayAuthVersion", { length: 32 }),
+  externalDisplayContext: text("externalDisplayContext"),
+  externalDisplayRightsConfirmed: boolean("externalDisplayRightsConfirmed").default(false).notNull(),
   isrc: varchar("isrc", { length: 32 }),
   aiConsent: mysqlEnum("aiConsent", ["prohibited", "permitted_attribution", "permitted"]).default("prohibited").notNull(),
 

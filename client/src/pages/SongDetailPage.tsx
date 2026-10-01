@@ -1005,6 +1005,19 @@ export default function SongDetailPage() {
                   The manifestation itself is the primary evidence of this work's existence and authorship. Supplementary proof artifacts can be attached by the creator.
                 </p>
 
+                {(song as any).externalDisplayEnabled && (
+                  <div className="rounded-xl px-4 py-3" style={{ background: "rgba(196,154,40,0.06)", border: "1px solid rgba(196,154,40,0.2)" }}>
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-[10px] tracking-[0.18em] uppercase" style={{ color: "var(--ln-gold)", fontFamily: "'Cinzel', serif" }}>External Display</span>
+                      <span className="text-[10px]" style={{ color: "rgba(74,222,128,0.85)" }}>Creator authorized · Not published</span>
+                    </div>
+                    {(song as any).externalDisplayContext && (
+                      <p className="mt-2 text-xs leading-relaxed" style={{ color: "var(--ln-smoke)" }}>{(song as any).externalDisplayContext}</p>
+                    )}
+                    <p className="mt-2 text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>Attribution and this Work’s provenance remain attached. Media distribution is not authorized by this setting.</p>
+                  </div>
+                )}
+
                 {/* ── Supplementary Artifacts — inline list ── */}
                 {evidenceItems.length > 0 && (
                   <div className="space-y-2 pt-1">
@@ -1322,6 +1335,9 @@ export default function SongDetailPage() {
               <h3 className="text-sm font-semibold mb-3 flex items-center gap-2 flex-wrap" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>
                 <MessageSquare className="w-4 h-4" />
                 Activity
+                {comments && comments.length > 0 && (
+                  <span className="text-xs font-normal" style={{ color: "var(--ln-smoke)" }}>{comments.length} comment{comments.length === 1 ? "" : "s"}</span>
+                )}
                 {eventThread && eventThread.length > 0 && (
                   <span className="text-xs font-normal" style={{ color: "var(--ln-smoke)" }}>{eventThread.length}</span>
                 )}
@@ -1386,7 +1402,7 @@ export default function SongDetailPage() {
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-0.5">
                               <span className="text-xs font-medium" style={{ color: "var(--ln-parchment)" }}>{c.authorName || "Anonymous"}</span>
-                              <span className="text-[10px] ml-auto" style={{ color: "var(--ln-coal)" }}>{timeStr}</span>
+                              <span className="text-[10px] ml-auto" style={{ color: "var(--ln-iron)" }}>{timeStr}</span>
                             </div>
                             <p className="text-sm" style={{ color: "var(--ln-smoke)" }}>{c.content}</p>
                             <button
@@ -1447,7 +1463,7 @@ export default function SongDetailPage() {
                                 <div className="flex-1 min-w-0">
                                   <div className="flex items-center gap-2 mb-0.5">
                                     <span className="text-[11px] font-medium" style={{ color: "var(--ln-smoke)" }}>{r.authorName || "Anonymous"}</span>
-                                    <span className="text-[9px] ml-auto" style={{ color: "var(--ln-coal)" }}>{new Date(r.createdAt).toLocaleDateString()}</span>
+                                    <span className="text-[9px] ml-auto" style={{ color: "var(--ln-iron)" }}>{new Date(r.createdAt).toLocaleDateString()}</span>
                                   </div>
                                   <p className="text-xs" style={{ color: "var(--ln-smoke)" }}>{r.content}</p>
                                 </div>

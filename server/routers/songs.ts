@@ -1155,6 +1155,9 @@ export const songsRouter = router({
       // timestamps deliberately have no editable input contract here.
       releaseDate: z.string().nullable().optional(),
       creatorReleaseDate: z.string().nullable().optional(),
+      externalDisplayEnabled: z.boolean().optional(),
+      externalDisplayContext: z.string().max(1000).nullable().optional(),
+      externalDisplayRightsConfirmed: z.boolean().optional(),
       // Download Settings
       downloadPermission: z.enum(["none", "free", "tipped"]).optional(),
       downloadTipThresholdCents: z.number().int().min(0).max(100000).optional(),
@@ -1162,7 +1165,7 @@ export const songsRouter = router({
       parentGuideWid: z.string().max(64).nullable().optional(),
     }).strict()).mutation(async ({ ctx, input }) => {
       const { songId, creditsJson, collectionId, ...fields } = input;
-      const existing = fields.releaseDate !== undefined || fields.creatorReleaseDate !== undefined || collectionId !== undefined
+      const existing = fields.releaseDate !== undefined || fields.creatorReleaseDate !== undefined || collectionId !== undefined || input.externalDisplayEnabled !== undefined || input.externalDisplayContext !== undefined || input.externalDisplayRightsConfirmed !== undefined
         ? await getSongById(songId)
         : undefined;
       if (collectionId !== undefined) {
@@ -1182,6 +1185,48 @@ export const songsRouter = router({
           originalReleaseDate: fields.creatorReleaseDate !== undefined ? fields.creatorReleaseDate : (existing as any).creatorReleaseDate,
         });
         if (historicalDateError) throw new TRPCError({ code: "BAD_REQUEST", message: historicalDateError });
+      }
+      const externalDisplayChanged = existing?.userId === ctx.user.id && input.externalDisplayEnabled !== undefined && input.externalDisplayEnabled !== Boolean((existing as any).externalDisplayEnabled);
+      if (input.externalDisplayEnabled === true && (!input.externalDisplayContext?.trim() || input.externalDisplayContext.trim().length < 20)) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "Add at least 20 characters of creator context before authorizing external display." });
+      }
+      if (input.externalDisplayEnabled === true && input.externalDisplayRightsConfirmed !== true && !Boolean((existing as any)?.externalDisplayRightsConfirmed)) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "Confirm that you have the rights necessary to authorize this Work." });
+      }
+      if (input.externalDisplayEnabled === true && externalDisplayChanged && existing?.userId === ctx.user.id) {
+        await updateSongMetadata(songId, ctx.user.id, {
+          externalDisplayAuthorizedAt: new Date(),
+          externalDisplayRevokedAt: null,
+          externalDisplayAuthVersion: "1",
+        });
+        await addWorkEvent({
+          songId,
+          eventType: "EXTERNAL_DISPLAY_AUTHORIZED",
+          eventLabel: "External display authorized by creator",
+          eventData: {
+            authorizationVersion: "1",
+            contextPresent: Boolean(input.externalDisplayContext?.trim() || (existing as any)?.externalDisplayContext?.trim()),
+            rightsConfirmed: input.externalDisplayRightsConfirmed === true || Boolean((existing as any)?.externalDisplayRightsConfirmed),
+            platformScope: "approved_display_surfaces",
+            mediaDistribution: false,
+          },
+          actorId: ctx.user.id,
+          actorName: ctx.user.name ?? undefined,
+          isSystemEvent: false,
+        });
+      } else if (input.externalDisplayEnabled === false && externalDisplayChanged && existing?.userId === ctx.user.id) {
+        await updateSongMetadata(songId, ctx.user.id, {
+          externalDisplayRevokedAt: new Date(),
+        });
+        await addWorkEvent({
+          songId,
+          eventType: "EXTERNAL_DISPLAY_REVOKED",
+          eventLabel: "External display authorization revoked by creator",
+          eventData: { authorizationVersion: (existing as any).externalDisplayAuthVersion ?? "1", platformScope: "approved_display_surfaces" },
+          actorId: ctx.user.id,
+          actorName: ctx.user.name ?? undefined,
+          isSystemEvent: false,
+        });
       }
       // If saving a complete HAAI declaration, stamp the declared timestamp
       const haaiFields = [fields.haaiVisualConcept, fields.haaiStyleLanguage, fields.haaiInstrumentation, fields.haaiVocalConveyance, fields.haaiLyricalInspiration, fields.haaiEmotionalTone];

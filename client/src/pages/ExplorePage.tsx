@@ -48,10 +48,10 @@ function getInitialViewMode(): ViewMode {
 const MAX_LIMIT = 700;
 
 // ── Data hook ──────────────────────────────────────────────────────────────
-function useExploreData(seed: number, randomize: boolean, creatorId?: number) {
+function useExploreData(seed: number, randomize: boolean, creatorId?: number, enabled = true) {
   const { data, isLoading, error } = trpc.songs.exploreIndex.useQuery(
     { seed, limit: MAX_LIMIT, randomize, ...(creatorId ? { creatorId } : {}) },
-    { staleTime: 2 * 60 * 1000, refetchOnWindowFocus: false }
+    { enabled, staleTime: 2 * 60 * 1000, refetchOnWindowFocus: false }
   );
   return useMemo(() => ({
     featured: ((data?.featured ?? []) as FeedRow[]).filter(isAudioRow),
@@ -514,7 +514,7 @@ export default function ExplorePage() {
   const { data: creatorsRaw } = trpc.profile.allCreators.useQuery(undefined, { staleTime: 5 * 60 * 1000, refetchOnWindowFocus: false });
   const creators: CreatorSummary[] = (creatorsRaw ?? []).map((c: any) => ({ id: c.id, name: c.name, artistHandle: c.artistHandle, profilePhotoUrl: c.profilePhotoUrl, publishedCount: c.publishedCount ?? 0 }));
 
-  const data = useExploreData(seed, randomize, selectedCreatorId ?? undefined);
+  const data = useExploreData(seed, randomize, selectedCreatorId ?? undefined, viewMode === "list");
 
   // ── Bulk like status fetch ────────────────────────────────────────
   const allSongIds = useMemo(() => {
@@ -526,7 +526,10 @@ export default function ExplorePage() {
   const getBulkLikes = trpc.songs.getBulkLikeStatuses.useMutation();
   const [likedMap, setLikedMap] = useState<Record<number, boolean>>({});
   useEffect(() => {
-    if (allSongIds.length === 0) return;
+    if (viewMode !== "list" || allSongIds.length === 0) {
+      setLikedMap({});
+      return;
+    }
     getBulkLikes.mutate({ songIds: allSongIds }, {
       onSuccess: (result) => {
         const boolMap: Record<number, boolean> = {};
@@ -535,7 +538,7 @@ export default function ExplorePage() {
       },
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allSongIds.join(",")]);
+  }, [allSongIds.join(","), viewMode]);
 
   const handleRefresh = useCallback(() => { window.location.reload(); }, []);
   const handleRandomizeToggle = useCallback((v: boolean) => { setRandomize(v); }, []);

@@ -31,4 +31,12 @@ describe("Explore public-surface contract", () => {
     expect(exploreSource).toContain("xl:w-[12rem]");
     expect(exploreSource).toContain("text-sm font-medium leading-tight");
   });
+
+  it("does not load the full track index or bulk likes in creator view", () => {
+    const exploreSource = fs.readFileSync(explorePagePath, "utf8");
+
+    expect(exploreSource).toContain('useExploreData(seed, randomize, selectedCreatorId ?? undefined, viewMode === "list")');
+    expect(exploreSource).toContain('{ enabled, staleTime: 2 * 60 * 1000, refetchOnWindowFocus: false }');
+    expect(exploreSource).toContain('if (viewMode !== "list" || allSongIds.length === 0)');
+  });
 });

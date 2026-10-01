@@ -808,6 +808,13 @@ export async function updateSongMetadata(
     headlineCaption?: string | null;
     // Release / creation date
     releaseDate?: string | null;
+    creatorReleaseDate?: string | null;
+    externalDisplayEnabled?: boolean;
+    externalDisplayContext?: string | null;
+    externalDisplayRightsConfirmed?: boolean;
+    externalDisplayAuthorizedAt?: Date | null;
+    externalDisplayRevokedAt?: Date | null;
+    externalDisplayAuthVersion?: string | null;
     // HAAI Origin Story
     haaiOriginStory?: string | null;
     // Mood tags
@@ -852,6 +859,13 @@ export async function updateSongMetadata(
   if (fields.description !== undefined) updateSet.description = fields.description;
   if (fields.headlineCaption !== undefined) updateSet.headlineCaption = fields.headlineCaption;
   if (fields.releaseDate !== undefined) updateSet.releaseDate = fields.releaseDate;
+  if (fields.creatorReleaseDate !== undefined) updateSet.creatorReleaseDate = fields.creatorReleaseDate;
+  if (fields.externalDisplayEnabled !== undefined) updateSet.externalDisplayEnabled = fields.externalDisplayEnabled;
+  if (fields.externalDisplayContext !== undefined) updateSet.externalDisplayContext = fields.externalDisplayContext;
+  if (fields.externalDisplayRightsConfirmed !== undefined) updateSet.externalDisplayRightsConfirmed = fields.externalDisplayRightsConfirmed;
+  if (fields.externalDisplayAuthorizedAt !== undefined) updateSet.externalDisplayAuthorizedAt = fields.externalDisplayAuthorizedAt;
+  if (fields.externalDisplayRevokedAt !== undefined) updateSet.externalDisplayRevokedAt = fields.externalDisplayRevokedAt;
+  if (fields.externalDisplayAuthVersion !== undefined) updateSet.externalDisplayAuthVersion = fields.externalDisplayAuthVersion;
   if (fields.haaiOriginStory !== undefined) updateSet.haaiOriginStory = fields.haaiOriginStory;
   if (fields.moodTags !== undefined) updateSet.moodTags = fields.moodTags;
   if (fields.downloadPermission !== undefined) updateSet.downloadPermission = fields.downloadPermission;
