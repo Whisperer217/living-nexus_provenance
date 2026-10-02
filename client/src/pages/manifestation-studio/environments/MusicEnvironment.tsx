@@ -627,6 +627,7 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
               eyebrow="Visual identity"
               title="Artwork for this Work"
               description="Visual identity is attached to this Work for presentation and publication. It is not part of the WID hash."
+              interactive
               status={coverPreview
                 ? `${visualSourceCopy.label} is attached to this Work.`
                 : "Optional for draft. Required before public publication."}
@@ -657,8 +658,8 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
                   }
                 }}
               />
-              <div className="grid min-w-0 grid-cols-[4.5rem_minmax(0,1fr)] gap-3 rounded-sm border p-3 sm:grid-cols-[5rem_minmax(0,1fr)] sm:items-center sm:p-4" style={{ borderColor: "rgba(196,154,40,0.22)", background: "rgba(0,0,0,0.2)" }}>
-                <div className="relative flex aspect-square w-full items-center justify-center overflow-hidden rounded-sm" style={{ background: "rgba(196,154,40,0.06)", border: "1px solid rgba(196,154,40,0.22)" }}>
+              <div className="registration-artwork-preview grid min-w-0 grid-cols-[4.5rem_minmax(0,1fr)] gap-3 rounded-sm border p-3 sm:grid-cols-[5rem_minmax(0,1fr)] sm:items-center sm:p-4" style={{ borderColor: "color-mix(in srgb, var(--ln-gold) 22%, transparent)", background: "color-mix(in srgb, var(--ln-coal) 84%, var(--ln-gold))" }}>
+                <div className="registration-artwork-preview__image relative flex aspect-square w-full items-center justify-center overflow-hidden rounded-sm" style={{ background: "color-mix(in srgb, var(--ln-gold) 6%, var(--ln-coal))", border: "1px solid color-mix(in srgb, var(--ln-gold) 22%, transparent)" }}>
                   {coverPreview ? (
                     <img src={coverPreview} alt={`${visualSourceCopy.label} preview`} className="h-full w-full object-cover" />
                   ) : (
@@ -670,7 +671,7 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
                 </div>
                 <div className="min-w-0">
                   <p className="text-sm font-semibold" style={{ color: "var(--ln-parchment)" }}>{visualSourceCopy.label}</p>
-                  <p className="mt-1 text-xs leading-relaxed" style={{ color: "rgba(245,237,216,0.68)" }}>{visualSourceCopy.detail}</p>
+                  <p className="mt-1 text-xs leading-relaxed" style={{ color: "var(--ln-bone)" }}>{visualSourceCopy.detail}</p>
                   {visualSource === "uploaded" && coverFile?.name && (
                     <p className="mt-1 line-clamp-2 break-all text-xs" title={coverFile.name} style={{ color: "rgba(245,237,216,0.52)" }}>{coverFile.name}</p>
                   )}

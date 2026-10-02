@@ -2831,6 +2831,51 @@ h1, h2, h3, h4, h5, h6,
   font-weight: 600;
 }
 
+/* ── Registration asset cards ── */
+.registration-asset-card {
+  transition: border-color 180ms ease, background-color 180ms ease, box-shadow 180ms ease;
+}
+
+.registration-artwork-preview,
+.registration-artwork-preview__image {
+  transition: border-color 180ms ease, background-color 180ms ease, transform 180ms ease, box-shadow 180ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .registration-asset-card--interactive:hover,
+  .registration-asset-card--interactive:focus-within {
+    border-color: color-mix(in srgb, var(--ln-gold) 58%, transparent) !important;
+    background: color-mix(in srgb, var(--ln-gold) 7%, var(--ln-coal)) !important;
+    box-shadow: 0 10px 28px color-mix(in srgb, var(--ln-gold) 11%, transparent);
+  }
+
+  .registration-asset-card--interactive:hover .registration-artwork-preview,
+  .registration-asset-card--interactive:focus-within .registration-artwork-preview {
+    border-color: color-mix(in srgb, var(--ln-gold) 46%, transparent) !important;
+    background: color-mix(in srgb, var(--ln-gold) 9%, var(--ln-coal)) !important;
+  }
+
+  .registration-asset-card--interactive:hover .registration-artwork-preview__image,
+  .registration-asset-card--interactive:focus-within .registration-artwork-preview__image {
+    transform: scale(1.015);
+    border-color: color-mix(in srgb, var(--ln-gold-hot) 58%, transparent) !important;
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--ln-gold) 17%, transparent), 0 8px 18px color-mix(in srgb, var(--ln-gold) 13%, transparent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .registration-asset-card,
+  .registration-artwork-preview,
+  .registration-artwork-preview__image {
+    transition: none;
+  }
+
+  .registration-asset-card--interactive:hover .registration-artwork-preview__image,
+  .registration-asset-card--interactive:focus-within .registration-artwork-preview__image {
+    transform: none;
+  }
+}
+
 /* ── Upload page ── */
 .upload-steps {
   display: flex;

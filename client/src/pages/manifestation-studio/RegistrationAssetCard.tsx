@@ -8,6 +8,7 @@ interface RegistrationAssetCardProps {
   description: string;
   status: string;
   action?: ReactNode;
+  interactive?: boolean;
   children: ReactNode;
 }
 
@@ -24,6 +25,7 @@ export function RegistrationAssetCard({
   description,
   status,
   action,
+  interactive = false,
   children,
 }: RegistrationAssetCardProps) {
   const titleId = `${id}-title`;
@@ -31,10 +33,10 @@ export function RegistrationAssetCard({
   return (
     <section
       aria-labelledby={titleId}
-      className="rounded-sm border px-4 py-4 sm:px-5"
+      className={`registration-asset-card rounded-sm border px-3 py-4 sm:px-5${interactive ? " registration-asset-card--interactive" : ""}`}
       style={{
-        borderColor: "rgba(196,154,40,0.3)",
-        background: "rgba(196,154,40,0.035)",
+        borderColor: "color-mix(in srgb, var(--ln-gold) 30%, transparent)",
+        background: "color-mix(in srgb, var(--ln-gold) 4%, var(--ln-coal))",
       }}
     >
       <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
@@ -52,7 +54,7 @@ export function RegistrationAssetCard({
           >
             {title}
           </h3>
-          <p className="mt-1 text-sm leading-relaxed" style={{ color: "rgba(245,237,216,0.68)" }}>
+          <p className="mt-1 text-sm leading-relaxed" style={{ color: "var(--ln-bone)" }}>
             {description}
           </p>
         </div>
@@ -63,7 +65,7 @@ export function RegistrationAssetCard({
         {children}
       </div>
 
-      <p className="mt-3 text-xs leading-relaxed" style={{ color: "rgba(245,237,216,0.54)" }} role="status">
+      <p className="mt-3 text-xs leading-relaxed" style={{ color: "var(--ln-bone)" }} role="status">
         {status}
       </p>
     </section>

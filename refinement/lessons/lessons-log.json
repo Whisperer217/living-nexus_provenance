@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-10-02T19:03:17.646Z",
-  "totalLessons": 38,
+  "lastUpdated": "2026-10-02T19:12:32.094Z",
+  "totalLessons": 39,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -889,6 +889,30 @@
         "mobile"
       ],
       "id": "LESSON-038"
+    },
+    {
+      "date": "2026-10-02",
+      "checkpointVersion": "pending-manifest-mobile-refinement",
+      "category": "accessibility",
+      "problem": "The newly shared Manifest asset card did not explicitly differentiate desktop hover feedback from touch behavior or prove the readability of Work-to-visual relationship language on a dark surface.",
+      "solution": "Reduced mobile card gutters while preserving full-width actions, gated artwork hover and focus-within feedback behind fine-pointer media queries, honored reduced motion, and moved relationship/support text to high-contrast cathedral tokens. Calculated contrast against the void: bone 11.59:1, parchment 15.82:1, gold 8.00:1.",
+      "files": [
+        "client/src/pages/manifestation-studio/RegistrationAssetCard.tsx",
+        "client/src/pages/manifestation-studio/environments/MusicEnvironment.tsx",
+        "client/src/index.css",
+        "server/tests/musicRegisterPresentation.contract.test.ts"
+      ],
+      "score": 0,
+      "tags": [
+        "manifest",
+        "mobile",
+        "contrast",
+        "hover",
+        "reduced-motion",
+        "visual-identity",
+        "accessibility"
+      ],
+      "id": "LESSON-039"
     }
   ]
 }

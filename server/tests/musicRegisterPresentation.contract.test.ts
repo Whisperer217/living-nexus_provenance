@@ -29,6 +29,7 @@ describe("Music Register presentation contracts", () => {
     const gateway = read("client/src/pages/manifestation-studio/TypeGateway.tsx");
     const music = read("client/src/pages/manifestation-studio/environments/MusicEnvironment.tsx");
     const assetCard = read("client/src/pages/manifestation-studio/RegistrationAssetCard.tsx");
+    const tokens = read("client/src/index.css");
 
     expect(gateway).toContain("RegistrationAssetCard");
     expect(music).toContain("RegistrationAssetCard");
@@ -41,6 +42,14 @@ describe("Music Register presentation contracts", () => {
     expect(music).toContain("Publish requires a visual identity");
     expect(music).not.toContain("Bound visual");
     expect(music).not.toContain("Publish requires a bound visual");
+    expect(assetCard).toContain("px-3 py-4 sm:px-5");
+    expect(assetCard).toContain("w-full sm:w-auto");
+    expect(assetCard).toContain('color: "var(--ln-bone)"');
+    expect(music).toContain("registration-artwork-preview");
+    expect(music).toContain("interactive");
+    expect(tokens).toContain("@media (hover: hover) and (pointer: fine)");
+    expect(tokens).toContain(".registration-asset-card--interactive:hover");
+    expect(tokens).toContain("prefers-reduced-motion: reduce");
   });
 
   it("gives Cathedral a high-contrast, creator-expandable workspace", () => {
