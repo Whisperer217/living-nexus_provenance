@@ -86,6 +86,11 @@ describe("Loop MP3 queue intake", () => {
     expect(music).toContain("queueBulkMetadata?.albumName");
     expect(music).toContain("queueBulkMetadata?.publisherName");
     expect(music).toContain("queueBulkMetadata?.creatorReleaseDate");
+    expect(music).toContain("queueBulkPrefillFields");
+    expect(music).toContain("Bulk edit proposal");
+    expect(music).toContain("Prefilled for review");
+    expect(music).toContain("Creator-proposed shared values for this queued Work");
+    expect(music).toContain("Bulk prefill does not alter the source file, embedded metadata, or Witness ID boundary.");
     expect(gateway).toContain("describeLoopMp3QueueIntake");
     expect(gateway).toContain('role="alert"');
     expect(engine).toContain("prepareLoopMp3Queue");

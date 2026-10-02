@@ -19,6 +19,7 @@ The pre-review MP3 Queue may provide three local controls before a record enters
 - The review title is a creator-controlled proposal for the existing canonical Work title input. It does **not** rename the immutable browser `File`, change source bytes, or alter hash evidence.
 - Queue-level artist, album, publisher, and Original Release Date values are browser-memory proposals that prefill each unstarted Work review. They do **not** overwrite source tags, modify a completed Work, bypass metadata review, or enter a shared WID payload.
 - Publisher persists only through the existing bounded Work-credit mapping; Original Release Date persists only after the existing client and server chronology checks accept it. Neither field is WID-bound.
+- When a queued Work has bulk-prefilled values, its individual Loop player shows a gold **Bulk edit proposal** badge and the exact field/value set. This is intentionally distinct from the **Extracted** indicator used for embedded-file evidence: it identifies creator-proposed queue data, not audio-file metadata.
 - Each record still reaches its own metadata review, participation disclosure, attestation, Witness ID sealing, and draft/publish decision.
 - Clearing the queue revokes temporary object URLs and removes only browser-memory selections. It does not delete, unregister, or alter any Work.
 

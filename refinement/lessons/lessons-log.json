@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-10-02T22:02:41.665Z",
-  "totalLessons": 46,
+  "lastUpdated": "2026-10-02T22:34:54.526Z",
+  "totalLessons": 47,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -1073,6 +1073,30 @@
         "wid-boundary"
       ],
       "id": "LESSON-046"
+    },
+    {
+      "date": "2026-10-02",
+      "category": "registry",
+      "problem": "A queued Work could inherit creator-proposed shared metadata from a bulk edit, but the individual Loop player did not disclose that provenance. This could make a bulk-prefilled value look indistinguishable from embedded-file extraction.",
+      "solution": "Added an accessible, gold Bulk edit proposal panel to the individual queued Work player. It lists only the fields supplied by the local queue proposal and states they remain editable before sealing. The presentation explicitly distinguishes creator-proposed prefill from the existing Extracted marker for audio-file evidence and reiterates that no source metadata or WID boundary changes.",
+      "files": [
+        "client/src/pages/manifestation-studio/environments/MusicEnvironment.tsx",
+        "server/tests/loopMp3Queue.contract.test.ts",
+        "server/tests/musicRegisterPresentation.contract.test.ts",
+        "docs/lnls/architecture/LOOP-MP3-QUEUE-PREVIEW-AND-TITLE-ADR.md"
+      ],
+      "score": 0,
+      "tags": [
+        "loop",
+        "mp3-queue",
+        "bulk-edit",
+        "metadata-origin",
+        "player",
+        "provenance",
+        "creator-control",
+        "wid-boundary"
+      ],
+      "id": "LESSON-047"
     }
   ]
 }

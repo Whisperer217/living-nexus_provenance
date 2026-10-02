@@ -88,6 +88,16 @@ describe("Music Register presentation contracts", () => {
     expect(prepared).not.toContain('widBound: [\n    "audioFile",\n    "title",\n    "officialArtistName"');
   });
 
+  it("discloses creator-proposed queue prefill inside the individual Work player", () => {
+    const music = read("client/src/pages/manifestation-studio/environments/MusicEnvironment.tsx");
+    expect(music).toContain("queueBulkPrefillFields");
+    expect(music).toContain("Bulk edit proposal");
+    expect(music).toContain("Prefilled for review");
+    expect(music).toContain("Creator-proposed shared values for this queued Work");
+    expect(music).toContain("Bulk prefill does not alter the source file, embedded metadata, or Witness ID boundary.");
+    expect(music).toContain('aria-label="Bulk edit metadata prefill"');
+  });
+
   it("gives Cathedral a high-contrast, creator-expandable workspace", () => {
     const workspace = read("client/src/components/creative-cathedral/CreativeCathedralWorkspace.tsx");
     const gate = read("client/src/components/creative-cathedral/CathedralContextGate.tsx");

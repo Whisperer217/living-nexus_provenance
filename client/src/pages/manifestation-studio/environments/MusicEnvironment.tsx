@@ -10,7 +10,7 @@ import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import {
   Upload, Music, Image as ImageIcon, Play, Pause, Shield,
-  ChevronRight, ChevronLeft, Loader2, CheckCircle2, Sparkles, RefreshCw, CircleHelp,
+  ChevronRight, ChevronLeft, Loader2, CheckCircle2, Sparkles, RefreshCw, CircleHelp, ListChecks,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -248,6 +248,12 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile, queueRevi
     originalReleaseDate: creatorReleaseDate,
   });
   const detectedRecordValidationError = isrcValidationError ?? releaseDateValidationError;
+  const queueBulkPrefillFields = [
+    { label: "Artist", value: queueBulkMetadata?.officialArtistName },
+    { label: "Album", value: queueBulkMetadata?.albumName },
+    { label: "Publisher", value: queueBulkMetadata?.publisherName },
+    { label: "Original Release Date", value: queueBulkMetadata?.creatorReleaseDate },
+  ].filter((field): field is { label: string; value: string } => Boolean(field.value?.trim()));
   const clearExtractedMarker = (field: DetectedMetadataField) => {
     setAutoExtractedFields((current) => ({ ...current, [field]: undefined }));
   };
@@ -1398,6 +1404,36 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile, queueRevi
         <p className="font-mono text-[10px]" style={{ color: "var(--ln-gold)" }}>
           {witnessData.wid}
         </p>
+      )}
+      {queueProgress && queueBulkPrefillFields.length > 0 && (
+        <section
+          className="rounded-sm border px-3 py-3"
+          aria-label="Bulk edit metadata prefill"
+          style={{
+            borderColor: "color-mix(in srgb, var(--ln-gold-hot) 48%, transparent)",
+            background: "color-mix(in srgb, var(--ln-gold) 9%, var(--ln-coal))",
+            boxShadow: "inset 0 0 0 1px color-mix(in srgb, var(--ln-gold) 10%, transparent)",
+          }}
+        >
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <span className="inline-flex items-center gap-1.5 rounded-full border px-2 py-1 text-[10px] uppercase tracking-[0.14em]" style={{ borderColor: "color-mix(in srgb, var(--ln-gold-hot) 58%, transparent)", color: "var(--ln-gold-hot)", fontFamily: "'Cinzel', serif" }}>
+              <ListChecks aria-hidden="true" className="size-3" /> Bulk edit proposal
+            </span>
+            <span className="text-[10px] uppercase tracking-[0.12em]" style={{ color: "var(--ln-smoke)", fontFamily: "'Cinzel', serif" }}>Prefilled for review</span>
+          </div>
+          <p className="mt-2 text-xs leading-relaxed" style={{ color: "var(--ln-bone)" }}>
+            Creator-proposed shared values for this queued Work. Confirm or edit them in Details before sealing.
+          </p>
+          <dl className="mt-3 grid gap-2 sm:grid-cols-2">
+            {queueBulkPrefillFields.map((field) => (
+              <div key={field.label} className="min-w-0 rounded-sm border px-2 py-1.5" style={{ borderColor: "color-mix(in srgb, var(--ln-gold) 18%, transparent)", background: "color-mix(in srgb, var(--ln-coal) 78%, var(--ln-gold))" }}>
+                <dt className="text-[10px] uppercase tracking-[0.12em]" style={{ color: "var(--ln-smoke)", fontFamily: "'Cinzel', serif" }}>{field.label}</dt>
+                <dd className="mt-0.5 truncate text-xs" title={field.value} style={{ color: "var(--ln-parchment)" }}>{field.value}</dd>
+              </div>
+            ))}
+          </dl>
+          <p className="mt-2 text-[10px] leading-relaxed" style={{ color: "var(--ln-smoke)" }}>Bulk prefill does not alter the source file, embedded metadata, or Witness ID boundary.</p>
+        </section>
       )}
       <CreativeCathedralWorkspace
         disabled={!user}
