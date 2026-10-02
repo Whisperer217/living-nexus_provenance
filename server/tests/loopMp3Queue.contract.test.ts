@@ -54,11 +54,16 @@ describe("Loop MP3 queue intake", () => {
     expect(studio).toContain("Arrange review order");
     expect(studio).toContain("sortableKeyboardCoordinates");
     expect(studio).toContain('aria-label="MP3 Queue review order"');
+    expect(studio).toContain("URL.createObjectURL(file)");
+    expect(studio).toContain(">Review title</label>");
+    expect(studio).toContain("Clear all");
+    expect(studio).toContain("queueReviewTitle");
     expect(music).toContain("MP3 Queue accepts .mp3 audio only");
     expect(music).toContain("Nothing is carried forward automatically.");
     expect(music).toContain('formData.append("loopIntake", "mp3-queue")');
     expect(music).toContain('role="progressbar"');
     expect(music).toContain("awaiting review");
+    expect(music).toContain("queueReviewTitle");
     expect(gateway).toContain("describeLoopMp3QueueIntake");
     expect(gateway).toContain('role="alert"');
     expect(engine).toContain("prepareLoopMp3Queue");

@@ -159,6 +159,8 @@ function ExtractedMetadataStatus({
 interface MusicEnvironmentProps {
   onBack: () => void;
   pendingFile?: File;
+  /** Creator-set, pre-review title proposal. It pre-fills the existing Work title input only. */
+  queueReviewTitle?: string;
   queueProgress?: {
     current: number;
     total: number;
@@ -181,7 +183,7 @@ interface MusicEnvironmentProps {
   };
 }
 
-export function MusicEnvironment({ onBack, keeperPrefill, pendingFile, queueProgress, onRegistered }: MusicEnvironmentProps) {
+export function MusicEnvironment({ onBack, keeperPrefill, pendingFile, queueReviewTitle, queueProgress, onRegistered }: MusicEnvironmentProps) {
   const [, navigate] = useLocation();
   const { user } = useAuth();
   const utils = trpc.useUtils();
@@ -200,7 +202,7 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile, queueProg
   const audioInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
 
-  const [title, setTitle] = useState(keeperPrefill?.title ?? "");
+  const [title, setTitle] = useState(queueReviewTitle ?? keeperPrefill?.title ?? "");
   const [officialArtistName, setOfficialArtistName] = useState("");
   const [albumName, setAlbumName] = useState("");
   const [publisherName, setPublisherName] = useState("");

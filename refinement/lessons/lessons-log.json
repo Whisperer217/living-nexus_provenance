@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-10-02T20:55:22.734Z",
-  "totalLessons": 42,
+  "lastUpdated": "2026-10-02T21:09:08.824Z",
+  "totalLessons": 43,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -979,6 +979,28 @@
         "server-verification",
         "wid-boundary"
       ]
+    },
+    {
+      "date": "2026-10-02",
+      "category": "accessibility",
+      "problem": "Creators could arrange a local MP3 queue but could not audition a selected source, set a clear pre-review Work-title proposal, or reset a mistaken selection without removing records one by one.",
+      "solution": "Added local object-URL previews, a visible review-title input that only pre-fills the canonical title field, and a Clear all action that revokes browser-only preview URLs. The source filename, bytes, metadata review, disclosure, attestation, and per-Work WID path remain intact.",
+      "files": [
+        "client/src/pages/manifestation-studio/ManifestationStudio.tsx",
+        "client/src/pages/manifestation-studio/environments/MusicEnvironment.tsx",
+        "server/tests/loopMp3Queue.contract.test.ts"
+      ],
+      "score": 0,
+      "tags": [
+        "loop",
+        "mp3-queue",
+        "local-preview",
+        "review-title",
+        "object-url",
+        "wid-boundary",
+        "accessibility"
+      ],
+      "id": "LESSON-043"
     }
   ]
 }

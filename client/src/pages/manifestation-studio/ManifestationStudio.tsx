@@ -3,11 +3,11 @@
    WID engine entry. Non-music mediums removed from product scope.
 ════════════════════════════════════════════════════════════════════ */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { DndContext, KeyboardSensor, PointerSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { CircleAlert, GripVertical, ListOrdered, Play, Trash2 } from "lucide-react";
+import { CircleAlert, GripVertical, ListOrdered, Pause, Play, Trash2, X } from "lucide-react";
 import { usePendingWork } from "@/contexts/PendingWorkContext";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
@@ -24,13 +24,34 @@ interface QueueCompletion {
 interface QueuedMp3 {
   id: string;
   file: File;
+  previewUrl: string;
+  reviewTitle: string;
 }
 
 function toQueuedMp3(file: File, index: number): QueuedMp3 {
-  return { id: `${file.name}-${file.size}-${file.lastModified}-${index}`, file };
+  return {
+    id: `${file.name}-${file.size}-${file.lastModified}-${index}`,
+    file,
+    previewUrl: URL.createObjectURL(file),
+    reviewTitle: file.name.replace(/\.[^.]+$/, ""),
+  };
 }
 
-function SortableQueuedMp3({ item, position, onRemove }: { item: QueuedMp3; position: number; onRemove: (id: string) => void }) {
+function SortableQueuedMp3({
+  item,
+  position,
+  isPreviewing,
+  onPreview,
+  onRename,
+  onRemove,
+}: {
+  item: QueuedMp3;
+  position: number;
+  isPreviewing: boolean;
+  onPreview: (item: QueuedMp3) => void;
+  onRename: (id: string, reviewTitle: string) => void;
+  onRemove: (id: string) => void;
+}) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id });
 
   return (
@@ -58,7 +79,27 @@ function SortableQueuedMp3({ item, position, onRemove }: { item: QueuedMp3; posi
         <GripVertical aria-hidden="true" className="size-4" />
       </button>
       <span className="inline-flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold" style={{ color: "var(--ln-coal)", background: "var(--ln-gold)" }}>{position}</span>
-      <span className="min-w-0 flex-1 break-all text-sm" style={{ color: "var(--ln-parchment)" }}>{item.file.name}</span>
+      <div className="min-w-0 flex-1">
+        <label className="mb-1 block text-xs uppercase tracking-[0.14em]" style={{ color: "var(--ln-smoke)", fontFamily: "'Cinzel', serif" }} htmlFor={`queue-title-${item.id}`}>Review title</label>
+        <input
+          id={`queue-title-${item.id}`}
+          value={item.reviewTitle}
+          onChange={(event) => onRename(item.id, event.target.value)}
+          className="w-full rounded-sm border bg-transparent px-2 py-1 text-sm outline-none transition-colors focus-visible:border-[var(--ln-gold-hot)] focus-visible:ring-2 focus-visible:ring-[color-mix(in_srgb,var(--ln-gold)_28%,transparent)]"
+          style={{ borderColor: "color-mix(in srgb, var(--ln-gold) 22%, transparent)", color: "var(--ln-parchment)" }}
+          aria-describedby={`queue-source-${item.id}`}
+        />
+        <p id={`queue-source-${item.id}`} className="mt-1 break-all text-xs" style={{ color: "var(--ln-smoke)" }}>Source file: {item.file.name}</p>
+      </div>
+      <button
+        type="button"
+        aria-label={`${isPreviewing ? "Pause" : "Preview"} ${item.reviewTitle || item.file.name}`}
+        onClick={() => onPreview(item)}
+        className="inline-flex min-h-10 min-w-10 shrink-0 items-center justify-center rounded-sm border transition-colors hover:border-[var(--ln-gold-hot)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ln-gold-hot)]"
+        style={{ borderColor: "color-mix(in srgb, var(--ln-gold) 42%, transparent)", color: "var(--ln-gold-hot)", background: isPreviewing ? "color-mix(in srgb, var(--ln-gold) 16%, transparent)" : "transparent" }}
+      >
+        {isPreviewing ? <Pause aria-hidden="true" className="size-4" /> : <Play aria-hidden="true" className="size-4" />}
+      </button>
       <button
         type="button"
         aria-label={`Remove ${item.file.name} from the MP3 queue`}
@@ -100,20 +141,45 @@ export default function ManifestationStudio() {
   const [queueComplete, setQueueComplete] = useState(false);
   const [queueReviewStarted, setQueueReviewStarted] = useState(false);
   const [queueIntakeNotice, setQueueIntakeNotice] = useState<LoopMp3QueueIntakeNotice | null>(null);
+  const [previewingQueueId, setPreviewingQueueId] = useState<string | null>(null);
   const { consumePendingWork, consumePendingQueue } = usePendingWork();
+  const queuePreviewAudioRef = useRef<HTMLAudioElement | null>(null);
   const queueSensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
+  const stopQueuePreview = () => {
+    const audio = queuePreviewAudioRef.current;
+    if (audio) {
+      audio.pause();
+      audio.currentTime = 0;
+      audio.src = "";
+      queuePreviewAudioRef.current = null;
+    }
+    setPreviewingQueueId(null);
+  };
+
   const clearQueue = () => {
-    setMp3Queue([]);
+    stopQueuePreview();
+    setMp3Queue((current) => {
+      current.forEach((item) => URL.revokeObjectURL(item.previewUrl));
+      return [];
+    });
     setQueueIndex(0);
     setQueueCompletions([]);
     setQueueComplete(false);
     setQueueReviewStarted(false);
     setQueueIntakeNotice(null);
   };
+
+  useEffect(() => () => {
+    const audio = queuePreviewAudioRef.current;
+    if (audio) {
+      audio.pause();
+      audio.src = "";
+    }
+  }, []);
 
   useEffect(() => {
     const queue = consumePendingQueue();
@@ -259,7 +325,10 @@ export default function ManifestationStudio() {
   };
 
   const removeQueuedMp3 = (id: string) => {
+    if (previewingQueueId === id) stopQueuePreview();
     const next = mp3Queue.filter((item) => item.id !== id);
+    const removed = mp3Queue.find((item) => item.id === id);
+    if (removed) URL.revokeObjectURL(removed.previewUrl);
     if (next.length === 0) {
       clearQueue();
       setPendingFile(null);
@@ -267,6 +336,31 @@ export default function ManifestationStudio() {
       return;
     }
     setMp3Queue(next);
+  };
+
+  const renameQueuedMp3 = (id: string, reviewTitle: string) => {
+    setMp3Queue((current) => current.map((item) => item.id === id ? { ...item, reviewTitle } : item));
+  };
+
+  const toggleQueuePreview = (item: QueuedMp3) => {
+    if (previewingQueueId === item.id) {
+      stopQueuePreview();
+      return;
+    }
+
+    stopQueuePreview();
+    const audio = new Audio(item.previewUrl);
+    queuePreviewAudioRef.current = audio;
+    audio.addEventListener("ended", () => {
+      if (queuePreviewAudioRef.current === audio) stopQueuePreview();
+    }, { once: true });
+    audio.addEventListener("error", () => {
+      if (queuePreviewAudioRef.current === audio) stopQueuePreview();
+    }, { once: true });
+    setPreviewingQueueId(item.id);
+    void audio.play().catch(() => {
+      if (queuePreviewAudioRef.current === audio) stopQueuePreview();
+    });
   };
 
   if (mp3Queue.length > 0 && !queueReviewStarted) {
@@ -289,18 +383,28 @@ export default function ManifestationStudio() {
             </section>
           )}
 
-          <p id="mp3-queue-order-help" className="mt-5 text-xs" style={{ color: "var(--ln-smoke)" }}>Drag the handle to reorder, or focus it and use keyboard sorting. Removing a record only removes it from this local queue.</p>
+          <p id="mp3-queue-order-help" className="mt-5 text-xs" style={{ color: "var(--ln-smoke)" }}>Drag the handle to reorder, preview a selected source locally, and set its review title. Source filenames and file bytes remain unchanged until each Work is verified in review.</p>
           <DndContext sensors={queueSensors} collisionDetection={closestCenter} onDragEnd={handleQueueDragEnd}>
             <SortableContext items={mp3Queue.map((item) => item.id)} strategy={verticalListSortingStrategy}>
               <ol aria-label="MP3 Queue review order" aria-describedby="mp3-queue-order-help" className="mt-3 space-y-2">
-                {mp3Queue.map((item, index) => <SortableQueuedMp3 key={item.id} item={item} position={index + 1} onRemove={removeQueuedMp3} />)}
+                {mp3Queue.map((item, index) => (
+                  <SortableQueuedMp3
+                    key={item.id}
+                    item={item}
+                    position={index + 1}
+                    isPreviewing={previewingQueueId === item.id}
+                    onPreview={toggleQueuePreview}
+                    onRename={renameQueuedMp3}
+                    onRemove={removeQueuedMp3}
+                  />
+                ))}
               </ol>
             </SortableContext>
           </DndContext>
 
           <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <button type="button" onClick={() => { clearQueue(); setPendingFile(null); setEntered(false); }} className="min-h-11 rounded-sm border px-4 text-sm transition-colors hover:border-[var(--ln-gold-hot)]" style={{ borderColor: "color-mix(in srgb, var(--ln-gold) 38%, transparent)", color: "var(--ln-parchment)" }}>Choose different files</button>
-            <button type="button" onClick={() => { setQueueReviewStarted(true); setQueueIndex(0); setPendingFile(mp3Queue[0].file); }} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-sm px-5 text-sm font-semibold transition-transform hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ln-gold-hot)]" style={{ background: "var(--ln-gold)", color: "var(--ln-coal)" }}><Play aria-hidden="true" className="size-4" /> Begin review</button>
+            <button type="button" onClick={() => { clearQueue(); setPendingFile(null); setEntered(false); }} className="min-h-11 rounded-sm border px-4 text-sm transition-colors hover:border-[var(--destructive)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--destructive)]" style={{ borderColor: "color-mix(in srgb, var(--destructive) 56%, transparent)", color: "var(--ln-parchment)" }}>Clear all</button>
+            <button type="button" onClick={() => { stopQueuePreview(); mp3Queue.forEach((item) => URL.revokeObjectURL(item.previewUrl)); setQueueReviewStarted(true); setQueueIndex(0); setPendingFile(mp3Queue[0].file); }} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-sm px-5 text-sm font-semibold transition-transform hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ln-gold-hot)]" style={{ background: "var(--ln-gold)", color: "var(--ln-coal)" }}><Play aria-hidden="true" className="size-4" /> Begin review</button>
           </div>
         </section>
       </div>
@@ -318,6 +422,7 @@ export default function ManifestationStudio() {
       }}
       keeperPrefill={keeperPrefill ?? undefined}
       pendingFile={pendingFile ?? undefined}
+      queueReviewTitle={mp3Queue.length > 0 ? mp3Queue[queueIndex]?.reviewTitle : undefined}
       queueProgress={mp3Queue.length > 0 ? {
         current: queueIndex + 1,
         total: mp3Queue.length,
