@@ -163,6 +163,7 @@ interface MusicEnvironmentProps {
     current: number;
     total: number;
     completed: number;
+    remaining: number;
   };
   /** Returns true only when the parent has safely advanced an in-memory queue. */
   onRegistered?: (data: { songId?: number; witnessId?: string }, registeredTitle: string) => boolean;
@@ -1417,6 +1418,7 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile, queueProg
     </div>
   );
 
+  const queueCompletionPercent = queueProgress ? Math.round((queueProgress.completed / queueProgress.total) * 100) : 0;
   const queueNotice = queueProgress ? (
     <section
       className="mb-5 rounded-sm border px-4 py-3"
@@ -1427,7 +1429,36 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile, queueProg
         <p className="text-[11px] uppercase tracking-[0.18em]" style={{ color: "var(--ln-gold)", fontFamily: "'Cinzel', serif" }}>
           MP3 queue · record {queueProgress.current} of {queueProgress.total}
         </p>
-        <span className="text-xs" style={{ color: "var(--ln-bone)" }}>{queueProgress.completed} completed</span>
+        <span className="text-xs" style={{ color: "var(--ln-bone)" }}>{queueProgress.completed} completed · {queueProgress.remaining} remaining</span>
+      </div>
+      <div className="mt-3 h-1.5 overflow-hidden rounded-full" style={{ background: "color-mix(in srgb, var(--ln-gold) 14%, var(--ln-coal))" }}>
+        <div
+          role="progressbar"
+          aria-label="Completed MP3 queue records"
+          aria-valuemin={0}
+          aria-valuemax={queueProgress.total}
+          aria-valuenow={queueProgress.completed}
+          aria-valuetext={`${queueProgress.completed} of ${queueProgress.total} records completed`}
+          className="h-full rounded-full transition-[width] duration-500 motion-reduce:transition-none"
+          style={{ width: `${queueCompletionPercent}%`, background: "var(--ln-gold)", boxShadow: "0 0 10px color-mix(in srgb, var(--ln-gold) 48%, transparent)" }}
+        />
+      </div>
+      <div className="mt-2 flex flex-wrap gap-1.5" aria-label="MP3 queue record status">
+        {Array.from({ length: queueProgress.total }, (_, index) => {
+          const isComplete = index < queueProgress.completed;
+          const isCurrent = index === queueProgress.current - 1;
+          return (
+            <span
+              key={index}
+              title={isComplete ? `Record ${index + 1}: completed` : isCurrent ? `Record ${index + 1}: in review` : `Record ${index + 1}: awaiting review`}
+              className="inline-flex size-2.5 rounded-full"
+              style={{
+                background: isComplete ? "var(--ln-gold)" : isCurrent ? "var(--ln-gold-hot)" : "color-mix(in srgb, var(--ln-smoke) 44%, transparent)",
+                boxShadow: isCurrent ? "0 0 8px color-mix(in srgb, var(--ln-gold-hot) 52%, transparent)" : "none",
+              }}
+            />
+          );
+        })}
       </div>
       <p className="mt-1 text-xs leading-relaxed" style={{ color: "color-mix(in srgb, var(--ln-parchment) 68%, transparent)" }}>
         This Work receives its own metadata review, participation disclosure, attestation, and WID. Nothing is carried forward automatically.

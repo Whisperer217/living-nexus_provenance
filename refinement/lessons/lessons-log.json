@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-10-02T20:06:06.012Z",
+  "lastUpdated": "2026-10-02T20:55:22.734Z",
   "totalLessons": 42,
   "lessons": [
     {
@@ -959,16 +959,26 @@
     },
     {
       "category": "architecture",
-      "summary": "A multi-file audio intake must preserve one Work per review, disclosure, attestation, WID seal, and registration; browser queues are not batch authorship claims.",
-      "source": "Loop MP3 queue registration",
-      "action": "Constrain queue mode to MP3 sources and make server verification mandatory before storage.",
       "files": [
+        "shared/loopMp3Queue.ts",
         "client/src/pages/manifestation-studio/TypeGateway.tsx",
         "client/src/pages/manifestation-studio/ManifestationStudio.tsx",
         "client/src/pages/manifestation-studio/environments/MusicEnvironment.tsx",
         "server/routes/uploadRoute.ts"
       ],
-      "id": "LESSON-042"
+      "id": "LESSON-042",
+      "date": "2026-10-02",
+      "problem": "A multi-file audio selection could accidentally be treated as one provenance claim or allow a source type label to substitute for evidence before storage.",
+      "solution": "Loop uses a bounded browser-memory MP3 queue, preserves one review and seal path per Work, and verifies marked queue sources as MPEG audio at the upload boundary.",
+      "score": 0,
+      "tags": [
+        "loop",
+        "mp3-queue",
+        "browser-memory",
+        "per-work-review",
+        "server-verification",
+        "wid-boundary"
+      ]
     }
   ]
 }

@@ -121,4 +121,11 @@ export function isLoopMusicFile(file: File): boolean {
   );
 }
 
-export { isLoopMp3File, LOOP_MP3_QUEUE_LIMIT, prepareLoopMp3Queue } from "@shared/loopMp3Queue";
+export {
+  LOOP_MP3_QUEUE_LIMIT,
+  describeLoopMp3QueueIntake,
+  isLoopMp3File,
+  prepareLoopMp3Queue,
+  reorderLoopMp3Queue,
+} from "@shared/loopMp3Queue";
+export type { LoopMp3QueueIntakeNotice } from "@shared/loopMp3Queue";

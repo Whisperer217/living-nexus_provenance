@@ -4,9 +4,10 @@
 ═══════════════════════════════════════════════════════════════════ */
 
 import { useState, useCallback, useRef } from "react";
-import { Music, Upload, Loader2, Shield, Layers } from "lucide-react";
+import { Music, Upload, Loader2, Shield, Layers, CircleAlert } from "lucide-react";
+import { toast } from "sonner";
 import { extractFileMetadata } from "@/lib/uploadPipeline";
-import { isLoopMusicFile, LOOP_MP3_QUEUE_LIMIT, LOOP_PRODUCT, prepareLoopMp3Queue } from "@/lib/loopProduct";
+import { describeLoopMp3QueueIntake, isLoopMusicFile, LOOP_MP3_QUEUE_LIMIT, LOOP_PRODUCT, prepareLoopMp3Queue, type LoopMp3QueueIntakeNotice } from "@/lib/loopProduct";
 import type { KeeperPrefill } from "./ManifestationStudio";
 import { RegistrationAssetCard } from "./RegistrationAssetCard";
 
@@ -21,7 +22,7 @@ interface TypeGatewayProps {
   onSelect: (type: "music") => void;
   onSelectWithPrefill?: (type: "music", prefill: KeeperPrefill) => void;
   onFileReady?: (file: File) => void;
-  onMp3QueueReady?: (files: File[]) => void;
+  onMp3QueueReady?: (files: File[], intakeNotice?: LoopMp3QueueIntakeNotice) => void;
 }
 
 export function TypeGateway({ onSelect, onSelectWithPrefill, onFileReady, onMp3QueueReady }: TypeGatewayProps) {
@@ -29,11 +30,13 @@ export function TypeGateway({ onSelect, onSelectWithPrefill, onFileReady, onMp3Q
   const [extracting, setExtracting] = useState(false);
   const [extractedFile, setExtractedFile] = useState<string | null>(null);
   const [extractError, setExtractError] = useState<string | null>(null);
+  const [queueIntakeNotice, setQueueIntakeNotice] = useState<LoopMp3QueueIntakeNotice | null>(null);
   const [intakeMode, setIntakeMode] = useState<"single" | "mp3-queue">("single");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const queueInputRef = useRef<HTMLInputElement>(null);
 
   const handleFile = useCallback(async (file: File) => {
+    setQueueIntakeNotice(null);
     if (!isLoopMusicFile(file)) {
       setExtractError("Loop accepts audio only — MP3, WAV, FLAC, AAC, OGG, M4A.");
       return;
@@ -73,22 +76,23 @@ export function TypeGateway({ onSelect, onSelectWithPrefill, onFileReady, onMp3Q
 
   const handleQueueFiles = useCallback((files: File[]) => {
     const selection = prepareLoopMp3Queue(files);
-    const rejectedNames = selection.rejected.slice(0, 3).map((file) => file.name).join(", ");
+    const notice = describeLoopMp3QueueIntake(selection);
+    setQueueIntakeNotice(notice);
 
     if (selection.accepted.length === 0) {
-      setExtractError(rejectedNames
-        ? `MP3 Queue accepts .mp3 audio only. Remove: ${rejectedNames}${selection.rejected.length > 3 ? "…" : ""}`
-        : "Choose one or more MP3 files to begin a queue.");
+      const emptyQueueNotice: LoopMp3QueueIntakeNotice = notice ?? {
+        title: "Choose MP3 records",
+        message: "Choose one or more .mp3 files to begin a review queue.",
+      };
+      setQueueIntakeNotice(emptyQueueNotice);
+      toast.error(emptyQueueNotice.title, { description: emptyQueueNotice.message, duration: 7500 });
       return;
     }
 
-    setExtractError(selection.rejected.length
-      ? `${selection.rejected.length} non-MP3 file${selection.rejected.length === 1 ? " was" : "s were"} not added: ${rejectedNames}${selection.rejected.length > 3 ? "…" : ""}`
-      : selection.overLimit.length
-        ? `The first ${LOOP_MP3_QUEUE_LIMIT} MP3 files were added. ${selection.overLimit.length} remained outside this queue.`
-        : null);
+    setExtractError(null);
+    if (notice) toast.error(notice.title, { description: notice.message, duration: 7500 });
     setExtractedFile(`${selection.accepted.length} MP3 ${selection.accepted.length === 1 ? "record" : "records"}`);
-    onMp3QueueReady?.(selection.accepted);
+    onMp3QueueReady?.(selection.accepted, notice ?? undefined);
   }, [onMp3QueueReady]);
 
   const onDrop = useCallback((e: React.DragEvent) => {
@@ -137,7 +141,7 @@ export function TypeGateway({ onSelect, onSelectWithPrefill, onFileReady, onMp3Q
             type="button"
             role="radio"
             aria-checked={intakeMode === "single"}
-            onClick={() => { setIntakeMode("single"); setExtractError(null); }}
+            onClick={() => { setIntakeMode("single"); setExtractError(null); setQueueIntakeNotice(null); }}
             className="min-h-11 rounded-sm px-3 text-xs font-semibold transition-colors"
             style={{ background: intakeMode === "single" ? "rgba(196,154,40,0.16)" : "transparent", color: intakeMode === "single" ? "var(--ln-gold-hot)" : "var(--ln-bone)" }}
           >
@@ -147,7 +151,7 @@ export function TypeGateway({ onSelect, onSelectWithPrefill, onFileReady, onMp3Q
             type="button"
             role="radio"
             aria-checked={intakeMode === "mp3-queue"}
-            onClick={() => { setIntakeMode("mp3-queue"); setExtractError(null); }}
+            onClick={() => { setIntakeMode("mp3-queue"); setExtractError(null); setQueueIntakeNotice(null); }}
             className="min-h-11 rounded-sm px-3 text-xs font-semibold transition-colors"
             style={{ background: intakeMode === "mp3-queue" ? "rgba(196,154,40,0.16)" : "transparent", color: intakeMode === "mp3-queue" ? "var(--ln-gold-hot)" : "var(--ln-bone)" }}
           >
@@ -237,6 +241,21 @@ export function TypeGateway({ onSelect, onSelectWithPrefill, onFileReady, onMp3Q
           </label>
         </RegistrationAssetCard>
       </div>
+
+      {queueIntakeNotice && (
+        <section
+          role="alert"
+          aria-live="assertive"
+          className="relative mb-6 flex w-full max-w-lg gap-3 rounded-sm border px-4 py-3 text-left"
+          style={{ borderColor: "color-mix(in srgb, var(--destructive) 64%, transparent)", background: "color-mix(in srgb, var(--destructive) 12%, var(--ln-coal))" }}
+        >
+          <CircleAlert aria-hidden="true" className="mt-0.5 size-4 shrink-0" style={{ color: "var(--destructive)" }} />
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em]" style={{ color: "var(--destructive-foreground)", fontFamily: "'Cinzel', serif" }}>{queueIntakeNotice.title}</p>
+            <p className="mt-1 text-xs leading-relaxed" style={{ color: "var(--ln-bone)" }}>{queueIntakeNotice.message}</p>
+          </div>
+        </section>
+      )}
 
       {extractError && (
         <p className="relative text-xs mb-6 text-center max-w-md" style={{ color: "#F87171" }}>

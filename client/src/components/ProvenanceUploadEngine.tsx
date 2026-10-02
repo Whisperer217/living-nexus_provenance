@@ -23,7 +23,8 @@ import {
 import { useUploadEngine } from "@/contexts/UploadEngineContext";
 import { usePendingWork } from "@/contexts/PendingWorkContext";
 import { Button } from "@/components/ui/button";
-import { isLoopMp3File } from "@/lib/loopProduct";
+import { describeLoopMp3QueueIntake, isLoopMp3File, prepareLoopMp3Queue, type LoopMp3QueueIntakeNotice } from "@/lib/loopProduct";
+import { toast } from "sonner";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -458,6 +459,7 @@ export default function ProvenanceUploadEngine() {
   const [isDragging, setIsDragging] = useState(false);
   const [works, setWorks] = useState<WorkObject[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
+  const [queueIntakeNotice, setQueueIntakeNotice] = useState<LoopMp3QueueIntakeNotice | null>(null);
 
   // Consume pending files when engine opens
   useEffect(() => {
@@ -646,11 +648,20 @@ export default function ProvenanceUploadEngine() {
     } else {
       // Queue only actual MP3 sources. Every Work still completes the established
       // Detect → disclose → attest → seal → register path individually.
-      const queue = readyWorks.map(toPendingWork).filter((work): work is NonNullable<typeof work> => Boolean(work));
-      if (queue.length > 1 && queue.every((work) => isLoopMp3File(work.file))) {
+      const selection = prepareLoopMp3Queue(readyWorks.map((work) => work.file));
+      const notice = describeLoopMp3QueueIntake(selection);
+      setQueueIntakeNotice(notice);
+      if (notice) toast.error(notice.title, { description: notice.message, duration: 7500 });
+
+      const acceptedIds = new Set(selection.accepted.map(fileId));
+      const acceptedWorks = readyWorks.filter((work) => acceptedIds.has(work.id));
+      const queue = acceptedWorks.map(toPendingWork).filter((work): work is NonNullable<typeof work> => Boolean(work));
+      if (queue.length > 1) {
         setPendingQueue(queue);
         closeEngine();
         navigate("/manifest?type=music&intake=mp3-queue");
+      } else if (acceptedWorks.length === 1) {
+        registerWork(acceptedWorks[0]);
       } else if (readyWorks.length === 0) {
         closeEngine();
         navigate("/manifest");
@@ -728,10 +739,9 @@ export default function ProvenanceUploadEngine() {
               <Button
                 onClick={registerAll}
                 size="sm"
-                disabled={readyCount > 1 && !readyWorksAreMp3}
                 style={{ background: "linear-gradient(135deg, #D4AF37, #B8960C)", color: "#000", fontFamily: "'Cinzel', serif", letterSpacing: "0.08em", fontSize: 11, border: "none" }}
               >
-                {readyCount > 1 ? (readyWorksAreMp3 ? `REVIEW MP3 QUEUE · ${readyCount}` : "QUEUE REQUIRES MP3") : "REGISTER WORK"} <ArrowRight size={12} className="ml-1" />
+                {readyCount > 1 ? (readyWorksAreMp3 ? `REVIEW MP3 QUEUE · ${readyCount}` : `REVIEW MP3S · ${readyCount}`) : "REGISTER WORK"} <ArrowRight size={12} className="ml-1" />
               </Button>
             )}
             <button
@@ -746,6 +756,16 @@ export default function ProvenanceUploadEngine() {
 
         {/* ── Body ── */}
         <div className="flex-1 overflow-y-auto" style={{ minHeight: 0 }}>
+
+          {queueIntakeNotice && (
+            <section role="alert" aria-live="assertive" className="mx-6 mt-4 flex gap-3 rounded-xl border px-4 py-3" style={{ borderColor: "color-mix(in srgb, var(--destructive) 62%, transparent)", background: "color-mix(in srgb, var(--destructive) 12%, var(--ln-coal))" }}>
+              <AlertCircle aria-hidden="true" className="mt-0.5 shrink-0" size={16} style={{ color: "var(--destructive)" }} />
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: "var(--destructive-foreground)", fontFamily: "'Cinzel', serif" }}>{queueIntakeNotice.title}</p>
+                <p className="mt-1 text-[11px] leading-relaxed" style={{ color: "var(--ln-bone)" }}>{queueIntakeNotice.message}</p>
+              </div>
+            </section>
+          )}
 
           {/* Drop zone (always visible) */}
           <div

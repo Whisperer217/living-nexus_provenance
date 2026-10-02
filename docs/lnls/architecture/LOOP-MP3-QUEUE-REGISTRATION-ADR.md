@@ -36,6 +36,12 @@ The source filename and browser MIME declaration are insufficient authority by t
 - The queue is intentionally in memory only. A page refresh, browser close, or cancelled intake does not claim durable recovery. Durable queue recovery requires an authenticated server-side operation with item-level registration receipts and is not introduced here.
 - The queue does not automatically create an album or collection. Existing collection assignment remains an explicit per-Work creator decision.
 
+## Arrangement, Progress, and Intake Feedback
+
+- Before the first review begins, the creator may arrange the in-memory MP3 queue by drag and drop (with keyboard-accessible sorting support) or remove a selected source. This only changes the review order; it does not change file bytes, extracted evidence, disclosure, WID, publication state, or a Collection relationship.
+- Once a record enters the existing Loop review environment, queue order is frozen. The progress display reports completed Works, the current record, and records remaining after the current review; it does not imply that a current or queued source is registered.
+- Non-MP3 selections and selections above the twenty-record limit produce a visible alert and an immediate toast. Accepted records can still be arranged; rejected or excluded sources remain outside the browser-memory queue.
+
 ## Rationale
 
 A multi-file picker must not convert a set of tracks into one provenance claim. Keeping the established Creator Cathedral review and disclosure controls per Work protects the distinction between creator input, extracted evidence, and registry authority.

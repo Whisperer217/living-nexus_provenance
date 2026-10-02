@@ -149,5 +149,8 @@ describe("Music Register presentation contracts", () => {
     expect(studio).toContain("onRegistered");
     expect(music).toContain("Nothing is carried forward automatically.");
     expect(music).toContain("MP3 Queue accepts .mp3 audio only");
+    expect(music).toContain("completed ·");
+    expect(music).toContain('role="progressbar"');
+    expect(studio).toContain("Arrange review order");
   });
 });
