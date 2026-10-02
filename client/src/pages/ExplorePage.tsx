@@ -18,6 +18,7 @@ import type { FeedRow } from "@shared/coreDataTypes";
 import { toast } from "sonner";
 import { usePlayer, type Track } from "@/contexts/PlayerContext";
 import { DepthAtmosphere } from "@/components/atmosphere/DepthAtmosphere";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 function isAudioRow(row: FeedRow): boolean {
   return (row.song.contentType ?? "audio") === "audio";
@@ -452,34 +453,48 @@ function WorkSortControl({ value, onChange }: { value: WorkSort; onChange: (valu
   const selected = WORK_SORT_OPTIONS.find((option) => option.value === value) ?? WORK_SORT_OPTIONS[0];
   const isRegistryOrder = value === "curated";
   return (
-    <label
-      className={`group flex min-h-11 items-center gap-2 rounded-xl border px-3 py-1.5 text-xs transition-[background-color,border-color,color,box-shadow] duration-200 hover:border-[var(--ln-gold-hot)]/75 hover:bg-[var(--ln-gold)]/20 focus-within:border-[var(--ln-gold-hot)] focus-within:ring-2 focus-within:ring-[var(--ln-gold)]/25 sm:min-h-0 sm:gap-1.5 sm:px-2.5 ${
-        isRegistryOrder
-          ? "border-[var(--ln-gold)]/55 bg-[var(--ln-gold)]/15 text-[var(--ln-parchment)]"
-          : "border-white/10 bg-[var(--void-3)] text-[var(--ln-bone)]"
-      }`}
-    >
-      <span className={`transition-colors duration-200 ${isRegistryOrder ? "text-[var(--ln-gold-hot)] group-hover:text-[var(--ln-gold-flame)]" : "text-[var(--ln-gold)] group-hover:text-[var(--ln-gold-hot)]"}`} aria-hidden="true">{selected.icon}</span>
-      <select
-        aria-label="Sort works"
-        value={value}
-        onChange={(event) => onChange(event.target.value as WorkSort)}
-        className={`min-h-11 min-w-[8.75rem] origin-left cursor-pointer touch-manipulation appearance-none bg-transparent pr-1 text-xs font-medium outline-none transition-[color,transform] duration-150 ease-out group-hover:text-[var(--ln-gold-flame)] active:scale-[0.985] active:text-[var(--ln-gold-hot)] motion-reduce:active:scale-100 sm:min-h-0 sm:min-w-0 sm:max-w-none ${
-          isRegistryOrder ? "text-[var(--ln-parchment)]" : "text-[var(--ln-bone)]"
+    <Tooltip>
+      <label
+        className={`group flex min-h-11 items-center gap-2 rounded-xl border px-3 py-1.5 text-xs transition-[background-color,border-color,color,box-shadow] duration-200 hover:border-[var(--ln-gold-hot)]/75 hover:bg-[var(--ln-gold)]/20 focus-within:border-[var(--ln-gold-hot)] focus-within:ring-2 focus-within:ring-[var(--ln-gold)]/25 sm:min-h-0 sm:gap-1.5 sm:px-2.5 ${
+          isRegistryOrder
+            ? "border-[var(--ln-gold)]/55 bg-[var(--ln-gold)]/15 text-[var(--ln-parchment)]"
+            : "border-white/10 bg-[var(--void-3)] text-[var(--ln-bone)]"
         }`}
-        style={{ colorScheme: "dark" }}
       >
-        {WORK_SORT_OPTIONS.map((option) => (
-          <option
-            key={option.value}
-            value={option.value}
-            style={{ background: "var(--ln-coal)", color: "var(--ln-parchment)" }}
+        <span className={`transition-colors duration-200 ${isRegistryOrder ? "text-[var(--ln-gold-hot)] group-hover:text-[var(--ln-gold-flame)]" : "text-[var(--ln-gold)] group-hover:text-[var(--ln-gold-hot)]"}`} aria-hidden="true">{selected.icon}</span>
+        <TooltipTrigger asChild>
+          <select
+            aria-label="Sort works"
+            value={value}
+            onChange={(event) => onChange(event.target.value as WorkSort)}
+            className={`min-h-11 min-w-[8.75rem] origin-left cursor-pointer touch-manipulation appearance-none bg-transparent pr-1 text-xs font-medium outline-none transition-[color,transform] duration-150 ease-out group-hover:text-[var(--ln-gold-flame)] active:scale-[0.985] active:text-[var(--ln-gold-hot)] focus-visible:ring-2 focus-visible:ring-[var(--ln-gold-hot)]/80 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--ln-void)] motion-reduce:active:scale-100 sm:min-h-0 sm:min-w-0 sm:max-w-none ${
+              isRegistryOrder
+                ? "text-[var(--ln-parchment)] group-hover:animate-[ln-registry-order-text-pulse_1.8s_ease-in-out_infinite] motion-reduce:group-hover:animate-none"
+                : "text-[var(--ln-bone)]"
+            }`}
+            style={{ colorScheme: "dark" }}
           >
-            {option.label}
-          </option>
-        ))}
-      </select>
-    </label>
+            {WORK_SORT_OPTIONS.map((option) => (
+              <option
+                key={option.value}
+                value={option.value}
+                style={{ background: "var(--ln-coal)", color: "var(--ln-parchment)" }}
+              >
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </TooltipTrigger>
+      </label>
+      <TooltipContent
+        side="bottom"
+        sideOffset={8}
+        className="max-w-[16rem] text-xs leading-relaxed"
+        style={{ background: "var(--ln-coal)", border: "1px solid var(--ln-gold-dim)", color: "var(--ln-parchment)" }}
+      >
+        Registry order keeps the public Works index in its curated discovery sequence.
+      </TooltipContent>
+    </Tooltip>
   );
 }
 

@@ -56,5 +56,10 @@ describe("Explore public-surface contract", () => {
     expect(exploreSource).toContain("active:scale-[0.985]");
     expect(exploreSource).toContain("active:text-[var(--ln-gold-hot)]");
     expect(exploreSource).toContain("motion-reduce:active:scale-100");
+    expect(exploreSource).toContain("focus-visible:ring-[var(--ln-gold-hot)]/80");
+    expect(exploreSource).toContain("TooltipContent");
+    expect(exploreSource).toContain("curated discovery sequence");
+    expect(exploreSource).toContain("ln-registry-order-text-pulse");
+    expect(exploreSource).toContain("motion-reduce:group-hover:animate-none");
   });
 });
