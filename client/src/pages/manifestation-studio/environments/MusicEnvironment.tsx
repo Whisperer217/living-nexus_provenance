@@ -47,6 +47,7 @@ import {
 } from "@shared/preparedWorkRegistration";
 import { validateHistoricalDates } from "@shared/workHistoricalDates";
 import { applySuggestedWorkGenres, getSuggestedWorkGenres, parseWorkGenres, toggleWorkGenre } from "@shared/workMetadata";
+import { isLoopMp3File } from "@/lib/loopProduct";
 
 const atmosphere = ATMOSPHERES.music;
 
@@ -158,6 +159,13 @@ function ExtractedMetadataStatus({
 interface MusicEnvironmentProps {
   onBack: () => void;
   pendingFile?: File;
+  queueProgress?: {
+    current: number;
+    total: number;
+    completed: number;
+  };
+  /** Returns true only when the parent has safely advanced an in-memory queue. */
+  onRegistered?: (data: { songId?: number; witnessId?: string }, registeredTitle: string) => boolean;
   keeperPrefill?: {
     title?: string;
     genre?: string;
@@ -172,7 +180,7 @@ interface MusicEnvironmentProps {
   };
 }
 
-export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEnvironmentProps) {
+export function MusicEnvironment({ onBack, keeperPrefill, pendingFile, queueProgress, onRegistered }: MusicEnvironmentProps) {
   const [, navigate] = useLocation();
   const { user } = useAuth();
   const utils = trpc.useUtils();
@@ -403,6 +411,7 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
     const formData = new FormData();
     formData.append("type", type);
     formData.append("filename", file.name);
+    if (type === "audio" && queueProgress) formData.append("loopIntake", "mp3-queue");
     formData.append("file", file);
     const res = await fetch("/api/upload-file", { method: "POST", credentials: "include", body: formData });
     if (!res.ok) {
@@ -526,6 +535,7 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
           ? "Published to the registry"
           : "Saved as draft — seal retained"
       );
+      if (onRegistered?.(data ?? {}, title)) return;
       if (data?.songId) navigate(`/song/${data.songId}`);
       else navigate("/manage");
     },
@@ -612,6 +622,14 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
     }
   };
 
+  const ingestCandidateAudio = (file: File) => {
+    if (queueProgress && !isLoopMp3File(file)) {
+      toast.error("MP3 Queue accepts .mp3 audio only. This queue does not replace the single-record audio path.");
+      return;
+    }
+    void ingestAudio(file);
+  };
+
   const canAdvanceFromUpload = !!audioFile;
   const canAdvanceFromMeta =
     !!title.trim() && attested && participation.music && participation.lyrics && participation.voice &&
@@ -671,10 +689,14 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
               title={audioFile ? "Canonical audio received" : "Choose canonical audio"}
               description={audioFile
                 ? "Metadata is ready for your review. Replace only if this is not the file you intend to witness."
-                : "This exact audio file establishes the canonical audio hash used when the Witness ID is sealed."}
+                : queueProgress
+                  ? "This queued record must remain an MP3. Its canonical audio hash will be used only for this Work's Witness ID."
+                  : "This exact audio file establishes the canonical audio hash used when the Witness ID is sealed."}
               status={audioFile
                 ? `Ready for review: ${audioFile.name}`
-                : "Required before you can continue to Details and participation."}
+                : queueProgress
+                  ? `MP3 Queue · record ${queueProgress.current} of ${queueProgress.total}`
+                  : "Required before you can continue to Details and participation."}
               action={
                 <Button
                   type="button"
@@ -692,7 +714,7 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
                 onDrop={(e) => {
                   e.preventDefault();
                   const f = e.dataTransfer.files[0];
-                  if (f?.type.startsWith("audio/")) void ingestAudio(f);
+                  if (f) ingestCandidateAudio(f);
                 }}
                 className="flex min-h-36 cursor-pointer flex-col items-center justify-center gap-3 rounded-sm border border-dashed px-6 py-7 text-center"
                 style={{
@@ -704,12 +726,13 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
                   id="music-register-audio-file"
                   ref={audioInputRef}
                   type="file"
-                  accept="audio/*,.mp3,.wav,.flac,.m4a,.ogg,.aac"
+                  accept={queueProgress ? ".mp3,audio/mpeg,audio/mp3" : "audio/*,.mp3,.wav,.flac,.m4a,.ogg,.aac"}
                   aria-label="Choose canonical audio file"
                   className="sr-only"
                   onChange={(e) => {
                     const f = e.target.files?.[0];
-                    if (f) void ingestAudio(f);
+                    if (f) ingestCandidateAudio(f);
+                    e.target.value = "";
                   }}
                 />
                 {assisting ? (
@@ -729,7 +752,7 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
                   <>
                     <Music className="h-6 w-6 opacity-60" style={{ color: "var(--ln-gold)" }} />
                     <p className="text-sm" style={{ color: "var(--ln-parchment)" }}>
-                      Drop canonical audio (MP3, WAV, FLAC…)
+                      {queueProgress ? "Drop canonical MP3" : "Drop canonical audio (MP3, WAV, FLAC…)"}
                     </p>
                   </>
                 )}
@@ -1394,13 +1417,31 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
     </div>
   );
 
+  const queueNotice = queueProgress ? (
+    <section
+      className="mb-5 rounded-sm border px-4 py-3"
+      aria-label="MP3 queue progress"
+      style={{ borderColor: "color-mix(in srgb, var(--ln-gold) 42%, transparent)", background: "color-mix(in srgb, var(--ln-gold) 7%, var(--ln-coal))" }}
+    >
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-[11px] uppercase tracking-[0.18em]" style={{ color: "var(--ln-gold)", fontFamily: "'Cinzel', serif" }}>
+          MP3 queue · record {queueProgress.current} of {queueProgress.total}
+        </p>
+        <span className="text-xs" style={{ color: "var(--ln-bone)" }}>{queueProgress.completed} completed</span>
+      </div>
+      <p className="mt-1 text-xs leading-relaxed" style={{ color: "color-mix(in srgb, var(--ln-parchment) 68%, transparent)" }}>
+        This Work receives its own metadata review, participation disclosure, attestation, and WID. Nothing is carried forward automatically.
+      </p>
+    </section>
+  ) : null;
+
   return (
     <StudioShell
       atmosphere={atmosphere}
       currentStep={step}
       progress={progress}
       onBack={onBack}
-      leftPanel={renderLeftPanel()}
+      leftPanel={<>{queueNotice}{renderLeftPanel()}</>}
       rightPanel={rightPanel}
     />
   );

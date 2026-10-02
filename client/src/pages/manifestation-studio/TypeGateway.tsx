@@ -4,9 +4,9 @@
 ═══════════════════════════════════════════════════════════════════ */
 
 import { useState, useCallback, useRef } from "react";
-import { Music, Upload, Loader2, Shield } from "lucide-react";
+import { Music, Upload, Loader2, Shield, Layers } from "lucide-react";
 import { extractFileMetadata } from "@/lib/uploadPipeline";
-import { isLoopMusicFile, LOOP_PRODUCT } from "@/lib/loopProduct";
+import { isLoopMusicFile, LOOP_MP3_QUEUE_LIMIT, LOOP_PRODUCT, prepareLoopMp3Queue } from "@/lib/loopProduct";
 import type { KeeperPrefill } from "./ManifestationStudio";
 import { RegistrationAssetCard } from "./RegistrationAssetCard";
 
@@ -21,14 +21,17 @@ interface TypeGatewayProps {
   onSelect: (type: "music") => void;
   onSelectWithPrefill?: (type: "music", prefill: KeeperPrefill) => void;
   onFileReady?: (file: File) => void;
+  onMp3QueueReady?: (files: File[]) => void;
 }
 
-export function TypeGateway({ onSelect, onSelectWithPrefill, onFileReady }: TypeGatewayProps) {
+export function TypeGateway({ onSelect, onSelectWithPrefill, onFileReady, onMp3QueueReady }: TypeGatewayProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [extracting, setExtracting] = useState(false);
   const [extractedFile, setExtractedFile] = useState<string | null>(null);
   const [extractError, setExtractError] = useState<string | null>(null);
+  const [intakeMode, setIntakeMode] = useState<"single" | "mp3-queue">("single");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const queueInputRef = useRef<HTMLInputElement>(null);
 
   const handleFile = useCallback(async (file: File) => {
     if (!isLoopMusicFile(file)) {
@@ -68,12 +71,33 @@ export function TypeGateway({ onSelect, onSelectWithPrefill, onFileReady }: Type
     }
   }, [onSelect, onSelectWithPrefill, onFileReady]);
 
+  const handleQueueFiles = useCallback((files: File[]) => {
+    const selection = prepareLoopMp3Queue(files);
+    const rejectedNames = selection.rejected.slice(0, 3).map((file) => file.name).join(", ");
+
+    if (selection.accepted.length === 0) {
+      setExtractError(rejectedNames
+        ? `MP3 Queue accepts .mp3 audio only. Remove: ${rejectedNames}${selection.rejected.length > 3 ? "…" : ""}`
+        : "Choose one or more MP3 files to begin a queue.");
+      return;
+    }
+
+    setExtractError(selection.rejected.length
+      ? `${selection.rejected.length} non-MP3 file${selection.rejected.length === 1 ? " was" : "s were"} not added: ${rejectedNames}${selection.rejected.length > 3 ? "…" : ""}`
+      : selection.overLimit.length
+        ? `The first ${LOOP_MP3_QUEUE_LIMIT} MP3 files were added. ${selection.overLimit.length} remained outside this queue.`
+        : null);
+    setExtractedFile(`${selection.accepted.length} MP3 ${selection.accepted.length === 1 ? "record" : "records"}`);
+    onMp3QueueReady?.(selection.accepted);
+  }, [onMp3QueueReady]);
+
   const onDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
-    const file = e.dataTransfer.files[0];
-    if (file) handleFile(file);
-  }, [handleFile]);
+    const files = Array.from(e.dataTransfer.files);
+    if (intakeMode === "mp3-queue") handleQueueFiles(files);
+    else if (files[0]) handleFile(files[0]);
+  }, [handleFile, handleQueueFiles, intakeMode]);
 
   return (
     <div className="min-h-[80vh] flex flex-col items-center justify-center px-4 py-12 relative overflow-hidden">
@@ -108,17 +132,43 @@ export function TypeGateway({ onSelect, onSelectWithPrefill, onFileReady }: Type
       </div>
 
       <div className="relative mb-8 w-full max-w-lg">
+        <div className="mb-3 grid grid-cols-2 rounded-sm border p-1" role="radiogroup" aria-label="Registration intake mode" style={{ borderColor: "rgba(196,154,40,0.28)", background: "rgba(0,0,0,0.24)" }}>
+          <button
+            type="button"
+            role="radio"
+            aria-checked={intakeMode === "single"}
+            onClick={() => { setIntakeMode("single"); setExtractError(null); }}
+            className="min-h-11 rounded-sm px-3 text-xs font-semibold transition-colors"
+            style={{ background: intakeMode === "single" ? "rgba(196,154,40,0.16)" : "transparent", color: intakeMode === "single" ? "var(--ln-gold-hot)" : "var(--ln-bone)" }}
+          >
+            One record
+          </button>
+          <button
+            type="button"
+            role="radio"
+            aria-checked={intakeMode === "mp3-queue"}
+            onClick={() => { setIntakeMode("mp3-queue"); setExtractError(null); }}
+            className="min-h-11 rounded-sm px-3 text-xs font-semibold transition-colors"
+            style={{ background: intakeMode === "mp3-queue" ? "rgba(196,154,40,0.16)" : "transparent", color: intakeMode === "mp3-queue" ? "var(--ln-gold-hot)" : "var(--ln-bone)" }}
+          >
+            <Layers aria-hidden="true" className="mr-1 inline size-3.5" /> MP3 queue
+          </button>
+        </div>
         <RegistrationAssetCard
           id="gateway-canonical-audio"
           sectionNumber="01"
           eyebrow="Canonical artifact"
-          title="Choose canonical audio"
-          description="Select the exact track you intend to witness. We read embedded metadata before you confirm the Work."
-          status={extracting ? `Reading ${extractedFile ?? "audio"}…` : "Audio metadata is read before registration; nothing is published from this step."}
+          title={intakeMode === "mp3-queue" ? "Build an MP3 review queue" : "Choose canonical audio"}
+          description={intakeMode === "mp3-queue"
+            ? `Choose up to ${LOOP_MP3_QUEUE_LIMIT} MP3 records. Each opens separately for metadata review, participation disclosure, attestation, WID sealing, and draft/publish choice.`
+            : "Select the exact track you intend to witness. We read embedded metadata before you confirm the Work."}
+          status={intakeMode === "mp3-queue"
+            ? "Queue order is local to this browser. Nothing is uploaded or registered until you complete each Work."
+            : extracting ? `Reading ${extractedFile ?? "audio"}…` : "Audio metadata is read before registration; nothing is published from this step."}
           action={
             <button
               type="button"
-              onClick={() => fileInputRef.current?.click()}
+              onClick={() => (intakeMode === "mp3-queue" ? queueInputRef.current : fileInputRef.current)?.click()}
               disabled={extracting}
               className="min-h-11 w-full rounded-sm border px-4 text-sm font-medium transition-colors hover:border-[var(--ln-gold-hot)] hover:text-[var(--ln-gold-hot)] disabled:cursor-wait disabled:opacity-60 sm:w-auto"
               style={{ borderColor: "rgba(196,154,40,0.45)", color: "var(--ln-parchment)" }}
@@ -127,8 +177,8 @@ export function TypeGateway({ onSelect, onSelectWithPrefill, onFileReady }: Type
             </button>
           }
         >
-          <label
-            htmlFor="gateway-canonical-audio-file"
+            <label
+            htmlFor={intakeMode === "mp3-queue" ? "gateway-mp3-queue-files" : "gateway-canonical-audio-file"}
             className="flex min-h-40 cursor-pointer flex-col items-center justify-center gap-3 rounded-sm border border-dashed px-6 py-8 text-center transition-all duration-300"
             onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
             onDragLeave={() => setIsDragging(false)}
@@ -139,30 +189,51 @@ export function TypeGateway({ onSelect, onSelectWithPrefill, onFileReady }: Type
               boxShadow: isDragging ? "0 0 28px rgba(196,154,40,0.12)" : "none",
             }}
           >
-            <input
+              <input
               id="gateway-canonical-audio-file"
               ref={fileInputRef}
               type="file"
               accept="audio/*,.mp3,.flac,.wav,.ogg,.aac,.m4a,.opus,.aiff"
               className="sr-only"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) handleFile(file);
-              }}
-            />
-            {extracting ? (
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) handleFile(file);
+                  e.target.value = "";
+                }}
+              />
+              <input
+                id="gateway-mp3-queue-files"
+                ref={queueInputRef}
+                type="file"
+                accept=".mp3,audio/mpeg,audio/mp3"
+                multiple
+                className="sr-only"
+                onChange={(e) => {
+                  handleQueueFiles(Array.from(e.target.files ?? []));
+                  e.target.value = "";
+                }}
+              />
+              {extracting ? (
               <Loader2 className="h-8 w-8 animate-spin" style={{ color: "var(--ln-gold)" }} />
             ) : (
               <div className="flex h-12 w-12 items-center justify-center rounded-full" style={{ background: "rgba(196,154,40,0.1)", border: "1px solid rgba(196,154,40,0.3)" }}>
                 {isDragging ? <Upload className="h-5 w-5" style={{ color: "var(--ln-gold)" }} /> : <Music className="h-5 w-5" style={{ color: "var(--ln-gold)" }} />}
               </div>
             )}
-            <div>
-              <p className="text-sm font-medium" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>
-                {extracting ? `Reading ${extractedFile ?? "audio"}…` : isDragging ? "Release to begin" : "Drop canonical audio"}
-              </p>
-              <p className="mt-1 text-xs" style={{ color: "rgba(245,237,216,0.54)" }}>MP3 · WAV · FLAC · AAC · OGG · M4A</p>
-            </div>
+              <div>
+                <p className="text-sm font-medium" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>
+                  {extracting
+                    ? `Reading ${extractedFile ?? "audio"}…`
+                    : isDragging
+                      ? "Release to begin"
+                      : intakeMode === "mp3-queue"
+                        ? "Drop MP3 records for review"
+                        : "Drop canonical audio"}
+                </p>
+                <p className="mt-1 text-xs" style={{ color: "rgba(245,237,216,0.54)" }}>
+                  {intakeMode === "mp3-queue" ? `MP3 only · maximum ${LOOP_MP3_QUEUE_LIMIT} records · review one Work at a time` : "MP3 · WAV · FLAC · AAC · OGG · M4A"}
+                </p>
+              </div>
           </label>
         </RegistrationAssetCard>
       </div>
@@ -173,14 +244,16 @@ export function TypeGateway({ onSelect, onSelectWithPrefill, onFileReady }: Type
         </p>
       )}
 
-      <button
-        type="button"
-        onClick={() => onSelect("music")}
-        className="relative text-sm underline underline-offset-4 transition-opacity hover:opacity-100 opacity-70"
-        style={{ color: "var(--ln-gold)", fontFamily: "'Cormorant Garamond', serif", fontSize: 17 }}
-      >
-        Continue without a file
-      </button>
+      {intakeMode === "single" && (
+        <button
+          type="button"
+          onClick={() => onSelect("music")}
+          className="relative text-sm underline underline-offset-4 transition-opacity hover:opacity-100 opacity-70"
+          style={{ color: "var(--ln-gold)", fontFamily: "'Cormorant Garamond', serif", fontSize: 17 }}
+        >
+          Continue without a file
+        </button>
+      )}
     </div>
   );
 }

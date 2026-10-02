@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-10-02T19:36:25.246Z",
-  "totalLessons": 41,
+  "lastUpdated": "2026-10-02T20:06:06.012Z",
+  "totalLessons": 42,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -956,6 +956,19 @@
         "creator-agency"
       ],
       "id": "LESSON-041"
+    },
+    {
+      "category": "architecture",
+      "summary": "A multi-file audio intake must preserve one Work per review, disclosure, attestation, WID seal, and registration; browser queues are not batch authorship claims.",
+      "source": "Loop MP3 queue registration",
+      "action": "Constrain queue mode to MP3 sources and make server verification mandatory before storage.",
+      "files": [
+        "client/src/pages/manifestation-studio/TypeGateway.tsx",
+        "client/src/pages/manifestation-studio/ManifestationStudio.tsx",
+        "client/src/pages/manifestation-studio/environments/MusicEnvironment.tsx",
+        "server/routes/uploadRoute.ts"
+      ],
+      "id": "LESSON-042"
     }
   ]
 }

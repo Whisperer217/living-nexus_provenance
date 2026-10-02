@@ -137,4 +137,17 @@ describe("Music Register presentation contracts", () => {
     ].map(read).join("\n");
     expect(files).not.toMatch(/songs\.upload|generateWID|setSongPublicationStatus|workEvents|publishSong/);
   });
+
+  it("keeps MP3 queue records inside the same per-Work Cathedral review flow", () => {
+    const gateway = read("client/src/pages/manifestation-studio/TypeGateway.tsx");
+    const studio = read("client/src/pages/manifestation-studio/ManifestationStudio.tsx");
+    const music = read("client/src/pages/manifestation-studio/environments/MusicEnvironment.tsx");
+
+    expect(gateway).toContain("MP3 queue");
+    expect(gateway).toContain("one Work at a time");
+    expect(studio).toContain("onMp3QueueReady");
+    expect(studio).toContain("onRegistered");
+    expect(music).toContain("Nothing is carried forward automatically.");
+    expect(music).toContain("MP3 Queue accepts .mp3 audio only");
+  });
 });

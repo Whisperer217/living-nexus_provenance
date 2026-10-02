@@ -23,6 +23,7 @@ import {
 import { useUploadEngine } from "@/contexts/UploadEngineContext";
 import { usePendingWork } from "@/contexts/PendingWorkContext";
 import { Button } from "@/components/ui/button";
+import { isLoopMp3File } from "@/lib/loopProduct";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -451,7 +452,7 @@ function GroupHeader({ group, onToggle }: { group: Group; onToggle: (id: string)
 export default function ProvenanceUploadEngine() {
   const { isOpen, closeEngine, pendingFiles, clearPending } = useUploadEngine();
   const [, navigate] = useLocation();
-  const { setPendingWork } = usePendingWork();
+  const { setPendingWork, setPendingQueue } = usePendingWork();
   const inputRef = useRef<HTMLInputElement>(null);
   const folderInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -594,14 +595,9 @@ export default function ProvenanceUploadEngine() {
     setGroups(gs => gs.map(g => g.id === id ? { ...g, isExpanded: !g.isExpanded } : g));
   }, []);
 
-  const registerWork = useCallback((work: WorkObject) => {
+  const toPendingWork = useCallback((work: WorkObject) => {
     if (!work.meta) return;
     const { meta } = work;
-    const cat = getCategory(work.file);
-    const typeMap: Record<string, string> = {
-      music: "music", image: "comic", video: "video",
-      document: "manuscript", code: "manuscript", "3d": "manuscript", archive: "manuscript",
-    };
     const detectedType = "music" as const;
     // Map free-form AI platform to the enum value
     const aiDisclosureEnum = ((): "original" | "ai_assisted" | "ai_generated" | "human_authored_ai_instrument" => {
@@ -611,8 +607,7 @@ export default function ProvenanceUploadEngine() {
       if (["chatgpt","claude","gemini"].includes(p)) return "ai_assisted";
       return "human_authored_ai_instrument";
     })();
-    // Store the File object in PendingWorkContext so ManifestationStudio can consume it
-    setPendingWork({
+    return {
       file: work.file,
       type: detectedType,
       meta: {
@@ -630,23 +625,38 @@ export default function ProvenanceUploadEngine() {
         durationSeconds: meta.durationSeconds,
         fileHash: meta.file.sha256,
       },
-    });
+    };
+  }, []);
+
+  const registerWork = useCallback((work: WorkObject) => {
+    const pendingWork = toPendingWork(work);
+    if (!pendingWork) return;
+    // Store the File object in PendingWorkContext so ManifestationStudio can consume it.
+    setPendingWork(pendingWork);
     const params = new URLSearchParams();
-    params.set("type", detectedType);
+    params.set("type", "music");
     closeEngine();
     navigate(`/manifest?${params.toString()}`);
-  }, [closeEngine, navigate]);
+  }, [closeEngine, navigate, setPendingWork, toPendingWork]);
 
   const registerAll = useCallback(() => {
     const readyWorks = works.filter(w => w.stage === "ready");
     if (readyWorks.length === 1) {
       registerWork(readyWorks[0]);
     } else {
-      // For multiple works, register the first one; user can register others after
-      if (readyWorks.length > 0) { registerWork(readyWorks[0]); }
-      else { closeEngine(); navigate("/manifest"); }
+      // Queue only actual MP3 sources. Every Work still completes the established
+      // Detect → disclose → attest → seal → register path individually.
+      const queue = readyWorks.map(toPendingWork).filter((work): work is NonNullable<typeof work> => Boolean(work));
+      if (queue.length > 1 && queue.every((work) => isLoopMp3File(work.file))) {
+        setPendingQueue(queue);
+        closeEngine();
+        navigate("/manifest?type=music&intake=mp3-queue");
+      } else if (readyWorks.length === 0) {
+        closeEngine();
+        navigate("/manifest");
+      }
     }
-  }, [works, registerWork, closeEngine, navigate]);
+  }, [works, registerWork, toPendingWork, setPendingQueue, closeEngine, navigate]);
 
   const onDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -662,6 +672,7 @@ export default function ProvenanceUploadEngine() {
   }, [addFiles]);
 
   const readyCount = works.filter(w => w.stage === "ready").length;
+  const readyWorksAreMp3 = works.filter(w => w.stage === "ready").every((work) => isLoopMp3File(work.file));
   const aiCount = works.filter(w => w.meta?.ai.detected).length;
   const totalCount = works.length;
 
@@ -717,9 +728,10 @@ export default function ProvenanceUploadEngine() {
               <Button
                 onClick={registerAll}
                 size="sm"
+                disabled={readyCount > 1 && !readyWorksAreMp3}
                 style={{ background: "linear-gradient(135deg, #D4AF37, #B8960C)", color: "#000", fontFamily: "'Cinzel', serif", letterSpacing: "0.08em", fontSize: 11, border: "none" }}
               >
-                REGISTER {readyCount > 1 ? `ALL ${readyCount}` : "WORK"} <ArrowRight size={12} className="ml-1" />
+                {readyCount > 1 ? (readyWorksAreMp3 ? `REVIEW MP3 QUEUE · ${readyCount}` : "QUEUE REQUIRES MP3") : "REGISTER WORK"} <ArrowRight size={12} className="ml-1" />
               </Button>
             )}
             <button

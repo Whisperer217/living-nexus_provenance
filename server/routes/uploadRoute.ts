@@ -30,6 +30,7 @@ import { stripAudioMetadata } from "../services/audioMetadataStrip";
 import { parseGcode } from "../services/gcodeParser";
 import { createStorageEvidence, type StorageEvidence } from "../domains/batchUpload/evidenceContracts";
 import { bindVerifiedBatchAsset } from "../domains/batchUpload/service";
+import { assertLoopMp3QueueSource, LoopMp3QueueSourceError } from "../services/mp3QueueVerification";
 
 const router = Router();
 
@@ -81,6 +82,7 @@ router.post("/api/upload-file", async (req: Request, res: Response) => {
   let batchOperationId: string | undefined;
   let batchClientCardId: string | undefined;
   let batchAssetKind: "audio" | "cover" | undefined;
+  let loopIntake: "mp3-queue" | undefined;
   let uploadPromise: Promise<{ url: string; key: string; evidence?: StorageEvidence }> | null = null;
 
   bb.on("field", (name: string, value: string) => {
@@ -89,6 +91,7 @@ router.post("/api/upload-file", async (req: Request, res: Response) => {
     if (name === "batchOperationId") batchOperationId = value;
     if (name === "batchClientCardId") batchClientCardId = value;
     if (name === "batchAssetKind" && (value === "audio" || value === "cover")) batchAssetKind = value;
+    if (name === "loopIntake" && value === "mp3-queue") loopIntake = value;
   });
 
   bb.on("file", (_fieldname: string, fileStream: NodeJS.ReadableStream, info: { filename: string; mimeType: string }) => {
@@ -174,6 +177,9 @@ router.post("/api/upload-file", async (req: Request, res: Response) => {
         fileStream.on("end", async () => {
           try {
             const sourceBuffer = Buffer.concat(chunks);
+            if (loopIntake === "mp3-queue") {
+              await assertLoopMp3QueueSource(sourceBuffer, safeFileName, mimeType);
+            }
             let buffer = sourceBuffer;
             // Strip all ID3/EXIF metadata from audio files before storage
             if (isAudio) {
@@ -240,6 +246,10 @@ router.post("/api/upload-file", async (req: Request, res: Response) => {
         },
       });
     } catch (err: any) {
+      if (err instanceof LoopMp3QueueSourceError || err?.code === "ERR_LOOP_MP3_QUEUE_SOURCE") {
+        res.status(415).json({ error: err.message, code: "ERR_LOOP_MP3_QUEUE_SOURCE" });
+        return;
+      }
       if (err?.code === "NOT_FOUND") {
         res.status(404).json({ error: "Private Batch operation not found", code: "ERR_BATCH_OPERATION_NOT_FOUND" });
         return;

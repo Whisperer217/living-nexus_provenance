@@ -38,12 +38,17 @@ interface PendingWorkContextValue {
   pendingWork: PendingWork | null;
   setPendingWork: (work: PendingWork | null) => void;
   consumePendingWork: () => PendingWork | null;
+  /** Browser-memory only: records are still reviewed and registered one at a time. */
+  pendingQueue: PendingWork[];
+  setPendingQueue: (works: PendingWork[]) => void;
+  consumePendingQueue: () => PendingWork[];
 }
 
 const PendingWorkContext = createContext<PendingWorkContextValue | null>(null);
 
 export function PendingWorkProvider({ children }: { children: ReactNode }) {
   const [pendingWork, setPendingWorkState] = useState<PendingWork | null>(null);
+  const [pendingQueue, setPendingQueueState] = useState<PendingWork[]>([]);
 
   const setPendingWork = useCallback((work: PendingWork | null) => {
     setPendingWorkState(work);
@@ -56,8 +61,18 @@ export function PendingWorkProvider({ children }: { children: ReactNode }) {
     return work;
   }, [pendingWork]);
 
+  const setPendingQueue = useCallback((works: PendingWork[]) => {
+    setPendingQueueState(works);
+  }, []);
+
+  const consumePendingQueue = useCallback((): PendingWork[] => {
+    const works = pendingQueue;
+    setPendingQueueState([]);
+    return works;
+  }, [pendingQueue]);
+
   return (
-    <PendingWorkContext.Provider value={{ pendingWork, setPendingWork, consumePendingWork }}>
+    <PendingWorkContext.Provider value={{ pendingWork, setPendingWork, consumePendingWork, pendingQueue, setPendingQueue, consumePendingQueue }}>
       {children}
     </PendingWorkContext.Provider>
   );

@@ -120,3 +120,5 @@ export function isLoopMusicFile(file: File): boolean {
     ["mp3", "flac", "wav", "ogg", "aac", "m4a", "opus", "aiff"].includes(ext)
   );
 }
+
+export { isLoopMp3File, LOOP_MP3_QUEUE_LIMIT, prepareLoopMp3Queue } from "@shared/loopMp3Queue";
