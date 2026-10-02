@@ -97,7 +97,7 @@ function SortableQueuedMp3({
   return (
     <li
       ref={setNodeRef}
-      className="flex min-h-12 items-center gap-2 rounded-sm border px-2 py-2 transition-[background-color,border-color,box-shadow] duration-200 sm:px-3"
+      className="grid min-h-12 grid-cols-[auto_auto_minmax(0,1fr)] gap-x-2 gap-y-3 rounded-sm border px-2 py-2 transition-[background-color,border-color,box-shadow] duration-200 sm:grid-cols-[auto_auto_minmax(0,1fr)_auto_auto] sm:items-center sm:px-3"
       aria-current={isSelected ? true : undefined}
       onClick={() => onSelect(item.id)}
       onFocusCapture={() => onSelect(item.id)}
@@ -118,15 +118,15 @@ function SortableQueuedMp3({
         type="button"
         aria-label={`Reorder ${item.file.name}`}
         title="Drag or use the keyboard to reorder"
-        className="inline-flex min-h-10 min-w-10 shrink-0 items-center justify-center rounded-sm transition-colors hover:bg-[color-mix(in_srgb,var(--ln-gold)_12%,transparent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ln-gold-hot)]"
+        className="row-start-1 inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-sm transition-colors hover:bg-[color-mix(in_srgb,var(--ln-gold)_12%,transparent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ln-gold-hot)]"
         style={{ color: "var(--ln-gold)" }}
         {...attributes}
         {...listeners}
       >
         <GripVertical aria-hidden="true" className="size-4" />
       </button>
-      <span className="inline-flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold" style={{ color: "var(--ln-coal)", background: "var(--ln-gold)" }}>{position}</span>
-      <div className="min-w-0 flex-1">
+      <span className="row-start-1 inline-flex size-7 shrink-0 items-center justify-center self-center rounded-full text-xs font-semibold" style={{ color: "var(--ln-coal)", background: "var(--ln-gold)" }}>{position}</span>
+      <div className="col-start-3 row-start-1 min-w-0">
         <label className="mb-1 flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.14em]" style={{ color: "var(--ln-smoke)", fontFamily: "'Cinzel', serif" }} htmlFor={`queue-title-${item.id}`}>
           <span>Review title</span>
           {isSelected && <span className="rounded-full border px-1.5 py-0.5 text-[10px] tracking-[0.1em]" style={{ borderColor: "color-mix(in srgb, var(--ln-gold-hot) 64%, transparent)", color: "var(--ln-gold-hot)" }}>Active</span>}
@@ -169,7 +169,7 @@ function SortableQueuedMp3({
         type="button"
         aria-label={`${isPreviewing ? "Pause" : "Preview"} ${item.reviewTitle || item.file.name}`}
         onClick={() => onPreview(item)}
-        className="inline-flex min-h-10 min-w-10 shrink-0 items-center justify-center rounded-sm border transition-colors hover:border-[var(--ln-gold-hot)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ln-gold-hot)]"
+        className="col-start-1 row-start-2 inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-sm border transition-colors hover:border-[var(--ln-gold-hot)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ln-gold-hot)] sm:col-start-4 sm:row-start-1"
         style={{ borderColor: "color-mix(in srgb, var(--ln-gold) 42%, transparent)", color: "var(--ln-gold-hot)", background: isPreviewing ? "color-mix(in srgb, var(--ln-gold) 16%, transparent)" : "transparent" }}
       >
         {isPreviewing ? <Pause aria-hidden="true" className="size-4" /> : <Play aria-hidden="true" className="size-4" />}
@@ -178,7 +178,7 @@ function SortableQueuedMp3({
         type="button"
         aria-label={`Remove ${item.file.name} from the MP3 queue`}
         onClick={() => onRemove(item.id)}
-        className="inline-flex min-h-10 min-w-10 shrink-0 items-center justify-center rounded-sm transition-colors hover:bg-[color-mix(in_srgb,var(--destructive)_14%,transparent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--destructive)]"
+        className="col-start-2 row-start-2 inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-sm transition-colors hover:bg-[color-mix(in_srgb,var(--destructive)_14%,transparent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--destructive)] sm:col-start-5 sm:row-start-1"
         style={{ color: "var(--destructive)" }}
       >
         <Trash2 aria-hidden="true" className="size-4" />

@@ -67,6 +67,10 @@ describe("Loop MP3 queue intake", () => {
     expect(studio).toContain("queueBulkMetadata");
     expect(studio).toContain("0 0 0 2px color-mix(in srgb, var(--ln-gold-hot) 82%, transparent)");
     expect(studio).toContain(">Active</span>");
+    expect(studio).toContain("grid-cols-[auto_auto_minmax(0,1fr)]");
+    expect(studio).toContain("sm:grid-cols-[auto_auto_minmax(0,1fr)_auto_auto]");
+    expect(studio).toContain("col-start-1 row-start-2");
+    expect(studio).toContain("min-h-11 min-w-11");
     expect(studio).toContain('type="range"');
     expect(studio).toContain("Preview position for");
     expect(studio).toContain('event.code === "Space"');
@@ -91,6 +95,8 @@ describe("Loop MP3 queue intake", () => {
     expect(music).toContain("Prefilled for review");
     expect(music).toContain("Creator-proposed shared values for this queued Work");
     expect(music).toContain("Bulk prefill does not alter the source file, embedded metadata, or Witness ID boundary.");
+    expect(music).toContain("line-clamp-2 break-words text-sm leading-snug");
+    expect(music).toContain("loop-queued-work-transition");
     expect(gateway).toContain("describeLoopMp3QueueIntake");
     expect(gateway).toContain('role="alert"');
     expect(engine).toContain("prepareLoopMp3Queue");

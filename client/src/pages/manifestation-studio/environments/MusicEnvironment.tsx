@@ -129,7 +129,7 @@ function ExtractedMetadataStatus({
   if (!extracted && !tooltip) return null;
 
   return (
-    <span className="inline-flex items-center gap-1.5">
+    <span className="inline-flex max-w-full shrink-0 flex-wrap items-center gap-1.5">
       {extracted && (
         <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-[0.12em]" style={{ color: "var(--ln-gold-hot)" }}>
           <Sparkles aria-hidden="true" className="size-3" /> Extracted
@@ -1379,7 +1379,7 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile, queueRevi
   };
 
   const rightPanel = (
-    <div className="space-y-6 p-4">
+    <div className="space-y-6 sm:space-y-7">
       <div className="max-w-lg border-l-2 pl-4" style={{ borderColor: "color-mix(in srgb, var(--ln-gold) 46%, transparent)" }}>
         <p className="text-xs uppercase tracking-[0.22em]" style={{ color: "var(--ln-gold)", fontFamily: "'Cinzel', serif" }}>Work preview</p>
         <p className="mt-2 text-sm leading-relaxed" style={{ color: "var(--ln-bone)" }}>A live reference for the Work you are preparing. Visual presentation remains separate from the canonical audio and Witness ID boundary.</p>
@@ -1416,7 +1416,7 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile, queueRevi
       )}
       {queueProgress && queueBulkPrefillFields.length > 0 && (
         <section
-          className="rounded-sm border px-3 py-3"
+          className="rounded-sm border px-4 py-4 sm:px-5"
           aria-label="Bulk edit metadata prefill"
           style={{
             borderColor: "color-mix(in srgb, var(--ln-gold-hot) 48%, transparent)",
@@ -1424,20 +1424,20 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile, queueRevi
             boxShadow: "inset 0 0 0 1px color-mix(in srgb, var(--ln-gold) 10%, transparent)",
           }}
         >
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <span className="inline-flex items-center gap-1.5 rounded-full border px-2 py-1 text-[10px] uppercase tracking-[0.14em]" style={{ borderColor: "color-mix(in srgb, var(--ln-gold-hot) 58%, transparent)", color: "var(--ln-gold-hot)", fontFamily: "'Cinzel', serif" }}>
+          <div className="flex flex-wrap items-start justify-between gap-2 sm:items-center">
+            <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2 py-1 text-[10px] uppercase tracking-[0.14em]" style={{ borderColor: "color-mix(in srgb, var(--ln-gold-hot) 58%, transparent)", color: "var(--ln-gold-hot)", fontFamily: "'Cinzel', serif" }}>
               <ListChecks aria-hidden="true" className="size-3" /> Bulk edit proposal
             </span>
-            <span className="text-[10px] uppercase tracking-[0.12em]" style={{ color: "var(--ln-smoke)", fontFamily: "'Cinzel', serif" }}>Prefilled for review</span>
+            <span className="max-w-full text-[10px] leading-relaxed uppercase tracking-[0.12em]" style={{ color: "var(--ln-smoke)", fontFamily: "'Cinzel', serif" }}>Prefilled for review</span>
           </div>
           <p className="mt-2 text-xs leading-relaxed" style={{ color: "var(--ln-bone)" }}>
             Creator-proposed shared values for this queued Work. Confirm or edit them in Details before sealing.
           </p>
           <dl className="mt-3 grid gap-2 sm:grid-cols-2">
             {queueBulkPrefillFields.map((field) => (
-              <div key={field.label} className="min-w-0 rounded-sm border px-2 py-1.5" style={{ borderColor: "color-mix(in srgb, var(--ln-gold) 18%, transparent)", background: "color-mix(in srgb, var(--ln-coal) 78%, var(--ln-gold))" }}>
+              <div key={field.label} className="min-w-0 rounded-sm border px-3 py-2" style={{ borderColor: "color-mix(in srgb, var(--ln-gold) 18%, transparent)", background: "color-mix(in srgb, var(--ln-coal) 78%, var(--ln-gold))" }}>
                 <dt className="text-[10px] uppercase tracking-[0.12em]" style={{ color: "var(--ln-smoke)", fontFamily: "'Cinzel', serif" }}>{field.label}</dt>
-                <dd className="mt-0.5 truncate text-xs" title={field.value} style={{ color: "var(--ln-parchment)" }}>{field.value}</dd>
+                <dd className="mt-1 line-clamp-2 break-words text-sm leading-snug [overflow-wrap:anywhere] sm:text-xs" title={field.value} style={{ color: "var(--ln-parchment)" }}>{field.value}</dd>
               </div>
             ))}
           </dl>
@@ -1523,13 +1523,15 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile, queueRevi
   ) : null;
 
   return (
-    <StudioShell
-      atmosphere={atmosphere}
-      currentStep={step}
-      progress={progress}
-      onBack={onBack}
-      leftPanel={<>{queueNotice}{renderLeftPanel()}</>}
-      rightPanel={rightPanel}
-    />
+    <div className={`h-full min-h-0${queueProgress ? " loop-queued-work-transition" : ""}`}>
+      <StudioShell
+        atmosphere={atmosphere}
+        currentStep={step}
+        progress={progress}
+        onBack={onBack}
+        leftPanel={<>{queueNotice}{renderLeftPanel()}</>}
+        rightPanel={rightPanel}
+      />
+    </div>
   );
 }

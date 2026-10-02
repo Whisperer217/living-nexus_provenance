@@ -130,14 +130,34 @@ describe("Music Register presentation contracts", () => {
     const layout = read("client/src/components/layout/MainLayout.tsx");
     const studio = read("client/src/pages/manifestation-studio/ManifestationStudio.tsx");
     expect(shell).toContain("h-full min-h-0 flex flex-col");
-    expect(shell).toContain("min-h-16 items-center gap-4");
-    expect(shell).toContain("min-h-0 flex-1 flex flex-col overflow-hidden lg:flex-row");
-    expect(shell).toContain("max-w-3xl p-6 sm:p-8 lg:px-12 lg:py-10");
+    expect(shell).toContain("min-h-16 items-center gap-2");
+    expect(shell).toContain("flex-1 lg:min-h-0 lg:flex lg:flex-row lg:overflow-hidden");
+    expect(shell).toContain("max-w-3xl p-5 sm:p-8 lg:px-12 lg:py-10");
     expect(shell).toContain('overscrollBehavior: "contain"');
     expect(layout).toContain('const isManifestWorkspace = location === "/manifest" || location.startsWith("/manifest?")');
     expect(layout).toContain("!isManifestWorkspace && <SiteFooter />");
     expect(layout).toContain("min-h-0 flex-1 overflow-y-auto overflow-x-hidden player-scroll-area");
     expect(studio).toContain('document.getElementById("main-scroll")?.scrollTo({ top: 0, behavior: "auto" })');
+  });
+
+  it("returns Loop to one readable mobile flow while preserving desktop panel containment", () => {
+    const shell = read("client/src/pages/manifestation-studio/StudioShell.tsx");
+    const studio = read("client/src/pages/manifestation-studio/ManifestationStudio.tsx");
+    const music = read("client/src/pages/manifestation-studio/environments/MusicEnvironment.tsx");
+    const tokens = read("client/src/index.css");
+
+    expect(shell).toContain("flex-1 lg:min-h-0 lg:flex lg:flex-row lg:overflow-hidden");
+    expect(shell).toContain("lg:overflow-y-auto");
+    expect(shell).toContain("min-w-0 border-t lg:min-h-0");
+    expect(studio).toContain("grid-cols-[auto_auto_minmax(0,1fr)]");
+    expect(studio).toContain("sm:grid-cols-[auto_auto_minmax(0,1fr)_auto_auto]");
+    expect(studio).toContain("min-h-11 min-w-11");
+    expect(music).toContain("loop-queued-work-transition");
+    expect(music).toContain("line-clamp-2 break-words text-sm leading-snug");
+    expect(music).toContain("max-w-full shrink-0 flex-wrap");
+    expect(tokens).toContain("@keyframes loop-queued-work-enter");
+    expect(tokens).toContain(".loop-queued-work-transition");
+    expect(tokens).toContain("animation: none;");
   });
 
   it("allows provenance-aware adornments on canonical historical date controls", () => {
