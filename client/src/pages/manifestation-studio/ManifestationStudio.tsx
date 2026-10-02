@@ -28,6 +28,11 @@ interface QueuedMp3 {
   reviewTitle: string;
 }
 
+interface QueueBulkMetadata {
+  officialArtistName?: string;
+  albumName?: string;
+}
+
 function toQueuedMp3(file: File, index: number): QueuedMp3 {
   return {
     id: `${file.name}-${file.size}-${file.lastModified}-${index}`,
@@ -83,14 +88,18 @@ function SortableQueuedMp3({
   return (
     <li
       ref={setNodeRef}
-      className="flex min-h-12 items-center gap-2 rounded-sm border px-2 py-2 sm:px-3"
+      className="flex min-h-12 items-center gap-2 rounded-sm border px-2 py-2 transition-[background-color,border-color,box-shadow] duration-200 sm:px-3"
       aria-current={isSelected ? true : undefined}
       onClick={() => onSelect(item.id)}
       onFocusCapture={() => onSelect(item.id)}
       style={{
         borderColor: isDragging || isSelected ? "color-mix(in srgb, var(--ln-gold) 70%, transparent)" : "color-mix(in srgb, var(--ln-gold) 22%, transparent)",
         background: isDragging || isSelected ? "color-mix(in srgb, var(--ln-gold) 14%, var(--ln-coal))" : "color-mix(in srgb, var(--ln-coal) 90%, var(--ln-gold))",
-        boxShadow: isDragging ? "0 10px 28px color-mix(in srgb, var(--ln-gold) 18%, transparent)" : "none",
+        boxShadow: isDragging
+          ? "0 10px 28px color-mix(in srgb, var(--ln-gold) 18%, transparent)"
+          : isSelected
+            ? "0 0 0 2px color-mix(in srgb, var(--ln-gold-hot) 82%, transparent), 0 0 20px color-mix(in srgb, var(--ln-gold) 24%, transparent), inset 0 0 0 1px color-mix(in srgb, var(--ln-gold-hot) 25%, transparent)"
+            : "none",
         opacity: isDragging ? 0.92 : 1,
         transform: CSS.Transform.toString(transform),
         transition,
@@ -111,6 +120,7 @@ function SortableQueuedMp3({
       <div className="min-w-0 flex-1">
         <label className="mb-1 flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.14em]" style={{ color: "var(--ln-smoke)", fontFamily: "'Cinzel', serif" }} htmlFor={`queue-title-${item.id}`}>
           <span>Review title</span>
+          {isSelected && <span className="rounded-full border px-1.5 py-0.5 text-[10px] tracking-[0.1em]" style={{ borderColor: "color-mix(in srgb, var(--ln-gold-hot) 64%, transparent)", color: "var(--ln-gold-hot)" }}>Active</span>}
           <span className="rounded-full border px-1.5 py-0.5 text-[10px] tracking-[0.1em]" style={{ borderColor: titleEdited ? "color-mix(in srgb, var(--ln-gold-hot) 54%, transparent)" : "color-mix(in srgb, var(--ln-smoke) 42%, transparent)", color: titleEdited ? "var(--ln-gold-hot)" : "var(--ln-smoke)" }}>
             {titleEdited ? "Edited for review" : "From source filename"}
           </span>
@@ -201,6 +211,8 @@ export default function ManifestationStudio() {
   const [previewPositionSeconds, setPreviewPositionSeconds] = useState(0);
   const [previewDurationSeconds, setPreviewDurationSeconds] = useState(0);
   const [selectedQueueId, setSelectedQueueId] = useState<string | null>(null);
+  const [queueBulkDraft, setQueueBulkDraft] = useState({ officialArtistName: "", albumName: "" });
+  const [queueBulkMetadata, setQueueBulkMetadata] = useState<QueueBulkMetadata>({});
   const { consumePendingWork, consumePendingQueue } = usePendingWork();
   const queuePreviewAudioRef = useRef<HTMLAudioElement | null>(null);
   const queueSensors = useSensors(
@@ -238,6 +250,8 @@ export default function ManifestationStudio() {
     setQueueReviewStarted(false);
     setQueueIntakeNotice(null);
     setSelectedQueueId(null);
+    setQueueBulkDraft({ officialArtistName: "", albumName: "" });
+    setQueueBulkMetadata({});
   };
 
   useEffect(() => () => {
@@ -260,6 +274,8 @@ export default function ManifestationStudio() {
       setQueueComplete(false);
       setQueueReviewStarted(false);
       setPendingFile(null);
+      setQueueBulkDraft({ officialArtistName: "", albumName: "" });
+      setQueueBulkMetadata({});
       setEntered(true);
       return;
     }
@@ -426,6 +442,8 @@ export default function ManifestationStudio() {
           setQueueReviewStarted(false);
           setQueueIntakeNotice(intakeNotice ?? null);
           setPendingFile(null);
+          setQueueBulkDraft({ officialArtistName: "", albumName: "" });
+          setQueueBulkMetadata({});
           setEntered(true);
         }}
       />
@@ -454,6 +472,15 @@ export default function ManifestationStudio() {
 
   const renameQueuedMp3 = (id: string, reviewTitle: string) => {
     setMp3Queue((current) => current.map((item) => item.id === id ? { ...item, reviewTitle } : item));
+  };
+
+  const applyQueueBulkMetadata = () => {
+    const officialArtistName = queueBulkDraft.officialArtistName.trim();
+    const albumName = queueBulkDraft.albumName.trim();
+    setQueueBulkMetadata({
+      ...(officialArtistName ? { officialArtistName } : {}),
+      ...(albumName ? { albumName } : {}),
+    });
   };
 
   const toggleQueuePreview = (item: QueuedMp3) => {
@@ -526,6 +553,31 @@ export default function ManifestationStudio() {
             </section>
           )}
 
+          <section className="mt-5 rounded-sm border px-3 py-3 sm:px-4" style={{ borderColor: "color-mix(in srgb, var(--ln-gold) 28%, transparent)", background: "color-mix(in srgb, var(--ln-gold) 6%, var(--ln-coal))" }} aria-labelledby="queue-bulk-metadata-heading">
+            <div className="flex flex-wrap items-start justify-between gap-2">
+              <div>
+                <p id="queue-bulk-metadata-heading" className="text-xs uppercase tracking-[0.18em]" style={{ color: "var(--ln-gold)", fontFamily: "'Cinzel', serif" }}>Queue metadata proposal</p>
+                <p className="mt-1 text-xs leading-relaxed" style={{ color: "var(--ln-bone)" }}>Propose one artist or album value for each unstarted review. Each Work remains editable and separately attested before sealing.</p>
+              </div>
+              {Object.keys(queueBulkMetadata).length > 0 && <span className="rounded-full border px-2 py-1 text-[10px] uppercase tracking-[0.1em]" style={{ borderColor: "color-mix(in srgb, var(--ln-gold-hot) 52%, transparent)", color: "var(--ln-gold-hot)" }}>Proposal active</span>}
+            </div>
+            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+              <label className="grid gap-1 text-xs uppercase tracking-[0.12em]" style={{ color: "var(--ln-smoke)", fontFamily: "'Cinzel', serif" }}>
+                Artist
+                <input value={queueBulkDraft.officialArtistName} onChange={(event) => setQueueBulkDraft((current) => ({ ...current, officialArtistName: event.target.value }))} placeholder="Artist for queued reviews" className="min-h-10 rounded-sm border bg-transparent px-3 text-sm normal-case tracking-normal outline-none transition-colors focus-visible:border-[var(--ln-gold-hot)] focus-visible:ring-2 focus-visible:ring-[color-mix(in_srgb,var(--ln-gold)_28%,transparent)]" style={{ borderColor: "color-mix(in srgb, var(--ln-gold) 24%, transparent)", color: "var(--ln-parchment)" }} />
+              </label>
+              <label className="grid gap-1 text-xs uppercase tracking-[0.12em]" style={{ color: "var(--ln-smoke)", fontFamily: "'Cinzel', serif" }}>
+                Album
+                <input value={queueBulkDraft.albumName} onChange={(event) => setQueueBulkDraft((current) => ({ ...current, albumName: event.target.value }))} placeholder="Album for queued reviews" className="min-h-10 rounded-sm border bg-transparent px-3 text-sm normal-case tracking-normal outline-none transition-colors focus-visible:border-[var(--ln-gold-hot)] focus-visible:ring-2 focus-visible:ring-[color-mix(in_srgb,var(--ln-gold)_28%,transparent)]" style={{ borderColor: "color-mix(in srgb, var(--ln-gold) 24%, transparent)", color: "var(--ln-parchment)" }} />
+              </label>
+            </div>
+            <div className="mt-3 flex flex-wrap items-center gap-3">
+              <button type="button" onClick={applyQueueBulkMetadata} disabled={!queueBulkDraft.officialArtistName.trim() && !queueBulkDraft.albumName.trim()} className="min-h-10 rounded-sm border px-3 text-xs font-semibold uppercase tracking-[0.1em] transition-colors enabled:hover:border-[var(--ln-gold-hot)] disabled:cursor-not-allowed disabled:opacity-45" style={{ borderColor: "color-mix(in srgb, var(--ln-gold) 52%, transparent)", color: "var(--ln-gold-hot)" }}>Apply to all pending reviews</button>
+              {Object.keys(queueBulkMetadata).length > 0 && <button type="button" onClick={() => { setQueueBulkMetadata({}); setQueueBulkDraft({ officialArtistName: "", albumName: "" }); }} className="min-h-10 rounded-sm border px-3 text-xs uppercase tracking-[0.1em] transition-colors hover:border-[var(--destructive)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--destructive)]" style={{ borderColor: "color-mix(in srgb, var(--ln-smoke) 52%, transparent)", color: "var(--ln-bone)" }}>Clear proposal</button>}
+              <span className="text-xs" style={{ color: "var(--ln-smoke)" }}>No WID, source metadata, or completed record is changed here.</span>
+            </div>
+          </section>
+
           <p id="mp3-queue-order-help" className="mt-5 text-xs" style={{ color: "var(--ln-smoke)" }}>Drag the handle to reorder, preview a selected source locally, and set its review title. Select a queue card, then use Space to play or pause and ←/↑ or →/↓ to move the active record. Source filenames and file bytes remain unchanged until each Work is verified in review.</p>
           <DndContext sensors={queueSensors} collisionDetection={closestCenter} onDragEnd={handleQueueDragEnd}>
             <SortableContext items={mp3Queue.map((item) => item.id)} strategy={verticalListSortingStrategy}>
@@ -572,6 +624,7 @@ export default function ManifestationStudio() {
       keeperPrefill={keeperPrefill ?? undefined}
       pendingFile={pendingFile ?? undefined}
       queueReviewTitle={mp3Queue.length > 0 ? mp3Queue[queueIndex]?.reviewTitle : undefined}
+      queueBulkMetadata={mp3Queue.length > 0 ? queueBulkMetadata : undefined}
       queueProgress={mp3Queue.length > 0 ? {
         current: queueIndex + 1,
         total: mp3Queue.length,

@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-10-02T21:37:31.996Z",
-  "totalLessons": 44,
+  "lastUpdated": "2026-10-02T21:52:25.704Z",
+  "totalLessons": 45,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -1023,6 +1023,29 @@
         "wid-boundary"
       ],
       "id": "LESSON-044"
+    },
+    {
+      "date": "2026-10-02",
+      "category": "ux",
+      "problem": "A creator could arrange and preview an MP3 queue, but setting shared artist or album metadata still required retyping it in every sequential Work review. Arrow-key selection also lacked a visually unmistakable location.",
+      "solution": "Added a browser-memory artist and album proposal that pre-fills only unstarted per-Work reviews, remains editable there, and does not alter source tags, hashes, completed records, disclosures, or WIDs. Added a persistent gold selection ring and Active label to the arrow-key-selected queue card.",
+      "files": [
+        "client/src/pages/manifestation-studio/ManifestationStudio.tsx",
+        "client/src/pages/manifestation-studio/environments/MusicEnvironment.tsx",
+        "server/tests/loopMp3Queue.contract.test.ts",
+        "docs/lnls/architecture/LOOP-MP3-QUEUE-PREVIEW-AND-TITLE-ADR.md"
+      ],
+      "score": 0,
+      "tags": [
+        "loop",
+        "mp3-queue",
+        "bulk-metadata",
+        "artist",
+        "album",
+        "keyboard-focus",
+        "wid-boundary"
+      ],
+      "id": "LESSON-045"
     }
   ]
 }

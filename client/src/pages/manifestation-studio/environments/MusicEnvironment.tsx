@@ -161,6 +161,11 @@ interface MusicEnvironmentProps {
   pendingFile?: File;
   /** Creator-set, pre-review title proposal. It pre-fills the existing Work title input only. */
   queueReviewTitle?: string;
+  /** Creator-set, pre-review artist and album proposal. Each Work remains independently editable. */
+  queueBulkMetadata?: {
+    officialArtistName?: string;
+    albumName?: string;
+  };
   queueProgress?: {
     current: number;
     total: number;
@@ -183,7 +188,7 @@ interface MusicEnvironmentProps {
   };
 }
 
-export function MusicEnvironment({ onBack, keeperPrefill, pendingFile, queueReviewTitle, queueProgress, onRegistered }: MusicEnvironmentProps) {
+export function MusicEnvironment({ onBack, keeperPrefill, pendingFile, queueReviewTitle, queueBulkMetadata, queueProgress, onRegistered }: MusicEnvironmentProps) {
   const [, navigate] = useLocation();
   const { user } = useAuth();
   const utils = trpc.useUtils();
@@ -203,8 +208,8 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile, queueRevi
   const coverInputRef = useRef<HTMLInputElement>(null);
 
   const [title, setTitle] = useState(queueReviewTitle ?? keeperPrefill?.title ?? "");
-  const [officialArtistName, setOfficialArtistName] = useState("");
-  const [albumName, setAlbumName] = useState("");
+  const [officialArtistName, setOfficialArtistName] = useState(queueBulkMetadata?.officialArtistName ?? "");
+  const [albumName, setAlbumName] = useState(queueBulkMetadata?.albumName ?? "");
   const [publisherName, setPublisherName] = useState("");
   const [isrc, setIsrc] = useState("");
   const [collectionId, setCollectionId] = useState<number | null>(null);

@@ -58,6 +58,12 @@ describe("Loop MP3 queue intake", () => {
     expect(studio).toContain(">Review title</span>");
     expect(studio).toContain("Edited for review");
     expect(studio).toContain("From source filename");
+    expect(studio).toContain("Queue metadata proposal");
+    expect(studio).toContain("Apply to all pending reviews");
+    expect(studio).toContain("Clear proposal");
+    expect(studio).toContain("queueBulkMetadata");
+    expect(studio).toContain("0 0 0 2px color-mix(in srgb, var(--ln-gold-hot) 82%, transparent)");
+    expect(studio).toContain(">Active</span>");
     expect(studio).toContain('type="range"');
     expect(studio).toContain("Preview position for");
     expect(studio).toContain('event.code === "Space"');
@@ -72,6 +78,9 @@ describe("Loop MP3 queue intake", () => {
     expect(music).toContain('role="progressbar"');
     expect(music).toContain("awaiting review");
     expect(music).toContain("queueReviewTitle");
+    expect(music).toContain("queueBulkMetadata");
+    expect(music).toContain("queueBulkMetadata?.officialArtistName");
+    expect(music).toContain("queueBulkMetadata?.albumName");
     expect(gateway).toContain("describeLoopMp3QueueIntake");
     expect(gateway).toContain('role="alert"');
     expect(engine).toContain("prepareLoopMp3Queue");
