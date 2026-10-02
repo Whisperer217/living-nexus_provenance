@@ -37,30 +37,59 @@ function toQueuedMp3(file: File, index: number): QueuedMp3 {
   };
 }
 
+function queueSourceTitle(file: File): string {
+  return file.name.replace(/\.[^.]+$/, "");
+}
+
+function formatQueuePreviewTime(seconds: number): string {
+  if (!Number.isFinite(seconds) || seconds < 0) return "0:00";
+  const wholeSeconds = Math.floor(seconds);
+  return `${Math.floor(wholeSeconds / 60)}:${String(wholeSeconds % 60).padStart(2, "0")}`;
+}
+
 function SortableQueuedMp3({
   item,
   position,
   isPreviewing,
+  isPreviewReady,
+  previewPosition,
+  previewDuration,
+  isSelected,
   onPreview,
+  onSeek,
+  onSelect,
   onRename,
   onRemove,
 }: {
   item: QueuedMp3;
   position: number;
   isPreviewing: boolean;
+  isPreviewReady: boolean;
+  previewPosition: number;
+  previewDuration: number;
+  isSelected: boolean;
   onPreview: (item: QueuedMp3) => void;
+  onSeek: (seconds: number) => void;
+  onSelect: (id: string) => void;
   onRename: (id: string, reviewTitle: string) => void;
   onRemove: (id: string) => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id });
+  const sourceTitle = queueSourceTitle(item.file);
+  const titleEdited = item.reviewTitle.trim() !== sourceTitle;
+  const safePreviewDuration = previewDuration > 0 ? previewDuration : 0;
+  const safePreviewPosition = Math.min(Math.max(previewPosition, 0), safePreviewDuration || 0);
 
   return (
     <li
       ref={setNodeRef}
       className="flex min-h-12 items-center gap-2 rounded-sm border px-2 py-2 sm:px-3"
+      aria-current={isSelected ? true : undefined}
+      onClick={() => onSelect(item.id)}
+      onFocusCapture={() => onSelect(item.id)}
       style={{
-        borderColor: isDragging ? "color-mix(in srgb, var(--ln-gold) 70%, transparent)" : "color-mix(in srgb, var(--ln-gold) 22%, transparent)",
-        background: isDragging ? "color-mix(in srgb, var(--ln-gold) 14%, var(--ln-coal))" : "color-mix(in srgb, var(--ln-coal) 90%, var(--ln-gold))",
+        borderColor: isDragging || isSelected ? "color-mix(in srgb, var(--ln-gold) 70%, transparent)" : "color-mix(in srgb, var(--ln-gold) 22%, transparent)",
+        background: isDragging || isSelected ? "color-mix(in srgb, var(--ln-gold) 14%, var(--ln-coal))" : "color-mix(in srgb, var(--ln-coal) 90%, var(--ln-gold))",
         boxShadow: isDragging ? "0 10px 28px color-mix(in srgb, var(--ln-gold) 18%, transparent)" : "none",
         opacity: isDragging ? 0.92 : 1,
         transform: CSS.Transform.toString(transform),
@@ -80,7 +109,12 @@ function SortableQueuedMp3({
       </button>
       <span className="inline-flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold" style={{ color: "var(--ln-coal)", background: "var(--ln-gold)" }}>{position}</span>
       <div className="min-w-0 flex-1">
-        <label className="mb-1 block text-xs uppercase tracking-[0.14em]" style={{ color: "var(--ln-smoke)", fontFamily: "'Cinzel', serif" }} htmlFor={`queue-title-${item.id}`}>Review title</label>
+        <label className="mb-1 flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.14em]" style={{ color: "var(--ln-smoke)", fontFamily: "'Cinzel', serif" }} htmlFor={`queue-title-${item.id}`}>
+          <span>Review title</span>
+          <span className="rounded-full border px-1.5 py-0.5 text-[10px] tracking-[0.1em]" style={{ borderColor: titleEdited ? "color-mix(in srgb, var(--ln-gold-hot) 54%, transparent)" : "color-mix(in srgb, var(--ln-smoke) 42%, transparent)", color: titleEdited ? "var(--ln-gold-hot)" : "var(--ln-smoke)" }}>
+            {titleEdited ? "Edited for review" : "From source filename"}
+          </span>
+        </label>
         <input
           id={`queue-title-${item.id}`}
           value={item.reviewTitle}
@@ -90,6 +124,27 @@ function SortableQueuedMp3({
           aria-describedby={`queue-source-${item.id}`}
         />
         <p id={`queue-source-${item.id}`} className="mt-1 break-all text-xs" style={{ color: "var(--ln-smoke)" }}>Source file: {item.file.name}</p>
+        {isPreviewReady && (
+          <div className="mt-2 rounded-sm border px-2 py-2" style={{ borderColor: "color-mix(in srgb, var(--ln-gold) 20%, transparent)", background: "color-mix(in srgb, var(--ln-gold) 7%, transparent)" }}>
+            <div className="mb-1 flex items-center justify-between gap-3 text-[10px] uppercase tracking-[0.12em]" style={{ color: "var(--ln-smoke)", fontFamily: "'Cinzel', serif" }}>
+              <span>{isPreviewing ? "Previewing" : safePreviewPosition > 0 ? "Preview paused" : "Preview ready"}</span>
+              <span style={{ color: "var(--ln-bone)" }}>{formatQueuePreviewTime(safePreviewPosition)} / {formatQueuePreviewTime(safePreviewDuration)}</span>
+            </div>
+            <input
+              type="range"
+              min="0"
+              max={safePreviewDuration || 0.01}
+              step="0.01"
+              value={safePreviewPosition}
+              disabled={safePreviewDuration <= 0}
+              aria-label={`Preview position for ${item.reviewTitle || item.file.name}`}
+              aria-valuetext={`${formatQueuePreviewTime(safePreviewPosition)} of ${formatQueuePreviewTime(safePreviewDuration)}`}
+              onChange={(event) => onSeek(Number(event.target.value))}
+              className="h-2 w-full cursor-pointer accent-[var(--ln-gold-hot)] disabled:cursor-not-allowed disabled:opacity-45"
+              style={{ accentColor: "var(--ln-gold-hot)" }}
+            />
+          </div>
+        )}
       </div>
       <button
         type="button"
@@ -142,6 +197,10 @@ export default function ManifestationStudio() {
   const [queueReviewStarted, setQueueReviewStarted] = useState(false);
   const [queueIntakeNotice, setQueueIntakeNotice] = useState<LoopMp3QueueIntakeNotice | null>(null);
   const [previewingQueueId, setPreviewingQueueId] = useState<string | null>(null);
+  const [previewQueueId, setPreviewQueueId] = useState<string | null>(null);
+  const [previewPositionSeconds, setPreviewPositionSeconds] = useState(0);
+  const [previewDurationSeconds, setPreviewDurationSeconds] = useState(0);
+  const [selectedQueueId, setSelectedQueueId] = useState<string | null>(null);
   const { consumePendingWork, consumePendingQueue } = usePendingWork();
   const queuePreviewAudioRef = useRef<HTMLAudioElement | null>(null);
   const queueSensors = useSensors(
@@ -149,15 +208,22 @@ export default function ManifestationStudio() {
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
-  const stopQueuePreview = () => {
+  const stopQueuePreview = (clearSource = true) => {
     const audio = queuePreviewAudioRef.current;
     if (audio) {
       audio.pause();
-      audio.currentTime = 0;
-      audio.src = "";
-      queuePreviewAudioRef.current = null;
+      if (clearSource) {
+        audio.currentTime = 0;
+        audio.src = "";
+        queuePreviewAudioRef.current = null;
+      }
     }
     setPreviewingQueueId(null);
+    if (clearSource) {
+      setPreviewQueueId(null);
+      setPreviewPositionSeconds(0);
+      setPreviewDurationSeconds(0);
+    }
   };
 
   const clearQueue = () => {
@@ -171,6 +237,7 @@ export default function ManifestationStudio() {
     setQueueComplete(false);
     setQueueReviewStarted(false);
     setQueueIntakeNotice(null);
+    setSelectedQueueId(null);
   };
 
   useEffect(() => () => {
@@ -237,6 +304,52 @@ export default function ManifestationStudio() {
       window.history.replaceState({}, "", window.location.pathname);
     }
   }, []);
+
+  useEffect(() => {
+    if (mp3Queue.length === 0) {
+      if (selectedQueueId) setSelectedQueueId(null);
+      return;
+    }
+    if (!selectedQueueId || !mp3Queue.some((item) => item.id === selectedQueueId)) {
+      setSelectedQueueId(mp3Queue[0].id);
+    }
+  }, [mp3Queue, selectedQueueId]);
+
+  useEffect(() => {
+    if (!entered || !isAuthenticated || mp3Queue.length === 0 || queueReviewStarted) return;
+
+    const handleQueueShortcut = (event: KeyboardEvent) => {
+      const target = event.target instanceof Element ? event.target : null;
+      if (
+        event.metaKey || event.ctrlKey || event.altKey ||
+        target?.closest("input, textarea, select, button, [role=slider], [contenteditable=true]")
+      ) return;
+
+      const currentIndex = Math.max(0, mp3Queue.findIndex((item) => item.id === selectedQueueId));
+      if (event.code === "Space") {
+        event.preventDefault();
+        const selectedItem = mp3Queue[currentIndex];
+        if (selectedItem) toggleQueuePreview(selectedItem);
+        return;
+      }
+
+      const direction = event.key === "ArrowDown" || event.key === "ArrowRight"
+        ? 1
+        : event.key === "ArrowUp" || event.key === "ArrowLeft"
+          ? -1
+          : 0;
+      if (!direction) return;
+
+      event.preventDefault();
+      const nextIndex = Math.min(Math.max(currentIndex + direction, 0), mp3Queue.length - 1);
+      setSelectedQueueId(mp3Queue[nextIndex].id);
+    };
+
+    window.addEventListener("keydown", handleQueueShortcut);
+    return () => window.removeEventListener("keydown", handleQueueShortcut);
+  // Selection, source queue, and review mode intentionally rebind this local-only handler.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [entered, isAuthenticated, mp3Queue, queueReviewStarted, selectedQueueId]);
 
   if (!isAuthenticated) {
     return (
@@ -335,6 +448,7 @@ export default function ManifestationStudio() {
       setEntered(false);
       return;
     }
+    if (selectedQueueId === id) setSelectedQueueId(next[0]?.id ?? null);
     setMp3Queue(next);
   };
 
@@ -343,16 +457,38 @@ export default function ManifestationStudio() {
   };
 
   const toggleQueuePreview = (item: QueuedMp3) => {
-    if (previewingQueueId === item.id) {
-      stopQueuePreview();
+    const currentAudio = queuePreviewAudioRef.current;
+    if (previewQueueId === item.id && currentAudio) {
+      if (currentAudio.paused) {
+        setPreviewingQueueId(item.id);
+        void currentAudio.play().catch(() => {
+          if (queuePreviewAudioRef.current === currentAudio) setPreviewingQueueId(null);
+        });
+      } else {
+        currentAudio.pause();
+        setPreviewingQueueId(null);
+      }
       return;
     }
 
     stopQueuePreview();
     const audio = new Audio(item.previewUrl);
     queuePreviewAudioRef.current = audio;
+    setPreviewQueueId(item.id);
+    setPreviewPositionSeconds(0);
+    setPreviewDurationSeconds(0);
+    audio.addEventListener("loadedmetadata", () => {
+      if (queuePreviewAudioRef.current === audio) setPreviewDurationSeconds(Number.isFinite(audio.duration) ? audio.duration : 0);
+    });
+    audio.addEventListener("timeupdate", () => {
+      if (queuePreviewAudioRef.current === audio) setPreviewPositionSeconds(audio.currentTime);
+    });
     audio.addEventListener("ended", () => {
-      if (queuePreviewAudioRef.current === audio) stopQueuePreview();
+      if (queuePreviewAudioRef.current === audio) {
+        audio.currentTime = 0;
+        setPreviewPositionSeconds(0);
+        setPreviewingQueueId(null);
+      }
     }, { once: true });
     audio.addEventListener("error", () => {
       if (queuePreviewAudioRef.current === audio) stopQueuePreview();
@@ -361,6 +497,13 @@ export default function ManifestationStudio() {
     void audio.play().catch(() => {
       if (queuePreviewAudioRef.current === audio) stopQueuePreview();
     });
+  };
+
+  const seekQueuePreview = (seconds: number) => {
+    const audio = queuePreviewAudioRef.current;
+    if (!audio || !previewQueueId || !Number.isFinite(seconds)) return;
+    audio.currentTime = seconds;
+    setPreviewPositionSeconds(seconds);
   };
 
   if (mp3Queue.length > 0 && !queueReviewStarted) {
@@ -383,17 +526,23 @@ export default function ManifestationStudio() {
             </section>
           )}
 
-          <p id="mp3-queue-order-help" className="mt-5 text-xs" style={{ color: "var(--ln-smoke)" }}>Drag the handle to reorder, preview a selected source locally, and set its review title. Source filenames and file bytes remain unchanged until each Work is verified in review.</p>
+          <p id="mp3-queue-order-help" className="mt-5 text-xs" style={{ color: "var(--ln-smoke)" }}>Drag the handle to reorder, preview a selected source locally, and set its review title. Select a queue card, then use Space to play or pause and ←/↑ or →/↓ to move the active record. Source filenames and file bytes remain unchanged until each Work is verified in review.</p>
           <DndContext sensors={queueSensors} collisionDetection={closestCenter} onDragEnd={handleQueueDragEnd}>
             <SortableContext items={mp3Queue.map((item) => item.id)} strategy={verticalListSortingStrategy}>
-              <ol aria-label="MP3 Queue review order" aria-describedby="mp3-queue-order-help" className="mt-3 space-y-2">
+              <ol aria-label="MP3 Queue review order" aria-describedby="mp3-queue-order-help" aria-keyshortcuts="Space ArrowLeft ArrowRight ArrowUp ArrowDown" className="mt-3 space-y-2">
                 {mp3Queue.map((item, index) => (
                   <SortableQueuedMp3
                     key={item.id}
                     item={item}
                     position={index + 1}
                     isPreviewing={previewingQueueId === item.id}
+                    isPreviewReady={previewQueueId === item.id}
+                    previewPosition={previewQueueId === item.id ? previewPositionSeconds : 0}
+                    previewDuration={previewQueueId === item.id ? previewDurationSeconds : 0}
+                    isSelected={selectedQueueId === item.id}
                     onPreview={toggleQueuePreview}
+                    onSeek={seekQueuePreview}
+                    onSelect={setSelectedQueueId}
                     onRename={renameQueuedMp3}
                     onRemove={removeQueuedMp3}
                   />

@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-10-02T21:09:08.824Z",
-  "totalLessons": 43,
+  "lastUpdated": "2026-10-02T21:37:31.996Z",
+  "totalLessons": 44,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -1001,6 +1001,28 @@
         "accessibility"
       ],
       "id": "LESSON-043"
+    },
+    {
+      "date": "2026-10-02",
+      "category": "accessibility",
+      "problem": "The local MP3 Queue preview could start and stop audio, but it did not expose playback position, allow creators to scrub a selected source, support low-friction keyboard review, or show whether a proposed Work title diverged from source evidence.",
+      "solution": "Added a browser-only preview progress range with elapsed/duration feedback and seeking, queue-scoped Space and arrow shortcuts that exclude editable and interactive controls, and title-origin labels. Playback state, proposed title, and queue selection remain local; no source bytes, evidence hash, disclosure, WID, server state, or global player queue is changed.",
+      "files": [
+        "client/src/pages/manifestation-studio/ManifestationStudio.tsx",
+        "server/tests/loopMp3Queue.contract.test.ts",
+        "docs/lnls/architecture/LOOP-MP3-QUEUE-PREVIEW-AND-TITLE-ADR.md"
+      ],
+      "score": 0,
+      "tags": [
+        "loop",
+        "mp3-queue",
+        "audio-scrubbing",
+        "keyboard",
+        "aria-keyshortcuts",
+        "title-origin",
+        "wid-boundary"
+      ],
+      "id": "LESSON-044"
     }
   ]
 }

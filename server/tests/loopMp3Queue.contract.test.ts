@@ -55,7 +55,15 @@ describe("Loop MP3 queue intake", () => {
     expect(studio).toContain("sortableKeyboardCoordinates");
     expect(studio).toContain('aria-label="MP3 Queue review order"');
     expect(studio).toContain("URL.createObjectURL(file)");
-    expect(studio).toContain(">Review title</label>");
+    expect(studio).toContain(">Review title</span>");
+    expect(studio).toContain("Edited for review");
+    expect(studio).toContain("From source filename");
+    expect(studio).toContain('type="range"');
+    expect(studio).toContain("Preview position for");
+    expect(studio).toContain('event.code === "Space"');
+    expect(studio).toContain('event.key === "ArrowDown"');
+    expect(studio).toContain('aria-keyshortcuts="Space ArrowLeft ArrowRight ArrowUp ArrowDown"');
+    expect(studio).toContain('target?.closest("input, textarea, select, button, [role=slider], [contenteditable=true]")');
     expect(studio).toContain("Clear all");
     expect(studio).toContain("queueReviewTitle");
     expect(music).toContain("MP3 Queue accepts .mp3 audio only");
