@@ -31,6 +31,13 @@ describe("Explore creator directory", () => {
     expect(explore).not.toContain("href={`/creator/${creator.name}`}");
   });
 
+  it("makes the shared discovery field a creator-aware search without adding a separate eager query", () => {
+    expect(explore).toContain('"Search public creators"');
+    expect(explore).toContain('"Find creators, handles, statements…"');
+    expect(explore).toContain("[creator.name, creator.artistHandle, creator.bio]");
+    expect(explore).toContain("!search && !selectedCreatorId && viewMode === \"list\"");
+  });
+
   it("passes existing creator banners through the public directory without replacing them with Work artwork", () => {
     const creatorReaderStart = creatorDb.indexOf("export async function getAllCreators");
     const creatorReaderEnd = creatorDb.indexOf("// ─── Creator OG", creatorReaderStart);

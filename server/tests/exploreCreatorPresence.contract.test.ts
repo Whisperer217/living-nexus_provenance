@@ -32,6 +32,21 @@ describe("Explore creator presence contract", () => {
     expect(exploreSource).toContain("mt-4 flex items-center justify-between");
   });
 
+  it("adds restrained browse feedback without overriding reduced-motion preferences", () => {
+    expect(exploreSource).toContain("hover:scale-[1.012]");
+    expect(exploreSource).toContain("hover:shadow-[0_16px_36px_rgba(0,0,0,0.28)]");
+    expect(exploreSource).toContain("motion-reduce:transform-none motion-reduce:transition-none");
+  });
+
+  it("uses creator-specific skeletons while public directory data and images are loading", () => {
+    expect(exploreSource).toContain("function CreatorDirectorySkeleton()");
+    expect(exploreSource).toContain('aria-label="Loading public creator domains"');
+    expect(exploreSource).toContain("viewMode === \"creators\" ? (");
+    expect(exploreSource).toContain("<CreatorDirectorySkeleton />");
+    expect(exploreSource).toContain("creator.bannerUrl && !bannerLoaded && !bannerFailed");
+    expect(exploreSource).toContain("!avatarLoaded &&");
+  });
+
   it("opens the existing support drawer only after a visitor requests creator support", () => {
     expect(exploreSource).toContain('import { SupportCreatorDrawer, type SupportTarget }');
     expect(exploreSource).toContain("enabled: supportRequested");

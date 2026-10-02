@@ -556,6 +556,9 @@ function CreatorDirectoryCard({ creator }: { creator: CreatorSummary }) {
   const [supportRequested, setSupportRequested] = useState(false);
   const [supportOpen, setSupportOpen] = useState(false);
   const [bannerFailed, setBannerFailed] = useState(false);
+  const [bannerLoaded, setBannerLoaded] = useState(!creator.bannerUrl);
+  const [avatarFailed, setAvatarFailed] = useState(false);
+  const [avatarLoaded, setAvatarLoaded] = useState(!creator.profilePhotoUrl);
   const supportQuery = trpc.songs.discoverInfinite.useInfiniteQuery(
     { creatorId: creator.id, limit: 1 },
     {
@@ -589,18 +592,29 @@ function CreatorDirectoryCard({ creator }: { creator: CreatorSummary }) {
     }
   }, [supportQuery.isError, supportRequested]);
 
+  useEffect(() => {
+    setBannerFailed(false);
+    setBannerLoaded(!creator.bannerUrl);
+    setAvatarFailed(false);
+    setAvatarLoaded(!creator.profilePhotoUrl);
+  }, [creator.bannerUrl, creator.profilePhotoUrl]);
+
   return (
-    <article className="group relative aspect-[5/4] min-h-72 min-w-0 overflow-hidden rounded-2xl border border-white/8 bg-[var(--void-3)] transition-all hover:-translate-y-0.5 hover:border-[var(--gold)]/35 focus-within:ring-2 focus-within:ring-[var(--gold)]/45">
+    <article className="group relative aspect-[5/4] min-h-72 min-w-0 overflow-hidden rounded-2xl border border-white/8 bg-[var(--void-3)] transition-[transform,border-color,box-shadow] duration-300 ease-out hover:-translate-y-0.5 hover:scale-[1.012] hover:border-[var(--gold)]/35 hover:shadow-[0_16px_36px_rgba(0,0,0,0.28)] focus-within:ring-2 focus-within:ring-[var(--gold)]/45 motion-reduce:transform-none motion-reduce:transition-none">
       {creator.bannerUrl && !bannerFailed && (
         <img
           src={creator.bannerUrl}
           alt=""
           aria-hidden="true"
-          className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.035]"
+          className={`absolute inset-0 h-full w-full object-cover transition-[opacity,transform] duration-700 ease-out group-hover:scale-[1.035] ${bannerLoaded ? "opacity-100" : "opacity-0"}`}
           loading="lazy"
           decoding="async"
-          onError={() => setBannerFailed(true)}
+          onLoad={() => setBannerLoaded(true)}
+          onError={() => { setBannerFailed(true); setBannerLoaded(true); }}
         />
+      )}
+      {creator.bannerUrl && !bannerLoaded && !bannerFailed && (
+        <div aria-hidden="true" className="absolute inset-0 animate-pulse bg-[linear-gradient(120deg,var(--void-3),var(--void-2),var(--void-3))]" />
       )}
       <div
         aria-hidden="true"
@@ -609,16 +623,27 @@ function CreatorDirectoryCard({ creator }: { creator: CreatorSummary }) {
       <div className="relative z-10 flex h-full min-h-0 flex-col p-5 sm:p-6">
         <Link href={`/creator/${routeIdentity}`} className="flex min-h-0 flex-1 flex-col rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--gold)]/75">
           <div className="flex items-center gap-3 min-w-0">
-          {creator.profilePhotoUrl ? (
-            <img src={creator.profilePhotoUrl} alt="" className="h-12 w-12 flex-shrink-0 rounded-full border border-[var(--gold)]/35 object-cover" loading="lazy" decoding="async" />
-          ) : (
-            <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full border border-[var(--gold)]/20 bg-[var(--void-2)]"><Users className="h-5 w-5 text-[var(--stone-shadow)]" /></div>
-          )}
-          <div className="min-w-0 flex-1">
-            <h2 className="ln-subsection-header truncate text-[var(--ln-parchment)] transition-colors group-hover:text-[var(--gold-hot)]" title={identity}>{identity}</h2>
-            <p className="ln-mono mt-0.5 truncate text-[var(--ln-bone)]">{handleLabel}</p>
-          </div>
-          <ChevronRight className="h-4 w-4 flex-shrink-0 text-[var(--ln-bone)] transition-transform group-hover:translate-x-0.5 group-hover:text-[var(--gold)]" aria-hidden="true" />
+            {creator.profilePhotoUrl && !avatarFailed ? (
+              <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-full border border-[var(--gold)]/35 bg-[var(--void-2)]">
+                {!avatarLoaded && <span aria-hidden="true" className="absolute inset-0 animate-pulse bg-[var(--void-1)]" />}
+                <img
+                  src={creator.profilePhotoUrl}
+                  alt=""
+                  className={`h-full w-full object-cover transition-opacity duration-300 ${avatarLoaded ? "opacity-100" : "opacity-0"}`}
+                  loading="lazy"
+                  decoding="async"
+                  onLoad={() => setAvatarLoaded(true)}
+                  onError={() => { setAvatarFailed(true); setAvatarLoaded(true); }}
+                />
+              </div>
+            ) : (
+              <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full border border-[var(--gold)]/20 bg-[var(--void-2)]"><Users className="h-5 w-5 text-[var(--stone-shadow)]" /></div>
+            )}
+            <div className="min-w-0 flex-1">
+              <h2 className="ln-subsection-header truncate text-[var(--ln-parchment)] transition-colors group-hover:text-[var(--gold-hot)]" title={identity}>{identity}</h2>
+              <p className="ln-mono mt-0.5 truncate text-[var(--ln-bone)]">{handleLabel}</p>
+            </div>
+            <ChevronRight className="h-4 w-4 flex-shrink-0 text-[var(--ln-bone)] transition-transform group-hover:translate-x-0.5 group-hover:text-[var(--gold)]" aria-hidden="true" />
           </div>
           {creator.bio ? (
             <div className="mt-5">
@@ -656,13 +681,42 @@ function CreatorDirectoryCard({ creator }: { creator: CreatorSummary }) {
   );
 }
 
+function CreatorDirectorySkeleton() {
+  return (
+    <section className="pt-6" aria-label="Loading public creator domains" aria-busy="true">
+      <div className="mb-4 flex items-end justify-between gap-2">
+        <div className="space-y-2">
+          <div className="h-3 w-24 animate-pulse rounded bg-[var(--void-3)]" />
+          <div className="h-8 w-48 animate-pulse rounded bg-[var(--void-3)]" />
+          <div className="h-4 w-64 animate-pulse rounded bg-[var(--void-3)]" />
+        </div>
+        <div className="h-4 w-20 animate-pulse rounded bg-[var(--void-3)]" />
+      </div>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        {Array.from({ length: 6 }).map((_, index) => (
+          <div key={index} className="relative aspect-[5/4] min-h-72 overflow-hidden rounded-2xl border border-white/8 bg-[var(--void-3)]" aria-hidden="true">
+            <div className="absolute inset-0 animate-pulse bg-[linear-gradient(120deg,var(--void-3),var(--void-2),var(--void-3))]" />
+            <div className="relative flex h-full flex-col p-5 sm:p-6">
+              <div className="flex items-center gap-3"><div className="h-12 w-12 rounded-full bg-[var(--void-1)]" /><div className="space-y-2"><div className="h-4 w-32 rounded bg-[var(--void-1)]" /><div className="h-3 w-20 rounded bg-[var(--void-1)]" /></div></div>
+              <div className="mt-5 space-y-2"><div className="h-3 w-24 rounded bg-[var(--void-1)]" /><div className="h-4 w-full rounded bg-[var(--void-1)]" /><div className="h-4 w-4/5 rounded bg-[var(--void-1)]" /></div>
+              <div className="mt-auto flex items-center justify-between border-t border-white/10 pt-3"><div className="h-3 w-24 rounded bg-[var(--void-1)]" /><div className="h-8 w-24 rounded-lg bg-[var(--void-1)]" /></div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function AllCreatorsView({ creators, search, selectedCreatorId }: { creators: CreatorSummary[]; search: string; selectedCreatorId: number | null }) {
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return creators.filter((creator) => {
       if (selectedCreatorId && creator.id !== selectedCreatorId) return false;
       if (!q) return true;
-      return (creator.name ?? "").toLowerCase().includes(q) || (creator.artistHandle ?? "").toLowerCase().includes(q);
+      return [creator.name, creator.artistHandle, creator.bio]
+        .filter((value): value is string => Boolean(value))
+        .some((value) => value.toLowerCase().includes(q));
     });
   }, [creators, search, selectedCreatorId]);
 
@@ -815,11 +869,11 @@ export default function ExplorePage() {
               </button>
             </div>
           </div>
-          {/* Row 2: Search + creator filter */}
+          {/* Row 2: contextual discovery search + creator filter */}
           <div className="flex items-center gap-2 pb-3">
             <div className="relative flex-shrink-0 w-40 sm:w-64">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[var(--stone-shadow)]" />
-              <input type="text" placeholder="Search works, creators, genres…" value={search} onChange={(e) => setSearch(e.target.value)}
+              <input type="text" aria-label={viewMode === "creators" ? "Search public creators" : "Search works, creators, or genres"} placeholder={viewMode === "creators" ? "Find creators, handles, statements…" : "Search works, creators, genres…"} value={search} onChange={(e) => setSearch(e.target.value)}
                 className="w-full bg-[var(--void-3)] border border-white/10 rounded-xl pl-9 pr-4 py-2 text-sm text-[var(--stone-light)] placeholder:text-[var(--stone-shadow)] focus:outline-none focus:border-[var(--gold)]/40 transition-colors" />
             </div>
             {search && (
@@ -836,7 +890,9 @@ export default function ExplorePage() {
       {/* ── Main content ──────────────────────────────────────────── */}
       <div className="mx-auto max-w-[1360px] px-4 pb-32 sm:px-6">
         {/* Loading state */}
-        {isLoading && (
+        {isLoading && (viewMode === "creators" ? (
+          <CreatorDirectorySkeleton />
+        ) : (
           <div className="pt-8 space-y-6">
             {/* Supplemental row skeletons */}
             {[0, 1].map(i => (
@@ -852,7 +908,7 @@ export default function ExplorePage() {
               ))}
             </div>
           </div>
-        )}
+        ))}
 
         {/* Error state */}
         {loadError && !isLoading && (

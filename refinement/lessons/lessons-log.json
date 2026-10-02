@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-10-02T23:39:58.396Z",
-  "totalLessons": 49,
+  "lastUpdated": "2026-10-02T23:44:33.986Z",
+  "totalLessons": 50,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -1143,6 +1143,24 @@
         "presentation-only"
       ],
       "id": "LESSON-049"
+    },
+    {
+      "problem": "Creator discovery needed stronger browse feedback, a domain-specific discovery prompt, and stable loading affordances without changing the public creator query or loading every creator Work.",
+      "solution": "Added a reduced-motion-safe 1.2% hover scale and shadow, switched the shared discovery field to creator-specific name/handle/statement filtering in creator mode, and introduced fixed-geometry directory plus image-level skeleton states.",
+      "filesChanged": [
+        "client/src/pages/ExplorePage.tsx",
+        "server/tests/exploreCreatorPresence.contract.test.ts",
+        "server/tests/exploreCreatorDirectory.contract.test.ts"
+      ],
+      "scoreDelta": 0,
+      "tags": [
+        "explore",
+        "creator-discovery",
+        "skeleton",
+        "motion",
+        "accessibility"
+      ],
+      "id": "LESSON-050"
     }
   ]
 }
