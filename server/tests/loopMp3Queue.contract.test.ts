@@ -59,6 +59,9 @@ describe("Loop MP3 queue intake", () => {
     expect(studio).toContain("Edited for review");
     expect(studio).toContain("From source filename");
     expect(studio).toContain("Queue metadata proposal");
+    expect(studio).toContain("Publisher");
+    expect(studio).toContain("Original Release Date");
+    expect(studio).toContain('type="date"');
     expect(studio).toContain("Apply to all pending reviews");
     expect(studio).toContain("Clear proposal");
     expect(studio).toContain("queueBulkMetadata");
@@ -81,6 +84,8 @@ describe("Loop MP3 queue intake", () => {
     expect(music).toContain("queueBulkMetadata");
     expect(music).toContain("queueBulkMetadata?.officialArtistName");
     expect(music).toContain("queueBulkMetadata?.albumName");
+    expect(music).toContain("queueBulkMetadata?.publisherName");
+    expect(music).toContain("queueBulkMetadata?.creatorReleaseDate");
     expect(gateway).toContain("describeLoopMp3QueueIntake");
     expect(gateway).toContain('role="alert"');
     expect(engine).toContain("prepareLoopMp3Queue");

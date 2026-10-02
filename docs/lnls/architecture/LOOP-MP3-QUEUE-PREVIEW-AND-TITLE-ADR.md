@@ -10,14 +10,15 @@ The pre-review MP3 Queue may provide three local controls before a record enters
 1. **Preview audio** using a browser object URL created from the selected source, with a local scrub control and elapsed/duration feedback.
 2. **Set a review title** that pre-fills the canonical Work title field.
 3. **Clear all** selected queue records and return to intake.
-4. **Propose artist and album metadata** for all pending reviews, then verify or amend each value inside its own existing Work review.
+4. **Propose artist, album, publisher, and Original Release Date metadata** for all pending reviews, then verify or amend each value inside its own existing Work review.
 
 ## Identity and Registry Boundary
 
 - The preview never enters the global player queue, creates a server request, or changes a registration state.
 - Preview position and playback state exist only in browser memory. Scrubbing does not edit the source file or become provenance evidence.
 - The review title is a creator-controlled proposal for the existing canonical Work title input. It does **not** rename the immutable browser `File`, change source bytes, or alter hash evidence.
-- Queue-level artist and album values are browser-memory proposals that prefill each unstarted Work review. They do **not** overwrite source tags, modify a completed Work, bypass metadata review, or enter a shared WID payload.
+- Queue-level artist, album, publisher, and Original Release Date values are browser-memory proposals that prefill each unstarted Work review. They do **not** overwrite source tags, modify a completed Work, bypass metadata review, or enter a shared WID payload.
+- Publisher persists only through the existing bounded Work-credit mapping; Original Release Date persists only after the existing client and server chronology checks accept it. Neither field is WID-bound.
 - Each record still reaches its own metadata review, participation disclosure, attestation, Witness ID sealing, and draft/publish decision.
 - Clearing the queue revokes temporary object URLs and removes only browser-memory selections. It does not delete, unregister, or alter any Work.
 

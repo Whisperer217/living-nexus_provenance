@@ -43,10 +43,14 @@ describe("Work metadata continuity", () => {
 
     expect(router).toContain("creatorReleaseDate: z.string().optional()");
     expect(router).toContain("creatorReleaseDate: input.creatorReleaseDate");
+    expect(router).toContain("originalReleaseDate: input.creatorReleaseDate");
+    expect(router).toContain("creditsJson: input.creditsJson");
     expect(activeDb).toContain("creatorReleaseDate?: string");
     expect(activeDb).toContain("officialArtistName?: string");
+    expect(activeDb).toContain("creditsJson?: string");
     expect(musicEnvironment).toContain("releaseDate: creationDate");
     expect(musicEnvironment).toContain("creatorReleaseDate,");
+    expect(router).toContain("const historicalDateError = validateHistoricalDates({");
     expect(musicEnvironment).toContain("toggleWorkGenre");
     expect(publicWork).toContain("parseWorkGenres(song.genre)");
     expect(publicWork).toContain("Released {(song as any).creatorReleaseDate}");

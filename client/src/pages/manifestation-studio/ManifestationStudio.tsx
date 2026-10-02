@@ -31,7 +31,16 @@ interface QueuedMp3 {
 interface QueueBulkMetadata {
   officialArtistName?: string;
   albumName?: string;
+  publisherName?: string;
+  creatorReleaseDate?: string;
 }
+
+const EMPTY_QUEUE_BULK_DRAFT = {
+  officialArtistName: "",
+  albumName: "",
+  publisherName: "",
+  creatorReleaseDate: "",
+};
 
 function toQueuedMp3(file: File, index: number): QueuedMp3 {
   return {
@@ -211,7 +220,7 @@ export default function ManifestationStudio() {
   const [previewPositionSeconds, setPreviewPositionSeconds] = useState(0);
   const [previewDurationSeconds, setPreviewDurationSeconds] = useState(0);
   const [selectedQueueId, setSelectedQueueId] = useState<string | null>(null);
-  const [queueBulkDraft, setQueueBulkDraft] = useState({ officialArtistName: "", albumName: "" });
+  const [queueBulkDraft, setQueueBulkDraft] = useState(EMPTY_QUEUE_BULK_DRAFT);
   const [queueBulkMetadata, setQueueBulkMetadata] = useState<QueueBulkMetadata>({});
   const { consumePendingWork, consumePendingQueue } = usePendingWork();
   const queuePreviewAudioRef = useRef<HTMLAudioElement | null>(null);
@@ -250,7 +259,7 @@ export default function ManifestationStudio() {
     setQueueReviewStarted(false);
     setQueueIntakeNotice(null);
     setSelectedQueueId(null);
-    setQueueBulkDraft({ officialArtistName: "", albumName: "" });
+    setQueueBulkDraft(EMPTY_QUEUE_BULK_DRAFT);
     setQueueBulkMetadata({});
   };
 
@@ -274,7 +283,7 @@ export default function ManifestationStudio() {
       setQueueComplete(false);
       setQueueReviewStarted(false);
       setPendingFile(null);
-      setQueueBulkDraft({ officialArtistName: "", albumName: "" });
+      setQueueBulkDraft(EMPTY_QUEUE_BULK_DRAFT);
       setQueueBulkMetadata({});
       setEntered(true);
       return;
@@ -442,7 +451,7 @@ export default function ManifestationStudio() {
           setQueueReviewStarted(false);
           setQueueIntakeNotice(intakeNotice ?? null);
           setPendingFile(null);
-          setQueueBulkDraft({ officialArtistName: "", albumName: "" });
+          setQueueBulkDraft(EMPTY_QUEUE_BULK_DRAFT);
           setQueueBulkMetadata({});
           setEntered(true);
         }}
@@ -477,9 +486,13 @@ export default function ManifestationStudio() {
   const applyQueueBulkMetadata = () => {
     const officialArtistName = queueBulkDraft.officialArtistName.trim();
     const albumName = queueBulkDraft.albumName.trim();
+    const publisherName = queueBulkDraft.publisherName.trim();
+    const creatorReleaseDate = queueBulkDraft.creatorReleaseDate;
     setQueueBulkMetadata({
       ...(officialArtistName ? { officialArtistName } : {}),
       ...(albumName ? { albumName } : {}),
+      ...(publisherName ? { publisherName } : {}),
+      ...(creatorReleaseDate ? { creatorReleaseDate } : {}),
     });
   };
 
@@ -557,7 +570,7 @@ export default function ManifestationStudio() {
             <div className="flex flex-wrap items-start justify-between gap-2">
               <div>
                 <p id="queue-bulk-metadata-heading" className="text-xs uppercase tracking-[0.18em]" style={{ color: "var(--ln-gold)", fontFamily: "'Cinzel', serif" }}>Queue metadata proposal</p>
-                <p className="mt-1 text-xs leading-relaxed" style={{ color: "var(--ln-bone)" }}>Propose one artist or album value for each unstarted review. Each Work remains editable and separately attested before sealing.</p>
+                <p className="mt-1 text-xs leading-relaxed" style={{ color: "var(--ln-bone)" }}>Propose artist, album, publisher, or Original Release Date for each unstarted review. Each Work remains editable, chronology-checked, and separately attested before sealing.</p>
               </div>
               {Object.keys(queueBulkMetadata).length > 0 && <span className="rounded-full border px-2 py-1 text-[10px] uppercase tracking-[0.1em]" style={{ borderColor: "color-mix(in srgb, var(--ln-gold-hot) 52%, transparent)", color: "var(--ln-gold-hot)" }}>Proposal active</span>}
             </div>
@@ -570,11 +583,19 @@ export default function ManifestationStudio() {
                 Album
                 <input value={queueBulkDraft.albumName} onChange={(event) => setQueueBulkDraft((current) => ({ ...current, albumName: event.target.value }))} placeholder="Album for queued reviews" className="min-h-10 rounded-sm border bg-transparent px-3 text-sm normal-case tracking-normal outline-none transition-colors focus-visible:border-[var(--ln-gold-hot)] focus-visible:ring-2 focus-visible:ring-[color-mix(in_srgb,var(--ln-gold)_28%,transparent)]" style={{ borderColor: "color-mix(in srgb, var(--ln-gold) 24%, transparent)", color: "var(--ln-parchment)" }} />
               </label>
+              <label className="grid gap-1 text-xs uppercase tracking-[0.12em]" style={{ color: "var(--ln-smoke)", fontFamily: "'Cinzel', serif" }}>
+                Publisher
+                <input value={queueBulkDraft.publisherName} onChange={(event) => setQueueBulkDraft((current) => ({ ...current, publisherName: event.target.value }))} placeholder="Publisher or label for queued reviews" className="min-h-10 rounded-sm border bg-transparent px-3 text-sm normal-case tracking-normal outline-none transition-colors focus-visible:border-[var(--ln-gold-hot)] focus-visible:ring-2 focus-visible:ring-[color-mix(in_srgb,var(--ln-gold)_28%,transparent)]" style={{ borderColor: "color-mix(in srgb, var(--ln-gold) 24%, transparent)", color: "var(--ln-parchment)" }} />
+              </label>
+              <label className="grid gap-1 text-xs uppercase tracking-[0.12em]" style={{ color: "var(--ln-smoke)", fontFamily: "'Cinzel', serif" }}>
+                Original Release Date
+                <input type="date" value={queueBulkDraft.creatorReleaseDate} onChange={(event) => setQueueBulkDraft((current) => ({ ...current, creatorReleaseDate: event.target.value }))} className="min-h-10 rounded-sm border bg-transparent px-3 text-sm normal-case tracking-normal outline-none transition-colors focus-visible:border-[var(--ln-gold-hot)] focus-visible:ring-2 focus-visible:ring-[color-mix(in_srgb,var(--ln-gold)_28%,transparent)]" style={{ borderColor: "color-mix(in srgb, var(--ln-gold) 24%, transparent)", color: "var(--ln-parchment)", colorScheme: "dark" }} />
+              </label>
             </div>
             <div className="mt-3 flex flex-wrap items-center gap-3">
-              <button type="button" onClick={applyQueueBulkMetadata} disabled={!queueBulkDraft.officialArtistName.trim() && !queueBulkDraft.albumName.trim()} className="min-h-10 rounded-sm border px-3 text-xs font-semibold uppercase tracking-[0.1em] transition-colors enabled:hover:border-[var(--ln-gold-hot)] disabled:cursor-not-allowed disabled:opacity-45" style={{ borderColor: "color-mix(in srgb, var(--ln-gold) 52%, transparent)", color: "var(--ln-gold-hot)" }}>Apply to all pending reviews</button>
-              {Object.keys(queueBulkMetadata).length > 0 && <button type="button" onClick={() => { setQueueBulkMetadata({}); setQueueBulkDraft({ officialArtistName: "", albumName: "" }); }} className="min-h-10 rounded-sm border px-3 text-xs uppercase tracking-[0.1em] transition-colors hover:border-[var(--destructive)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--destructive)]" style={{ borderColor: "color-mix(in srgb, var(--ln-smoke) 52%, transparent)", color: "var(--ln-bone)" }}>Clear proposal</button>}
-              <span className="text-xs" style={{ color: "var(--ln-smoke)" }}>No WID, source metadata, or completed record is changed here.</span>
+              <button type="button" onClick={applyQueueBulkMetadata} disabled={!queueBulkDraft.officialArtistName.trim() && !queueBulkDraft.albumName.trim() && !queueBulkDraft.publisherName.trim() && !queueBulkDraft.creatorReleaseDate} className="min-h-10 rounded-sm border px-3 text-xs font-semibold uppercase tracking-[0.1em] transition-colors enabled:hover:border-[var(--ln-gold-hot)] disabled:cursor-not-allowed disabled:opacity-45" style={{ borderColor: "color-mix(in srgb, var(--ln-gold) 52%, transparent)", color: "var(--ln-gold-hot)" }}>Apply to all pending reviews</button>
+              {Object.keys(queueBulkMetadata).length > 0 && <button type="button" onClick={() => { setQueueBulkMetadata({}); setQueueBulkDraft(EMPTY_QUEUE_BULK_DRAFT); }} className="min-h-10 rounded-sm border px-3 text-xs uppercase tracking-[0.1em] transition-colors hover:border-[var(--destructive)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--destructive)]" style={{ borderColor: "color-mix(in srgb, var(--ln-smoke) 52%, transparent)", color: "var(--ln-bone)" }}>Clear proposal</button>}
+              <span className="text-xs" style={{ color: "var(--ln-smoke)" }}>Publisher is saved as a Work credit; date validity is checked again by the registration server. No WID, source metadata, or completed record changes here.</span>
             </div>
           </section>
 

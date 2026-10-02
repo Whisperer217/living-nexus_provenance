@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-10-02T21:52:25.704Z",
-  "totalLessons": 45,
+  "lastUpdated": "2026-10-02T22:02:41.665Z",
+  "totalLessons": 46,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -1046,6 +1046,33 @@
         "wid-boundary"
       ],
       "id": "LESSON-045"
+    },
+    {
+      "date": "2026-10-02",
+      "category": "registry",
+      "problem": "Batch queue review could propose artist and album metadata but required duplicate publisher and Original Release Date entry even when those values were shared. The permanence path needed evidence that bulk review does not become a bulk persistence bypass.",
+      "solution": "Extended the local queue proposal to publisher and Original Release Date. Each unstarted MusicEnvironment review pre-fills the values but remains individually editable and subject to client/server chronology checks. Publisher travels through the established bounded Work-credit mapping; Original Release Date persists through the established creator-date field and append-only declaration event. Neither value enters WID serialization.",
+      "files": [
+        "client/src/pages/manifestation-studio/ManifestationStudio.tsx",
+        "client/src/pages/manifestation-studio/environments/MusicEnvironment.tsx",
+        "shared/preparedWorkRegistration.ts",
+        "server/routers/songs.ts",
+        "server/utils/db.ts",
+        "server/tests/loopMp3Queue.contract.test.ts",
+        "server/tests/workMetadataContinuity.test.ts"
+      ],
+      "score": 0,
+      "tags": [
+        "loop",
+        "mp3-queue",
+        "publisher",
+        "original-release-date",
+        "work-credits",
+        "historical-dates",
+        "backend-continuity",
+        "wid-boundary"
+      ],
+      "id": "LESSON-046"
     }
   ]
 }

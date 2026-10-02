@@ -161,10 +161,12 @@ interface MusicEnvironmentProps {
   pendingFile?: File;
   /** Creator-set, pre-review title proposal. It pre-fills the existing Work title input only. */
   queueReviewTitle?: string;
-  /** Creator-set, pre-review artist and album proposal. Each Work remains independently editable. */
+  /** Creator-set, pre-review editorial proposal. Each Work remains independently editable and date-validated. */
   queueBulkMetadata?: {
     officialArtistName?: string;
     albumName?: string;
+    publisherName?: string;
+    creatorReleaseDate?: string;
   };
   queueProgress?: {
     current: number;
@@ -210,12 +212,12 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile, queueRevi
   const [title, setTitle] = useState(queueReviewTitle ?? keeperPrefill?.title ?? "");
   const [officialArtistName, setOfficialArtistName] = useState(queueBulkMetadata?.officialArtistName ?? "");
   const [albumName, setAlbumName] = useState(queueBulkMetadata?.albumName ?? "");
-  const [publisherName, setPublisherName] = useState("");
+  const [publisherName, setPublisherName] = useState(queueBulkMetadata?.publisherName ?? "");
   const [isrc, setIsrc] = useState("");
   const [collectionId, setCollectionId] = useState<number | null>(null);
   const [genre, setGenre] = useState(keeperPrefill?.genre ?? "");
   const [creationDate, setCreationDate] = useState("");
-  const [creatorReleaseDate, setCreatorReleaseDate] = useState("");
+  const [creatorReleaseDate, setCreatorReleaseDate] = useState(queueBulkMetadata?.creatorReleaseDate ?? "");
   const [bpm, setBpm] = useState("");
   const [keySignature, setKeySignature] = useState("");
   const [lyrics, setLyrics] = useState(keeperPrefill?.lyrics ?? "");
