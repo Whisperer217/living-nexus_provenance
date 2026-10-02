@@ -5910,6 +5910,23 @@ export async function getWitnessSubscription(witnessId: number, creatorId: numbe
   return rows[0] ?? null;
 }
 
+/**
+ * Read a viewer's existing publication subscriptions for a bounded creator
+ * directory. This prevents one protected status request for every card.
+ */
+export async function getWitnessSubscriptionsForCreators(witnessId: number, creatorIds: number[]) {
+  const db = await getDb();
+  const uniqueCreatorIds = Array.from(new Set(creatorIds)).filter((creatorId) => Number.isInteger(creatorId) && creatorId > 0);
+  if (!db || uniqueCreatorIds.length === 0) return [];
+  return db
+    .select({ creatorId: witnessSubscriptions.creatorId, tier: witnessSubscriptions.tier })
+    .from(witnessSubscriptions)
+    .where(and(
+      eq(witnessSubscriptions.witnessId, witnessId),
+      inArray(witnessSubscriptions.creatorId, uniqueCreatorIds),
+    ));
+}
+
 /** Count how many subscribers (all tiers) a creator has in the Witness Subscription system. */
 export async function getSubscriberCount(creatorId: number): Promise<number> {
   const db = await getDb();

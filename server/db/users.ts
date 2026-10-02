@@ -274,7 +274,9 @@ export async function getAllCreators() {
       stripeAccountStatus: users.stripeAccountStatus,
       isPinned: users.isPinned,
       role: users.role,
+      createdAt: users.createdAt,
       publishedCount: sql<number>`count(${songs.id})`,
+      totalPlays: sql<number>`coalesce(sum(${songs.playCount}), 0)`,
     })
     .from(users)
     .innerJoin(songs, and(
@@ -308,7 +310,12 @@ export async function getAllCreators() {
     ))
     .groupBy(songs.userId);
   const widMap = new Map(widCounts.map((r: { userId: number | null; count: number }) => [r.userId, Number(r.count)]));
-  return results.map((r: typeof results[number]) => ({ ...r, widCount: widMap.get(r.id) ?? 0 }));
+  return results.map((r: typeof results[number]) => ({
+    ...r,
+    publishedCount: Number(r.publishedCount ?? 0),
+    totalPlays: Number(r.totalPlays ?? 0),
+    widCount: widMap.get(r.id) ?? 0,
+  }));
 }
 
 // ─── Creator OG Nomination Card ───────────────────────────────────────────────

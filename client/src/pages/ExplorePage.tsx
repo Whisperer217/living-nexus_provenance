@@ -4,13 +4,14 @@
 ═══════════════════════════════════════════════════════════════════════════ */
 import React, { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { Link, useLocation, useParams, useSearch } from "wouter";
 import {
   Search, RefreshCw, Shield, Music, Eye, Flame,
   Sparkles, Star, ChevronRight, ChevronLeft, LayoutList,
   FileText, Users, X, Lock, ArrowDownAZ, CalendarArrowDown, UserRound,
-  Play, FileAudio, File, Heart, Loader2,
+  Play, FileAudio, File, Heart, Loader2, UserPlus, UserCheck,
 } from "lucide-react";
 import { WorkListRow, type WorkListRowItem } from "@/components/WorkListRow";
 import { SupportCreatorDrawer, type SupportTarget } from "@/components/SupportCreatorDrawer";
@@ -38,12 +39,18 @@ const SUPPLEMENTAL_SECTIONS = [
 type SupplementalKey = typeof SUPPLEMENTAL_SECTIONS[number]["key"];
 type ViewMode = "list" | "creators";
 type WorkSort = "curated" | "newest" | "title" | "creator";
+type CreatorSort = "newest" | "popular";
 
 const WORK_SORT_OPTIONS: { value: WorkSort; label: string; icon: React.ReactNode }[] = [
   { value: "curated", label: "Registry order", icon: <Sparkles className="h-3.5 w-3.5" /> },
   { value: "newest", label: "Newest", icon: <CalendarArrowDown className="h-3.5 w-3.5" /> },
   { value: "title", label: "Title A–Z", icon: <ArrowDownAZ className="h-3.5 w-3.5" /> },
   { value: "creator", label: "Creator A–Z", icon: <UserRound className="h-3.5 w-3.5" /> },
+];
+
+const CREATOR_SORT_OPTIONS: { value: CreatorSort; label: string; icon: React.ReactNode }[] = [
+  { value: "newest", label: "Newest creators", icon: <CalendarArrowDown className="h-3.5 w-3.5" /> },
+  { value: "popular", label: "Most popular", icon: <Flame className="h-3.5 w-3.5" /> },
 ];
 
 function getInitialViewMode(): ViewMode {
@@ -257,6 +264,8 @@ type CreatorSummary = {
   bio: string | null;
   stripeAccountStatus: string | null;
   publishedCount: number;
+  totalPlays: number;
+  createdAt: Date | string | null;
 };
 function CreatorFilter({ creators, selected, onSelect }: { creators: CreatorSummary[]; selected: number | null; onSelect: (id: number | null) => void }) {
   const [open, setOpen] = useState(false);
@@ -499,6 +508,28 @@ function WorkSortControl({ value, onChange }: { value: WorkSort; onChange: (valu
   );
 }
 
+function CreatorSortControl({ value, onChange }: { value: CreatorSort; onChange: (value: CreatorSort) => void }) {
+  const selected = CREATOR_SORT_OPTIONS.find((option) => option.value === value) ?? CREATOR_SORT_OPTIONS[0];
+  return (
+    <label className="group flex min-h-11 items-center gap-2 rounded-xl border border-[var(--ln-gold)]/35 bg-[var(--ln-gold)]/10 px-3 py-1.5 text-xs text-[var(--ln-parchment)] transition-[background-color,border-color] duration-200 hover:border-[var(--ln-gold-hot)]/75 hover:bg-[var(--ln-gold)]/15 focus-within:border-[var(--ln-gold-hot)] focus-within:ring-2 focus-within:ring-[var(--ln-gold)]/25 sm:min-h-0 sm:gap-1.5 sm:px-2.5">
+      <span className="text-[var(--ln-gold-hot)]" aria-hidden="true">{selected.icon}</span>
+      <select
+        aria-label="Sort creators"
+        value={value}
+        onChange={(event) => onChange(event.target.value as CreatorSort)}
+        className="min-h-11 min-w-[8.75rem] cursor-pointer touch-manipulation appearance-none bg-transparent pr-1 text-xs font-medium text-[var(--ln-parchment)] outline-none transition-colors focus-visible:ring-2 focus-visible:ring-[var(--ln-gold-hot)]/80 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--ln-void)] sm:min-h-0 sm:min-w-0"
+        style={{ colorScheme: "dark" }}
+      >
+        {CREATOR_SORT_OPTIONS.map((option) => (
+          <option key={option.value} value={option.value} style={{ background: "var(--ln-coal)", color: "var(--ln-parchment)" }}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
 // ── All-works list view (progressive Registry index) ───────────────────────
 function AllWorksListView({
   rows,
@@ -549,10 +580,28 @@ function AllWorksListView({
 }
 
 // ── Creator view (public creator directory; independent of the track feed) ─
-function CreatorDirectoryCard({ creator }: { creator: CreatorSummary }) {
+type CreatorSubscriptionTier = "witness" | "reserve" | "steward" | null;
+
+function CreatorDirectoryCard({
+  creator,
+  followTier,
+  viewerId,
+  followPending,
+  onFollowToggle,
+}: {
+  creator: CreatorSummary;
+  followTier: CreatorSubscriptionTier;
+  viewerId?: number;
+  followPending: boolean;
+  onFollowToggle: (creatorId: number, creatorName: string) => void;
+}) {
   const identity = creator.name ?? creator.artistHandle ?? `Creator ${creator.id}`;
   const handleLabel = creator.artistHandle ? `@${creator.artistHandle}` : "Creator domain";
   const routeIdentity = creator.artistHandle || creator.id;
+  const followsByWitnessTier = followTier === "witness";
+  const hasManagedSubscription = followTier === "reserve" || followTier === "steward";
+  const followLabel = followTier === "witness" ? "Following" : followTier ? "Subscribed" : "Follow";
+  const canFollowCreator = viewerId !== creator.id;
   const [supportRequested, setSupportRequested] = useState(false);
   const [supportOpen, setSupportOpen] = useState(false);
   const [bannerFailed, setBannerFailed] = useState(false);
@@ -657,6 +706,23 @@ function CreatorDirectoryCard({ creator }: { creator: CreatorSummary }) {
         <div className="mt-4 flex items-center justify-between gap-3 border-t border-white/15 pt-3">
           <span className="ln-caption text-[var(--ln-bone)]">{creator.publishedCount} published work{creator.publishedCount === 1 ? "" : "s"}</span>
           <div className="flex items-center gap-2">
+            {canFollowCreator && (
+              <button
+                type="button"
+                onClick={() => onFollowToggle(creator.id, identity)}
+                disabled={followPending || hasManagedSubscription}
+                title={hasManagedSubscription ? "This creator is already managed through a higher subscription tier." : "Follow keeps you informed when this creator publishes."}
+                className={`inline-flex min-h-8 items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
+                  followsByWitnessTier || hasManagedSubscription
+                    ? "border-[var(--gold)]/45 bg-[var(--gold)]/15 text-[var(--gold-hot)]"
+                    : "border-white/15 bg-black/10 text-[var(--ln-bone)] hover:border-[var(--gold)]/35 hover:text-[var(--gold-hot)]"
+                }`}
+                aria-label={`${followLabel} ${identity}`}
+              >
+                {followPending ? <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" /> : followsByWitnessTier || hasManagedSubscription ? <UserCheck className="h-3 w-3" aria-hidden="true" /> : <UserPlus className="h-3 w-3" aria-hidden="true" />}
+                {followLabel}
+              </button>
+            )}
             <button
               type="button"
               onClick={() => setSupportRequested(true)}
@@ -708,17 +774,44 @@ function CreatorDirectorySkeleton() {
   );
 }
 
-function AllCreatorsView({ creators, search, selectedCreatorId }: { creators: CreatorSummary[]; search: string; selectedCreatorId: number | null }) {
+function AllCreatorsView({
+  creators,
+  search,
+  selectedCreatorId,
+  sort,
+  subscriptionTiers,
+  viewerId,
+  followingCreatorId,
+  onFollowToggle,
+}: {
+  creators: CreatorSummary[];
+  search: string;
+  selectedCreatorId: number | null;
+  sort: CreatorSort;
+  subscriptionTiers: Record<number, CreatorSubscriptionTier>;
+  viewerId?: number;
+  followingCreatorId: number | null;
+  onFollowToggle: (creatorId: number, creatorName: string) => void;
+}) {
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return creators.filter((creator) => {
+    const matched = creators.filter((creator) => {
       if (selectedCreatorId && creator.id !== selectedCreatorId) return false;
       if (!q) return true;
       return [creator.name, creator.artistHandle, creator.bio]
         .filter((value): value is string => Boolean(value))
         .some((value) => value.toLowerCase().includes(q));
     });
-  }, [creators, search, selectedCreatorId]);
+    return matched.sort((a, b) => {
+      if (sort === "popular") {
+        const playDelta = b.totalPlays - a.totalPlays;
+        return playDelta || b.publishedCount - a.publishedCount || a.id - b.id;
+      }
+      const aCreated = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const bCreated = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return bCreated - aCreated || b.id - a.id;
+    });
+  }, [creators, search, selectedCreatorId, sort]);
 
   return (
     <section className="pt-6" aria-labelledby="browse-creators-heading">
@@ -732,7 +825,16 @@ function AllCreatorsView({ creators, search, selectedCreatorId }: { creators: Cr
       </div>
       {filtered.length > 0 ? (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
-          {filtered.map((creator) => <CreatorDirectoryCard key={creator.id} creator={creator} />)}
+          {filtered.map((creator) => (
+            <CreatorDirectoryCard
+              key={creator.id}
+              creator={creator}
+              followTier={subscriptionTiers[creator.id] ?? null}
+              viewerId={viewerId}
+              followPending={followingCreatorId === creator.id}
+              onFollowToggle={onFollowToggle}
+            />
+          ))}
         </div>
       ) : (
         <div className="rounded-2xl border border-white/8 bg-[var(--void-3)] px-5 py-12 text-center">
@@ -749,6 +851,8 @@ function AllCreatorsView({ creators, search, selectedCreatorId }: { creators: Cr
 export default function ExplorePage() {
   const params = useParams<{ medium?: string }>();
   const routeSearch = useSearch();
+  const { user, isAuthenticated } = useAuth();
+  const utils = trpc.useUtils();
   const mediumParam = params.medium?.toLowerCase();
   // Legacy medium segments redirect to the music-first Explore surface.
   void mediumParam; // /explore/:medium redirects to /explore in App
@@ -764,10 +868,12 @@ export default function ExplorePage() {
   const [randomize, setRandomize] = useState(true);
   const [selectedCreatorId, setSelectedCreatorId] = useState<number | null>(null);
   const [workSort, setWorkSort] = useState<WorkSort>("curated");
+  const [creatorSort, setCreatorSort] = useState<CreatorSort>("newest");
+  const [subscriptionOverrides, setSubscriptionOverrides] = useState<Record<number, CreatorSubscriptionTier>>({});
 
   const creatorsQuery = trpc.profile.allCreators.useQuery(undefined, { staleTime: 5 * 60 * 1000, refetchOnWindowFocus: false });
   const creatorsRaw = creatorsQuery.data;
-  const creators: CreatorSummary[] = (creatorsRaw ?? []).map((c: any) => ({
+  const creators: CreatorSummary[] = useMemo(() => (creatorsRaw ?? []).map((c: any) => ({
     id: c.id,
     name: c.name,
     artistHandle: c.artistHandle,
@@ -776,9 +882,60 @@ export default function ExplorePage() {
     bio: c.bio ?? null,
     stripeAccountStatus: c.stripeAccountStatus ?? null,
     publishedCount: c.publishedCount ?? 0,
-  }));
+    totalPlays: c.totalPlays ?? 0,
+    createdAt: c.createdAt ?? null,
+  })), [creatorsRaw]);
 
   const isListView = viewMode === "list";
+  const creatorIds = useMemo(() => creators.map((creator) => creator.id), [creators]);
+  const subscriptionStatusQuery = trpc.witnessSubscription.getSubscriptions.useQuery(
+    { creatorIds },
+    {
+      enabled: !isListView && isAuthenticated && creatorIds.length > 0,
+      staleTime: 2 * 60 * 1000,
+      refetchOnWindowFocus: false,
+    },
+  );
+  const subscriptionTiers = useMemo<Record<number, CreatorSubscriptionTier>>(() => {
+    const tiers: Record<number, CreatorSubscriptionTier> = {};
+    for (const subscription of subscriptionStatusQuery.data ?? []) tiers[subscription.creatorId] = subscription.tier;
+    return { ...tiers, ...subscriptionOverrides };
+  }, [subscriptionOverrides, subscriptionStatusQuery.data]);
+  const subscribeMutation = trpc.witnessSubscription.subscribe.useMutation({
+    onSuccess: (result, variables) => {
+      setSubscriptionOverrides((current) => ({ ...current, [variables.creatorId]: result.tier }));
+      void utils.witnessSubscription.getSubscriptions.invalidate();
+      toast.success("Following creator — publication notices are enabled.");
+    },
+    onError: (error) => toast.error(error.message),
+  });
+  const unsubscribeMutation = trpc.witnessSubscription.unsubscribe.useMutation({
+    onSuccess: (_, variables) => {
+      setSubscriptionOverrides((current) => ({ ...current, [variables.creatorId]: null }));
+      void utils.witnessSubscription.getSubscriptions.invalidate();
+      toast.success("Unfollowed creator — publication notices are off.");
+    },
+    onError: (error) => toast.error(error.message),
+  });
+  const followingCreatorId = subscribeMutation.isPending
+    ? subscribeMutation.variables?.creatorId ?? null
+    : unsubscribeMutation.isPending ? unsubscribeMutation.variables?.creatorId ?? null : null;
+  const handleFollowToggle = useCallback((creatorId: number, creatorName: string) => {
+    if (!user) {
+      toast.info("Sign in to follow creators and receive publication notices.");
+      return;
+    }
+    const tier = subscriptionTiers[creatorId] ?? null;
+    if (tier === "reserve" || tier === "steward") {
+      toast.info(`${creatorName} is already managed through your ${tier} subscription.`);
+      return;
+    }
+    if (tier === "witness") {
+      unsubscribeMutation.mutate({ creatorId });
+      return;
+    }
+    subscribeMutation.mutate({ creatorId, tier: "witness" });
+  }, [subscribeMutation, subscriptionTiers, unsubscribeMutation, user]);
   const data = useExploreData(seed, randomize, isListView, selectedCreatorId ?? undefined);
   const worksIndex = useWorksIndex({
     creatorId: selectedCreatorId ?? undefined,
@@ -863,6 +1020,7 @@ export default function ExplorePage() {
                 <RandomizeSwitch value={randomize} onChange={handleRandomizeToggle} />
               </div>
               {viewMode === "list" && <WorkSortControl value={workSort} onChange={setWorkSort} />}
+              {viewMode === "creators" && <CreatorSortControl value={creatorSort} onChange={setCreatorSort} />}
               <ViewToggle value={viewMode} onChange={handleViewChange} />
               <button onClick={handleRefresh} disabled={isRefreshing} title="Refresh discovery" className="flex items-center gap-1.5 px-2.5 py-2 rounded-xl border border-white/10 text-[var(--stone-shadow)] hover:text-[var(--gold)] hover:border-[var(--gold)]/30 transition-all text-xs flex-shrink-0 disabled:cursor-wait disabled:opacity-60">
                 <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? "animate-spin" : ""}`} /><span className="hidden sm:inline">{isRefreshing ? "Refreshing" : "Refresh"}</span>
@@ -950,7 +1108,16 @@ export default function ExplorePage() {
 
             {/* ── Creator view ── */}
             {viewMode === "creators" && (
-              <AllCreatorsView creators={creators} search={search} selectedCreatorId={selectedCreatorId} />
+              <AllCreatorsView
+                creators={creators}
+                search={search}
+                selectedCreatorId={selectedCreatorId}
+                sort={creatorSort}
+                subscriptionTiers={subscriptionTiers}
+                viewerId={user?.id}
+                followingCreatorId={followingCreatorId}
+                onFollowToggle={handleFollowToggle}
+              />
             )}
 
             {/* Footer */}

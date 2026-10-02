@@ -18,7 +18,8 @@ describe("Explore creator directory", () => {
     expect(explore).toContain('view === "creators"');
     expect(explore).toContain('url.searchParams.set("view", "creators")');
     expect(explore).toContain('!search && !selectedCreatorId && viewMode === "list"');
-    expect(directory).toContain("function AllCreatorsView({ creators, search, selectedCreatorId }");
+    expect(directory).toContain("function AllCreatorsView({");
+    expect(directory).toContain("selectedCreatorId,");
     expect(directory).toContain("Browse creators");
     expect(directory).not.toContain("data: ReturnType<typeof useExploreData>");
     expect(directory).not.toContain("byCreator");
