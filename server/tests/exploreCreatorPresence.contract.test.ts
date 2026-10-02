@@ -14,6 +14,24 @@ describe("Explore creator presence contract", () => {
     expect(exploreSource).toContain("Explore this creator’s registered works and provenance record.");
   });
 
+  it("uses only the existing creator banner as the optional directory-card background", () => {
+    expect(exploreSource).toContain("bannerUrl: c.bannerUrl ?? null");
+    expect(exploreSource).toContain("creator.bannerUrl && !bannerFailed");
+    expect(exploreSource).toContain("src={creator.bannerUrl}");
+    expect(exploreSource).toContain("object-cover");
+    expect(exploreSource).toContain("setBannerFailed(true)");
+    expect(exploreSource).toContain("bg-[var(--void-3)]");
+    expect(exploreSource).not.toContain("src={supportRow.song.coverArtUrl}");
+  });
+
+  it("keeps directory cards geometrically stable while preserving creator statements and anchored actions", () => {
+    expect(exploreSource).toContain("aspect-[5/4] min-h-72");
+    expect(exploreSource).toContain("bg-gradient-to-b from-black/5 via-black/30 to-[var(--ln-coal)]/95");
+    expect(exploreSource).toContain("line-clamp-3 text-[var(--ln-bone)]");
+    expect(exploreSource).toContain("flex h-full min-h-0 flex-col");
+    expect(exploreSource).toContain("mt-4 flex items-center justify-between");
+  });
+
   it("opens the existing support drawer only after a visitor requests creator support", () => {
     expect(exploreSource).toContain('import { SupportCreatorDrawer, type SupportTarget }');
     expect(exploreSource).toContain("enabled: supportRequested");

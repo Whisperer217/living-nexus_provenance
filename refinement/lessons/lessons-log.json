@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-10-02T22:59:46.794Z",
-  "totalLessons": 48,
+  "lastUpdated": "2026-10-02T23:39:58.396Z",
+  "totalLessons": 49,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -1124,6 +1124,25 @@
         "creator-review"
       ],
       "id": "LESSON-048"
+    },
+    {
+      "problem": "Explore creator cards discarded creator banner imagery and allowed variable visual hierarchy despite an existing public bannerUrl projection.",
+      "solution": "Mapped existing bannerUrl into the Explore creator summary, preserved profile photos as avatars, added an optional presentation scrim and fixed 5:4 card geometry with clamped statements and anchored actions, without changing support fetches or registry data.",
+      "filesChanged": [
+        "client/src/pages/ExplorePage.tsx",
+        "server/tests/exploreCreatorPresence.contract.test.ts",
+        "server/tests/exploreCreatorDirectory.contract.test.ts",
+        "docs/lnls/architecture/EXPLORE-CREATOR-CARD-PRESENTATION-ADR.md"
+      ],
+      "scoreDelta": 0,
+      "tags": [
+        "explore",
+        "creator-identity",
+        "image-provenance",
+        "responsive",
+        "presentation-only"
+      ],
+      "id": "LESSON-049"
     }
   ]
 }

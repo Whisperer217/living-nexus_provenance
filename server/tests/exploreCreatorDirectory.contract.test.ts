@@ -31,6 +31,17 @@ describe("Explore creator directory", () => {
     expect(explore).not.toContain("href={`/creator/${creator.name}`}");
   });
 
+  it("passes existing creator banners through the public directory without replacing them with Work artwork", () => {
+    const creatorReaderStart = creatorDb.indexOf("export async function getAllCreators");
+    const creatorReaderEnd = creatorDb.indexOf("// ─── Creator OG", creatorReaderStart);
+    const creatorReader = creatorDb.slice(creatorReaderStart, creatorReaderEnd);
+
+    expect(creatorReader).toContain("bannerUrl: users.bannerUrl");
+    expect(explore).toContain("bannerUrl: c.bannerUrl ?? null");
+    expect(explore).not.toContain("coverArtUrl: c.bannerUrl");
+    expect(explore).not.toContain("coverArtUrl: creator.bannerUrl");
+  });
+
   it("requires a truly public published Work before shared public creator discovery exposes a profile", () => {
     const creatorReaderStart = creatorDb.indexOf("export async function getAllCreators");
     const creatorReaderEnd = creatorDb.indexOf("// ─── Creator OG", creatorReaderStart);

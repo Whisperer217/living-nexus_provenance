@@ -253,6 +253,7 @@ type CreatorSummary = {
   name: string | null;
   artistHandle: string | null;
   profilePhotoUrl: string | null;
+  bannerUrl: string | null;
   bio: string | null;
   stripeAccountStatus: string | null;
   publishedCount: number;
@@ -549,10 +550,12 @@ function AllWorksListView({
 
 // ── Creator view (public creator directory; independent of the track feed) ─
 function CreatorDirectoryCard({ creator }: { creator: CreatorSummary }) {
-  const identity = creator.artistHandle ?? creator.name ?? `Creator ${creator.id}`;
+  const identity = creator.name ?? creator.artistHandle ?? `Creator ${creator.id}`;
+  const handleLabel = creator.artistHandle ? `@${creator.artistHandle}` : "Creator domain";
   const routeIdentity = creator.artistHandle || creator.id;
   const [supportRequested, setSupportRequested] = useState(false);
   const [supportOpen, setSupportOpen] = useState(false);
+  const [bannerFailed, setBannerFailed] = useState(false);
   const supportQuery = trpc.songs.discoverInfinite.useInfiniteQuery(
     { creatorId: creator.id, limit: 1 },
     {
@@ -587,43 +590,60 @@ function CreatorDirectoryCard({ creator }: { creator: CreatorSummary }) {
   }, [supportQuery.isError, supportRequested]);
 
   return (
-    <article className="group relative min-w-0 overflow-hidden rounded-2xl border border-white/8 bg-[var(--void-3)] p-4 transition-all hover:-translate-y-0.5 hover:border-[var(--gold)]/35 hover:bg-[var(--void-2)] focus-within:ring-2 focus-within:ring-[var(--gold)]/45">
-      <Link href={`/creator/${routeIdentity}`} className="block rounded-xl focus:outline-none">
-        <div className="flex items-center gap-3 min-w-0">
+    <article className="group relative aspect-[5/4] min-h-72 min-w-0 overflow-hidden rounded-2xl border border-white/8 bg-[var(--void-3)] transition-all hover:-translate-y-0.5 hover:border-[var(--gold)]/35 focus-within:ring-2 focus-within:ring-[var(--gold)]/45">
+      {creator.bannerUrl && !bannerFailed && (
+        <img
+          src={creator.bannerUrl}
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.035]"
+          loading="lazy"
+          decoding="async"
+          onError={() => setBannerFailed(true)}
+        />
+      )}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/5 via-black/30 to-[var(--ln-coal)]/95"
+      />
+      <div className="relative z-10 flex h-full min-h-0 flex-col p-5 sm:p-6">
+        <Link href={`/creator/${routeIdentity}`} className="flex min-h-0 flex-1 flex-col rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--gold)]/75">
+          <div className="flex items-center gap-3 min-w-0">
           {creator.profilePhotoUrl ? (
             <img src={creator.profilePhotoUrl} alt="" className="h-12 w-12 flex-shrink-0 rounded-full border border-[var(--gold)]/35 object-cover" loading="lazy" decoding="async" />
           ) : (
             <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full border border-[var(--gold)]/20 bg-[var(--void-2)]"><Users className="h-5 w-5 text-[var(--stone-shadow)]" /></div>
           )}
           <div className="min-w-0 flex-1">
-            <h2 className="ln-subsection-header truncate transition-colors group-hover:text-[var(--gold)]" title={identity}>{identity}</h2>
-            <p className="ln-mono mt-0.5 truncate text-[var(--stone-shadow)]">{creator.artistHandle ? `@${creator.artistHandle}` : "Creator domain"}</p>
+            <h2 className="ln-subsection-header truncate text-[var(--ln-parchment)] transition-colors group-hover:text-[var(--gold-hot)]" title={identity}>{identity}</h2>
+            <p className="ln-mono mt-0.5 truncate text-[var(--ln-bone)]">{handleLabel}</p>
           </div>
-          <ChevronRight className="h-4 w-4 flex-shrink-0 text-[var(--stone-shadow)] transition-transform group-hover:translate-x-0.5 group-hover:text-[var(--gold)]" aria-hidden="true" />
-        </div>
-        {creator.bio ? (
-          <div className="mt-3">
-            <p className="ln-overline text-[var(--gold)]">Creator statement</p>
-            <p className="ln-editorial mt-1 line-clamp-3 text-[var(--stone-shadow)]">{creator.bio}</p>
+          <ChevronRight className="h-4 w-4 flex-shrink-0 text-[var(--ln-bone)] transition-transform group-hover:translate-x-0.5 group-hover:text-[var(--gold)]" aria-hidden="true" />
           </div>
-        ) : (
-          <p className="ln-caption mt-3 line-clamp-2 text-[var(--stone-shadow)]">Explore this creator’s registered works and provenance record.</p>
-        )}
-      </Link>
-      <div className="mt-4 flex items-center justify-between gap-3 border-t border-white/5 pt-3">
-        <span className="ln-caption text-[var(--stone-shadow)]">{creator.publishedCount} published work{creator.publishedCount === 1 ? "" : "s"}</span>
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setSupportRequested(true)}
-            disabled={supportRequested && !supportTarget}
-            className="inline-flex min-h-8 items-center gap-1.5 rounded-lg border border-[var(--gold)]/30 bg-[var(--gold)]/10 px-2.5 py-1 text-xs font-medium text-[var(--gold)] transition-colors hover:bg-[var(--gold)]/20 disabled:cursor-wait disabled:opacity-60"
-            aria-label={`Support ${identity}`}
-          >
-            {supportRequested && !supportTarget ? <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" /> : <Heart className="h-3 w-3" aria-hidden="true" />}
-            Support
-          </button>
-          <Link href={`/creator/${routeIdentity}`} className="ln-mono uppercase text-[var(--gold)] hover:text-[var(--ln-gold-hot)]">Visit domain</Link>
+          {creator.bio ? (
+            <div className="mt-5">
+              <p className="ln-overline text-[var(--gold-hot)]">Creator statement</p>
+              <p className="ln-editorial mt-1 line-clamp-3 text-[var(--ln-bone)]">{creator.bio}</p>
+            </div>
+          ) : (
+            <p className="ln-caption mt-5 line-clamp-3 text-[var(--ln-bone)]">Explore this creator’s registered works and provenance record.</p>
+          )}
+        </Link>
+        <div className="mt-4 flex items-center justify-between gap-3 border-t border-white/15 pt-3">
+          <span className="ln-caption text-[var(--ln-bone)]">{creator.publishedCount} published work{creator.publishedCount === 1 ? "" : "s"}</span>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setSupportRequested(true)}
+              disabled={supportRequested && !supportTarget}
+              className="inline-flex min-h-8 items-center gap-1.5 rounded-lg border border-[var(--gold)]/30 bg-[var(--gold)]/10 px-2.5 py-1 text-xs font-medium text-[var(--gold-hot)] transition-colors hover:bg-[var(--gold)]/20 disabled:cursor-wait disabled:opacity-60"
+              aria-label={`Support ${identity}`}
+            >
+              {supportRequested && !supportTarget ? <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" /> : <Heart className="h-3 w-3" aria-hidden="true" />}
+              Support
+            </button>
+            <Link href={`/creator/${routeIdentity}`} className="ln-mono uppercase text-[var(--gold-hot)] hover:text-[var(--ln-gold-flame)]">Visit domain</Link>
+          </div>
         </div>
       </div>
       {supportOpen && supportTarget && (
@@ -698,6 +718,7 @@ export default function ExplorePage() {
     name: c.name,
     artistHandle: c.artistHandle,
     profilePhotoUrl: c.profilePhotoUrl,
+    bannerUrl: c.bannerUrl ?? null,
     bio: c.bio ?? null,
     stripeAccountStatus: c.stripeAccountStatus ?? null,
     publishedCount: c.publishedCount ?? 0,
