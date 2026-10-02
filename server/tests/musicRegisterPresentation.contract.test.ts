@@ -42,8 +42,9 @@ describe("Music Register presentation contracts", () => {
     expect(music).toContain("Publish requires a visual identity");
     expect(music).not.toContain("Bound visual");
     expect(music).not.toContain("Publish requires a bound visual");
-    expect(assetCard).toContain("px-3 py-4 sm:px-5");
+    expect(assetCard).toContain("px-4 py-5 sm:px-6 sm:py-6");
     expect(assetCard).toContain("w-full sm:w-auto");
+    expect(assetCard).toContain("max-w-2xl text-base leading-relaxed");
     expect(assetCard).toContain('color: "var(--ln-bone)"');
     expect(music).toContain("registration-artwork-preview");
     expect(music).toContain("interactive");
@@ -124,12 +125,19 @@ describe("Music Register presentation contracts", () => {
     expect(tokens).toContain("--ln-cathedral-border:");
   });
 
-  it("keeps desktop Studio panels independently scrollable while preserving mobile document flow", () => {
+  it("contains the Studio inside the app viewport while preserving independently scrollable panels", () => {
     const shell = read("client/src/pages/manifestation-studio/StudioShell.tsx");
-    expect(shell).toContain("lg:h-[calc(100dvh-3rem)] lg:min-h-0");
-    expect(shell).toContain("min-h-0 flex-1 flex flex-col lg:flex-row overflow-hidden");
+    const layout = read("client/src/components/layout/MainLayout.tsx");
+    const studio = read("client/src/pages/manifestation-studio/ManifestationStudio.tsx");
+    expect(shell).toContain("h-full min-h-0 flex flex-col");
+    expect(shell).toContain("min-h-16 items-center gap-4");
+    expect(shell).toContain("min-h-0 flex-1 flex flex-col overflow-hidden lg:flex-row");
+    expect(shell).toContain("max-w-3xl p-6 sm:p-8 lg:px-12 lg:py-10");
     expect(shell).toContain('overscrollBehavior: "contain"');
-    expect(shell).not.toContain('className="p-6 md:p-8 lg:p-10 sticky top-0"');
+    expect(layout).toContain('const isManifestWorkspace = location === "/manifest" || location.startsWith("/manifest?")');
+    expect(layout).toContain("!isManifestWorkspace && <SiteFooter />");
+    expect(layout).toContain("min-h-0 flex-1 overflow-y-auto overflow-x-hidden player-scroll-area");
+    expect(studio).toContain('document.getElementById("main-scroll")?.scrollTo({ top: 0, behavior: "auto" })');
   });
 
   it("allows provenance-aware adornments on canonical historical date controls", () => {
@@ -160,6 +168,9 @@ describe("Music Register presentation contracts", () => {
     expect(music).toContain("Nothing is carried forward automatically.");
     expect(music).toContain("MP3 Queue accepts .mp3 audio only");
     expect(music).toContain("completed ·");
+    expect(music).toContain("Reviewing record {queueProgress.current} of {queueProgress.total}");
+    expect(music).toContain("Every queued Work receives its own review, disclosure, attestation, and Witness ID.");
+    expect(music).toContain("Review this Work");
     expect(music).toContain('role="progressbar"');
     expect(studio).toContain("Arrange review order");
   });

@@ -685,17 +685,22 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile, queueRevi
     switch (step) {
       case "upload":
         return (
-          <div className="space-y-6">
-            <div>
-              <p className="text-xs uppercase tracking-[0.28em] mb-2" style={{ color: "var(--ln-gold)", fontFamily: "'Cinzel', serif" }}>
+          <div className="space-y-8">
+            <div className="max-w-2xl border-l-2 pl-5" style={{ borderColor: "color-mix(in srgb, var(--ln-gold) 58%, transparent)" }}>
+              <p className="text-xs uppercase tracking-[0.28em]" style={{ color: "var(--ln-gold)", fontFamily: "'Cinzel', serif" }}>
                 Loop · Register Work
               </p>
-              <h2 className="text-xl font-bold mb-2" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>
-                Prepare Work assets
-              </h2>
-              <p className="text-sm" style={{ fontFamily: "'Cormorant Garamond', serif", color: "rgba(245,237,216,0.7)" }}>
+              <h1 className="mt-3 text-3xl font-semibold leading-tight sm:text-4xl" style={{ fontFamily: "'Cormorant Garamond', serif", color: "var(--ln-parchment)" }}>
+                {queueProgress ? "Review this Work" : "Prepare this Work"}
+              </h1>
+              <p className="mt-3 max-w-xl text-lg leading-relaxed" style={{ fontFamily: "'Cormorant Garamond', serif", color: "var(--ln-bone)" }}>
                 Confirm the canonical audio, then attach the visual identity that will accompany this Work.
               </p>
+              {queueProgress && (
+                <p className="mt-3 text-sm leading-relaxed" style={{ color: "var(--ln-smoke)" }}>
+                  This record remains independent: its metadata, participation disclosure, attestation, and Witness ID are reviewed here—not inherited from the rest of the queue.
+                </p>
+              )}
             </div>
 
             <RegistrationAssetCard
@@ -1374,7 +1379,11 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile, queueRevi
   };
 
   const rightPanel = (
-    <div className="space-y-4 p-4">
+    <div className="space-y-6 p-4">
+      <div className="max-w-lg border-l-2 pl-4" style={{ borderColor: "color-mix(in srgb, var(--ln-gold) 46%, transparent)" }}>
+        <p className="text-xs uppercase tracking-[0.22em]" style={{ color: "var(--ln-gold)", fontFamily: "'Cinzel', serif" }}>Work preview</p>
+        <p className="mt-2 text-sm leading-relaxed" style={{ color: "var(--ln-bone)" }}>A live reference for the Work you are preparing. Visual presentation remains separate from the canonical audio and Witness ID boundary.</p>
+      </div>
       <div
         className="relative aspect-square overflow-hidden rounded-sm flex items-center justify-center"
         style={{ background: "#111", border: "1px solid rgba(196,154,40,0.2)" }}
@@ -1466,16 +1475,18 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile, queueRevi
   const queueCompletionPercent = queueProgress ? Math.round((queueProgress.completed / queueProgress.total) * 100) : 0;
   const queueNotice = queueProgress ? (
     <section
-      className="mb-5 rounded-sm border px-4 py-3"
+      className="mb-8 rounded-sm border px-5 py-5"
       aria-label="MP3 queue progress"
       style={{ borderColor: "color-mix(in srgb, var(--ln-gold) 42%, transparent)", background: "color-mix(in srgb, var(--ln-gold) 7%, var(--ln-coal))" }}
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-[11px] uppercase tracking-[0.18em]" style={{ color: "var(--ln-gold)", fontFamily: "'Cinzel', serif" }}>
-          MP3 queue · record {queueProgress.current} of {queueProgress.total}
+          MP3 queue
         </p>
         <span className="text-xs" style={{ color: "var(--ln-bone)" }}>{queueProgress.completed} completed · {queueProgress.remaining} remaining</span>
       </div>
+      <p className="mt-2 text-2xl leading-tight" style={{ color: "var(--ln-parchment)", fontFamily: "'Cormorant Garamond', serif" }}>Reviewing record {queueProgress.current} of {queueProgress.total}</p>
+      <p className="mt-2 max-w-2xl text-sm leading-relaxed" style={{ color: "var(--ln-bone)" }}>Work through this record at its own pace. Every queued Work receives its own review, disclosure, attestation, and Witness ID.</p>
       <div className="mt-3 h-1.5 overflow-hidden rounded-full" style={{ background: "color-mix(in srgb, var(--ln-gold) 14%, var(--ln-coal))" }}>
         <div
           role="progressbar"

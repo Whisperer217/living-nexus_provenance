@@ -29,10 +29,10 @@ export function StudioShell({
   const currentStepIdx = STUDIO_STEPS.findIndex((s) => s.id === currentStep);
 
   return (
-    <div className="min-h-screen flex flex-col lg:h-[calc(100dvh-3rem)] lg:min-h-0" style={{ background: "#000000" }}>
+    <div className="h-full min-h-0 flex flex-col" style={{ background: "var(--ln-coal)" }}>
       {/* ── Top Bar ── */}
       <div
-        className="flex items-center gap-3 px-4 py-3 border-b flex-shrink-0"
+        className="flex min-h-16 items-center gap-4 border-b px-5 py-3 sm:px-6 lg:px-8 flex-shrink-0"
         style={{ borderColor: atmosphere.colorBorder, background: "rgba(17,16,9,0.95)" }}
       >
         <button
@@ -45,7 +45,7 @@ export function StudioShell({
         </button>
 
         {/* Type indicator */}
-        <div className="flex items-center gap-2">
+        <div className="min-w-0 flex items-center gap-2">
           <span className="text-lg">{atmosphere.icon}</span>
           <div>
             <p
@@ -64,7 +64,7 @@ export function StudioShell({
         </div>
 
         {/* Step indicators */}
-        <div className="flex items-center gap-1 ml-auto">
+        <div className="ml-auto flex items-center gap-1" aria-label={`Registration step ${currentStepIdx + 1} of ${STUDIO_STEPS.length}: ${currentStep}`}>
           {STUDIO_STEPS.map((s, i) => {
             const isActive = s.id === currentStep;
             const isDone = i < currentStepIdx;
@@ -86,7 +86,7 @@ export function StudioShell({
                   {isDone ? <Check size={10} /> : s.number}
                 </div>
                 <span
-                  className="text-[10px] hidden md:inline"
+                  className="hidden text-[10px] md:inline"
                   style={{ color: isActive ? atmosphere.colorPrimary : isDone ? "var(--ln-seal-bright)" : "rgba(245,237,216,0.3)" }}
                 >
                   {s.label}
@@ -116,17 +116,17 @@ export function StudioShell({
       </div>
 
       {/* ── Split Layout ── */}
-      <div className="min-h-0 flex-1 flex flex-col lg:flex-row overflow-hidden">
+      <div className="min-h-0 flex-1 flex flex-col overflow-hidden lg:flex-row">
         {/* Left Panel — Guided Process */}
         <div
-          className="min-h-0 flex-1 lg:w-[58%] lg:flex-none overflow-y-auto"
+          className="min-h-0 flex-1 overflow-y-auto lg:w-[58%] lg:flex-none"
           style={{
             scrollbarWidth: "thin",
             scrollbarColor: `${atmosphere.colorPrimary}40 transparent`,
             overscrollBehavior: "contain",
           }}
         >
-          <div className="p-6 md:p-8 lg:p-10 max-w-2xl mx-auto">
+          <div className="mx-auto w-full max-w-3xl p-6 sm:p-8 lg:px-12 lg:py-10 xl:px-14 xl:py-12">
             {leftPanel}
           </div>
         </div>
@@ -139,7 +139,7 @@ export function StudioShell({
 
         {/* Right Panel — Live Preview */}
         <div
-          className="min-h-0 lg:w-[42%] lg:flex-none overflow-y-auto border-t lg:border-t-0"
+          className="min-h-0 overflow-y-auto border-t lg:w-[42%] lg:flex-none lg:border-t-0"
           style={{
             borderColor: atmosphere.colorBorder,
             background: atmosphere.gradient,
@@ -148,7 +148,7 @@ export function StudioShell({
             overscrollBehavior: "contain",
           }}
         >
-          <div className="p-6 md:p-8 lg:p-10">
+          <div className="mx-auto w-full max-w-xl p-6 sm:p-8 lg:px-10 lg:py-10 xl:px-12 xl:py-12">
             {rightPanel}
           </div>
         </div>

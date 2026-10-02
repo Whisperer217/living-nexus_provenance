@@ -72,6 +72,10 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   const isCreatorFocus = CREATOR_FOCUS_ROUTES.some(
     (r) => location === r || location.startsWith(r + "/") || location.startsWith(r + "?")
   ) || location.includes("/studio");
+  // Manifest is an active registration workspace, not a document page. The
+  // Studio owns its panel scrolling; a site footer inside its review surface
+  // can displace the current Work and obscure its opening hierarchy.
+  const isManifestWorkspace = location === "/manifest" || location.startsWith("/manifest?");
   const { user, loading: authLoading, logout } = useAuth();
   const { isOpen: rightRailOpen } = useRightRail();
 
@@ -275,7 +279,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           transition: "padding-left 220ms cubic-bezier(0.22,1,0.36,1)",
         }}
       >
-        <main className="flex-1 flex overflow-hidden" style={{ overscrollBehavior: "none" }}>
+        <main className="min-h-0 flex-1 flex overflow-hidden" style={{ overscrollBehavior: "none" }}>
           <style>{`
             @media (min-width: 768px) and (max-width: 1023px) { .player-scroll-area { padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important; } }
             @media (max-width: 767px) { .player-scroll-area { padding-bottom: var(--bottom-stack) !important; } }
@@ -290,11 +294,11 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
           <div
             id="main-scroll"
-            className={`flex-1 overflow-y-auto overflow-x-hidden player-scroll-area ${rightRailOpen && !isCreatorFocus ? "lg:pr-[300px]" : ""}`}
+            className={`min-h-0 flex-1 overflow-y-auto overflow-x-hidden player-scroll-area ${rightRailOpen && !isCreatorFocus ? "lg:pr-[300px]" : ""}`}
             style={{ overscrollBehaviorX: "none", overscrollBehaviorY: "none", touchAction: "pan-y" }}
           >
             {children}
-            <SiteFooter />
+            {!isManifestWorkspace && <SiteFooter />}
           </div>
         </main>
       </div>

@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-10-02T22:34:54.526Z",
-  "totalLessons": 47,
+  "lastUpdated": "2026-10-02T22:59:46.794Z",
+  "totalLessons": 48,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -1097,6 +1097,33 @@
         "wid-boundary"
       ],
       "id": "LESSON-047"
+    },
+    {
+      "date": "2026-10-02",
+      "category": "ui",
+      "problem": "The active Loop multi-Work registration could inherit an outer page scroll position and render a site footer within the review canvas. At 100% desktop zoom, that clipped the Studio header and compressed the asset typography.",
+      "solution": "Made /manifest a contained workspace inside the existing application viewport. MainLayout now suppresses the document footer only for the Manifest route, StudioShell inherits its height and gives each panel independent scrolling, queue transitions reset the workspace to its own opening hierarchy, and the asset grammar uses a wider editorial measure with expanded type and spacing.",
+      "files": [
+        "client/src/components/layout/MainLayout.tsx",
+        "client/src/pages/manifestation-studio/StudioShell.tsx",
+        "client/src/pages/manifestation-studio/ManifestationStudio.tsx",
+        "client/src/pages/manifestation-studio/RegistrationAssetCard.tsx",
+        "client/src/pages/manifestation-studio/environments/MusicEnvironment.tsx",
+        "server/tests/musicRegisterPresentation.contract.test.ts",
+        "docs/lnls/architecture/LOOP-WORKSPACE-CONTAINMENT-AND-BREATHING-ADR.md"
+      ],
+      "score": 0,
+      "tags": [
+        "loop",
+        "manifest",
+        "workspace",
+        "scroll-containment",
+        "typography",
+        "multi-work",
+        "accessibility",
+        "creator-review"
+      ],
+      "id": "LESSON-048"
     }
   ]
 }

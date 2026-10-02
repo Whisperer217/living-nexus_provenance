@@ -3,7 +3,7 @@
    WID engine entry. Non-music mediums removed from product scope.
 ════════════════════════════════════════════════════════════════════ */
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { DndContext, KeyboardSensor, PointerSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -339,6 +339,14 @@ export default function ManifestationStudio() {
       setSelectedQueueId(mp3Queue[0].id);
     }
   }, [mp3Queue, selectedQueueId]);
+
+  // The main application shell is intentionally scrollable for ordinary pages.
+  // A Loop review is a contained workspace, so each queue transition must begin
+  // at its own ceremony rather than inheriting the arrangement page's scroll.
+  useLayoutEffect(() => {
+    if (!entered || (mp3Queue.length > 0 && !queueReviewStarted)) return;
+    document.getElementById("main-scroll")?.scrollTo({ top: 0, behavior: "auto" });
+  }, [entered, mp3Queue.length, queueIndex, queueReviewStarted]);
 
   useEffect(() => {
     if (!entered || !isAuthenticated || mp3Queue.length === 0 || queueReviewStarted) return;

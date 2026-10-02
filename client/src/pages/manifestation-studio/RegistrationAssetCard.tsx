@@ -33,13 +33,13 @@ export function RegistrationAssetCard({
   return (
     <section
       aria-labelledby={titleId}
-      className={`registration-asset-card rounded-sm border px-3 py-4 sm:px-5${interactive ? " registration-asset-card--interactive" : ""}`}
+      className={`registration-asset-card rounded-sm border px-4 py-5 sm:px-6 sm:py-6${interactive ? " registration-asset-card--interactive" : ""}`}
       style={{
         borderColor: "color-mix(in srgb, var(--ln-gold) 30%, transparent)",
         background: "color-mix(in srgb, var(--ln-gold) 4%, var(--ln-coal))",
       }}
     >
-      <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
+      <div className="grid gap-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
         <div className="min-w-0">
           <p
             className="text-xs uppercase tracking-[0.2em]"
@@ -49,23 +49,23 @@ export function RegistrationAssetCard({
           </p>
           <h3
             id={titleId}
-            className="mt-2 text-lg font-semibold leading-tight"
+            className="mt-2 text-xl font-semibold leading-tight"
             style={{ color: "var(--ln-parchment)", fontFamily: "'Cormorant Garamond', serif" }}
           >
             {title}
           </h3>
-          <p className="mt-1 text-sm leading-relaxed" style={{ color: "var(--ln-bone)" }}>
+          <p className="mt-2 max-w-2xl text-base leading-relaxed" style={{ color: "var(--ln-bone)" }}>
             {description}
           </p>
         </div>
         {action && <div className="w-full sm:w-auto">{action}</div>}
       </div>
 
-      <div className="mt-4 border-t pt-4" style={{ borderColor: "rgba(196,154,40,0.16)" }}>
+      <div className="mt-5 border-t pt-5" style={{ borderColor: "rgba(196,154,40,0.16)" }}>
         {children}
       </div>
 
-      <p className="mt-3 text-xs leading-relaxed" style={{ color: "var(--ln-bone)" }} role="status">
+      <p className="mt-4 text-sm leading-relaxed" style={{ color: "var(--ln-bone)" }} role="status">
         {status}
       </p>
     </section>
