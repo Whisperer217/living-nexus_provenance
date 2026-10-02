@@ -20,7 +20,7 @@ export function getPublicationReadinessMissing(input: PublicationReadinessInput)
   if (input.ownershipStatus === "partial") {
     missing.push("full commercial ownership or a commercial license");
   }
-  if (!input.coverArtUrl) missing.push("a bound visual (upload or generate cover art)");
+  if (!input.coverArtUrl) missing.push("a visual identity (upload, embed, generate, or remix artwork)");
   if (!input.creatorHandle && !input.creatorName) missing.push("name or handle");
   if (!input.creatorBio && !input.creatorOriginStatement) missing.push("bio or origin statement");
   if (!input.creatorProfilePhotoUrl) missing.push("profile photo");

@@ -25,6 +25,24 @@ describe("Music Register presentation contracts", () => {
     expect(source).toContain('aria-describedby="music-register-artwork-source"');
   });
 
+  it("uses one compact asset-card grammar and accurate audio-to-visual relationship language", () => {
+    const gateway = read("client/src/pages/manifestation-studio/TypeGateway.tsx");
+    const music = read("client/src/pages/manifestation-studio/environments/MusicEnvironment.tsx");
+    const assetCard = read("client/src/pages/manifestation-studio/RegistrationAssetCard.tsx");
+
+    expect(gateway).toContain("RegistrationAssetCard");
+    expect(music).toContain("RegistrationAssetCard");
+    expect(gateway).toContain('eyebrow="Canonical artifact"');
+    expect(assetCard).toContain("sm:grid-cols-[minmax(0,1fr)_auto]");
+    expect(gateway).toContain("min-h-11");
+    expect(music).toContain("Canonical audio received");
+    expect(music).toContain("Visual identity");
+    expect(music).toContain("not part of the WID hash");
+    expect(music).toContain("Publish requires a visual identity");
+    expect(music).not.toContain("Bound visual");
+    expect(music).not.toContain("Publish requires a bound visual");
+  });
+
   it("gives Cathedral a high-contrast, creator-expandable workspace", () => {
     const workspace = read("client/src/components/creative-cathedral/CreativeCathedralWorkspace.tsx");
     const gate = read("client/src/components/creative-cathedral/CathedralContextGate.tsx");

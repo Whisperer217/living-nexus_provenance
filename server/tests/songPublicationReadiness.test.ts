@@ -18,7 +18,7 @@ const readyCreator = {
 };
 
 describe("Song publication readiness", () => {
-  it("accepts a ready creator and bound Work for direct or later publication", () => {
+  it("accepts a ready creator and Work with a visual identity for direct or later publication", () => {
     expect(getPublicationReadinessMissing(readyCreator)).toEqual([]);
   });
 
@@ -36,20 +36,20 @@ describe("Song publication readiness", () => {
 
     expect(missing).toEqual([
       "full commercial ownership or a commercial license",
-      "a bound visual (upload or generate cover art)",
+      "a visual identity (upload, embed, generate, or remix artwork)",
       "name or handle",
       "bio or origin statement",
       "profile photo",
       "at least one testimony",
     ]);
     expect(publicationReadinessError(missing)).toBe(
-      "Cannot publish yet. Complete: full commercial ownership or a commercial license, a bound visual (upload or generate cover art), name or handle, bio or origin statement, profile photo, at least one testimony. Save as Draft instead."
+      "Cannot publish yet. Complete: full commercial ownership or a commercial license, a visual identity (upload, embed, generate, or remix artwork), name or handle, bio or origin statement, profile photo, at least one testimony. Save as Draft instead."
     );
   });
 
   it("treats a cover, profile, testimony, and full rights as direct-publish requirements", () => {
     expect(getPublicationReadinessMissing({ ...readyCreator, coverArtUrl: null })).toContain(
-      "a bound visual (upload or generate cover art)"
+      "a visual identity (upload, embed, generate, or remix artwork)"
     );
     expect(getPublicationReadinessMissing({ ...readyCreator, testimonyCount: 0 })).toContain(
       "at least one testimony"

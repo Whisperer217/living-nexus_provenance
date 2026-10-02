@@ -1,7 +1,7 @@
 # Manifest Registration Layout & Ontology Diagnosis
 
 **Date:** 2026-10-02  
-**Status:** Diagnosis only — no registration behavior, schema, or production data changed  
+**Status:** Repair implemented in the local checkpoint — no registration behavior, schema, or production data changed
 **Surface:** `/manifest` → authenticated Loop music registration flow
 
 ---
@@ -83,7 +83,7 @@ The existing implementation already distinguishes the following visual sources i
 
 | Existing source | Meaning already implemented |
 |---|---|
-| **No artwork bound** | No visual is currently attached; public publication is blocked until a visual exists. |
+| **No visual identity attached** | No visual is currently attached; public publication is blocked until a visual exists. |
 | **Embedded artwork** | Visual extracted from the canonical audio metadata. |
 | **Creator upload** | Visual chosen directly from the creator’s device. |
 | **Generated visual** | Visual generated from the creator’s prompt. |

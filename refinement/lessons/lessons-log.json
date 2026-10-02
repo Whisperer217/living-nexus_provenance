@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-10-01T17:18:00.965Z",
-  "totalLessons": 37,
+  "lastUpdated": "2026-10-02T19:03:17.646Z",
+  "totalLessons": 38,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -863,6 +863,32 @@
         "migration-readiness"
       ],
       "id": "LESSON-037"
+    },
+    {
+      "date": "2026-10-02",
+      "checkpointVersion": "pending-manifest-asset-grammar",
+      "category": "design_language",
+      "problem": "The Loop registration gateway and music environment treated canonical audio and artwork as unrelated layouts, creating a duplicate-feeling ingest, uneven spacing, and the inaccurate phrase bound visual.",
+      "solution": "Introduced one RegistrationAssetCard grammar across gateway, canonical audio, and visual identity sections; made the in-memory audio handoff explicit; standardized type roles and touch targets; and clarified that visual identity is attached to the Work, required for public publication, but not part of the WID hash.",
+      "files": [
+        "client/src/pages/manifestation-studio/RegistrationAssetCard.tsx",
+        "client/src/pages/manifestation-studio/TypeGateway.tsx",
+        "client/src/pages/manifestation-studio/environments/MusicEnvironment.tsx",
+        "server/domains/work/publicationReadiness.ts",
+        "server/tests/musicRegisterPresentation.contract.test.ts",
+        "server/tests/songPublicationReadiness.test.ts"
+      ],
+      "score": 0,
+      "tags": [
+        "manifest",
+        "registration",
+        "asset-grammar",
+        "visual-identity",
+        "wid-boundary",
+        "typography",
+        "mobile"
+      ],
+      "id": "LESSON-038"
     }
   ]
 }

@@ -8,6 +8,7 @@ import { Music, Upload, Loader2, Shield } from "lucide-react";
 import { extractFileMetadata } from "@/lib/uploadPipeline";
 import { isLoopMusicFile, LOOP_PRODUCT } from "@/lib/loopProduct";
 import type { KeeperPrefill } from "./ManifestationStudio";
+import { RegistrationAssetCard } from "./RegistrationAssetCard";
 
 const AI_LABELS: Record<string, string> = {
   suno: "Suno", udio: "Udio", midjourney: "Midjourney",
@@ -87,7 +88,7 @@ export function TypeGateway({ onSelect, onSelectWithPrefill, onFileReady }: Type
 
       <div className="relative text-center mb-10 max-w-xl">
         <p
-          className="text-[11px] uppercase tracking-[0.3em] mb-3 inline-flex items-center gap-2"
+          className="text-xs uppercase tracking-[0.3em] mb-3 inline-flex items-center gap-2"
           style={{ color: "var(--ln-gold)", fontFamily: "'Cinzel', serif" }}
         >
           <Shield size={12} /> {LOOP_PRODUCT.fullName}
@@ -106,58 +107,64 @@ export function TypeGateway({ onSelect, onSelectWithPrefill, onFileReady }: Type
         </p>
       </div>
 
-      <div
-        className="relative w-full max-w-lg mb-8 rounded-sm transition-all duration-300"
-        onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
-        onDragLeave={() => setIsDragging(false)}
-        onDrop={onDrop}
-        style={{
-          border: isDragging
-            ? "1px solid rgba(196,154,40,0.7)"
-            : "1px dashed rgba(196,154,40,0.28)",
-          background: isDragging ? "rgba(196,154,40,0.08)" : "rgba(196,154,40,0.03)",
-          boxShadow: isDragging ? "0 0 40px rgba(196,154,40,0.12)" : "none",
-        }}
-      >
-        <button
-          type="button"
-          onClick={() => fileInputRef.current?.click()}
-          disabled={extracting}
-          className="w-full flex flex-col items-center justify-center gap-3 px-6 py-14 cursor-pointer"
-        >
-          {extracting ? (
-            <Loader2 className="w-8 h-8 animate-spin" style={{ color: "var(--ln-gold)" }} />
-          ) : (
-            <div
-              className="w-14 h-14 rounded-full flex items-center justify-center"
-              style={{ background: "rgba(196,154,40,0.1)", border: "1px solid rgba(196,154,40,0.3)" }}
+      <div className="relative mb-8 w-full max-w-lg">
+        <RegistrationAssetCard
+          id="gateway-canonical-audio"
+          sectionNumber="01"
+          eyebrow="Canonical artifact"
+          title="Choose canonical audio"
+          description="Select the exact track you intend to witness. We read embedded metadata before you confirm the Work."
+          status={extracting ? `Reading ${extractedFile ?? "audio"}…` : "Audio metadata is read before registration; nothing is published from this step."}
+          action={
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={extracting}
+              className="min-h-11 w-full rounded-sm border px-4 text-sm font-medium transition-colors hover:border-[var(--ln-gold-hot)] hover:text-[var(--ln-gold-hot)] disabled:cursor-wait disabled:opacity-60 sm:w-auto"
+              style={{ borderColor: "rgba(196,154,40,0.45)", color: "var(--ln-parchment)" }}
             >
-              {isDragging ? <Upload className="w-6 h-6" style={{ color: "var(--ln-gold)" }} /> : <Music className="w-6 h-6" style={{ color: "var(--ln-gold)" }} />}
+              Choose audio
+            </button>
+          }
+        >
+          <label
+            htmlFor="gateway-canonical-audio-file"
+            className="flex min-h-40 cursor-pointer flex-col items-center justify-center gap-3 rounded-sm border border-dashed px-6 py-8 text-center transition-all duration-300"
+            onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+            onDragLeave={() => setIsDragging(false)}
+            onDrop={onDrop}
+            style={{
+              borderColor: isDragging ? "rgba(196,154,40,0.7)" : "rgba(196,154,40,0.28)",
+              background: isDragging ? "rgba(196,154,40,0.08)" : "rgba(0,0,0,0.2)",
+              boxShadow: isDragging ? "0 0 28px rgba(196,154,40,0.12)" : "none",
+            }}
+          >
+            <input
+              id="gateway-canonical-audio-file"
+              ref={fileInputRef}
+              type="file"
+              accept="audio/*,.mp3,.flac,.wav,.ogg,.aac,.m4a,.opus,.aiff"
+              className="sr-only"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) handleFile(file);
+              }}
+            />
+            {extracting ? (
+              <Loader2 className="h-8 w-8 animate-spin" style={{ color: "var(--ln-gold)" }} />
+            ) : (
+              <div className="flex h-12 w-12 items-center justify-center rounded-full" style={{ background: "rgba(196,154,40,0.1)", border: "1px solid rgba(196,154,40,0.3)" }}>
+                {isDragging ? <Upload className="h-5 w-5" style={{ color: "var(--ln-gold)" }} /> : <Music className="h-5 w-5" style={{ color: "var(--ln-gold)" }} />}
+              </div>
+            )}
+            <div>
+              <p className="text-sm font-medium" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>
+                {extracting ? `Reading ${extractedFile ?? "audio"}…` : isDragging ? "Release to begin" : "Drop canonical audio"}
+              </p>
+              <p className="mt-1 text-xs" style={{ color: "rgba(245,237,216,0.54)" }}>MP3 · WAV · FLAC · AAC · OGG · M4A</p>
             </div>
-          )}
-          <div className="text-center">
-            <p className="text-sm font-medium" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>
-              {extracting
-                ? `Reading ${extractedFile ?? "audio"}…`
-                : isDragging
-                  ? "Release to begin"
-                  : "Drop your track"}
-            </p>
-            <p className="text-xs mt-1" style={{ color: "rgba(245,237,216,0.45)" }}>
-              MP3 · WAV · FLAC · AAC · OGG · M4A
-            </p>
-          </div>
-        </button>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="audio/*,.mp3,.flac,.wav,.ogg,.aac,.m4a,.opus,.aiff"
-          className="hidden"
-          onChange={(e) => {
-            const file = e.target.files?.[0];
-            if (file) handleFile(file);
-          }}
-        />
+          </label>
+        </RegistrationAssetCard>
       </div>
 
       {extractError && (

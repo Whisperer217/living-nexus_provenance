@@ -23,6 +23,7 @@ import { addWIDSnapshot } from "@/lib/lnxCache";
 import { UPLOAD_GENRES as GENRES, MOODS } from "@shared/contentTypes";
 import { ATMOSPHERES, type StudioStep } from "../types";
 import { StudioShell } from "../StudioShell";
+import { RegistrationAssetCard } from "../RegistrationAssetCard";
 import {
   assistAudioMetadata,
   buildWaveformPngFromAudio,
@@ -48,7 +49,7 @@ import { applySuggestedWorkGenres, getSuggestedWorkGenres, parseWorkGenres, togg
 const atmosphere = ATMOSPHERES.music;
 
 const VISUAL_SOURCE_COPY: Record<VisualSource, { label: string; detail: string }> = {
-  none: { label: "No artwork bound", detail: "Upload artwork or generate a new visual before publishing." },
+  none: { label: "No visual identity attached", detail: "Attach artwork or create a visual identity before public publication." },
   embedded: { label: "Embedded artwork", detail: "Extracted from the selected audio file's metadata." },
   uploaded: { label: "Creator upload", detail: "Selected directly from your device for this Work." },
   generated: { label: "Generated visual", detail: "Created from your prompt and held in local preparation state." },
@@ -441,7 +442,7 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
     }
     const hasVisual = !!(coverFile || coverRemoteUrl);
     if (publishIntent === "Published" && !hasVisual) {
-      toast.error("Publish requires a bound visual");
+      toast.error("Publish requires a visual identity");
       return;
     }
     const historicalDateError = validateHistoricalDates({
@@ -537,70 +538,110 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
         return (
           <div className="space-y-6">
             <div>
-              <p className="text-[11px] uppercase tracking-[0.28em] mb-2" style={{ color: "var(--ln-gold)" }}>
-                Loop · Register
+              <p className="text-xs uppercase tracking-[0.28em] mb-2" style={{ color: "var(--ln-gold)", fontFamily: "'Cinzel', serif" }}>
+                Loop · Register Work
               </p>
               <h2 className="text-xl font-bold mb-2" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>
-                Audio + visual
+                Prepare Work assets
               </h2>
               <p className="text-sm" style={{ fontFamily: "'Cormorant Garamond', serif", color: "rgba(245,237,216,0.7)" }}>
-                Drop the canonical track. We merge embedded art when present — or upload / generate a cover.
+                Confirm the canonical audio, then attach the visual identity that will accompany this Work.
               </p>
             </div>
 
-            <label
-              htmlFor="music-register-audio-file"
-              onDragOver={(e) => e.preventDefault()}
-              onDrop={(e) => {
-                e.preventDefault();
-                const f = e.dataTransfer.files[0];
-                if (f?.type.startsWith("audio/")) void ingestAudio(f);
-              }}
-              className="relative min-w-0 cursor-pointer overflow-hidden rounded-sm p-8 text-center"
-              style={{
-                border: `1px dashed ${audioFile ? "rgba(74,222,128,0.5)" : "rgba(196,154,40,0.35)"}`,
-                background: "rgba(196,154,40,0.03)",
-              }}
+            <RegistrationAssetCard
+              id="music-register-canonical-audio"
+              sectionNumber="01"
+              eyebrow="Canonical artifact"
+              title={audioFile ? "Canonical audio received" : "Choose canonical audio"}
+              description={audioFile
+                ? "Metadata is ready for your review. Replace only if this is not the file you intend to witness."
+                : "This exact audio file establishes the canonical audio hash used when the Witness ID is sealed."}
+              status={audioFile
+                ? `Ready for review: ${audioFile.name}`
+                : "Required before you can continue to Details and participation."}
+              action={
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="min-h-11 w-full text-sm sm:w-auto"
+                  onClick={() => audioInputRef.current?.click()}
+                >
+                  {audioFile ? "Replace audio" : "Choose audio"}
+                </Button>
+              }
             >
-              <input
-                id="music-register-audio-file"
-                ref={audioInputRef}
-                type="file"
-                accept="audio/*,.mp3,.wav,.flac,.m4a,.ogg,.aac"
-                aria-label="Choose canonical audio file"
-                className="absolute left-3 top-3 h-4 w-4 cursor-pointer opacity-20"
-                onChange={(e) => {
-                  const f = e.target.files?.[0];
-                  if (f) void ingestAudio(f);
+              <label
+                htmlFor="music-register-audio-file"
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  const f = e.dataTransfer.files[0];
+                  if (f?.type.startsWith("audio/")) void ingestAudio(f);
                 }}
-              />
-              {assisting ? (
-                <Loader2 className="mx-auto animate-spin" style={{ color: "var(--ln-gold)" }} />
-              ) : audioFile ? (
-                <>
-                  <CheckCircle2 className="mx-auto mb-2" style={{ color: "#4ADE80" }} />
-                  <p
-                    className="mx-auto line-clamp-2 max-w-full break-all text-sm leading-relaxed"
-                    title={audioFile.name}
-                    style={{ color: "var(--ln-parchment)" }}
-                  >
-                    {audioFile.name}
-                  </p>
-                </>
-              ) : (
-                <>
-                  <Music className="mx-auto mb-2 opacity-60" style={{ color: "var(--ln-gold)" }} />
-                  <p className="text-sm" style={{ color: "var(--ln-parchment)" }}>
-                    Drop audio (MP3, WAV, FLAC…)
-                  </p>
-                </>
-              )}
-            </label>
+                className="flex min-h-36 cursor-pointer flex-col items-center justify-center gap-3 rounded-sm border border-dashed px-6 py-7 text-center"
+                style={{
+                  borderColor: audioFile ? "rgba(74,222,128,0.5)" : "rgba(196,154,40,0.35)",
+                  background: "rgba(0,0,0,0.2)",
+                }}
+              >
+                <input
+                  id="music-register-audio-file"
+                  ref={audioInputRef}
+                  type="file"
+                  accept="audio/*,.mp3,.wav,.flac,.m4a,.ogg,.aac"
+                  aria-label="Choose canonical audio file"
+                  className="sr-only"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) void ingestAudio(f);
+                  }}
+                />
+                {assisting ? (
+                  <Loader2 className="animate-spin" style={{ color: "var(--ln-gold)" }} />
+                ) : audioFile ? (
+                  <>
+                    <CheckCircle2 className="h-6 w-6" style={{ color: "#4ADE80" }} />
+                    <p
+                      className="line-clamp-2 max-w-full break-all text-sm leading-relaxed"
+                      title={audioFile.name}
+                      style={{ color: "var(--ln-parchment)" }}
+                    >
+                      {audioFile.name}
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <Music className="h-6 w-6 opacity-60" style={{ color: "var(--ln-gold)" }} />
+                    <p className="text-sm" style={{ color: "var(--ln-parchment)" }}>
+                      Drop canonical audio (MP3, WAV, FLAC…)
+                    </p>
+                  </>
+                )}
+              </label>
+            </RegistrationAssetCard>
 
-            <div>
-              <p className="text-[11px] uppercase tracking-[0.16em] mb-2" style={{ color: "var(--ln-gold)" }}>
-                Bound visual
-              </p>
+            <RegistrationAssetCard
+              id="music-register-visual-identity"
+              sectionNumber="02"
+              eyebrow="Visual identity"
+              title="Artwork for this Work"
+              description="Visual identity is attached to this Work for presentation and publication. It is not part of the WID hash."
+              status={coverPreview
+                ? `${visualSourceCopy.label} is attached to this Work.`
+                : "Optional for draft. Required before public publication."}
+              action={
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="min-h-11 w-full text-sm sm:w-auto"
+                  onClick={() => coverInputRef.current?.click()}
+                  aria-describedby="music-register-artwork-source"
+                >
+                  {coverPreview ? "Replace artwork" : "Upload artwork"}
+                </Button>
+              }
+            >
               <input
                 ref={coverInputRef}
                 id="music-register-cover-file"
@@ -616,18 +657,15 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
                   }
                 }}
               />
-              <div
-                className="mb-3 grid min-w-0 grid-cols-[4.5rem_minmax(0,1fr)] gap-3 rounded-sm p-3 sm:grid-cols-[5rem_minmax(0,1fr)_auto] sm:items-center sm:p-4"
-                style={{ border: "1px solid rgba(196,154,40,0.3)", background: "rgba(0,0,0,0.32)" }}
-              >
+              <div className="grid min-w-0 grid-cols-[4.5rem_minmax(0,1fr)] gap-3 rounded-sm border p-3 sm:grid-cols-[5rem_minmax(0,1fr)] sm:items-center sm:p-4" style={{ borderColor: "rgba(196,154,40,0.22)", background: "rgba(0,0,0,0.2)" }}>
                 <div className="relative flex aspect-square w-full items-center justify-center overflow-hidden rounded-sm" style={{ background: "rgba(196,154,40,0.06)", border: "1px solid rgba(196,154,40,0.22)" }}>
                   {coverPreview ? (
                     <img src={coverPreview} alt={`${visualSourceCopy.label} preview`} className="h-full w-full object-cover" />
                   ) : (
                     <ImageIcon size={22} style={{ color: "rgba(245,237,216,0.45)" }} />
                   )}
-                  <span className="absolute bottom-1 left-1 rounded-sm px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider" style={{ background: "rgba(0,0,0,0.82)", color: "var(--ln-gold)" }}>
-                    {visualSource === "none" ? "Unbound" : visualSource}
+                  <span className="absolute bottom-1 left-1 rounded-sm px-1.5 py-0.5 text-xs font-semibold uppercase tracking-wider" style={{ background: "rgba(0,0,0,0.82)", color: "var(--ln-gold)" }}>
+                    {visualSource === "none" ? "No source" : visualSource}
                   </span>
                 </div>
                 <div className="min-w-0">
@@ -637,48 +675,40 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
                     <p className="mt-1 line-clamp-2 break-all text-xs" title={coverFile.name} style={{ color: "rgba(245,237,216,0.52)" }}>{coverFile.name}</p>
                   )}
                 </div>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="outline"
-                  className="col-span-2 min-h-10 w-full text-sm sm:col-span-1 sm:w-auto"
-                  onClick={() => coverInputRef.current?.click()}
-                  aria-describedby="music-register-artwork-source"
-                >
-                  {coverPreview ? "Replace artwork" : "Upload artwork"}
-                </Button>
-                <span id="music-register-artwork-source" className="sr-only">Current artwork source: {visualSourceCopy.label}</span>
               </div>
+              <span id="music-register-artwork-source" className="sr-only">Current visual identity source: {visualSourceCopy.label}</span>
 
-              <Textarea
-                value={visualPrompt}
-                onChange={(e) => setVisualPrompt(e.target.value)}
-                placeholder="Visual prompt — generate or remix cover art"
-                className="mb-2 min-h-[72px] bg-transparent text-sm"
-                style={{ borderColor: "rgba(196,154,40,0.25)", color: "var(--ln-parchment)" }}
-              />
-              <div className="flex gap-2">
-                <Button
-                  type="button"
-                  disabled={generatingVisual || !visualPrompt.trim()}
-                  onClick={() => runGenerateVisual("generate")}
-                  className="gap-1 text-xs"
-                  style={{ background: "rgba(196,154,40,0.15)", color: "var(--ln-gold)" }}
-                >
-                  {generatingVisual ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
-                  Generate
-                </Button>
-                <Button
-                  type="button"
-                  disabled={generatingVisual || !visualPrompt.trim() || !coverPreview}
-                  onClick={() => runGenerateVisual("remix")}
-                  className="gap-1 text-xs"
-                  style={{ background: "transparent", color: "var(--ln-parchment)", border: "1px solid rgba(196,154,40,0.3)" }}
-                >
-                  <RefreshCw size={12} /> Remix
-                </Button>
+              <div className="mt-4 space-y-3">
+                <Textarea
+                  value={visualPrompt}
+                  onChange={(e) => setVisualPrompt(e.target.value)}
+                  placeholder="Visual prompt — generate or remix artwork"
+                  className="min-h-[88px] bg-transparent text-sm"
+                  style={{ borderColor: "rgba(196,154,40,0.25)", color: "var(--ln-parchment)" }}
+                />
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    type="button"
+                    disabled={generatingVisual || !visualPrompt.trim()}
+                    onClick={() => runGenerateVisual("generate")}
+                    className="min-h-11 gap-1 text-sm"
+                    style={{ background: "rgba(196,154,40,0.15)", color: "var(--ln-gold)" }}
+                  >
+                    {generatingVisual ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
+                    Generate artwork
+                  </Button>
+                  <Button
+                    type="button"
+                    disabled={generatingVisual || !visualPrompt.trim() || !coverPreview}
+                    onClick={() => runGenerateVisual("remix")}
+                    className="min-h-11 gap-1 text-sm"
+                    style={{ background: "transparent", color: "var(--ln-parchment)", border: "1px solid rgba(196,154,40,0.3)" }}
+                  >
+                    <RefreshCw size={14} /> Remix artwork
+                  </Button>
+                </div>
               </div>
-            </div>
+            </RegistrationAssetCard>
 
             <div className="flex justify-end pt-2">
               <Button
@@ -1016,7 +1046,7 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
               Draft or publish
             </h2>
             <p className="text-sm" style={{ color: "rgba(245,237,216,0.65)" }}>
-              Explicit choice — nothing goes public by accident. Publish requires bound visual + witness-ready profile.
+              Explicit choice — nothing goes public by accident. Publish requires a visual identity and a witness-ready profile.
             </p>
 
             <div className="flex gap-2">
