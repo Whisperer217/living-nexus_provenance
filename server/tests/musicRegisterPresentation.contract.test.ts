@@ -52,6 +52,30 @@ describe("Music Register presentation contracts", () => {
     expect(tokens).toContain("prefers-reduced-motion: reduce");
   });
 
+  it("places extracted record evidence under creator review before WID sealing", () => {
+    const music = read("client/src/pages/manifestation-studio/environments/MusicEnvironment.tsx");
+    const prepared = read("shared/preparedWorkRegistration.ts");
+    const extraction = read("shared/loopRegistration.ts");
+
+    expect(music).toContain("Detected record");
+    expect(music).toContain("Review embedded audio evidence");
+    expect(music).toContain("setDetectedRecordReviewed");
+    expect(music).toContain("Review the detected record details before sealing");
+    expect(music).toContain("!hasDetectedRecord || detectedRecordReviewed");
+    expect(music).toContain("Official artist / album artist");
+    expect(music).toContain("Publisher / label");
+    expect(music).toContain("Living Nexus Collection placement");
+    expect(music).toContain("distinct from the embedded album metadata above");
+    expect(music).toContain("setWitnessData(null)");
+    expect(music).toContain("setToneProfile(null)");
+    expect(extraction).toContain("albumArtist?: string");
+    expect(extraction).toContain("publisher?: string");
+    expect(prepared).toContain("officialArtistName");
+    expect(prepared).toContain("publisherName");
+    expect(prepared).toContain('role: "publisher"');
+    expect(prepared).not.toContain('widBound: [\n    "audioFile",\n    "title",\n    "officialArtistName"');
+  });
+
   it("gives Cathedral a high-contrast, creator-expandable workspace", () => {
     const workspace = read("client/src/components/creative-cathedral/CreativeCathedralWorkspace.tsx");
     const gate = read("client/src/components/creative-cathedral/CathedralContextGate.tsx");

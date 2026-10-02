@@ -13,10 +13,12 @@ describe("creator album assignment contracts", () => {
 
     for (const surface of [register, drawer, chapel]) {
       expect(surface).toContain("trpc.collectionStudio.listMine.useQuery");
-      expect(surface).toContain("Album placement");
       expect(surface).toContain("No album — keep this Work unassigned");
       expect(surface).toContain("collectionId");
     }
+    expect(register).toContain("Living Nexus Collection placement");
+    expect(drawer).toContain("Album placement");
+    expect(chapel).toContain("Album placement");
     expect(register).toContain("does not change this Work’s WID, signature, dates, or publication state");
   });
 

@@ -380,8 +380,11 @@ export async function getNextDisplayOrder(userId: number): Promise<number> {
 export async function createSong(data: {
   userId: number; title: string; genre?: string; bpm?: number; keySignature?: string;
   moodTags?: string[]; lyricsText?: string; lyricsHash?: string; coWriters?: string[]; albumName?: string;
+  /** Industry-facing artist metadata; distinct from the Living Nexus creator handle. */
+  officialArtistName?: string;
   creditsJson?: string;
-  releaseDate?: string; isrc?: string;
+  /** Creator-declared Work chronology, not a platform publication timestamp. */
+  releaseDate?: string; creatorReleaseDate?: string; isrc?: string;
   aiConsent: "prohibited" | "permitted_attribution" | "permitted";
   ownershipStatus?: "full" | "partial";
   fileUrl?: string; fileKey?: string; coverArtUrl?: string; fileHash?: string;

@@ -47,7 +47,10 @@ export interface AudioMetadataEvidence {
   codec?: string;
   title?: string;
   artist?: string;
+  albumArtist?: string;
   album?: string;
+  publisher?: string;
+  copyright?: string;
   genres: string[];
   bpm?: number;
   keySignature?: string;
@@ -278,7 +281,10 @@ export async function inspectAudioFile(file: File): Promise<AudioInspectionResul
         codec: meta.format.codec,
         title: common.title || undefined,
         artist: common.artist || undefined,
+        albumArtist: common.albumartist || undefined,
         album: common.album || undefined,
+        publisher: Array.isArray(common.label) ? common.label.join(", ") : common.label || undefined,
+        copyright: common.copyright || undefined,
         genres: Array.isArray(common.genre) ? common.genre.map(String).filter(Boolean).slice(0, 8) : [],
         bpm: assistance.bpm,
         keySignature: assistance.keySignature,

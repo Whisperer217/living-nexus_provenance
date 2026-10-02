@@ -151,6 +151,10 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
   const coverInputRef = useRef<HTMLInputElement>(null);
 
   const [title, setTitle] = useState(keeperPrefill?.title ?? "");
+  const [officialArtistName, setOfficialArtistName] = useState("");
+  const [albumName, setAlbumName] = useState("");
+  const [publisherName, setPublisherName] = useState("");
+  const [isrc, setIsrc] = useState("");
   const [collectionId, setCollectionId] = useState<number | null>(null);
   const [genre, setGenre] = useState(keeperPrefill?.genre ?? "");
   const [creationDate, setCreationDate] = useState("");
@@ -167,7 +171,17 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
   const [publishIntent, setPublishIntent] = useState<PublishIntent>("Draft");
   const [durationSeconds, setDurationSeconds] = useState<number | undefined>();
   const [audioEvidence, setAudioEvidence] = useState<AudioMetadataEvidence | null>(null);
+  const [detectedRecordReviewed, setDetectedRecordReviewed] = useState(false);
   const visualSourceCopy = VISUAL_SOURCE_COPY[visualSource];
+  const detectedRecordFields = [
+    { label: "Title", value: audioEvidence?.title },
+    { label: audioEvidence?.albumArtist ? "Album artist" : "Artist", value: audioEvidence?.albumArtist ?? audioEvidence?.artist },
+    { label: "Album", value: audioEvidence?.album },
+    { label: "Publisher / label", value: audioEvidence?.publisher },
+    { label: "ISRC", value: audioEvidence?.isrc },
+    { label: "Original release date", value: audioEvidence?.originalReleaseDate },
+  ].filter((field): field is { label: string; value: string } => Boolean(field.value));
+  const hasDetectedRecord = detectedRecordFields.length > 0;
 
   const [witnessData, setWitnessData] = useState<{
     wid: string;
@@ -193,6 +207,10 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
       visualPrompt,
       visualLineage,
       title,
+      officialArtistName,
+      albumName,
+      publisherName,
+      isrc,
       collectionId,
       genre,
       bpm,
@@ -243,6 +261,10 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
 
   const ingestAudio = async (file: File) => {
     setAudioFile(file);
+    setAudioEvidence(null);
+    setDetectedRecordReviewed(false);
+    setWitnessData(null);
+    setToneProfile(null);
     setAssisting(true);
     try {
       const inspection = await inspectAudioFile(file);
@@ -254,6 +276,14 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
       if (assist.keySignature) setKeySignature(assist.keySignature);
       if (assist.lyrics && !lyrics) setLyrics(assist.lyrics);
       if (assist.durationSeconds) setDurationSeconds(assist.durationSeconds);
+      const detectedArtist = inspection.evidence.albumArtist ?? inspection.evidence.artist;
+      if (detectedArtist && !officialArtistName) setOfficialArtistName(detectedArtist);
+      if (inspection.evidence.album && !albumName) setAlbumName(inspection.evidence.album);
+      if (inspection.evidence.publisher && !publisherName) setPublisherName(inspection.evidence.publisher);
+      if (inspection.evidence.isrc && !isrc) setIsrc(inspection.evidence.isrc);
+      if (inspection.evidence.originalReleaseDate && !creatorReleaseDate) {
+        setCreatorReleaseDate(inspection.evidence.originalReleaseDate);
+      }
 
       if (!coverFile && !coverRemoteUrl) {
         const embedded = inspection.embeddedCover;
@@ -359,6 +389,10 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
   const generateWID = async () => {
     if (!audioFile || !title.trim()) {
       toast.error("Audio and title required before seal");
+      return;
+    }
+    if (hasDetectedRecord && !detectedRecordReviewed) {
+      toast.error("Review the detected record details before sealing");
       return;
     }
     setGeneratingWid(true);
@@ -506,7 +540,8 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
 
   const canAdvanceFromUpload = !!audioFile;
   const canAdvanceFromMeta =
-    !!title.trim() && attested && participation.music && participation.lyrics && participation.voice;
+    !!title.trim() && attested && participation.music && participation.lyrics && participation.voice &&
+    (!hasDetectedRecord || detectedRecordReviewed);
 
   const applyCathedralPatch = useCallback((patch: CathedralSuggestionPatch) => {
     const nextCreationDate = patch.creationDate ?? creationDate;
@@ -742,16 +777,83 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
               </p>
             </div>
 
+            {hasDetectedRecord && (
+              <section
+                aria-labelledby="detected-record-title"
+                className="rounded-sm border p-4"
+                style={{ borderColor: "color-mix(in srgb, var(--ln-gold) 38%, transparent)", background: "color-mix(in srgb, var(--ln-gold) 5%, var(--ln-coal))" }}
+              >
+                <p className="text-[11px] uppercase tracking-[0.2em]" style={{ color: "var(--ln-gold)", fontFamily: "'Cinzel', serif" }}>
+                  Detected record
+                </p>
+                <h3 id="detected-record-title" className="mt-1 text-lg font-semibold" style={{ color: "var(--ln-parchment)", fontFamily: "'Cormorant Garamond', serif" }}>
+                  Review embedded audio evidence
+                </h3>
+                <p id="detected-record-boundary" className="mt-1 text-sm leading-relaxed" style={{ color: "var(--ln-bone)" }}>
+                  These suggestions came from the selected audio file. Confirm or correct the editable fields below; they never replace your Living Nexus creator identity or alter the source file.
+                </p>
+                <dl className="mt-3 grid gap-x-4 gap-y-2 sm:grid-cols-2">
+                  {detectedRecordFields.map((field) => (
+                    <div key={field.label} className="min-w-0">
+                      <dt className="text-[10px] uppercase tracking-[0.16em]" style={{ color: "color-mix(in srgb, var(--ln-gold) 78%, transparent)" }}>{field.label}</dt>
+                      <dd className="mt-0.5 break-words text-sm" style={{ color: "var(--ln-parchment)" }}>{field.value}</dd>
+                    </div>
+                  ))}
+                </dl>
+                <label className="mt-4 flex cursor-pointer items-start gap-3 rounded-sm border p-3" style={{ borderColor: "color-mix(in srgb, var(--ln-gold) 22%, transparent)", background: "color-mix(in srgb, var(--ln-coal) 90%, var(--ln-gold))" }}>
+                  <input
+                    type="checkbox"
+                    checked={detectedRecordReviewed}
+                    onChange={(event) => setDetectedRecordReviewed(event.target.checked)}
+                    aria-describedby="detected-record-boundary"
+                    className="mt-1"
+                  />
+                  <span className="text-sm leading-relaxed" style={{ color: "var(--ln-bone)" }}>
+                    I reviewed the detected record and confirm or correct these details before the Witness ID is sealed.
+                  </span>
+                </label>
+              </section>
+            )}
+
             <Input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Title *"
+              placeholder="Work title *"
+              aria-label="Work title"
               className="bg-transparent"
               style={{ borderColor: "rgba(196,154,40,0.3)", color: "var(--ln-parchment)" }}
             />
 
+            <section className="space-y-3 rounded-sm border p-4" aria-labelledby="distribution-record-title" style={{ borderColor: "color-mix(in srgb, var(--ln-gold) 23%, transparent)", background: "color-mix(in srgb, var(--ln-coal) 92%, var(--ln-gold))" }}>
+              <div>
+                <p className="text-[11px] uppercase tracking-[0.2em]" style={{ color: "var(--ln-gold)", fontFamily: "'Cinzel', serif" }}>Record identifiers</p>
+                <h3 id="distribution-record-title" className="mt-1 text-base font-semibold" style={{ color: "var(--ln-parchment)", fontFamily: "'Cormorant Garamond', serif" }}>Industry metadata</h3>
+                <p className="mt-1 text-xs leading-relaxed" style={{ color: "var(--ln-bone)" }}>
+                  Editable Work metadata. It is kept separate from your Living Nexus handle and does not expand the current WID payload.
+                </p>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <label className="block space-y-1.5">
+                  <span className="text-[11px] uppercase tracking-[0.16em]" style={{ color: "var(--ln-gold)" }}>Official artist / album artist</span>
+                  <Input value={officialArtistName} onChange={(event) => setOfficialArtistName(event.target.value)} placeholder="Embedded artist attribution" className="bg-transparent" style={{ borderColor: "rgba(196,154,40,0.3)", color: "var(--ln-parchment)" }} />
+                </label>
+                <label className="block space-y-1.5">
+                  <span className="text-[11px] uppercase tracking-[0.16em]" style={{ color: "var(--ln-gold)" }}>Album metadata</span>
+                  <Input value={albumName} onChange={(event) => setAlbumName(event.target.value)} placeholder="Embedded album name" className="bg-transparent" style={{ borderColor: "rgba(196,154,40,0.3)", color: "var(--ln-parchment)" }} />
+                </label>
+                <label className="block space-y-1.5">
+                  <span className="text-[11px] uppercase tracking-[0.16em]" style={{ color: "var(--ln-gold)" }}>Publisher / label</span>
+                  <Input value={publisherName} onChange={(event) => setPublisherName(event.target.value)} placeholder="Recorded as a Work credit" className="bg-transparent" style={{ borderColor: "rgba(196,154,40,0.3)", color: "var(--ln-parchment)" }} />
+                </label>
+                <label className="block space-y-1.5">
+                  <span className="text-[11px] uppercase tracking-[0.16em]" style={{ color: "var(--ln-gold)" }}>ISRC</span>
+                  <Input value={isrc} onChange={(event) => setIsrc(event.target.value.toUpperCase())} placeholder="International Standard Recording Code" className="bg-transparent font-mono" style={{ borderColor: "rgba(196,154,40,0.3)", color: "var(--ln-parchment)" }} />
+                </label>
+              </div>
+            </section>
+
             <label className="block space-y-1.5">
-              <span className="text-[11px] uppercase tracking-[0.16em]" style={{ color: "var(--ln-gold)" }}>Album placement</span>
+              <span className="text-[11px] uppercase tracking-[0.16em]" style={{ color: "var(--ln-gold)" }}>Living Nexus Collection placement</span>
               <select
                 aria-label="Place this Work in an existing album"
                 value={collectionId ?? ""}
@@ -767,7 +869,7 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
                 ))}
               </select>
               <span className="block text-[11px] leading-relaxed" style={{ color: "color-mix(in srgb, var(--ln-parchment) 52%, transparent)" }}>
-                Optional creator organization. It does not change this Work’s WID, signature, dates, or publication state.
+                Optional creator organization, distinct from the embedded album metadata above. It does not change this Work’s WID, signature, dates, or publication state.
               </span>
             </label>
 

@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-10-02T19:12:32.094Z",
-  "totalLessons": 39,
+  "lastUpdated": "2026-10-02T19:28:43.283Z",
+  "totalLessons": 40,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -913,6 +913,28 @@
         "accessibility"
       ],
       "id": "LESSON-039"
+    },
+    {
+      "date": "2026-10-02",
+      "category": "architecture",
+      "problem": "Loop inspected embedded music metadata but did not consistently promote verified ISRC, industry artist, album, publisher, and original release evidence into canonical Work fields before sealing.",
+      "solution": "Added a creator-confirmed Detected Record review that prefills only blank fields, maps artist/album/ISRC/date to existing Work metadata, records publisher as a structured Work credit, and gates WID sealing on review without expanding the WID payload.",
+      "files": [
+        "shared/loopRegistration.ts",
+        "shared/preparedWorkRegistration.ts",
+        "client/src/pages/manifestation-studio/environments/MusicEnvironment.tsx",
+        "server/utils/db.ts"
+      ],
+      "score": 0,
+      "tags": [
+        "loop",
+        "metadata-extraction",
+        "isrc",
+        "publisher-credit",
+        "creator-review",
+        "wid-boundary"
+      ],
+      "id": "LESSON-040"
     }
   ]
 }

@@ -28,7 +28,7 @@ export const PREPARED_WORK_FIELD_CLASSIFICATION = {
     "timestamp",
   ],
   /** Existing registration values outside the current WID-MUS signature payload. */
-  editorial: ["lyrics", "aiConsent", "publishIntent", "durationSeconds", "releaseDate", "creatorReleaseDate", "collectionId"],
+  editorial: ["lyrics", "aiConsent", "publishIntent", "durationSeconds", "releaseDate", "creatorReleaseDate", "collectionId", "officialArtistName", "albumName", "publisherName", "isrc"],
   /** Independently prepared media/manifestation components. */
   independentComponent: [
     "coverFile",
@@ -48,6 +48,14 @@ export interface PreparedWorkRegistrationInput<TAsset = unknown> {
   visualPrompt: string;
   visualLineage: Array<{ prompt: string; url: string; at: string }>;
   title: string;
+  /** Embedded or creator-confirmed industry-facing artist name; never the Living Nexus handle. */
+  officialArtistName: string;
+  /** Embedded or creator-confirmed album metadata; separate from a Living Nexus Collection. */
+  albumName: string;
+  /** Embedded or creator-confirmed publisher/label, persisted as a Work credit. */
+  publisherName: string;
+  /** Embedded or creator-confirmed ISRC. */
+  isrc: string;
   /** Existing creator-owned legacy album; editorial organization only, never WID-bound. */
   collectionId?: number | null;
   genre: string;
@@ -158,11 +166,18 @@ export function buildPreparedWorkUploadPayload(
     ...(metadata.releaseDate ? { releaseDate: metadata.releaseDate } : {}),
     ...(metadata.creatorReleaseDate ? { creatorReleaseDate: metadata.creatorReleaseDate } : {}),
   };
+  const publisherCredits = metadata.publisherName.trim()
+    ? JSON.stringify([{ role: "publisher", name: metadata.publisherName.trim() }])
+    : undefined;
   return {
     fileUrl: context.fileUrl,
     fileKey: context.fileKey,
     coverArtUrl: context.coverArtUrl,
     title: metadata.title,
+    ...(metadata.officialArtistName.trim() ? { officialArtistName: metadata.officialArtistName.trim() } : {}),
+    ...(metadata.albumName.trim() ? { albumName: metadata.albumName.trim() } : {}),
+    ...(metadata.isrc.trim() ? { isrc: metadata.isrc.trim() } : {}),
+    ...(publisherCredits ? { creditsJson: publisherCredits } : {}),
     ...(metadata.collectionId ? { collectionId: metadata.collectionId } : {}),
     genre: metadata.genre || undefined,
     bpm: metadata.bpm ? parseInt(metadata.bpm, 10) : undefined,

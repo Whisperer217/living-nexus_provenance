@@ -37,11 +37,14 @@ describe("Work metadata continuity", () => {
 
   it("passes historical dates through upload and renders each persisted Other genre on the public Work surface", () => {
     const router = read("server/routers/songs.ts");
+    const activeDb = read("server/utils/db.ts");
     const musicEnvironment = read("client/src/pages/manifestation-studio/environments/MusicEnvironment.tsx");
     const publicWork = read("client/src/pages/loop/LoopWorkPage.tsx");
 
     expect(router).toContain("creatorReleaseDate: z.string().optional()");
     expect(router).toContain("creatorReleaseDate: input.creatorReleaseDate");
+    expect(activeDb).toContain("creatorReleaseDate?: string");
+    expect(activeDb).toContain("officialArtistName?: string");
     expect(musicEnvironment).toContain("releaseDate: creationDate");
     expect(musicEnvironment).toContain("creatorReleaseDate,");
     expect(musicEnvironment).toContain("toggleWorkGenre");
