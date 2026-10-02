@@ -68,8 +68,20 @@ describe("Music Register presentation contracts", () => {
     expect(music).toContain("distinct from the embedded album metadata above");
     expect(music).toContain("setWitnessData(null)");
     expect(music).toContain("setToneProfile(null)");
+    expect(music).toContain("autoExtractedFields");
+    expect(music).toContain("ExtractedMetadataStatus");
+    expect(music).toContain("Extracted");
+    expect(music).toContain("Approve All");
+    expect(music).toContain("Detected record approved — ready to seal when you are.");
+    expect(music).toContain("validateIsrc(isrc)");
+    expect(music).toContain("aria-invalid={Boolean(isrcValidationError)}");
+    expect(music).toContain("Original Release Date is the first release of this Work");
+    expect(music).toContain("detectedRecordValidationError");
+    expect(music).toContain("labelAdornment");
     expect(extraction).toContain("albumArtist?: string");
     expect(extraction).toContain("publisher?: string");
+    expect(extraction).toContain("validateIsrc");
+    expect(extraction).toContain("ISRC must contain 12 characters");
     expect(prepared).toContain("officialArtistName");
     expect(prepared).toContain("publisherName");
     expect(prepared).toContain('role: "publisher"');
@@ -108,6 +120,13 @@ describe("Music Register presentation contracts", () => {
     expect(shell).toContain("min-h-0 flex-1 flex flex-col lg:flex-row overflow-hidden");
     expect(shell).toContain('overscrollBehavior: "contain"');
     expect(shell).not.toContain('className="p-6 md:p-8 lg:p-10 sticky top-0"');
+  });
+
+  it("allows provenance-aware adornments on canonical historical date controls", () => {
+    const historicalDateField = read("client/src/components/HistoricalDateField.tsx");
+    expect(historicalDateField).toContain("labelAdornment?: ReactNode");
+    expect(historicalDateField).toContain("labelAdornment,");
+    expect(historicalDateField).toContain("flex flex-wrap items-center gap-2 text-xs");
   });
 
   it("does not add registration, publication, WID, or provenance authority to Cathedral UI", () => {

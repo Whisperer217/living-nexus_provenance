@@ -10,11 +10,12 @@ import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import {
   Upload, Music, Image as ImageIcon, Play, Pause, Shield,
-  ChevronRight, ChevronLeft, Loader2, CheckCircle2, Sparkles, RefreshCw,
+  ChevronRight, ChevronLeft, Loader2, CheckCircle2, Sparkles, RefreshCw, CircleHelp,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { HistoricalDateField } from "@/components/HistoricalDateField";
 import { CreativeCathedralWorkspace } from "@/components/creative-cathedral/CreativeCathedralWorkspace";
 import type { CathedralSuggestionPatch } from "@shared/creativeCathedral";
@@ -29,6 +30,7 @@ import {
   buildWaveformPngFromAudio,
   defaultParticipation,
   inspectAudioFile,
+  validateIsrc,
   type AudioMetadataEvidence,
   type LoopParticipation,
   type ParticipationValue,
@@ -47,6 +49,8 @@ import { validateHistoricalDates } from "@shared/workHistoricalDates";
 import { applySuggestedWorkGenres, getSuggestedWorkGenres, parseWorkGenres, toggleWorkGenre } from "@shared/workMetadata";
 
 const atmosphere = ATMOSPHERES.music;
+
+type DetectedMetadataField = "title" | "officialArtistName" | "albumName" | "publisherName" | "isrc" | "creatorReleaseDate";
 
 const VISUAL_SOURCE_COPY: Record<VisualSource, { label: string; detail: string }> = {
   none: { label: "No visual identity attached", detail: "Attach artwork or create a visual identity before public publication." },
@@ -114,6 +118,43 @@ function AxisPicker({
   );
 }
 
+function ExtractedMetadataStatus({
+  extracted,
+  tooltip,
+}: {
+  extracted: boolean;
+  tooltip?: string;
+}) {
+  if (!extracted && !tooltip) return null;
+
+  return (
+    <span className="inline-flex items-center gap-1.5">
+      {extracted && (
+        <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-[0.12em]" style={{ color: "var(--ln-gold-hot)" }}>
+          <Sparkles aria-hidden="true" className="size-3" /> Extracted
+        </span>
+      )}
+      {tooltip && (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              type="button"
+              aria-label="Field guidance"
+              className="inline-flex size-5 items-center justify-center rounded-full transition-colors hover:bg-[color-mix(in_srgb,var(--ln-gold)_14%,transparent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ln-gold-hot)]"
+              style={{ color: "var(--ln-gold)" }}
+            >
+              <CircleHelp aria-hidden="true" className="size-3.5" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="top" sideOffset={8} className="max-w-xs border" style={{ background: "var(--ln-iron)", color: "var(--ln-parchment)", borderColor: "color-mix(in srgb, var(--ln-gold) 32%, transparent)" }}>
+            {tooltip}
+          </TooltipContent>
+        </Tooltip>
+      )}
+    </span>
+  );
+}
+
 interface MusicEnvironmentProps {
   onBack: () => void;
   pendingFile?: File;
@@ -172,6 +213,7 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
   const [durationSeconds, setDurationSeconds] = useState<number | undefined>();
   const [audioEvidence, setAudioEvidence] = useState<AudioMetadataEvidence | null>(null);
   const [detectedRecordReviewed, setDetectedRecordReviewed] = useState(false);
+  const [autoExtractedFields, setAutoExtractedFields] = useState<Partial<Record<DetectedMetadataField, true>>>({});
   const visualSourceCopy = VISUAL_SOURCE_COPY[visualSource];
   const detectedRecordFields = [
     { label: "Title", value: audioEvidence?.title },
@@ -182,6 +224,15 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
     { label: "Original release date", value: audioEvidence?.originalReleaseDate },
   ].filter((field): field is { label: string; value: string } => Boolean(field.value));
   const hasDetectedRecord = detectedRecordFields.length > 0;
+  const isrcValidationError = validateIsrc(isrc);
+  const releaseDateValidationError = validateHistoricalDates({
+    creationDate,
+    originalReleaseDate: creatorReleaseDate,
+  });
+  const detectedRecordValidationError = isrcValidationError ?? releaseDateValidationError;
+  const clearExtractedMarker = (field: DetectedMetadataField) => {
+    setAutoExtractedFields((current) => ({ ...current, [field]: undefined }));
+  };
 
   const [witnessData, setWitnessData] = useState<{
     wid: string;
@@ -263,27 +314,46 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
     setAudioFile(file);
     setAudioEvidence(null);
     setDetectedRecordReviewed(false);
+    setAutoExtractedFields({});
     setWitnessData(null);
     setToneProfile(null);
     setAssisting(true);
     try {
       const inspection = await inspectAudioFile(file);
       const assist = inspection.assistance;
+      const extracted: Partial<Record<DetectedMetadataField, true>> = {};
       setAudioEvidence(inspection.evidence);
-      if (assist.title && !title) setTitle(assist.title);
+      if (assist.title && !title) {
+        setTitle(assist.title);
+        extracted.title = true;
+      }
       if (assist.genre && !genre) setGenre(assist.genre);
       if (assist.bpm) setBpm(String(assist.bpm));
       if (assist.keySignature) setKeySignature(assist.keySignature);
       if (assist.lyrics && !lyrics) setLyrics(assist.lyrics);
       if (assist.durationSeconds) setDurationSeconds(assist.durationSeconds);
       const detectedArtist = inspection.evidence.albumArtist ?? inspection.evidence.artist;
-      if (detectedArtist && !officialArtistName) setOfficialArtistName(detectedArtist);
-      if (inspection.evidence.album && !albumName) setAlbumName(inspection.evidence.album);
-      if (inspection.evidence.publisher && !publisherName) setPublisherName(inspection.evidence.publisher);
-      if (inspection.evidence.isrc && !isrc) setIsrc(inspection.evidence.isrc);
+      if (detectedArtist && !officialArtistName) {
+        setOfficialArtistName(detectedArtist);
+        extracted.officialArtistName = true;
+      }
+      if (inspection.evidence.album && !albumName) {
+        setAlbumName(inspection.evidence.album);
+        extracted.albumName = true;
+      }
+      if (inspection.evidence.publisher && !publisherName) {
+        setPublisherName(inspection.evidence.publisher);
+        extracted.publisherName = true;
+      }
+      if (inspection.evidence.isrc && !isrc) {
+        setIsrc(inspection.evidence.isrc);
+        extracted.isrc = true;
+      }
       if (inspection.evidence.originalReleaseDate && !creatorReleaseDate) {
         setCreatorReleaseDate(inspection.evidence.originalReleaseDate);
+        extracted.creatorReleaseDate = true;
       }
+      setAutoExtractedFields(extracted);
 
       if (!coverFile && !coverRemoteUrl) {
         const embedded = inspection.embeddedCover;
@@ -393,6 +463,10 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
     }
     if (hasDetectedRecord && !detectedRecordReviewed) {
       toast.error("Review the detected record details before sealing");
+      return;
+    }
+    if (detectedRecordValidationError) {
+      toast.error(detectedRecordValidationError);
       return;
     }
     setGeneratingWid(true);
@@ -541,7 +615,7 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
   const canAdvanceFromUpload = !!audioFile;
   const canAdvanceFromMeta =
     !!title.trim() && attested && participation.music && participation.lyrics && participation.voice &&
-    (!hasDetectedRecord || detectedRecordReviewed);
+    (!hasDetectedRecord || detectedRecordReviewed) && !detectedRecordValidationError;
 
   const applyCathedralPatch = useCallback((patch: CathedralSuggestionPatch) => {
     const nextCreationDate = patch.creationDate ?? creationDate;
@@ -554,14 +628,20 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
       toast.error(historicalDateError);
       return;
     }
-    if (patch.title !== undefined) setTitle(patch.title);
+    if (patch.title !== undefined) {
+      setTitle(patch.title);
+      clearExtractedMarker("title");
+    }
     if (patch.genre !== undefined) setGenre(patch.genre);
     if (patch.bpm !== undefined) setBpm(patch.bpm === null ? "" : String(patch.bpm));
     if (patch.keySignature !== undefined) setKeySignature(patch.keySignature ?? "");
     if (patch.moodTags !== undefined) setSelectedMoods(patch.moodTags);
     if (patch.caption !== undefined) setCaption(patch.caption);
     if (patch.creationDate !== undefined) setCreationDate(patch.creationDate);
-    if (patch.originalReleaseDate !== undefined) setCreatorReleaseDate(patch.originalReleaseDate);
+    if (patch.originalReleaseDate !== undefined) {
+      setCreatorReleaseDate(patch.originalReleaseDate);
+      clearExtractedMarker("creatorReleaseDate");
+    }
     if (patch.participationMusic !== undefined) setParticipation((previous) => ({ ...previous, music: patch.participationMusic! }));
     if (patch.participationLyrics !== undefined) setParticipation((previous) => ({ ...previous, lyrics: patch.participationLyrics! }));
     if (patch.participationVoice !== undefined) setParticipation((previous) => ({ ...previous, voice: patch.participationVoice! }));
@@ -800,6 +880,29 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
                     </div>
                   ))}
                 </dl>
+                {detectedRecordValidationError && (
+                  <p id="detected-record-validation" role="alert" className="mt-3 rounded-sm border px-3 py-2 text-sm leading-relaxed" style={{ borderColor: "color-mix(in srgb, var(--ln-gold) 48%, transparent)", background: "color-mix(in srgb, var(--ln-gold) 9%, var(--ln-coal))", color: "var(--ln-parchment)" }}>
+                    {detectedRecordValidationError}
+                  </p>
+                )}
+                <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="text-xs leading-relaxed" style={{ color: "color-mix(in srgb, var(--ln-parchment) 62%, transparent)" }}>
+                    The <Sparkles aria-hidden="true" className="mx-0.5 inline size-3" style={{ color: "var(--ln-gold-hot)" }} /> Extracted marker identifies values populated from this audio file.
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={Boolean(detectedRecordValidationError)}
+                    onClick={() => {
+                      setDetectedRecordReviewed(true);
+                      toast.success("Detected record approved — ready to seal when you are.");
+                    }}
+                    aria-describedby={detectedRecordValidationError ? "detected-record-validation" : "detected-record-boundary"}
+                    className="min-h-11 shrink-0 gap-2 border-[color-mix(in_srgb,var(--ln-gold)_45%,transparent)] text-sm text-[var(--ln-gold)] hover:bg-[color-mix(in_srgb,var(--ln-gold)_10%,transparent)]"
+                  >
+                    <CheckCircle2 aria-hidden="true" className="size-4" /> Approve All
+                  </Button>
+                </div>
                 <label className="mt-4 flex cursor-pointer items-start gap-3 rounded-sm border p-3" style={{ borderColor: "color-mix(in srgb, var(--ln-gold) 22%, transparent)", background: "color-mix(in srgb, var(--ln-coal) 90%, var(--ln-gold))" }}>
                   <input
                     type="checkbox"
@@ -815,14 +918,23 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
               </section>
             )}
 
-            <Input
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Work title *"
-              aria-label="Work title"
-              className="bg-transparent"
-              style={{ borderColor: "rgba(196,154,40,0.3)", color: "var(--ln-parchment)" }}
-            />
+            <label className="block space-y-1.5">
+              <span className="flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.16em]" style={{ color: "var(--ln-gold)" }}>
+                <span>Work title</span>
+                <ExtractedMetadataStatus extracted={Boolean(autoExtractedFields.title)} />
+              </span>
+              <Input
+                value={title}
+                onChange={(e) => {
+                  setTitle(e.target.value);
+                  clearExtractedMarker("title");
+                }}
+                placeholder="Work title *"
+                aria-label="Work title"
+                className="bg-transparent"
+                style={{ borderColor: "rgba(196,154,40,0.3)", color: "var(--ln-parchment)" }}
+              />
+            </label>
 
             <section className="space-y-3 rounded-sm border p-4" aria-labelledby="distribution-record-title" style={{ borderColor: "color-mix(in srgb, var(--ln-gold) 23%, transparent)", background: "color-mix(in srgb, var(--ln-coal) 92%, var(--ln-gold))" }}>
               <div>
@@ -834,20 +946,22 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
               </div>
               <div className="grid gap-3 sm:grid-cols-2">
                 <label className="block space-y-1.5">
-                  <span className="text-[11px] uppercase tracking-[0.16em]" style={{ color: "var(--ln-gold)" }}>Official artist / album artist</span>
-                  <Input value={officialArtistName} onChange={(event) => setOfficialArtistName(event.target.value)} placeholder="Embedded artist attribution" className="bg-transparent" style={{ borderColor: "rgba(196,154,40,0.3)", color: "var(--ln-parchment)" }} />
+                  <span className="flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.16em]" style={{ color: "var(--ln-gold)" }}><span>Official artist / album artist</span><ExtractedMetadataStatus extracted={Boolean(autoExtractedFields.officialArtistName)} /></span>
+                  <Input value={officialArtistName} onChange={(event) => { setOfficialArtistName(event.target.value); clearExtractedMarker("officialArtistName"); }} placeholder="Embedded artist attribution" className="bg-transparent" style={{ borderColor: "rgba(196,154,40,0.3)", color: "var(--ln-parchment)" }} />
                 </label>
                 <label className="block space-y-1.5">
-                  <span className="text-[11px] uppercase tracking-[0.16em]" style={{ color: "var(--ln-gold)" }}>Album metadata</span>
-                  <Input value={albumName} onChange={(event) => setAlbumName(event.target.value)} placeholder="Embedded album name" className="bg-transparent" style={{ borderColor: "rgba(196,154,40,0.3)", color: "var(--ln-parchment)" }} />
+                  <span className="flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.16em]" style={{ color: "var(--ln-gold)" }}><span>Album metadata</span><ExtractedMetadataStatus extracted={Boolean(autoExtractedFields.albumName)} /></span>
+                  <Input value={albumName} onChange={(event) => { setAlbumName(event.target.value); clearExtractedMarker("albumName"); }} placeholder="Embedded album name" className="bg-transparent" style={{ borderColor: "rgba(196,154,40,0.3)", color: "var(--ln-parchment)" }} />
                 </label>
                 <label className="block space-y-1.5">
-                  <span className="text-[11px] uppercase tracking-[0.16em]" style={{ color: "var(--ln-gold)" }}>Publisher / label</span>
-                  <Input value={publisherName} onChange={(event) => setPublisherName(event.target.value)} placeholder="Recorded as a Work credit" className="bg-transparent" style={{ borderColor: "rgba(196,154,40,0.3)", color: "var(--ln-parchment)" }} />
+                  <span className="flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.16em]" style={{ color: "var(--ln-gold)" }}><span>Publisher / label</span><ExtractedMetadataStatus extracted={Boolean(autoExtractedFields.publisherName)} /></span>
+                  <Input value={publisherName} onChange={(event) => { setPublisherName(event.target.value); clearExtractedMarker("publisherName"); }} placeholder="Recorded as a Work credit" className="bg-transparent" style={{ borderColor: "rgba(196,154,40,0.3)", color: "var(--ln-parchment)" }} />
                 </label>
                 <label className="block space-y-1.5">
-                  <span className="text-[11px] uppercase tracking-[0.16em]" style={{ color: "var(--ln-gold)" }}>ISRC</span>
-                  <Input value={isrc} onChange={(event) => setIsrc(event.target.value.toUpperCase())} placeholder="International Standard Recording Code" className="bg-transparent font-mono" style={{ borderColor: "rgba(196,154,40,0.3)", color: "var(--ln-parchment)" }} />
+                  <span className="flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.16em]" style={{ color: "var(--ln-gold)" }}><span>ISRC</span><ExtractedMetadataStatus extracted={Boolean(autoExtractedFields.isrc)} tooltip="An ISRC identifies a sound recording. It does not establish authorship or replace a WID. Use 12 characters, for example US-ABC-24-12345." /></span>
+                  <Input value={isrc} onChange={(event) => { setIsrc(event.target.value.toUpperCase()); clearExtractedMarker("isrc"); }} placeholder="International Standard Recording Code" aria-invalid={Boolean(isrcValidationError)} aria-describedby={isrcValidationError ? "isrc-help isrc-validation" : "isrc-help"} className="bg-transparent font-mono" style={{ borderColor: isrcValidationError ? "var(--ln-gold-hot)" : "rgba(196,154,40,0.3)", color: "var(--ln-parchment)" }} />
+                  <span id="isrc-help" className="block text-[11px] leading-relaxed" style={{ color: "color-mix(in srgb, var(--ln-parchment) 55%, transparent)" }}>Optional recording identifier. Hyphens and spaces are accepted.</span>
+                  {isrcValidationError && <span id="isrc-validation" role="alert" className="block text-[11px] leading-relaxed" style={{ color: "var(--ln-gold-hot)" }}>{isrcValidationError}</span>}
                 </label>
               </div>
             </section>
@@ -986,10 +1100,24 @@ export function MusicEnvironment({ onBack, keeperPrefill, pendingFile }: MusicEn
                 id="music-original-release-date"
                 label="Original Release Date"
                 value={creatorReleaseDate}
-                onChange={setCreatorReleaseDate}
+                onChange={(value) => {
+                  setCreatorReleaseDate(value);
+                  clearExtractedMarker("creatorReleaseDate");
+                }}
                 minDate={creationDate}
                 helpText="When this Work was first released, if applicable. Creator-declared."
+                labelAdornment={
+                  <ExtractedMetadataStatus
+                    extracted={Boolean(autoExtractedFields.creatorReleaseDate)}
+                    tooltip="Original Release Date is the first release of this Work, if known. It is creator-declared and distinct from the Living Nexus registry timestamp."
+                  />
+                }
               />
+              {releaseDateValidationError && (
+                <p id="release-date-validation" role="alert" className="sm:col-span-2 text-[11px] leading-relaxed" style={{ color: "var(--ln-gold-hot)" }}>
+                  {releaseDateValidationError}
+                </p>
+              )}
               <p className="sm:col-span-2 text-[11px]" style={{ color: "color-mix(in srgb, var(--ln-parchment) 45%, transparent)" }}>
                 Creator-declared work history. The WID assignment and publication timestamps are system records and cannot be edited here.
               </p>

@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { CalendarDays, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -18,6 +19,7 @@ type HistoricalDateFieldProps = {
   maxDate?: string;
   popoverContainer?: HTMLElement | null;
   className?: string;
+  labelAdornment?: ReactNode;
 };
 
 export function HistoricalDateField({
@@ -30,6 +32,7 @@ export function HistoricalDateField({
   maxDate,
   popoverContainer,
   className,
+  labelAdornment,
 }: HistoricalDateFieldProps) {
   const selected = parseHistoricalDate(value);
   const minimum = parseHistoricalDate(minDate);
@@ -37,8 +40,9 @@ export function HistoricalDateField({
 
   return (
     <div className={className}>
-      <label htmlFor={id} className="block text-xs" style={{ color: "color-mix(in srgb, var(--ln-parchment) 72%, transparent)" }}>
-        {label}
+      <label htmlFor={id} className="flex flex-wrap items-center gap-2 text-xs" style={{ color: "color-mix(in srgb, var(--ln-parchment) 72%, transparent)" }}>
+        <span>{label}</span>
+        {labelAdornment}
       </label>
       <Popover>
         <PopoverTrigger asChild>

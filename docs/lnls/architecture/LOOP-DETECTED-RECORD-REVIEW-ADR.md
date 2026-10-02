@@ -32,3 +32,7 @@ The UI labels every value as extracted evidence, keeps canonical editable fields
 ## Implementation verification
 
 The active `songs.upload` procedure writes through `server/utils/db.ts#createSong`. That helper accepts the mapped `officialArtistName`, `albumName`, `creditsJson`, `isrc`, and `creatorReleaseDate` values and spreads them into the existing `songs` schema insert. The helper contract is typed accordingly so this preservation boundary remains visible to future changes.
+
+## Creator affirmation
+
+Fields that were populated from the selected audio carry a visible **Extracted** marker. **Approve All** acknowledges the evidence currently displayed; it does not mutate any value, replace a creator-entered value, waive ISRC or chronology validation, or add data to the WID payload. The ISRC and original-release-date controls provide inline validation and accessible explanations before sealing.

@@ -79,6 +79,23 @@ export function defaultParticipation(): LoopParticipation {
   return { music: "Human", lyrics: "Human", voice: "Human" };
 }
 
+/**
+ * Normalizes a display-form ISRC for validation and persistence without
+ * conflating the recording identifier with a Living Nexus Work or WID.
+ */
+export function normalizeIsrc(value: string): string {
+  return value.replace(/[\s-]/g, "").toUpperCase();
+}
+
+/** Accepts ISO 3901's 12-character recording identifier in display or compact form. */
+export function validateIsrc(value: string): string | null {
+  const normalized = normalizeIsrc(value);
+  if (!normalized) return null;
+  return /^[A-Z]{2}[A-Z0-9]{3}\d{7}$/.test(normalized)
+    ? null
+    : "ISRC must contain 12 characters: country, registrant, year, and recording designation.";
+}
+
 /** Tone-from-metadata — stable identity from confirmed register fields */
 export function deriveToneFromMetadata(input: {
   genre?: string | null;

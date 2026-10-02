@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-10-02T19:28:43.283Z",
-  "totalLessons": 40,
+  "lastUpdated": "2026-10-02T19:36:25.246Z",
+  "totalLessons": 41,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -935,6 +935,27 @@
         "wid-boundary"
       ],
       "id": "LESSON-040"
+    },
+    {
+      "date": "2026-10-02",
+      "category": "accessibility",
+      "problem": "Auto-extracted registration values were indistinguishable from creator-entered values, and creators could not quickly affirm a valid detected record or understand ISRC and release-date requirements before sealing.",
+      "solution": "Added source-preserving Extracted markers, an Approve All acknowledgement gated by inline ISRC and chronology validation, tooltip explanations, and WID seal guards. Source markers clear when a creator or workspace changes the value.",
+      "files": [
+        "client/src/pages/manifestation-studio/environments/MusicEnvironment.tsx",
+        "client/src/components/HistoricalDateField.tsx",
+        "shared/loopRegistration.ts"
+      ],
+      "score": 0,
+      "tags": [
+        "loop",
+        "detected-record",
+        "accessibility",
+        "isrc",
+        "date-validation",
+        "creator-agency"
+      ],
+      "id": "LESSON-041"
     }
   ]
 }
