@@ -53,5 +53,8 @@ describe("Explore public-surface contract", () => {
     expect(exploreSource).toContain("min-h-11");
     expect(exploreSource).toContain("min-w-[8.75rem]");
     expect(exploreSource).toContain("touch-manipulation");
+    expect(exploreSource).toContain("active:scale-[0.985]");
+    expect(exploreSource).toContain("active:text-[var(--ln-gold-hot)]");
+    expect(exploreSource).toContain("motion-reduce:active:scale-100");
   });
 });

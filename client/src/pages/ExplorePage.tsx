@@ -464,7 +464,7 @@ function WorkSortControl({ value, onChange }: { value: WorkSort; onChange: (valu
         aria-label="Sort works"
         value={value}
         onChange={(event) => onChange(event.target.value as WorkSort)}
-        className={`min-h-11 min-w-[8.75rem] cursor-pointer touch-manipulation appearance-none bg-transparent pr-1 text-xs font-medium outline-none transition-colors duration-200 group-hover:text-[var(--ln-gold-flame)] sm:min-h-0 sm:min-w-0 sm:max-w-none ${
+        className={`min-h-11 min-w-[8.75rem] origin-left cursor-pointer touch-manipulation appearance-none bg-transparent pr-1 text-xs font-medium outline-none transition-[color,transform] duration-150 ease-out group-hover:text-[var(--ln-gold-flame)] active:scale-[0.985] active:text-[var(--ln-gold-hot)] motion-reduce:active:scale-100 sm:min-h-0 sm:min-w-0 sm:max-w-none ${
           isRegistryOrder ? "text-[var(--ln-parchment)]" : "text-[var(--ln-bone)]"
         }`}
         style={{ colorScheme: "dark" }}
