@@ -1121,7 +1121,7 @@ export default function ProfilePage() {
                       PRESERVATION_MODE: { icon: Star, color: "var(--ln-gold)", label: "Preservation Mode" },
                       PROJECT_PUBLISHED: { icon: Layers, color: "#34d399", label: "Project Published" },
                       PROJECT_FUNDED: { icon: DollarSign, color: "#34d399", label: "Project Funded" },
-                      FOLLOW: { icon: Users, color: "#f472b6", label: "New Follower" },
+                      FOLLOW: { icon: Users, color: "#f472b6", label: "New Witness" },
                       PROJECT_ARCHIVED: { icon: Star, color: "#94a3b8", label: "Project Archived" },
                       PROJECT_DRAFT: { icon: Star, color: "#94a3b8", label: "Project Saved as Draft" },
                     };

@@ -4,11 +4,19 @@ import { describe, expect, it } from "vitest";
 
 const read = (relativePath: string) => readFileSync(resolve(process.cwd(), relativePath), "utf8");
 
-describe("Explore creator follow and sorting contracts", () => {
+describe("Explore creator witness and sorting contracts", () => {
   const explore = read("client/src/pages/ExplorePage.tsx");
   const subscriptionRouter = read("server/routers/witnessSubscription.ts");
   const db = read("server/utils/db.ts");
   const creators = read("server/db/users.ts");
+  const workHeader = read("client/src/components/CinematicSongHeader.tsx");
+  const identityColumn = read("client/src/components/IdentityColumn.tsx");
+  const collection = read("client/src/pages/CollectionPage.tsx");
+  const project = read("client/src/pages/ProjectPage.tsx");
+  const supportDrawer = read("client/src/components/SupportCreatorDrawer.tsx");
+  const activityRail = read("client/src/components/LivingContextRail.tsx");
+  const archive = read("client/src/pages/ArchivePage.tsx");
+  const domainEditor = read("client/src/components/domain/DomainEditor.tsx");
 
   it("reuses the persisted witness subscription relationship with one bounded status query", () => {
     expect(subscriptionRouter).toContain("getSubscriptions: protectedProcedure");
@@ -21,10 +29,24 @@ describe("Explore creator follow and sorting contracts", () => {
     expect(explore).toContain("trpc.witnessSubscription.unsubscribe.useMutation");
   });
 
-  it("keeps reserve and steward subscriptions safe from the lightweight Follow toggle", () => {
-    expect(explore).toContain('followTier === "witness" ? "Following" : followTier ? "Subscribed" : "Follow"');
+  it("keeps reserve and steward witness tiers safe from the lightweight Witness toggle", () => {
+    expect(explore).toContain('followTier === "witness" ? "Witnessing" : followTier ? "Witnessing" : "Witness"');
     expect(explore).toContain('followTier === "reserve" || followTier === "steward"');
-    expect(explore).toContain("Follow keeps you informed when this creator publishes.");
+    expect(explore).toContain("Witness this creator to receive publication notices.");
+  });
+
+  it("uses canonical witness language across public relationship surfaces", () => {
+    expect(workHeader).toContain('"Witness creator"');
+    expect(workHeader).toContain("Witnessing");
+    expect(identityColumn).toContain("Now witnessing");
+    expect(collection).toContain('following ? "Witnessing" : "Witness"');
+    expect(collection).toContain("witnesses");
+    expect(project).toContain("Witnessing project");
+    expect(project).toContain("witnesses");
+    expect(supportDrawer).toContain("Witness the journey.");
+    expect(activityRail).toContain("witnessed the creator");
+    expect(archive).toContain("witness tiers you hold with creators");
+    expect(domainEditor).toContain("Witnesses and collaborators");
   });
 
   it("sorts the existing public creator projection by explicit public evidence", () => {

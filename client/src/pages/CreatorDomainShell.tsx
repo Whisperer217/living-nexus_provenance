@@ -15,7 +15,7 @@
  *   Images      — visual works and photography
  *   Provenance  — Chain of Record (owner only)
  *   Analytics   — witness & discovery metrics (owner only)
- *   Followers   — domain audience
+ *   Witnesses   — domain audience
  *   Publishing  — publish to Registry (owner only)
  *   Settings    — domain configuration (owner only)
  *
@@ -520,7 +520,7 @@ export default function CreatorDomainShell() {
                 </div>
               )}
 
-              {/* FOLLOWERS */}
+              {/* WITNESSES */}
               {activeSection === "followers" && (
                 <div className="space-y-4">
                   <h2 className="text-lg font-bold" style={{ fontFamily: "var(--ln-font-display)", color: "var(--ln-text-primary)" }}>Witnesses</h2>

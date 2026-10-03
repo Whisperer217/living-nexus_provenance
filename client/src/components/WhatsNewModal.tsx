@@ -330,7 +330,7 @@ const UPDATES = [
     items: [
       { icon: BookOpen, text: "Comic Book Reader — Comics and novels now open in a full-screen horizontal page-turn reader. Pages slide left and right with a CSS 3D page-curl animation. Desktop shows a two-page spread; mobile shows one page at a time. The chrome fades away after a few seconds so nothing stands between you and the art. Swipe on mobile, arrow keys on desktop, Escape to close." },
       { icon: Gift, text: "Creator-Level Gifting — The Send a Gift button on a creator’s profile now goes directly to the creator — not attached to any specific track. Support the artist, not just the song." },
-      { icon: Users, text: "Witness Network Modal — Clicking the Witnessing or Witnesses count on a creator profile now opens a panel showing the full list of creators they follow and who follows them. Each entry links directly to that creator’s profile." },
+      { icon: Users, text: "Witness Network Modal — Clicking the Witnessing or Witnesses count on a creator profile now opens a panel showing the full list of creators they are witnessing and the witnesses who acknowledge them. Each entry links directly to that creator’s profile." },
       { icon: Compass, text: "Storyboard Builder — When uploading a comic or novel, a new Storyboard step lets you drag individual page images into order, set a cover, and add per-page captions before publishing. The reader uses your layout exactly as arranged." },
       { icon: LayoutGrid, text: "Unified Card Standard — Every track, comic, and project card across the platform — Home, Discover, Creator Profile, and Explore — now shares the same size, border, hover lift, and texture. One visual language, everywhere." },
     ],
@@ -391,8 +391,8 @@ const UPDATES = [
     date: "April 2026",
     label: "",
     items: [
-      { icon: Bell, text: "Follow Projects — You can now follow any creator campaign without donating. Hit the Follow button on any project page to subscribe to updates. You’ll receive an in-app notification every time the creator posts a progress update, keeping you in the loop from day one." },
-      { icon: LayoutGrid, text: "Featured Projects on Explore — The Explore page now surfaces active creator campaigns in a dedicated Featured Projects grid. Discover what the community is building, track funding progress, and follow projects you care about — all from the same page where you find new music." },
+      { icon: Bell, text: "Witness Projects — You can now witness any creator campaign without donating. Choose Witness on any project page to receive updates. You’ll receive an in-app notification every time the creator posts a progress update, keeping the record in view from day one." },
+      { icon: LayoutGrid, text: "Featured Projects on Explore — The Explore page now surfaces active creator campaigns in a dedicated Featured Projects grid. Discover what the community is building, track funding progress, and witness projects you care about — all from the same page where you find new music." },
       { icon: ImageIcon, text: "Update Image Uploads — Creators can now attach a photo to each progress update. The Post Update dialog includes an image picker that uploads directly to the CDN and embeds the image in the update, making campaigns feel more alive." },
     ],
   },

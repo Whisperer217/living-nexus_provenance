@@ -600,7 +600,7 @@ function CreatorDirectoryCard({
   const routeIdentity = creator.artistHandle || creator.id;
   const followsByWitnessTier = followTier === "witness";
   const hasManagedSubscription = followTier === "reserve" || followTier === "steward";
-  const followLabel = followTier === "witness" ? "Following" : followTier ? "Subscribed" : "Follow";
+  const witnessLabel = followTier === "witness" ? "Witnessing" : followTier ? "Witnessing" : "Witness";
   const canFollowCreator = viewerId !== creator.id;
   const [supportRequested, setSupportRequested] = useState(false);
   const [supportOpen, setSupportOpen] = useState(false);
@@ -711,16 +711,16 @@ function CreatorDirectoryCard({
                 type="button"
                 onClick={() => onFollowToggle(creator.id, identity)}
                 disabled={followPending || hasManagedSubscription}
-                title={hasManagedSubscription ? "This creator is already managed through a higher subscription tier." : "Follow keeps you informed when this creator publishes."}
+                title={hasManagedSubscription ? "This creator is already held through a higher witness tier." : "Witness this creator to receive publication notices."}
                 className={`ln-creator-follow ln-creator-card__action inline-flex min-h-9 items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-60 ${
                   followsByWitnessTier || hasManagedSubscription
                     ? "ln-creator-follow--active"
                     : "ln-creator-follow--idle"
                 }`}
-                aria-label={`${followLabel} ${identity}`}
+                aria-label={`${witnessLabel} ${identity}`}
               >
                 {followPending ? <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" /> : followsByWitnessTier || hasManagedSubscription ? <UserCheck className="h-3 w-3" aria-hidden="true" /> : <UserPlus className="h-3 w-3" aria-hidden="true" />}
-                {followLabel}
+                {witnessLabel}
               </button>
             )}
             <button
@@ -905,7 +905,7 @@ export default function ExplorePage() {
     onSuccess: (result, variables) => {
       setSubscriptionOverrides((current) => ({ ...current, [variables.creatorId]: result.tier }));
       void utils.witnessSubscription.getSubscriptions.invalidate();
-      toast.success("Following creator — publication notices are enabled.");
+      toast.success("Witnessing creator — publication notices are enabled.");
     },
     onError: (error) => toast.error(error.message),
   });
@@ -913,7 +913,7 @@ export default function ExplorePage() {
     onSuccess: (_, variables) => {
       setSubscriptionOverrides((current) => ({ ...current, [variables.creatorId]: null }));
       void utils.witnessSubscription.getSubscriptions.invalidate();
-      toast.success("Unfollowed creator — publication notices are off.");
+      toast.success("Witness withdrawn — publication notices are off.");
     },
     onError: (error) => toast.error(error.message),
   });
@@ -922,7 +922,7 @@ export default function ExplorePage() {
     : unsubscribeMutation.isPending ? unsubscribeMutation.variables?.creatorId ?? null : null;
   const handleFollowToggle = useCallback((creatorId: number, creatorName: string) => {
     if (!user) {
-      toast.info("Sign in to follow creators and receive publication notices.");
+      toast.info("Sign in to witness creators and receive publication notices.");
       return;
     }
     const tier = subscriptionTiers[creatorId] ?? null;

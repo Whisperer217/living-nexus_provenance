@@ -5,10 +5,10 @@
  * Sections:
  *   1. Creator Card (avatar, name, handle, bio, mission)
  *   2. Portfolio (work counts by type)
- *   3. Follow / Message
+ *   3. Witness / Message
  *   4. Organizations (label, BMI)
  *   5. Collections (album-style)
- *   6. Followers / Following (stub — follow system pending)
+ *   6. Witnesses / Witnessing (stub — witness relationship system pending)
  *   7. Creator Links (website, Twitter, Instagram)
  *
  * Desktop: sticky top-24, normal flow on mobile.
@@ -131,14 +131,14 @@ export function IdentityColumn({
   const bmiNumber = creator?.bmiMemberNumber;
   const hasOrgs = labelName || bmiNumber;
 
-  // Handle follow (stub — follow system not yet built)
+  // Handle witness (stub — witness relationship system not yet built)
   function handleFollow() {
     if (!user) {
-      toast.error("Sign in to follow creators");
+      toast.error("Sign in to witness creators");
       return;
     }
     setIsFollowing(f => !f);
-    toast.success(isFollowing ? `Unfollowed ${creatorName}` : `Following ${creatorName}`);
+    toast.success(isFollowing ? `Witness withdrawn from ${creatorName}` : `Now witnessing ${creatorName}`);
   }
 
   // Handle message (stub)
@@ -270,7 +270,7 @@ export function IdentityColumn({
         </div>
       </div>
 
-      {/* ── 2. FOLLOW / MESSAGE ── */}
+      {/* ── 2. WITNESS / MESSAGE ── */}
       {!isOwner && (
         <div className="flex gap-2">
           <button
@@ -285,7 +285,7 @@ export function IdentityColumn({
               letterSpacing: "0.06em",
             }}
           >
-            {isFollowing ? <><UserCheck size={12} /> Following</> : <><UserPlus size={12} /> Follow</>}
+            {isFollowing ? <><UserCheck size={12} /> Witnessing</> : <><UserPlus size={12} /> Witness</>}
           </button>
           <button
             type="button"
@@ -390,7 +390,7 @@ export function IdentityColumn({
         </div>
       )}
 
-      {/* ── 5. FOLLOWERS / FOLLOWING (stub) ── */}
+      {/* ── 5. WITNESSES / WITNESSING (stub) ── */}
       <div
         className="rounded-2xl p-4"
         style={{
@@ -404,12 +404,12 @@ export function IdentityColumn({
         <div className="flex gap-4">
           <div className="flex flex-col items-center gap-0.5">
             <span className="text-base font-bold tabular-nums" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>—</span>
-            <span className="text-[10px]" style={{ color: "var(--ln-iron)" }}>Followers</span>
+            <span className="text-[10px]" style={{ color: "var(--ln-iron)" }}>Witnesses</span>
           </div>
           <div className="w-px" style={{ background: "rgba(196,154,40,0.12)" }} />
           <div className="flex flex-col items-center gap-0.5">
             <span className="text-base font-bold tabular-nums" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>—</span>
-            <span className="text-[10px]" style={{ color: "var(--ln-iron)" }}>Following</span>
+            <span className="text-[10px]" style={{ color: "var(--ln-iron)" }}>Witnessing</span>
           </div>
           <div className="w-px" style={{ background: "rgba(196,154,40,0.12)" }} />
           <div className="flex flex-col items-center gap-0.5">

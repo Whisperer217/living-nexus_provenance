@@ -811,7 +811,7 @@ export default function ArchivePage() {
 
             {/* Description */}
             <p className="text-sm mb-4" style={{ color: "var(--ln-smoke)" }}>
-              Works reserved from creators you subscribe to. These are preserved in your archive as they are published.
+              Works reserved through the witness tiers you hold with creators. These are preserved in your archive as they are published.
             </p>
 
             {witnessArchiveLoading && (
@@ -827,7 +827,7 @@ export default function ArchivePage() {
                 <Eye className="w-8 h-8 mx-auto mb-3 opacity-30" style={{ color: "var(--ln-smoke)" }} />
                 <p className="text-sm font-medium mb-1" style={{ color: "var(--ln-parchment)" }}>No reserved works yet</p>
                 <p className="text-xs" style={{ color: "var(--ln-smoke)" }}>
-                  Subscribe to creators at the Reserve or Steward tier to automatically archive their new publications.
+                  Establish a Reserve or Steward witness with creators to automatically archive their new publications.
                 </p>
               </div>
             )}

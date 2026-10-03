@@ -591,7 +591,7 @@ export default function CreatorProfilePage() {
       refetchSubscription();
       utils.witnessSubscription.getCreatorSubscriberCount.invalidate({ creatorId: creatorIdForWitness });
       const tierLabel = result.tier === "witness" ? "Witness" : result.tier === "reserve" ? "Reserve" : "Steward";
-      toast.success(`You are now a ${tierLabel} of ${data?.creator?.artistHandle || data?.creator?.name}`);
+      toast.success(`Your ${tierLabel.toLowerCase()} witness is established for ${data?.creator?.artistHandle || data?.creator?.name}`);
       setShowSubscribeTierMenu(false);
     },
     onError: (e: any) => toast.error(e.message),
@@ -600,7 +600,7 @@ export default function CreatorProfilePage() {
     onSuccess: () => {
       refetchSubscription();
       utils.witnessSubscription.getCreatorSubscriberCount.invalidate({ creatorId: creatorIdForWitness });
-      toast.success("Witness subscription removed.");
+      toast.success("Witness withdrawn.");
     },
     onError: (e: any) => toast.error(e.message),
   });
@@ -1449,10 +1449,10 @@ export default function CreatorProfilePage() {
                           disabled={unsubscribeMutation.isPending}
                           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
                           style={{ background: "rgba(99,102,241,0.12)", border: "1px solid rgba(99,102,241,0.35)", color: "#a5b4fc" }}
-                          title={`Subscribed as ${mySubscription.tier} — click to unsubscribe`}
+                          title={`Witnessing as ${mySubscription.tier} — click to withdraw witness`}
                         >
                           <Bell className="w-3 h-3" />
-                          {mySubscription.tier === "witness" ? "Witness" : mySubscription.tier === "reserve" ? "Reserve" : "Steward"}
+                          {mySubscription.tier === "witness" ? "Witnessing" : mySubscription.tier === "reserve" ? "Reserve witness" : "Steward witness"}
                         </button>
                       ) : (
                         <div className="relative">
@@ -1460,10 +1460,10 @@ export default function CreatorProfilePage() {
                             onClick={() => setShowSubscribeTierMenu(v => !v)}
                             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
                             style={{ background: "rgba(99,102,241,0.08)", border: "1px solid rgba(99,102,241,0.2)", color: "var(--ln-smoke)" }}
-                            title="Subscribe to this creator's publication feed"
+                            title="Establish a witness relationship with this creator"
                           >
                             <BellPlus className="w-3 h-3" />
-                            Subscribe
+                            Establish witness
                           </button>
                           {showSubscribeTierMenu && (
                             <div
@@ -1777,10 +1777,10 @@ export default function CreatorProfilePage() {
                       disabled={unsubscribeMutation.isPending}
                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
                       style={{ background: "rgba(99,102,241,0.12)", border: "1px solid rgba(99,102,241,0.35)", color: "#a5b4fc" }}
-                      title={`Subscribed as ${mySubscription.tier} — click to unsubscribe`}
+                      title={`Witnessing as ${mySubscription.tier} — click to withdraw witness`}
                     >
                       <Bell className="w-3 h-3" />
-                      {mySubscription.tier === "witness" ? "Witness" : mySubscription.tier === "reserve" ? "Reserve" : "Steward"}
+                      {mySubscription.tier === "witness" ? "Witnessing" : mySubscription.tier === "reserve" ? "Reserve witness" : "Steward witness"}
                     </button>
                   ) : (
                     <>

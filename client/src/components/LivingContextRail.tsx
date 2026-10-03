@@ -86,7 +86,7 @@ function signalLabel(type: string, actorName: string | null | undefined): string
     case "TIP": return `${actor} sent a gift`;
     case "WITNESS_REGISTERED": return `${actor} witnessed this work`;
     case "WITNESS_VERIFIED": return `Witness verified`;
-    case "FOLLOW": return `${actor} followed the creator`;
+    case "FOLLOW": return `${actor} witnessed the creator`;
     case "WORK_REFERENCED": return `${actor} referenced this work`;
     case "SYSTEM_UPDATE": return "System update";
     case "PRESERVATION_MODE": return "Preservation mode activated";

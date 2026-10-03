@@ -49,7 +49,7 @@ const PATRONAGE_TIERS = [
   {
     id: "witness" as const,
     label: "Witness",
-    description: "Follow the journey. Receive publication updates.",
+    description: "Witness the journey. Receive publication notices.",
     icon: <Heart className="w-4 h-4" />,
     free: true,
   },
@@ -93,10 +93,10 @@ export function SupportCreatorDrawer({ target, onClose }: Props) {
 
   const subscribeMutation = trpc.witnessSubscription.subscribe.useMutation({
     onSuccess: (data) => {
-      toast.success(`You are now a ${data.tier} of ${target?.creatorName}`);
+      toast.success(`Your ${data.tier} witness is established for ${target?.creatorName}`);
       onClose();
     },
-    onError: (err) => toast.error(err.message || "Could not subscribe."),
+    onError: (err) => toast.error(err.message || "Could not establish witness."),
   });
 
   useEffect(() => {

@@ -410,7 +410,7 @@ export default function DesignSystemPage() {
                 <LnButton variant="primary" size="lg">Begin Your Archive</LnButton>
               </ShowcaseRow>
               <ShowcaseRow label="secondary — supporting action">
-                <LnButton variant="secondary" size="sm">Follow</LnButton>
+                <LnButton variant="secondary" size="sm">Witness</LnButton>
                 <LnButton variant="secondary">View Archive</LnButton>
                 <LnButton variant="secondary" size="lg">Explore Sanctuary</LnButton>
               </ShowcaseRow>

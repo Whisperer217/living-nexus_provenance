@@ -43,7 +43,7 @@ const BLOCK_META: Record<DomainBlockType, { label: string; category: string; ico
   tip_jar:            { label: "Tip Jar",            category: "Commerce",   icon: Package,      description: "Direct support and tipping" },
   provenance_trail:   { label: "Provenance Trail",   category: "Provenance", icon: Shield,       description: "WID timeline and domain version history" },
   field_notes:        { label: "Field Notes",        category: "Community",  icon: FileEdit,     description: "Your field notes feed" },
-  community:          { label: "Community",          category: "Community",  icon: LayoutGrid,   description: "Followers and collaborators" },
+  community:          { label: "Community",          category: "Community",  icon: LayoutGrid,   description: "Witnesses and collaborators" },
   divider:            { label: "Divider",            category: "Structure",  icon: Minus,        description: "Visual section separator" },
   custom_text:        { label: "Custom Text",        category: "Structure",  icon: AlignLeft,    description: "Free-form announcement or text block" },
 };

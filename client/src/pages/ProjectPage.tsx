@@ -1520,22 +1520,22 @@ export default function ProjectPage() {
 
   const isOwner = !!user && !!data?.project && user.id === data.project.userId;
 
-  // Follow state
+  // Witness state
   const { data: followStatus, refetch: refetchFollow } = trpc.projects.getFollowStatus.useQuery(
     { projectId: data?.project.id ?? 0 },
     { enabled: !!data?.project.id }
   );
   const followMutation = trpc.projects.follow.useMutation({
-    onSuccess: () => { refetchFollow(); toast.success("Following project — you'll be notified of updates!"); },
+    onSuccess: () => { refetchFollow(); toast.success("Witnessing project — you’ll be notified of updates."); },
     onError: (e) => toast.error(e.message),
   });
   const unfollowMutation = trpc.projects.unfollow.useMutation({
-    onSuccess: () => { refetchFollow(); toast.success("Unfollowed project"); },
+    onSuccess: () => { refetchFollow(); toast.success("Witness withdrawn from project"); },
     onError: (e) => toast.error(e.message),
   });
 
   const handleFollowToggle = () => {
-    if (!user) { toast.error("Sign in to follow this project"); return; }
+    if (!user) { toast.error("Sign in to witness this project"); return; }
     if (!data?.project) return;
     if (followStatus?.isFollowing) {
       unfollowMutation.mutate({ projectId: data.project.id });
@@ -1812,7 +1812,7 @@ export default function ProjectPage() {
               <VideoHero videoUrl={project.videoUrl} videoType={project.videoType} bannerUrl={project.bannerUrl} title={project.title} />
             )}
 
-            {/* Quick donate + follow under video */}
+            {/* Quick donate + witness under video */}
             {project.status === "active" && !editMode && (
               <div className="flex gap-2">
                 <Button onClick={() => setDonateOpen(true)} className="flex-1 bg-[#d4a017] hover:bg-[#b8891a] text-black font-bold py-3 text-base">
@@ -1830,8 +1830,8 @@ export default function ProjectPage() {
                     }`}
                   >
                     {followStatus?.isFollowing
-                      ? <><BellOff className="w-4 h-4 mr-1.5" /> Following</>  
-                      : <><Bell className="w-4 h-4 mr-1.5" /> Follow</>}
+                      ? <><BellOff className="w-4 h-4 mr-1.5" /> Witnessing</>
+                      : <><Bell className="w-4 h-4 mr-1.5" /> Witness</>}
                   </Button>
                 )}
               </div>
@@ -1901,7 +1901,7 @@ export default function ProjectPage() {
               </div>
               <div className="bg-white/5 rounded-lg p-3 text-center">
                 <p className="text-[#d4a017] font-bold text-lg">{followStatus?.followerCount ?? 0}</p>
-                <p className="text-white/40 text-xs">followers</p>
+                <p className="text-white/40 text-xs">witnesses</p>
               </div>
             </div>
 
@@ -2099,8 +2099,8 @@ export default function ProjectPage() {
                   }`}
                 >
                   {followStatus?.isFollowing
-                    ? <><BellOff className="w-3.5 h-3.5 mr-1" /> Following</>
-                    : <><Bell className="w-3.5 h-3.5 mr-1" /> Follow</>}
+                      ? <><BellOff className="w-3.5 h-3.5 mr-1" /> Witnessing</>
+                      : <><Bell className="w-3.5 h-3.5 mr-1" /> Witness</>}
                 </Button>
               )}
               <Button

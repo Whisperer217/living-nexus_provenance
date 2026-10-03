@@ -461,7 +461,7 @@ function AddPhaseDialog({ open, onClose, onAdded }: { open: boolean; onClose: ()
               <Input
                 value={title}
                 onChange={e => setTitle(e.target.value)}
-                placeholder="e.g. Follow System — Creator Follows"
+                placeholder="e.g. Witness System — Creator Witnesses"
                 className="bg-zinc-800 border-zinc-700 text-zinc-100"
               />
             </div>

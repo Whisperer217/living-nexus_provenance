@@ -6,7 +6,7 @@
  *  • Artwork-first visually: full-bleed cinematic frame, never cropped.
  *  • Minimal UI: only the elements that matter — identity, artifact, actions.
  *  • One play surface: the artwork frame is the single play trigger.
- *  • Primary action row: Play, Follow, Share, Register, Favorite — all below
+ *  • Primary action row: Play, Witness, Share, Register, Favorite — all below
  *    the artwork, never competing with the visual.
  *  • WID badge and genre/tags live in the metadata strip.
  *  • No competing play triggers anywhere on the page.
@@ -201,7 +201,7 @@ export function CinematicSongHeader({
           )}
         </div>
 
-        {/* Follow button — inline with creator identity */}
+        {/* Witness button — inline with creator identity */}
         {!isOwner && onFollow && (
           <button
             type="button"
@@ -214,11 +214,11 @@ export function CinematicSongHeader({
               fontFamily: "'Cinzel', serif",
               letterSpacing: "0.05em",
             }}
-            aria-label={isFollowing ? "Unfollow creator" : "Follow creator"}
+            aria-label={isFollowing ? "Withdraw witness from creator" : "Witness creator"}
           >
             {isFollowing
-              ? <><UserCheck size={12} /> Following</>
-              : <><UserPlus size={12} /> Follow</>}
+              ? <><UserCheck size={12} /> Witnessing</>
+              : <><UserPlus size={12} /> Witness</>}
           </button>
         )}
       </div>

@@ -47,7 +47,7 @@ export default function CollectionPage() {
 
   const toggleFollow = trpc.collections.toggleFollow.useMutation({
     onSuccess: (res) => {
-      toast.success(res.following ? "Following collection" : "Unfollowed collection");
+      toast.success(res.following ? "Witnessing collection" : "Witness withdrawn from collection");
       refetch();
     },
   });
@@ -116,7 +116,7 @@ export default function CollectionPage() {
   const pageTitle = `${collection.name} — ${ownerHandle} | Living Nexus Collection`;
   const pageDescription = [
     collection.description?.trim() ? collection.description.trim().slice(0, 120) : null,
-    `${collection.trackCount} work${collection.trackCount !== 1 ? "s" : ""} · ${collection.followerCount} follower${collection.followerCount !== 1 ? "s" : ""}`,
+    `${collection.trackCount} work${collection.trackCount !== 1 ? "s" : ""} · ${collection.followerCount} witness${collection.followerCount !== 1 ? "es" : ""}`,
     collection.wid ? `WID: ${collection.wid}` : null,
   ].filter(Boolean).join(" — ");
 
@@ -232,7 +232,7 @@ export default function CollectionPage() {
               {totalSeconds > 0 && (
                 <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> {formatTotalRuntime(totalSeconds)}</span>
               )}
-              <span className="flex items-center gap-1"><Heart className="w-3.5 h-3.5" /> {collection.followerCount} followers</span>
+              <span className="flex items-center gap-1"><Heart className="w-3.5 h-3.5" /> {collection.followerCount} witnesses</span>
               <span className="flex items-center gap-1"><GitFork className="w-3.5 h-3.5" /> {collection.forkCount} forks</span>
             </div>
 
@@ -254,7 +254,7 @@ export default function CollectionPage() {
                   className={following ? "border-amber-500 text-amber-500" : ""}
                 >
                   <Heart className={`w-4 h-4 mr-1 ${following ? "fill-amber-500 text-amber-500" : ""}`} />
-                  {following ? "Following" : "Follow"}
+                  {following ? "Witnessing" : "Witness"}
                 </Button>
               )}
 
