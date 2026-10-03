@@ -1,8 +1,11 @@
-import { useState } from "react";
-import { CornerDownRight, Loader2, MessageSquare, Send } from "lucide-react";
+import { useMemo, useState } from "react";
+import { ArrowDownUp, CornerDownRight, Loader2, MessageSquare, Send } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+
+type SignalOrder = "recent" | "first";
 
 function relativeVoiceTime(value: Date | string) {
   const timestamp = new Date(value).getTime();
@@ -44,7 +47,7 @@ function VoiceAvatar({ avatarUrl, authorName, compact = false }: { avatarUrl?: s
 
 function VoiceRecord({ voice, onReply }: { voice: any; onReply: (voice: any) => void }) {
   return (
-    <article className="ln-dimensional-card ln-voice-comment rounded-2xl p-4 sm:p-5">
+    <article className="ln-dimensional-card ln-voice-comment ln-signal-card rounded-2xl p-4 sm:p-5">
       <div className="flex gap-3">
         <VoiceAvatar avatarUrl={voice.avatarUrl} authorName={voice.authorName} />
         <div className="min-w-0 flex-1">
@@ -101,6 +104,7 @@ export function WorkVoices({ songId }: { songId: number }) {
   const [commentText, setCommentText] = useState("");
   const [replyingTo, setReplyingTo] = useState<any>(null);
   const [replyText, setReplyText] = useState("");
+  const [signalOrder, setSignalOrder] = useState<SignalOrder>("recent");
   const commentsQuery = trpc.comments.list.useQuery({ songId }, { enabled: songId > 0 });
 
   const refresh = () => utils.comments.list.invalidate({ songId });
@@ -119,6 +123,10 @@ export function WorkVoices({ songId }: { songId: number }) {
   });
 
   const comments = commentsQuery.data ?? [];
+  const orderedComments = useMemo(() => [...comments].sort((left: any, right: any) => {
+    const difference = new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime();
+    return signalOrder === "recent" ? difference : -difference;
+  }), [comments, signalOrder]);
   const requestSignIn = () => { window.location.assign(getLoginUrl()); };
   const postComment = () => {
     if (!user) return requestSignIn();
@@ -144,6 +152,17 @@ export function WorkVoices({ songId }: { songId: number }) {
           <span className="ln-mono rounded-full border border-[var(--ln-gold)]/30 bg-[var(--ln-gold)]/10 px-3 py-1.5 !text-[var(--ln-gold-hot)]">{comments.length} {comments.length === 1 ? "voice" : "voices"}</span>
         </div>
 
+        {comments.length > 1 && (
+          <label className="ln-signal-order mb-5">
+            <ArrowDownUp size={14} aria-hidden="true" />
+            <span>Signal order</span>
+            <select value={signalOrder} onChange={(event) => setSignalOrder(event.target.value as SignalOrder)} aria-label="Signal order">
+              <option value="recent">Most recent</option>
+              <option value="first">First signals</option>
+            </select>
+          </label>
+        )}
+
         <div className="ln-dimensional-card rounded-2xl p-4 sm:p-5">
           <div className="flex gap-3">
             <VoiceAvatar authorName={user?.name || "?"} />
@@ -158,15 +177,22 @@ export function WorkVoices({ songId }: { songId: number }) {
                 className="ln-dimensional-field mt-2 min-h-24 w-full resize-y bg-[var(--ln-coal)] px-3 py-2.5 text-sm text-[var(--ln-parchment)] placeholder:text-[var(--ln-smoke)]"
               />
               <div className="mt-3 flex justify-end">
-                <button
-                  type="button"
-                  onClick={postComment}
-                  disabled={commentMutation.isPending || (!commentText.trim() && !!user)}
-                  className="ln-dimensional-action inline-flex min-h-10 items-center gap-2 rounded-lg bg-[var(--ln-gold)]/15 px-4 text-sm font-medium text-[var(--ln-parchment)] disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {commentMutation.isPending ? <Loader2 size={15} className="animate-spin" aria-hidden="true" /> : <Send size={15} aria-hidden="true" />}
-                  {user ? "Send signal" : "Sign in to signal"}
-                </button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      type="button"
+                      onClick={postComment}
+                      disabled={commentMutation.isPending || (!commentText.trim() && !!user)}
+                      className="ln-dimensional-action inline-flex min-h-10 items-center gap-2 rounded-lg bg-[var(--ln-gold)]/15 px-4 text-sm font-medium text-[var(--ln-parchment)] disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {commentMutation.isPending ? <Loader2 size={15} className="animate-spin" aria-hidden="true" /> : <Send size={15} aria-hidden="true" />}
+                      {user ? "Signal this Work" : "Sign in to signal"}
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" sideOffset={8} className="max-w-64 border border-[var(--ln-gold)]/35 bg-[var(--ln-coal)] text-[var(--ln-parchment)] shadow-xl">
+                    A Signal adds your attributed voice to this Work’s visible living record and alerts its creator.
+                  </TooltipContent>
+                </Tooltip>
               </div>
             </div>
           </div>
@@ -198,7 +224,7 @@ export function WorkVoices({ songId }: { songId: number }) {
           {commentsQuery.isLoading ? (
             [0, 1].map((index) => <div key={index} className="h-28 animate-pulse rounded-2xl border border-[var(--ln-gold)]/10 bg-[var(--ln-coal)]" />)
           ) : comments.length > 0 ? (
-            comments.map((voice: any) => <VoiceRecord key={voice.id} voice={voice} onReply={setReplyingTo} />)
+            orderedComments.map((voice: any) => <VoiceRecord key={voice.id} voice={voice} onReply={setReplyingTo} />)
           ) : (
             <div className="ln-dimensional-card rounded-2xl border border-dashed border-[var(--ln-gold)]/30 px-6 py-10 text-center">
               <MessageSquare className="mx-auto mb-3 h-6 w-6 text-[var(--ln-gold-hot)]" aria-hidden="true" />

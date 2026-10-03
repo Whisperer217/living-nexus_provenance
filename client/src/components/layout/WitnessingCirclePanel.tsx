@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import { ArrowUpDown, ExternalLink, Search, X } from "lucide-react";
+import { ArrowUpDown, ExternalLink, Heart, Search, X } from "lucide-react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { WitnessSigil } from "@/components/icons/WitnessSigil";
+import { SupportCreatorDrawer, type SupportTarget } from "@/components/SupportCreatorDrawer";
 
 type WitnessedCreator = {
   creatorId: number;
@@ -14,6 +15,9 @@ type WitnessedCreator = {
   witnessedAt: Date | string;
   updatedAt: Date | string;
   latestPublishedAt: Date | string | null;
+  latestSupportWorkId: number | null;
+  latestSupportWorkTitle: string | null;
+  latestSupportWorkCoverArtUrl: string | null;
 };
 
 type CircleOrder = "recent" | "name";
@@ -35,6 +39,7 @@ export function WitnessingCirclePanel({ open, onClose }: { open: boolean; onClos
   const [, navigate] = useLocation();
   const [query, setQuery] = useState("");
   const [order, setOrder] = useState<CircleOrder>("recent");
+  const [supportTarget, setSupportTarget] = useState<SupportTarget | null>(null);
   const { data: witnessedCreators = [], isLoading } = trpc.witnessSubscription.myWitnessing.useQuery(undefined, {
     enabled: open,
     staleTime: 30_000,
@@ -131,22 +136,46 @@ export function WitnessingCirclePanel({ open, onClose }: { open: boolean; onClos
             visibleCreators.map((creator) => {
               const identity = creator.artistHandle || creator.name || "Creator";
               const recentlyPublished = hasRecentPublication(creator.latestPublishedAt);
+              const canSupport = Number.isInteger(creator.latestSupportWorkId) && !!creator.latestSupportWorkTitle;
               return (
-                <button key={creator.creatorId} type="button" className="ln-witnessing-circle__creator" onClick={() => openCreator(creator)}>
-                  <span className="ln-witnessing-circle__avatar">
-                    {creator.profilePhotoUrl ? <img src={creator.profilePhotoUrl} alt="" /> : identity.slice(0, 1).toUpperCase()}
-                  </span>
-                  <span className="min-w-0 flex-1 text-left">
-                    <span className="ln-witnessing-circle__identity-row">
-                      <span className="ln-witnessing-circle__identity">{identity}</span>
-                      {recentlyPublished && <span className="ln-witnessing-circle__publication" aria-label={`${identity} has published recently`}><span aria-hidden="true" />New work</span>}
+                <article key={creator.creatorId} className="ln-witnessing-circle__creator">
+                  <button type="button" className="ln-witnessing-circle__creator-main" onClick={() => openCreator(creator)}>
+                    <span className="ln-witnessing-circle__avatar">
+                      {creator.profilePhotoUrl ? <img src={creator.profilePhotoUrl} alt="" /> : identity.slice(0, 1).toUpperCase()}
                     </span>
-                    {creator.artistHandle && creator.name && creator.artistHandle !== creator.name && <span className="ln-witnessing-circle__name">{creator.name}</span>}
-                    <span className="ln-witnessing-circle__bio">{creator.bio || "Creator domain witnessed through the Living Nexus Registry."}</span>
+                    <span className="min-w-0 flex-1 text-left">
+                      <span className="ln-witnessing-circle__identity-row">
+                        <span className="ln-witnessing-circle__identity">{identity}</span>
+                        {recentlyPublished && <span className="ln-witnessing-circle__publication" aria-label={`${identity} has published recently`}><span aria-hidden="true" />New work</span>}
+                      </span>
+                      {creator.artistHandle && creator.name && creator.artistHandle !== creator.name && <span className="ln-witnessing-circle__name">{creator.name}</span>}
+                      <span className="ln-witnessing-circle__bio">{creator.bio || "Creator domain witnessed through the Living Nexus Registry."}</span>
+                    </span>
+                    <ExternalLink size={14} className="shrink-0" aria-hidden="true" />
+                  </button>
+                  <div className="ln-witnessing-circle__creator-actions">
                     <span className="ln-witnessing-circle__meta">{tierLabel(creator.tier)} · established {new Date(creator.witnessedAt).toLocaleDateString()}</span>
-                  </span>
-                  <ExternalLink size={14} className="shrink-0" aria-hidden="true" />
-                </button>
+                    <span className="ln-witnessing-circle__action-group">
+                      {canSupport && (
+                        <button
+                          type="button"
+                          className="ln-witnessing-circle__support"
+                          onClick={() => setSupportTarget({
+                            songId: creator.latestSupportWorkId!,
+                            songTitle: creator.latestSupportWorkTitle!,
+                            creatorId: creator.creatorId,
+                            creatorName: creator.name || identity,
+                            creatorHandle: creator.artistHandle,
+                            coverArtUrl: creator.latestSupportWorkCoverArtUrl,
+                          })}
+                        >
+                          <Heart size={12} aria-hidden="true" /> Support
+                        </button>
+                      )}
+                      <button type="button" className="ln-witnessing-circle__visit" onClick={() => openCreator(creator)}>Domain</button>
+                    </span>
+                  </div>
+                </article>
               );
             })
           )}
@@ -157,6 +186,7 @@ export function WitnessingCirclePanel({ open, onClose }: { open: boolean; onClos
           <button type="button" onClick={() => { navigate("/profile?tab=witnessing"); onClose(); }}>Open full directory</button>
         </footer>
       </aside>
+      <SupportCreatorDrawer target={supportTarget} onClose={() => setSupportTarget(null)} />
     </>
   );
 }

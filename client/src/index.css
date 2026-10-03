@@ -5072,15 +5072,24 @@ button:active .ln-witness-sigil,
 .ln-witnessing-circle__creator {
   display: flex;
   width: 100%;
-  align-items: flex-start;
-  gap: 0.75rem;
-  padding: 0.8rem;
+  flex-direction: column;
+  gap: 0.55rem;
+  padding: 0.68rem;
   border: 1px solid color-mix(in srgb, var(--ln-gold) 17%, transparent);
   border-radius: 0.85rem;
   color: var(--ln-smoke);
   background: linear-gradient(145deg, color-mix(in srgb, var(--ln-surface-card) 86%, transparent), color-mix(in srgb, var(--ln-void) 70%, transparent));
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.035), 0 8px 18px rgba(0,0,0,0.16);
   transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.ln-witnessing-circle__creator-main {
+  display: flex;
+  width: 100%;
+  align-items: flex-start;
+  gap: 0.65rem;
+  color: inherit;
+  text-align: left;
 }
 
 .ln-witnessing-circle__creator:hover,
@@ -5093,8 +5102,8 @@ button:active .ln-witness-sigil,
 
 .ln-witnessing-circle__avatar {
   display: grid;
-  width: 2.65rem;
-  height: 2.65rem;
+  width: 2.3rem;
+  height: 2.3rem;
   flex: 0 0 auto;
   place-items: center;
   overflow: hidden;
@@ -5111,12 +5120,27 @@ button:active .ln-witness-sigil,
 .ln-witnessing-circle__bio,
 .ln-witnessing-circle__meta { display: block; }
 .ln-witnessing-circle__identity-row { display: flex; min-width: 0; align-items: center; gap: 0.5rem; }
-.ln-witnessing-circle__identity { overflow: hidden; color: var(--ln-parchment); font-family: var(--font-display); font-size: 0.9rem; text-overflow: ellipsis; white-space: nowrap; }
+.ln-witnessing-circle__identity { overflow: hidden; color: var(--ln-parchment); font-family: var(--font-display); font-size: 0.84rem; text-overflow: ellipsis; white-space: nowrap; }
 .ln-witnessing-circle__name { overflow: hidden; margin-top: 0.1rem; color: var(--ln-gold-hot); font-size: 0.76rem; text-overflow: ellipsis; white-space: nowrap; }
-.ln-witnessing-circle__bio { display: -webkit-box; margin-top: 0.35rem; overflow: hidden; color: var(--ln-bone); font-size: 0.8rem; line-height: 1.35; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
-.ln-witnessing-circle__meta { margin-top: 0.42rem; color: var(--ln-smoke); font-family: 'JetBrains Mono', monospace; font-size: 0.64rem; letter-spacing: 0.035em; text-transform: uppercase; }
+.ln-witnessing-circle__bio { display: -webkit-box; margin-top: 0.25rem; overflow: hidden; color: var(--ln-bone); font-size: 0.76rem; line-height: 1.32; -webkit-box-orient: vertical; -webkit-line-clamp: 1; }
+.ln-witnessing-circle__meta { color: var(--ln-smoke); font-family: 'JetBrains Mono', monospace; font-size: 0.58rem; letter-spacing: 0.035em; text-transform: uppercase; }
 .ln-witnessing-circle__publication { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 0.28rem; border: 1px solid color-mix(in srgb, var(--ln-gold-hot) 44%, transparent); border-radius: 999px; padding: 0.16rem 0.4rem; color: var(--ln-gold-hot); background: color-mix(in srgb, var(--ln-gold) 14%, transparent); font-family: 'JetBrains Mono', monospace; font-size: 0.58rem; font-weight: 700; letter-spacing: 0.055em; line-height: 1; text-transform: uppercase; }
 .ln-witnessing-circle__publication > span { display: block; width: 0.35rem; height: 0.35rem; border-radius: 50%; background: var(--ln-gold-hot); box-shadow: 0 0 7px color-mix(in srgb, var(--ln-gold-hot) 82%, transparent); }
+
+.ln-witnessing-circle__creator-actions { display: flex; min-width: 0; align-items: center; justify-content: space-between; gap: 0.55rem; padding-top: 0.45rem; border-top: 1px solid color-mix(in srgb, var(--ln-gold) 12%, transparent); }
+.ln-witnessing-circle__action-group { display: inline-flex; flex: 0 0 auto; gap: 0.35rem; }
+.ln-witnessing-circle__support,
+.ln-witnessing-circle__visit { display: inline-flex; min-height: 1.8rem; align-items: center; gap: 0.3rem; border: 1px solid color-mix(in srgb, var(--ln-gold) 30%, transparent); border-radius: 0.45rem; padding: 0.25rem 0.46rem; color: var(--ln-parchment); background: color-mix(in srgb, var(--ln-void) 60%, transparent); font-family: 'JetBrains Mono', monospace; font-size: 0.61rem; letter-spacing: 0.03em; text-transform: uppercase; transition: border-color 160ms ease, background-color 160ms ease, color 160ms ease; }
+.ln-witnessing-circle__support { color: var(--ln-gold-hot); background: color-mix(in srgb, var(--ln-gold) 11%, transparent); }
+.ln-witnessing-circle__support:hover,
+.ln-witnessing-circle__support:focus-visible,
+.ln-witnessing-circle__visit:hover,
+.ln-witnessing-circle__visit:focus-visible { border-color: var(--ln-gold-hot); color: var(--ln-parchment); background: color-mix(in srgb, var(--ln-gold) 20%, transparent); outline: none; }
+
+.ln-signal-order { display: inline-flex; min-height: 2.4rem; align-items: center; gap: 0.45rem; border: 1px solid color-mix(in srgb, var(--ln-gold) 25%, transparent); border-radius: 0.7rem; padding: 0 0.65rem; color: var(--ln-gold-hot); background: color-mix(in srgb, var(--ln-coal) 82%, transparent); box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 5px 14px rgba(0,0,0,0.16); font-size: 0.72rem; }
+.ln-signal-order select { border: 0; outline: 0; color: var(--ln-parchment); background: transparent; color-scheme: dark; font: inherit; }
+.ln-signal-card { position: relative; overflow: hidden; border-color: color-mix(in srgb, var(--ln-gold) 24%, transparent); background: linear-gradient(145deg, color-mix(in srgb, var(--ln-surface-card) 92%, transparent), color-mix(in srgb, var(--ln-void) 74%, transparent)); box-shadow: inset 0 1px 0 rgba(255,255,255,0.07), inset 0 -1px 0 rgba(0,0,0,0.34), 0 10px 24px rgba(0,0,0,0.2); }
+.ln-signal-card::before { position: absolute; inset: 0 auto 0 0; width: 2px; background: linear-gradient(var(--ln-gold-hot), color-mix(in srgb, var(--ln-gold) 5%, transparent)); content: ""; }
 
 .ln-witnessing-circle__skeleton { min-height: 6rem; border-radius: 0.85rem; background: linear-gradient(100deg, rgba(255,255,255,0.025) 30%, rgba(196,154,40,0.09) 50%, rgba(255,255,255,0.025) 70%); background-size: 200% 100%; animation: ln-witness-circle-shimmer 1.3s linear infinite; }
 @keyframes ln-witness-circle-shimmer { to { background-position: -200% 0; } }

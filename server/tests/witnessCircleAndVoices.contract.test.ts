@@ -68,4 +68,24 @@ describe("Witnessing Circle and artifact Voices contracts", () => {
     expect(css).toContain(".ln-dimensional-action");
     expect(css).toContain(".ln-voice-comment");
   });
+
+  it("keeps Work Signals explainable, orderable, and individually dimensional", () => {
+    const voices = read("client/src/components/WorkVoices.tsx");
+
+    expect(voices).toContain("Signal order");
+    expect(voices).toContain("Most recent");
+    expect(voices).toContain("A Signal adds your attributed voice");
+    expect(voices).toContain("ln-signal-card");
+    expect(css).toContain(".ln-signal-card");
+  });
+
+  it("projects a latest eligible Work before exposing Circle support", () => {
+    expect(witnessedCreators).toContain("latestSupportWorkId");
+    expect(witnessedCreators).toContain("latestSupportWorkTitle");
+    expect(witnessedCreators).toContain("latestSupportWorkCoverArtUrl");
+    expect(circle).toContain("SupportCreatorDrawer");
+    expect(circle).toContain("latestSupportWorkId");
+    expect(circle).toContain("ln-witnessing-circle__support");
+    expect(css).toContain(".ln-witnessing-circle__creator-actions");
+  });
 });

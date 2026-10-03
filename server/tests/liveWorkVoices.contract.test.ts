@@ -21,7 +21,7 @@ describe("live Work Voices contract", () => {
     expect(voices).toContain("trpc.comments.addReply.useMutation");
     expect(voices).toContain("A visible conversation around this Work");
     expect(voices).toContain("Signal this Work");
-    expect(voices).toContain("Send signal");
+    expect(voices).toContain("Sign in to signal");
     expect(voices).toContain("voice.replies.map");
   });
 

@@ -5952,6 +5952,33 @@ export async function getMyWitnessedCreators(witnessId: number) {
         WHERE ${creatorPublicationFeed.creatorId} = ${users.id}
           AND ${creatorPublicationFeed.visibility} = 'public'
       )`,
+      latestSupportWorkId: sql<number | null>`(
+        SELECT ${songs.id}
+        FROM ${songs}
+        WHERE ${songs.userId} = ${users.id}
+          AND ${songs.status} = 'Published'
+          AND ${songs.isPublic} = true
+        ORDER BY ${songs.createdAt} DESC, ${songs.id} DESC
+        LIMIT 1
+      )`,
+      latestSupportWorkTitle: sql<string | null>`(
+        SELECT ${songs.title}
+        FROM ${songs}
+        WHERE ${songs.userId} = ${users.id}
+          AND ${songs.status} = 'Published'
+          AND ${songs.isPublic} = true
+        ORDER BY ${songs.createdAt} DESC, ${songs.id} DESC
+        LIMIT 1
+      )`,
+      latestSupportWorkCoverArtUrl: sql<string | null>`(
+        SELECT ${songs.coverArtUrl}
+        FROM ${songs}
+        WHERE ${songs.userId} = ${users.id}
+          AND ${songs.status} = 'Published'
+          AND ${songs.isPublic} = true
+        ORDER BY ${songs.createdAt} DESC, ${songs.id} DESC
+        LIMIT 1
+      )`,
     })
     .from(witnessSubscriptions)
     .innerJoin(users, eq(witnessSubscriptions.creatorId, users.id))
