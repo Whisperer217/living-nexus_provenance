@@ -50,6 +50,14 @@ describe("Explore creator presence contract", () => {
     expect(stylesheet).toContain("color: var(--ln-gold-hot)");
   });
 
+  it("makes an established witness relationship visible as a separate non-interactive card badge", () => {
+    expect(exploreSource).toContain("const isWitnessingCreator = followTier !== null");
+    expect(exploreSource).toContain('className="ln-creator-witness-badge mt-3"');
+    expect(exploreSource).toContain("aria-label={`You are witnessing ${identity}`}");
+    expect(stylesheet).toContain(".ln-creator-witness-badge");
+    expect(stylesheet).toContain("text-transform: uppercase");
+  });
+
   it("raises compact creator metadata and actions to the mobile readable type tier", () => {
     expect(exploreSource).toContain("ln-creator-card__handle");
     expect(exploreSource).toContain("ln-creator-card__supporting");

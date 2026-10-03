@@ -598,6 +598,7 @@ function CreatorDirectoryCard({
   const identity = creator.name ?? creator.artistHandle ?? `Creator ${creator.id}`;
   const handleLabel = creator.artistHandle ? `@${creator.artistHandle}` : "Creator domain";
   const routeIdentity = creator.artistHandle || creator.id;
+  const isWitnessingCreator = followTier !== null;
   const followsByWitnessTier = followTier === "witness";
   const hasManagedSubscription = followTier === "reserve" || followTier === "steward";
   const witnessLabel = followTier === "witness" ? "Witnessing" : followTier ? "Witnessing" : "Witness";
@@ -694,13 +695,22 @@ function CreatorDirectoryCard({
             </div>
             <ChevronRight className="ln-creator-card__ink h-4 w-4 flex-shrink-0 text-[var(--ln-bone)] transition-transform group-hover:translate-x-0.5 group-hover:text-[var(--gold)]" aria-hidden="true" />
           </div>
+          {isWitnessingCreator && (
+            <span
+              className="ln-creator-witness-badge mt-3"
+              aria-label={`You are witnessing ${identity}`}
+            >
+              <UserCheck className="h-3 w-3" aria-hidden="true" />
+              Witnessing
+            </span>
+          )}
           {creator.bio ? (
-            <div className="mt-5">
+            <div className={isWitnessingCreator ? "mt-3" : "mt-5"}>
               <p className="ln-overline ln-creator-card__ink !text-[var(--ln-gold-hot)]">Creator statement</p>
               <p className="ln-editorial ln-creator-card__ink mt-1 line-clamp-3 !text-[var(--ln-parchment)]">{creator.bio}</p>
             </div>
           ) : (
-            <p className="ln-caption ln-creator-card__ink ln-creator-card__supporting mt-5 line-clamp-3 !text-[var(--ln-bone)]">Explore this creator’s registered works and provenance record.</p>
+            <p className={`ln-caption ln-creator-card__ink ln-creator-card__supporting ${isWitnessingCreator ? "mt-3" : "mt-5"} line-clamp-3 !text-[var(--ln-bone)]`}>Explore this creator’s registered works and provenance record.</p>
           )}
         </Link>
         <div className="mt-4 flex items-center justify-between gap-3 border-t border-white/15 pt-3">

@@ -31,6 +31,7 @@ The authenticated `/profile` command center will receive a dedicated **Witnessin
 ## UI Boundary
 
 - The tooltip is added to the Explore creator-card Witness action, where the current user-facing button appears.
+- When the current viewer already holds any `witnessSubscriptions` tier with a creator, the Explore card shows a non-interactive **WITNESSING** badge. It is a presentation of the existing relationship only: it makes no tier claim and invokes no separate relationship mutation.
 - The Profile **Witnessing** tab is distinct from the legacy **Witness Network** tab. The latter continues to show the older network relationship; the new tab deliberately reports the subscription-backed relationship created by current creator-card actions.
 - Empty state directs the user to Explore rather than inventing a separate onboarding path.
 

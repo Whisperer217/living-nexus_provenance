@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-10-03T02:50:23.870Z",
-  "totalLessons": 51,
+  "lastUpdated": "2026-10-03T15:16:26.122Z",
+  "totalLessons": 52,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -1186,6 +1186,28 @@
         "tooltip"
       ],
       "id": "LESSON-051"
+    },
+    {
+      "date": "2026-10-03",
+      "category": "design",
+      "problem": "Explore creator cards only expressed an established witness subscription inside the action button, making the current viewer relationship easy to miss during directory scanning.",
+      "solution": "Added a non-interactive, token-based WITNESSING badge that derives directly from the existing followTier. It appears for every persisted tier without asserting a tier privilege or creating a new relationship source.",
+      "files": [
+        "client/src/pages/ExplorePage.tsx",
+        "client/src/index.css",
+        "server/tests/exploreCreatorPresence.contract.test.ts",
+        "docs/lnls/architecture/WITNESS-TOOLTIP-AND-DIRECTORY-ADR.md"
+      ],
+      "score": 0,
+      "tags": [
+        "explore",
+        "creator-card",
+        "witnessing",
+        "relationship-state",
+        "accessibility",
+        "mobile"
+      ],
+      "id": "LESSON-052"
     }
   ]
 }
