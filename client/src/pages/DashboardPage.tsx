@@ -799,7 +799,7 @@ export default function DashboardPage() {
               <div className="text-center py-16 rounded-xl" style={{ background: "var(--ln-coal)", border: "1px dashed #C3AB7D" }}>
                 <Activity className="w-12 h-12 mx-auto mb-3 opacity-20" style={{ color: "var(--ln-gold)" }} />
                 <p className="text-sm mb-2" style={{ color: "#E2E8F0" }}>No activity yet.</p>
-                <p className="text-xs" style={{ color: "var(--ln-iron)" }}>Gifts, comments, and witnesses on your songs will appear here.</p>
+                <p className="text-xs" style={{ color: "var(--ln-iron)" }}>Gifts, signals, and witnesses on your songs will appear here.</p>
               </div>
             ) : (
               <div className="space-y-2">
@@ -831,7 +831,7 @@ export default function DashboardPage() {
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="text-xs font-semibold" style={{ color: accentColor }}>
                             {isTip ? `$${((payload.amount ?? 0) / 100).toFixed(2)} Gift` :
-                             isComment ? "Comment" : evt.type.replace(/_/g, " ")}
+                             isComment ? "Signal" : evt.type.replace(/_/g, " ")}
                           </span>
                           {evt.actorName && (
                             <span className="text-xs" style={{ color: "var(--ln-smoke)" }}>by {evt.actorName}</span>

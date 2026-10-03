@@ -148,13 +148,13 @@ export function WorkVoices({ songId }: { songId: number }) {
           <div className="flex gap-3">
             <VoiceAvatar authorName={user?.name || "?"} />
             <div className="min-w-0 flex-1">
-              <label className="ln-overline !text-[var(--ln-gold-hot)]" htmlFor="voice-comment">Add your voice</label>
+              <label className="ln-overline !text-[var(--ln-gold-hot)]" htmlFor="voice-comment">Signal this Work</label>
               <textarea
                 id="voice-comment"
                 value={commentText}
                 onChange={(event) => setCommentText(event.target.value)}
                 onFocus={() => { if (!user) requestSignIn(); }}
-                placeholder={user ? "Share a thoughtful response to this Work…" : "Sign in to add your voice"}
+                placeholder={user ? "Send a thoughtful signal to this Work…" : "Sign in to send a signal"}
                 className="ln-dimensional-field mt-2 min-h-24 w-full resize-y bg-[var(--ln-coal)] px-3 py-2.5 text-sm text-[var(--ln-parchment)] placeholder:text-[var(--ln-smoke)]"
               />
               <div className="mt-3 flex justify-end">
@@ -165,7 +165,7 @@ export function WorkVoices({ songId }: { songId: number }) {
                   className="ln-dimensional-action inline-flex min-h-10 items-center gap-2 rounded-lg bg-[var(--ln-gold)]/15 px-4 text-sm font-medium text-[var(--ln-parchment)] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {commentMutation.isPending ? <Loader2 size={15} className="animate-spin" aria-hidden="true" /> : <Send size={15} aria-hidden="true" />}
-                  {user ? "Add voice" : "Sign in to speak"}
+                  {user ? "Send signal" : "Sign in to signal"}
                 </button>
               </div>
             </div>

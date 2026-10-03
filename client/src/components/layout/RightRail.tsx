@@ -202,7 +202,7 @@ export default function RightRail() {
             >
               <SignalIcon type={sig.type} />
               <div className="flex-1 min-w-0">
-                {/* When title is present it already contains the actor name (e.g. "Slimdoggy commented on…") */}
+                {/* When title is present it already contains the actor name (e.g. "Slimdoggy sent a signal on…") */}
                 {/* When title is absent (legacy rows), show actorName as a gold byline above the body */}
                 {!sig.title && sig.actorName && (
                   <p className="text-[10px] font-semibold mb-0.5" style={{ color: "rgba(212,175,55,0.85)" }}>
@@ -239,7 +239,7 @@ export default function RightRail() {
               <div className="flex-1 min-w-0">
                 <p className="text-[11px] leading-snug line-clamp-2" style={{ color: "color-mix(in srgb, var(--ln-parchment) 75%, transparent)" }}>
                   {item.type === "tip" && `${item.actorName} tipped ${item.songTitle ? `“${item.songTitle}”` : "a track"}`}
-                  {item.type === "comment" && `${item.actorName} commented on ${item.songTitle ? `“${item.songTitle}”` : "a track"}`}
+                  {item.type === "comment" && `${item.actorName} sent a signal on ${item.songTitle ? `“${item.songTitle}”` : "a Work"}`}
                   {item.type === "like" && `Someone liked ${item.songTitle ? `“${item.songTitle}”` : "a track"}`}
                   {item.type === "witness" && `New work witnessed: ${item.songTitle ?? "Untitled"}`}
                 </p>

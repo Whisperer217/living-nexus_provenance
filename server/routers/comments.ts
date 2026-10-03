@@ -205,7 +205,7 @@ export const commentsRouter = router({
         await createNotification({
           userId: song.userId,
           type: "comment",
-          title: `${actorName} commented on "${song.title}"`,
+          title: `${actorName} sent a signal on "${song.title}"`,
           body: input.content.slice(0, 120),
           actorId: ctx.user.id,
           actorName,
@@ -238,7 +238,7 @@ export const commentsRouter = router({
           await createNotification({
             userId: song.userId,
             type: "comment",
-            title: `${actorName} replied to a comment on "${song.title}"`,
+          title: `${actorName} replied to a signal on "${song.title}"`,
             body: input.content.slice(0, 120),
             actorId: ctx.user.id,
             actorName,
@@ -274,5 +274,4 @@ export const commentsRouter = router({
         return moderateCommentReport(input.reportId, input.action, ctx.user.id);
       }),
   });
-
 

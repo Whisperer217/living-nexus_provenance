@@ -1118,7 +1118,7 @@ export default function ProfilePage() {
                   {(myActivity as any[]).slice(0, activityLimit).map((evt) => {
                     const iconMap: Record<string, { icon: any; color: string; label: string }> = {
                       TIP: { icon: DollarSign, color: "#4ade80", label: "Gift received" },
-                      COMMENT: { icon: ScrollText, color: "#A78BFA", label: "Comment" },
+                      COMMENT: { icon: ScrollText, color: "#A78BFA", label: "Signal sent" },
                       LIKE: { icon: Heart, color: "#f472b6", label: "Like" },
                       WITNESS_REGISTERED: { icon: Fingerprint, color: "var(--ln-gold)", label: "WID Registered" },
                       WITNESS_VERIFIED: { icon: CheckCircle, color: "var(--ln-gold)", label: "WID Verified" },

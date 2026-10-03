@@ -20,6 +20,8 @@ describe("live Work Voices contract", () => {
     expect(voices).toContain("trpc.comments.add.useMutation");
     expect(voices).toContain("trpc.comments.addReply.useMutation");
     expect(voices).toContain("A visible conversation around this Work");
+    expect(voices).toContain("Signal this Work");
+    expect(voices).toContain("Send signal");
     expect(voices).toContain("voice.replies.map");
   });
 
@@ -29,5 +31,15 @@ describe("live Work Voices contract", () => {
     expect(row).toContain("MessageSquare");
     expect(row).toContain("#voices");
     expect(row).toContain("Open Voices conversation");
+  });
+
+  it("interprets a posted Voice as a visible Signal without creating a second record model", () => {
+    const commentsRouter = read("server/routers/comments.ts");
+    const rail = read("client/src/components/layout/RightRail.tsx");
+
+    expect(commentsRouter).toContain('type: "COMMENT"');
+    expect(commentsRouter).toContain("sent a signal on");
+    expect(commentsRouter).toContain('type: "comment"');
+    expect(rail).toContain("sent a signal on");
   });
 });

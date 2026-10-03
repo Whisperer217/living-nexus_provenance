@@ -81,7 +81,7 @@ function signalIcon(type: string) {
 function signalLabel(type: string, actorName: string | null | undefined): string {
   const actor = actorName || "Someone";
   switch (type) {
-    case "COMMENT": return `${actor} commented`;
+    case "COMMENT": return `${actor} sent a signal`;
     case "LIKE": return `${actor} appreciated this`;
     case "TIP": return `${actor} sent a gift`;
     case "WITNESS_REGISTERED": return `${actor} witnessed this work`;
