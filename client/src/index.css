@@ -4127,6 +4127,64 @@ h1, h2, h3, h4, h5, h6,
     0 0 10px color-mix(in srgb, var(--ln-coal) 86%, transparent);
 }
 
+.ln-creator-follow {
+  color: var(--ln-parchment);
+  transition: border-color 180ms ease-out, background-color 180ms ease-out, box-shadow 180ms ease-out, color 180ms ease-out, transform 180ms ease-out;
+}
+
+.ln-creator-follow--idle {
+  border-color: color-mix(in srgb, var(--ln-bone) 28%, transparent);
+  background: color-mix(in srgb, var(--ln-coal) 78%, transparent);
+}
+
+.ln-creator-follow--idle:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--ln-gold-hot) 58%, transparent);
+  background: color-mix(in srgb, var(--ln-gold) 16%, var(--ln-coal));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--ln-gold-hot) 16%, transparent), 0 0 16px color-mix(in srgb, var(--ln-gold) 22%, transparent);
+  color: var(--ln-parchment);
+  transform: translateY(-1px);
+}
+
+.ln-creator-follow--active {
+  border-color: color-mix(in srgb, var(--ln-gold-hot) 62%, transparent);
+  background: color-mix(in srgb, var(--ln-gold) 22%, var(--ln-coal));
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--ln-parchment) 16%, transparent), 0 0 14px color-mix(in srgb, var(--ln-gold) 18%, transparent);
+  color: var(--ln-parchment);
+}
+
+.ln-creator-follow--active:hover:not(:disabled) {
+  border-color: var(--ln-gold-flame);
+  background: color-mix(in srgb, var(--ln-gold-hot) 26%, var(--ln-coal));
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--ln-parchment) 24%, transparent), 0 0 20px color-mix(in srgb, var(--ln-gold-hot) 28%, transparent);
+  transform: translateY(-1px);
+}
+
+.ln-creator-follow svg {
+  color: var(--ln-gold-hot);
+}
+
+@media (max-width: 639px) {
+  .ln-creator-card__handle,
+  .ln-creator-card__supporting,
+  .ln-creator-card__domain,
+  .ln-creator-card__action {
+    font-size: var(--text-sm) !important;
+  }
+
+  .ln-creator-card__handle,
+  .ln-creator-card__domain {
+    line-height: 1.4;
+  }
+
+  .ln-creator-card__supporting {
+    line-height: 1.5;
+  }
+
+  .ln-creator-card__action {
+    min-height: 2.75rem;
+  }
+}
+
 /* Pull quote — large editorial quote, creator testimony */
 .ln-pull-quote {
   font-family: 'Cormorant Garamond', serif;

@@ -30,6 +30,10 @@ The existing card correctly preserves creator-owned imagery, but a lightly shade
 
 Presentation-only change to Explore creator cards. No data, routing, permissions, registry, or creator-owned imagery changes.
 
+## Follow action and mobile extension
+
+The Follow action uses parchment as its readable label in every state. Gold-hot belongs to its active witness mark, border, and hover uplift; it does not replace readable action text. On narrow viewports, the handle, supporting copy, domain action, and both creator-card actions rise to the established `--text-sm` tier, while action targets expand to the 44px mobile touch floor.
+
 ## Verification
 
 - Keep existing banner and avatar loading/error behavior.

@@ -689,8 +689,8 @@ function CreatorDirectoryCard({
               <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full border border-[var(--gold)]/20 bg-[var(--void-2)]"><Users className="h-5 w-5 text-[var(--stone-shadow)]" /></div>
             )}
             <div className="min-w-0 flex-1">
-              <h2 className="ln-subsection-header ln-creator-card__ink truncate text-[var(--ln-parchment)] transition-colors group-hover:text-[var(--gold-hot)]" title={identity}>{identity}</h2>
-              <p className="ln-mono ln-creator-card__ink mt-0.5 truncate !text-[var(--ln-gold-hot)]">{handleLabel}</p>
+              <h2 className="ln-subsection-header ln-creator-card__ink ln-creator-card__title truncate text-[var(--ln-parchment)] transition-colors group-hover:text-[var(--gold-hot)]" title={identity}>{identity}</h2>
+              <p className="ln-mono ln-creator-card__ink ln-creator-card__handle mt-0.5 truncate !text-[var(--ln-gold-hot)]">{handleLabel}</p>
             </div>
             <ChevronRight className="ln-creator-card__ink h-4 w-4 flex-shrink-0 text-[var(--ln-bone)] transition-transform group-hover:translate-x-0.5 group-hover:text-[var(--gold)]" aria-hidden="true" />
           </div>
@@ -700,11 +700,11 @@ function CreatorDirectoryCard({
               <p className="ln-editorial ln-creator-card__ink mt-1 line-clamp-3 !text-[var(--ln-parchment)]">{creator.bio}</p>
             </div>
           ) : (
-            <p className="ln-caption ln-creator-card__ink mt-5 line-clamp-3 !text-[var(--ln-bone)]">Explore this creator’s registered works and provenance record.</p>
+            <p className="ln-caption ln-creator-card__ink ln-creator-card__supporting mt-5 line-clamp-3 !text-[var(--ln-bone)]">Explore this creator’s registered works and provenance record.</p>
           )}
         </Link>
         <div className="mt-4 flex items-center justify-between gap-3 border-t border-white/15 pt-3">
-          <span className="ln-caption ln-creator-card__ink !text-[var(--ln-bone)]">{creator.publishedCount} published work{creator.publishedCount === 1 ? "" : "s"}</span>
+          <span className="ln-caption ln-creator-card__ink ln-creator-card__supporting !text-[var(--ln-bone)]">{creator.publishedCount} published work{creator.publishedCount === 1 ? "" : "s"}</span>
           <div className="flex items-center gap-2">
             {canFollowCreator && (
               <button
@@ -712,10 +712,10 @@ function CreatorDirectoryCard({
                 onClick={() => onFollowToggle(creator.id, identity)}
                 disabled={followPending || hasManagedSubscription}
                 title={hasManagedSubscription ? "This creator is already managed through a higher subscription tier." : "Follow keeps you informed when this creator publishes."}
-                className={`inline-flex min-h-8 items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
+                className={`ln-creator-follow ln-creator-card__action inline-flex min-h-9 items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-60 ${
                   followsByWitnessTier || hasManagedSubscription
-                    ? "border-[var(--gold)]/45 bg-[var(--gold)]/15 text-[var(--gold-hot)]"
-                    : "border-white/15 bg-black/10 text-[var(--ln-bone)] hover:border-[var(--gold)]/35 hover:text-[var(--gold-hot)]"
+                    ? "ln-creator-follow--active"
+                    : "ln-creator-follow--idle"
                 }`}
                 aria-label={`${followLabel} ${identity}`}
               >
@@ -727,13 +727,13 @@ function CreatorDirectoryCard({
               type="button"
               onClick={() => setSupportRequested(true)}
               disabled={supportRequested && !supportTarget}
-              className="inline-flex min-h-8 items-center gap-1.5 rounded-lg border border-[var(--gold)]/30 bg-[var(--gold)]/10 px-2.5 py-1 text-xs font-medium text-[var(--gold-hot)] transition-colors hover:bg-[var(--gold)]/20 disabled:cursor-wait disabled:opacity-60"
+              className="ln-creator-card__action inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-[var(--gold)]/30 bg-[var(--gold)]/10 px-3 py-1.5 text-sm font-medium text-[var(--ln-parchment)] transition-colors hover:border-[var(--ln-gold-hot)]/55 hover:bg-[var(--gold)]/20 hover:text-[var(--ln-parchment)] disabled:cursor-wait disabled:opacity-60"
               aria-label={`Support ${identity}`}
             >
               {supportRequested && !supportTarget ? <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" /> : <Heart className="h-3 w-3" aria-hidden="true" />}
               Support
             </button>
-            <Link href={`/creator/${routeIdentity}`} className="ln-mono uppercase text-[var(--gold-hot)] hover:text-[var(--ln-gold-flame)]">Visit domain</Link>
+            <Link href={`/creator/${routeIdentity}`} className="ln-mono ln-creator-card__domain uppercase text-[var(--gold-hot)] hover:text-[var(--ln-gold-flame)]">Visit domain</Link>
           </div>
         </div>
       </div>

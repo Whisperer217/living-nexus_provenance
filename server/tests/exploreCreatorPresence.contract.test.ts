@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 const projectRoot = path.resolve(import.meta.dirname, "../..");
 const exploreSource = fs.readFileSync(path.join(projectRoot, "client/src/pages/ExplorePage.tsx"), "utf8");
 const workListSource = fs.readFileSync(path.join(projectRoot, "client/src/components/WorkListRow.tsx"), "utf8");
+const stylesheet = fs.readFileSync(path.join(projectRoot, "client/src/index.css"), "utf8");
 
 describe("Explore creator presence contract", () => {
   it("retains creator-declared biography from the public creator directory response", () => {
@@ -38,6 +39,24 @@ describe("Explore creator presence contract", () => {
     expect(exploreSource).toContain("hover:scale-[1.012]");
     expect(exploreSource).toContain("hover:shadow-[0_16px_36px_rgba(0,0,0,0.28)]");
     expect(exploreSource).toContain("motion-reduce:transform-none motion-reduce:transition-none");
+  });
+
+  it("aligns creator Follow states with parchment labels and gold-hot witness emphasis", () => {
+    expect(exploreSource).toContain("ln-creator-follow--active");
+    expect(exploreSource).toContain("ln-creator-follow--idle");
+    expect(stylesheet).toContain(".ln-creator-follow--active");
+    expect(stylesheet).toContain(".ln-creator-follow--idle:hover:not(:disabled)");
+    expect(stylesheet).toContain("color: var(--ln-parchment)");
+    expect(stylesheet).toContain("color: var(--ln-gold-hot)");
+  });
+
+  it("raises compact creator metadata and actions to the mobile readable type tier", () => {
+    expect(exploreSource).toContain("ln-creator-card__handle");
+    expect(exploreSource).toContain("ln-creator-card__supporting");
+    expect(exploreSource).toContain("ln-creator-card__action");
+    expect(stylesheet).toContain("@media (max-width: 639px)");
+    expect(stylesheet).toContain("font-size: var(--text-sm) !important");
+    expect(stylesheet).toContain("min-height: 2.75rem");
   });
 
   it("uses creator-specific skeletons while public directory data and images are loading", () => {
