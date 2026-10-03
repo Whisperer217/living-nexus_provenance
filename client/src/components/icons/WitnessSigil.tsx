@@ -21,7 +21,7 @@ export function WitnessSigil({ size = 16, className, title }: WitnessSigilProps)
       xmlns="http://www.w3.org/2000/svg"
       aria-hidden={title ? undefined : true}
       role={title ? "img" : undefined}
-      className={className}
+      className={["ln-witness-sigil", className].filter(Boolean).join(" ")}
     >
       {title && <title>{title}</title>}
       <path

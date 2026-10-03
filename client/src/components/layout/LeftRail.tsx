@@ -205,28 +205,24 @@ export default function LeftRail({
           aria-label="Open Witnessing Circle"
           onClick={(event) => {
             event.stopPropagation();
-            navigate("/profile?tab=witnessing");
+            window.dispatchEvent(new Event("ln:open-witnessing-circle"));
             if (isMobile) onMobileClose?.();
           }}
-          className="relative flex flex-col items-center justify-center gap-0.5 transition-all duration-150 rounded-xl"
+          className="ln-witness-sigil-trigger relative flex flex-col items-center justify-center gap-0.5 transition-all duration-150 rounded-xl"
           style={{
             width: isMobile ? 72 : 60,
             height: 56,
-            color: location.startsWith("/profile?tab=witnessing") ? "var(--ln-gold)" : "var(--ln-text-muted)",
-            background: location.startsWith("/profile?tab=witnessing") ? "var(--ln-surface-rail-active)" : "transparent",
+            color: "var(--ln-text-muted)",
+            background: "transparent",
             WebkitTapHighlightColor: "transparent",
           }}
           onMouseEnter={(event) => {
-            if (!location.startsWith("/profile?tab=witnessing")) {
-              (event.currentTarget as HTMLElement).style.color = "var(--ln-gold)";
-              (event.currentTarget as HTMLElement).style.background = "var(--ln-surface-rail-hover)";
-            }
+            (event.currentTarget as HTMLElement).style.color = "var(--ln-gold)";
+            (event.currentTarget as HTMLElement).style.background = "var(--ln-surface-rail-hover)";
           }}
           onMouseLeave={(event) => {
-            if (!location.startsWith("/profile?tab=witnessing")) {
-              (event.currentTarget as HTMLElement).style.color = "var(--ln-text-muted)";
-              (event.currentTarget as HTMLElement).style.background = "transparent";
-            }
+            (event.currentTarget as HTMLElement).style.color = "var(--ln-text-muted)";
+            (event.currentTarget as HTMLElement).style.background = "transparent";
           }}
         >
           <WitnessSigil size={18} />

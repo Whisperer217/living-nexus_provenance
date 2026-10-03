@@ -68,7 +68,7 @@ describe("Explore creator witness and sorting contracts", () => {
     expect(domainEditor).toContain("Witnesses and collaborators");
   });
 
-  it("uses the shared Witness Sigil and one profile-backed Witnessing Circle path", () => {
+  it("uses the shared Witness Sigil and one immediate Witnessing Circle path", () => {
     expect(witnessSigil).toContain("The Living Nexus Witness Sigil");
     expect(witnessSigil).toContain('viewBox="0 0 24 24"');
     expect(explore).toContain('import { WitnessSigil } from "@/components/icons/WitnessSigil"');
@@ -77,9 +77,9 @@ describe("Explore creator witness and sorting contracts", () => {
     expect(creatorProfile).toContain('<WitnessSigil size={16} />');
     expect(collection).toContain('<WitnessSigil size={15} className="mr-1" />');
     expect(project).toContain('<WitnessSigil size={16} className="mr-1.5" />');
-    expect(leftRail).toContain('navigate("/profile?tab=witnessing")');
-    expect(topBar).toContain('goTo("/profile?tab=witnessing")');
-    expect(mobileShell).toContain('navigate("/profile?tab=witnessing")');
+    expect(leftRail).toContain('new Event("ln:open-witnessing-circle")');
+    expect(topBar).toContain('new Event("ln:open-witnessing-circle")');
+    expect(mobileShell).toContain('"ln:open-witnessing-circle"');
   });
 
   it("sorts the existing public creator projection by explicit public evidence", () => {

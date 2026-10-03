@@ -614,8 +614,8 @@ export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCoun
                     <User size={13} style={{ opacity: 0.6 }} /> Profile
                   </button>
                   <button
-                    onClick={() => { setAvatarMenuOpen(false); goTo("/profile?tab=witnessing"); }}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/[0.06] transition-colors text-left"
+                    onClick={() => { setAvatarMenuOpen(false); window.dispatchEvent(new Event("ln:open-witnessing-circle")); }}
+                    className="ln-witness-sigil-trigger w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/[0.06] transition-colors text-left"
                     style={{ color: "var(--ln-parchment)" }}
                     title="Creators whose future registered manifestations you witness"
                   >

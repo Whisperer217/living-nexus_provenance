@@ -747,16 +747,19 @@ export function ExperienceColumn({
       </ExperienceSection>
 
       {/* ═══════════════════════════════════════════════════════════
-          7. COMMENTS
+          7. VOICES
       ═══════════════════════════════════════════════════════════ */}
       <ExperienceSection
         id="comments"
-        title="Comments"
+        title="Voices"
         icon={<MessageSquare size={14} />}
         defaultOpen={true}
         badge={commentCount || undefined}
       >
         <div className="pt-4 space-y-4">
+          <p className="text-sm leading-relaxed" style={{ color: "var(--ln-bone)" }}>
+            Conversation held in the living record of this Work.
+          </p>
           {/* Emoji Reactions */}
           <div className="flex flex-wrap gap-2">
             {REACTION_SLUGS.map((slug: string) => (
@@ -789,6 +792,7 @@ export function ExperienceColumn({
                 value={commentText}
                 onChange={e => setCommentText(e.target.value)}
                 disabled={!user}
+                className="ln-dimensional-field"
                 onKeyDown={e => {
                   if (e.key === "Enter" && !e.shiftKey && commentText.trim()) {
                     e.preventDefault();

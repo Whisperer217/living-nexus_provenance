@@ -60,7 +60,7 @@ describe("creator album assignment contracts", () => {
     expect(studio).not.toContain("getCollectionsByCreator(callerId)");
   });
 
-  it("keeps creator dates and Work discussion visible after publication", () => {
+  it("keeps creator dates and the canonical Work Voices surface visible after publication", () => {
     const register = read("client/src/pages/manifestation-studio/environments/MusicEnvironment.tsx");
     const chapel = read("client/src/components/EditChapel.tsx");
     const work = read("client/src/pages/SongDetailPage.tsx");
@@ -68,8 +68,8 @@ describe("creator album assignment contracts", () => {
     expect(register).toContain("creatorReleaseDate");
     expect(prepared).toContain("creatorReleaseDate");
     expect(chapel).toContain("song.creatorReleaseDate ? song.creatorReleaseDate.slice(0, 10) : \"\"");
-    expect(work).toContain("comments.length");
-    expect(work).toContain('color: "var(--ln-iron)"');
+    expect(work).toContain("publishedVoices");
+    expect(work).toContain("Canonical conversation lives in the Experience Column below.");
   });
 
   it("requires explicit creator context and rights confirmation, then records authorization and revocation events", () => {

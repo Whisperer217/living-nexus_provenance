@@ -62,6 +62,7 @@ interface CinematicSongHeaderProps {
   onEditArt?: () => void;
   onLike?: () => void;
   onFollow?: () => void;
+  onOpenVoices?: () => void;
   onShare?: () => void;
   onRegister?: () => void;
 }
@@ -94,6 +95,7 @@ export function CinematicSongHeader({
   onEditArt,
   onLike,
   onFollow,
+  onOpenVoices,
   onShare,
   onRegister,
 }: CinematicSongHeaderProps) {
@@ -610,10 +612,16 @@ export function CinematicSongHeader({
           <span className="text-[10px] tracking-widest uppercase" style={{ color: "rgba(196,154,40,0.45)" }}>Plays</span>
         </div>
         <div className="w-px h-6" style={{ background: "rgba(196,154,40,0.12)" }} />
-        <div className="flex flex-col items-center gap-0.5" title={`${commentCount} voices`}>
+        <button
+          type="button"
+          onClick={onOpenVoices}
+          className="flex flex-col items-center gap-0.5 rounded-md px-2 py-1 transition-colors hover:bg-[var(--ln-gold)]/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ln-gold)]/70"
+          title={`${commentCount} voices — open the conversation`}
+          aria-label={`Open ${commentCount} voices`}
+        >
           <span className="text-base font-bold" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>{commentCount}</span>
           <span className="text-[10px] tracking-widest uppercase" style={{ color: "rgba(196,154,40,0.45)" }}>Voices</span>
-        </div>
+        </button>
         <div className="w-px h-6" style={{ background: "rgba(196,154,40,0.12)" }} />
         <div className="flex flex-col items-center gap-0.5" title={`${likeCount} loved`}>
           <span className="text-base font-bold" style={{ color: likeCount > 0 ? "var(--ln-ember)" : "var(--ln-smoke)", fontFamily: "'Cinzel', serif" }}>{likeCount}</span>

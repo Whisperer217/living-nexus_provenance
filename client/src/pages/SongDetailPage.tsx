@@ -200,6 +200,13 @@ export default function SongDetailPage() {
     { songId },
     { enabled: songId > 0 }
   );
+  const publishedVoices = (comments ?? []).reduce((count: number, comment: any) => count + 1 + (comment.replies?.length ?? 0), 0);
+  const openVoices = useCallback(() => {
+    const voicesSection = document.getElementById("exp-comments");
+    if (!voicesSection) return;
+    voicesSection.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "start" });
+    window.setTimeout(() => voicesSection.querySelector<HTMLButtonElement>("button")?.focus(), reducedMotion ? 0 : 300);
+  }, [reducedMotion]);
   const { data: eventThread, refetch: refetchEvents } = trpc.events.getByWork.useQuery(
     { workId: songId },
     { enabled: songId > 0 }
@@ -642,7 +649,7 @@ export default function SongDetailPage() {
           isThisTrackActive={isThisTrackActive}
           isPlaying={isPlaying}
           playCount={song.playCount ?? 0}
-          commentCount={0}
+          commentCount={publishedVoices}
           likeCount={likeCount}
           isLiked={isLiked}
           waveCanvasRef={waveCanvasRef as React.RefObject<HTMLCanvasElement>}
@@ -650,6 +657,7 @@ export default function SongDetailPage() {
           onReadNow={handleReadNow}
           onEditArt={() => {}}
           onLike={(e?: React.MouseEvent) => toggleLike(e as React.MouseEvent)}
+          onOpenVoices={openVoices}
           onShare={() => {
             const shareUrl = song.witnessId
               ? `${window.location.origin}/share/${song.witnessId}`
@@ -1330,155 +1338,21 @@ export default function SongDetailPage() {
               </div>
             </div>
 
-            {/* Unified Interaction Thread */}
-            <div className="p-4" style={{ background: "var(--ln-coal)", border: "1px solid #C49A28" }}>
-              <h3 className="text-sm font-semibold mb-3 flex items-center gap-2 flex-wrap" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>
-                <MessageSquare className="w-4 h-4" />
-                Activity
-                {comments && comments.length > 0 && (
-                  <span className="text-xs font-normal" style={{ color: "var(--ln-smoke)" }}>{comments.length} comment{comments.length === 1 ? "" : "s"}</span>
-                )}
-                {eventThread && eventThread.length > 0 && (
-                  <span className="text-xs font-normal" style={{ color: "var(--ln-smoke)" }}>{eventThread.length}</span>
-                )}
-                {song.witnessId && (
-                  <span className="ml-auto text-[10px] font-mono px-2 py-0.5 rounded-full" style={{ background: "rgba(196,154,40,0.08)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.2)" }}>
-                    WID-linked
-                  </span>
-                )}
-              </h3>
-
-              {/* Comment input */}
-              <div className="flex gap-2 mb-4">
-                <div className="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold"
-                  style={{ background: "var(--ln-coal)" }}>
-                  {user ? (user.name || "?").charAt(0).toUpperCase() : "?"}
-                </div>
-                <div className="flex-1 space-y-2">
-                  <Input placeholder="Write a comment..." value={commentText} onChange={(e) => setCommentText(e.target.value)}
-                    onPaste={(e) => {
-                      // Strip WID certificate block that gets appended when copying from the lyrics panel
-                      const raw = e.clipboardData.getData("text/plain");
-                      const widIdx = raw.indexOf("\n═══");
-                      if (widIdx !== -1) {
-                        e.preventDefault();
-                        const clean = raw.slice(0, widIdx).trim();
-                        setCommentText(prev => prev + clean);
-                      }
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && !e.shiftKey && commentText.trim()) {
-                        e.preventDefault();
-                        commentMutation.mutate({ songId: song.id, content: commentText.trim() });
-                      }
-                    }}
-                    style={{ background: "var(--ln-coal)", border: "1px solid #C49A28", color: "var(--ln-parchment)", fontSize: "13px" }} />
-                  {commentText.trim() && (
-                    <Button size="sm"
-                      onClick={() => commentMutation.mutate({ songId: song.id, content: commentText.trim() })}
-                      disabled={commentMutation.isPending}
-                      style={{ background: "var(--ln-gold)", color: "var(--ln-parchment)" }}>
-                      Post
-                    </Button>
-                  )}
-                </div>
+            {/* Canonical conversation lives in the Experience Column below. */}
+            <button
+              type="button"
+              onClick={openVoices}
+              className="group w-full rounded-xl p-4 text-left transition-[border-color,transform,box-shadow] hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ln-gold)]/70 motion-reduce:transform-none"
+              style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.35)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.03), 0 10px 24px rgba(0,0,0,0.18)" }}
+              aria-label={`Open ${publishedVoices} voices`}
+            >
+              <div className="flex items-center gap-2">
+                <MessageSquare className="h-4 w-4" style={{ color: "var(--ln-gold-hot)" }} />
+                <span className="text-sm font-semibold" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>Voices</span>
+                <span className="ml-auto text-xs tabular-nums" style={{ color: "var(--ln-gold-hot)" }}>{publishedVoices}</span>
               </div>
-
-              {/* Threaded comment list — from comments.list (supports replies) */}
-              <div className="space-y-3 max-h-[420px] overflow-y-auto pr-1">
-                {comments && comments.length > 0 ? (
-                  (comments as any[]).map((c: any) => {
-                    const initial = (c.authorName || "A").charAt(0).toUpperCase();
-                    const timeStr = new Date(c.createdAt).toLocaleDateString();
-                    const isReplying = replyingTo?.id === c.id;
-                    return (
-                      <div key={c.id}>
-                        {/* Top-level comment */}
-                        <div className="flex gap-2">
-                          <div className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold"
-                            style={{ background: "var(--ln-coal)" }}>
-                            <span style={{ color: "var(--ln-smoke)" }}>{initial}</span>
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-0.5">
-                              <span className="text-xs font-medium" style={{ color: "var(--ln-parchment)" }}>{c.authorName || "Anonymous"}</span>
-                              <span className="text-[10px] ml-auto" style={{ color: "var(--ln-iron)" }}>{timeStr}</span>
-                            </div>
-                            <p className="text-sm" style={{ color: "var(--ln-smoke)" }}>{c.content}</p>
-                            <button
-                              onClick={() => { setReplyingTo(isReplying ? null : { id: c.id, authorName: c.authorName || "Anonymous" }); setReplyText(""); }}
-                              className="text-[10px] mt-1 transition-colors"
-                              style={{ color: isReplying ? "var(--ln-gold)" : "var(--ln-iron)" }}
-                            >
-                              {isReplying ? "Cancel" : `Reply`}
-                              {c.replies?.length > 0 && !isReplying && ` · ${c.replies.length} ${c.replies.length === 1 ? "reply" : "replies"}`}
-                            </button>
-                          </div>
-                        </div>
-
-                        {/* Inline reply input */}
-                        {isReplying && (
-                          <div className="ml-9 mt-2 flex gap-2">
-                            <div className="w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center text-[10px] font-bold"
-                              style={{ background: "var(--ln-coal)" }}>
-                              {user ? (user.name || "?").charAt(0).toUpperCase() : "?"}
-                            </div>
-                            <div className="flex-1 space-y-1.5">
-                              <Input
-                                placeholder={`Reply to ${replyingTo?.authorName ?? "comment"}…`}
-                                value={replyText}
-                                onChange={e => setReplyText(e.target.value)}
-                                onKeyDown={e => {
-                                  if (e.key === "Enter" && !e.shiftKey && replyText.trim()) {
-                                    e.preventDefault();
-                                    replyMutation.mutate({ songId: song.id, parentId: c.id, content: replyText.trim() });
-                                  }
-                                  if (e.key === "Escape") { setReplyingTo(null); setReplyText(""); }
-                                }}
-                                style={{ background: "var(--ln-coal)", border: "1px solid #C49A28", color: "var(--ln-parchment)", fontSize: "12px", height: "32px" }}
-                                autoFocus
-                              />
-                              {replyText.trim() && (
-                                <Button size="sm"
-                                  onClick={() => replyMutation.mutate({ songId: song.id, parentId: c.id, content: replyText.trim() })}
-                                  disabled={replyMutation.isPending}
-                                  className="h-6 text-[11px] px-2"
-                                  style={{ background: "var(--ln-gold)", color: "var(--ln-parchment)" }}>
-                                  Post reply
-                                </Button>
-                              )}
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Nested replies */}
-                        {c.replies?.length > 0 && (
-                          <div className="ml-9 mt-2 space-y-2 pl-3" style={{ borderLeft: "1px solid #C49A28" }}>
-                            {(c.replies as any[]).map((r: any) => (
-                              <div key={r.id} className="flex gap-2">
-                                <div className="w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center text-[10px] font-bold"
-                                  style={{ background: "var(--ln-coal)" }}>
-                                  <span style={{ color: "var(--ln-iron)" }}>{(r.authorName || "A").charAt(0).toUpperCase()}</span>
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-2 mb-0.5">
-                                    <span className="text-[11px] font-medium" style={{ color: "var(--ln-smoke)" }}>{r.authorName || "Anonymous"}</span>
-                                    <span className="text-[9px] ml-auto" style={{ color: "var(--ln-iron)" }}>{new Date(r.createdAt).toLocaleDateString()}</span>
-                                  </div>
-                                  <p className="text-xs" style={{ color: "var(--ln-smoke)" }}>{r.content}</p>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })
-                ) : (
-                  <p className="text-xs text-center py-4" style={{ color: "var(--ln-iron)" }}>Be the first to comment</p>
-                )}
-              </div>
-            </div>
+              <p className="mt-2 text-sm leading-relaxed" style={{ color: "var(--ln-bone)" }}>Read or add to the conversation held in this Work’s living record.</p>
+            </button>
 
             {/* Related */}
             {relatedData && relatedData.length > 0 && (

@@ -32,6 +32,7 @@ import ScrollToTopButton from "@/components/layout/ScrollToTopButton";
 import SiteFooter from "@/components/layout/SiteFooter";
 import TopBar from "@/components/layout/TopBar";
 import LivingNexusLauncher from "@/components/layout/LivingNexusLauncher";
+import { WitnessingCirclePanel } from "@/components/layout/WitnessingCirclePanel";
 import { WhatsNewModal } from "@/components/WhatsNewModal";
 import { trpc } from "@/lib/trpc";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -109,11 +110,18 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
   // ── What's New modal ───────────────────────────────────────────────
   const [whatsNewOpen, setWhatsNewOpen] = useState(false);
+  const [witnessingCircleOpen, setWitnessingCircleOpen] = useState(false);
 
   useEffect(() => {
     const handler = () => setWhatsNewOpen(true);
     window.addEventListener("ln:open-whats-new", handler);
     return () => window.removeEventListener("ln:open-whats-new", handler);
+  }, []);
+
+  useEffect(() => {
+    const handler = () => setWitnessingCircleOpen(true);
+    window.addEventListener("ln:open-witnessing-circle", handler);
+    return () => window.removeEventListener("ln:open-witnessing-circle", handler);
   }, []);
 
   // ── Notification badge count ───────────────────────────────────────
@@ -240,11 +248,11 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           </button>
         )}
 
-        {/* Witnessing Circle — a direct mobile path to the existing profile directory. */}
+        {/* Witnessing Circle — a direct mobile path to the relationship panel. */}
         {!!user && (
           <button
-            onClick={() => navigate("/profile?tab=witnessing")}
-            className="flex items-center justify-center rounded-lg transition-all"
+            onClick={() => setWitnessingCircleOpen(true)}
+            className="ln-witness-sigil-trigger flex items-center justify-center rounded-lg transition-all"
             style={{ minWidth: 44, minHeight: 44, color: "var(--ln-gold)", WebkitTapHighlightColor: "transparent" }}
             aria-label="Open Witnessing Circle"
             title="Witnessing Circle"
@@ -334,6 +342,8 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
       {/* ── RIGHT RAIL ── */}
       <RightRail />
+
+      <WitnessingCirclePanel open={witnessingCircleOpen} onClose={() => setWitnessingCircleOpen(false)} />
 
       {/* ── DRAWER LAYER ── */}
       {/* Marketplace / skins commerce lives on PNA Store (/avatar-registry) — not Loop chrome */}
