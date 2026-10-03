@@ -836,6 +836,24 @@ export const comments = mysqlTable("comments", {
 export type Comment = typeof comments.$inferSelect;
 export type InsertComment = typeof comments.$inferInsert;
 
+// ─── Creator references in public Work Signals ────────────────────────────────
+// A persisted reference is intentionally separate from a Signal's plain text.
+// It supports safe profile links and notification fan-out without making a
+// reference an authorship, participation, ownership, or provenance claim.
+export const commentMentions = mysqlTable("commentMentions", {
+  id: int("id").autoincrement().primaryKey(),
+  commentId: int("commentId").notNull(),
+  mentionedUserId: int("mentionedUserId").notNull(),
+  mentionedHandleSnapshot: varchar("mentionedHandleSnapshot", { length: 64 }).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (t) => ({
+  commentIdx: index("commentMentions_commentId_idx").on(t.commentId),
+  mentionedUserIdx: index("commentMentions_mentionedUserId_idx").on(t.mentionedUserId),
+  commentMentionedUserUnique: uniqueIndex("commentMentions_comment_mentioned_user_uq").on(t.commentId, t.mentionedUserId),
+}));
+export type CommentMention = typeof commentMentions.$inferSelect;
+export type InsertCommentMention = typeof commentMentions.$inferInsert;
+
 // ─── Comment Reports ─────────────────────────────────────────────────────────────────────────────────
 export const commentReports = mysqlTable("commentReports", {
   id: int("id").autoincrement().primaryKey(),
@@ -1086,6 +1104,8 @@ export const notifications = mysqlTable("notifications", {
     "project_update",    // creator posted a project update
     "project_donation",  // someone donated to your project
     "project_follow",    // someone followed your project
+    "signal_mention",    // creator was referenced in a public Work Signal
+    "correspondence",    // Witnessing Circle request, acceptance, or new message
   ]).notNull(),
   title: varchar("title", { length: 256 }).notNull(),
   body: text("body"),
@@ -2535,6 +2555,101 @@ export const witnessSubscriptions = mysqlTable("witnessSubscriptions", {
 });
 export type WitnessSubscription = typeof witnessSubscriptions.$inferSelect;
 export type InsertWitnessSubscription = typeof witnessSubscriptions.$inferInsert;
+
+// ─── Witnessing Circle correspondence ─────────────────────────────────────────
+// This is server-stored private correspondence between accepted participants.
+// It is intentionally not PNA/Keeper chat and does not claim end-to-end encryption.
+export const creatorContactSettings = mysqlTable("creatorContactSettings", {
+  userId: int("userId").primaryKey(),
+  incomingPolicy: mysqlEnum("incomingPolicy", ["none", "mutual_witnesses", "witnesses"]).notNull().default("witnesses"),
+  allowWorkContext: boolean("allowWorkContext").notNull().default(true),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().notNull(),
+});
+export type CreatorContactSetting = typeof creatorContactSettings.$inferSelect;
+export type InsertCreatorContactSetting = typeof creatorContactSettings.$inferInsert;
+
+export const correspondenceThreads = mysqlTable("correspondenceThreads", {
+  id: bigint("id", { mode: "number" }).autoincrement().primaryKey(),
+  kind: mysqlEnum("kind", ["direct"]).notNull().default("direct"),
+  // SHA-256 of sorted user ids: stable thread identity without exposing participant ids.
+  directKey: varchar("directKey", { length: 64 }).notNull(),
+  initiatedByUserId: int("initiatedByUserId").notNull(),
+  workContextId: int("workContextId"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().notNull(),
+  closedAt: timestamp("closedAt"),
+}, (t) => ({
+  directKeyUnique: uniqueIndex("correspondenceThreads_directKey_uq").on(t.directKey),
+  initiatorUpdatedIdx: index("correspondenceThreads_initiator_updated_idx").on(t.initiatedByUserId, t.updatedAt),
+}));
+export type CorrespondenceThread = typeof correspondenceThreads.$inferSelect;
+export type InsertCorrespondenceThread = typeof correspondenceThreads.$inferInsert;
+
+export const correspondenceParticipants = mysqlTable("correspondenceParticipants", {
+  id: bigint("id", { mode: "number" }).autoincrement().primaryKey(),
+  threadId: bigint("threadId", { mode: "number" }).notNull(),
+  userId: int("userId").notNull(),
+  role: mysqlEnum("role", ["initiator", "recipient"]).notNull(),
+  state: mysqlEnum("state", ["requested", "accepted", "declined", "left", "blocked"]).notNull().default("requested"),
+  lastReadMessageId: bigint("lastReadMessageId", { mode: "number" }),
+  joinedAt: timestamp("joinedAt").defaultNow().notNull(),
+  respondedAt: timestamp("respondedAt"),
+}, (t) => ({
+  participantUnique: uniqueIndex("correspondenceParticipants_thread_user_uq").on(t.threadId, t.userId),
+  userStateIdx: index("correspondenceParticipants_user_state_idx").on(t.userId, t.state),
+}));
+export type CorrespondenceParticipant = typeof correspondenceParticipants.$inferSelect;
+export type InsertCorrespondenceParticipant = typeof correspondenceParticipants.$inferInsert;
+
+export const correspondenceMessages = mysqlTable("correspondenceMessages", {
+  id: bigint("id", { mode: "number" }).autoincrement().primaryKey(),
+  threadId: bigint("threadId", { mode: "number" }).notNull(),
+  senderId: int("senderId").notNull(),
+  body: text("body").notNull(),
+  workContextId: int("workContextId"),
+  clientMessageId: varchar("clientMessageId", { length: 64 }).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  editedAt: timestamp("editedAt"),
+  deletedAt: timestamp("deletedAt"),
+}, (t) => ({
+  threadCreatedIdx: index("correspondenceMessages_thread_created_idx").on(t.threadId, t.createdAt),
+  senderCreatedIdx: index("correspondenceMessages_sender_created_idx").on(t.senderId, t.createdAt),
+  idempotencyUnique: uniqueIndex("correspondenceMessages_thread_sender_client_uq").on(t.threadId, t.senderId, t.clientMessageId),
+}));
+export type CorrespondenceMessage = typeof correspondenceMessages.$inferSelect;
+export type InsertCorrespondenceMessage = typeof correspondenceMessages.$inferInsert;
+
+export const correspondenceBlocks = mysqlTable("correspondenceBlocks", {
+  id: bigint("id", { mode: "number" }).autoincrement().primaryKey(),
+  blockerUserId: int("blockerUserId").notNull(),
+  blockedUserId: int("blockedUserId").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (t) => ({
+  blockedPairUnique: uniqueIndex("correspondenceBlocks_pair_uq").on(t.blockerUserId, t.blockedUserId),
+  blockedUserIdx: index("correspondenceBlocks_blocked_user_idx").on(t.blockedUserId),
+}));
+export type CorrespondenceBlock = typeof correspondenceBlocks.$inferSelect;
+export type InsertCorrespondenceBlock = typeof correspondenceBlocks.$inferInsert;
+
+// Durable creator safety report for authorized participants or recipients.
+export const correspondenceReports = mysqlTable("correspondenceReports", {
+  id: bigint("id", { mode: "number" }).autoincrement().primaryKey(),
+  threadId: bigint("threadId", { mode: "number" }).notNull(),
+  messageId: bigint("messageId", { mode: "number" }),
+  reporterId: int("reporterId").notNull(),
+  reason: mysqlEnum("reason", ["spam", "harassment", "hate_speech", "threat", "other"]).notNull(),
+  notes: varchar("notes", { length: 500 }),
+  status: mysqlEnum("status", ["pending", "dismissed", "actioned"]).notNull().default("pending"),
+  reviewedBy: int("reviewedBy"),
+  reviewedAt: timestamp("reviewedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (t) => ({
+  threadStatusIdx: index("correspondenceReports_thread_status_idx").on(t.threadId, t.status),
+  reporterCreatedIdx: index("correspondenceReports_reporter_created_idx").on(t.reporterId, t.createdAt),
+}));
+export type CorrespondenceReport = typeof correspondenceReports.$inferSelect;
+export type InsertCorrespondenceReport = typeof correspondenceReports.$inferInsert;
 
 // ─── Witness Reservations ─────────────────────────────────────────────────────
 // A reserved manifestation in a witness's personal archive queue.

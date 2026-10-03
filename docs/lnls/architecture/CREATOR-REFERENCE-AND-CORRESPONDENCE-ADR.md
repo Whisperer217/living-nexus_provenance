@@ -1,6 +1,6 @@
 # ADR — Creator References and Witnessing Circle Correspondence
 
-**Status:** Proposed — schema only; not yet migrated or exposed as private messaging  
+**Status:** Accepted — additive implementation in progress; migration generated and applied to the current development database
 **Date:** 2026-10-03  
 **Scope:** Creator mentions in public Work Signals and consent-based creator correspondence from the Witnessing Circle
 
@@ -24,7 +24,7 @@ Keep **Work Signals** public, attributable, and linked to a Work. Add structured
 
 Treat private correspondence as a separate, consent-based product surface within the Witnessing Circle. Do not claim end-to-end encryption unless client-side encryption, key exchange, recovery, and attachment handling are designed and verified separately.
 
-## Proposed additive schema
+## Accepted additive schema
 
 ### 1. Public creator references in Work Signals
 
@@ -103,12 +103,12 @@ creatorContactSettings
 ## Authorization and safety rules
 
 - Only authenticated humans may request correspondence.
-- A request is allowed only when the recipient’s `incomingPolicy` permits it; **`mutual_witnesses` should be the secure default**.
+- A request is allowed only when the recipient’s `incomingPolicy` permits it. The implementation default is **`witnesses`**: the requester must already witness the recipient, and the recipient must explicitly accept before any message is sent. Creators can tighten this to `mutual_witnesses` or close requests entirely.
 - A request remains silent to the sender until accepted; it must never reveal a private block or hidden contact policy.
 - Every thread/message query verifies participation server-side. No client-supplied user ID determines access.
 - Work context is optional and references a published Work only; it is an invitation context, not a statement of participation or rights.
 - Blocks terminate existing access and prevent new requests.
-- Rate limits, report/review records, retention/deletion semantics, notification preferences, and abuse handling must ship before public launch.
+- Requests and messages are rate limited server-side; a durable report/review record, request decline, and block controls ship with the initial correspondence surface. Retention/deletion policy remains a separate governance decision; messages are not advertised as ephemeral.
 - Standard server-stored messaging is private-to-participants, **not end-to-end encrypted**.
 
 ## Delivery sequence
@@ -118,6 +118,12 @@ creatorContactSettings
 3. Add correspondence request/accept/decline with a thread inbox in the Witnessing Circle.
 4. Add messages, unread state, notifications, reports, and moderation operations.
 5. Add live delivery only after the durable, authorized message model is complete.
+
+## Implementation record
+
+- `drizzle/0135_dazzling_firebird.sql` is the first generated migration after the reconciled `0134` baseline. It creates the reference/correspondence tables and extends the existing notification enum with `signal_mention` and `correspondence`.
+- The migration has been source-reviewed for additive DDL only. It has **not** been applied to a shared, staging, or production database as part of this decision record.
+- The implementation does not reuse `pnaThreads`; PNA remains creator-private AI context, while these tables carry only human participant correspondence.
 
 ## Current interface refinement
 

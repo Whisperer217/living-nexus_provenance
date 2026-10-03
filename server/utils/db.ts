@@ -30,6 +30,7 @@ import {
   type QrShare, type InsertQrShare,
   agents, wids, provenanceEvents,
   commentReports,
+  commentMentions,
   userCollections,
   userCollectionTracks,
   activationContributions,
@@ -170,6 +171,25 @@ export async function getUserByHandle(handle: string) {
   const lower = handle.toLowerCase();
   const ci = await db.select().from(users).where(sql`LOWER(${users.artistHandle}) = ${lower}`).limit(1);
   return ci.length > 0 ? ci[0] : undefined;
+}
+
+/** Bounded creator-handle lookup used only for public Work Signal composition. */
+export async function searchCreatorHandles(query: string, limit = 5) {
+  const db = await getDb();
+  const normalized = query.trim().toLocaleLowerCase().replace(/[\\%_]/g, "\\$&");
+  if (!db || !normalized) return [];
+  return db.select({
+    id: users.id,
+    artistHandle: users.artistHandle,
+    name: users.name,
+    profilePhotoUrl: users.profilePhotoUrl,
+  }).from(users)
+    .where(and(
+      isNotNull(users.artistHandle),
+      like(sql<string>`LOWER(${users.artistHandle})`, `${normalized}%`),
+    ))
+    .orderBy(asc(users.artistHandle))
+    .limit(Math.min(Math.max(limit, 1), 5));
 }
 
 // ─── Name History ────────────────────────────────────────────────────────────
@@ -946,11 +966,37 @@ export async function getCommentsBySong(songId: number) {
     .where(eq(comments.songId, songId))
     .orderBy(comments.createdAt)
     .limit(200);
+  const commentIds = rows.map((row: { id: number }) => row.id);
+  const mentionRows = commentIds.length === 0
+    ? []
+    : await db
+      .select({
+        commentId: commentMentions.commentId,
+        mentionedUserId: commentMentions.mentionedUserId,
+        handle: commentMentions.mentionedHandleSnapshot,
+        currentHandle: users.artistHandle,
+        name: users.name,
+      })
+      .from(commentMentions)
+      .leftJoin(users, eq(commentMentions.mentionedUserId, users.id))
+      .where(inArray(commentMentions.commentId, commentIds));
+  const mentionsByCommentId = new Map<number, Array<{ userId: number; handle: string; name: string | null }>>();
+  for (const mention of mentionRows) {
+    const existing = mentionsByCommentId.get(mention.commentId) ?? [];
+    existing.push({
+      userId: mention.mentionedUserId,
+      handle: mention.currentHandle || mention.handle,
+      name: mention.name ?? null,
+    });
+    mentionsByCommentId.set(mention.commentId, existing);
+  }
+
   // Resolve display name: stored authorName -> user artistHandle -> user name -> 'Anonymous'
   type RawRow = typeof rows[0];
   type CommentRow = {
     id: number; songId: number; userId: number | null; authorName: string | null;
     content: string; parentId: number | null; createdAt: Date; avatarUrl: string | null;
+    mentions: Array<{ userId: number; handle: string; name: string | null }>;
   };
   const resolved: CommentRow[] = rows.map((r: RawRow) => {
     const stored = r.authorName;
@@ -967,6 +1013,7 @@ export async function getCommentsBySong(songId: number) {
       parentId: r.parentId,
       createdAt: r.createdAt,
       avatarUrl: r.resolvedAvatar ?? null,
+      mentions: mentionsByCommentId.get(r.id) ?? [],
     };
   });
   // Build threaded structure: top-level comments with nested replies
@@ -988,10 +1035,74 @@ export async function getCommentsBySong(songId: number) {
   // Return newest top-level first
   return topLevel.reverse();
 }
-export async function addComment(data: { songId: number; userId?: number; authorName?: string; content: string; parentId?: number | null }) {
+const SIGNAL_MENTION_PATTERN = /(?:^|[^A-Za-z0-9_])@([A-Za-z0-9][A-Za-z0-9_.-]{0,63})/g;
+
+/**
+ * Extracts explicit @creator tokens from public Signal text. Raw text is retained
+ * as submitted; this only creates a bounded, separately persisted reference.
+ */
+export function extractSignalMentionHandles(content: string): string[] {
+  const handles = new Map<string, string>();
+  for (const match of Array.from(content.matchAll(SIGNAL_MENTION_PATTERN))) {
+    // A terminal period is ordinary sentence punctuation, not part of the
+    // reference token. Suggestions always add a trailing space, so this only
+    // repairs natural freeform input such as "Thank you @creator.".
+    const handle = match[1]?.trim().replace(/\.+$/, "");
+    if (!handle) continue;
+    const normalized = handle.toLocaleLowerCase();
+    if (!handles.has(normalized)) handles.set(normalized, handle);
+    if (handles.size >= 5) break;
+  }
+  return Array.from(handles.values());
+}
+
+export async function addComment(data: {
+  songId: number;
+  userId?: number;
+  authorName?: string;
+  content: string;
+  parentId?: number | null;
+  mentionedCreatorHandles?: string[];
+}) {
   const db = await getDb();
   if (!db) throw new Error("Database unavailable");
-  return db.insert(comments).values(data);
+  const contentHandles = extractSignalMentionHandles(data.content);
+  const suppliedHandles = new Set((data.mentionedCreatorHandles ?? []).map((handle) => handle.trim().toLocaleLowerCase()));
+  // A client may assist with suggestions, but only an @token present in the submitted
+  // public text can become a stored reference. Empty supplied input allows typed tokens.
+  const eligibleHandles = contentHandles.filter((handle) => suppliedHandles.size === 0 || suppliedHandles.has(handle.toLocaleLowerCase()));
+
+  return db.transaction(async (tx: any) => {
+    const [result] = await tx.insert(comments).values({
+      songId: data.songId,
+      userId: data.userId,
+      authorName: data.authorName,
+      content: data.content,
+      parentId: data.parentId ?? null,
+    });
+    const commentId = Number(result.insertId);
+    if (!commentId || eligibleHandles.length === 0) return { id: commentId, mentions: [] as Array<{ userId: number; handle: string }> };
+
+    const normalizedHandles = eligibleHandles.map((handle) => handle.toLocaleLowerCase());
+    const matches = await tx
+      .select({ id: users.id, artistHandle: users.artistHandle })
+      .from(users)
+      .where(inArray(sql<string>`LOWER(${users.artistHandle})`, normalizedHandles));
+    const resolved = new Map<number, { userId: number; handle: string }>();
+    for (const match of matches) {
+      if (!match.artistHandle || match.id === data.userId || resolved.has(match.id)) continue;
+      resolved.set(match.id, { userId: match.id, handle: match.artistHandle });
+    }
+    const mentions = Array.from(resolved.values()).slice(0, 5);
+    if (mentions.length > 0) {
+      await tx.insert(commentMentions).values(mentions.map((mention) => ({
+        commentId,
+        mentionedUserId: mention.userId,
+        mentionedHandleSnapshot: mention.handle,
+      })));
+    }
+    return { id: commentId, mentions };
+  });
 }
 
 export async function createCommentReport(data: { commentId: number; reporterId: number; reason: "spam" | "harassment" | "hate_speech" | "misinformation" | "other"; notes?: string }) {

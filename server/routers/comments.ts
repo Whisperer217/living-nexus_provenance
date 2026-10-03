@@ -12,7 +12,7 @@ import { storagePut } from "../utils/storage";
 import { micronize } from "../services/imageProcessing";
 import { invokeLLM } from "../_core/llm";
 import {
-  addComment, createSong, deleteSong, getAllCreators,
+  addComment, createSong, deleteSong, getAllCreators, searchCreatorHandles,
   getCommentsBySong, getPublicSongs, getSongById,
   getSongsByUser, getSongWithCreator, getTipsBySong, reorderSongs, getNextDisplayOrder,
   getUserById, incrementPlayCount, recordDownload,
@@ -171,6 +171,34 @@ const stripe = process.env.STRIPE_SECRET_KEY
   : null as unknown as Stripe;
 const PLATFORM_FEE_PERCENT = 10;
 
+const creatorHandleInput = z.string()
+  .trim()
+  .min(1)
+  .max(64)
+  .regex(/^[A-Za-z0-9][A-Za-z0-9_.-]*$/, "Creator handles may only use letters, numbers, periods, underscores, and hyphens.");
+
+async function notifySignalMentions(input: {
+  mentions: Array<{ userId: number; handle: string }>;
+  actorId: number;
+  actorName: string;
+  songId: number;
+  songTitle: string;
+  content: string;
+}) {
+  await Promise.all(input.mentions
+    .filter((mention) => mention.userId !== input.actorId)
+    .map((mention) => createNotification({
+      userId: mention.userId,
+      type: "signal_mention",
+      title: `${input.actorName} referenced @${mention.handle} in a signal on "${input.songTitle}"`,
+      body: input.content.slice(0, 120),
+      actorId: input.actorId,
+      actorName: input.actorName,
+      refId: input.songId,
+      refType: "song",
+    })));
+}
+
 // ── Build stats — updated via env vars on each deploy ──
 const BUGS_FIXED = parseInt(process.env.BUGS_FIXED ?? "222", 10);
 const TOTAL_COMMITS = parseInt(process.env.TOTAL_COMMITS ?? "554", 10);
@@ -186,7 +214,13 @@ const KEEPER_PRESETS = [
 
 export const commentsRouter = router({
     list: publicProcedure.input(z.object({ songId: z.number() })).query(async ({ input }) => getCommentsBySong(input.songId)),
-    add: protectedProcedure.input(z.object({ songId: z.number(), content: z.string().min(1).max(1000) })).mutation(async ({ ctx, input }) => {
+    mentionCandidates: publicProcedure.input(z.object({ query: z.string().trim().min(1).max(64) }))
+      .query(async ({ input }) => searchCreatorHandles(input.query)),
+    add: protectedProcedure.input(z.object({
+      songId: z.number(),
+      content: z.string().min(1).max(1000),
+      mentionedCreatorHandles: z.array(creatorHandleInput).max(5).optional(),
+    })).mutation(async ({ ctx, input }) => {
       // Always use the authenticated user's identity — never fall back to Anonymous
       const actorName = ctx.user.artistHandle || ctx.user.name || "Creator";
       await createEvent({
@@ -197,48 +231,23 @@ export const commentsRouter = router({
         actorName,
         payload: { content: input.content },
       });
-      // Secondary write: comments table for legacy queries
-      await addComment({ songId: input.songId, userId: ctx.user.id, authorName: actorName, content: input.content });
+      // Secondary write: comments table with a bounded structured creator-reference relation.
+      // Server parsing remains authoritative; a client suggestion cannot create a phantom reference.
+      const comment = await addComment({
+        songId: input.songId,
+        userId: ctx.user.id,
+        authorName: actorName,
+        content: input.content,
+        mentionedCreatorHandles: input.mentionedCreatorHandles,
+      });
       // Notify the song owner if commenter is a different user
       const song = await getSongById(input.songId);
       if (song && song.userId && song.userId !== ctx.user.id) {
-        await createNotification({
-          userId: song.userId,
-          type: "comment",
-          title: `${actorName} sent a signal on "${song.title}"`,
-          body: input.content.slice(0, 120),
-          actorId: ctx.user.id,
-          actorName,
-          actorAvatarUrl: undefined,
-          refId: input.songId,
-          refType: "song",
-        });
-      }
-      return { success: true };
-    }),
-    addReply: protectedProcedure
-      .input(z.object({
-        songId: z.number(),
-        parentId: z.number(),
-        content: z.string().min(1).max(1000),
-      }))
-      .mutation(async ({ ctx, input }) => {
-        const actorName = ctx.user.artistHandle || ctx.user.name || "Creator";
-        // Insert reply with parentId
-        await addComment({
-          songId: input.songId,
-          userId: ctx.user.id,
-          authorName: actorName,
-          content: input.content,
-          parentId: input.parentId,
-        });
-        // Notify the song owner if commenter is a different user
-        const song = await getSongById(input.songId);
-        if (song && song.userId && song.userId !== ctx.user.id) {
+        if (!comment.mentions.some((mention: { userId: number }) => mention.userId === song.userId)) {
           await createNotification({
             userId: song.userId,
             type: "comment",
-          title: `${actorName} replied to a signal on "${song.title}"`,
+            title: `${actorName} sent a signal on "${song.title}"`,
             body: input.content.slice(0, 120),
             actorId: ctx.user.id,
             actorName,
@@ -247,7 +256,61 @@ export const commentsRouter = router({
             refType: "song",
           });
         }
-        return { success: true };
+        await notifySignalMentions({
+          mentions: comment.mentions,
+          actorId: ctx.user.id,
+          actorName,
+          songId: input.songId,
+          songTitle: song.title,
+          content: input.content,
+        });
+      }
+      return { success: true, commentId: comment.id, mentions: comment.mentions };
+    }),
+    addReply: protectedProcedure
+      .input(z.object({
+        songId: z.number(),
+        parentId: z.number(),
+        content: z.string().min(1).max(1000),
+        mentionedCreatorHandles: z.array(creatorHandleInput).max(5).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const actorName = ctx.user.artistHandle || ctx.user.name || "Creator";
+        // Insert reply with parentId
+        const comment = await addComment({
+          songId: input.songId,
+          userId: ctx.user.id,
+          authorName: actorName,
+          content: input.content,
+          parentId: input.parentId,
+          mentionedCreatorHandles: input.mentionedCreatorHandles,
+        });
+        // Notify the song owner if commenter is a different user
+        const song = await getSongById(input.songId);
+        if (song && song.userId && song.userId !== ctx.user.id) {
+          if (!comment.mentions.some((mention: { userId: number }) => mention.userId === song.userId)) {
+            await createNotification({
+              userId: song.userId,
+              type: "comment",
+              title: `${actorName} replied to a signal on "${song.title}"`,
+              body: input.content.slice(0, 120),
+              actorId: ctx.user.id,
+              actorName,
+              actorAvatarUrl: undefined,
+              refId: input.songId,
+              refType: "song",
+            });
+          }
+          await notifySignalMentions({
+            mentions: comment.mentions,
+            actorId: ctx.user.id,
+            actorName,
+            songId: input.songId,
+            songTitle: song.title,
+            content: input.content,
+          });
+        }
+        return { success: true, commentId: comment.id, mentions: comment.mentions };
       }),
     report: protectedProcedure
       .input(z.object({
@@ -274,4 +337,3 @@ export const commentsRouter = router({
         return moderateCommentReport(input.reportId, input.action, ctx.user.id);
       }),
   });
-

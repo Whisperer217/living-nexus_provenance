@@ -29,11 +29,13 @@ describe("Drizzle migration lineage", () => {
 
   it("uses one canonical reconciliation baseline after the trusted 0133 state", () => {
     const journal = JSON.parse(fs.readFileSync(journalPath, "utf8")) as { entries: JournalEntry[] };
-    const baseline = journal.entries.at(-1);
+    const baseline = journal.entries.find((entry) => entry.tag === "0134_reconcile_live_schema");
+    const postBaseline = journal.entries.filter((entry) => entry.idx > (baseline?.idx ?? Number.MAX_SAFE_INTEGER));
     const migrationPath = path.join(root, "0134_reconcile_live_schema.sql");
     const archivedPath = path.join(root, "legacy", "untracked-pre-0134");
 
     expect(baseline?.tag).toBe("0134_reconcile_live_schema");
+    expect(postBaseline.every((entry) => entry.idx > baseline!.idx)).toBe(true);
     expect(fs.existsSync(migrationPath)).toBe(true);
     expect(fs.existsSync(path.join(meta, "0134_snapshot.json"))).toBe(true);
     expect(fs.existsSync(archivedPath)).toBe(true);
