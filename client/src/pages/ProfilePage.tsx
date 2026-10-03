@@ -190,11 +190,11 @@ export default function ProfilePage() {
   // Read ?tab= URL param for deep-links from ContextDrawer and other navigation sources
   const search = useSearch();
   const tabFromUrl = new URLSearchParams(search).get("tab") as
-    | "overview" | "works" | "collections" | "liked" | "signals" | "field-notes" | "testimony" | "identity" | "witness-network"
+    | "overview" | "works" | "collections" | "liked" | "signals" | "field-notes" | "testimony" | "identity" | "witnessing" | "witness-network"
     | null;
-  const validTabs = ["overview", "works", "collections", "liked", "signals", "field-notes", "testimony", "identity", "witness-network"] as const;
+  const validTabs = ["overview", "works", "collections", "liked", "signals", "field-notes", "testimony", "identity", "witnessing", "witness-network"] as const;
   const initialTab = tabFromUrl && (validTabs as readonly string[]).includes(tabFromUrl) ? tabFromUrl : "overview";
-  const [activeTab, setActiveTab] = useState<"overview" | "works" | "collections" | "liked" | "signals" | "field-notes" | "testimony" | "identity" | "witness-network">(initialTab);
+  const [activeTab, setActiveTab] = useState<"overview" | "works" | "collections" | "liked" | "signals" | "field-notes" | "testimony" | "identity" | "witnessing" | "witness-network">(initialTab);
   // Sync tab when URL search changes (handles same-page navigation e.g. /profile → /profile?tab=works)
   useEffect(() => {
     const t = new URLSearchParams(search).get("tab") as typeof activeTab | null;
@@ -212,6 +212,10 @@ export default function ProfilePage() {
   const { data: myStats } = trpc.profile.myStats.useQuery(undefined, { enabled: !!user });
   const { data: myActivity = [] } = trpc.profile.myActivity.useQuery({ limit: 20 }, { enabled: !!user && activeTab === "overview" });
   const { data: witnessNetwork } = trpc.witness.network.useQuery(undefined, { enabled: !!user && (activeTab === "overview" || activeTab === "witness-network") });
+  const { data: myWitnessing = [], isLoading: witnessingLoading } = trpc.witnessSubscription.myWitnessing.useQuery(undefined, {
+    enabled: !!user && activeTab === "witnessing",
+    staleTime: 30_000,
+  });
   const { data: analytics } = trpc.profile.myAnalytics.useQuery(undefined, { enabled: !!user && activeTab === "overview", staleTime: 60_000 });
   // ── Command center tab data ───────────────────────────────────────
   const { data: likedSongs = [] } = trpc.songs.getLikedOrdered.useQuery(undefined, { enabled: !!user && activeTab === "liked" });
@@ -1014,6 +1018,7 @@ export default function ProfilePage() {
             { id: "collections",     label: "Collections & Playlists" },
             { id: "works",           label: "Works" },
             { id: "liked",           label: "Liked" },
+            { id: "witnessing",      label: "Witnessing" },
             { id: "witness-network", label: "Witness Network", badge: !witnessNetworkSeen && ((witnessNetwork?.witnessing?.length ?? 0) + (witnessNetwork?.witnessedBy?.length ?? 0) > 0) ? String((witnessNetwork?.witnessing?.length ?? 0) + (witnessNetwork?.witnessedBy?.length ?? 0)) : null },
             { id: "signals",         label: "Signals", badge: (unreadCount as number) > 0 ? String(unreadCount) : null },
             { id: "field-notes",     label: "Field Notes" },
@@ -2176,6 +2181,62 @@ export default function ProfilePage() {
         {/* ── Identity Tab ── */}
         {activeTab === "identity" && (
           <IdentityEditor profile={profile} />
+        )}
+
+        {/* ── Witnessing Tab — subscription-backed creator relationships ── */}
+        {activeTab === "witnessing" && (
+          <section className="space-y-5" aria-labelledby="profile-witnessing-heading">
+            <div className="flex items-center gap-3 border-b border-[var(--ln-gold)]/15 pb-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full border border-[var(--ln-gold)]/30 bg-[var(--ln-gold)]/10">
+                <Eye size={17} style={{ color: "var(--ln-gold-hot)" }} aria-hidden="true" />
+              </div>
+              <div>
+                <p className="ln-overline !text-[var(--ln-gold-hot)]">Creator relationships</p>
+                <h2 id="profile-witnessing-heading" className="ln-section-header !mt-0 !text-[var(--ln-parchment)]">Witnessing</h2>
+                <p className="ln-caption mt-1 !text-[var(--ln-bone)]">Creators whose future registered manifestations you have chosen to witness.</p>
+              </div>
+            </div>
+
+            {witnessingLoading ? (
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {[0, 1, 2, 3].map((index) => <div key={index} className="h-32 animate-pulse rounded-2xl border border-[var(--ln-ash)] bg-[var(--ln-coal)]" />)}
+              </div>
+            ) : myWitnessing.length === 0 ? (
+              <div className="rounded-2xl border border-dashed border-[var(--ln-gold)]/25 bg-[var(--ln-coal)] px-6 py-12 text-center">
+                <Eye className="mx-auto mb-3 h-7 w-7" style={{ color: "var(--ln-gold-dim)" }} aria-hidden="true" />
+                <h3 className="ln-subsection-header !text-[var(--ln-parchment)]">No creators witnessed yet</h3>
+                <p className="ln-caption mx-auto mt-2 max-w-md !text-[var(--ln-bone)]">Witnessing acknowledges a creator’s continuing record and connects you to future registered manifestations.</p>
+                <Link href="/explore?view=creators" className="mt-5 inline-flex min-h-10 items-center rounded-lg border border-[var(--ln-gold)]/35 bg-[var(--ln-gold)]/10 px-4 py-2 text-sm font-medium text-[var(--ln-parchment)] transition-colors hover:border-[var(--ln-gold-hot)]/65 hover:bg-[var(--ln-gold)]/20">
+                  Explore creators
+                </Link>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {myWitnessing.map((creator: any) => {
+                  const identity = creator.artistHandle || creator.name || "Creator";
+                  const tierLabel = creator.tier === "reserve" ? "Reserve witness" : creator.tier === "steward" ? "Steward witness" : "Witness";
+                  return (
+                    <Link key={creator.creatorId} href={`/creator/${creator.artistHandle || creator.creatorId}`} className="group rounded-2xl border border-[var(--ln-ash)] bg-[var(--ln-coal)] p-4 transition-[border-color,transform,box-shadow] hover:-translate-y-0.5 hover:border-[var(--ln-gold)]/45 hover:shadow-[0_12px_28px_rgba(0,0,0,0.24)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ln-gold)]/70 motion-reduce:transform-none motion-reduce:transition-none">
+                      <div className="flex items-start gap-3">
+                        <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center overflow-hidden rounded-full border border-[var(--ln-gold)]/25 bg-[var(--ln-void)]">
+                          {creator.profilePhotoUrl ? <img src={creator.profilePhotoUrl} alt="" className="h-full w-full object-cover" loading="lazy" decoding="async" /> : <span className="ln-subsection-header !text-[var(--ln-gold-hot)]">{identity.slice(0, 1).toUpperCase()}</span>}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <h3 className="ln-subsection-header truncate !text-[var(--ln-parchment)] group-hover:!text-[var(--ln-gold-hot)]">{identity}</h3>
+                          {creator.artistHandle && creator.name && creator.artistHandle !== creator.name && <p className="ln-caption truncate !text-[var(--ln-bone)]">{creator.name}</p>}
+                          <p className="ln-caption mt-1 line-clamp-2 !text-[var(--ln-smoke)]">{creator.bio || "Creator domain witnessed through the Living Nexus Registry."}</p>
+                        </div>
+                      </div>
+                      <div className="mt-4 flex items-center justify-between gap-3 border-t border-[var(--ln-ash)] pt-3">
+                        <span className="ln-mono rounded-full border border-[var(--ln-gold)]/25 bg-[var(--ln-gold)]/10 px-2 py-1 !text-[var(--ln-gold-hot)]">{tierLabel}</span>
+                        <span className="ln-caption !text-[var(--ln-smoke)]">Established {new Date(creator.witnessedAt).toLocaleDateString()}</span>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+          </section>
         )}
 
         {/* ── Witness Network Tab ── */}

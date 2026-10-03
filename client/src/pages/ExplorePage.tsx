@@ -707,21 +707,35 @@ function CreatorDirectoryCard({
           <span className="ln-caption ln-creator-card__ink ln-creator-card__supporting !text-[var(--ln-bone)]">{creator.publishedCount} published work{creator.publishedCount === 1 ? "" : "s"}</span>
           <div className="flex items-center gap-2">
             {canFollowCreator && (
-              <button
-                type="button"
-                onClick={() => onFollowToggle(creator.id, identity)}
-                disabled={followPending || hasManagedSubscription}
-                title={hasManagedSubscription ? "This creator is already held through a higher witness tier." : "Witness this creator to receive publication notices."}
-                className={`ln-creator-follow ln-creator-card__action inline-flex min-h-9 items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-60 ${
-                  followsByWitnessTier || hasManagedSubscription
-                    ? "ln-creator-follow--active"
-                    : "ln-creator-follow--idle"
-                }`}
-                aria-label={`${witnessLabel} ${identity}`}
-              >
-                {followPending ? <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" /> : followsByWitnessTier || hasManagedSubscription ? <UserCheck className="h-3 w-3" aria-hidden="true" /> : <UserPlus className="h-3 w-3" aria-hidden="true" />}
-                {witnessLabel}
-              </button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="inline-flex">
+                    <button
+                      type="button"
+                      onClick={() => onFollowToggle(creator.id, identity)}
+                      disabled={followPending || hasManagedSubscription}
+                      className={`ln-creator-follow ln-creator-card__action inline-flex min-h-9 items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-60 ${
+                        followsByWitnessTier || hasManagedSubscription
+                          ? "ln-creator-follow--active"
+                          : "ln-creator-follow--idle"
+                      }`}
+                      aria-label={`${witnessLabel} ${identity}`}
+                    >
+                      {followPending ? <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" /> : followsByWitnessTier || hasManagedSubscription ? <UserCheck className="h-3 w-3" aria-hidden="true" /> : <UserPlus className="h-3 w-3" aria-hidden="true" />}
+                      {witnessLabel}
+                    </button>
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent
+                  side="top"
+                  sideOffset={8}
+                  className="max-w-[16rem] text-xs leading-relaxed"
+                  style={{ background: "var(--ln-coal)", border: "1px solid var(--ln-gold-dim)", color: "var(--ln-parchment)" }}
+                >
+                  <p className="font-semibold">Witness a continuing creative record.</p>
+                  <p className="mt-1 opacity-80">Witnessing is not a social follow; it connects you to this creator’s future registered manifestations.</p>
+                </TooltipContent>
+              </Tooltip>
             )}
             <button
               type="button"

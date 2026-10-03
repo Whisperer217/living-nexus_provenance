@@ -17,6 +17,7 @@ describe("Explore creator witness and sorting contracts", () => {
   const activityRail = read("client/src/components/LivingContextRail.tsx");
   const archive = read("client/src/pages/ArchivePage.tsx");
   const domainEditor = read("client/src/components/domain/DomainEditor.tsx");
+  const profile = read("client/src/pages/ProfilePage.tsx");
 
   it("reuses the persisted witness subscription relationship with one bounded status query", () => {
     expect(subscriptionRouter).toContain("getSubscriptions: protectedProcedure");
@@ -32,7 +33,19 @@ describe("Explore creator witness and sorting contracts", () => {
   it("keeps reserve and steward witness tiers safe from the lightweight Witness toggle", () => {
     expect(explore).toContain('followTier === "witness" ? "Witnessing" : followTier ? "Witnessing" : "Witness"');
     expect(explore).toContain('followTier === "reserve" || followTier === "steward"');
-    expect(explore).toContain("Witness this creator to receive publication notices.");
+    expect(explore).toContain("Witness a continuing creative record.");
+  });
+
+  it("explains Witness at the Explore action and gives profile a subscription-backed directory", () => {
+    expect(explore).toContain("Witness a continuing creative record.");
+    expect(explore).toContain("Witnessing is not a social follow; it connects you to this creator’s future registered manifestations.");
+    expect(subscriptionRouter).toContain("myWitnessing: protectedProcedure");
+    expect(subscriptionRouter).toContain("getMyWitnessedCreators(ctx.user.id)");
+    expect(db).toContain("export async function getMyWitnessedCreators");
+    expect(db).toContain("innerJoin(users, eq(witnessSubscriptions.creatorId, users.id))");
+    expect(profile).toContain('id: "witnessing",      label: "Witnessing"');
+    expect(profile).toContain("trpc.witnessSubscription.myWitnessing.useQuery");
+    expect(profile).toContain("Creators whose future registered manifestations you have chosen to witness.");
   });
 
   it("uses canonical witness language across public relationship surfaces", () => {

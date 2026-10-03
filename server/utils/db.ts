@@ -5927,6 +5927,32 @@ export async function getWitnessSubscriptionsForCreators(witnessId: number, crea
     ));
 }
 
+/**
+ * Read the creator domains an authenticated user has chosen to witness.
+ * This is intentionally subscription-backed rather than derived from the
+ * legacy social witness network, so its tier reflects the current authority.
+ */
+export async function getMyWitnessedCreators(witnessId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db
+    .select({
+      creatorId: users.id,
+      name: users.name,
+      artistHandle: users.artistHandle,
+      bio: users.bio,
+      profilePhotoUrl: users.profilePhotoUrl,
+      bannerUrl: users.bannerUrl,
+      tier: witnessSubscriptions.tier,
+      witnessedAt: witnessSubscriptions.createdAt,
+      updatedAt: witnessSubscriptions.updatedAt,
+    })
+    .from(witnessSubscriptions)
+    .innerJoin(users, eq(witnessSubscriptions.creatorId, users.id))
+    .where(eq(witnessSubscriptions.witnessId, witnessId))
+    .orderBy(desc(witnessSubscriptions.updatedAt), asc(users.artistHandle));
+}
+
 /** Count how many subscribers (all tiers) a creator has in the Witness Subscription system. */
 export async function getSubscriberCount(creatorId: number): Promise<number> {
   const db = await getDb();

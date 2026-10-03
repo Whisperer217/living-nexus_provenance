@@ -149,6 +149,7 @@ import {
   witnessUnsubscribe,
   getWitnessSubscription,
   getWitnessSubscriptionsForCreators,
+  getMyWitnessedCreators,
   getSubscriberCount,
   publishToFeed,
   getWitnessArchive,
@@ -216,6 +217,10 @@ export const witnessSubscriptionRouter = router({
       .query(async ({ ctx, input }) => {
         return getWitnessSubscriptionsForCreators(ctx.user.id, input.creatorIds);
       }),
+    /** Read the authenticated user's subscription-backed Witnessing directory. */
+    myWitnessing: protectedProcedure.query(async ({ ctx }) => {
+      return getMyWitnessedCreators(ctx.user.id);
+    }),
     /** Public subscriber count for a creator */
     getCreatorSubscriberCount: publicProcedure
       .input(z.object({ creatorId: z.number().int().positive() }))
@@ -237,4 +242,3 @@ export const witnessSubscriptionRouter = router({
         return { items, total };
       }),
   });
-

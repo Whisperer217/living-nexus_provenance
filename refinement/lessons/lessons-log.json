@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-10-02T23:44:33.986Z",
-  "totalLessons": 50,
+  "lastUpdated": "2026-10-03T02:50:23.870Z",
+  "totalLessons": 51,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -1142,7 +1142,8 @@
         "responsive",
         "presentation-only"
       ],
-      "id": "LESSON-049"
+      "id": "LESSON-049",
+      "date": "2026-10-02"
     },
     {
       "problem": "Creator discovery needed stronger browse feedback, a domain-specific discovery prompt, and stable loading affordances without changing the public creator query or loading every creator Work.",
@@ -1160,7 +1161,31 @@
         "motion",
         "accessibility"
       ],
-      "id": "LESSON-050"
+      "id": "LESSON-050",
+      "date": "2026-10-02"
+    },
+    {
+      "date": "2026-10-02",
+      "category": "architecture",
+      "problem": "The Explore creator-card Witness action created a persisted subscription relationship without explaining that it preserves an ongoing relationship to a creator’s registered record. The profile command center also had no distinct view of those subscription-backed relationships.",
+      "solution": "Added a concise Explore tooltip distinguishing Witnessing from a social follow, a protected subscription-backed creator directory, and a dedicated Profile Witnessing tab. The tab is intentionally separate from the legacy Witness Network so the two relationship systems are not conflated.",
+      "files": [
+        "client/src/pages/ExplorePage.tsx",
+        "client/src/pages/ProfilePage.tsx",
+        "server/utils/db.ts",
+        "server/routers/witnessSubscription.ts",
+        "docs/lnls/architecture/WITNESS-TOOLTIP-AND-DIRECTORY-ADR.md"
+      ],
+      "score": 0,
+      "tags": [
+        "witnessing",
+        "creator-directory",
+        "profile",
+        "subscription",
+        "relationship-boundary",
+        "tooltip"
+      ],
+      "id": "LESSON-051"
     }
   ]
 }
