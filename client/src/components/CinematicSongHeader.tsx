@@ -16,9 +16,10 @@
 import { useRef, useState, useEffect, RefObject } from "react";
 import {
   Play, Pause, Music, ShieldCheck, Video, ImageIcon, BookOpen,
-  Heart, Share2, UserPlus, UserCheck, Plus, Check,
+  Heart, Share2, Plus, Check,
 } from "lucide-react";
 import { Link } from "wouter";
+import { WitnessSigil } from "@/components/icons/WitnessSigil";
 
 interface CinematicSongHeaderProps {
   // Song data
@@ -217,8 +218,8 @@ export function CinematicSongHeader({
             aria-label={isFollowing ? "Withdraw witness from creator" : "Witness creator"}
           >
             {isFollowing
-              ? <><UserCheck size={12} /> Witnessing</>
-              : <><UserPlus size={12} /> Witness</>}
+              ? <><WitnessSigil size={13} /> Witnessing</>
+              : <><WitnessSigil size={13} /> Witness</>}
           </button>
         )}
       </div>

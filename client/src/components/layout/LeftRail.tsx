@@ -19,6 +19,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 import { LOOP_PRODUCT, DISCORD_COMMUNITY_URL } from "@/lib/loopProduct";
 import { DiscordGlyph } from "@/components/icons/DiscordGlyph";
+import { WitnessSigil } from "@/components/icons/WitnessSigil";
 
 export type NavMode = "home" | "explore" | "upload" | "manage" | "archive";
 
@@ -195,6 +196,45 @@ export default function LeftRail({
 
       {/* Divider before companion tools */}
       <div className="w-8 h-px mt-2 mb-2" style={{ background: "var(--ln-border-subtle)" }} />
+
+      {/* Witnessing Circle — the signed-in person's private relationship directory. */}
+      {!!user && (
+        <button
+          type="button"
+          title="Witnessing Circle"
+          aria-label="Open Witnessing Circle"
+          onClick={(event) => {
+            event.stopPropagation();
+            navigate("/profile?tab=witnessing");
+            if (isMobile) onMobileClose?.();
+          }}
+          className="relative flex flex-col items-center justify-center gap-0.5 transition-all duration-150 rounded-xl"
+          style={{
+            width: isMobile ? 72 : 60,
+            height: 56,
+            color: location.startsWith("/profile?tab=witnessing") ? "var(--ln-gold)" : "var(--ln-text-muted)",
+            background: location.startsWith("/profile?tab=witnessing") ? "var(--ln-surface-rail-active)" : "transparent",
+            WebkitTapHighlightColor: "transparent",
+          }}
+          onMouseEnter={(event) => {
+            if (!location.startsWith("/profile?tab=witnessing")) {
+              (event.currentTarget as HTMLElement).style.color = "var(--ln-gold)";
+              (event.currentTarget as HTMLElement).style.background = "var(--ln-surface-rail-hover)";
+            }
+          }}
+          onMouseLeave={(event) => {
+            if (!location.startsWith("/profile?tab=witnessing")) {
+              (event.currentTarget as HTMLElement).style.color = "var(--ln-text-muted)";
+              (event.currentTarget as HTMLElement).style.background = "transparent";
+            }
+          }}
+        >
+          <WitnessSigil size={18} />
+          <span style={{ fontSize: 8, fontWeight: 600, letterSpacing: "0.04em", lineHeight: 1, textAlign: "center" }}>
+            WITNESSING
+          </span>
+        </button>
+      )}
 
       {/* Discord community */}
       <a

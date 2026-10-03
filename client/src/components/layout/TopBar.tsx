@@ -25,6 +25,7 @@ import NotificationBellDropdown from "@/components/NotificationBellDropdown";
 import { DISCORD_COMMUNITY_URL } from "@/lib/loopProduct";
 import { DiscordGlyph as SharedDiscordGlyph } from "@/components/icons/DiscordGlyph";
 import LivingNexusLauncher from "@/components/layout/LivingNexusLauncher";
+import { WitnessSigil } from "@/components/icons/WitnessSigil";
 
 const LOGO_URL =
   "/manus-storage/living-nexus-logo-2025_19c2d497.png";
@@ -611,6 +612,14 @@ export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCoun
                     style={{ color: "var(--ln-parchment)" }}
                   >
                     <User size={13} style={{ opacity: 0.6 }} /> Profile
+                  </button>
+                  <button
+                    onClick={() => { setAvatarMenuOpen(false); goTo("/profile?tab=witnessing"); }}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/[0.06] transition-colors text-left"
+                    style={{ color: "var(--ln-parchment)" }}
+                    title="Creators whose future registered manifestations you witness"
+                  >
+                    <WitnessSigil size={14} /> Witnessing Circle
                   </button>
                   <button
                     onClick={() => { setAvatarMenuOpen(false); goTo("/settings"); }}

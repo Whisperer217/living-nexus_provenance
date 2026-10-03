@@ -11,10 +11,11 @@ import {
   Search, RefreshCw, Shield, Music, Eye, Flame,
   Sparkles, Star, ChevronRight, ChevronLeft, LayoutList,
   FileText, Users, X, Lock, ArrowDownAZ, CalendarArrowDown, UserRound,
-  Play, FileAudio, File, Heart, Loader2, UserPlus, UserCheck,
+  Play, FileAudio, File, Heart, Loader2,
 } from "lucide-react";
 import { WorkListRow, type WorkListRowItem } from "@/components/WorkListRow";
 import { SupportCreatorDrawer, type SupportTarget } from "@/components/SupportCreatorDrawer";
+import { WitnessSigil } from "@/components/icons/WitnessSigil";
 import type { FeedRow } from "@shared/coreDataTypes";
 import { toast } from "sonner";
 import { usePlayer, type Track } from "@/contexts/PlayerContext";
@@ -700,7 +701,7 @@ function CreatorDirectoryCard({
               className="ln-creator-witness-badge mt-3"
               aria-label={`You are witnessing ${identity}`}
             >
-              <UserCheck className="h-3 w-3" aria-hidden="true" />
+              <WitnessSigil size={12} />
               Witnessing
             </span>
           )}
@@ -731,7 +732,7 @@ function CreatorDirectoryCard({
                       }`}
                       aria-label={`${witnessLabel} ${identity}`}
                     >
-                      {followPending ? <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" /> : followsByWitnessTier || hasManagedSubscription ? <UserCheck className="h-3 w-3" aria-hidden="true" /> : <UserPlus className="h-3 w-3" aria-hidden="true" />}
+                      {followPending ? <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" /> : <WitnessSigil size={13} />}
                       {witnessLabel}
                     </button>
                   </span>

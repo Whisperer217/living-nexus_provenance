@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { usePlayer } from "@/contexts/PlayerContext";
 import type { Track } from "@/contexts/PlayerContext";
+import { WitnessSigil } from "@/components/icons/WitnessSigil";
 
 function formatDuration(seconds: number | null | undefined): string {
   if (!seconds) return "0:00";
@@ -250,12 +251,12 @@ export default function CollectionPage() {
                 <Button
                   variant="outline"
                   onClick={() => toggleFollow.mutate({ collectionId: collection.id })}
-                  disabled={toggleFollow.isPending}
-                  className={following ? "border-amber-500 text-amber-500" : ""}
-                >
-                  <Heart className={`w-4 h-4 mr-1 ${following ? "fill-amber-500 text-amber-500" : ""}`} />
+                disabled={toggleFollow.isPending}
+                className={following ? "border-amber-500 text-amber-500" : ""}
+              >
+                  <WitnessSigil size={15} className="mr-1" />
                   {following ? "Witnessing" : "Witness"}
-                </Button>
+              </Button>
               )}
 
               {user && !isOwner && collection.isPublic && (

@@ -40,6 +40,7 @@ import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { Z } from "@/lib/viewportLayers";
 import { DISCORD_COMMUNITY_URL } from "@/lib/loopProduct";
 import { DiscordGlyph as SharedDiscordGlyph } from "@/components/icons/DiscordGlyph";
+import { WitnessSigil } from "@/components/icons/WitnessSigil";
 import { playbackDiag } from "@/lib/playbackDiag";
 
 const LOGO_URL = "/manus-storage/living-nexus-logo-2025_19c2d497.png";
@@ -236,6 +237,19 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
             aria-label="Compose"
           >
             <Sparkles size={18} />
+          </button>
+        )}
+
+        {/* Witnessing Circle — a direct mobile path to the existing profile directory. */}
+        {!!user && (
+          <button
+            onClick={() => navigate("/profile?tab=witnessing")}
+            className="flex items-center justify-center rounded-lg transition-all"
+            style={{ minWidth: 44, minHeight: 44, color: "var(--ln-gold)", WebkitTapHighlightColor: "transparent" }}
+            aria-label="Open Witnessing Circle"
+            title="Witnessing Circle"
+          >
+            <WitnessSigil size={18} />
           </button>
         )}
 

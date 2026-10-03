@@ -18,6 +18,12 @@ describe("Explore creator witness and sorting contracts", () => {
   const archive = read("client/src/pages/ArchivePage.tsx");
   const domainEditor = read("client/src/components/domain/DomainEditor.tsx");
   const profile = read("client/src/pages/ProfilePage.tsx");
+  const leftRail = read("client/src/components/layout/LeftRail.tsx");
+  const topBar = read("client/src/components/layout/TopBar.tsx");
+  const mobileShell = read("client/src/components/layout/MainLayout.tsx");
+  const loopCreator = read("client/src/pages/loop/LoopCreatorPage.tsx");
+  const creatorProfile = read("client/src/pages/CreatorProfilePage.tsx");
+  const witnessSigil = read("client/src/components/icons/WitnessSigil.tsx");
 
   it("reuses the persisted witness subscription relationship with one bounded status query", () => {
     expect(subscriptionRouter).toContain("getSubscriptions: protectedProcedure");
@@ -60,6 +66,20 @@ describe("Explore creator witness and sorting contracts", () => {
     expect(activityRail).toContain("witnessed the creator");
     expect(archive).toContain("witness tiers you hold with creators");
     expect(domainEditor).toContain("Witnesses and collaborators");
+  });
+
+  it("uses the shared Witness Sigil and one profile-backed Witnessing Circle path", () => {
+    expect(witnessSigil).toContain("The Living Nexus Witness Sigil");
+    expect(witnessSigil).toContain('viewBox="0 0 24 24"');
+    expect(explore).toContain('import { WitnessSigil } from "@/components/icons/WitnessSigil"');
+    expect(workHeader).toContain('<WitnessSigil size={13} />');
+    expect(loopCreator).toContain('<WitnessSigil size={16} />');
+    expect(creatorProfile).toContain('<WitnessSigil size={16} />');
+    expect(collection).toContain('<WitnessSigil size={15} className="mr-1" />');
+    expect(project).toContain('<WitnessSigil size={16} className="mr-1.5" />');
+    expect(leftRail).toContain('navigate("/profile?tab=witnessing")');
+    expect(topBar).toContain('goTo("/profile?tab=witnessing")');
+    expect(mobileShell).toContain('navigate("/profile?tab=witnessing")');
   });
 
   it("sorts the existing public creator projection by explicit public evidence", () => {

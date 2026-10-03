@@ -36,6 +36,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { QRShareModal } from "@/components/QRIdentityCard";
+import { WitnessSigil } from "@/components/icons/WitnessSigil";
 
 // ── Share Modal ──────────────────────────────────────────────────────────────────
 
@@ -1830,8 +1831,8 @@ export default function ProjectPage() {
                     }`}
                   >
                     {followStatus?.isFollowing
-                      ? <><BellOff className="w-4 h-4 mr-1.5" /> Witnessing</>
-                      : <><Bell className="w-4 h-4 mr-1.5" /> Witness</>}
+                      ? <><WitnessSigil size={16} className="mr-1.5" /> Witnessing</>
+                      : <><WitnessSigil size={16} className="mr-1.5" /> Witness</>}
                   </Button>
                 )}
               </div>
@@ -2099,8 +2100,8 @@ export default function ProjectPage() {
                   }`}
                 >
                   {followStatus?.isFollowing
-                      ? <><BellOff className="w-3.5 h-3.5 mr-1" /> Witnessing</>
-                      : <><Bell className="w-3.5 h-3.5 mr-1" /> Witness</>}
+                      ? <><WitnessSigil size={14} className="mr-1" /> Witnessing</>
+                      : <><WitnessSigil size={14} className="mr-1" /> Witness</>}
                 </Button>
               )}
               <Button

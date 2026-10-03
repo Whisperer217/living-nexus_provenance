@@ -33,6 +33,7 @@ import { CreatorIdentityStrip } from "@/components/CreatorIdentityStrip";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { useWorkEditorActions } from "@/contexts/WorkEditorContext";
 import { SacredCanvas } from "@/components/SacredCanvas";
+import { WitnessSigil } from "@/components/icons/WitnessSigil";
 const LOGO_URL = "/manus-storage/living-nexus-logo-2025_19c2d497.png";
 
 /* ── Editable inline field ─────────────────────────────────────── */
@@ -2188,7 +2189,7 @@ export default function ProfilePage() {
           <section className="space-y-5" aria-labelledby="profile-witnessing-heading">
             <div className="flex items-center gap-3 border-b border-[var(--ln-gold)]/15 pb-4">
               <div className="flex h-10 w-10 items-center justify-center rounded-full border border-[var(--ln-gold)]/30 bg-[var(--ln-gold)]/10">
-                <Eye size={17} style={{ color: "var(--ln-gold-hot)" }} aria-hidden="true" />
+                <WitnessSigil size={18} />
               </div>
               <div>
                 <p className="ln-overline !text-[var(--ln-gold-hot)]">Creator relationships</p>
@@ -2203,7 +2204,7 @@ export default function ProfilePage() {
               </div>
             ) : myWitnessing.length === 0 ? (
               <div className="rounded-2xl border border-dashed border-[var(--ln-gold)]/25 bg-[var(--ln-coal)] px-6 py-12 text-center">
-                <Eye className="mx-auto mb-3 h-7 w-7" style={{ color: "var(--ln-gold-dim)" }} aria-hidden="true" />
+                <WitnessSigil size={28} className="mx-auto mb-3" />
                 <h3 className="ln-subsection-header !text-[var(--ln-parchment)]">No creators witnessed yet</h3>
                 <p className="ln-caption mx-auto mt-2 max-w-md !text-[var(--ln-bone)]">Witnessing acknowledges a creator’s continuing record and connects you to future registered manifestations.</p>
                 <Link href="/explore?view=creators" className="mt-5 inline-flex min-h-10 items-center rounded-lg border border-[var(--ln-gold)]/35 bg-[var(--ln-gold)]/10 px-4 py-2 text-sm font-medium text-[var(--ln-parchment)] transition-colors hover:border-[var(--ln-gold-hot)]/65 hover:bg-[var(--ln-gold)]/20">

@@ -21,8 +21,6 @@ import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { toast } from "sonner";
 import {
-  UserPlus,
-  UserCheck,
   MessageSquare,
   Globe,
   Twitter,
@@ -38,6 +36,7 @@ import {
   ChevronRight,
   Fingerprint,
 } from "lucide-react";
+import { WitnessSigil } from "@/components/icons/WitnessSigil";
 
 interface IdentityColumnProps {
   creatorId: number | null;
@@ -285,7 +284,7 @@ export function IdentityColumn({
               letterSpacing: "0.06em",
             }}
           >
-            {isFollowing ? <><UserCheck size={12} /> Witnessing</> : <><UserPlus size={12} /> Witness</>}
+            {isFollowing ? <><WitnessSigil size={13} /> Witnessing</> : <><WitnessSigil size={13} /> Witness</>}
           </button>
           <button
             type="button"

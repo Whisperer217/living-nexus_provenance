@@ -14,8 +14,6 @@ import {
   QrCode,
   Settings,
   Share2,
-  UserPlus,
-  UserCheck,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -25,6 +23,7 @@ import { DomainEditor } from "@/components/domain/DomainEditor";
 import { DomainRenderer } from "@/components/domain/DomainRenderer";
 import { SupportCreatorDrawer } from "@/components/SupportCreatorDrawer";
 import { QRShareModal } from "@/components/QRIdentityCard";
+import { WitnessSigil } from "@/components/icons/WitnessSigil";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { useHarmonicSignature } from "@/hooks/useHarmonicSignature";
 import { LOOP_PRODUCT } from "@/lib/loopProduct";
@@ -337,7 +336,7 @@ export default function LoopCreatorPage() {
                   background: "rgba(0,0,0,0.35)",
                 }}
               >
-                {isWitnessing ? <UserCheck size={15} /> : <UserPlus size={15} />}
+                <WitnessSigil size={16} />
                 {isWitnessing ? "Witnessing" : "Witness"}
               </button>
             )}

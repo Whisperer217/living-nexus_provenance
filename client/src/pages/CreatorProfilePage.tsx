@@ -47,6 +47,7 @@ import { CreatorDomainHub } from "@/components/CreatorDomainHub";
 import { SupportCreatorDrawer } from "@/components/SupportCreatorDrawer";
 import { PlatformHubDisplay } from "@/components/PlatformHubDisplay";
 import { PlatformHubEditor } from "@/components/PlatformHubEditor";
+import { WitnessSigil } from "@/components/icons/WitnessSigil";
 
 // ─── Context Menu ─────────────────────────────────────────────────────────────
 interface ContextMenuProps {
@@ -1437,7 +1438,7 @@ export default function CreatorProfilePage() {
                       }
                       title={isWitnessingCreator ? "Remove witness" : "Witness this creator"}
                     >
-                      {isWitnessingCreator ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      <WitnessSigil size={16} />
                     </button>
                   )}
                   {/* Witness Subscription button — desktop */}
@@ -1451,7 +1452,7 @@ export default function CreatorProfilePage() {
                           style={{ background: "rgba(99,102,241,0.12)", border: "1px solid rgba(99,102,241,0.35)", color: "#a5b4fc" }}
                           title={`Witnessing as ${mySubscription.tier} — click to withdraw witness`}
                         >
-                          <Bell className="w-3 h-3" />
+                          <WitnessSigil size={13} />
                           {mySubscription.tier === "witness" ? "Witnessing" : mySubscription.tier === "reserve" ? "Reserve witness" : "Steward witness"}
                         </button>
                       ) : (
@@ -1462,7 +1463,7 @@ export default function CreatorProfilePage() {
                             style={{ background: "rgba(99,102,241,0.08)", border: "1px solid rgba(99,102,241,0.2)", color: "var(--ln-smoke)" }}
                             title="Establish a witness relationship with this creator"
                           >
-                            <BellPlus className="w-3 h-3" />
+                            <WitnessSigil size={13} />
                             Establish witness
                           </button>
                           {showSubscribeTierMenu && (
@@ -1766,7 +1767,7 @@ export default function CreatorProfilePage() {
                     }
                     title={isWitnessingCreator ? "Remove witness" : "Witness this creator"}
                   >
-                    {isWitnessingCreator ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    <WitnessSigil size={16} />
                   </button>
                 )}
                 {/* Witness Subscription button — mobile */}
@@ -1779,7 +1780,7 @@ export default function CreatorProfilePage() {
                       style={{ background: "rgba(99,102,241,0.12)", border: "1px solid rgba(99,102,241,0.35)", color: "#a5b4fc" }}
                       title={`Witnessing as ${mySubscription.tier} — click to withdraw witness`}
                     >
-                      <Bell className="w-3 h-3" />
+                      <WitnessSigil size={13} />
                       {mySubscription.tier === "witness" ? "Witnessing" : mySubscription.tier === "reserve" ? "Reserve witness" : "Steward witness"}
                     </button>
                   ) : (
@@ -1792,7 +1793,7 @@ export default function CreatorProfilePage() {
                           className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs transition-all"
                           style={{ background: "rgba(99,102,241,0.08)", border: "1px solid rgba(99,102,241,0.2)", color: "var(--ln-smoke)" }}
                         >
-                          <BellPlus className="w-3 h-3" />
+                          <WitnessSigil size={13} />
                           {tier === "witness" ? "Witness" : tier === "reserve" ? "Reserve" : "Steward"}
                         </button>
                       ))}
