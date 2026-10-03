@@ -4110,6 +4110,23 @@ h1, h2, h3, h4, h5, h6,
   color: var(--ln-gold);
 }
 
+/* Explore creator directory — creator-owned banners remain atmospheric while
+   identity and testimony retain a predictable high-contrast reading field. */
+.ln-creator-card__veil {
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--ln-coal) 64%, transparent) 0%,
+    color-mix(in srgb, var(--ln-coal) 72%, transparent) 54%,
+    var(--ln-coal) 100%
+  );
+}
+
+.ln-creator-card__ink {
+  text-shadow:
+    0 1px 2px color-mix(in srgb, var(--ln-coal) 94%, transparent),
+    0 0 10px color-mix(in srgb, var(--ln-coal) 86%, transparent);
+}
+
 /* Pull quote — large editorial quote, creator testimony */
 .ln-pull-quote {
   font-family: 'Cormorant Garamond', serif;

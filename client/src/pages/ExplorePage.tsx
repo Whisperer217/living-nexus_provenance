@@ -667,7 +667,7 @@ function CreatorDirectoryCard({
       )}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/5 via-black/30 to-[var(--ln-coal)]/95"
+        className="ln-creator-card__veil pointer-events-none absolute inset-0"
       />
       <div className="relative z-10 flex h-full min-h-0 flex-col p-5 sm:p-6">
         <Link href={`/creator/${routeIdentity}`} className="flex min-h-0 flex-1 flex-col rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--gold)]/75">
@@ -689,22 +689,22 @@ function CreatorDirectoryCard({
               <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full border border-[var(--gold)]/20 bg-[var(--void-2)]"><Users className="h-5 w-5 text-[var(--stone-shadow)]" /></div>
             )}
             <div className="min-w-0 flex-1">
-              <h2 className="ln-subsection-header truncate text-[var(--ln-parchment)] transition-colors group-hover:text-[var(--gold-hot)]" title={identity}>{identity}</h2>
-              <p className="ln-mono mt-0.5 truncate text-[var(--ln-bone)]">{handleLabel}</p>
+              <h2 className="ln-subsection-header ln-creator-card__ink truncate text-[var(--ln-parchment)] transition-colors group-hover:text-[var(--gold-hot)]" title={identity}>{identity}</h2>
+              <p className="ln-mono ln-creator-card__ink mt-0.5 truncate !text-[var(--ln-gold-hot)]">{handleLabel}</p>
             </div>
-            <ChevronRight className="h-4 w-4 flex-shrink-0 text-[var(--ln-bone)] transition-transform group-hover:translate-x-0.5 group-hover:text-[var(--gold)]" aria-hidden="true" />
+            <ChevronRight className="ln-creator-card__ink h-4 w-4 flex-shrink-0 text-[var(--ln-bone)] transition-transform group-hover:translate-x-0.5 group-hover:text-[var(--gold)]" aria-hidden="true" />
           </div>
           {creator.bio ? (
             <div className="mt-5">
-              <p className="ln-overline text-[var(--gold-hot)]">Creator statement</p>
-              <p className="ln-editorial mt-1 line-clamp-3 text-[var(--ln-bone)]">{creator.bio}</p>
+              <p className="ln-overline ln-creator-card__ink !text-[var(--ln-gold-hot)]">Creator statement</p>
+              <p className="ln-editorial ln-creator-card__ink mt-1 line-clamp-3 !text-[var(--ln-parchment)]">{creator.bio}</p>
             </div>
           ) : (
-            <p className="ln-caption mt-5 line-clamp-3 text-[var(--ln-bone)]">Explore this creator’s registered works and provenance record.</p>
+            <p className="ln-caption ln-creator-card__ink mt-5 line-clamp-3 !text-[var(--ln-bone)]">Explore this creator’s registered works and provenance record.</p>
           )}
         </Link>
         <div className="mt-4 flex items-center justify-between gap-3 border-t border-white/15 pt-3">
-          <span className="ln-caption text-[var(--ln-bone)]">{creator.publishedCount} published work{creator.publishedCount === 1 ? "" : "s"}</span>
+          <span className="ln-caption ln-creator-card__ink !text-[var(--ln-bone)]">{creator.publishedCount} published work{creator.publishedCount === 1 ? "" : "s"}</span>
           <div className="flex items-center gap-2">
             {canFollowCreator && (
               <button

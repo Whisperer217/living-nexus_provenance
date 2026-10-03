@@ -26,8 +26,10 @@ describe("Explore creator presence contract", () => {
 
   it("keeps directory cards geometrically stable while preserving creator statements and anchored actions", () => {
     expect(exploreSource).toContain("aspect-[5/4] min-h-72");
-    expect(exploreSource).toContain("bg-gradient-to-b from-black/5 via-black/30 to-[var(--ln-coal)]/95");
-    expect(exploreSource).toContain("line-clamp-3 text-[var(--ln-bone)]");
+    expect(exploreSource).toContain("ln-creator-card__veil");
+    expect(exploreSource).toContain("ln-creator-card__ink");
+    expect(exploreSource).toContain("line-clamp-3 !text-[var(--ln-parchment)]");
+    expect(exploreSource).toContain("!text-[var(--ln-gold-hot)]");
     expect(exploreSource).toContain("flex h-full min-h-0 flex-col");
     expect(exploreSource).toContain("mt-4 flex items-center justify-between");
   });

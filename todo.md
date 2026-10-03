@@ -106,10 +106,10 @@
 - [x] 0 TypeScript errors, 324/324 tests passing
 
 ## Phase 9: Audio Player Fix
-- [ ] Audit PlayerContext addAndPlay, player bar metadata display, DiscoverPage/ExplorePage click handlers
-- [ ] Fix addAndPlay so clicking a track card loads it into the bottom player bar and starts playing
-- [ ] Player bar must show track title, artist name, and cover art
-- [ ] Active track card shows animated waveform instead of play button
+- [x] Audit PlayerContext addAndPlay, player bar metadata display, DiscoverPage/ExplorePage click handlers
+- [x] Fix addAndPlay so clicking a track card loads it into the bottom player bar and starts playing
+- [x] Player bar must show track title, artist name, and cover art
+- [x] Active track card shows animated waveform instead of play button
 
 ## Phase 10: OAuth Login Fix
 - [x] Fix redirectUri so ?code= lands on /api/oauth/callback not /?code=
