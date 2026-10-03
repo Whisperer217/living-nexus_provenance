@@ -112,7 +112,7 @@ export default function LeftRail({
           ? () => handleMobileClick(path, authRequired)
           : (e) => handleDesktopClick(e as React.MouseEvent, id)
         }
-        className="relative flex flex-col items-center justify-center gap-0.5 transition-all duration-150 rounded-xl"
+        className="ln-dimensional-action relative flex flex-col items-center justify-center gap-0.5 transition-all duration-150 rounded-xl"
         style={{
           width: isMobile ? 72 : 60,
           height: 56,
@@ -208,7 +208,7 @@ export default function LeftRail({
             window.dispatchEvent(new Event("ln:open-witnessing-circle"));
             if (isMobile) onMobileClose?.();
           }}
-          className="ln-witness-sigil-trigger relative flex flex-col items-center justify-center gap-0.5 transition-all duration-150 rounded-xl"
+          className="ln-dimensional-action ln-witness-sigil-trigger relative flex flex-col items-center justify-center gap-0.5 transition-all duration-150 rounded-xl"
           style={{
             width: isMobile ? 72 : 60,
             height: 56,

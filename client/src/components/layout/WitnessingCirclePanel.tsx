@@ -13,6 +13,7 @@ type WitnessedCreator = {
   tier: "witness" | "reserve" | "steward";
   witnessedAt: Date | string;
   updatedAt: Date | string;
+  latestPublishedAt: Date | string | null;
 };
 
 type CircleOrder = "recent" | "name";
@@ -21,6 +22,13 @@ function tierLabel(tier: WitnessedCreator["tier"]) {
   if (tier === "reserve") return "Reserve witness";
   if (tier === "steward") return "Steward witness";
   return "Witness";
+}
+
+function hasRecentPublication(publishedAt: WitnessedCreator["latestPublishedAt"]) {
+  if (!publishedAt) return false;
+  const publishedTime = new Date(publishedAt).getTime();
+  const fourteenDays = 14 * 24 * 60 * 60 * 1000;
+  return Number.isFinite(publishedTime) && publishedTime >= Date.now() - fourteenDays;
 }
 
 export function WitnessingCirclePanel({ open, onClose }: { open: boolean; onClose: () => void }) {
@@ -122,13 +130,17 @@ export function WitnessingCirclePanel({ open, onClose }: { open: boolean; onClos
           ) : (
             visibleCreators.map((creator) => {
               const identity = creator.artistHandle || creator.name || "Creator";
+              const recentlyPublished = hasRecentPublication(creator.latestPublishedAt);
               return (
                 <button key={creator.creatorId} type="button" className="ln-witnessing-circle__creator" onClick={() => openCreator(creator)}>
                   <span className="ln-witnessing-circle__avatar">
                     {creator.profilePhotoUrl ? <img src={creator.profilePhotoUrl} alt="" /> : identity.slice(0, 1).toUpperCase()}
                   </span>
                   <span className="min-w-0 flex-1 text-left">
-                    <span className="ln-witnessing-circle__identity">{identity}</span>
+                    <span className="ln-witnessing-circle__identity-row">
+                      <span className="ln-witnessing-circle__identity">{identity}</span>
+                      {recentlyPublished && <span className="ln-witnessing-circle__publication" aria-label={`${identity} has published recently`}><span aria-hidden="true" />New work</span>}
+                    </span>
                     {creator.artistHandle && creator.name && creator.artistHandle !== creator.name && <span className="ln-witnessing-circle__name">{creator.name}</span>}
                     <span className="ln-witnessing-circle__bio">{creator.bio || "Creator domain witnessed through the Living Nexus Registry."}</span>
                     <span className="ln-witnessing-circle__meta">{tierLabel(creator.tier)} · established {new Date(creator.witnessedAt).toLocaleDateString()}</span>

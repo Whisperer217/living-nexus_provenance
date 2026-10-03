@@ -97,6 +97,27 @@ function SectionDivider() {
   return <div style={{ height: 1, background: "rgba(196,154,40,0.08)", margin: "1.25rem 0" }} />;
 }
 
+function relativeVoiceTime(value: Date | string) {
+  const timestamp = new Date(value).getTime();
+  if (!Number.isFinite(timestamp)) return "Recorded date unavailable";
+  const elapsedSeconds = Math.max(0, Math.floor((Date.now() - timestamp) / 1000));
+  if (elapsedSeconds < 45) return "just now";
+  const units = [
+    [365 * 24 * 60 * 60, "year"],
+    [30 * 24 * 60 * 60, "month"],
+    [7 * 24 * 60 * 60, "week"],
+    [24 * 60 * 60, "day"],
+    [60 * 60, "hour"],
+    [60, "minute"],
+  ] as const;
+  for (const [seconds, label] of units) {
+    if (elapsedSeconds >= seconds) {
+      const amount = Math.floor(elapsedSeconds / seconds);
+      return `${amount} ${label}${amount === 1 ? "" : "s"} ago`;
+    }
+  }
+  return "just now";
+}
 function MetaRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
     <div className="flex items-start gap-2.5">
@@ -821,15 +842,15 @@ export function ExperienceColumn({
               (comments as any[]).map((c: any) => {
                 const isReplying = replyingTo?.id === c.id;
                 return (
-                  <div key={c.id} className="rounded-xl px-4 py-3" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(196,154,40,0.08)" }}>
+                  <div key={c.id} className="ln-dimensional-card ln-voice-comment rounded-xl px-4 py-3" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(196,154,40,0.08)" }}>
                     <div className="flex gap-2.5">
-                      <div className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-[11px] font-bold" style={{ background: "var(--ln-coal)" }}>
-                        <span style={{ color: "var(--ln-iron)" }}>{(c.authorName || "A").charAt(0).toUpperCase()}</span>
+                      <div className="ln-voice-comment__avatar w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden text-[11px] font-bold" style={{ background: "var(--ln-coal)" }}>
+                        {c.avatarUrl ? <img src={c.avatarUrl} alt="" className="h-full w-full object-cover" loading="lazy" decoding="async" /> : <span style={{ color: "var(--ln-iron)" }}>{(c.authorName || "A").charAt(0).toUpperCase()}</span>}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
                           <span className="text-xs font-medium" style={{ color: "var(--ln-smoke)" }}>{c.authorName || "Anonymous"}</span>
-                          <span className="text-[9px] ml-auto" style={{ color: "var(--ln-iron)" }}>{new Date(c.createdAt).toLocaleDateString()}</span>
+                          <time className="text-[9px] ml-auto" dateTime={new Date(c.createdAt).toISOString()} title={new Date(c.createdAt).toLocaleString()} style={{ color: "var(--ln-iron)" }}>{relativeVoiceTime(c.createdAt)}</time>
                         </div>
                         <p className="text-sm leading-relaxed" style={{ color: "var(--ln-bone)" }}>{c.content}</p>
                         <div className="flex items-center gap-3 mt-2">
@@ -893,13 +914,13 @@ export function ExperienceColumn({
                       <div className="ml-9 mt-2 space-y-2 pl-3" style={{ borderLeft: "1px solid rgba(196,154,40,0.15)" }}>
                         {(c.replies as any[]).map((r: any) => (
                           <div key={r.id} className="flex gap-2">
-                            <div className="w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center text-[10px] font-bold" style={{ background: "var(--ln-coal)" }}>
-                              <span style={{ color: "var(--ln-iron)" }}>{(r.authorName || "A").charAt(0).toUpperCase()}</span>
+                            <div className="ln-voice-comment__avatar w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden text-[10px] font-bold" style={{ background: "var(--ln-coal)" }}>
+                              {r.avatarUrl ? <img src={r.avatarUrl} alt="" className="h-full w-full object-cover" loading="lazy" decoding="async" /> : <span style={{ color: "var(--ln-iron)" }}>{(r.authorName || "A").charAt(0).toUpperCase()}</span>}
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 mb-0.5">
                                 <span className="text-[11px] font-medium" style={{ color: "var(--ln-smoke)" }}>{r.authorName || "Anonymous"}</span>
-                                <span className="text-[9px] ml-auto" style={{ color: "var(--ln-iron)" }}>{new Date(r.createdAt).toLocaleDateString()}</span>
+                                <time className="text-[9px] ml-auto" dateTime={new Date(r.createdAt).toISOString()} title={new Date(r.createdAt).toLocaleString()} style={{ color: "var(--ln-iron)" }}>{relativeVoiceTime(r.createdAt)}</time>
                               </div>
                               <p className="text-xs leading-relaxed" style={{ color: "var(--ln-smoke)" }}>{r.content}</p>
                             </div>

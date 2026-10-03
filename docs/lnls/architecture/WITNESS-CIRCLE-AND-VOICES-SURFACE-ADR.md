@@ -7,7 +7,9 @@
 
 Living Nexus will surface the existing creator-witness relationship as an immediately available **Witnessing Circle** side panel. The panel is a convenience view over the canonical `witnessSubscriptions` record. It does not introduce a parallel social graph, a new subscription type, or a replacement for the full Profile → Witnessing directory.
 
-Track commentary is presented as **Voices**: a visible, counted part of a Work’s living record. The existing comments and replies procedure remains canonical. The artifact header receives the live count and a direct path to the Voices section; no duplicate activity feed or comment store is created.
+Track commentary is presented as **Voices**: a visible, counted part of a Work’s living record. The existing comments and replies procedure remains canonical. The live `/song/:id` route exposes a direct Voices action and a persistent threaded Voices section; no duplicate activity feed or comment store is created.
+
+The canonical public Work route is `client/src/pages/loop/LoopWorkPage.tsx` at `/song/:id`. Legacy `SongDetailPage` and `ExperienceColumn` components are not the canonical public music route and must not be treated as evidence that comments are visible on `/song/:id`.
 
 A reusable dimensional-field treatment is added as a restrained platform grammar: layered surface, inset edge, light elevation, focus glow, and reduced-motion-safe transitions. It is first used for the Witnessing Circle search field and the Voices composer. It is not a blanket box-shadow retrofit.
 

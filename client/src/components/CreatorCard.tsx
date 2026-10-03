@@ -189,7 +189,7 @@ export function CreatorCard({
       {active && creator && (
         <div
           ref={cardRef}
-          className="absolute z-50 rounded-xl shadow-2xl animate-in fade-in slide-in-from-bottom-2 duration-200 overflow-hidden"
+          className="ln-dimensional-card absolute z-50 rounded-xl shadow-2xl animate-in fade-in slide-in-from-bottom-2 duration-200 overflow-hidden"
           style={{
             ...cardStyle,
             background: "linear-gradient(160deg, #0f0c06 0%, #1c1508 60%, #0d0b07 100%)",

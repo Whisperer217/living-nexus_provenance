@@ -463,7 +463,7 @@ export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCoun
             href={DISCORD_COMMUNITY_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-all no-underline"
+            className="ln-dimensional-action flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-all no-underline"
             style={{
               fontSize: "clamp(9px, 0.7vw, 11px)",
               fontFamily: "var(--font-display)",
@@ -498,7 +498,7 @@ export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCoun
                 window.location.assign(getLoginUrl("/pna"));
               }
             }}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-all"
+            className="ln-dimensional-action flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-all"
             style={{
               fontSize: "clamp(9px, 0.7vw, 11px)",
               fontFamily: "'Cinzel', serif",
@@ -531,7 +531,7 @@ export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCoun
                 window.location.assign(getLoginUrl("/manifest"));
               }
             }}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-all"
+            className="ln-dimensional-action flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-all"
             style={{
               fontSize: "clamp(9px, 0.7vw, 11px)",
               fontWeight: 700,

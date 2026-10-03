@@ -208,7 +208,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         {/* Hamburger — toggles LeftRail mobile state only */}
         <button
           onClick={mobileMenuOpen ? closeMobileMenu : openMobileMenu}
-          className="p-2 rounded-lg transition-all"
+          className="ln-dimensional-action p-2 rounded-lg transition-all"
           style={{ color: "var(--ln-text-muted)", WebkitTapHighlightColor: "transparent" }}
           aria-label={mobileMenuOpen ? "Close navigation" : "Open navigation"}
           aria-expanded={mobileMenuOpen}
@@ -228,7 +228,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           href={DISCORD_COMMUNITY_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center justify-center rounded-lg transition-all"
+          className="ln-dimensional-action flex items-center justify-center rounded-lg transition-all"
           style={{ minWidth: 44, minHeight: 44, color: "var(--ln-gold)", WebkitTapHighlightColor: "transparent" }}
           aria-label="Join Discord"
           title="Join Living Nexus on Discord"
@@ -240,7 +240,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         {!!user && (
           <button
             onClick={() => navigate("/keeper-compose")}
-            className="flex items-center justify-center rounded-lg transition-all"
+            className="ln-dimensional-action flex items-center justify-center rounded-lg transition-all"
             style={{ minWidth: 44, minHeight: 44, color: "var(--ln-text-muted)", WebkitTapHighlightColor: "transparent" }}
             aria-label="Compose"
           >
@@ -252,7 +252,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         {!!user && (
           <button
             onClick={() => setWitnessingCircleOpen(true)}
-            className="ln-witness-sigil-trigger flex items-center justify-center rounded-lg transition-all"
+            className="ln-dimensional-action ln-witness-sigil-trigger flex items-center justify-center rounded-lg transition-all"
             style={{ minWidth: 44, minHeight: 44, color: "var(--ln-gold)", WebkitTapHighlightColor: "transparent" }}
             aria-label="Open Witnessing Circle"
             title="Witnessing Circle"
@@ -271,7 +271,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         {!!user && (
           <button
             onClick={() => navigate("/notifications")}
-            className="relative flex items-center justify-center rounded-lg transition-all"
+            className="ln-dimensional-action relative flex items-center justify-center rounded-lg transition-all"
             style={{ minWidth: 44, minHeight: 44, color: "var(--ln-text-muted)", WebkitTapHighlightColor: "transparent" }}
             aria-label="Notifications"
           >

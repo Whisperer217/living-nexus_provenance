@@ -651,7 +651,7 @@ function CreatorDirectoryCard({
   }, [creator.bannerUrl, creator.profilePhotoUrl]);
 
   return (
-    <article className="group relative aspect-[5/4] min-h-72 min-w-0 overflow-hidden rounded-2xl border border-white/8 bg-[var(--void-3)] transition-[transform,border-color,box-shadow] duration-300 ease-out hover:-translate-y-0.5 hover:scale-[1.012] hover:border-[var(--gold)]/35 hover:shadow-[0_16px_36px_rgba(0,0,0,0.28)] focus-within:ring-2 focus-within:ring-[var(--gold)]/45 motion-reduce:transform-none motion-reduce:transition-none">
+    <article className="ln-dimensional-card group relative aspect-[5/4] min-h-72 min-w-0 overflow-hidden rounded-2xl border border-white/8 bg-[var(--void-3)] transition-[transform,border-color,box-shadow] duration-300 ease-out hover:-translate-y-0.5 hover:scale-[1.012] hover:border-[var(--gold)]/35 hover:shadow-[0_16px_36px_rgba(0,0,0,0.28)] focus-within:ring-2 focus-within:ring-[var(--gold)]/45 motion-reduce:transform-none motion-reduce:transition-none">
       {creator.bannerUrl && !bannerFailed && (
         <img
           src={creator.bannerUrl}

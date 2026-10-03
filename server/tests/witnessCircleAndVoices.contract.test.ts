@@ -12,6 +12,8 @@ describe("Witnessing Circle and artifact Voices contracts", () => {
   const detail = read("client/src/pages/SongDetailPage.tsx");
   const header = read("client/src/components/CinematicSongHeader.tsx");
   const experience = read("client/src/components/ExperienceColumn.tsx");
+  const creatorDirectory = read("client/src/pages/ExplorePage.tsx");
+  const witnessedCreators = read("server/utils/db.ts");
   const css = read("client/src/index.css");
 
   it("opens one subscription-backed Witnessing Circle from global navigation", () => {
@@ -41,5 +43,29 @@ describe("Witnessing Circle and artifact Voices contracts", () => {
     expect(experience).toContain('title="Voices"');
     expect(experience).toContain("Conversation held in the living record of this Work.");
     expect(experience).toContain("ln-dimensional-field");
+  });
+
+  it("shows resolved comment identities and relative time within the canonical Voices surface", () => {
+    expect(experience).toContain("function relativeVoiceTime");
+    expect(experience).toContain("c.avatarUrl ? <img");
+    expect(experience).toContain("r.avatarUrl ? <img");
+    expect(experience).toContain("relativeVoiceTime(c.createdAt)");
+    expect(experience).toContain("relativeVoiceTime(r.createdAt)");
+    expect(experience).toContain("ln-voice-comment__avatar");
+  });
+
+  it("derives recent publication indicators from the canonical publication feed", () => {
+    expect(witnessedCreators).toContain("latestPublishedAt");
+    expect(witnessedCreators).toContain("creatorPublicationFeed.publishedAt");
+    expect(circle).toContain("function hasRecentPublication");
+    expect(circle).toContain("New work");
+    expect(circle).toContain("ln-witnessing-circle__publication");
+  });
+
+  it("uses the shared dimensional grammar for creator cards and global navigation actions", () => {
+    expect(creatorDirectory).toContain("ln-dimensional-card group relative aspect-[5/4]");
+    expect(css).toContain(".ln-dimensional-card");
+    expect(css).toContain(".ln-dimensional-action");
+    expect(css).toContain(".ln-voice-comment");
   });
 });

@@ -4,7 +4,7 @@
    Every work is displayed with intention.
 ═══════════════════════════════════════════════════════════════════ */
 import { useState, useCallback } from "react";
-import { Play, Pause, Shield, BookOpen, ListPlus, Heart, Headphones, FileText, Image, Gamepad2, Code2, Music } from "lucide-react";
+import { Play, Pause, Shield, BookOpen, ListPlus, Heart, Headphones, FileText, Image, Gamepad2, Code2, Music, MessageSquare } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { usePlayer, type Track, type QueueContext } from "@/contexts/PlayerContext";
 import { useLike } from "../hooks/useLike";
@@ -296,6 +296,15 @@ export function WorkListRow({ item, index, prefetchedLiked, prefetchedLikeCount,
 
         {/* Actions */}
         <div className="flex items-center gap-1 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+          <Link
+            to={`/song/${song.id}#voices`}
+            onClick={(e) => e.stopPropagation()}
+            aria-label={`Open Voices for ${song.title}`}
+            title="Open Voices conversation"
+            className="rounded-lg p-1.5 text-[var(--ln-gold)] transition-colors hover:bg-[var(--gold)]/10 hover:text-[var(--stone-light)]"
+          >
+            <MessageSquare className="h-3.5 w-3.5" />
+          </Link>
           {/* Like */}
           <button
             onClick={(e) => { e.stopPropagation(); toggleLike(); }}

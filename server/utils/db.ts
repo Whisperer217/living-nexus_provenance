@@ -5946,6 +5946,12 @@ export async function getMyWitnessedCreators(witnessId: number) {
       tier: witnessSubscriptions.tier,
       witnessedAt: witnessSubscriptions.createdAt,
       updatedAt: witnessSubscriptions.updatedAt,
+      latestPublishedAt: sql<Date | null>`(
+        SELECT MAX(${creatorPublicationFeed.publishedAt})
+        FROM ${creatorPublicationFeed}
+        WHERE ${creatorPublicationFeed.creatorId} = ${users.id}
+          AND ${creatorPublicationFeed.visibility} = 'public'
+      )`,
     })
     .from(witnessSubscriptions)
     .innerJoin(users, eq(witnessSubscriptions.creatorId, users.id))

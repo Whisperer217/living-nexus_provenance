@@ -13,6 +13,7 @@ import {
   Download,
   Heart,
   Loader2,
+  MessageSquare,
   Music,
   Pause,
   Pencil,
@@ -33,6 +34,7 @@ import { trpc } from "@/lib/trpc";
 import { getLoginUrl } from "@/const";
 import { parseWorkGenres } from "@shared/workMetadata";
 import { WorkProvenanceHistory } from "@/components/WorkProvenanceHistory";
+import { WorkVoices } from "@/components/WorkVoices";
 
 export default function LoopWorkPage() {
   const { id } = useParams<{ id: string }>();
@@ -150,6 +152,14 @@ export default function LoopWorkPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [song?.id, user?.id]);
 
+  useEffect(() => {
+    if (window.location.hash !== "#voices") return;
+    const frame = window.requestAnimationFrame(() => {
+      document.getElementById("voices")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [songId]);
+
   if (isLoading) {
     return (
       <div className="min-h-[70vh] flex items-center justify-center">
@@ -233,6 +243,10 @@ export default function LoopWorkPage() {
     if (!wid) return;
     navigator.clipboard.writeText(wid);
     toast.success("WID copied");
+  };
+
+  const openVoices = () => {
+    document.getElementById("voices")?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   const share = async () => {
@@ -422,6 +436,16 @@ export default function LoopWorkPage() {
               aria-label="Share"
             >
               <Share2 size={16} />
+            </button>
+            <button
+              type="button"
+              onClick={openVoices}
+              className="inline-flex items-center gap-2 rounded-full px-4 py-3 text-sm transition-colors hover:bg-[var(--ln-gold)]/10"
+              style={{ border: "1px solid rgba(196,154,40,0.30)", color: "var(--ln-parchment)" }}
+              aria-label="Open Voices conversation"
+              title="Open Voices conversation"
+            >
+              <MessageSquare size={15} aria-hidden="true" /> Voices
             </button>
             {isOwner && (
               <button
@@ -726,6 +750,8 @@ export default function LoopWorkPage() {
           </aside>
         </div>
       </section>
+
+      <WorkVoices songId={songId} />
 
       {/* Related works */}
       {related.length > 0 && (
