@@ -2073,6 +2073,161 @@ export const pnaThreadMessages = mysqlTable("pna_thread_messages", {
 export type PnaThreadMessage = typeof pnaThreadMessages.$inferSelect;
 export type InsertPnaThreadMessage = typeof pnaThreadMessages.$inferInsert;
 
+// ─── PNA Governance Workspace ───────────────────────────────────────────────
+// Context, profile permissions, and Artifacts remain creator-private preparation
+// records. None of these tables issue WIDs, alter Works, amend testimony, or
+// change publication state. Their role is to make PNA scope and decisions
+// inspectable before any separate Manifest/Registry workflow is chosen.
+export const pnaProfileSettings = mysqlTable("pna_profile_settings", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("user_id").notNull(),
+  profileId: varchar("profile_id", { length: 32 }).notNull(),
+  isEnabled: boolean("is_enabled").notNull().default(true),
+  // Consent covers selected Envelope sources only. It does not imply the route
+  // is local, authorize unselected records, or grant Registry mutation rights.
+  allowRemoteContext: boolean("allow_remote_context").notNull().default(false),
+  updatedAt: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
+}, (t) => ({
+  userProfileUnique: uniqueIndex("pna_profile_settings_user_profile_unique").on(t.userId, t.profileId),
+  userUpdatedIdx: index("pna_profile_settings_user_updated_idx").on(t.userId, t.updatedAt),
+}));
+export type PnaProfileSetting = typeof pnaProfileSettings.$inferSelect;
+export type InsertPnaProfileSetting = typeof pnaProfileSettings.$inferInsert;
+
+export const pnaContextEnvelopes = mysqlTable("pna_context_envelopes", {
+  id: varchar("id", { length: 64 }).primaryKey(),
+  userId: int("user_id").notNull(),
+  threadId: varchar("thread_id", { length: 64 }).notNull(),
+  revision: int("revision").notNull().default(1),
+  state: mysqlEnum("state", ["active", "archived"]).notNull().default("active"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
+}, (t) => ({
+  userThreadStateIdx: index("pna_context_envelopes_user_thread_state_idx").on(t.userId, t.threadId, t.state),
+  userThreadUnique: uniqueIndex("pna_context_envelopes_user_thread_unique").on(t.userId, t.threadId),
+}));
+export type PnaContextEnvelope = typeof pnaContextEnvelopes.$inferSelect;
+export type InsertPnaContextEnvelope = typeof pnaContextEnvelopes.$inferInsert;
+
+export const pnaContextEntries = mysqlTable("pna_context_entries", {
+  id: varchar("id", { length: 64 }).primaryKey(),
+  envelopeId: varchar("envelope_id", { length: 64 }).notNull(),
+  userId: int("user_id").notNull(),
+  sourceKind: mysqlEnum("source_kind", ["work", "wid", "keeper_note", "diary", "quiver_image"])
+    .notNull(),
+  sourceRef: varchar("source_ref", { length: 255 }).notNull(),
+  titleSnapshot: varchar("title_snapshot", { length: 255 }).notNull(),
+  widSnapshot: varchar("wid_snapshot", { length: 128 }),
+  visibility: mysqlEnum("visibility", ["creator_private", "creator_approved", "public"])
+    .notNull().default("creator_private"),
+  state: mysqlEnum("state", ["attached", "detached"]).notNull().default("attached"),
+  attachedAt: timestamp("attached_at").notNull().defaultNow(),
+  detachedAt: timestamp("detached_at"),
+}, (t) => ({
+  envelopeStateIdx: index("pna_context_entries_envelope_state_idx").on(t.envelopeId, t.state),
+  userSourceIdx: index("pna_context_entries_user_source_idx").on(t.userId, t.sourceKind, t.sourceRef),
+  envelopeSourceUnique: uniqueIndex("pna_context_entries_envelope_source_unique")
+    .on(t.envelopeId, t.sourceKind, t.sourceRef),
+}));
+export type PnaContextEntry = typeof pnaContextEntries.$inferSelect;
+export type InsertPnaContextEntry = typeof pnaContextEntries.$inferInsert;
+
+export const pnaContextUseReceipts = mysqlTable("pna_context_use_receipts", {
+  id: varchar("id", { length: 64 }).primaryKey(),
+  userId: int("user_id").notNull(),
+  threadId: varchar("thread_id", { length: 64 }).notNull(),
+  envelopeId: varchar("envelope_id", { length: 64 }).notNull(),
+  envelopeRevision: int("envelope_revision").notNull(),
+  profileId: varchar("profile_id", { length: 32 }).notNull(),
+  route: mysqlEnum("route", ["remote"]).notNull().default("remote"),
+  disclosureSnapshot: varchar("disclosure_snapshot", { length: 500 }).notNull(),
+  outcome: mysqlEnum("outcome", ["prepared", "sent", "blocked", "failed"]).notNull().default("prepared"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  resolvedAt: timestamp("resolved_at"),
+}, (t) => ({
+  userThreadCreatedIdx: index("pna_context_use_receipts_user_thread_created_idx").on(t.userId, t.threadId, t.createdAt),
+  envelopeRevisionIdx: index("pna_context_use_receipts_envelope_revision_idx").on(t.envelopeId, t.envelopeRevision),
+}));
+export type PnaContextUseReceipt = typeof pnaContextUseReceipts.$inferSelect;
+export type InsertPnaContextUseReceipt = typeof pnaContextUseReceipts.$inferInsert;
+
+// Immutable source snapshots for each model-route receipt. This lets the
+// Activity rail show exactly which selected entries were used without copying
+// the private source body into a receipt or turning it into Registry evidence.
+export const pnaContextUseEntries = mysqlTable("pna_context_use_entries", {
+  id: varchar("id", { length: 64 }).primaryKey(),
+  receiptId: varchar("receipt_id", { length: 64 }).notNull(),
+  contextEntryId: varchar("context_entry_id", { length: 64 }).notNull(),
+  sourceKind: varchar("source_kind", { length: 32 }).notNull(),
+  sourceRefSnapshot: varchar("source_ref_snapshot", { length: 255 }).notNull(),
+  titleSnapshot: varchar("title_snapshot", { length: 255 }).notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (t) => ({
+  receiptIdx: index("pna_context_use_entries_receipt_idx").on(t.receiptId, t.createdAt),
+  receiptEntryUnique: uniqueIndex("pna_context_use_entries_receipt_entry_unique").on(t.receiptId, t.contextEntryId),
+}));
+export type PnaContextUseEntry = typeof pnaContextUseEntries.$inferSelect;
+export type InsertPnaContextUseEntry = typeof pnaContextUseEntries.$inferInsert;
+
+export const pnaArtifacts = mysqlTable("pna_artifacts", {
+  id: varchar("id", { length: 64 }).primaryKey(),
+  userId: int("user_id").notNull(),
+  threadId: varchar("thread_id", { length: 64 }).notNull(),
+  originMessageId: varchar("origin_message_id", { length: 64 }),
+  contextEnvelopeId: varchar("context_envelope_id", { length: 64 }),
+  contextRevision: int("context_revision"),
+  profileId: varchar("profile_id", { length: 32 }).notNull(),
+  kind: varchar("kind", { length: 64 }).notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
+  summary: varchar("summary", { length: 500 }),
+  state: mysqlEnum("state", ["draft", "reviewed", "preserved_private", "discarded"])
+    .notNull().default("draft"),
+  payloadJson: json("payload_json").notNull(),
+  quiverImageId: int("quiver_image_id"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
+}, (t) => ({
+  userThreadUpdatedIdx: index("pna_artifacts_user_thread_updated_idx").on(t.userId, t.threadId, t.updatedAt),
+  userStateUpdatedIdx: index("pna_artifacts_user_state_updated_idx").on(t.userId, t.state, t.updatedAt),
+  originMessageUnique: uniqueIndex("pna_artifacts_origin_message_unique").on(t.originMessageId),
+}));
+export type PnaArtifact = typeof pnaArtifacts.$inferSelect;
+export type InsertPnaArtifact = typeof pnaArtifacts.$inferInsert;
+
+export const pnaArtifactSources = mysqlTable("pna_artifact_sources", {
+  id: varchar("id", { length: 64 }).primaryKey(),
+  artifactId: varchar("artifact_id", { length: 64 }).notNull(),
+  contextEntryId: varchar("context_entry_id", { length: 64 }),
+  sourceKind: varchar("source_kind", { length: 32 }).notNull(),
+  titleSnapshot: varchar("title_snapshot", { length: 255 }).notNull(),
+  locatorSnapshot: varchar("locator_snapshot", { length: 500 }),
+  relation: mysqlEnum("relation", ["source", "inference_basis", "creator_input", "reference_image"])
+    .notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (t) => ({
+  artifactCreatedIdx: index("pna_artifact_sources_artifact_created_idx").on(t.artifactId, t.createdAt),
+}));
+export type PnaArtifactSource = typeof pnaArtifactSources.$inferSelect;
+export type InsertPnaArtifactSource = typeof pnaArtifactSources.$inferInsert;
+
+export const pnaActionReceipts = mysqlTable("pna_action_receipts", {
+  id: varchar("id", { length: 64 }).primaryKey(),
+  userId: int("user_id").notNull(),
+  threadId: varchar("thread_id", { length: 64 }),
+  artifactId: varchar("artifact_id", { length: 64 }),
+  envelopeId: varchar("envelope_id", { length: 64 }),
+  action: mysqlEnum("action", ["attach_context", "detach_context", "review_artifact", "preserve_artifact", "discard_artifact"])
+    .notNull(),
+  effectSummary: varchar("effect_summary", { length: 500 }).notNull(),
+  nonEffectSummary: varchar("non_effect_summary", { length: 500 }).notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (t) => ({
+  userThreadCreatedIdx: index("pna_action_receipts_user_thread_created_idx").on(t.userId, t.threadId, t.createdAt),
+  artifactCreatedIdx: index("pna_action_receipts_artifact_created_idx").on(t.artifactId, t.createdAt),
+}));
+export type PnaActionReceipt = typeof pnaActionReceipts.$inferSelect;
+export type InsertPnaActionReceipt = typeof pnaActionReceipts.$inferInsert;
+
 // ─── Creative Cathedral Private Workspace ─────────────────────────────────────
 // Creator-private preparation state and non-binding AI proposals. These records
 // are exchange context beside the Chain of Record. They never issue a WID,

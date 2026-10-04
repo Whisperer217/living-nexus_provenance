@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-10-04T02:02:34.620Z",
-  "totalLessons": 53,
+  "lastUpdated": "2026-10-04T03:04:59.548Z",
+  "totalLessons": 54,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -1232,6 +1232,36 @@
         "artifacts",
         "mobile",
         "creator-agency"
+      ]
+    },
+    {
+      "id": "LESSON-054",
+      "date": "2026-10-03",
+      "category": "security",
+      "problem": "PNA threads and private Quiver proposals existed, but a creator could not inspect or revoke the exact selected context sent to a model route, profile permissions were not surfaced as a creator setting, and generated visuals could be saved without a governed review lifecycle.",
+      "solution": "Added creator-private Context Envelopes with owner and revision checks, explicit remote selected-context consent per Stewardship Profile, immutable source-use and action receipts, and an Artifact Review lifecycle. Vision output enters a draft Artifact; only an explicit review then Preserve privately produces a Quiver copy. The implementation does not create Works, WIDs, testimony, provenance events, publication, licenses, payments, or public sharing.",
+      "files": [
+        "shared/pnaGovernance.ts",
+        "drizzle/schema.ts",
+        "drizzle/0136_nosy_sally_floyd.sql",
+        "drizzle/0137_magenta_newton_destine.sql",
+        "server/utils/pnaGovernance.ts",
+        "server/routers/pnaGovernance.ts",
+        "server/routers/keeper.ts",
+        "client/src/pages/PNAShellPage.tsx",
+        "client/src/pages/PNASettingsPage.tsx",
+        "client/src/components/pna/PNAWorkspaceRail.tsx",
+        "client/src/components/pna/PNAArtifactReviewCard.tsx"
+      ],
+      "score": 0,
+      "tags": [
+        "pna",
+        "creator-consent",
+        "context-envelope",
+        "artifact-review",
+        "private-by-default",
+        "receipt",
+        "stewardship-profile"
       ]
     }
   ]

@@ -27,7 +27,7 @@ import { PNAVisualProposalCard, type PNAVisualProposal } from "@/components/PNAV
 import { PNAQuiverWorkspace } from "@/components/PNAQuiverWorkspace";
 import { PNACommandPalette } from "@/components/pna/PNACommandPalette";
 import { PNAWorkspaceRail } from "@/components/pna/PNAWorkspaceRail";
-import type { PNAMode, PNAWorkspaceArtifact, PNAWorkspaceSurface } from "@/components/pna/pnaWorkspaceTypes";
+import type { PNAInspectionSurface, PNAMode, PNAWorkspaceArtifact, PNAWorkspaceSurface } from "@/components/pna/pnaWorkspaceTypes";
 import { SKIN_IMAGES } from "@/components/FloatingAvatar";
 import { PNA_PRODUCT } from "@/lib/loopProduct";
 import { consumePnaDiaryReload } from "@/lib/pnaDiary";
@@ -156,6 +156,7 @@ export default function PNAShellPage() {
     const saved = readString(LS_WORKSPACE_SURFACE, "conversation");
     return saved === "context" || saved === "artifacts" ? saved : "conversation";
   });
+  const [inspectionSurface, setInspectionSurface] = useState<PNAInspectionSurface>("context");
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const query = new URLSearchParams(search);
   const routeThreadId = query.get("thread");
@@ -188,6 +189,15 @@ export default function PNAShellPage() {
   const createThread = trpc.pnaThread.create.useMutation();
   const appendThreadMessage = trpc.pnaThread.append.useMutation();
   const setThreadVisual = trpc.pnaThread.setVisualProposal.useMutation();
+  const pnaProfileSettings = trpc.pnaGovernance.profileSettings.useQuery(undefined, { enabled: Boolean(user), staleTime: 60_000 });
+  const pnaGovernance = trpc.pnaGovernance.overview.useQuery({ threadId: threadId ?? "" }, { enabled: Boolean(user && threadId) });
+  const prepareContextUse = trpc.pnaGovernance.prepareContextUse.useMutation();
+  const attachContext = trpc.pnaGovernance.attachContext.useMutation();
+  const detachContext = trpc.pnaGovernance.detachContext.useMutation();
+  const createVisualArtifact = trpc.pnaGovernance.createVisualArtifact.useMutation();
+  const reviewArtifact = trpc.pnaGovernance.reviewArtifact.useMutation();
+  const preserveArtifact = trpc.pnaGovernance.preserveArtifact.useMutation();
+  const discardArtifact = trpc.pnaGovernance.discardArtifact.useMutation();
   const threadQuery = trpc.pnaThread.get.useQuery({ id: threadId ?? "" }, { enabled: Boolean(user && threadId) });
   const threadListQuery = trpc.pnaThread.list.useQuery(undefined, { enabled: Boolean(user), staleTime: 60_000 });
   const setActiveSkin = trpc.keeper.setActiveSkin.useMutation({
@@ -199,6 +209,12 @@ export default function PNAShellPage() {
   });
 
   const currentMode = PNA_MODES.find(m => m.id === activeMode) ?? PNA_MODES[0];
+  const activeProfile = pnaProfileSettings.data?.find((profile) => profile.id === activeMode) ?? null;
+  const governedArtifacts = (pnaGovernance.data?.artifacts ?? []) as PNAWorkspaceArtifact[];
+  const artifactByMessage = useMemo(
+    () => new Map(governedArtifacts.filter((artifact) => artifact.originMessageId).map((artifact) => [artifact.originMessageId!, artifact])),
+    [governedArtifacts],
+  );
   const playing = playerState.currentIdx >= 0 ? playerState.tracks[playerState.currentIdx] : null;
   const nowPlaying = playing
     ? { title: playing.title, artist: playing.artist, artUrl: playing.artUrl, id: playing.id, wid: playing.witnessId }
@@ -416,6 +432,11 @@ export default function PNAShellPage() {
   const handleSend = useCallback(async () => {
     const text = input.trim();
     if (!text || isLoading || !user) return;
+    if (activeProfile && !activeProfile.isEnabled) {
+      toast.error(`${activeProfile.label} is disabled in Stewardship settings.`);
+      navigate("/settings/stewardship");
+      return;
+    }
     if (activeMode === "vision" && isVisionPromptOverLimit(text)) {
       toast.error(getVisionPromptLimitMessage(text));
       return;
@@ -426,12 +447,24 @@ export default function PNAShellPage() {
 
     try {
       const activeThreadId = await ensureThread(activeMode);
+      // The gateway produces an immutable receipt only when selected Context
+      // exists. It rechecks the profile policy and source ownership server-side.
+      const preparedContext = activeMode === "vision"
+        ? { receiptId: null, sourceCount: 0 }
+        : await prepareContextUse.mutateAsync({ threadId: activeThreadId, profileId: activeMode });
       const persistedUser = await appendThreadMessage.mutateAsync({ threadId: activeThreadId, role: "user", content: text, mode: activeMode });
       setMessages(prev => [...prev, { id: persistedUser.id, role: "user", content: text, mode: activeMode, timestamp: new Date() }]);
       if (activeMode === "vision") {
-        const visual = await generateArtwork.mutateAsync({ prompt: text });
+        const visual = await generateArtwork.mutateAsync({ prompt: text, pnaThreadId: activeThreadId, pnaProfileId: "vision" });
         const content = "A private cover-art proposal is ready. Review it below; it will not enter Quiver until you choose to save it.";
         const persistedPna = await appendThreadMessage.mutateAsync({ threadId: activeThreadId, role: "pna", content, mode: "vision", visualProposal: { url: visual.url, prompt: text } });
+        await createVisualArtifact.mutateAsync({
+          threadId: activeThreadId,
+          originMessageId: persistedPna.id,
+          url: visual.url,
+          prompt: text,
+          title: "Private visual proposal",
+        });
         setMessages(prev => [...prev, {
           id: persistedPna.id,
           role: "pna",
@@ -441,11 +474,16 @@ export default function PNAShellPage() {
           visualProposal: { url: visual.url, prompt: text },
         }]);
         await utils.pnaThread.list.invalidate();
+        await utils.pnaGovernance.overview.invalidate({ threadId: activeThreadId });
+        setInspectionSurface("artifacts");
         return;
       }
       const result = await chatMutation.mutateAsync({
         message: text,
         persona: currentMode.persona,
+        pnaThreadId: activeThreadId,
+        pnaProfileId: activeMode,
+        ...(preparedContext.receiptId ? { pnaContextReceiptId: preparedContext.receiptId } : {}),
         history: messages.slice(-8).map(m => ({
           role: m.role === "user" ? "user" as const : "assistant" as const,
           content: m.content,
@@ -461,12 +499,13 @@ export default function PNAShellPage() {
         timestamp: new Date(),
       }]);
       await utils.pnaThread.list.invalidate();
+      await utils.pnaGovernance.overview.invalidate({ threadId: activeThreadId });
     } catch (e: any) {
       toast.error(activeMode === "vision" ? getVisionPromptErrorMessage(e) : (e.message ?? "PNA unavailable"));
     } finally {
       setIsLoading(false);
     }
-  }, [input, isLoading, activeMode, currentMode, messages, chatMutation, generateArtwork, user, ensureThread, appendThreadMessage]);
+  }, [input, isLoading, activeMode, activeProfile, currentMode, messages, chatMutation, generateArtwork, user, ensureThread, appendThreadMessage, prepareContextUse, createVisualArtifact, utils, navigate]);
 
   const handleSaveVisualProposal = useCallback(async (messageId: string) => {
     const message = messages.find(candidate => candidate.id === messageId);
@@ -503,15 +542,6 @@ export default function PNAShellPage() {
     await setActiveSkin.mutateAsync({ skinId });
   };
 
-  const visualArtifacts = useMemo<PNAWorkspaceArtifact[]>(() => messages
-    .filter((message): message is Message & { visualProposal: PNAVisualProposal } => Boolean(message.visualProposal))
-    .map((message) => ({
-      id: message.id,
-      createdAt: message.timestamp,
-      mode: message.mode,
-      proposal: message.visualProposal,
-    })), [messages]);
-
   const focusComposer = useCallback(() => {
     setWorkspaceSurface("conversation");
     window.requestAnimationFrame(() => inputRef.current?.focus());
@@ -521,6 +551,54 @@ export default function PNAShellPage() {
     setWorkspaceSurface(surface);
     if (surface === "context" && !contextRef && nowPlaying) openNowPlayingContext();
   }, [contextRef, nowPlaying, openNowPlayingContext]);
+
+  const openInspectionSurface = useCallback((surface: PNAInspectionSurface) => {
+    setInspectionSurface(surface);
+    setWorkspaceSurface(surface === "artifacts" ? "artifacts" : "context");
+    if (surface === "context" && !contextRef && nowPlaying) openNowPlayingContext();
+  }, [contextRef, nowPlaying, openNowPlayingContext]);
+
+  const refreshGovernance = useCallback(async (id: string) => {
+    await utils.pnaGovernance.overview.invalidate({ threadId: id });
+  }, [utils]);
+
+  const handleAttachNowPlaying = useCallback(async () => {
+    if (!nowPlaying?.id) {
+      toast.message("Play one of your Works before attaching it to a private Context Envelope.");
+      return;
+    }
+    try {
+      const activeThreadId = await ensureThread(activeMode);
+      await attachContext.mutateAsync({ threadId: activeThreadId, profileId: activeMode, sourceKind: "work", sourceRef: String(nowPlaying.id) });
+      await refreshGovernance(activeThreadId);
+      toast.success("Work attached to this private Context Envelope.");
+    } catch (error: any) {
+      toast.error(error.message ?? "Could not attach this Work to private PNA context.");
+    }
+  }, [activeMode, attachContext, ensureThread, nowPlaying?.id, refreshGovernance]);
+
+  const handleDetachContext = useCallback(async (entryId: string) => {
+    if (!threadId) return;
+    try {
+      await detachContext.mutateAsync({ threadId, entryId });
+      await refreshGovernance(threadId);
+      toast.success("Context source detached from future PNA use.");
+    } catch (error: any) {
+      toast.error(error.message ?? "Could not detach this private source.");
+    }
+  }, [detachContext, refreshGovernance, threadId]);
+
+  const handleArtifactAction = useCallback(async (id: string, action: "review" | "preserve" | "discard") => {
+    try {
+      if (action === "review") await reviewArtifact.mutateAsync({ id });
+      if (action === "preserve") await preserveArtifact.mutateAsync({ id });
+      if (action === "discard") await discardArtifact.mutateAsync({ id });
+      if (threadId) await refreshGovernance(threadId);
+      toast.success(action === "preserve" ? "Artifact preserved privately in Quiver." : action === "discard" ? "Artifact removed from private review." : "Artifact marked reviewed.");
+    } catch (error: any) {
+      toast.error(error.message ?? "Artifact review action could not be completed.");
+    }
+  }, [discardArtifact, preserveArtifact, refreshGovernance, reviewArtifact, threadId]);
 
   // ── Auth gate ──────────────────────────────────────────────────────────────
   if (authLoading) {
@@ -879,14 +957,23 @@ export default function PNAShellPage() {
                       {msg.content}
                     </p>
                   </div>
-                  {msg.visualProposal && (
+                  {msg.visualProposal && (artifactByMessage.has(msg.id) ? (
+                    <button
+                      type="button"
+                      onClick={() => openInspectionSurface("artifacts")}
+                      className="mt-2 flex min-h-11 items-center gap-2 rounded-lg px-3 text-left focus-visible:outline-none focus-visible:ring-2"
+                      style={{ background: "color-mix(in srgb, var(--ln-gold) 10%, var(--ln-coal))", border: "1px solid color-mix(in srgb, var(--ln-gold) 28%, var(--ln-panel-border))", color: ACCENT, fontFamily: "var(--font-display)", fontSize: "var(--text-xs)", letterSpacing: "0.07em" }}
+                    >
+                      <Archive size={13} /> PRIVATE ARTIFACT READY FOR REVIEW
+                    </button>
+                  ) : (
                     <PNAVisualProposalCard
                       proposal={msg.visualProposal}
                       isSaving={saveQuiverAsset.isPending}
                       onSave={() => handleSaveVisualProposal(msg.id)}
                       onOpenQuiver={msg.visualProposal.savedQuiverId ? () => navigate(`/pna?view=quiver&thread=${encodeURIComponent(threadId ?? "")}`) : undefined}
                     />
-                  )}
+                  ))}
                   {!isUser && (
                     <button
                       type="button"
@@ -1205,8 +1292,6 @@ export default function PNAShellPage() {
     </div>
   );
 
-  const inspectionSurface = workspaceSurface === "artifacts" ? "artifacts" : "context";
-
   const mobileSurfaceNavigation = (
     <div className="grid grid-cols-3 gap-1 px-3 py-2 xl:hidden" role="tablist" aria-label="PNA workspace surfaces" style={{ borderBottom: `1px solid ${PANEL_BORDER}`, background: "var(--ln-panel)" }}>
       {([
@@ -1244,19 +1329,31 @@ export default function PNAShellPage() {
     <PNAWorkspaceRail
       mobile={mobile}
       surface={inspectionSurface}
-      onSurfaceChange={openWorkspaceSurface}
+      onSurfaceChange={openInspectionSurface}
+      threadId={threadId}
+      envelope={pnaGovernance.data?.envelope ?? null}
+      entries={pnaGovernance.data?.entries ?? []}
+      profile={activeProfile}
       context={contextRef}
       suggestion={contextSuggestion}
       nowPlaying={nowPlaying ? { ...nowPlaying, isPlaying: playerState.isPlaying } : null}
-      artifacts={visualArtifacts}
-      isSavingArtifact={saveQuiverAsset.isPending}
-      onOpenNowPlaying={openNowPlayingContext}
-      onCloseContext={closeContext}
+      artifacts={governedArtifacts}
+      artifactSources={pnaGovernance.data?.artifactSources ?? []}
+      actionReceipts={pnaGovernance.data?.actionReceipts ?? []}
+      useReceipts={pnaGovernance.data?.useReceipts ?? []}
+      useEntries={pnaGovernance.data?.useEntries ?? []}
+      pendingArtifactAction={reviewArtifact.isPending ? { id: reviewArtifact.variables?.id ?? "", action: "review" } : preserveArtifact.isPending ? { id: preserveArtifact.variables?.id ?? "", action: "preserve" } : discardArtifact.isPending ? { id: discardArtifact.variables?.id ?? "", action: "discard" } : null}
+      isDetachingContext={detachContext.isPending}
+      onAttachNowPlaying={handleAttachNowPlaying}
+      onDetachContext={handleDetachContext}
       onOpenContextReference={handleContextOpen}
       onVerifyContext={handleContextVerify}
       onPlayContext={handleContextPlay}
-      onSaveArtifact={handleSaveVisualProposal}
+      onReviewArtifact={(id) => handleArtifactAction(id, "review")}
+      onPreserveArtifact={(id) => handleArtifactAction(id, "preserve")}
+      onDiscardArtifact={(id) => handleArtifactAction(id, "discard")}
       onOpenQuiver={() => navigate(threadId ? `/pna?view=quiver&thread=${encodeURIComponent(threadId)}` : "/pna?view=quiver")}
+      onOpenStewardshipSettings={() => navigate("/settings/stewardship")}
     />
   );
 

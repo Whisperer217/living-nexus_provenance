@@ -8,6 +8,32 @@ import { PNAWorkspaceRail } from "../../client/src/components/pna/PNAWorkspaceRa
 const root = process.cwd();
 const read = (relativePath: string) => fs.readFileSync(path.resolve(root, relativePath), "utf8");
 const noop = vi.fn();
+const defaultProps = {
+  mobile: true,
+  onSurfaceChange: noop,
+  threadId: "thread-1",
+  envelope: null,
+  entries: [],
+  profile: null,
+  context: null,
+  suggestion: null,
+  nowPlaying: null,
+  artifacts: [],
+  artifactSources: [],
+  actionReceipts: [],
+  useReceipts: [],
+  useEntries: [],
+  onAttachNowPlaying: noop,
+  onDetachContext: noop,
+  onOpenContextReference: noop,
+  onVerifyContext: noop,
+  onPlayContext: noop,
+  onReviewArtifact: noop,
+  onPreserveArtifact: noop,
+  onDiscardArtifact: noop,
+  onOpenQuiver: noop,
+  onOpenStewardshipSettings: noop,
+};
 
 describe("PNA workspace foundations", () => {
   it("uses the owner-scoped thread list in the command palette without adding a new authority surface", () => {
@@ -25,62 +51,46 @@ describe("PNA workspace foundations", () => {
     expect(palette).not.toContain("insertWid");
   });
 
-  it("keeps inspection sources read-only and private artifacts behind explicit Quiver preservation", () => {
+  it("keeps inspection sources private and Artifact review behind explicit creator decisions", () => {
     const rail = read("client/src/components/pna/PNAWorkspaceRail.tsx");
+    const card = read("client/src/components/pna/PNAArtifactReviewCard.tsx");
 
     expect(rail).toContain("NexusContextPanel");
-    expect(rail).toContain("PNAVisualProposalCard");
-    expect(rail).toContain("Active sources");
-    expect(rail).toContain("A private artifact is not a Work, WID, or publication.");
+    expect(rail).toContain("Context Envelope");
+    expect(rail).toContain("Route not permitted");
+    expect(rail).toContain("A private Artifact is not a Work, Witness ID, testimony, or publication.");
     expect(rail).toContain("No source is attached to this private thread.");
+    expect(card).toContain("MARK REVIEWED");
+    expect(card).toContain("PRESERVE PRIVATELY");
+    expect(card).toContain("No Work, WID, or public page changed.");
     expect(rail).not.toContain("mutateAsync");
     expect(rail).not.toContain("setPublished");
   });
 
-  it("renders explicit empty context and private artifact states", () => {
+  it("renders explicit Envelope and Artifact review states", () => {
     const contextHtml = renderToStaticMarkup(createElement(PNAWorkspaceRail, {
-      mobile: true,
+      ...defaultProps,
       surface: "context",
-      onSurfaceChange: noop,
-      context: null,
-      suggestion: null,
-      nowPlaying: null,
-      artifacts: [],
-      onOpenNowPlaying: noop,
-      onCloseContext: noop,
-      onOpenContextReference: noop,
-      onVerifyContext: noop,
-      onPlayContext: noop,
-      onSaveArtifact: noop,
-      onOpenQuiver: noop,
     }));
-
     const artifactsHtml = renderToStaticMarkup(createElement(PNAWorkspaceRail, {
-      mobile: true,
+      ...defaultProps,
       surface: "artifacts",
-      onSurfaceChange: noop,
-      context: null,
-      suggestion: null,
-      nowPlaying: null,
       artifacts: [{
-        id: "proposal-1",
+        id: "artifact-1",
         createdAt: new Date("2026-10-03T00:00:00.000Z"),
-        mode: "vision",
-        proposal: { url: "https://example.test/private-proposal.png", prompt: "A private cover-art proposal" },
+        profileId: "vision",
+        kind: "image_proposal",
+        title: "Private cover-art proposal",
+        summary: "Private visual proposal. Review before preserving it in Quiver.",
+        state: "draft",
+        payloadJson: { url: "https://example.test/private-proposal.png", prompt: "A private cover-art proposal" },
       }],
-      onOpenNowPlaying: noop,
-      onCloseContext: noop,
-      onOpenContextReference: noop,
-      onVerifyContext: noop,
-      onPlayContext: noop,
-      onSaveArtifact: noop,
-      onOpenQuiver: noop,
     }));
 
     expect(contextHtml).toContain("No source is attached to this private thread.");
-    expect(contextHtml).toContain("OPEN NOW-PLAYING CONTEXT");
-    expect(artifactsHtml).toContain("PRIVATE VISUAL PROPOSAL");
-    expect(artifactsHtml).toContain("SAVE TO QUIVER PRIVATELY");
+    expect(contextHtml).toContain("ATTACH NOW-PLAYING WORK");
+    expect(artifactsHtml).toContain("Private Artifact");
+    expect(artifactsHtml).toContain("MARK REVIEWED");
   });
 
   it("defines a mobile conversation, context, and artifacts switch without a squeezed desktop rail", () => {

@@ -15,6 +15,8 @@ import { adminProcedure, protectedProcedure, publicProcedure, router } from "../
 import { storagePut } from "../utils/storage";
 import { micronize } from "../services/imageProcessing";
 import { invokeLLM } from "../_core/llm";
+import { getPnaProfileSetting, requireOwnedPnaThread, resolvePnaContextUseForModel, settlePnaContextReceipt } from "../utils/pnaGovernance";
+import { PNA_PROFILE_IDS } from "../../shared/pnaGovernance";
 import {
   addComment, createSong, deleteSong, getAllCreators,
   getCommentsBySong, getPublicSongs, getSongById,
@@ -282,6 +284,12 @@ export const keeperRouter = router({
       .input(z.object({
         persona: z.enum(["guide", "conductor", "witness", "custodian", "archivist"]).default("guide"),
         message: z.string().max(8000),
+        // Present only from the canonical PNA workspace. The thread/profile pair
+        // activates owner-scoped Context Envelope checks; generic Keeper chat
+        // remains unchanged and cannot claim selected PNA context.
+        pnaThreadId: z.string().min(1).max(64).optional(),
+        pnaProfileId: z.enum(PNA_PROFILE_IDS).optional(),
+        pnaContextReceiptId: z.string().min(1).max(64).optional(),
         imageUrls: z.array(z.string().url()).optional(),
         history: z.array(z.object({
           role: z.enum(["user", "assistant"]),
@@ -297,6 +305,13 @@ export const keeperRouter = router({
         }).optional(),
       }))
       .mutation(async ({ ctx, input }) => {
+        if (Boolean(input.pnaThreadId) !== Boolean(input.pnaProfileId)) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "Private PNA requests require a matched thread and Stewardship Profile." });
+        }
+        if (input.pnaProfileId) {
+          const setting = await getPnaProfileSetting(ctx.user.id, input.pnaProfileId);
+          if (!setting.isEnabled) throw new TRPCError({ code: "FORBIDDEN", message: "This Stewardship Profile is disabled in your settings." });
+        }
         // ── Persona system prompts — each with a distinct voice, strength, and depth ──
         const PERSONA_PROMPTS: Record<string, string> = {
           guide: `You are the GUIDE — the user's Personal Nexus Avatar. You are a wise, deeply intuitive creative mentor who has studied the user's full creative corpus. Your strength is direction, inspiration, and unlocking creative breakthroughs. You ask penetrating questions that reveal what the creator already knows but hasn't articulated. You speak in layered language — poetic but precise. You can break down lyrical structure, identify thematic threads, and help the creator find their authentic voice. When given lyrics or prose, you identify the emotional core, suggest structural improvements, and point out where the writing is strongest. You never give generic advice — every response is specific to what the creator has shared. You are warm but not sycophantic. You challenge gently. You see the whole arc of the creator's work, not just the current piece.`,
@@ -353,8 +368,10 @@ ${isLyricsAnalysisRequest
 Never collapse multiple sections into a single block. Always label clearly.
 --- END FORMAT RULE ---` : '';
 
-        // ── Fetch creator profile for personalized context ──────────────────────────────────────
-        const creatorProfile = await getUserById(ctx.user.id);
+        // The generic Keeper can retain its creator-profile assistance. Canonical
+        // PNA threads instead use only creator-selected, receipt-gated Envelope
+        // context so a private Workspace never gains silent corpus access.
+        const creatorProfile = input.pnaThreadId ? null : await getUserById(ctx.user.id);
         const profileBlock = creatorProfile ? (() => {
           const lines: string[] = [];
           if (creatorProfile.name) lines.push(`Creator Name: ${creatorProfile.name}`);
@@ -373,7 +390,12 @@ Never collapse multiple sections into a single block. Always label clearly.
           if (lines.length === 0) return '';
           return `\n--- CREATOR IDENTITY PROFILE ---\n${lines.join('\n')}\n--- END CREATOR PROFILE ---`;
         })() : '';
-        const systemPrompt = PERSONA_PROMPTS[input.persona] + profileBlock + attrBlock + lyricsFormatInstruction;
+        let selectedContextBlock = "";
+        if (input.pnaThreadId && input.pnaProfileId && input.pnaContextReceiptId) {
+          const resolved = await resolvePnaContextUseForModel(ctx.user.id, input.pnaThreadId, input.pnaProfileId, input.pnaContextReceiptId);
+          selectedContextBlock = resolved.contextBlock;
+        }
+        const systemPrompt = PERSONA_PROMPTS[input.persona] + profileBlock + attrBlock + lyricsFormatInstruction + selectedContextBlock;
 
         // Build message array — history first, then current turn
         const historyMessages = (input.history ?? []).map(h => ({
@@ -401,9 +423,15 @@ Never collapse multiple sections into a single block. Always label clearly.
           { role: 'user' as const, content: userContent },
         ];
 
-        const response = await invokeLLM({ messages, maxTokens: 800 });
-        const reply = response?.choices?.[0]?.message?.content ?? 'The Keeper is momentarily silent. Try again.';
-        return { reply, persona: input.persona };
+        try {
+          const response = await invokeLLM({ messages, maxTokens: 800 });
+          const reply = response?.choices?.[0]?.message?.content ?? 'The Keeper is momentarily silent. Try again.';
+          if (input.pnaContextReceiptId) await settlePnaContextReceipt(input.pnaContextReceiptId, "sent");
+          return { reply, persona: input.persona };
+        } catch (error) {
+          if (input.pnaContextReceiptId) await settlePnaContextReceipt(input.pnaContextReceiptId, "failed");
+          throw error;
+        }
       }),
 
     /** Save a note from the Keeper sandbox to the DB */
@@ -642,8 +670,18 @@ Never collapse multiple sections into a single block. Always label clearly.
       .input(z.object({
         prompt: z.string().max(1000),
         styleTags: z.array(z.string()).optional(),
+        pnaThreadId: z.string().min(1).max(64).optional(),
+        pnaProfileId: z.literal("vision").optional(),
       }))
       .mutation(async ({ ctx, input }) => {
+        if (Boolean(input.pnaThreadId) !== Boolean(input.pnaProfileId)) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "Private PNA visual requests require a matched thread and Vision Profile." });
+        }
+        if (input.pnaThreadId) {
+          await requireOwnedPnaThread(ctx.user.id, input.pnaThreadId);
+          const setting = await getPnaProfileSetting(ctx.user.id, "vision");
+          if (!setting.isEnabled) throw new TRPCError({ code: "FORBIDDEN", message: "Vision is disabled in your Stewardship settings." });
+        }
         const { generateImage, PRIMARY_IMAGE_MODEL } = await import('../_core/imageGeneration');
         const fullPrompt = input.styleTags?.length
           ? `${input.prompt}. Style: ${input.styleTags.join(', ')}`

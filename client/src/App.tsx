@@ -104,6 +104,7 @@ const WitnessFlowPage = lazy(() => import("./pages/WitnessFlowPage"));
 const LivingArchiveBillingPage = lazy(() => import("./pages/LivingArchiveBillingPage"));
 const PlaybackSettingsPage = lazy(() => import("./pages/PlaybackSettingsPage"));
 const PaymentMethodsPage = lazy(() => import("./pages/PaymentMethodsPage"));
+const PNASettingsPage = lazy(() => import("./pages/PNASettingsPage"));
 const SharedPromptPage = lazy(() => import("./pages/SharedPromptPage"));
 const TermsPage = lazy(() => import("./pages/TermsPage"));
 const TosComparePage = lazy(() => import("./pages/TosComparePage"));
@@ -361,6 +362,7 @@ function Router() {
                 <Route path="/settings/billing" component={LivingArchiveBillingPage} />
                 <Route path="/settings/playback" component={PlaybackSettingsPage} />
                 <Route path="/settings/payment-methods" component={PaymentMethodsPage} />
+                <Route path="/settings/stewardship" component={PNASettingsPage} />
                 <Route path="/prompt/:token" component={SharedPromptPage} />
                 <Route path="/terms/compare" component={TosComparePage} />
                 <Route path="/terms" component={TermsPage} />

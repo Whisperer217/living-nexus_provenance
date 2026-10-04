@@ -161,6 +161,7 @@ function SettingsSubNav() {
     { path: "/settings/billing", label: "Billing", icon: <Zap size={13} /> },
     { path: "/settings/playback", label: "Playback", icon: <Music2 size={13} /> },
     { path: "/settings/payment-methods", label: "Payment Methods", icon: <CreditCard size={13} /> },
+    { path: "/settings/stewardship", label: "PNA Stewardship", icon: <Shield size={13} /> },
   ];
   return (
     <div className="flex gap-1">

@@ -1,6 +1,6 @@
 # PNA Context Envelope, Stewardship Profile, and Artifact Manifest Specification
 
-**Status:** Proposed technical specification — no schema migration, new router, provider change, Registry mutation, or publication behavior is activated by this document.  
+**Status:** Partially implemented — Context Envelope v1, profile consent, private Artifact Review, and source-use receipts are active in the PNA development workspace. Manifest handoff/export, documents, public-source retrieval, and any local-provider/Libre WebUI deployment remain proposed.
 **Date:** 2026-10-03  
 **Decision owner:** Living Nexus platform stewardship  
 **Predecessors:** [PNA Workspace Experience Redesign](./PNA-WORKSPACE-EXPERIENCE-REDESIGN.md), [PNA × Libre WebUI Integration ADR](./PNA-LIBRE-WEBUI-INTEGRATION-ADR.md), [Drizzle Migration Reconciliation ADR](./DRIZZLE-MIGRATION-RECONCILIATION-ADR.md)
@@ -10,6 +10,14 @@
 ## 1. Decision in one sentence
 
 > PNA may use only creator-selected, thread-bounded context; produce reviewable private artifacts under a declared Stewardship Profile; and hand an artifact into Manifest only through an explicit, reversible preparation step—never by treating a chat, source, artifact, or model response as a Work, WID, testimony, or publication.
+
+### Implementation record — 2026-10-03
+
+- Additive Drizzle migrations `0136_nosy_sally_floyd` and `0137_magenta_newton_destine` create creator-private PNA profiles, Context Envelopes, context entries, source-use receipts and exact receipt source snapshots, Artifacts, Artifact sources, and action receipts.
+- `pnaGovernance` enforces thread ownership, source ownership, profile/source compatibility, remote selected-context consent, and Envelope revision checks. `keeper.chat` receives Context only after a server-issued receipt and performs a final setting/revision/source recheck before model invocation.
+- `/settings/stewardship` exposes per-profile enablement and remote selected-context permission. Defaults leave remote selected-context use off.
+- New Vision proposals enter `draft` Artifact Review. A creator must mark the proposal reviewed before **Preserve privately** creates a Quiver copy. Discarding removes it from review only. None of these records create a Work, WID, testimony, provenance event, publication, license, or payment.
+- This delivery does **not** add a local model, provider replacement, Libre WebUI service, team access, public sharing, automatic Manifest registration, end-to-end encryption, or a live deployment claim.
 
 This specification converts the current PNA workspace foundation into three governed systems:
 
