@@ -7,11 +7,12 @@ vi.mock("../utils/db", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../utils/db")>();
   return {
     ...actual,
+    getSongById: vi.fn(),
     updateSongStatus: vi.fn().mockResolvedValue(undefined),
   };
 });
 
-import { updateSongStatus } from "../utils/db";
+import { getSongById, updateSongStatus } from "../utils/db";
 
 type AuthenticatedUser = NonNullable<TrpcContext["user"]>;
 
@@ -37,6 +38,10 @@ function createAuthContext(userId = 42): TrpcContext {
 describe("songs.updateStatus", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(getSongById).mockImplementation(async (songId) => ({
+      id: songId,
+      userId: songId === 1 ? 1 : 42,
+    }) as any);
   });
 
   it("calls updateSongStatus with correct args and returns success", async () => {

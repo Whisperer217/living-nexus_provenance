@@ -6,6 +6,7 @@ vi.mock("../utils/db", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../utils/db")>();
   return {
     ...actual,
+    getSongById: vi.fn(),
     updateSongMetadata: vi.fn().mockResolvedValue(undefined),
     updateSongStatus: vi.fn().mockResolvedValue(undefined),
   };
@@ -13,6 +14,7 @@ vi.mock("../utils/db", async (importOriginal) => {
 
 import {
   isPublicForSongStatus,
+  getSongById,
   updateSongMetadata,
   updateSongStatus,
 } from "../utils/db";
@@ -41,6 +43,7 @@ function createAuthContext(userId = 42): TrpcContext {
 describe("songs publication-state integrity", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(getSongById).mockResolvedValue({ id: 7, userId: 42 } as any);
   });
 
   it("maps every lifecycle status to the established public-visibility invariant", () => {
@@ -82,6 +85,17 @@ describe("songs publication-state integrity", () => {
     await expect(
       caller.songs.updateMetadata({ songId: 7, status: "Published" } as never)
     ).rejects.toThrow();
+
+    expect(updateSongMetadata).not.toHaveBeenCalled();
+    expect(updateSongStatus).not.toHaveBeenCalled();
+  });
+
+  it("rejects a non-owner before any metadata or lifecycle mutation", async () => {
+    vi.mocked(getSongById).mockResolvedValue({ id: 7, userId: 77 } as any);
+    const caller = appRouter.createCaller(createAuthContext(42));
+
+    await expect(caller.songs.updateMetadata({ songId: 7, caption: "Attempted overwrite" })).rejects.toMatchObject({ code: "FORBIDDEN" });
+    await expect(caller.songs.updateStatus({ songId: 7, status: "Deleted" })).rejects.toMatchObject({ code: "FORBIDDEN" });
 
     expect(updateSongMetadata).not.toHaveBeenCalled();
     expect(updateSongStatus).not.toHaveBeenCalled();

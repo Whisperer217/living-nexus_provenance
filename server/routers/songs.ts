@@ -808,6 +808,8 @@ export const songsRouter = router({
       coverBase64: z.string(),
       coverMimeType: z.string(),
     })).mutation(async ({ ctx, input }) => {
+      const song = await getSongById(input.songId);
+      if (!song || song.userId !== ctx.user.id) throw new TRPCError({ code: "FORBIDDEN", message: "Not your song" });
       const rawBuffer = Buffer.from(input.coverBase64, "base64");
       // Micronize: trim, resize to max 1200×1200, WebP quality 85
       const { buffer, mimeType } = await micronize(rawBuffer, "coverArt");
@@ -1096,6 +1098,10 @@ export const songsRouter = router({
       songId: z.number(),
       status: z.enum(["Draft", "Published", "Unlisted", "Deleted"]),
     })).mutation(async ({ ctx, input }) => {
+      const song = await getSongById(input.songId);
+      if (!song || song.userId !== ctx.user.id) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "This Work is not available to your creator account." });
+      }
       await updateSongStatus(input.songId, ctx.user.id, input.status);
       // On publish: ensure visual pipeline is triggered + fan out to witnesses
       if (input.status === "Published") {
@@ -1173,9 +1179,10 @@ export const songsRouter = router({
       parentGuideWid: z.string().max(64).nullable().optional(),
     }).strict()).mutation(async ({ ctx, input }) => {
       const { songId, creditsJson, collectionId, ...fields } = input;
-      const existing = fields.releaseDate !== undefined || fields.creatorReleaseDate !== undefined || collectionId !== undefined || input.externalDisplayEnabled !== undefined || input.externalDisplayContext !== undefined || input.externalDisplayRightsConfirmed !== undefined
-        ? await getSongById(songId)
-        : undefined;
+      const existing = await getSongById(songId);
+      if (!existing || existing.userId !== ctx.user.id) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "This Work is not available to your creator account." });
+      }
       if (collectionId !== undefined) {
         if (!existing || existing.userId !== ctx.user.id) {
           throw new TRPCError({ code: "FORBIDDEN", message: "This Work is not available to your creator account." });
@@ -1349,6 +1356,8 @@ export const songsRouter = router({
       return { url: song.fileUrl };
     }),
     updateLyrics: protectedProcedure.input(z.object({ songId: z.number(), lyricsText: z.string().max(10000) })).mutation(async ({ ctx, input }) => {
+      const song = await getSongById(input.songId);
+      if (!song || song.userId !== ctx.user.id) throw new TRPCError({ code: "FORBIDDEN", message: "Not your song" });
       await updateSongLyrics(input.songId, ctx.user.id, input.lyricsText);
       return { success: true };
     }),
