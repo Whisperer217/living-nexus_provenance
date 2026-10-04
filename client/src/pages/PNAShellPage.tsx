@@ -436,7 +436,8 @@ export default function PNAShellPage() {
       const activeThreadId = await ensureThread(activeMode);
       // The gateway produces an immutable receipt only when selected Context
       // exists. It rechecks the profile policy and source ownership server-side.
-      const preparedContext = activeMode === "vision"
+      const canUseSelectedContext = Boolean(activeProfile?.allowRemoteContext);
+      const preparedContext = activeMode === "vision" || !canUseSelectedContext
         ? { receiptId: null, sourceCount: 0 }
         : await prepareContextUse.mutateAsync({ threadId: activeThreadId, profileId: activeMode });
       const persistedUser = await appendThreadMessage.mutateAsync({ threadId: activeThreadId, role: "user", content: text, mode: activeMode });

@@ -72,6 +72,12 @@ export function PNAComposerBar({
       </div>
 
       <div className="rounded-xl p-2.5" style={{ background: "var(--ln-coal)", border: "1px solid color-mix(in srgb, var(--ln-gold) 28%, var(--ln-panel-border))" }}>
+        {contextCount > 0 && !profileDisabled && !profile?.allowRemoteContext ? (
+          <div className="mb-2 flex flex-wrap items-center justify-between gap-2 rounded-lg px-3 py-2" role="status" style={{ background: "color-mix(in srgb, var(--ln-gold) 7%, transparent)", border: "1px solid color-mix(in srgb, var(--ln-gold) 20%, var(--ln-panel-border))" }}>
+            <p className="font-body text-[var(--text-xs)] leading-relaxed" style={{ color: "var(--ln-bone)" }}>Attached context remains private and will not be sent with this reply.</p>
+            <button type="button" onClick={onOpenSettings} className="min-h-9 rounded px-2 font-display text-[var(--text-xs)] tracking-[0.06em] uppercase focus-visible:outline-none focus-visible:ring-2" style={{ color: "var(--ln-gold)" }}>Review permissions</button>
+          </div>
+        ) : null}
         <div className="flex items-end gap-3">
           <textarea
             ref={inputRef}

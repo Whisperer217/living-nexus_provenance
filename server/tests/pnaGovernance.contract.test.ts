@@ -34,6 +34,17 @@ describe("PNA governance contracts", () => {
     expect(keeper).toContain("input.pnaThreadId ? null : await getUserById");
   });
 
+  it("keeps attached Context local instead of failing a normal PNA reply before remote consent", () => {
+    const shell = read("client/src/pages/PNAShellPage.tsx");
+    const composer = read("client/src/components/pna/PNAComposerBar.tsx");
+
+    expect(shell).toContain("const canUseSelectedContext = Boolean(activeProfile?.allowRemoteContext);");
+    expect(shell).toContain('activeMode === "vision" || !canUseSelectedContext');
+    expect(shell).toContain("receiptId: null, sourceCount: 0");
+    expect(composer).toContain("Attached context remains private and will not be sent with this reply.");
+    expect(composer).toContain("Review permissions");
+  });
+
   it("keeps Artifacts private and routes visual preservation through review before Quiver", () => {
     const router = read("server/routers/pnaGovernance.ts");
     const shell = read("client/src/pages/PNAShellPage.tsx");

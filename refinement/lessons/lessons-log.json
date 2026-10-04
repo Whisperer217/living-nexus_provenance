@@ -1,14 +1,14 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-10-04T03:04:59.548Z",
-  "totalLessons": 54,
+  "lastUpdated": "2026-10-04T05:19:26.833871Z",
+  "totalLessons": 55,
   "lessons": [
     {
       "id": "LESSON-001",
       "date": "2026-08-01",
       "checkpointVersion": "cc6ed77f",
       "category": "performance",
-      "problem": "Clicking 'Edit Work' on SongDetailPage caused a 1–3 second UI freeze. The CreativeDrawer (1408 lines, multiple tRPC queries) was statically imported and mounted synchronously on the already-heavy SongDetailPage.",
+      "problem": "Clicking 'Edit Work' on SongDetailPage caused a 1\u20133 second UI freeze. The CreativeDrawer (1408 lines, multiple tRPC queries) was statically imported and mounted synchronously on the already-heavy SongDetailPage.",
       "solution": "Replaced static import with React.lazy() to code-split the CreativeDrawer into its own 78KB chunk. Wrapped setEditingSong() in startTransition() so React yields to the browser during mount. Added Suspense boundary with a gold spinner fallback.",
       "files": [
         "client/src/contexts/WorkEditorContext.tsx"
@@ -67,7 +67,7 @@
       "date": "2026-08-01",
       "checkpointVersion": "91a11fdb",
       "category": "doctrine",
-      "problem": "VerifyPage — the highest-intent screen (QR scan destination) — had zero creator information, zero support action, and zero link to the creator's profile. The page proved the work existed but said nothing about the person who made it. Violated doctrine questions: attribution, support, discoverability.",
+      "problem": "VerifyPage \u2014 the highest-intent screen (QR scan destination) \u2014 had zero creator information, zero support action, and zero link to the creator's profile. The page proved the work existed but said nothing about the person who made it. Violated doctrine questions: attribution, support, discoverability.",
       "solution": "Added CreatorPanel component to VerifyPage: avatar with gold border, creator name, handle, bio/origin statement, work origin story in gold pull quote, Support Creator button (opens SupportCreatorDrawer), View Profile link. Extended getSongByWitnessId to return bio, originStatement, stripeAccountStatus.",
       "files": [
         "client/src/pages/VerifyPage.tsx",
@@ -108,7 +108,7 @@
       "checkpointVersion": "44c53c92",
       "category": "design_language",
       "problem": "Feed/social language detected in multiple places: 'Activity Feed' in DashboardPage, 'Unsubscribed from creator feed' in CreatorProfilePage. These phrases position Living Nexus as a social media platform rather than a registry and archive.",
-      "solution": "Replaced all feed/social language with cathedral doctrine language: 'Activity Feed' → 'Witness Activity', 'creator feed' → 'witness subscription'. Added DesignDriftScanner to detect future language drift automatically.",
+      "solution": "Replaced all feed/social language with cathedral doctrine language: 'Activity Feed' \u2192 'Witness Activity', 'creator feed' \u2192 'witness subscription'. Added DesignDriftScanner to detect future language drift automatically.",
       "files": [
         "client/src/pages/DashboardPage.tsx",
         "client/src/pages/CreatorProfilePage.tsx",
@@ -148,8 +148,8 @@
       "date": "2026-08-01",
       "checkpointVersion": "0c664466",
       "category": "creator_experience",
-      "problem": "WorkListRow action buttons (Save, Add to Collection, Support) used opacity-0 group-hover:opacity-100 — completely invisible to keyboard users and screen readers. Touch users on mobile never saw them because hover doesn't exist on touch.",
-      "solution": "Changed to sm:opacity-0 sm:group-hover:opacity-100 — always visible on mobile (no hover), hover-reveal only on desktop (sm: breakpoint). Added aria-label to all three buttons.",
+      "problem": "WorkListRow action buttons (Save, Add to Collection, Support) used opacity-0 group-hover:opacity-100 \u2014 completely invisible to keyboard users and screen readers. Touch users on mobile never saw them because hover doesn't exist on touch.",
+      "solution": "Changed to sm:opacity-0 sm:group-hover:opacity-100 \u2014 always visible on mobile (no hover), hover-reveal only on desktop (sm: breakpoint). Added aria-label to all three buttons.",
       "files": [
         "client/src/components/WorkListRow.tsx"
       ],
@@ -303,8 +303,8 @@
       "id": "LESSON-015",
       "date": "2026-08-18",
       "category": "architecture",
-      "problem": "The existing songsRouter is a critical compatibility façade across Work registration, Registry lookup, Explore, Player telemetry, collection behavior, media, and commerce. A broad router split would risk changing public procedure contracts or weakening creator/provenance custody before the target boundaries were proven.",
-      "solution": "Keeper-approved Slice 1 extracted only the read-only duplicate hash lookup into lookupExistingWorkByFileHash while retaining the identical protected songs.checkDuplicate façade, Zod input, response shape, no-match/own-match/other-creator behavior, and caller identity source. Added focused behavior, authorization, no-side-effect, full-suite, type, route-smoke, and database custody checks. The pattern is internal-helper-first with compatibility facades; it does not authorize further router separation.",
+      "problem": "The existing songsRouter is a critical compatibility fa\u00e7ade across Work registration, Registry lookup, Explore, Player telemetry, collection behavior, media, and commerce. A broad router split would risk changing public procedure contracts or weakening creator/provenance custody before the target boundaries were proven.",
+      "solution": "Keeper-approved Slice 1 extracted only the read-only duplicate hash lookup into lookupExistingWorkByFileHash while retaining the identical protected songs.checkDuplicate fa\u00e7ade, Zod input, response shape, no-match/own-match/other-creator behavior, and caller identity source. Added focused behavior, authorization, no-side-effect, full-suite, type, route-smoke, and database custody checks. The pattern is internal-helper-first with compatibility facades; it does not authorize further router separation.",
       "files": [
         "server/domains/registry/lookupExistingWorkByFileHash.ts",
         "server/routers/songs.ts",
@@ -349,7 +349,7 @@
       "date": "2026-08-18",
       "category": "architecture",
       "problem": "The Work lifecycle used status and isPublic as a synchronized public-projection invariant, but ordinary metadata mutation accepted status without synchronizing isPublic. Both CreativeDrawer and EditChapel exposed that path, producing the invalid but reachable Published/isPublic=false state. Public Explore/creator/guest Work readers excluded that state while canonical WID and Witness Registry readers still admitted it.",
-      "solution": "Keeper-approved Publication State Integrity Repair removed status from ordinary songs.updateMetadata input and persistence. CreativeDrawer and EditChapel now save metadata first and call the existing owner-gated songs.updateStatus authority only when lifecycle selection changes. Dedicated transition authority retains publication gates and synchronizes isPublic through isPublicForSongStatus. Focused tests prove Draft→Published, Published→Unlisted, Unlisted→Published, Draft/Published metadata saves, and status rejection through metadata. Existing divergent rows were read-only verified and deliberately not repaired.",
+      "solution": "Keeper-approved Publication State Integrity Repair removed status from ordinary songs.updateMetadata input and persistence. CreativeDrawer and EditChapel now save metadata first and call the existing owner-gated songs.updateStatus authority only when lifecycle selection changes. Dedicated transition authority retains publication gates and synchronizes isPublic through isPublicForSongStatus. Focused tests prove Draft\u2192Published, Published\u2192Unlisted, Unlisted\u2192Published, Draft/Published metadata saves, and status rejection through metadata. Existing divergent rows were read-only verified and deliberately not repaired.",
       "files": [
         "server/routers/songs.ts",
         "server/utils/db.ts",
@@ -373,7 +373,7 @@
       "id": "LESSON-018",
       "date": "2026-08-18",
       "category": "creator_experience",
-      "problem": "Direct Published registration and later Draft→Published transition had parallel readiness gates that could drift. The direct registration path omitted the partial-rights ownership requirement while the dedicated status authority enforced it. A blocked creator could receive inconsistent reasons depending on when they tried to publish.",
+      "problem": "Direct Published registration and later Draft\u2192Published transition had parallel readiness gates that could drift. The direct registration path omitted the partial-rights ownership requirement while the dedicated status authority enforced it. A blocked creator could receive inconsistent reasons depending on when they tried to publish.",
       "solution": "Keeper-approved Song Publication Fix introduced one pure publication-readiness evaluator shared by direct songs.upload Published registration and the existing owner-gated updateSongStatus transition. The evaluator returns one explicit, creator-actionable message listing full rights/license, bound cover, creator name/handle, bio/origin, profile photo, and testimony requirements. Existing UI error paths surface that message; WID, schema, Registry/provenance, storage, Explore predicates, routes, and existing Work rows remain unchanged.",
       "files": [
         "server/domains/work/publicationReadiness.ts",
@@ -573,7 +573,7 @@
       "date": "2026-09-13",
       "category": "creator-experience",
       "problem": "A technically correct creator-private Commission API is not usable when it requires a creator to know an opaque Commission identifier before selecting the audio they already own. Directly reusing a Work asset also risks silently mutating or reclassifying the canonical Work that stores it.",
-      "solution": "Expose a creator-private selector that reads only the authenticated creator’s persisted audio rows with valid `audio/{creatorId}/` keys, then starts and attaches an I1 Commission through the existing idempotent boundaries. The source Work remains untouched. The interface labels the action as private preparation and states that no Work, WID, publication, or AI context changes. Queue processing stays separate: a scheduler plan requires a task-UID-bound configuration, deployed callback verification, explicit cadence choice, safe no-op pause, and a separate operational authorization before any schedule exists.",
+      "solution": "Expose a creator-private selector that reads only the authenticated creator\u2019s persisted audio rows with valid `audio/{creatorId}/` keys, then starts and attaches an I1 Commission through the existing idempotent boundaries. The source Work remains untouched. The interface labels the action as private preparation and states that no Work, WID, publication, or AI context changes. Queue processing stays separate: a scheduler plan requires a task-UID-bound configuration, deployed callback verification, explicit cadence choice, safe no-op pause, and a separate operational authorization before any schedule exists.",
       "files": [
         "server/services/coreIngestion.ts",
         "server/routers/coreIngestion.ts",
@@ -697,7 +697,7 @@
       "id": "LESSON-031",
       "date": "2026-09-14",
       "category": "ux-reliability",
-      "problem": "Onboarding previously advanced optimistically after invoking persistence, hid field requirements behind a disabled Continue control, and gave no truthful confirmation that a creator’s progress had reached the database. This made a failed update difficult to distinguish from a completed save.",
+      "problem": "Onboarding previously advanced optimistically after invoking persistence, hid field requirements behind a disabled Continue control, and gave no truthful confirmation that a creator\u2019s progress had reached the database. This made a failed update difficult to distinguish from a completed save.",
       "solution": "Validate the current step before the mutation, render accessible field-specific errors and focus the first invalid control, then disable the applicable submit action with a visible saving state while the mutation is pending. Advance the step and mark it complete only after `mutateAsync` resolves; show a success toast only then, and retain the current step with a recovery toast on failure. Optional testimony and license paths may deliberately skip validation rather than bypassing persistence safety.",
       "files": [
         "client/src/lib/onboardingValidation.ts",
@@ -745,7 +745,7 @@
       "id": "LESSON-033",
       "date": "2026-09-14",
       "category": "structured-publication-integrity",
-      "problem": "Public MusicRecording output mapped the system-created Work timestamp to `datePublished`, conflating platform record establishment or registration-adjacent time with a creator’s original release declaration. A public audit surfaced 639 affected public records, alongside separate Registry projection conflicts and missing creator/technical metadata that must not be fabricated.",
+      "problem": "Public MusicRecording output mapped the system-created Work timestamp to `datePublished`, conflating platform record establishment or registration-adjacent time with a creator\u2019s original release declaration. A public audit surfaced 639 affected public records, alongside separate Registry projection conflicts and missing creator/technical metadata that must not be fabricated.",
       "solution": "Render historical date semantics from their existing creator-controlled fields only: `releaseDate` becomes `dateCreated` and `creatorReleaseDate` becomes `datePublished`. Preserve the exact persisted calendar day, omit unknown declarations, and show the system record date under an explicitly different label. Keep WID as an identifier; do not rewrite a Work, backfill metadata, change a Registry record, or treat audit media enrichment as a data mutation. Handle duplicate WIDs, 404s, Registry/page mismatches, and missing metadata through separate governed diagnostics.",
       "files": [
         "server/services/og.ts",
@@ -847,7 +847,7 @@
       "checkpointVersion": "",
       "category": "accessibility",
       "problem": "Explore Registry order used a native select whose popup could inherit a light system surface while retaining light cathedral option text, making the active registry order difficult to read on mobile.",
-      "solution": "Promoted the active Registry order control with cathedral gold and parchment contrast, set the native select color scheme to dark, and explicitly styled option surfaces. Audited database release readiness separately; recent schema objects exist in the live database, but SQL migrations 0134–0142 are absent from Drizzle journal metadata and require reconciliation before a reproducible public release.",
+      "solution": "Promoted the active Registry order control with cathedral gold and parchment contrast, set the native select color scheme to dark, and explicitly styled option surfaces. Audited database release readiness separately; recent schema objects exist in the live database, but SQL migrations 0134\u20130142 are absent from Drizzle journal metadata and require reconciliation before a reproducible public release.",
       "files": [
         "client/src/pages/ExplorePage.tsx",
         "server/tests/exploreSurfaceContract.test.ts",
@@ -1167,7 +1167,7 @@
     {
       "date": "2026-10-02",
       "category": "architecture",
-      "problem": "The Explore creator-card Witness action created a persisted subscription relationship without explaining that it preserves an ongoing relationship to a creator’s registered record. The profile command center also had no distinct view of those subscription-backed relationships.",
+      "problem": "The Explore creator-card Witness action created a persisted subscription relationship without explaining that it preserves an ongoing relationship to a creator\u2019s registered record. The profile command center also had no distinct view of those subscription-backed relationships.",
       "solution": "Added a concise Explore tooltip distinguishing Witnessing from a social follow, a protected subscription-backed creator directory, and a dedicated Profile Witnessing tab. The tab is intentionally separate from the legacy Witness Network so the two relationship systems are not conflated.",
       "files": [
         "client/src/pages/ExplorePage.tsx",
@@ -1262,6 +1262,27 @@
         "private-by-default",
         "receipt",
         "stewardship-profile"
+      ]
+    },
+    {
+      "id": "LESSON-055",
+      "date": "2026-10-04",
+      "category": "architecture",
+      "problem": "A PNA thread with deliberately attached Context sources could reject an ordinary Guide reply when remote selected-context permission was off. The server safeguard was correct, but the client attempted remote preparation whenever sources existed, contradicting the visible local-only state.",
+      "solution": "PNA now sends a normal thread reply without forwarding attached sources until the active Stewardship Profile explicitly permits remote selected-context use. The composer states that attached context remains private, offers an explicit permissions handoff, and server-side owner/profile/envelope checks remain mandatory whenever remote use is actually authorized.",
+      "files": [
+        "client/src/pages/PNAShellPage.tsx",
+        "client/src/components/pna/PNAComposerBar.tsx",
+        "server/tests/pnaGovernance.contract.test.ts"
+      ],
+      "score": 0,
+      "tags": [
+        "PNA",
+        "Context Envelope",
+        "consent",
+        "local-only fallback",
+        "creator control",
+        "remote context"
       ]
     }
   ]
