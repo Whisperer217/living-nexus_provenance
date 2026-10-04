@@ -15,6 +15,8 @@ The first delivered foundation intentionally covers the three approved interacti
 
 Still deferred: a full left-rail thread browser, Context Envelope persistence, Sources/Activity tabs, a shared artifact manifest, profile contracts, and any Libre WebUI/local-workspace handoff. Those require separate scoped decisions and must not be implied by the foundation.
 
+The exact proposed records, authorization gates, profile contracts, Artifact lifecycle, review flow, and migration sequence for the next PNA boundary are defined in [PNA Context Envelope, Stewardship Profile, and Artifact Manifest Specification](./PNA-CONTEXT-ENVELOPE-ARTIFACT-MANIFEST-SPEC.md). The specification remains proposed until its data/consent decisions are accepted; this link does not activate any of its behavior.
+
 ---
 
 ## North Star
