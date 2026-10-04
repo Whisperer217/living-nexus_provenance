@@ -7,7 +7,7 @@
  *  - Avatar portraits in the left Full Workspace drawer
  */
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useLocation, useSearch } from "wouter";
@@ -25,6 +25,9 @@ import NexusAvatarViewer from "@/components/NexusAvatarViewer";
 import { NexusContextPanel } from "@/components/NexusContextPanel";
 import { PNAVisualProposalCard, type PNAVisualProposal } from "@/components/PNAVisualProposalCard";
 import { PNAQuiverWorkspace } from "@/components/PNAQuiverWorkspace";
+import { PNACommandPalette } from "@/components/pna/PNACommandPalette";
+import { PNAWorkspaceRail } from "@/components/pna/PNAWorkspaceRail";
+import type { PNAMode, PNAWorkspaceArtifact, PNAWorkspaceSurface } from "@/components/pna/pnaWorkspaceTypes";
 import { SKIN_IMAGES } from "@/components/FloatingAvatar";
 import { PNA_PRODUCT } from "@/lib/loopProduct";
 import { consumePnaDiaryReload } from "@/lib/pnaDiary";
@@ -43,8 +46,6 @@ import {
 } from "@/lib/nexusContext";
 
 // ─── Stewardship modes ────────────────────────────────────────────────────────
-
-type PNAMode = "guide" | "conductor" | "witness" | "custodian" | "archivist" | "vision" | "research";
 
 const PNA_MODES = [
   { id: "guide" as PNAMode, label: "Guide", desc: "Creative direction and intent", icon: Zap, persona: "guide" as const },
@@ -89,6 +90,7 @@ const LS_CHAT_WIDTH = "ln-pna-chat-width";
 const LS_LAYOUT = "ln-pna-layout";
 const LS_DRAWER = "ln-pna-drawer-open";
 const LS_OPEN_NOTES = "ln-keeper-notes-open";
+const LS_WORKSPACE_SURFACE = "ln-pna-workspace-surface";
 
 interface Message {
   id: string;
@@ -150,6 +152,11 @@ export default function PNAShellPage() {
   const [popoutSize, setPopoutSize] = useState({ w: 440, h: 640 });
   const [contextRef, setContextRef] = useState<NexusContextRef | null>(null);
   const [contextSuggestion, setContextSuggestion] = useState<NexusContextSuggestion | null>(null);
+  const [workspaceSurface, setWorkspaceSurface] = useState<PNAWorkspaceSurface>(() => {
+    const saved = readString(LS_WORKSPACE_SURFACE, "conversation");
+    return saved === "context" || saved === "artifacts" ? saved : "conversation";
+  });
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const query = new URLSearchParams(search);
   const routeThreadId = query.get("thread");
   const showQuiver = query.get("view") === "quiver";
@@ -182,6 +189,7 @@ export default function PNAShellPage() {
   const appendThreadMessage = trpc.pnaThread.append.useMutation();
   const setThreadVisual = trpc.pnaThread.setVisualProposal.useMutation();
   const threadQuery = trpc.pnaThread.get.useQuery({ id: threadId ?? "" }, { enabled: Boolean(user && threadId) });
+  const threadListQuery = trpc.pnaThread.list.useQuery(undefined, { enabled: Boolean(user), staleTime: 60_000 });
   const setActiveSkin = trpc.keeper.setActiveSkin.useMutation({
     onSuccess: () => {
       utils.keeper.getProfile.invalidate();
@@ -281,6 +289,10 @@ export default function PNAShellPage() {
   useEffect(() => {
     try { localStorage.setItem(LS_DRAWER, sidebarCollapsed ? "1" : "0"); } catch { /* ignore */ }
   }, [sidebarCollapsed]);
+
+  useEffect(() => {
+    try { localStorage.setItem(LS_WORKSPACE_SURFACE, workspaceSurface); } catch { /* ignore */ }
+  }, [workspaceSurface]);
 
   // ADR-023 Phase 1: context remains session-only and click-to-open. A track
   // becoming contextual never changes playback or queue state on its own.
@@ -386,6 +398,7 @@ export default function PNAShellPage() {
   };
 
   const openThread = useCallback((id: string) => {
+    setWorkspaceSurface("conversation");
     setThreadHydrated(false);
     navigate(`/pna?thread=${encodeURIComponent(id)}`);
   }, [navigate]);
@@ -393,9 +406,10 @@ export default function PNAShellPage() {
   const startThread = useCallback(async (mode: PNAMode = activeMode) => {
     const created = await createThread.mutateAsync({ activeMode: mode });
     setMessages([]);
+    await utils.pnaThread.list.invalidate();
     openThread(created.id);
     return created.id;
-  }, [activeMode, createThread, openThread]);
+  }, [activeMode, createThread, openThread, utils]);
 
   const ensureThread = useCallback(async (mode: PNAMode) => threadId ?? startThread(mode), [threadId, startThread]);
 
@@ -426,6 +440,7 @@ export default function PNAShellPage() {
           timestamp: new Date(),
           visualProposal: { url: visual.url, prompt: text },
         }]);
+        await utils.pnaThread.list.invalidate();
         return;
       }
       const result = await chatMutation.mutateAsync({
@@ -445,6 +460,7 @@ export default function PNAShellPage() {
         mode: activeMode,
         timestamp: new Date(),
       }]);
+      await utils.pnaThread.list.invalidate();
     } catch (e: any) {
       toast.error(activeMode === "vision" ? getVisionPromptErrorMessage(e) : (e.message ?? "PNA unavailable"));
     } finally {
@@ -486,6 +502,25 @@ export default function PNAShellPage() {
     }
     await setActiveSkin.mutateAsync({ skinId });
   };
+
+  const visualArtifacts = useMemo<PNAWorkspaceArtifact[]>(() => messages
+    .filter((message): message is Message & { visualProposal: PNAVisualProposal } => Boolean(message.visualProposal))
+    .map((message) => ({
+      id: message.id,
+      createdAt: message.timestamp,
+      mode: message.mode,
+      proposal: message.visualProposal,
+    })), [messages]);
+
+  const focusComposer = useCallback(() => {
+    setWorkspaceSurface("conversation");
+    window.requestAnimationFrame(() => inputRef.current?.focus());
+  }, []);
+
+  const openWorkspaceSurface = useCallback((surface: PNAWorkspaceSurface) => {
+    setWorkspaceSurface(surface);
+    if (surface === "context" && !contextRef && nowPlaying) openNowPlayingContext();
+  }, [contextRef, nowPlaying, openNowPlayingContext]);
 
   // ── Auth gate ──────────────────────────────────────────────────────────────
   if (authLoading) {
@@ -621,6 +656,16 @@ export default function PNAShellPage() {
         </div>
       </div>
       <div className="flex items-center gap-1.5 flex-shrink-0">
+        <button
+          type="button"
+          onClick={() => setCommandPaletteOpen(true)}
+          className="min-h-8 px-2 py-1 rounded flex items-center gap-1"
+          style={{ fontSize: "var(--text-xs)", color: INK_MUTED, border: `1px solid ${PANEL_BORDER}`, fontFamily: "'Space Mono', monospace" }}
+          title="Open workspace command palette (Ctrl or Command K)"
+          aria-label="Open workspace command palette"
+        >
+          <Search size={11} /> COMMAND
+        </button>
         <button
           type="button"
           onClick={() => startThread()}
@@ -1160,204 +1205,206 @@ export default function PNAShellPage() {
     </div>
   );
 
+  const inspectionSurface = workspaceSurface === "artifacts" ? "artifacts" : "context";
+
+  const mobileSurfaceNavigation = (
+    <div className="grid grid-cols-3 gap-1 px-3 py-2 xl:hidden" role="tablist" aria-label="PNA workspace surfaces" style={{ borderBottom: `1px solid ${PANEL_BORDER}`, background: "var(--ln-panel)" }}>
+      {([
+        ["conversation", "Conversation", Sparkles],
+        ["context", "Context", Layers],
+        ["artifacts", "Artifacts", Image],
+      ] as const).map(([surface, label, Icon]) => {
+        const selected = workspaceSurface === surface;
+        return (
+          <button
+            key={surface}
+            type="button"
+            role="tab"
+            aria-selected={selected}
+            onClick={() => openWorkspaceSurface(surface)}
+            className="flex min-h-11 items-center justify-center gap-1.5 rounded-lg px-2 focus-visible:outline-none focus-visible:ring-2"
+            style={{
+              background: selected ? "color-mix(in srgb, var(--ln-gold) 15%, transparent)" : "transparent",
+              border: `1px solid ${selected ? "color-mix(in srgb, var(--ln-gold) 38%, transparent)" : "transparent"}`,
+              color: selected ? ACCENT : INK_MUTED,
+              fontFamily: "var(--font-display)",
+              fontSize: "var(--text-xs)",
+              letterSpacing: "0.08em",
+            }}
+          >
+            <Icon size={13} aria-hidden="true" />
+            {label.toUpperCase()}
+          </button>
+        );
+      })}
+    </div>
+  );
+
+  const rail = (mobile = false) => (
+    <PNAWorkspaceRail
+      mobile={mobile}
+      surface={inspectionSurface}
+      onSurfaceChange={openWorkspaceSurface}
+      context={contextRef}
+      suggestion={contextSuggestion}
+      nowPlaying={nowPlaying ? { ...nowPlaying, isPlaying: playerState.isPlaying } : null}
+      artifacts={visualArtifacts}
+      isSavingArtifact={saveQuiverAsset.isPending}
+      onOpenNowPlaying={openNowPlayingContext}
+      onCloseContext={closeContext}
+      onOpenContextReference={handleContextOpen}
+      onVerifyContext={handleContextVerify}
+      onPlayContext={handleContextPlay}
+      onSaveArtifact={handleSaveVisualProposal}
+      onOpenQuiver={() => navigate(threadId ? `/pna?view=quiver&thread=${encodeURIComponent(threadId)}` : "/pna?view=quiver")}
+    />
+  );
+
   // ── Main workspace ─────────────────────────────────────────────────────────
   return (
     <div
       className="flex h-[100dvh] overflow-hidden relative"
       style={{ background: STAGE_BG, fontFamily: "'Space Mono', monospace" }}
     >
-      {leftDrawer}
+      <div className="hidden h-full md:flex">{leftDrawer}</div>
 
       {layoutMode === "workspace" ? (
-        <>
-          {/* Stage / witness canvas */}
-          <div className="flex-1 min-w-0 relative hidden md:flex flex-col items-center justify-center px-6">
-            <div
-              className="relative overflow-hidden rounded-2xl w-[min(320px,28vw)] h-[min(420px,55vh)]"
-              style={{
-                border: `1px solid color-mix(in srgb, var(--ln-gold) 28%, transparent)`,
-                boxShadow: cinematic ? "0 0 80px color-mix(in srgb, var(--ln-gold) 18%, transparent)" : "0 20px 60px rgba(0,0,0,0.35)",
-                background: VOID,
-              }}
-            >
-              {/* Track art is the stage subject when music is bound; scholar is companion badge */}
-              {nowPlaying?.artUrl ? (
-                <img src={nowPlaying.artUrl} alt="" className="w-full h-full object-cover" />
-              ) : (
-                <img src={activeSkinImg} alt="" className="w-full h-full object-cover" />
-              )}
-              {nowPlaying?.artUrl && (
-                <div
-                  className="absolute bottom-3 left-3 w-14 h-18 overflow-hidden rounded-lg"
-                  style={{
-                    width: 56,
-                    height: 72,
-                    border: `1.5px solid color-mix(in srgb, var(--ln-gold) 50%, transparent)`,
-                    boxShadow: "0 8px 24px rgba(0,0,0,0.45)",
-                  }}
-                >
-                  <img src={activeSkinImg} alt="Active avatar" className="w-full h-full object-cover" />
-                </div>
-              )}
+        <main className="flex min-w-0 flex-1 flex-col">
+          <header className="flex min-h-14 items-center justify-between gap-3 px-4 xl:hidden" style={{ borderBottom: `1px solid ${PANEL_BORDER}`, background: "var(--ln-panel)" }}>
+            <div className="min-w-0">
+              <p className="truncate font-display text-[var(--text-sm)] tracking-[0.14em] uppercase" style={{ color: ACCENT }}>{PNA_PRODUCT.name}</p>
+              <p className="mt-0.5 truncate font-body text-[var(--text-xs)]" style={{ color: INK_MUTED }}>Private creator workspace · {currentMode.label}</p>
             </div>
-            <div className="mt-5 text-center max-w-sm">
-              <div style={{ fontFamily: "'Cinzel', serif", fontSize: "1.05rem", color: ACCENT }}>
-                {nowPlaying?.title ?? "Witness stage"}
-              </div>
-              <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "0.95rem", color: INK_MUTED, marginTop: 6, lineHeight: 1.6 }}>
-                {nowPlaying
-                  ? `${nowPlaying.artist ?? ""} · track art on stage · avatar stays as companion`
-                  : "Play music from Loop — cover art takes the stage; your avatar stays beside it"}
-              </div>
-            </div>
-            <div className="mt-4 flex items-center gap-2">
+            <div className="flex items-center gap-2">
               <button
                 type="button"
-                onClick={() => setLayoutMode("popout")}
-                className="px-3 py-1.5 rounded-lg flex items-center gap-1.5"
-                style={{ border: `1px solid ${PANEL_BORDER}`, color: INK_MUTED, fontSize: "0.45rem", letterSpacing: "0.08em" }}
+                onClick={() => setCommandPaletteOpen(true)}
+                className="flex min-h-11 items-center gap-2 rounded-lg px-3 focus-visible:outline-none focus-visible:ring-2"
+                style={{ border: `1px solid ${PANEL_BORDER}`, color: INK_MUTED, fontFamily: "var(--font-display)", fontSize: "var(--text-xs)", letterSpacing: "0.08em" }}
               >
-                <Maximize2 size={11} /> POP-OUT CHAT
+                <Search size={14} /> COMMAND
               </button>
               <button
                 type="button"
-                onClick={() => navigate("/explore")}
-                className="px-3 py-1.5 rounded-lg flex items-center gap-1.5"
-                style={{ border: "1px solid color-mix(in srgb, var(--ln-gold) 28%, transparent)", color: ACCENT, fontSize: "0.45rem", letterSpacing: "0.08em" }}
+                onClick={() => startThread()}
+                disabled={createThread.isPending}
+                className="flex min-h-11 items-center gap-2 rounded-lg px-3 disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2"
+                style={{ background: ACCENT, color: VOID, fontFamily: "var(--font-display)", fontSize: "var(--text-xs)", letterSpacing: "0.08em" }}
               >
-                <Music size={11} /> FIND MUSIC
+                <Plus size={14} /> NEW
               </button>
             </div>
-          </div>
+          </header>
 
-          {/* Resize handle + docked chat */}
-          <div className="flex h-full flex-shrink-0" style={{ width: chatWidth, maxWidth: "100%" }}>
-            <button
-              type="button"
-              aria-label="Resize chat"
-              className="w-2 h-full flex items-center justify-center cursor-col-resize flex-shrink-0"
-              style={{ background: "rgba(196,154,40,0.06)", borderLeft: "1px solid rgba(196,154,40,0.14)" }}
-              onMouseDown={(e) => {
-                resizingRef.current = { startX: e.clientX, startW: chatWidth };
-              }}
+          {mobileSurfaceNavigation}
+
+          <div className="flex min-h-0 flex-1">
+            <section className="relative hidden min-w-0 flex-1 flex-col items-center justify-center px-6 2xl:flex" aria-label="PNA workspace canvas">
+              <div
+                className="relative h-[min(420px,55vh)] w-[min(320px,28vw)] overflow-hidden rounded-2xl"
+                style={{
+                  border: `1px solid color-mix(in srgb, var(--ln-gold) 28%, transparent)`,
+                  boxShadow: cinematic ? "0 0 80px color-mix(in srgb, var(--ln-gold) 18%, transparent)" : "0 20px 60px rgba(0,0,0,0.35)",
+                  background: VOID,
+                }}
+              >
+                {nowPlaying?.artUrl ? (
+                  <img src={nowPlaying.artUrl} alt="" className="h-full w-full object-cover" />
+                ) : (
+                  <img src={activeSkinImg} alt="" className="h-full w-full object-cover" />
+                )}
+                {nowPlaying?.artUrl && (
+                  <div
+                    className="absolute bottom-3 left-3 overflow-hidden rounded-lg"
+                    style={{ width: 56, height: 72, border: `1.5px solid color-mix(in srgb, var(--ln-gold) 50%, transparent)`, boxShadow: "0 8px 24px rgba(0,0,0,0.45)" }}
+                  >
+                    <img src={activeSkinImg} alt="Active avatar" className="h-full w-full object-cover" />
+                  </div>
+                )}
+              </div>
+              <div className="mt-5 max-w-sm text-center">
+                <p className="font-display text-[var(--text-h4)]" style={{ color: ACCENT }}>{nowPlaying?.title ?? "Private working canvas"}</p>
+                <p className="mt-2 font-editorial text-[var(--text-base)] leading-relaxed" style={{ color: INK_MUTED }}>
+                  {nowPlaying ? `${nowPlaying.artist ?? ""} · inspect its context or hold it beside your private thread.` : "Select a Work context when it should inform this private thread. Nothing is attached automatically."}
+                </p>
+              </div>
+              <div className="mt-4 flex items-center gap-2">
+                <button type="button" onClick={() => openWorkspaceSurface("context")} className="flex min-h-11 items-center gap-2 rounded-lg px-3 focus-visible:outline-none focus-visible:ring-2" style={{ border: `1px solid ${PANEL_BORDER}`, color: INK_MUTED, fontFamily: "var(--font-display)", fontSize: "var(--text-xs)", letterSpacing: "0.08em" }}>
+                  <Layers size={13} /> INSPECT CONTEXT
+                </button>
+                <button type="button" onClick={() => setLayoutMode("popout")} className="flex min-h-11 items-center gap-2 rounded-lg px-3 focus-visible:outline-none focus-visible:ring-2" style={{ border: "1px solid color-mix(in srgb, var(--ln-gold) 28%, transparent)", color: ACCENT, fontFamily: "var(--font-display)", fontSize: "var(--text-xs)", letterSpacing: "0.08em" }}>
+                  <Maximize2 size={13} /> POP OUT
+                </button>
+              </div>
+            </section>
+
+            <div
+              className={`${workspaceSurface === "conversation" ? "flex" : "hidden"} min-w-0 flex-1 xl:flex xl:flex-none xl:w-[var(--pna-chat-width)]`}
+              style={{ "--pna-chat-width": `${chatWidth}px` } as React.CSSProperties}
             >
-              <GripVertical size={12} style={{ color: "rgba(196,154,40,0.45)" }} />
-            </button>
-            <div className="flex-1 min-w-0 h-full" style={{ borderLeft: "1px solid rgba(196,154,40,0.12)" }}>
-              {chatColumn}
+              <div className="hidden h-full w-2 flex-shrink-0 items-center justify-center xl:flex" style={{ background: "color-mix(in srgb, var(--ln-gold) 6%, transparent)", borderLeft: `1px solid ${PANEL_BORDER}` }}>
+                <button
+                  type="button"
+                  aria-label="Resize conversation column"
+                  className="h-full w-full cursor-col-resize focus-visible:outline-none focus-visible:ring-2"
+                  onMouseDown={(event) => { resizingRef.current = { startX: event.clientX, startW: chatWidth }; }}
+                >
+                  <GripVertical size={12} style={{ color: "var(--ln-gold-dim)" }} />
+                </button>
+              </div>
+              <div className="min-w-0 flex-1" style={{ borderLeft: `1px solid ${PANEL_BORDER}` }}>{chatColumn}</div>
             </div>
+
+            <div className="hidden h-full w-[320px] flex-shrink-0 xl:flex">{rail()}</div>
+            <div className={`${workspaceSurface === "conversation" ? "hidden" : "flex"} min-h-0 flex-1 xl:hidden`}>{rail(true)}</div>
           </div>
-          {contextRef && (
-            <div className="hidden 2xl:flex h-full w-[300px] flex-shrink-0">
-              <NexusContextPanel
-                context={contextRef}
-                suggestion={contextSuggestion}
-                nowPlaying={nowPlaying ? { ...nowPlaying, isPlaying: playerState.isPlaying } : null}
-                onClose={closeContext}
-                onOpen={handleContextOpen}
-                onVerify={handleContextVerify}
-                onPlay={handleContextPlay}
-              />
-            </div>
-          )}
-        </>
+        </main>
       ) : (
-        <>
-          {/* Pop-out stage fills remaining space */}
-          <div className="flex-1 min-w-0 relative flex flex-col items-center justify-center px-4">
-            <div
-              className="relative overflow-hidden rounded-2xl w-[min(360px,40vw)] h-[min(460px,58vh)]"
-              style={{
-                border: "1px solid color-mix(in srgb, var(--ln-gold) 20%, transparent)",
-                boxShadow: "0 0 80px color-mix(in srgb, var(--ln-gold) 12%, transparent)",
-                background: VOID,
-              }}
-            >
-              {nowPlaying?.artUrl ? (
-                <img src={nowPlaying.artUrl} alt="" className="w-full h-full object-cover" />
-              ) : (
-                <img src={activeSkinImg} alt="" className="w-full h-full object-cover" />
-              )}
-              {nowPlaying?.artUrl && (
-                <div
-                  className="absolute bottom-3 left-3 overflow-hidden rounded-lg"
-                  style={{
-                    width: 56,
-                    height: 72,
-                    border: "1.5px solid color-mix(in srgb, var(--ln-gold) 50%, transparent)",
-                    boxShadow: "0 8px 24px rgba(0,0,0,0.45)",
-                  }}
-                >
-                  <img src={activeSkinImg} alt="Active avatar" className="w-full h-full object-cover" />
-                </div>
-              )}
-            </div>
-            <div className="mt-4 text-center">
-              <div style={{ fontFamily: "'Cinzel', serif", fontSize: "1rem", color: ACCENT }}>
-                {nowPlaying?.title ?? "Pop-out chat active"}
-              </div>
-              <div style={{ fontSize: "0.55rem", color: INK_MUTED, marginTop: 4, fontFamily: "'Space Mono', monospace" }}>
-                Drag the chat · resize from corner · dock anytime
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={() => setLayoutMode("workspace")}
-              className="mt-4 px-3 py-1.5 rounded-lg flex items-center gap-1.5"
-              style={{ border: `1px solid ${PANEL_BORDER}`, color: INK_MUTED, fontSize: "0.45rem" }}
-            >
-              <Minimize2 size={11} /> DOCK CHAT
-            </button>
+        <main className="flex min-w-0 flex-1 flex-col items-center justify-center px-4 relative">
+          <div
+            className="relative h-[min(460px,58vh)] w-[min(360px,80vw)] overflow-hidden rounded-2xl"
+            style={{ border: "1px solid color-mix(in srgb, var(--ln-gold) 20%, transparent)", boxShadow: "0 0 80px color-mix(in srgb, var(--ln-gold) 12%, transparent)", background: VOID }}
+          >
+            {nowPlaying?.artUrl ? <img src={nowPlaying.artUrl} alt="" className="h-full w-full object-cover" /> : <img src={activeSkinImg} alt="" className="h-full w-full object-cover" />}
           </div>
+          <div className="mt-4 text-center">
+            <p className="font-display text-[var(--text-h4)]" style={{ color: ACCENT }}>{nowPlaying?.title ?? "Pop-out chat active"}</p>
+            <p className="mt-1 font-body text-[var(--text-sm)]" style={{ color: INK_MUTED }}>Drag the conversation, resize from its corner, or dock when ready.</p>
+          </div>
+          <button type="button" onClick={() => setLayoutMode("workspace")} className="mt-4 flex min-h-11 items-center gap-2 rounded-lg px-3 focus-visible:outline-none focus-visible:ring-2" style={{ border: `1px solid ${PANEL_BORDER}`, color: INK_MUTED, fontFamily: "var(--font-display)", fontSize: "var(--text-xs)", letterSpacing: "0.08em" }}>
+            <Minimize2 size={13} /> DOCK CONVERSATION
+          </button>
 
-          {/* Floating chat panel */}
           <div
             className="fixed z-[420] flex flex-col overflow-hidden rounded-2xl shadow-2xl"
-            style={{
-              left: popoutPos.x,
-              top: popoutPos.y,
-              width: popoutSize.w,
-              height: popoutSize.h,
-              border: "1px solid color-mix(in srgb, var(--ln-gold) 28%, transparent)",
-              boxShadow: "0 24px 80px rgba(0,0,0,0.55)",
-            }}
+            style={{ left: popoutPos.x, top: popoutPos.y, width: popoutSize.w, height: popoutSize.h, border: "1px solid color-mix(in srgb, var(--ln-gold) 28%, transparent)", boxShadow: "0 24px 80px rgba(0,0,0,0.55)" }}
           >
             {chatColumn}
-            <button
-              type="button"
-              aria-label="Resize pop-out"
-              className="absolute bottom-1 right-1 w-5 h-5 cursor-se-resize"
-              style={{ color: "rgba(196,154,40,0.55)" }}
-              onMouseDown={(e) => {
-                e.preventDefault();
-                popoutResizeRef.current = {
-                  startX: e.clientX,
-                  startY: e.clientY,
-                  origW: popoutSize.w,
-                  origH: popoutSize.h,
-                };
-              }}
-            >
+            <button type="button" aria-label="Resize pop-out conversation" className="absolute bottom-1 right-1 h-5 w-5 cursor-se-resize" style={{ color: "var(--ln-gold-dim)" }} onMouseDown={(event) => { event.preventDefault(); popoutResizeRef.current = { startX: event.clientX, startY: event.clientY, origW: popoutSize.w, origH: popoutSize.h }; }}>
               <GripVertical size={14} />
             </button>
           </div>
-        </>
+        </main>
       )}
-      {contextRef && (
-        <div
-          className="fixed inset-0 z-50 2xl:hidden"
-          role="presentation"
-          onMouseDown={(event) => {
-            if (event.target === event.currentTarget) closeContext();
-          }}
-          style={{ background: "color-mix(in srgb, var(--ln-void) 54%, transparent)" }}
-        >
-          <div
-            className="absolute inset-x-3 top-16 bottom-4"
-            role="dialog"
-            aria-modal="true"
-            aria-label="Nexus Context Canvas"
-          >
+
+      <PNACommandPalette
+        open={commandPaletteOpen}
+        onOpenChange={setCommandPaletteOpen}
+        modes={PNA_MODES}
+        activeMode={activeMode}
+        threads={threadListQuery.data ?? []}
+        activeThreadId={threadId}
+        onCreateThread={() => { void startThread(); }}
+        onSelectThread={openThread}
+        onSelectMode={(mode) => { setActiveMode(mode); focusComposer(); }}
+        onOpenSurface={openWorkspaceSurface}
+        onFocusComposer={focusComposer}
+        onNavigate={(href) => navigate(href === "/pna?view=quiver" && threadId ? `${href}&thread=${encodeURIComponent(threadId)}` : href)}
+      />
+
+      {layoutMode !== "workspace" && contextRef && (
+        <div className="fixed inset-0 z-50 xl:hidden" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) closeContext(); }} style={{ background: "color-mix(in srgb, var(--ln-void) 54%, transparent)" }}>
+          <div className="absolute inset-x-3 bottom-4 top-16" role="dialog" aria-modal="true" aria-label="Nexus Context Canvas">
             <NexusContextPanel
               context={contextRef}
               suggestion={contextSuggestion}

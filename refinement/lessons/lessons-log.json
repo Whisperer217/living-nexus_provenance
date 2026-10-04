@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-10-03T15:16:26.122Z",
-  "totalLessons": 52,
+  "lastUpdated": "2026-10-04T02:02:34.620Z",
+  "totalLessons": 53,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -1208,6 +1208,31 @@
         "mobile"
       ],
       "id": "LESSON-052"
+    },
+    {
+      "id": "LESSON-053",
+      "date": "2026-10-03",
+      "category": "creator_experience",
+      "problem": "The PNA private workspace had owner-scoped threads, private visual proposals, and a contextual Work panel, but those capabilities were difficult to discover and the context panel vanished below ultra-wide widths. Mobile risked inheriting a squeezed desktop workspace.",
+      "solution": "Reused the existing cmdk, pnaThread.list, NexusContextPanel, and private Quiver proposal flow to add a keyboard-first command palette, inspectable Context and Artifacts rail, and a 44px mobile Conversation/Context/Artifacts switch. The implementation preserves explicit save-to-Quiver consent and adds no Registry, WID, provider, or publication authority.",
+      "files": [
+        "client/src/pages/PNAShellPage.tsx",
+        "client/src/components/pna/PNACommandPalette.tsx",
+        "client/src/components/pna/PNAWorkspaceRail.tsx",
+        "client/src/components/pna/pnaWorkspaceTypes.ts",
+        "server/tests/pnaWorkspaceFoundation.contract.test.ts",
+        "docs/lnls/architecture/PNA-WORKSPACE-EXPERIENCE-REDESIGN.md"
+      ],
+      "score": 0,
+      "tags": [
+        "pna",
+        "cmdk",
+        "private-threads",
+        "context-rail",
+        "artifacts",
+        "mobile",
+        "creator-agency"
+      ]
     }
   ]
 }

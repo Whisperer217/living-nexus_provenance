@@ -1,3 +1,4 @@
+import React from "react";
 import { Check, ExternalLink, Image, Loader2, Save } from "lucide-react";
 
 export interface PNAVisualProposal {

@@ -1,9 +1,19 @@
 # PNA Workspace Experience Redesign
 
-**Status:** Proposed — design and architecture map only. No PNA interface replacement, Libre WebUI deployment, schema change, or external connector is activated by this record.
+**Status:** Partially implemented — workspace foundation delivered 2026-10-03. No Libre WebUI deployment, schema change, external connector, model-provider change, WID issuance, Registry mutation, or publication is activated by this record.
 
 **Date:** 2026-10-03  
 **Scope:** Evolve the existing PNA from a visually rich chat surface into a calm, durable creator workspace while preserving Living Nexus identity, WID authority, creator consent, and provenance boundaries.
+
+## Implementation record — Workspace Foundation
+
+The first delivered foundation intentionally covers the three approved interaction seams rather than claiming the complete redesign:
+
+- **Command palette:** `cmdk` now opens existing private thread history, stewardship profiles, the composer, Context, Artifacts, Quiver, notes, and archive destinations. It reuses the owner-scoped `pnaThread.list` query; it creates no new data authority.
+- **Inspectable right rail:** Context makes the active session source and existing read-only `NexusContextPanel` visible; Artifacts presents persisted private visual proposals through the existing explicit **Save to Quiver privately** decision. Neither surface registers, seals, or publishes a Work.
+- **Mobile surface model:** below `xl`, creators select one deliberate **Conversation / Context / Artifacts** surface at a time with 44px controls, rather than receiving a squeezed desktop rail.
+
+Still deferred: a full left-rail thread browser, Context Envelope persistence, Sources/Activity tabs, a shared artifact manifest, profile contracts, and any Libre WebUI/local-workspace handoff. Those require separate scoped decisions and must not be implied by the foundation.
 
 ---
 
