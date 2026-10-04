@@ -6,6 +6,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import MainLayout from "./components/layout/MainLayout";
 import QueueLoader from "./components/QueueLoader";
 import { WhatsNewModal } from "./components/WhatsNewModal";
+import { PNAServiceFrame } from "./components/pna/PNAServiceFrame";
 import WelcomeModal from "./components/WelcomeModal";
 import { TosAcceptanceModal } from "./components/TosAcceptanceModal";
 import { CommunityToastProvider } from "./components/CommunityToast";
@@ -164,6 +165,29 @@ function PageLoader() {
   );
 }
 
+function isPNAServiceLocation(location: string, hostname: string): boolean {
+  const isPNASubdomain = hostname.split(".")[0]?.toLowerCase() === "pna";
+  return isPNASubdomain || location === "/pna" || location.startsWith("/pna/") || location === "/settings/stewardship";
+}
+
+/**
+ * Both PNA entry points use the same private-service frame. The public site
+ * MainLayout owns discovery chrome and its global player; PNA owns its own
+ * navigation, inspection, and thread-bound playback surface.
+ */
+function PNAServiceRouter() {
+  const [location] = useLocation();
+  const isStewardship = location === "/settings/stewardship";
+
+  return (
+    <PNAServiceFrame surface={isStewardship ? "settings" : "workspace"}>
+      <Suspense fallback={<PageLoader />}>
+        {isStewardship ? <PNASettingsPage /> : <PNAShellPage />}
+      </Suspense>
+    </PNAServiceFrame>
+  );
+}
+
 /**
  * Closes all overlays on every route change.
  * Prevents stale scroll locks surviving navigation — critical on mobile.
@@ -250,11 +274,7 @@ function Router() {
 
   // PNA subdomain — render creator workspace directly, no MainLayout
   if (isPNASubdomain) {
-    return (
-      <Suspense fallback={<PageLoader />}>
-        <PNAShellPage />
-      </Suspense>
-    );
+    return <PNAServiceRouter />;
   }
 
   // API subdomain — redirect to developer dashboard
@@ -291,6 +311,9 @@ function Router() {
         <Route path="/admin" component={AdminControlPlanePage} />
         {/* DIAGNOSTIC — Strip to Bone: zero nav infrastructure, raw React only */}
         <Route path="/diag/strip-to-bone" component={StripToBone} />
+        {/* PNA is a focused creator service, not an ordinary discovery page. */}
+        <Route path="/pna"><PNAServiceRouter /></Route>
+        <Route path="/settings/stewardship"><PNAServiceRouter /></Route>
 
         {/* App pages inside MainLayout */}
         <Route>
@@ -362,7 +385,6 @@ function Router() {
                 <Route path="/settings/billing" component={LivingArchiveBillingPage} />
                 <Route path="/settings/playback" component={PlaybackSettingsPage} />
                 <Route path="/settings/payment-methods" component={PaymentMethodsPage} />
-                <Route path="/settings/stewardship" component={PNASettingsPage} />
                 <Route path="/prompt/:token" component={SharedPromptPage} />
                 <Route path="/terms/compare" component={TosComparePage} />
                 <Route path="/terms" component={TermsPage} />
@@ -381,7 +403,6 @@ function Router() {
                 <Route path="/store"><Redirect to="/avatar-registry" /></Route>
                 <Route path="/marketplace"><Redirect to="/avatar-registry" /></Route>
                 <Route path="/avatar-registry" component={AvatarMarketplacePage} />
-                <Route path="/pna" component={PNAShellPage} />
                 <Route path="/distribute" component={DistributionPage} />
                 <Route path="/identity/:id" component={CreatorIdentityPage} />
                 <Route path="/domain"><Redirect to="/manage" /></Route>
@@ -425,8 +446,11 @@ function Router() {
 }
 
 export default function App() {
+  const [location] = useLocation();
   const pathname = typeof window !== "undefined" ? window.location.pathname : "";
+  const hostname = typeof window !== "undefined" ? window.location.hostname : "";
   const isSpatialRegistryMock = pathname === "/prototype/spatial-registry";
+  const isPNAService = isPNAServiceLocation(location, hostname);
   const [splashDone, setSplashDone] = useState(() => {
     return isSpatialRegistryMock || !shouldRenderCinematicSplash(pathname, shouldShowSplash());
   });
@@ -445,7 +469,7 @@ export default function App() {
         <HarmonicProvider>
           <AmbientPlayerProvider>
           <QueueLoader />
-          {!isSpatialRegistryMock && <WhatsNewModal />}
+          {!isSpatialRegistryMock && !isPNAService && <WhatsNewModal />}
           {!isSpatialRegistryMock && <TosAcceptanceModal />}
           {!isSpatialRegistryMock && <WelcomeModal />}
           <CommunityToastProvider />
@@ -466,10 +490,10 @@ export default function App() {
           <OverlayRouteGuard />
           <ScrollRestorationManager />
           <QrScanLogger />
-          {/* PNA stewarded: Keeper Avatar on /pna · /keeper · /avatar-registry (and pna subdomain) — not Loop chrome */}
-          {!isSpatialRegistryMock && <KeeperAvatarWidget />}
-          {!isSpatialRegistryMock && <ProvenanceUploadEngine />}
-          {!isSpatialRegistryMock && <PWAInstallBanner />}
+          {/* PNA owns its focused service chrome; public global overlays stay outside. */}
+          {!isSpatialRegistryMock && !isPNAService && <KeeperAvatarWidget />}
+          {!isSpatialRegistryMock && !isPNAService && <ProvenanceUploadEngine />}
+          {!isSpatialRegistryMock && !isPNAService && <PWAInstallBanner />}
           <Router />
           </AmbientPlayerProvider>
         </HarmonicProvider>

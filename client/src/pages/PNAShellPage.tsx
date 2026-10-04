@@ -157,6 +157,9 @@ export default function PNAShellPage() {
   const showQuiver = query.get("view") === "quiver";
   const [threadId, setThreadId] = useState<string | null>(routeThreadId);
   const [threadHydrated, setThreadHydrated] = useState(false);
+  const pnaSettingsHref = threadId
+    ? `/settings/stewardship?returnTo=${encodeURIComponent(`/pna?thread=${threadId}`)}`
+    : "/settings/stewardship";
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -421,7 +424,7 @@ export default function PNAShellPage() {
     if (!text || isLoading || !user) return;
     if (activeProfile && !activeProfile.isEnabled) {
       toast.error(`${activeProfile.label} is disabled in Stewardship settings.`);
-      navigate("/settings/stewardship");
+      navigate(pnaSettingsHref);
       return;
     }
     if (activeMode === "vision" && isVisionPromptOverLimit(text)) {
@@ -774,7 +777,7 @@ export default function PNAShellPage() {
       onKeyDown={handleKeyDown}
       onSelectProfile={(mode) => { setActiveMode(mode); focusComposer(); }}
       onAttachContext={() => { void handleAttachNowPlaying(); }}
-      onOpenSettings={() => navigate("/settings/stewardship")}
+      onOpenSettings={() => navigate(pnaSettingsHref)}
       onSend={() => { void handleSend(); }}
     />
   );
@@ -823,7 +826,13 @@ export default function PNAShellPage() {
       onSelectThread={openThread}
       onOpenCommand={() => setCommandPaletteOpen(true)}
       onOpenAppearance={() => navigate("/keeper")}
-      onNavigate={(href) => navigate(href === "/pna?view=quiver" && threadId ? `${href}&thread=${encodeURIComponent(threadId)}` : href)}
+      onNavigate={(href) => navigate(
+        href === "/settings/stewardship"
+          ? pnaSettingsHref
+          : href === "/pna?view=quiver" && threadId
+            ? `${href}&thread=${encodeURIComponent(threadId)}`
+            : href,
+      )}
     />
   );
 
@@ -888,7 +897,7 @@ export default function PNAShellPage() {
       onPreserveArtifact={(id) => handleArtifactAction(id, "preserve")}
       onDiscardArtifact={(id) => handleArtifactAction(id, "discard")}
       onOpenQuiver={() => navigate(threadId ? `/pna?view=quiver&thread=${encodeURIComponent(threadId)}` : "/pna?view=quiver")}
-      onOpenStewardshipSettings={() => navigate("/settings/stewardship")}
+      onOpenStewardshipSettings={() => navigate(pnaSettingsHref)}
     />
   );
 

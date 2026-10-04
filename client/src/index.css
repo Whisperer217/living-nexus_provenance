@@ -5243,3 +5243,104 @@ button:active .ln-witness-sigil,
     scroll-behavior: auto !important;
   }
 }
+
+
+/* ── PNA focused service frame ────────────────────────────────────────────
+   PNA owns its private workspace chrome. The public app's rails, player,
+   assistant and release modal are intentionally absent on PNA service routes. */
+.pna-service-frame {
+  min-height: 100dvh;
+  background: var(--ln-void);
+  color: var(--ln-bone);
+}
+
+.pna-service-frame--workspace {
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.pna-service-frame--settings {
+  min-height: 100dvh;
+  background:
+    radial-gradient(circle at top right, color-mix(in srgb, var(--ln-gold) 7%, transparent), transparent 34rem),
+    var(--ln-void);
+}
+
+.pna-service-frame__bar {
+  display: flex;
+  min-height: 72px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.875rem clamp(1rem, 3vw, 2.5rem);
+  border-bottom: 1px solid var(--ln-panel-border);
+  background: color-mix(in srgb, var(--ln-panel) 94%, var(--ln-void));
+}
+
+.pna-service-frame__seal {
+  display: flex;
+  width: 2.5rem;
+  height: 2.5rem;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid color-mix(in srgb, var(--ln-gold) 30%, var(--ln-panel-border));
+  border-radius: 0.625rem;
+  background: color-mix(in srgb, var(--ln-gold) 9%, transparent);
+  color: var(--ln-gold);
+}
+
+.pna-service-frame__action {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px solid var(--ln-panel-border);
+  border-radius: 0.625rem;
+  padding: 0.625rem 0.75rem;
+  color: var(--ln-bone);
+  font-family: var(--font-display);
+  font-size: var(--text-xs);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  transition: border-color 160ms ease, background-color 160ms ease, color 160ms ease, transform 160ms ease;
+}
+
+.pna-service-frame__action:hover {
+  border-color: color-mix(in srgb, var(--ln-gold) 42%, var(--ln-panel-border));
+  background: color-mix(in srgb, var(--ln-gold) 8%, transparent);
+  color: var(--ln-parchment);
+  transform: translateY(-1px);
+}
+
+.pna-service-frame__action:focus-visible {
+  outline: 2px solid var(--ln-gold-hot);
+  outline-offset: 3px;
+}
+
+@media (max-width: 640px) {
+  .pna-service-frame__bar {
+    align-items: flex-start;
+    padding-block: 0.75rem;
+  }
+
+  .pna-service-frame__bar nav {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .pna-service-frame__action {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pna-service-frame__action {
+    transition: none;
+  }
+
+  .pna-service-frame__action:hover {
+    transform: none;
+  }
+}

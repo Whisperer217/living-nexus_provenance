@@ -1,5 +1,4 @@
 import { useMemo } from "react";
-import { Link, useLocation } from "wouter";
 import { Archive, BrainCircuit, Eye, Image, Layers, Music2, ShieldCheck, Sparkles, Wand2, Zap } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -15,17 +14,6 @@ const ICONS: Record<PNAProfileId, typeof Sparkles> = {
   vision: Image,
   research: BrainCircuit,
 };
-
-function SettingsSubNav() {
-  const [location] = useLocation();
-  const items = [
-    ["/settings/billing", "Billing"],
-    ["/settings/playback", "Playback"],
-    ["/settings/payment-methods", "Payment Methods"],
-    ["/settings/stewardship", "PNA Stewardship"],
-  ] as const;
-  return <nav className="flex flex-wrap gap-1" aria-label="Settings sections">{items.map(([path, label]) => <Link key={path} href={path} className="flex min-h-10 items-center rounded-lg px-3 font-display text-[var(--text-xs)] tracking-[0.08em] uppercase focus-visible:outline-none focus-visible:ring-2" style={{ background: location === path ? "color-mix(in srgb, var(--ln-gold) 14%, transparent)" : "transparent", border: `1px solid ${location === path ? "color-mix(in srgb, var(--ln-gold) 34%, transparent)" : "transparent"}`, color: location === path ? "var(--ln-gold)" : "var(--ln-smoke)" }}>{label}</Link>)}</nav>;
-}
 
 function Toggle({ checked, label, description, disabled, onChange }: { checked: boolean; label: string; description: string; disabled?: boolean; onChange: (next: boolean) => void }) {
   return <button type="button" role="switch" aria-checked={checked} disabled={disabled} onClick={() => onChange(!checked)} className="flex w-full items-start gap-3 rounded-lg p-3 text-left transition-colors disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2" style={{ background: "var(--ln-iron)", border: "1px solid var(--ln-panel-border)" }}><span className="mt-0.5 flex h-5 w-9 flex-shrink-0 items-center rounded-full p-0.5 transition-colors" style={{ background: checked ? "var(--ln-gold)" : "var(--ln-ash)" }}><span className="h-4 w-4 rounded-full bg-white transition-transform" style={{ transform: checked ? "translateX(16px)" : "translateX(0)" }} /></span><span><span className="block font-display text-[var(--text-xs)] tracking-[0.1em] uppercase" style={{ color: "var(--ln-bone)" }}>{label}</span><span className="mt-1 block font-body text-[var(--text-sm)] leading-relaxed" style={{ color: "var(--ln-smoke)" }}>{description}</span></span></button>;
@@ -51,8 +39,7 @@ export default function PNASettingsPage() {
 
   return <main className="min-h-screen px-4 py-8 sm:px-7 lg:px-10" style={{ background: "var(--ln-void)", color: "var(--ln-parchment)" }}>
     <div className="mx-auto max-w-6xl">
-      <SettingsSubNav />
-      <header className="mt-8 max-w-3xl"><div className="flex items-center gap-2 font-display text-[var(--text-xs)] tracking-[0.16em] uppercase" style={{ color: "var(--ln-gold)" }}><Wand2 size={14} /> PNA Stewardship</div><h1 className="mt-3 font-editorial text-[var(--text-h1)] leading-[0.95]" style={{ color: "var(--ln-parchment)" }}>Choose what each PNA Profile may do.</h1><p className="mt-4 font-body text-[var(--text-lg)] leading-relaxed" style={{ color: "var(--ln-bone)" }}>Profiles are creator-controlled roles, not autonomous authorities. A PNA profile never registers a Work, issues a Witness ID, changes testimony, publishes, licenses, or spends on your behalf.</p></header>
+      <header className="max-w-3xl"><div className="flex items-center gap-2 font-display text-[var(--text-xs)] tracking-[0.16em] uppercase" style={{ color: "var(--ln-gold)" }}><Wand2 size={14} /> PNA Stewardship</div><h1 className="mt-3 font-editorial text-[var(--text-h1)] leading-[0.95]" style={{ color: "var(--ln-parchment)" }}>Choose what each PNA Profile may do.</h1><p className="mt-4 font-body text-[var(--text-lg)] leading-relaxed" style={{ color: "var(--ln-bone)" }}>Profiles are creator-controlled roles, not autonomous authorities. A PNA profile never registers a Work, issues a Witness ID, changes testimony, publishes, licenses, or spends on your behalf.</p></header>
       <section className="mt-7 rounded-xl p-4 sm:p-5" style={{ background: "color-mix(in srgb, var(--ln-gold) 8%, var(--ln-coal))", border: "1px solid color-mix(in srgb, var(--ln-gold) 26%, var(--ln-panel-border))" }}><div className="flex gap-3"><ShieldCheck className="mt-0.5 flex-shrink-0" size={18} style={{ color: "var(--ln-gold)" }} /><div><h2 className="font-display text-[var(--text-sm)] tracking-[0.11em] uppercase" style={{ color: "var(--ln-gold)" }}>Selected Context needs a separate permission</h2><p className="mt-2 font-body text-[var(--text-sm)] leading-relaxed" style={{ color: "var(--ln-bone)" }}>Turning on a Profile only permits its workspace role. Turning on <strong>remote selected-context use</strong> allows that specific profile to send only the sources you deliberately attach to a private Context Envelope to the configured model route. Each send rechecks this setting, source ownership, source compatibility, and the Envelope revision.</p></div></div></section>
       <section className="mt-7 grid gap-4 lg:grid-cols-2" aria-label="Stewardship Profile contracts">{PNA_PROFILE_IDS.map((id) => {
         const contract = PNA_STEWARDSHIP_PROFILES[id];
