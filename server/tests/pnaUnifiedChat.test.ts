@@ -22,7 +22,9 @@ describe("unified PNA chat surface", () => {
 
     expect(source).toContain('const ACCENT = "var(--ln-gold)"');
     expect(source).toContain('const LS_OPEN_NOTES = "ln-keeper-notes-open"');
-    expect(source).toContain("const modeTabs = (");
+    expect(source).toContain("PNAThreadRail");
+    expect(source).toContain("PNAComposerBar");
+    expect(source).not.toContain("const modeTabs = (");
     expect(source).not.toContain("CHAT_BG_SKINS");
     expect(source).not.toContain("LS_CHAT_BG");
     expect(keeperSource).toContain('sessionStorage.getItem("ln-keeper-notes-open") === "1"');

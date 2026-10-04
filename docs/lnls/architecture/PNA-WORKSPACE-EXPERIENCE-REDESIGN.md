@@ -19,6 +19,10 @@ The exact proposed records, authorization gates, profile contracts, Artifact lif
 
 ---
 
+## Hierarchy decision
+
+The detailed hierarchy, typography, desktop/mobile layout, implementation boundary, risks, and validation record for the PNA shell are recorded in [PNA Workspace Hierarchy ADR](./PNA-WORKSPACE-HIERARCHY-ADR.md). The approved hierarchy slice is now implemented; it changes PNA presentation and component composition only, not creator authority, providers, Registry behavior, or WID records.
+
 ## North Star
 
 > PNA is not a chatbot with platform buttons. It is the private working room where a creator gathers intent, Work context, evidence, drafts, and decisions before they choose what belongs in the Living Nexus record.

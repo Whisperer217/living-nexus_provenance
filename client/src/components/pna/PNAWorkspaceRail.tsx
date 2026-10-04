@@ -67,14 +67,14 @@ function SurfaceTabs({ surface, onSurfaceChange }: Pick<PNAWorkspaceRailProps, "
   };
 
   return (
-    <div className="grid grid-cols-2 gap-1 p-2" role="tablist" aria-label="PNA inspection surfaces" onKeyDown={handleKeyDown} style={{ borderBottom: "1px solid var(--ln-panel-border)" }}>
+    <div className="grid grid-cols-4 gap-1 px-3 py-2" role="tablist" aria-label="PNA inspection surfaces" onKeyDown={handleKeyDown} style={{ borderBottom: "1px solid var(--ln-panel-border)" }}>
       {INSPECTION_TABS.map(([id, label, Icon]) => {
         const selected = surface === id;
         return (
           <button key={id} id={`pna-rail-tab-${id}`} type="button" role="tab" aria-selected={selected} aria-controls={`pna-rail-panel-${id}`} tabIndex={selected ? 0 : -1}
-            onClick={() => onSurfaceChange(id)} className="flex min-h-11 items-center justify-center gap-2 rounded-lg px-2 transition-colors focus-visible:outline-none focus-visible:ring-2"
-            style={{ background: selected ? "color-mix(in srgb, var(--ln-gold) 14%, transparent)" : "transparent", border: `1px solid ${selected ? "color-mix(in srgb, var(--ln-gold) 36%, transparent)" : "transparent"}`, color: selected ? "var(--ln-gold)" : "var(--ln-smoke)", fontFamily: "var(--font-display)", fontSize: "var(--text-xs)", letterSpacing: "0.08em" }}>
-            <Icon size={13} aria-hidden="true" />{label.toUpperCase()}
+            onClick={() => onSurfaceChange(id)} className="flex min-h-11 flex-col items-center justify-center gap-0.5 rounded-md px-1 transition-colors focus-visible:outline-none focus-visible:ring-2"
+            style={{ background: selected ? "color-mix(in srgb, var(--ln-gold) 11%, transparent)" : "transparent", borderBottom: `2px solid ${selected ? "var(--ln-gold)" : "transparent"}`, color: selected ? "var(--ln-gold)" : "var(--ln-smoke)", fontFamily: "var(--font-display)", fontSize: "var(--text-xs)", letterSpacing: "0.04em" }}>
+            <Icon size={13} aria-hidden="true" /><span className="truncate">{label.toUpperCase()}</span>
           </button>
         );
       })}

@@ -5210,3 +5210,36 @@ button:active .ln-witness-sigil,
   .ln-witnessing-circle__correspond:hover,
   .ln-witnessing-circle__correspond:focus-visible { transform: none; }
 }
+
+/* ── PNA workspace hierarchy ───────────────────────────────────────────────
+   Conversation is the working center; private navigation and inspection are
+   deliberate supporting surfaces. These rules avoid a squeezed desktop shell
+   and retain readable contrast in both Cathedral themes. */
+.pna-workspace-shell {
+  min-height: 100dvh;
+  background: var(--ln-void);
+  color: var(--ln-bone);
+}
+
+.pna-workspace-shell select {
+  color-scheme: dark;
+}
+
+.pna-workspace-shell select option {
+  background: var(--ln-coal);
+  color: var(--ln-parchment);
+}
+
+@media (max-width: 1279px) {
+  .pna-workspace-shell {
+    min-height: 100dvh;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pna-workspace-shell *,
+  .pna-workspace-shell *::before,
+  .pna-workspace-shell *::after {
+    scroll-behavior: auto !important;
+  }
+}

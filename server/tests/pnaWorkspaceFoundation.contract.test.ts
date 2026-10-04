@@ -3,6 +3,8 @@ import path from "node:path";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
+import { Sparkles } from "lucide-react";
+import { PNAThreadRail } from "../../client/src/components/pna/PNAThreadRail";
 import { PNAWorkspaceRail } from "../../client/src/components/pna/PNAWorkspaceRail";
 
 const root = process.cwd();
@@ -102,5 +104,47 @@ describe("PNA workspace foundations", () => {
     expect(shell).toContain('["artifacts", "Artifacts", Image]');
     expect(shell).toContain("xl:hidden");
     expect(shell).toContain("min-h-11");
+  });
+
+  it("uses a thread-first private rail and a single composer profile control", () => {
+    const shell = read("client/src/pages/PNAShellPage.tsx");
+    const rail = read("client/src/components/pna/PNAThreadRail.tsx");
+    const composer = read("client/src/components/pna/PNAComposerBar.tsx");
+    const html = renderToStaticMarkup(createElement(PNAThreadRail, {
+      threads: [{ id: "thread-1", title: "Armor of Light review", activeMode: "guide", updatedAt: new Date("2026-10-04T00:00:00.000Z") }],
+      activeThreadId: "thread-1",
+      activeMode: "guide",
+      modes: [{ id: "guide", label: "Guide", desc: "Creative direction and intent", icon: Sparkles }],
+      contextCount: 1,
+      onCreateThread: noop,
+      onSelectThread: noop,
+      onOpenCommand: noop,
+      onNavigate: noop,
+    }));
+
+    expect(shell).toContain("PNAThreadRail");
+    expect(shell).toContain("PNAComposerBar");
+    expect(shell).toContain("mobileRailOpen");
+    expect(shell).not.toContain("const modeTabs");
+    expect(shell).not.toContain("AVATARS");
+    expect(rail).toContain("Quick reference");
+    expect(rail).toContain("Recent threads");
+    expect(rail).toContain("Private library");
+    expect(composer).toContain("Active Stewardship Profile");
+    expect(composer).toContain("PNA does not register or publish from this thread.");
+    expect(html).toContain("Armor of Light review");
+    expect(html).toContain("1 selected source");
+  });
+
+  it("uses readable text tiers instead of microtype in the canonical PNA workspace", () => {
+    const shell = read("client/src/pages/PNAShellPage.tsx");
+    const composer = read("client/src/components/pna/PNAComposerBar.tsx");
+
+    expect(shell).toContain('text-[var(--text-base)]');
+    expect(shell).toContain('text-[var(--text-h3)]');
+    expect(shell).not.toContain('fontSize: "0.38rem"');
+    expect(shell).not.toContain('fontSize: "0.4rem"');
+    expect(composer).toContain('text-[var(--text-base)]');
+    expect(composer).toContain('fontSize: "var(--text-xs)"');
   });
 });

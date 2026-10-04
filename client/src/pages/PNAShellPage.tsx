@@ -4,7 +4,7 @@
  *  - Fixed/adjustable chat column (or floating pop-out)
  *  - Music dock bound into the PNA stage
  *  - Chat background skins
- *  - Avatar portraits in the left Full Workspace drawer
+ *  - Thread-first private navigation with compact appearance controls
  */
 
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
@@ -17,17 +17,20 @@ import {
   Image, Shield, Upload, BookOpen, Settings, LogOut,
   ChevronRight, Send, Loader2, ExternalLink, Save, Film, BookMarked,
   Play, Pause, SkipBack, SkipForward, PanelRightOpen, PanelRightClose,
-  Maximize2, Minimize2, GripVertical, Plus,
+  Maximize2, Minimize2, GripVertical, Plus, Menu,
 } from "lucide-react";
 import { getLoginUrl } from "@/const";
 import { usePlayer } from "@/contexts/PlayerContext";
 import NexusAvatarViewer from "@/components/NexusAvatarViewer";
 import { NexusContextPanel } from "@/components/NexusContextPanel";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { PNAVisualProposalCard, type PNAVisualProposal } from "@/components/PNAVisualProposalCard";
 import { PNAQuiverWorkspace } from "@/components/PNAQuiverWorkspace";
 import { PNACommandPalette } from "@/components/pna/PNACommandPalette";
 import { PNAWorkspaceRail } from "@/components/pna/PNAWorkspaceRail";
-import type { PNAInspectionSurface, PNAMode, PNAWorkspaceArtifact, PNAWorkspaceSurface } from "@/components/pna/pnaWorkspaceTypes";
+import { PNAThreadRail } from "@/components/pna/PNAThreadRail";
+import { PNAComposerBar } from "@/components/pna/PNAComposerBar";
+import type { PNAInspectionSurface, PNAMode, PNAThreadSummary, PNAWorkspaceArtifact, PNAWorkspaceSurface } from "@/components/pna/pnaWorkspaceTypes";
 import { SKIN_IMAGES } from "@/components/FloatingAvatar";
 import { PNA_PRODUCT } from "@/lib/loopProduct";
 import { consumePnaDiaryReload } from "@/lib/pnaDiary";
@@ -86,7 +89,6 @@ const AVATAR_SKINS = [
   { id: "cipher", name: "The Cipher" },
 ] as const;
 
-const LS_CHAT_WIDTH = "ln-pna-chat-width";
 const LS_LAYOUT = "ln-pna-layout";
 const LS_DRAWER = "ln-pna-drawer-open";
 const LS_OPEN_NOTES = "ln-keeper-notes-open";
@@ -102,14 +104,6 @@ interface Message {
 }
 
 type LayoutMode = "workspace" | "popout";
-
-function readNumber(key: string, fallback: number, min: number, max: number) {
-  try {
-    const n = Number(localStorage.getItem(key));
-    if (Number.isFinite(n)) return Math.min(max, Math.max(min, n));
-  } catch { /* ignore */ }
-  return fallback;
-}
 
 function readString(key: string, fallback: string) {
   try {
@@ -147,7 +141,6 @@ export default function PNAShellPage() {
   const [layoutMode, setLayoutMode] = useState<LayoutMode>(() =>
     readString(LS_LAYOUT, "workspace") === "popout" ? "popout" : "workspace",
   );
-  const [chatWidth, setChatWidth] = useState(() => readNumber(LS_CHAT_WIDTH, 520, 360, 900));
   const [popoutPos, setPopoutPos] = useState({ x: 72, y: 64 });
   const [popoutSize, setPopoutSize] = useState({ w: 440, h: 640 });
   const [contextRef, setContextRef] = useState<NexusContextRef | null>(null);
@@ -158,6 +151,7 @@ export default function PNAShellPage() {
   });
   const [inspectionSurface, setInspectionSurface] = useState<PNAInspectionSurface>("context");
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+  const [mobileRailOpen, setMobileRailOpen] = useState(false);
   const query = new URLSearchParams(search);
   const routeThreadId = query.get("thread");
   const showQuiver = query.get("view") === "quiver";
@@ -166,7 +160,6 @@ export default function PNAShellPage() {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const resizingRef = useRef<{ startX: number; startW: number } | null>(null);
   const popoutDragRef = useRef<{ startX: number; startY: number; origX: number; origY: number } | null>(null);
   const popoutResizeRef = useRef<{ startX: number; startY: number; origW: number; origH: number } | null>(null);
 
@@ -210,6 +203,10 @@ export default function PNAShellPage() {
 
   const currentMode = PNA_MODES.find(m => m.id === activeMode) ?? PNA_MODES[0];
   const activeProfile = pnaProfileSettings.data?.find((profile) => profile.id === activeMode) ?? null;
+  const contextEntries = (pnaGovernance.data?.entries ?? []) as Array<{ state: string }>;
+  const threadSummaries = (threadListQuery.data ?? []) as PNAThreadSummary[];
+  const attachedContextCount = contextEntries.filter((entry) => entry.state === "attached").length;
+  const activeThreadSummary = threadSummaries.find((thread) => thread.id === threadId) ?? null;
   const governedArtifacts = (pnaGovernance.data?.artifacts ?? []) as PNAWorkspaceArtifact[];
   const artifactByMessage = useMemo(
     () => new Map(governedArtifacts.filter((artifact) => artifact.originMessageId).map((artifact) => [artifact.originMessageId!, artifact])),
@@ -294,11 +291,6 @@ export default function PNAShellPage() {
   }, [cinematic, contextRef]);
 
   useEffect(() => {
-    try { localStorage.setItem(LS_CHAT_WIDTH, String(chatWidth)); } catch { /* ignore */ }
-  }, [chatWidth]);
-
-
-  useEffect(() => {
     try { localStorage.setItem(LS_LAYOUT, layoutMode); } catch { /* ignore */ }
   }, [layoutMode]);
 
@@ -360,10 +352,6 @@ export default function PNAShellPage() {
   // Chat column resize (workspace docked)
   useEffect(() => {
     const onMove = (e: MouseEvent) => {
-      if (resizingRef.current) {
-        const delta = resizingRef.current.startX - e.clientX;
-        setChatWidth(Math.min(900, Math.max(360, resizingRef.current.startW + delta)));
-      }
       if (popoutDragRef.current) {
         const d = popoutDragRef.current;
         setPopoutPos({
@@ -380,7 +368,6 @@ export default function PNAShellPage() {
       }
     };
     const onUp = () => {
-      resizingRef.current = null;
       popoutDragRef.current = null;
       popoutResizeRef.current = null;
     };
@@ -616,7 +603,7 @@ export default function PNAShellPage() {
           <div style={{ fontFamily: "'Cinzel', serif", fontSize: "1.5rem", color: "#C9A84C", letterSpacing: "0.08em" }}>
             {PNA_PRODUCT.fullName}
           </div>
-          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.55rem", color: "rgba(255,255,255,0.4)", marginTop: 8 }}>
+          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "var(--text-xs)", color: "rgba(255,255,255,0.4)", marginTop: 8 }}>
             pna.livingnexus.org · Creator Workspace
           </div>
         </div>
@@ -626,11 +613,11 @@ export default function PNAShellPage() {
         <a
           href={getLoginUrl("/pna")}
           className="flex items-center gap-2 px-6 py-3 rounded-lg transition-all hover:opacity-80"
-          style={{ background: "rgba(196,154,40,0.15)", border: "1px solid rgba(196,154,40,0.4)", color: "#C9A84C", fontFamily: "'Space Mono', monospace", fontSize: "0.6rem", letterSpacing: "0.08em", textDecoration: "none" }}
+          style={{ background: "rgba(196,154,40,0.15)", border: "1px solid rgba(196,154,40,0.4)", color: "#C9A84C", fontFamily: "'Space Mono', monospace", fontSize: "var(--text-xs)", letterSpacing: "0.08em", textDecoration: "none" }}
         >
           SIGN IN TO WORKSPACE
         </a>
-        <a href="https://livingnexus.org" style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.45rem", color: "rgba(255,255,255,0.25)", textDecoration: "none" }}>
+        <a href="https://livingnexus.org" style={{ fontFamily: "'Space Mono', monospace", fontSize: "var(--text-xs)", color: "rgba(255,255,255,0.25)", textDecoration: "none" }}>
           ← Back to Living Nexus
         </a>
       </div>
@@ -669,13 +656,13 @@ export default function PNAShellPage() {
         )}
       </button>
       <div className="min-w-0 flex-1">
-        <div style={{ fontSize: "0.4rem", color: "rgba(196,154,40,0.6)", letterSpacing: "0.12em", fontFamily: "'Space Mono', monospace" }}>
+        <div style={{ fontSize: "var(--text-xs)", color: "rgba(196,154,40,0.6)", letterSpacing: "0.12em", fontFamily: "'Space Mono', monospace" }}>
           {playerState.isPlaying ? "NOW PLAYING · BOUND TO THREAD" : nowPlaying ? "PAUSED · BOUND TO THREAD" : "MUSIC · PLAY A TRACK TO BIND"}
         </div>
-        <div className="truncate" style={{ fontFamily: "'Cinzel', serif", fontSize: "0.78rem", color: INK }}>
+        <div className="truncate" style={{ fontFamily: "'Cinzel', serif", fontSize: "var(--text-sm)", color: INK }}>
           {nowPlaying?.title ?? "No track loaded"}
         </div>
-        <div className="truncate" style={{ fontSize: "0.5rem", color: INK_MUTED, fontFamily: "'Space Mono', monospace" }}>
+        <div className="truncate" style={{ fontSize: "var(--text-xs)", color: INK_MUTED, fontFamily: "'Space Mono', monospace" }}>
           {nowPlaying
             ? `${nowPlaying.artist ?? "Unknown"}${nowPlaying.wid ? ` · ${nowPlaying.wid}` : ""} · ${formatTime(playerState.currentTime)} / ${formatTime(playerState.duration)}`
             : "Use Explore or Archive, then return — playback stays in this dock"}
@@ -703,381 +690,92 @@ export default function PNAShellPage() {
   );
 
   const chatHeader = (
-    <div
-      className="flex items-center justify-between px-4 py-2.5 flex-shrink-0 gap-2"
-      style={{ borderBottom: `1px solid ${PANEL_BORDER}`, background: "rgba(0,0,0,0.12)" }}
-      onMouseDown={layoutMode === "popout" ? (e) => {
-        // drag only from header chrome, not buttons
-        if ((e.target as HTMLElement).closest("button,a")) return;
-        popoutDragRef.current = {
-          startX: e.clientX,
-          startY: e.clientY,
-          origX: popoutPos.x,
-          origY: popoutPos.y,
-        };
-      } : undefined}
-    >
-      <div className="flex items-center gap-2.5 min-w-0">
-        <img
-          src={activeSkinImg}
-          alt=""
-          className="w-8 h-8 rounded-full object-cover flex-shrink-0"
-          style={{ border: "1.5px solid color-mix(in srgb, var(--ln-gold) 40%, transparent)" }}
-        />
-        <div className="min-w-0">
-          <div className="truncate" style={{ fontFamily: "'Cinzel', serif", fontSize: "0.72rem", color: ACCENT }}>
-            {PNA_PRODUCT.name} · {currentMode.label}
-          </div>
-          <div style={{ fontSize: "0.4rem", color: INK_MUTED, fontFamily: "'Space Mono', monospace", letterSpacing: "0.06em" }}>
-            {layoutMode === "popout" ? "POP-OUT CHAT · DRAG HEADER" : "DOCKED CHAT · RESIZE FROM LEFT EDGE"}
-          </div>
-        </div>
+    <header className="flex min-h-[78px] items-center justify-between gap-4 px-5 py-3 flex-shrink-0" style={{ borderBottom: `1px solid ${PANEL_BORDER}`, background: "var(--ln-panel)" }}>
+      <div className="min-w-0">
+        <p className="font-display text-[var(--text-xs)] tracking-[0.16em] uppercase" style={{ color: "var(--ln-gold-dim)" }}>Private working thread</p>
+        <h1 className="mt-1 truncate font-editorial text-[var(--text-h3)] leading-none" style={{ color: INK }}>{activeThreadSummary?.title ?? "Begin a private thread"}</h1>
+        <p className="mt-1 truncate font-body text-[var(--text-sm)]" style={{ color: INK_MUTED }}>{currentMode.desc} · {attachedContextCount === 0 ? "No context attached" : `${attachedContextCount} selected source${attachedContextCount === 1 ? "" : "s"}`}</p>
       </div>
-      <div className="flex items-center gap-1.5 flex-shrink-0">
-        <button
-          type="button"
-          onClick={() => setCommandPaletteOpen(true)}
-          className="min-h-8 px-2 py-1 rounded flex items-center gap-1"
-          style={{ fontSize: "var(--text-xs)", color: INK_MUTED, border: `1px solid ${PANEL_BORDER}`, fontFamily: "'Space Mono', monospace" }}
-          title="Open workspace command palette (Ctrl or Command K)"
-          aria-label="Open workspace command palette"
-        >
-          <Search size={11} /> COMMAND
-        </button>
-        <button
-          type="button"
-          onClick={() => startThread()}
-          disabled={createThread.isPending}
-          className="px-2 py-1 rounded flex items-center gap-1 disabled:opacity-40"
-          style={{ fontSize: "0.4rem", color: INK_MUTED, border: `1px solid ${PANEL_BORDER}`, fontFamily: "'Space Mono', monospace" }}
-          title="Start a new private working thread"
-        >
-          <Plus size={10} /> NEW
-        </button>
-        <button
-          type="button"
-          onClick={() => navigate(threadId ? `/pna?view=quiver&thread=${encodeURIComponent(threadId)}` : "/pna?view=quiver")}
-          className="px-2 py-1 rounded flex items-center gap-1"
-          style={{ fontSize: "0.4rem", color: INK_MUTED, border: `1px solid ${PANEL_BORDER}`, fontFamily: "'Space Mono', monospace" }}
-          title="Open private Quiver"
-        >
-          <Image size={10} /> QUIVER
-        </button>
-        <button
-          type="button"
-          onClick={openNowPlayingContext}
-          aria-expanded={Boolean(contextRef)}
-          className="px-2 py-1 rounded flex items-center gap-1"
-          style={{ fontSize: "0.4rem", color: contextRef ? ACCENT : INK_MUTED, border: `1px solid ${contextRef ? "color-mix(in srgb, var(--ln-gold) 45%, transparent)" : PANEL_BORDER}`, fontFamily: "'Space Mono', monospace" }}
-          title="Open current music context"
-        >
-          <PanelRightOpen size={10} /> CONTEXT
-        </button>
-        <button
-          type="button"
-          onClick={() => {
-            try { sessionStorage.setItem(LS_OPEN_NOTES, "1"); } catch { /* ignore */ }
-            navigate("/keeper");
-          }}
-          className="px-2 py-1 rounded flex items-center gap-1"
-          style={{ fontSize: "0.4rem", color: INK_MUTED, border: `1px solid ${PANEL_BORDER}`, fontFamily: "'Space Mono', monospace" }}
-          title="Keeper NOTES & diaries"
-        >
-          <BookOpen size={10} /> NOTES
-        </button>
-        <button
-          type="button"
-          onClick={() => setCinematic(v => !v)}
-          className="px-2 py-1 rounded flex items-center gap-1"
-          style={{
-            fontSize: "0.4rem",
-            color: cinematic ? ACCENT : INK_MUTED,
-            border: `1px solid ${cinematic ? "color-mix(in srgb, var(--ln-gold) 45%, transparent)" : PANEL_BORDER}`,
-            fontFamily: "'Space Mono', monospace",
-          }}
-          title="Cinematic listen + chat (F11)"
-        >
-          <Film size={9} /> {cinematic ? "LIVE" : "CINE"}
-        </button>
-        <button
-          type="button"
-          onClick={() => setLayoutMode(m => m === "workspace" ? "popout" : "workspace")}
-          className="px-2 py-1 rounded flex items-center gap-1"
-          style={{ fontSize: "0.4rem", color: INK_MUTED, border: `1px solid ${PANEL_BORDER}`, fontFamily: "'Space Mono', monospace" }}
-          title={layoutMode === "workspace" ? "Pop out chat panel" : "Dock chat into workspace"}
-        >
-          {layoutMode === "workspace" ? <><PanelRightOpen size={10} /> POP OUT</> : <><PanelRightClose size={10} /> DOCK</>}
-        </button>
-        {messages.length > 0 && (
-          <>
-            <button
-              type="button"
-              onClick={handleSaveDiary}
-              disabled={saveArchive.isPending || sealArchive.isPending}
-              className="px-2 py-1 rounded flex items-center gap-1"
-              style={{ fontSize: "0.4rem", color: ACCENT, border: `1px solid color-mix(in srgb, var(--ln-gold) 30%, transparent)`, fontFamily: "'Space Mono', monospace" }}
-            >
-              <BookMarked size={9} /> DIARY
-            </button>
-            <button
-              type="button"
-              onClick={() => setMessages([])}
-              className="px-2 py-1 rounded"
-              style={{ fontSize: "0.4rem", color: INK_MUTED, border: `1px solid ${PANEL_BORDER}`, fontFamily: "'Space Mono', monospace" }}
-            >
-              CLEAR
-            </button>
-          </>
-        )}
+      <div className="flex flex-shrink-0 items-center gap-2">
+        <button type="button" onClick={() => setLayoutMode("popout")} className="hidden min-h-11 items-center gap-2 rounded-lg px-3 lg:flex focus-visible:outline-none focus-visible:ring-2" style={{ border: `1px solid ${PANEL_BORDER}`, color: INK_MUTED, fontFamily: "var(--font-display)", fontSize: "var(--text-xs)", letterSpacing: "0.07em" }} title="Focus this private conversation"><Maximize2 size={14} /> FOCUS</button>
+        <button type="button" onClick={() => setCommandPaletteOpen(true)} className="hidden min-h-11 items-center gap-2 rounded-lg px-3 md:flex focus-visible:outline-none focus-visible:ring-2" style={{ border: `1px solid ${PANEL_BORDER}`, color: INK_MUTED, fontFamily: "var(--font-display)", fontSize: "var(--text-xs)", letterSpacing: "0.07em" }} aria-label="Open workspace command palette"><Search size={14} /> COMMAND</button>
+        <button type="button" onClick={() => startThread()} disabled={createThread.isPending} className="flex min-h-11 items-center gap-2 rounded-lg px-3 disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2" style={{ background: ACCENT, color: VOID, fontFamily: "var(--font-display)", fontSize: "var(--text-xs)", letterSpacing: "0.07em" }}><Plus size={14} /> <span className="hidden sm:inline">NEW THREAD</span></button>
       </div>
-    </div>
-  );
-
-  const modeTabs = (
-    <div
-      className="flex items-center gap-1 px-3 py-2 flex-shrink-0 overflow-x-auto"
-      style={{ borderBottom: `1px solid ${PANEL_BORDER}`, background: "color-mix(in srgb, var(--ln-panel) 80%, transparent)" }}
-    >
-      {PNA_MODES.map(mode => {
-        const active = activeMode === mode.id;
-        return (
-          <button
-            key={mode.id}
-            type="button"
-            onClick={() => setActiveMode(mode.id)}
-            className="flex items-center gap-1 px-2.5 py-1 rounded-full flex-shrink-0"
-            style={{
-              background: active ? "color-mix(in srgb, var(--ln-gold) 18%, transparent)" : "transparent",
-              border: active ? `1px solid color-mix(in srgb, var(--ln-gold) 45%, transparent)` : `1px solid transparent`,
-              color: active ? ACCENT : INK_MUTED,
-              fontFamily: "'Space Mono', monospace",
-              fontSize: "0.45rem",
-              letterSpacing: "0.06em",
-            }}
-            title={mode.desc}
-          >
-            <mode.icon size={10} />
-            {mode.label.toUpperCase()}
-          </button>
-        );
-      })}
-    </div>
+    </header>
   );
 
   const messagesPane = (
-    <div className="flex-1 overflow-y-auto px-4 py-4" style={{ overscrollBehavior: "contain" }}>
+    <div className="min-h-0 flex-1 overflow-y-auto px-5 py-6" style={{ overscrollBehavior: "contain" }}>
       {messages.length === 0 ? (
-        <div className="flex flex-col items-center justify-center h-full gap-5 max-w-md mx-auto">
-          <div
-            className="relative overflow-hidden rounded-2xl"
-            style={{
-              width: 132,
-              height: 168,
-              border: "1px solid color-mix(in srgb, var(--ln-gold) 28%, transparent)",
-              boxShadow: "0 0 36px color-mix(in srgb, var(--ln-gold) 12%, transparent)",
-              background: "#080604",
-            }}
-          >
-            <img src={activeSkinImg} alt="" className="absolute inset-0 w-full h-full object-cover opacity-90" />
-            <div className="absolute inset-0 opacity-40">
-              <NexusAvatarViewer seed={user.id} width={132} height={168} accentColor="#C49A28" />
-            </div>
+        <div className="mx-auto flex h-full w-full max-w-2xl flex-col justify-center">
+          <div className="max-w-xl">
+            <p className="font-display text-[var(--text-xs)] tracking-[0.16em] uppercase" style={{ color: "var(--ln-gold-dim)" }}>A private place to begin</p>
+            <h2 className="mt-3 font-editorial text-[var(--text-h2)] leading-tight" style={{ color: INK }}>What needs shape, witness, or careful review?</h2>
+            <p className="mt-3 max-w-lg font-body text-[var(--text-base)] leading-relaxed" style={{ color: INK_MUTED }}>Start with an intention, a question, or a chosen Work. PNA can only use a Work after you deliberately attach it to this thread.</p>
           </div>
-          <div className="text-center">
-            <div style={{ fontFamily: "'Cinzel', serif", fontSize: "1rem", color: ACCENT, marginBottom: 6 }}>
-              {PNA_PRODUCT.fullName}
-            </div>
-            <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "0.9rem", color: INK_MUTED, lineHeight: 1.7 }}>
-              Traditional chat · music dock · avatar skins. Ask, witness, and seal the thread.
-            </div>
-          </div>
-          <div className="w-full grid grid-cols-2 gap-2">
-              {[
-                { label: "Analyze my lyrics", icon: FileText },
-                { label: "Build arrangement", icon: Music },
-                { label: "Write testimony", icon: BookOpen },
-                { label: "Generate cover art", icon: Image, mode: "vision" as PNAMode },
-                { label: "Register a work", icon: Shield },
-              ].map(s => (
-              <button
-                key={s.label}
-                type="button"
-                onClick={() => { if (s.mode) setActiveMode(s.mode); setInput(s.mode ? "" : s.label); inputRef.current?.focus(); }}
-                className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl text-left transition-all hover:opacity-80"
-                style={{ background: SURFACE, border: `1px solid ${PANEL_BORDER}` }}
-              >
-                <s.icon size={12} style={{ color: ACCENT, flexShrink: 0 }} />
-                <span style={{ fontSize: "0.55rem", color: INK_MUTED, fontFamily: "'Space Mono', monospace" }}>{s.label}</span>
+          <div className="mt-7 grid gap-2 sm:grid-cols-2">
+            {[
+              { label: "Clarify the intent behind this Work", mode: "guide" as PNAMode },
+              { label: "Shape an arrangement or next revision", mode: "conductor" as PNAMode },
+              { label: "Reflect on the testimony it carries", mode: "witness" as PNAMode },
+              { label: "Prepare a private visual direction", mode: "vision" as PNAMode },
+            ].map((suggestion) => (
+              <button key={suggestion.label} type="button" onClick={() => { setActiveMode(suggestion.mode); setInput(suggestion.label); inputRef.current?.focus(); }} className="rounded-lg px-4 py-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 hover:bg-[color-mix(in_srgb,var(--ln-gold)_7%,transparent)]" style={{ background: SURFACE, border: `1px solid ${PANEL_BORDER}` }}>
+                <p className="font-body text-[var(--text-base)]" style={{ color: INK_BODY }}>{suggestion.label}</p>
+                <p className="mt-1 font-body text-[var(--text-xs)]" style={{ color: INK_MUTED }}>{PNA_MODES.find((mode) => mode.id === suggestion.mode)?.desc}</p>
               </button>
             ))}
           </div>
         </div>
       ) : (
-        <>
-          {messages.map(msg => {
-            const modeConfig = PNA_MODES.find(m => m.id === msg.mode) ?? PNA_MODES[0];
+        <div className="mx-auto w-full max-w-3xl">
+          {messages.map((msg) => {
+            const modeConfig = PNA_MODES.find((mode) => mode.id === msg.mode) ?? PNA_MODES[0];
             const isUser = msg.role === "user";
             return (
-              <div key={msg.id} className={`flex ${isUser ? "justify-end" : "justify-start"} mb-3.5`}>
-                {!isUser && (
-                  <img
-                    src={activeSkinImg}
-                    alt=""
-                    className="w-8 h-8 rounded-full object-cover flex-shrink-0 mr-2 mt-0.5"
-                    style={{ border: `1px solid color-mix(in srgb, var(--ln-gold) 40%, transparent)` }}
-                  />
-                )}
-                <div className={`max-w-[78%] flex flex-col ${isUser ? "items-end" : "items-start"}`}>
-                  <div className="flex items-center gap-2 mb-1 px-0.5">
-                    <span style={{ fontSize: "0.4rem", color: ACCENT, letterSpacing: "0.08em", fontFamily: "'Space Mono', monospace" }}>
-                      {isUser ? "YOU" : `PNA · ${modeConfig.label.toUpperCase()}`}
-                    </span>
-                    <span style={{ fontSize: "0.38rem", color: INK_MUTED, fontFamily: "'Space Mono', monospace" }}>
-                      {msg.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                    </span>
+              <article key={msg.id} className={`mb-7 flex gap-3 ${isUser ? "flex-row-reverse" : ""}`}>
+                {isUser ? (
+                  user.profilePhotoUrl ? <img src={user.profilePhotoUrl} alt="" className="mt-1 h-9 w-9 flex-shrink-0 rounded-full object-cover" style={{ border: "1px solid color-mix(in srgb, var(--ln-gold) 34%, transparent)" }} /> : <div className="mt-1 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full font-body text-[var(--text-sm)]" style={{ background: "color-mix(in srgb, var(--ln-gold) 15%, transparent)", border: "1px solid color-mix(in srgb, var(--ln-gold) 28%, transparent)", color: ACCENT }}>{(user.name ?? "?")[0].toUpperCase()}</div>
+                ) : <img src={activeSkinImg} alt="" className="mt-1 h-9 w-9 flex-shrink-0 rounded-full object-cover" style={{ border: "1px solid color-mix(in srgb, var(--ln-gold) 40%, transparent)" }} />}
+                <div className={`min-w-0 max-w-[min(88%,44rem)] ${isUser ? "ml-auto" : ""}`}>
+                  <div className={`mb-1.5 flex items-center gap-2 ${isUser ? "justify-end" : ""}`}>
+                    <span className="font-display text-[var(--text-xs)] tracking-[0.1em] uppercase" style={{ color: isUser ? "var(--ln-gold)" : "var(--ln-gold-dim)" }}>{isUser ? "You" : `PNA · ${modeConfig.label}`}</span>
+                    <span className="font-mono text-[var(--text-xs)]" style={{ color: INK_MUTED }}>{msg.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
                   </div>
-                  <div
-                    className="rounded-2xl px-3.5 py-2.5"
-                    style={{
-                      background: isUser ? "color-mix(in srgb, var(--ln-gold) 14%, transparent)" : SURFACE,
-                      border: `1px solid ${isUser ? "color-mix(in srgb, var(--ln-gold) 32%, transparent)" : PANEL_BORDER}`,
-                      borderBottomRightRadius: isUser ? 6 : 16,
-                      borderBottomLeftRadius: isUser ? 16 : 6,
-                    }}
-                  >
-                    <p
-                      className="whitespace-pre-wrap"
-                      style={{
-                        fontFamily: isUser ? "'DM Sans', sans-serif" : "'Cormorant Garamond', serif",
-                        fontSize: isUser ? "0.82rem" : "0.95rem",
-                        color: INK,
-                        lineHeight: 1.65,
-                      }}
-                    >
-                      {msg.content}
-                    </p>
+                  <div className="rounded-xl px-4 py-3" style={{ background: isUser ? "color-mix(in srgb, var(--ln-gold) 12%, var(--ln-coal))" : SURFACE, border: `1px solid ${isUser ? "color-mix(in srgb, var(--ln-gold) 28%, transparent)" : PANEL_BORDER}` }}>
+                    <p className="whitespace-pre-wrap font-body text-[var(--text-base)] leading-relaxed" style={{ color: INK }}>{msg.content}</p>
                   </div>
-                  {msg.visualProposal && (artifactByMessage.has(msg.id) ? (
-                    <button
-                      type="button"
-                      onClick={() => openInspectionSurface("artifacts")}
-                      className="mt-2 flex min-h-11 items-center gap-2 rounded-lg px-3 text-left focus-visible:outline-none focus-visible:ring-2"
-                      style={{ background: "color-mix(in srgb, var(--ln-gold) 10%, var(--ln-coal))", border: "1px solid color-mix(in srgb, var(--ln-gold) 28%, var(--ln-panel-border))", color: ACCENT, fontFamily: "var(--font-display)", fontSize: "var(--text-xs)", letterSpacing: "0.07em" }}
-                    >
-                      <Archive size={13} /> PRIVATE ARTIFACT READY FOR REVIEW
-                    </button>
-                  ) : (
-                    <PNAVisualProposalCard
-                      proposal={msg.visualProposal}
-                      isSaving={saveQuiverAsset.isPending}
-                      onSave={() => handleSaveVisualProposal(msg.id)}
-                      onOpenQuiver={msg.visualProposal.savedQuiverId ? () => navigate(`/pna?view=quiver&thread=${encodeURIComponent(threadId ?? "")}`) : undefined}
-                    />
-                  ))}
-                  {!isUser && (
-                    <button
-                      type="button"
-                      onClick={() => saveNoteMutation.mutate({ content: msg.content, personaId: msg.mode })}
-                      className="flex items-center gap-1 mt-1 transition-opacity hover:opacity-70"
-                      style={{ fontSize: "0.38rem", color: INK_MUTED, letterSpacing: "0.06em", fontFamily: "'Space Mono', monospace" }}
-                    >
-                      <Save size={9} /> SAVE TO NOTES
-                    </button>
-                  )}
+                  {msg.visualProposal && (artifactByMessage.has(msg.id) ? <button type="button" onClick={() => openInspectionSurface("artifacts")} className="mt-3 flex min-h-11 items-center gap-2 rounded-lg px-3 text-left focus-visible:outline-none focus-visible:ring-2" style={{ background: "color-mix(in srgb, var(--ln-gold) 10%, var(--ln-coal))", border: "1px solid color-mix(in srgb, var(--ln-gold) 28%, var(--ln-panel-border))", color: ACCENT, fontFamily: "var(--font-display)", fontSize: "var(--text-xs)", letterSpacing: "0.07em" }}><Archive size={13} /> PRIVATE ARTIFACT READY FOR REVIEW</button> : <PNAVisualProposalCard proposal={msg.visualProposal} isSaving={saveQuiverAsset.isPending} onSave={() => handleSaveVisualProposal(msg.id)} onOpenQuiver={msg.visualProposal.savedQuiverId ? () => navigate(`/pna?view=quiver&thread=${encodeURIComponent(threadId ?? "")}`) : undefined} />)}
+                  {!isUser && <button type="button" onClick={() => saveNoteMutation.mutate({ content: msg.content, personaId: msg.mode })} className="mt-2 flex min-h-10 items-center gap-1.5 rounded px-1.5 transition-opacity hover:opacity-70 focus-visible:outline-none focus-visible:ring-2" style={{ color: INK_MUTED, fontFamily: "var(--font-display)", fontSize: "var(--text-xs)", letterSpacing: "0.06em" }}><Save size={12} /> SAVE TO NOTES</button>}
                 </div>
-                {isUser && (
-                  user.profilePhotoUrl ? (
-                    <img
-                      src={user.profilePhotoUrl}
-                      alt=""
-                      className="w-8 h-8 rounded-full object-cover flex-shrink-0 ml-2 mt-0.5"
-                      style={{ border: "1px solid rgba(196,154,40,0.35)" }}
-                    />
-                  ) : (
-                    <div
-                      className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ml-2 mt-0.5"
-                      style={{ background: "rgba(196,154,40,0.15)", border: "1px solid rgba(196,154,40,0.3)", color: "#C9A84C", fontSize: "0.65rem" }}
-                    >
-                      {(user.name ?? "?")[0].toUpperCase()}
-                    </div>
-                  )
-                )}
-              </div>
+              </article>
             );
           })}
-          {isLoading && (
-            <div className="flex items-center gap-2.5 mb-3">
-              <img src={activeSkinImg} alt="" className="w-8 h-8 rounded-full object-cover" style={{ border: "1px solid color-mix(in srgb, var(--ln-gold) 28%, transparent)" }} />
-              <div className="flex gap-1 px-3 py-2 rounded-2xl" style={{ background: SURFACE, border: `1px solid ${PANEL_BORDER}` }}>
-                {[0, 1, 2].map(i => (
-                  <div key={i} className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: ACCENT, opacity: 0.55, animationDelay: `${i * 0.15}s` }} />
-                ))}
-              </div>
-            </div>
-          )}
+          {isLoading && <div className="flex items-center gap-3"><img src={activeSkinImg} alt="" className="h-9 w-9 rounded-full object-cover" style={{ border: "1px solid color-mix(in srgb, var(--ln-gold) 28%, transparent)" }} /><div className="flex gap-1 rounded-xl px-4 py-3" style={{ background: SURFACE, border: `1px solid ${PANEL_BORDER}` }}><span className="h-2 w-2 animate-pulse rounded-full" style={{ background: ACCENT }} /><span className="h-2 w-2 animate-pulse rounded-full" style={{ background: ACCENT, animationDelay: "0.15s" }} /><span className="h-2 w-2 animate-pulse rounded-full" style={{ background: ACCENT, animationDelay: "0.3s" }} /></div></div>}
           <div ref={messagesEndRef} />
-        </>
+        </div>
       )}
     </div>
   );
 
   const composer = (
-    <div className="flex-shrink-0 px-4 py-3" style={{ borderTop: `1px solid ${PANEL_BORDER}` }}>
-      <div
-        className="flex items-end gap-2.5 rounded-2xl px-3.5 py-2.5"
-        style={{ background: SURFACE, border: "1px solid color-mix(in srgb, var(--ln-gold) 28%, transparent)" }}
-      >
-        <textarea
-          ref={inputRef}
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder={activeMode === "vision" ? "Describe private cover art…" : `Message ${currentMode.label}…`}
-          aria-label={activeMode === "vision" ? "Private cover art prompt" : `Message ${currentMode.label}`}
-          aria-invalid={activeMode === "vision" && isVisionPromptOverLimit(input)}
-          rows={1}
-          className="flex-1 bg-transparent outline-none resize-none"
-          style={{
-            fontFamily: "'DM Sans', sans-serif",
-            fontSize: "0.9rem",
-            color: INK,
-            lineHeight: 1.5,
-            maxHeight: "140px",
-            overflowY: "auto",
-          }}
-          onInput={e => {
-            const el = e.currentTarget;
-            el.style.height = "auto";
-            el.style.height = `${Math.min(el.scrollHeight, 140)}px`;
-          }}
-        />
-        <button
-          type="button"
-          onClick={handleSend}
-          disabled={!input.trim() || isLoading || (activeMode === "vision" && isVisionPromptOverLimit(input))}
-          className="flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center transition-all hover:opacity-80 disabled:opacity-30"
-          style={{ background: ACCENT, color: VOID }}
-        >
-          {isLoading ? <Loader2 size={15} className="animate-spin" /> : <Send size={15} />}
-        </button>
-      </div>
-      <div className="flex items-center justify-between mt-1.5 px-0.5">
-        <span style={{ fontSize: "0.38rem", color: INK_MUTED, fontFamily: "'Space Mono', monospace" }}>
-          Enter to send · Shift+Enter newline
-        </span>
-        {activeMode === "vision" && (
-          <span
-            aria-live="polite"
-            style={{ fontSize: "0.38rem", color: isVisionPromptOverLimit(input) ? "var(--ln-gold-hot)" : INK_MUTED, fontFamily: "'Space Mono', monospace" }}
-          >
-            {getVisionPromptLength(input).toLocaleString()} / {VISION_PROMPT_MAX_LENGTH.toLocaleString()}
-          </span>
-        )}
-        <span style={{ fontSize: "0.38rem", color: INK_MUTED, fontFamily: "'Space Mono', monospace" }}>
-          {"theme"} skin
-        </span>
-      </div>
-    </div>
+    <PNAComposerBar
+      activeMode={activeMode}
+      modes={PNA_MODES}
+      profile={activeProfile}
+      contextCount={attachedContextCount}
+      value={input}
+      isSending={isLoading}
+      isVisionPromptInvalid={activeMode === "vision" && isVisionPromptOverLimit(input)}
+      visionCounter={activeMode === "vision" ? `${getVisionPromptLength(input).toLocaleString()} / ${VISION_PROMPT_MAX_LENGTH.toLocaleString()}` : undefined}
+      inputRef={inputRef}
+      onChange={setInput}
+      onKeyDown={handleKeyDown}
+      onSelectProfile={(mode) => { setActiveMode(mode); focusComposer(); }}
+      onAttachContext={() => { void handleAttachNowPlaying(); }}
+      onOpenSettings={() => navigate("/settings/stewardship")}
+      onSend={() => { void handleSend(); }}
+    />
   );
 
   const chatColumn = (
@@ -1086,7 +784,6 @@ export default function PNAShellPage() {
       style={{ background: PANEL }}
     >
       {chatHeader}
-      {modeTabs}
       {(cinematic || nowPlaying) && (
         <div
           className="flex items-center gap-3 px-4 py-2 flex-shrink-0"
@@ -1098,7 +795,7 @@ export default function PNAShellPage() {
           }}
         >
           <Music size={12} style={{ color: ACCENT }} />
-          <div className="min-w-0 flex-1 truncate" style={{ fontSize: "0.55rem", color: INK, fontFamily: "'Space Mono', monospace" }}>
+          <div className="min-w-0 flex-1 truncate" style={{ fontSize: "var(--text-sm)", color: INK, fontFamily: "'Space Mono', monospace" }}>
             {nowPlaying ? `${playerState.isPlaying ? "▶" : "❚❚"} ${nowPlaying.title}` : "Cinematic ready — start playback"}
           </div>
         </div>
@@ -1109,187 +806,24 @@ export default function PNAShellPage() {
     </div>
   );
 
-  const leftDrawer = (
-    <div
-      className="flex flex-col flex-shrink-0 transition-all duration-300 h-full"
-      style={{
-        width: sidebarCollapsed ? 64 : 248,
-        background: "rgba(8,6,4,0.98)",
-        borderRight: "1px solid rgba(196,154,40,0.12)",
-      }}
-    >
-      <div
-        className="flex items-center justify-between px-3 py-3 flex-shrink-0"
-        style={{ borderBottom: "1px solid rgba(196,154,40,0.08)" }}
-      >
-        {!sidebarCollapsed && (
-          <div>
-            <div style={{ fontFamily: "'Cinzel', serif", fontSize: "0.7rem", color: "#C9A84C", letterSpacing: "0.06em" }}>{PNA_PRODUCT.name}</div>
-            <div style={{ fontSize: "0.38rem", color: "rgba(255,255,255,0.25)", marginTop: 1 }}>Full Workspace</div>
-          </div>
-        )}
-        <button
-          type="button"
-          onClick={() => setSidebarCollapsed(v => !v)}
-          className="w-7 h-7 rounded flex items-center justify-center transition-opacity hover:opacity-70"
-          style={{ color: "rgba(196,154,40,0.5)", marginLeft: sidebarCollapsed ? "auto" : 0 }}
-        >
-          <ChevronRight size={14} style={{ transform: sidebarCollapsed ? "none" : "rotate(180deg)", transition: "transform 0.2s" }} />
-        </button>
-      </div>
-
-      {/* Active avatar portrait */}
-      {!sidebarCollapsed && (
-        <div className="px-3 pt-3 pb-2 flex-shrink-0">
-          <div
-            className="relative overflow-hidden rounded-xl"
-            style={{ height: 168, border: "1px solid color-mix(in srgb, var(--ln-gold) 28%, transparent)", background: VOID }}
-          >
-            <img src={activeSkinImg} alt="Active avatar" className="w-full h-full object-cover" />
-            <div
-              className="absolute bottom-0 inset-x-0 px-2 py-1.5"
-              style={{ background: "linear-gradient(transparent, rgba(0,0,0,0.85))" }}
-            >
-              <div style={{ fontFamily: "'Cinzel', serif", fontSize: "0.65rem", color: "#C9A84C" }}>
-                {AVATAR_SKINS.find(s => s.id === activeSkinId)?.name
-                  ?? (activeSkinId === "custom" ? "Custom Portrait" : "Avatar")}
-              </div>
-              <div style={{ fontSize: "0.4rem", color: "rgba(255,255,255,0.45)", fontFamily: "'Space Mono', monospace" }}>
-                ACTIVE · {currentMode.label.toUpperCase()}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Avatar skin gallery */}
-      <div className="px-2 pb-2 flex-shrink-0" style={{ borderBottom: "1px solid rgba(196,154,40,0.08)" }}>
-        {!sidebarCollapsed && (
-          <div style={{ fontSize: "0.38rem", color: "rgba(196,154,40,0.45)", letterSpacing: "0.1em", padding: "6px 8px 4px", fontFamily: "'Space Mono', monospace" }}>
-            AVATARS
-          </div>
-        )}
-        <div className={sidebarCollapsed ? "flex flex-col items-center gap-1.5" : "grid grid-cols-3 gap-1.5 px-1"}>
-          {AVATAR_SKINS.map(skin => {
-            const img = SKIN_IMAGES[skin.id];
-            const owned = ownedSkins.has(skin.id) || skin.id === "hooded-scholar";
-            const active = activeSkinId === skin.id;
-            return (
-              <button
-                key={skin.id}
-                type="button"
-                onClick={() => handleActivateSkin(skin.id)}
-                title={skin.name}
-                className="relative overflow-hidden rounded-lg transition-all hover:opacity-90"
-                style={{
-                  aspectRatio: sidebarCollapsed ? "1" : "3/4",
-                  width: sidebarCollapsed ? 40 : "100%",
-                  border: active ? `2px solid ${ACCENT}` : `1px solid ${PANEL_BORDER}`,
-                  opacity: owned ? 1 : 0.45,
-                }}
-              >
-                <img src={img} alt={skin.name} className="w-full h-full object-cover" />
-              </button>
-            );
-          })}
-          {customImageUrl && (
-            <button
-              type="button"
-              onClick={() => handleActivateSkin("custom")}
-              title="Custom portrait"
-              className="relative overflow-hidden rounded-lg"
-              style={{
-                aspectRatio: sidebarCollapsed ? "1" : "3/4",
-                width: sidebarCollapsed ? 40 : "100%",
-                border: activeSkinId === "custom" ? "2px solid #C9A84C" : "1px solid rgba(255,255,255,0.08)",
-              }}
-            >
-              <img src={customImageUrl} alt="Custom" className="w-full h-full object-cover" />
-            </button>
-          )}
-        </div>
-      </div>
-
-      <div className="flex-1 overflow-y-auto py-2">
-        {!sidebarCollapsed && (
-          <div style={{ fontSize: "0.38rem", color: "rgba(196,154,40,0.4)", letterSpacing: "0.1em", padding: "4px 12px 6px", fontFamily: "'Space Mono', monospace" }}>
-            STEWARDSHIP
-          </div>
-        )}
-        {PNA_MODES.map(mode => (
-          <button
-            key={mode.id}
-            type="button"
-            onClick={() => setActiveMode(mode.id)}
-            className="w-full flex items-center gap-2.5 transition-all hover:opacity-80"
-            style={{
-              padding: sidebarCollapsed ? "8px 0" : "7px 12px",
-              justifyContent: sidebarCollapsed ? "center" : "flex-start",
-              background: activeMode === mode.id ? "color-mix(in srgb, var(--ln-gold) 12%, transparent)" : "transparent",
-              borderLeft: activeMode === mode.id ? `2px solid ${ACCENT}` : "2px solid transparent",
-            }}
-            title={sidebarCollapsed ? mode.label : undefined}
-          >
-            <mode.icon size={13} style={{ color: activeMode === mode.id ? ACCENT : INK_MUTED, flexShrink: 0 }} />
-            {!sidebarCollapsed && (
-              <div className="min-w-0 text-left">
-                <div style={{ fontSize: "0.5rem", color: activeMode === mode.id ? ACCENT : INK_BODY, letterSpacing: "0.04em", fontFamily: "'Space Mono', monospace" }}>
-                  {mode.label}
-                </div>
-              </div>
-            )}
-          </button>
-        ))}
-
-        {!sidebarCollapsed && (
-          <>
-            <div style={{ fontSize: "0.38rem", color: "rgba(196,154,40,0.4)", letterSpacing: "0.1em", padding: "12px 12px 6px", fontFamily: "'Space Mono', monospace" }}>
-              WORKSPACE
-            </div>
-            {QUICK_ACTIONS.map(a => (
-              <button
-                key={a.href}
-                type="button"
-                onClick={() => navigate(a.href)}
-                className="w-full flex items-center gap-2.5 px-3 py-1.5 transition-all hover:opacity-80 text-left"
-                title={a.desc}
-              >
-                <a.icon size={12} style={{ color: "rgba(255,255,255,0.3)", flexShrink: 0 }} />
-                <span style={{ fontSize: "0.48rem", color: "rgba(255,255,255,0.5)", fontFamily: "'Space Mono', monospace" }}>{a.label}</span>
-              </button>
-            ))}
-          </>
-        )}
-      </div>
-
-      <div style={{ borderTop: "1px solid rgba(196,154,40,0.08)", padding: "8px 0" }}>
-        {!sidebarCollapsed ? (
-          <>
-            <button type="button" onClick={() => navigate("/keeper")} className="w-full flex items-center gap-2.5 px-3 py-1.5 hover:opacity-80">
-              <Settings size={12} style={{ color: "rgba(255,255,255,0.3)" }} />
-              <span style={{ fontSize: "0.48rem", color: "rgba(255,255,255,0.4)", fontFamily: "'Space Mono', monospace" }}>Avatar & Keeper</span>
-            </button>
-            <button type="button" onClick={() => navigate("/")} className="w-full flex items-center gap-2.5 px-3 py-1.5 hover:opacity-80">
-              <ExternalLink size={12} style={{ color: "rgba(255,255,255,0.3)" }} />
-              <span style={{ fontSize: "0.48rem", color: "rgba(255,255,255,0.4)", fontFamily: "'Space Mono', monospace" }}>Loop Registry</span>
-            </button>
-            <button type="button" onClick={() => logout().finally(() => navigate("/"))} className="w-full flex items-center gap-2.5 px-3 py-1.5 hover:opacity-80">
-              <LogOut size={12} style={{ color: "rgba(255,255,255,0.25)" }} />
-              <span style={{ fontSize: "0.48rem", color: "rgba(255,255,255,0.3)", fontFamily: "'Space Mono', monospace" }}>Sign Out</span>
-            </button>
-          </>
-        ) : (
-          <div className="flex flex-col items-center gap-1">
-            <button type="button" onClick={() => navigate("/keeper")} className="w-7 h-7 flex items-center justify-center hover:opacity-70" title="Keeper">
-              <Settings size={12} style={{ color: "rgba(255,255,255,0.3)" }} />
-            </button>
-            <button type="button" onClick={() => logout()} className="w-7 h-7 flex items-center justify-center hover:opacity-70" title="Sign Out">
-              <LogOut size={11} style={{ color: "rgba(255,255,255,0.25)" }} />
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
+  const leftDrawer = (mobile = false) => (
+    <PNAThreadRail
+      mobile={mobile}
+      collapsed={!mobile && sidebarCollapsed}
+      threads={threadSummaries}
+      activeThreadId={threadId}
+      activeMode={activeMode}
+      modes={PNA_MODES}
+      contextCount={attachedContextCount}
+      appearanceImageUrl={activeSkinImg}
+      onToggleCollapsed={() => setSidebarCollapsed((value) => !value)}
+      onClose={mobile ? () => setMobileRailOpen(false) : undefined}
+      onCreateThread={() => { void startThread(); }}
+      onSelectThread={openThread}
+      onOpenCommand={() => setCommandPaletteOpen(true)}
+      onOpenAppearance={() => navigate("/keeper")}
+      onNavigate={(href) => navigate(href === "/pna?view=quiver" && threadId ? `${href}&thread=${encodeURIComponent(threadId)}` : href)}
+    />
   );
 
   const mobileSurfaceNavigation = (
@@ -1360,99 +894,28 @@ export default function PNAShellPage() {
   // ── Main workspace ─────────────────────────────────────────────────────────
   return (
     <div
-      className="flex h-[100dvh] overflow-hidden relative"
-      style={{ background: STAGE_BG, fontFamily: "'Space Mono', monospace" }}
+      className="pna-workspace-shell flex h-[100dvh] overflow-hidden relative"
+      style={{ background: STAGE_BG }}
     >
-      <div className="hidden h-full md:flex">{leftDrawer}</div>
+      <div className="hidden h-full lg:flex">{leftDrawer()}</div>
 
       {layoutMode === "workspace" ? (
         <main className="flex min-w-0 flex-1 flex-col">
-          <header className="flex min-h-14 items-center justify-between gap-3 px-4 xl:hidden" style={{ borderBottom: `1px solid ${PANEL_BORDER}`, background: "var(--ln-panel)" }}>
-            <div className="min-w-0">
-              <p className="truncate font-display text-[var(--text-sm)] tracking-[0.14em] uppercase" style={{ color: ACCENT }}>{PNA_PRODUCT.name}</p>
-              <p className="mt-0.5 truncate font-body text-[var(--text-xs)]" style={{ color: INK_MUTED }}>Private creator workspace · {currentMode.label}</p>
+          <header className="flex min-h-16 items-center justify-between gap-3 px-4 xl:hidden" style={{ borderBottom: `1px solid ${PANEL_BORDER}`, background: "var(--ln-panel)" }}>
+            <div className="flex min-w-0 items-center gap-2">
+              <button type="button" onClick={() => setMobileRailOpen(true)} className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-lg focus-visible:outline-none focus-visible:ring-2" style={{ border: `1px solid ${PANEL_BORDER}`, color: ACCENT }} aria-label="Open private navigation"><Menu size={17} /></button>
+              <div className="min-w-0"><p className="truncate font-display text-[var(--text-sm)] tracking-[0.13em] uppercase" style={{ color: ACCENT }}>PNA</p><p className="mt-0.5 truncate font-body text-[var(--text-xs)]" style={{ color: INK_MUTED }}>{activeThreadSummary?.title ?? "Private workspace"}</p></div>
             </div>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setCommandPaletteOpen(true)}
-                className="flex min-h-11 items-center gap-2 rounded-lg px-3 focus-visible:outline-none focus-visible:ring-2"
-                style={{ border: `1px solid ${PANEL_BORDER}`, color: INK_MUTED, fontFamily: "var(--font-display)", fontSize: "var(--text-xs)", letterSpacing: "0.08em" }}
-              >
-                <Search size={14} /> COMMAND
-              </button>
-              <button
-                type="button"
-                onClick={() => startThread()}
-                disabled={createThread.isPending}
-                className="flex min-h-11 items-center gap-2 rounded-lg px-3 disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2"
-                style={{ background: ACCENT, color: VOID, fontFamily: "var(--font-display)", fontSize: "var(--text-xs)", letterSpacing: "0.08em" }}
-              >
-                <Plus size={14} /> NEW
-              </button>
-            </div>
+            <button type="button" onClick={() => setCommandPaletteOpen(true)} className="flex min-h-11 items-center gap-2 rounded-lg px-3 focus-visible:outline-none focus-visible:ring-2" style={{ border: `1px solid ${PANEL_BORDER}`, color: INK_MUTED, fontFamily: "var(--font-display)", fontSize: "var(--text-xs)", letterSpacing: "0.08em" }}><Search size={14} /> COMMAND</button>
           </header>
 
           {mobileSurfaceNavigation}
 
           <div className="flex min-h-0 flex-1">
-            <section className="relative hidden min-w-0 flex-1 flex-col items-center justify-center px-6 2xl:flex" aria-label="PNA workspace canvas">
-              <div
-                className="relative h-[min(420px,55vh)] w-[min(320px,28vw)] overflow-hidden rounded-2xl"
-                style={{
-                  border: `1px solid color-mix(in srgb, var(--ln-gold) 28%, transparent)`,
-                  boxShadow: cinematic ? "0 0 80px color-mix(in srgb, var(--ln-gold) 18%, transparent)" : "0 20px 60px rgba(0,0,0,0.35)",
-                  background: VOID,
-                }}
-              >
-                {nowPlaying?.artUrl ? (
-                  <img src={nowPlaying.artUrl} alt="" className="h-full w-full object-cover" />
-                ) : (
-                  <img src={activeSkinImg} alt="" className="h-full w-full object-cover" />
-                )}
-                {nowPlaying?.artUrl && (
-                  <div
-                    className="absolute bottom-3 left-3 overflow-hidden rounded-lg"
-                    style={{ width: 56, height: 72, border: `1.5px solid color-mix(in srgb, var(--ln-gold) 50%, transparent)`, boxShadow: "0 8px 24px rgba(0,0,0,0.45)" }}
-                  >
-                    <img src={activeSkinImg} alt="Active avatar" className="h-full w-full object-cover" />
-                  </div>
-                )}
-              </div>
-              <div className="mt-5 max-w-sm text-center">
-                <p className="font-display text-[var(--text-h4)]" style={{ color: ACCENT }}>{nowPlaying?.title ?? "Private working canvas"}</p>
-                <p className="mt-2 font-editorial text-[var(--text-base)] leading-relaxed" style={{ color: INK_MUTED }}>
-                  {nowPlaying ? `${nowPlaying.artist ?? ""} · inspect its context or hold it beside your private thread.` : "Select a Work context when it should inform this private thread. Nothing is attached automatically."}
-                </p>
-              </div>
-              <div className="mt-4 flex items-center gap-2">
-                <button type="button" onClick={() => openWorkspaceSurface("context")} className="flex min-h-11 items-center gap-2 rounded-lg px-3 focus-visible:outline-none focus-visible:ring-2" style={{ border: `1px solid ${PANEL_BORDER}`, color: INK_MUTED, fontFamily: "var(--font-display)", fontSize: "var(--text-xs)", letterSpacing: "0.08em" }}>
-                  <Layers size={13} /> INSPECT CONTEXT
-                </button>
-                <button type="button" onClick={() => setLayoutMode("popout")} className="flex min-h-11 items-center gap-2 rounded-lg px-3 focus-visible:outline-none focus-visible:ring-2" style={{ border: "1px solid color-mix(in srgb, var(--ln-gold) 28%, transparent)", color: ACCENT, fontFamily: "var(--font-display)", fontSize: "var(--text-xs)", letterSpacing: "0.08em" }}>
-                  <Maximize2 size={13} /> POP OUT
-                </button>
-              </div>
+            <section className={`${workspaceSurface === "conversation" ? "flex" : "hidden"} min-w-0 flex-1 flex-col xl:flex`} aria-label="PNA conversation workspace">
+              {chatColumn}
             </section>
-
-            <div
-              className={`${workspaceSurface === "conversation" ? "flex" : "hidden"} min-w-0 flex-1 xl:flex xl:flex-none xl:w-[var(--pna-chat-width)]`}
-              style={{ "--pna-chat-width": `${chatWidth}px` } as React.CSSProperties}
-            >
-              <div className="hidden h-full w-2 flex-shrink-0 items-center justify-center xl:flex" style={{ background: "color-mix(in srgb, var(--ln-gold) 6%, transparent)", borderLeft: `1px solid ${PANEL_BORDER}` }}>
-                <button
-                  type="button"
-                  aria-label="Resize conversation column"
-                  className="h-full w-full cursor-col-resize focus-visible:outline-none focus-visible:ring-2"
-                  onMouseDown={(event) => { resizingRef.current = { startX: event.clientX, startW: chatWidth }; }}
-                >
-                  <GripVertical size={12} style={{ color: "var(--ln-gold-dim)" }} />
-                </button>
-              </div>
-              <div className="min-w-0 flex-1" style={{ borderLeft: `1px solid ${PANEL_BORDER}` }}>{chatColumn}</div>
-            </div>
-
-            <div className="hidden h-full w-[320px] flex-shrink-0 xl:flex">{rail()}</div>
+            <div className="hidden h-full w-[360px] flex-shrink-0 xl:flex">{rail()}</div>
             <div className={`${workspaceSurface === "conversation" ? "hidden" : "flex"} min-h-0 flex-1 xl:hidden`}>{rail(true)}</div>
           </div>
         </main>
@@ -1484,12 +947,19 @@ export default function PNAShellPage() {
         </main>
       )}
 
+      <Sheet open={mobileRailOpen} onOpenChange={setMobileRailOpen}>
+        <SheetContent side="left" className="p-0 [&>[data-slot=sheet-close]]:hidden" style={{ width: "min(22rem, 90vw)", maxWidth: "22rem", background: "var(--ln-panel)", borderColor: "var(--ln-panel-border)" }}>
+          <SheetHeader className="sr-only"><SheetTitle>Private navigation</SheetTitle><SheetDescription>Private PNA threads, quick reference, and library destinations.</SheetDescription></SheetHeader>
+          {leftDrawer(true)}
+        </SheetContent>
+      </Sheet>
+
       <PNACommandPalette
         open={commandPaletteOpen}
         onOpenChange={setCommandPaletteOpen}
         modes={PNA_MODES}
         activeMode={activeMode}
-        threads={threadListQuery.data ?? []}
+        threads={threadSummaries}
         activeThreadId={threadId}
         onCreateThread={() => { void startThread(); }}
         onSelectThread={openThread}
