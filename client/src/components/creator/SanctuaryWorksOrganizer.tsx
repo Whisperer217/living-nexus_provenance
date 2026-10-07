@@ -6,6 +6,7 @@
 import { useState } from "react";
 import { Link } from "wouter";
 import { Eye, ListMusic, Music, Pause, Play, Shield } from "lucide-react";
+import { CreatorWorkQuickActions } from "@/components/CreatorWorkQuickActions";
 
 export type SanctuaryWork = {
   id: number;
@@ -16,6 +17,8 @@ export type SanctuaryWork = {
   coverPositionY?: number | null;
   genre?: string | null;
   witnessId?: string | null;
+  downloadPermission?: string | null;
+  initialLiked?: boolean;
 };
 
 export type SanctuaryPlaylist = {
@@ -218,6 +221,12 @@ export function SanctuaryWorksOrganizer({
                     )}
                   </div>
                 </div>
+                <CreatorWorkQuickActions
+                  songId={song.id}
+                  initialLiked={song.initialLiked}
+                  downloadPermission={song.downloadPermission}
+                  className="shrink-0"
+                />
               </li>
             );
           })}

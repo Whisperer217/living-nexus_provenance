@@ -93,25 +93,37 @@ function AxisPicker({
   value: ParticipationValue;
   onChange: (v: ParticipationValue) => void;
 }) {
+  // Music necessarily has a sound-making axis. Lyrics and Voice can be
+  // truthfully absent on an instrumental Work; their stored value is `None`.
+  const availableValues = label === "Music"
+    ? PARTICIPATION_VALUES.filter((candidate) => candidate !== "None")
+    : PARTICIPATION_VALUES;
+  const optionLabel = (candidate: ParticipationValue) => {
+    if (candidate !== "None") return candidate;
+    return label === "Lyrics" ? "No lyrics" : "No voice";
+  };
+
   return (
     <div className="mb-4">
       <p className="text-[11px] uppercase tracking-[0.16em] mb-2" style={{ color: "var(--ln-gold)" }}>
         {label}
       </p>
       <div className="flex gap-2">
-        {PARTICIPATION_VALUES.map((v) => (
+        {availableValues.map((v) => (
           <button
             key={v}
             type="button"
             onClick={() => onChange(v)}
             className="flex-1 py-2 text-xs rounded-full transition-colors"
+            aria-pressed={value === v}
+            aria-label={`${label}: ${optionLabel(v)}`}
             style={{
               border: value === v ? "1px solid var(--ln-gold)" : "1px solid rgba(196,154,40,0.2)",
               background: value === v ? "rgba(196,154,40,0.15)" : "transparent",
               color: value === v ? "var(--ln-gold)" : "color-mix(in srgb, var(--ln-parchment) 55%, transparent)",
             }}
           >
-            {v}
+            {optionLabel(v)}
           </button>
         ))}
       </div>

@@ -5,6 +5,7 @@ import { Play, Pause, ChevronLeft, ChevronRight, Shield, Music, BookOpen, FileTe
 import { MediaAsset } from "@/components/MediaAsset";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
+import { CreatorWorkQuickActions } from "@/components/CreatorWorkQuickActions";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 export interface ShelfTrack {
@@ -24,6 +25,7 @@ export interface ShelfTrack {
   playCount?: number | null;
   composerNote?: string | null;
   downloadPermission?: string | null;
+  initialLiked?: boolean;
 }
 
 export interface ShelfAlbum {
@@ -82,22 +84,6 @@ function TrackCard({
   const duration = track.durationSeconds
     ? `${Math.floor(track.durationSeconds / 60)}:${String(Math.round(track.durationSeconds % 60)).padStart(2, "0")}`
     : null;
-
-  const downloadMutation = trpc.songs.download.useMutation({
-    onSuccess: async (_data: { url: string }, vars: { songId: number }) => {
-      try { await triggerTaggedDownload(vars.songId); }
-      catch (e: unknown) { toast.error(e instanceof Error ? e.message : 'Download failed'); }
-    },
-    onError: (e) => toast.error(e.message),
-  });
-  const handleDownload = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!track.downloadPermission || track.downloadPermission === 'none') {
-      toast.error('Downloads are not enabled for this track.');
-      return;
-    }
-    downloadMutation.mutate({ songId: track.id });
-  };
 
   return (
     <div
@@ -223,26 +209,18 @@ function TrackCard({
               {track.title}
             </p>
           </Link>
-          {/* Download icon — only when downloadPermission is free or tipped */}
-          {track.downloadPermission && track.downloadPermission !== 'none' && (
-            <button
-              onClick={handleDownload}
-              disabled={downloadMutation.isPending}
-              className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-50"
-              title={track.downloadPermission === 'tipped' ? 'Download (tip required)' : 'Download track'}
-              style={{ color: 'rgba(196,154,40,0.7)' }}
-            >
-              {downloadMutation.isPending
-                ? <span className="text-[8px]" style={{ color: 'var(--ln-gold)' }}>...</span>
-                : <Download className="w-3 h-3" />}
-            </button>
-          )}
         </div>
         {track.genre && (
           <p className="text-[10px] truncate mt-0.5" style={{ color: "var(--ln-smoke)" }}>
             {track.genre}
           </p>
         )}
+        <CreatorWorkQuickActions
+          songId={track.id}
+          initialLiked={track.initialLiked}
+          downloadPermission={track.downloadPermission}
+          className="mt-2"
+        />
       </div>
     </div>
   );
@@ -262,27 +240,6 @@ function TrackListRow({
   onPlay: () => void;
   onEdit?: () => void;
 }) {
-  // Uses fetch+blob to handle cross-origin S3 redirects (anchor a.download fails on cross-origin)
-  const downloadMutation = trpc.songs.download.useMutation({
-    onSuccess: async (_data: { url: string }, vars: { songId: number }) => {
-      try {
-        await triggerTaggedDownload(vars.songId);
-      } catch (e: unknown) {
-        toast.error(e instanceof Error ? e.message : "Download failed");
-      }
-    },
-    onError: (e) => toast.error(e.message),
-  });
-
-  const handleDownload = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!track.downloadPermission || track.downloadPermission === "none") {
-      toast.error("Downloads are not enabled for this track.");
-      return;
-    }
-    downloadMutation.mutate({ songId: track.id });
-  };
-
   const duration = track.durationSeconds
     ? `${Math.floor(track.durationSeconds / 60)}:${String(Math.round(track.durationSeconds % 60)).padStart(2, "0")}`
     : null;
@@ -415,17 +372,12 @@ function TrackListRow({
           <Pencil className="w-3 h-3" />
         </button>
       )}
-      {/* Download button */}
-      <button
-        onClick={handleDownload}
-        className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
-        title={!track.downloadPermission || track.downloadPermission === 'none' ? 'Download not available' : 'Download track'}
-        style={{ color: (!track.downloadPermission || track.downloadPermission === 'none') ? 'rgba(255,255,255,0.2)' : 'rgba(196,154,40,0.6)' }}
-      >
-        {downloadMutation.isPending
-          ? <span className="text-[9px]" style={{ color: 'var(--ln-gold)' }}>...</span>
-          : <Download className="w-3 h-3" />}
-      </button>
+      <CreatorWorkQuickActions
+        songId={track.id}
+        initialLiked={track.initialLiked}
+        downloadPermission={track.downloadPermission}
+        className="ml-1 shrink-0"
+      />
 
       {/* Duration */}
       {duration && (

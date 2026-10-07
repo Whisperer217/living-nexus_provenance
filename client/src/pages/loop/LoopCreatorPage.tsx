@@ -4,7 +4,7 @@
  * Progressive rendering: low-power skips particles / parallax.
  */
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, useLocation, useParams } from "wouter";
 import {
@@ -75,13 +75,38 @@ export default function LoopCreatorPage() {
   });
 
   const creator = (data as any)?.creator;
-  const songs = useMemo(() => {
+  const rawSongs = useMemo(() => {
     const list = ((data as any)?.songs ?? []) as any[];
     return list.filter((s) => {
       const ct = (s.contentType || "audio").toLowerCase();
       return ct === "audio" || ct === "music" || !s.contentType;
     });
   }, [data]);
+  // Use the established bounded bulk status read rather than one reaction
+  // request per Work row in a Creator Domain.
+  const songIds = useMemo(() => rawSongs.map((song) => song.id).slice(0, 500), [rawSongs]);
+  const getBulkLikes = trpc.songs.getBulkLikeStatuses.useMutation();
+  const [likedMap, setLikedMap] = useState<Record<number, boolean>>({});
+  useEffect(() => {
+    if (songIds.length === 0) {
+      setLikedMap({});
+      return;
+    }
+    getBulkLikes.mutate({ songIds }, {
+      onSuccess: (result) => {
+        const next: Record<number, boolean> = {};
+        Object.entries(result).forEach(([songId, status]) => {
+          next[Number(songId)] = (status as { liked: boolean }).liked;
+        });
+        setLikedMap(next);
+      },
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [songIds.join(",")]);
+  const songs = useMemo(
+    () => rawSongs.map((song) => ({ ...song, initialLiked: likedMap[song.id] ?? false })),
+    [rawSongs, likedMap],
+  );
 
   const seedWid = songs.find((s) => s.witnessId)?.witnessId ?? null;
   const breath = useHarmonicSignature(seedWid, null);

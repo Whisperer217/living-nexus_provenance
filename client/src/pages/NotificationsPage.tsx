@@ -49,7 +49,7 @@ function NotifRow({
 
   const handleClick = () => {
     if (!notif.isRead) onRead(notif.id);
-    if (notif.refType === "song" && notif.refId) navigate(`/song/${notif.refId}`);
+    if (notif.refType === "song" && notif.refId) navigate(`/song/${notif.refId}${notif.type === "comment" ? "#voices" : ""}`);
     else if (notif.refType === "playlist" && notif.refId) navigate(`/playlists`);
     else if (notif.refType === "user" && notif.refId) navigate(`/creator/${notif.refId}`);
   };

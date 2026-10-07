@@ -37,6 +37,15 @@ export function HistoricalDateField({
   const selected = parseHistoricalDate(value);
   const minimum = parseHistoricalDate(minDate);
   const maximum = parseHistoricalDate(maxDate);
+  const today = new Date();
+  // The selector is intentionally broad but bounded. It supports archival
+  // registration without allowing an implausible future date by default.
+  const startMonth = minimum
+    ? new Date(minimum.getFullYear(), 0)
+    : new Date(today.getFullYear() - 150, 0);
+  const endMonth = maximum
+    ? new Date(maximum.getFullYear(), 11)
+    : new Date(today.getFullYear() + 1, 11);
 
   return (
     <div className={className}>
@@ -70,6 +79,10 @@ export function HistoricalDateField({
             selected={selected}
             onSelect={(date) => onChange(date ? formatHistoricalDateValue(date) : "")}
             disabled={(date) => (minimum ? date < minimum : false) || (maximum ? date > maximum : false)}
+            captionLayout="dropdown"
+            startMonth={startMonth}
+            endMonth={endMonth}
+            defaultMonth={selected ?? maximum ?? today}
             initialFocus
           />
           {value && (

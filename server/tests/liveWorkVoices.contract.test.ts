@@ -15,6 +15,8 @@ describe("live Work Voices contract", () => {
     expect(workPage).toContain('import { WorkVoices } from "@/components/WorkVoices"');
     expect(workPage).toContain("<WorkVoices songId={songId} />");
     expect(workPage).toContain("openVoices");
+    expect(workPage).toContain('window.location.hash !== "#voices"');
+    expect(workPage).toContain("[isLoading, song?.id]");
     expect(voices).toContain('id="voices"');
     expect(voices).toContain("trpc.comments.list.useQuery");
     expect(voices).toContain("trpc.comments.add.useMutation");

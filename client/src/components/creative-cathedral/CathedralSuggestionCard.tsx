@@ -58,7 +58,7 @@ export function CathedralSuggestionCard({
           className="h-10 rounded-sm px-3 text-sm"
           style={{ color: "var(--ln-cathedral-text)", background: "var(--ln-cathedral-surface)", border: "1px solid var(--ln-cathedral-border)" }}
         >
-          {(["Human", "AI", "Both"] as const).map((option) => <option key={option} value={option} style={{ color: "var(--ln-cathedral-text)", background: "var(--ln-cathedral-surface-strong)" }}>{option}</option>)}
+          {(["Human", "AI", "Both", "None"] as const).map((option) => <option key={option} value={option} style={{ color: "var(--ln-cathedral-text)", background: "var(--ln-cathedral-surface-strong)" }}>{option}</option>)}
         </select>
       );
     }

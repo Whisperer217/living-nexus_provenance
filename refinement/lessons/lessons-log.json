@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-10-04T15:50:43.040Z",
-  "totalLessons": 56,
+  "lastUpdated": "2026-10-07T16:38:51.219Z",
+  "totalLessons": 57,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -1309,6 +1309,32 @@
         "overlay-suppression",
         "playback-ownership",
         "thread-continuity"
+      ]
+    },
+    {
+      "id": "LESSON-057",
+      "date": "2026-10-07",
+      "category": "creator_experience",
+      "problem": "Creator-domain Work actions were split across implementation surfaces: a legacy profile component received card controls while the public /creator/:id route used LoopCreatorPage and SanctuaryWorksOrganizer. Separately, #voices deep-links could run before the asynchronous Work page had rendered the Voices landmark, leaving the hash set while the reader remained at the hero.",
+      "solution": "Mapped the active public route before finalizing UI work. Creator Work rows now use one reusable, permission-aware quick-action group for hearts, playlists, and permitted WID-tagged downloads; heart state is loaded through the bounded existing bulk-status read. The Voices deep-link retries after Work hydration, so Signal alerts land at the conversation rather than only preserving the hash. Reading tiers and control targets were raised without changing authorship, WID, participation, or download authority.",
+      "files": [
+        "client/src/pages/loop/LoopCreatorPage.tsx",
+        "client/src/components/creator/SanctuaryWorksOrganizer.tsx",
+        "client/src/components/CreatorWorkQuickActions.tsx",
+        "client/src/components/WorkVoices.tsx",
+        "client/src/pages/loop/LoopWorkPage.tsx",
+        "server/tests/creatorWorkflowFriction.contract.test.ts",
+        "server/tests/liveWorkVoices.contract.test.ts"
+      ],
+      "score": 0,
+      "tags": [
+        "creator-domain",
+        "quick-actions",
+        "signals",
+        "deep-link",
+        "route-ownership",
+        "accessibility",
+        "mobile"
       ]
     }
   ]

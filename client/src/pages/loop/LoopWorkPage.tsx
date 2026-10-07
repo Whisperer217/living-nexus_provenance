@@ -36,6 +36,11 @@ import { parseWorkGenres } from "@shared/workMetadata";
 import { WorkProvenanceHistory } from "@/components/WorkProvenanceHistory";
 import { WorkVoices } from "@/components/WorkVoices";
 
+function formatParticipation(axis: "Music" | "Lyrics" | "Voice", value: string | null | undefined) {
+  if (value === "None") return `No ${axis.toLowerCase()} declared`;
+  return value ?? "—";
+}
+
 export default function LoopWorkPage() {
   const { id } = useParams<{ id: string }>();
   const songId = parseInt(id || "0", 10);
@@ -158,7 +163,9 @@ export default function LoopWorkPage() {
       document.getElementById("voices")?.scrollIntoView({ behavior: "smooth", block: "start" });
     });
     return () => window.cancelAnimationFrame(frame);
-  }, [songId]);
+  // The Voices landmark is absent during the loading render. Re-run after
+  // the Work hydrates so notification deep-links do not stop at the hero.
+  }, [isLoading, song?.id]);
 
   if (isLoading) {
     return (
@@ -602,9 +609,9 @@ export default function LoopWorkPage() {
               className="flex flex-wrap gap-4 mb-6 text-xs uppercase tracking-[0.12em]"
               style={{ color: "color-mix(in srgb, var(--ln-parchment) 70%, transparent)" }}
             >
-              <span>Music · {(song as any).participationMusic ?? "—"}</span>
-              <span>Lyrics · {(song as any).participationLyrics ?? "—"}</span>
-              <span>Voice · {(song as any).participationVoice ?? "—"}</span>
+              <span>Music · {formatParticipation("Music", (song as any).participationMusic)}</span>
+              <span>Lyrics · {formatParticipation("Lyrics", (song as any).participationLyrics)}</span>
+              <span>Voice · {formatParticipation("Voice", (song as any).participationVoice)}</span>
             </div>
 
             {(() => {

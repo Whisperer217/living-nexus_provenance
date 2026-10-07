@@ -5,9 +5,9 @@
 
 export const PARTICIPATION_AXES = ["music", "lyrics", "voice"] as const;
 export type ParticipationAxis = (typeof PARTICIPATION_AXES)[number];
-export type ParticipationValue = "Human" | "AI" | "Both";
+export type ParticipationValue = "Human" | "AI" | "Both" | "None";
 
-export const PARTICIPATION_VALUES: ParticipationValue[] = ["Human", "AI", "Both"];
+export const PARTICIPATION_VALUES: ParticipationValue[] = ["Human", "AI", "Both", "None"];
 
 export type VisualSource = "embedded" | "uploaded" | "generated" | "remixed" | "none";
 
@@ -112,10 +112,12 @@ export function deriveToneFromMetadata(input: {
   if (input.keySignature) parts.push(`Key ${input.keySignature}`);
   if (input.bpm) parts.push(`${input.bpm} BPM`);
   if (moods.length) parts.push(moods.slice(0, 3).join(" · "));
-  const collab =
-    input.participation.music !== "Human" ||
-    input.participation.lyrics !== "Human" ||
-    input.participation.voice !== "Human";
+  const declaredContributions = [
+    input.participation.music,
+    input.participation.lyrics,
+    input.participation.voice,
+  ].filter((value) => value !== "None");
+  const collab = declaredContributions.some((value) => value !== "Human");
   if (collab) parts.push("Mixed authorship");
   if (input.emotionalHint) parts.push(input.emotionalHint.slice(0, 48));
 

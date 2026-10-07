@@ -198,7 +198,9 @@ export default function RightRail() {
               key={sig.id}
               className="flex items-start gap-2 py-2 border-b cursor-pointer transition-opacity hover:opacity-80"
               style={{ borderColor: "rgba(212,175,55,0.06)" }}
-              onClick={() => sig.refId && sig.refType === "song" ? navigate(`/song/${sig.refId}`) : navigate("/notifications")}
+              onClick={() => sig.refId && sig.refType === "song"
+                ? navigate(`/song/${sig.refId}${sig.type === "comment" ? "#voices" : ""}`)
+                : navigate("/notifications")}
             >
               <SignalIcon type={sig.type} />
               <div className="flex-1 min-w-0">
@@ -233,7 +235,7 @@ export default function RightRail() {
               key={item.id}
               className="flex items-start gap-2 py-2 border-b cursor-pointer transition-opacity hover:opacity-80"
               style={{ borderColor: "rgba(212,175,55,0.06)" }}
-              onClick={() => item.songId && navigate(`/song/${item.songId}`)}
+              onClick={() => item.songId && navigate(`/song/${item.songId}${item.type === "comment" ? "#voices" : ""}`)}
             >
               <SignalIcon type={item.type} />
               <div className="flex-1 min-w-0">

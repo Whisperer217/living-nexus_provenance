@@ -75,21 +75,21 @@ function VoiceAvatar({ avatarUrl, authorName, compact = false }: { avatarUrl?: s
 
 function VoiceRecord({ voice, onReply }: { voice: any; onReply: (voice: any) => void }) {
   return (
-    <article className="ln-dimensional-card ln-voice-comment ln-signal-card rounded-2xl p-4 sm:p-5">
+    <article className="ln-dimensional-card ln-voice-comment ln-signal-card rounded-2xl p-5 sm:p-6">
       <div className="flex gap-3">
         <VoiceAvatar avatarUrl={voice.avatarUrl} authorName={voice.authorName} />
         <div className="min-w-0 flex-1">
           <div className="flex min-w-0 items-center gap-2">
-            <span className="truncate font-medium text-[var(--ln-parchment)]">{voice.authorName || "Anonymous"}</span>
+            <span className="truncate text-base font-medium text-[var(--ln-parchment)]">{voice.authorName || "Anonymous"}</span>
             <time
-              className="ml-auto flex-shrink-0 text-xs text-[var(--ln-smoke)]"
+              className="ml-auto flex-shrink-0 text-sm text-[var(--ln-smoke)]"
               dateTime={new Date(voice.createdAt).toISOString()}
               title={new Date(voice.createdAt).toLocaleString()}
             >
               {relativeVoiceTime(voice.createdAt)}
             </time>
           </div>
-          <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-[var(--ln-bone)]">{mentionPieces(voice.content, voice.mentions)}</p>
+          <p className="mt-3 whitespace-pre-wrap text-base leading-relaxed text-[var(--ln-bone)]">{mentionPieces(voice.content, voice.mentions)}</p>
           <button
             type="button"
             onClick={() => onReply(voice)}
@@ -107,16 +107,16 @@ function VoiceRecord({ voice, onReply }: { voice: any; onReply: (voice: any) => 
               <VoiceAvatar avatarUrl={reply.avatarUrl} authorName={reply.authorName} compact />
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                  <span className="truncate text-sm font-medium text-[var(--ln-parchment)]">{reply.authorName || "Anonymous"}</span>
+                  <span className="truncate text-[0.9375rem] font-medium text-[var(--ln-parchment)]">{reply.authorName || "Anonymous"}</span>
                   <time
-                    className="ml-auto flex-shrink-0 text-[11px] text-[var(--ln-smoke)]"
+                    className="ml-auto flex-shrink-0 text-xs text-[var(--ln-smoke)]"
                     dateTime={new Date(reply.createdAt).toISOString()}
                     title={new Date(reply.createdAt).toLocaleString()}
                   >
                     {relativeVoiceTime(reply.createdAt)}
                   </time>
                 </div>
-                <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-[var(--ln-smoke)]">{mentionPieces(reply.content, reply.mentions)}</p>
+                <p className="mt-1 whitespace-pre-wrap text-[0.9375rem] leading-relaxed text-[var(--ln-bone)]">{mentionPieces(reply.content, reply.mentions)}</p>
               </div>
             </div>
           ))}

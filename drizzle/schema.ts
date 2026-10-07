@@ -653,9 +653,9 @@ export const songs = mysqlTable("songs", {
   status: mysqlEnum("status", ["Draft", "Published", "Unlisted", "Deleted"]).default("Published").notNull(),
 
   // ─── Loop participation axes (Music / Lyrics / Voice) ───────────────────────
-  participationMusic: mysqlEnum("participationMusic", ["Human", "AI", "Both"]).default("Human"),
-  participationLyrics: mysqlEnum("participationLyrics", ["Human", "AI", "Both"]).default("Human"),
-  participationVoice: mysqlEnum("participationVoice", ["Human", "AI", "Both"]).default("Human"),
+  participationMusic: mysqlEnum("participationMusic", ["Human", "AI", "Both", "None"]).default("Human"),
+  participationLyrics: mysqlEnum("participationLyrics", ["Human", "AI", "Both", "None"]).default("Human"),
+  participationVoice: mysqlEnum("participationVoice", ["Human", "AI", "Both", "None"]).default("Human"),
   // Tone-from-metadata JSON (ToneProfile v1)
   toneProfileJson: text("toneProfileJson"),
   // Downloadable waveform PNG (from canonical audio at seal)

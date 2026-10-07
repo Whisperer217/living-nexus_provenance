@@ -648,9 +648,9 @@ export const songsRouter = router({
       parentGuideWid: z.string().max(64).optional(),
       // Loop registration
       status: z.enum(["Draft", "Published"]).optional(),
-      participationMusic: z.enum(["Human", "AI", "Both"]).optional(),
-      participationLyrics: z.enum(["Human", "AI", "Both"]).optional(),
-      participationVoice: z.enum(["Human", "AI", "Both"]).optional(),
+      participationMusic: z.enum(["Human", "AI", "Both", "None"]).optional(),
+      participationLyrics: z.enum(["Human", "AI", "Both", "None"]).optional(),
+      participationVoice: z.enum(["Human", "AI", "Both", "None"]).optional(),
       toneProfileJson: z.string().max(8000).optional(),
       waveformUrl: z.string().url().optional(),
       waveformKey: z.string().optional(),

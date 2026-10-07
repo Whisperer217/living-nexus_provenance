@@ -121,7 +121,7 @@ describe("Work metadata continuity", () => {
     expect(publicWork).toContain("Origin is a creator-declared provenance field");
     expect(publicWork).not.toContain("song.haaiOriginStory || song.description || song.caption");
     expect(publicWork).toContain("No origin testimony recorded for this work yet.");
-    expect(publicWork).toContain("Music · {(song as any).participationMusic");
+    expect(publicWork).toContain('formatParticipation("Music", (song as any).participationMusic)');
   });
 
   it("validates creator chronology as date-only editorial metadata", () => {

@@ -89,7 +89,7 @@ export async function suggestWorkMetadataFromApprovedContext(input: {
 Return a conservative, structured proposal based only on the creator-approved evidence packet in the request.
 Never invent provenance, authorship, dates, credits, ownership, WIDs, publication state, or legal conclusions.
 Do not infer Creation Date from file modification time. Propose Original Release Date only when an embedded date supports it.
-Propose participationMusic, participationLyrics, or participationVoice only when an embedded production hint or creator field explicitly supports Human, AI, or Both. Never invent contributor names or ownership.
+Propose participationMusic, participationLyrics, or participationVoice only when an embedded production hint or creator field explicitly supports Human, AI, Both, or None. Never invent contributor names or ownership.
 Omit unsupported fields from patch. Explain every proposed field in evidence with high, medium, or low confidence. Keep each caution under 240 characters.
 Your response is non-binding and will not be saved to a Work unless the creator separately acts.`,
       },
@@ -118,9 +118,9 @@ Your response is non-binding and will not be saved to a Work unless the creator 
                 caption: { type: ["string", "null"] },
                 creationDate: { type: ["string", "null"] },
                 originalReleaseDate: { type: ["string", "null"] },
-                participationMusic: { type: ["string", "null"], enum: ["Human", "AI", "Both", null] },
-                participationLyrics: { type: ["string", "null"], enum: ["Human", "AI", "Both", null] },
-                participationVoice: { type: ["string", "null"], enum: ["Human", "AI", "Both", null] },
+                participationMusic: { type: ["string", "null"], enum: ["Human", "AI", "Both", "None", null] },
+                participationLyrics: { type: ["string", "null"], enum: ["Human", "AI", "Both", "None", null] },
+                participationVoice: { type: ["string", "null"], enum: ["Human", "AI", "Both", "None", null] },
               },
               required: ["title", "genre", "bpm", "keySignature", "moodTags", "caption", "creationDate", "originalReleaseDate", "participationMusic", "participationLyrics", "participationVoice"],
               additionalProperties: false,

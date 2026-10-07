@@ -11,9 +11,9 @@ export const cathedralDraftSnapshotSchema = z.object({
   caption: z.string().trim().max(280).default(""),
   creationDate: z.string().trim().max(10).default(""),
   originalReleaseDate: z.string().trim().max(10).default(""),
-  participationMusic: z.enum(["Human", "AI", "Both"]).default("Human"),
-  participationLyrics: z.enum(["Human", "AI", "Both"]).default("Human"),
-  participationVoice: z.enum(["Human", "AI", "Both"]).default("Human"),
+  participationMusic: z.enum(["Human", "AI", "Both", "None"]).default("Human"),
+  participationLyrics: z.enum(["Human", "AI", "Both", "None"]).default("Human"),
+  participationVoice: z.enum(["Human", "AI", "Both", "None"]).default("Human"),
 }).strict();
 
 export type CathedralDraftSnapshot = z.infer<typeof cathedralDraftSnapshotSchema>;
@@ -49,9 +49,9 @@ export const cathedralSuggestionPatchSchema = z.object({
   caption: z.string().trim().max(280).optional(),
   creationDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
   originalReleaseDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
-  participationMusic: z.enum(["Human", "AI", "Both"]).optional(),
-  participationLyrics: z.enum(["Human", "AI", "Both"]).optional(),
-  participationVoice: z.enum(["Human", "AI", "Both"]).optional(),
+  participationMusic: z.enum(["Human", "AI", "Both", "None"]).optional(),
+  participationLyrics: z.enum(["Human", "AI", "Both", "None"]).optional(),
+  participationVoice: z.enum(["Human", "AI", "Both", "None"]).optional(),
 }).strict();
 
 export type CathedralSuggestionPatch = z.infer<typeof cathedralSuggestionPatchSchema>;

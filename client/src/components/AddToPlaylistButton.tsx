@@ -15,15 +15,17 @@ interface AddToPlaylistButtonProps {
   /** compact = icon-only, full = icon + label */
   variant?: "compact" | "full";
   className?: string;
+  /** Use when a dense Work shelf cannot safely issue one status query per card. */
+  deferStatusQuery?: boolean;
 }
 
-export default function AddToPlaylistButton({ songId, variant = "compact", className = "" }: AddToPlaylistButtonProps) {
+export default function AddToPlaylistButton({ songId, variant = "compact", className = "", deferStatusQuery = false }: AddToPlaylistButtonProps) {
   const { isAuthenticated } = useAuth();
   const utils = trpc.useUtils();
 
   const { data: checkData, isLoading: checkLoading } = trpc.playlist.check.useQuery(
     { songId },
-    { enabled: isAuthenticated, staleTime: 30_000 }
+    { enabled: isAuthenticated && !deferStatusQuery, staleTime: 30_000 }
   );
 
   const inPlaylist = checkData?.inPlaylist ?? false;
@@ -73,6 +75,7 @@ export default function AddToPlaylistButton({ songId, variant = "compact", class
         onClick={handleClick}
         disabled={isPending}
         title={title}
+        aria-label={title}
         className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-[12px] font-body transition-all
           ${inPlaylist
             ? "bg-[#111111]/20 text-[#C49A28] border border-[#C49A28]/40 hover:bg-[#111111]/30"
@@ -96,6 +99,7 @@ export default function AddToPlaylistButton({ songId, variant = "compact", class
       onClick={handleClick}
       disabled={isPending}
       title={title}
+      aria-label={title}
       className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all
         ${inPlaylist
           ? "bg-[#111111]/20 text-[#C49A28] border border-[#C49A28]/40 hover:bg-[#111111]/30"
