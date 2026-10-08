@@ -283,7 +283,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       isPlaying: false,
       isShuffle: false,
       isRepeat: false,
-      isMuted: false,
+      isMuted: getCache<boolean>(CACHE_KEYS.MUTED) ?? false,
       volume: getCache<number>(CACHE_KEYS.VOLUME) ?? 0.75,
       currentTime: 0,
       duration: 0,
@@ -377,6 +377,15 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   // Keep a stable ref to current state for use inside the audio engine
   const stateRef = useRef(state);
   useEffect(() => { stateRef.current = state; }, [state]);
+
+  // UI volume/mute changes must not rebind the long-lived media listeners.
+  // Sync the singleton audio element when the provider mounts or state changes.
+  useEffect(() => {
+    audioRef.current.volume = clampVol(state.volume);
+  }, [state.volume]);
+  useEffect(() => {
+    audioRef.current.muted = state.isMuted;
+  }, [state.isMuted]);
 
   useEffect(() => {
     exposePlaybackAudioForDiagnostics(audioRef.current);
@@ -473,7 +482,6 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
-    audio.volume = clampVol(state.volume);
 
     const onTimeUpdate = () => {
       setState(s => ({ ...s, currentTime: audio.currentTime }));
@@ -1269,18 +1277,21 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const toggleMute = useCallback(() => {
     const audio = audioRef.current;
     if (!audio) return;
-    setState(s => {
-      audio.muted = !s.isMuted;
-      return { ...s, isMuted: !s.isMuted };
-    });
+    const isMuted = !audio.muted;
+    audio.muted = isMuted;
+    setState(s => ({ ...s, isMuted }));
+    setCache(CACHE_KEYS.MUTED, isMuted, TTL.UI_STATE);
   }, []);
 
   const setVolume = useCallback((v: number) => {
     const audio = audioRef.current;
     if (!audio) return;
-    audio.volume = clampVol(v);
-    setState(s => ({ ...s, volume: clampVol(v), isMuted: false }));
-    setCache(CACHE_KEYS.VOLUME, clampVol(v), TTL.UI_STATE);
+    const volume = clampVol(v);
+    audio.volume = volume;
+    audio.muted = false;
+    setState(s => ({ ...s, volume, isMuted: false }));
+    setCache(CACHE_KEYS.VOLUME, volume, TTL.UI_STATE);
+    setCache(CACHE_KEYS.MUTED, false, TTL.UI_STATE);
   }, []);
 
   const seek = useCallback((t: number) => {
