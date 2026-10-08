@@ -9,6 +9,7 @@ interface PNAComposerBarProps {
   contextCount: number;
   value: string;
   isSending: boolean;
+  isWorkInProgress: boolean;
   isVisionPromptInvalid: boolean;
   visionCounter?: string;
   inputRef: RefObject<HTMLTextAreaElement | null>;
@@ -27,6 +28,7 @@ export function PNAComposerBar({
   contextCount,
   value,
   isSending,
+  isWorkInProgress,
   isVisionPromptInvalid,
   visionCounter,
   inputRef,
@@ -55,6 +57,7 @@ export function PNAComposerBar({
           <select
             value={activeMode}
             onChange={(event) => onSelectProfile(event.target.value as PNAMode)}
+            disabled={isWorkInProgress}
             className="bg-transparent font-body text-[var(--text-sm)] outline-none"
             style={{ color: "var(--ln-parchment)" }}
             aria-label="Active Stewardship Profile"
@@ -62,7 +65,7 @@ export function PNAComposerBar({
             {modes.map((mode) => <option key={mode.id} value={mode.id}>{mode.label}</option>)}
           </select>
         </label>
-        <button type="button" onClick={onAttachContext} className="flex min-h-10 items-center gap-2 rounded-lg px-3 focus-visible:outline-none focus-visible:ring-2" style={{ border: "1px solid var(--ln-panel-border)", color: contextCount > 0 ? "var(--ln-gold)" : "var(--ln-bone)", fontFamily: "var(--font-display)", fontSize: "var(--text-xs)", letterSpacing: "0.06em" }}>
+        <button type="button" onClick={onAttachContext} disabled={isWorkInProgress} className="flex min-h-10 items-center gap-2 rounded-lg px-3 disabled:opacity-45 focus-visible:outline-none focus-visible:ring-2" style={{ border: "1px solid var(--ln-panel-border)", color: contextCount > 0 ? "var(--ln-gold)" : "var(--ln-bone)", fontFamily: "var(--font-display)", fontSize: "var(--text-xs)", letterSpacing: "0.06em" }}>
           <Layers size={13} /> {contextCount === 0 ? "ATTACH CONTEXT" : `${contextCount} SOURCE${contextCount === 1 ? "" : "S"}`}
         </button>
         <button type="button" onClick={onOpenSettings} className="flex min-h-10 min-w-0 items-center gap-1.5 rounded-lg px-1.5 text-left focus-visible:outline-none focus-visible:ring-2" style={{ color: profileDisabled ? "var(--ln-gold-hot)" : "var(--ln-smoke)" }} title="Open Stewardship settings">
@@ -78,13 +81,20 @@ export function PNAComposerBar({
             <button type="button" onClick={onOpenSettings} className="min-h-9 rounded px-2 font-display text-[var(--text-xs)] tracking-[0.06em] uppercase focus-visible:outline-none focus-visible:ring-2" style={{ color: "var(--ln-gold)" }}>Review permissions</button>
           </div>
         ) : null}
+        {isWorkInProgress ? (
+          <div className="mb-2 rounded-lg px-3 py-2" role="status" style={{ background: "color-mix(in srgb, var(--ln-gold) 7%, transparent)", border: "1px solid color-mix(in srgb, var(--ln-gold) 25%, var(--ln-panel-border))" }}>
+            <p className="font-display text-[var(--text-xs)] tracking-[0.1em] uppercase" style={{ color: "var(--ln-gold)" }}>PNA is in active construction</p>
+            <p className="mt-1 font-body text-[var(--text-sm)] leading-relaxed" style={{ color: "var(--ln-bone)" }}>Messages, visual proposals, and model use are paused. You can still inspect private threads, context, and artifacts.</p>
+          </div>
+        ) : null}
         <div className="flex items-end gap-3">
           <textarea
             ref={inputRef}
             value={value}
             onChange={(event) => onChange(event.target.value)}
             onKeyDown={onKeyDown}
-            placeholder={activeMode === "vision" ? "Describe a private visual proposal…" : `Message ${active.label}…`}
+            disabled={isWorkInProgress}
+            placeholder={isWorkInProgress ? "PNA model operations are paused while this service is under construction." : activeMode === "vision" ? "Describe a private visual proposal…" : `Message ${active.label}…`}
             aria-label={activeMode === "vision" ? "Private visual proposal prompt" : `Message ${active.label}`}
             aria-invalid={isVisionPromptInvalid}
             rows={1}
@@ -96,7 +106,7 @@ export function PNAComposerBar({
               element.style.height = `${Math.min(element.scrollHeight, 160)}px`;
             }}
           />
-          <button type="button" onClick={onSend} disabled={!value.trim() || isSending || isVisionPromptInvalid || profileDisabled} className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-lg transition-opacity hover:opacity-85 disabled:opacity-35 focus-visible:outline-none focus-visible:ring-2" style={{ background: "var(--ln-gold)", color: "var(--ln-void)" }} aria-label={isSending ? "PNA is responding" : `Send message to ${active.label}`}>
+          <button type="button" onClick={onSend} disabled={isWorkInProgress || !value.trim() || isSending || isVisionPromptInvalid || profileDisabled} className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-lg transition-opacity hover:opacity-85 disabled:opacity-35 focus-visible:outline-none focus-visible:ring-2" style={{ background: "var(--ln-gold)", color: "var(--ln-void)" }} aria-label={isWorkInProgress ? "PNA model operations are paused" : isSending ? "PNA is responding" : `Send message to ${active.label}`}>
             {isSending ? <Loader2 size={17} className="animate-spin" /> : <Send size={17} />}
           </button>
         </div>

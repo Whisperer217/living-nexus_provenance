@@ -26,6 +26,7 @@
  * ```
  */
 import { ENV } from "./env";
+import { AI_OPERATIONS_ENABLED, AI_OPERATIONS_PAUSE_MESSAGE } from "../../shared/aiAvailability";
 
 export type TranscribeOptions = {
   audioUrl: string; // URL to the audio file (e.g., S3 URL)
@@ -60,7 +61,7 @@ export type TranscriptionResponse = WhisperResponse; // Return native Whisper AP
 
 export type TranscriptionError = {
   error: string;
-  code: "FILE_TOO_LARGE" | "INVALID_FORMAT" | "TRANSCRIPTION_FAILED" | "UPLOAD_FAILED" | "SERVICE_ERROR";
+  code: "FILE_TOO_LARGE" | "INVALID_FORMAT" | "TRANSCRIPTION_FAILED" | "UPLOAD_FAILED" | "SERVICE_ERROR" | "SERVICE_PAUSED";
   details?: string;
 };
 
@@ -73,6 +74,13 @@ export type TranscriptionError = {
 export async function transcribeAudio(
   options: TranscribeOptions
 ): Promise<TranscriptionResponse | TranscriptionError> {
+  if (!AI_OPERATIONS_ENABLED) {
+    return {
+      error: AI_OPERATIONS_PAUSE_MESSAGE,
+      code: "SERVICE_PAUSED",
+    };
+  }
+
   try {
     // Step 1: Validate environment configuration
     if (!ENV.forgeApiUrl) {

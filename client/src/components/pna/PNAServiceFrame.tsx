@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { ArrowLeft, Compass, ShieldCheck } from "lucide-react";
 import { Link, useLocation, useSearch } from "wouter";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import { AI_OPERATIONS_ENABLED } from "@shared/aiAvailability";
 
 type PNAServiceSurface = "workspace" | "settings";
 
@@ -38,7 +39,13 @@ export function PNAServiceFrame({ children, surface }: PNAServiceFrameProps) {
 
   return (
     <ErrorBoundary resetKey={location}>
-      <div className={`pna-service-frame pna-service-frame--${surface}`}>
+      <div className={`pna-service-frame pna-service-frame--${surface} ${AI_OPERATIONS_ENABLED ? "" : "pna-service-frame--paused"}`}>
+        {!AI_OPERATIONS_ENABLED ? (
+          <div className="pna-service-frame__wip" role="status">
+            <span>WORK IN PROGRESS</span>
+            <span className="pna-service-frame__wip-detail">PNA model operations are paused; private records remain available for review.</span>
+          </div>
+        ) : null}
         {isSettings ? (
           <header className="pna-service-frame__bar">
             <div className="flex min-w-0 items-center gap-3">

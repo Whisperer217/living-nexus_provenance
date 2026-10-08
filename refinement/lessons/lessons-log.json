@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-10-07T16:38:51.219Z",
-  "totalLessons": 57,
+  "lastUpdated": "2026-10-08T04:33:49.297Z",
+  "totalLessons": 58,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -1335,6 +1335,34 @@
         "route-ownership",
         "accessibility",
         "mobile"
+      ]
+    },
+    {
+      "id": "LESSON-058",
+      "date": "2026-10-07",
+      "category": "security",
+      "problem": "Model-assisted features were represented in several interfaces and services, so hiding PNA alone would still leave model, image, transcription, and automated visual paths callable.",
+      "solution": "Introduced one disabled shared AI operations contract that blocks model provider calls before fetch; made transcription return an explicit paused result before reading creator media; skipped the AI music-video follow-on without changing Work status; and made PNA visibly work-in-progress with a read-only composer while private threads, Context Envelope, and Artifact review remain available.",
+      "files": [
+        "shared/aiAvailability.ts",
+        "server/_core/llm.ts",
+        "server/_core/imageGeneration.ts",
+        "server/_core/voiceTranscription.ts",
+        "server/services/musicVideoService.ts",
+        "server/workers/visualQueue.ts",
+        "client/src/components/pna/PNAServiceFrame.tsx",
+        "client/src/components/pna/PNAComposerBar.tsx",
+        "client/src/pages/PNAShellPage.tsx",
+        "server/tests/aiOperationsPause.contract.test.ts"
+      ],
+      "score": 0,
+      "tags": [
+        "ai-operations-pause",
+        "PNA",
+        "stewardship",
+        "provider-boundary",
+        "provenance-preservation",
+        "work-in-progress"
       ]
     }
   ]

@@ -26,6 +26,7 @@ import { songs } from "../../drizzle/schema";
 import { invokeLLM } from "../_core/llm";
 import { generateImage } from "../_core/imageGeneration";
 import { storagePut } from "../utils/storage";
+import { AI_OPERATIONS_ENABLED } from "../../shared/aiAvailability";
 
 const execFileAsync = promisify(execFile);
 
@@ -73,6 +74,11 @@ interface FrameScript {
  */
 export async function generateMusicVideo(input: MusicVideoInput): Promise<string | null> {
   const { songId } = input;
+
+  if (!AI_OPERATIONS_ENABLED) {
+    console.info(`[MusicVideo] Skipping song ${songId} — model-assisted operations are paused`);
+    return null;
+  }
 
   // Skip if already generated
   if (input.musicVideoUrl?.trim()) {

@@ -24,6 +24,7 @@ import { getOrGenerateEmbedVideo } from "../services/embedVideo";
 import { generateMusicVideo } from "../services/musicVideoService";
 import { storagePut } from "../utils/storage";
 import { notifyOwner } from "../_core/notification";
+import { AI_OPERATIONS_ENABLED } from "../../shared/aiAvailability";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -332,7 +333,7 @@ export async function processVisualQueueBatch(): Promise<void> {
         // Only trigger if the song has cover art and no music video yet.
         // We do NOT await this — it runs in the background so the visual queue
         // job completes immediately and the embed video is available right away.
-        if (song.coverArtUrl && !song.musicVideoUrl && song.musicVideoStatus !== 'generating') {
+        if (AI_OPERATIONS_ENABLED && song.coverArtUrl && !song.musicVideoUrl && song.musicVideoStatus !== 'generating') {
           generateMusicVideo({
             songId: song.id,
             title: song.title,

@@ -34,6 +34,7 @@ import type { PNAInspectionSurface, PNAMode, PNAThreadSummary, PNAWorkspaceArtif
 import { SKIN_IMAGES } from "@/components/FloatingAvatar";
 import { PNA_PRODUCT } from "@/lib/loopProduct";
 import { consumePnaDiaryReload } from "@/lib/pnaDiary";
+import { AI_OPERATIONS_ENABLED, AI_OPERATIONS_PAUSE_MESSAGE } from "@shared/aiAvailability";
 import {
   getVisionPromptErrorMessage,
   getVisionPromptLength,
@@ -420,6 +421,10 @@ export default function PNAShellPage() {
   const ensureThread = useCallback(async (mode: PNAMode) => threadId ?? startThread(mode), [threadId, startThread]);
 
   const handleSend = useCallback(async () => {
+    if (!AI_OPERATIONS_ENABLED) {
+      toast.info(AI_OPERATIONS_PAUSE_MESSAGE);
+      return;
+    }
     const text = input.trim();
     if (!text || isLoading || !user) return;
     if (activeProfile && !activeProfile.isEnabled) {
@@ -770,6 +775,7 @@ export default function PNAShellPage() {
       contextCount={attachedContextCount}
       value={input}
       isSending={isLoading}
+      isWorkInProgress={!AI_OPERATIONS_ENABLED}
       isVisionPromptInvalid={activeMode === "vision" && isVisionPromptOverLimit(input)}
       visionCounter={activeMode === "vision" ? `${getVisionPromptLength(input).toLocaleString()} / ${VISION_PROMPT_MAX_LENGTH.toLocaleString()}` : undefined}
       inputRef={inputRef}

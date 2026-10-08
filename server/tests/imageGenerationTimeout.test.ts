@@ -6,6 +6,11 @@ vi.mock("../utils/storage", () => storage);
 vi.mock("../_core/env", () => ({
   ENV: { forgeApiUrl: "https://forge.example/", forgeApiKey: "test-key" },
 }));
+vi.mock("../../shared/aiAvailability", () => ({
+  AI_OPERATIONS_ENABLED: true,
+  AI_OPERATIONS_PAUSE_MESSAGE: "Model-assisted operations are temporarily paused while Living Nexus is under stewardship.",
+  assertAiOperationsEnabled: () => undefined,
+}));
 
 import { generateImage, IMAGE_GENERATION_TIMEOUT_MS } from "../_core/imageGeneration";
 

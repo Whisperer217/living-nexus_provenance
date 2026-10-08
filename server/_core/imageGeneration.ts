@@ -17,6 +17,7 @@
  */
 import { storagePut } from "../utils/storage";
 import { ENV } from "./env";
+import { assertAiOperationsEnabled } from "../../shared/aiAvailability";
 
 export type GenerateImageOptions = {
   prompt: string;
@@ -45,6 +46,7 @@ export const IMAGE_GENERATION_TIMEOUT_MS = 45_000;
 export async function generateImage(
   options: GenerateImageOptions
 ): Promise<GenerateImageResponse> {
+  assertAiOperationsEnabled();
   if (!ENV.forgeApiUrl) {
     throw new Error("BUILT_IN_FORGE_API_URL is not configured");
   }

@@ -1,4 +1,5 @@
 import { ENV } from "./env";
+import { assertAiOperationsEnabled } from "../../shared/aiAvailability";
 
 export type Role = "system" | "user" | "assistant" | "tool" | "function";
 
@@ -267,6 +268,7 @@ const normalizeResponseFormat = ({
 };
 
 export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
+  assertAiOperationsEnabled();
   assertApiKey();
 
   const {
