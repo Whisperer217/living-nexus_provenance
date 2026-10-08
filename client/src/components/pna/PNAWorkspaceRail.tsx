@@ -3,6 +3,8 @@ import { Archive, BookOpen, CheckCircle2, Eye, Image, Layers, Link2, Music, Sett
 import { NexusContextPanel, type NexusNowPlayingContext } from "@/components/NexusContextPanel";
 import type { NexusContextRef, NexusContextSuggestion } from "@/lib/nexusContext";
 import { PNAArtifactReviewCard } from "./PNAArtifactReviewCard";
+import { PNAOperationsPauseNotice } from "./PNAOperationsPauseNotice";
+import { AI_OPERATIONS_ENABLED } from "@shared/aiAvailability";
 import type {
   PNAActionReceiptView,
   PNAArtifactSourceView,
@@ -104,7 +106,9 @@ function ContextEntryCard({ entry, busy, onDetach, onOpen }: { entry: PNAContext
 function RouteDisclosure({ profile, entryCount, onOpenSettings }: { profile: PNAProfileSettingView | null; entryCount: number; onOpenSettings: () => void }) {
   const disabled = profile && !profile.isEnabled;
   const remoteAllowed = profile?.allowRemoteContext ?? false;
-  const copy = disabled
+  const copy = !AI_OPERATIONS_ENABLED
+    ? "Model operations are paused while PNA is under construction. Selected sources remain private and are not sent to a model."
+    : disabled
     ? `${profile?.label ?? "This profile"} is disabled in Stewardship settings.`
     : entryCount === 0
       ? "No selected source has been sent to a model."
@@ -113,7 +117,7 @@ function RouteDisclosure({ profile, entryCount, onOpenSettings }: { profile: PNA
         : `Selected sources stay here until you permit remote selected-context use for ${profile?.label ?? "this profile"}.`;
   return (
     <section className="rounded-lg p-3" aria-label="Model route disclosure" style={{ background: "color-mix(in srgb, var(--ln-gold) 7%, var(--ln-coal))", border: "1px solid color-mix(in srgb, var(--ln-gold) 22%, var(--ln-panel-border))" }}>
-      <div className="flex items-center gap-2"><ShieldCheck size={14} style={{ color: "var(--ln-gold)" }} aria-hidden="true" /><p className="font-display text-[var(--text-xs)] tracking-[0.12em] uppercase" style={{ color: "var(--ln-gold)" }}>{disabled ? "Profile disabled" : remoteAllowed ? "Remote route permitted" : "Route not permitted"}</p></div>
+      <div className="flex items-center gap-2"><ShieldCheck size={14} style={{ color: "var(--ln-gold)" }} aria-hidden="true" /><p className="font-display text-[var(--text-xs)] tracking-[0.12em] uppercase" style={{ color: "var(--ln-gold)" }}>{!AI_OPERATIONS_ENABLED ? "Model operations paused" : disabled ? "Profile disabled" : remoteAllowed ? "Remote route permitted" : "Route not permitted"}</p></div>
       <p className="mt-2 font-body text-[var(--text-sm)] leading-relaxed" style={{ color: "var(--ln-bone)" }}>{copy}</p>
       <button type="button" onClick={onOpenSettings} className="mt-3 flex min-h-11 w-full items-center justify-center gap-2 rounded-lg px-3 focus-visible:outline-none focus-visible:ring-2" style={{ border: "1px solid var(--ln-gold-dim)", color: "var(--ln-gold)", fontFamily: "var(--font-display)", fontSize: "var(--text-xs)", letterSpacing: "0.08em" }}><Settings2 size={13} /> STEWARDSHIP SETTINGS</button>
     </section>
@@ -128,7 +132,7 @@ export function PNAWorkspaceRail({ surface, onSurfaceChange, threadId, envelope,
     <aside aria-label="PNA workspace inspection rail" className={mobile ? "flex h-full min-h-0 w-full flex-col" : "hidden h-full min-h-0 w-[360px] flex-shrink-0 flex-col xl:flex"} style={{ background: "var(--ln-panel)", borderLeft: mobile ? "none" : "1px solid var(--ln-panel-border)" }}>
       <header className="flex items-start gap-3 px-4 py-3" style={{ borderBottom: "1px solid var(--ln-panel-border)" }}>
         <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg" style={{ background: "color-mix(in srgb, var(--ln-gold) 10%, transparent)", color: "var(--ln-gold)", border: "1px solid color-mix(in srgb, var(--ln-gold) 24%, transparent)" }}><Sparkles size={16} aria-hidden="true" /></div>
-        <div className="min-w-0"><p className="font-display text-[var(--text-xs)] tracking-[0.18em] uppercase" style={{ color: "var(--ln-gold)" }}>Private inspection</p><p className="mt-1 font-body text-[var(--text-sm)]" style={{ color: "var(--ln-smoke)" }}>Scope, sources, proposals, and creator decisions stay inspectable.</p></div>
+        <div className="min-w-0"><p className="font-display text-[var(--text-xs)] tracking-[0.18em] uppercase" style={{ color: "var(--ln-gold)" }}>Private inspection</p><p className="mt-1 font-body text-[var(--text-sm)]" style={{ color: "var(--ln-smoke)" }}>Scope, sources, proposals, and creator decisions stay inspectable.</p><PNAOperationsPauseNotice compact className="mt-2" /></div>
       </header>
       <SurfaceTabs surface={surface} onSurfaceChange={onSurfaceChange} />
       <div aria-live="polite" className="sr-only">{surface === "context" ? `${attachedEntries.length} selected Context sources` : surface === "artifacts" ? `${visibleArtifacts.length} private Artifacts` : `${surface} inspection surface`}</div>

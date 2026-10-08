@@ -15,7 +15,7 @@ This decision is an **operations pause**, not a provenance rewrite. Existing Wor
 1. A shared, compile-time `AI_OPERATIONS_ENABLED = false` contract is the single source of truth.
 2. The three provider adapters—LLM invocation, image generation, and transcription—reject before creating any external request.
 3. The AI music-video service and its worker follow-on return without changing a Work to failed state while the pause is active.
-4. PNA prevents message/visual submission in the client and presents a persistent **WORK IN PROGRESS** perimeter and status notice. Private thread, Context Envelope, Artifact review, and Stewardship settings remain inspectable; no selected context is forwarded to a model.
+4. PNA prevents message/visual submission in every current entry surface—the focused workspace, command palette, canonical composer, legacy drawer, inspection rail, and Stewardship settings. A persistent **WORK IN PROGRESS** perimeter and shared status notice make the pause explicit. Private thread, Context Envelope, Artifact review, and Stewardship settings remain inspectable; profile preferences are preserved but cannot be changed to reactivate model operations; no selected context is forwarded to a model.
 5. Non-AI registry operations remain available: registration, upload, disclosure, WID verification, creator records, relationship tools, support, Signals, correspondence, playback, and archive access.
 
 ## Architecture Alignment
@@ -45,3 +45,4 @@ No schema or migration change is required. Re-enabling requires an explicit owne
 - Transcription returns an explicit paused-state result without downloading creator media.
 - Source contracts cover PNA client gating and the worker’s non-failure skip.
 - TypeScript, focused tests, production build, diff validation, and full regression are run before checkpointing.
+- The 2026-10-07 follow-up audit also scans the checkpoint for raw provider endpoints outside the guarded adapters and visually verifies desktop and mobile PNA workspace and Stewardship surfaces.

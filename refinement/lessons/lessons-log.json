@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-10-08T04:33:49.297Z",
-  "totalLessons": 58,
+  "lastUpdated": "2026-10-07",
+  "totalLessons": 59,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -1362,6 +1362,34 @@
         "stewardship",
         "provider-boundary",
         "provenance-preservation",
+        "work-in-progress"
+      ]
+    },
+    {
+      "id": "LESSON-059",
+      "date": "2026-10-07",
+      "category": "security",
+      "problem": "A global provider pause can be technically effective while legacy or secondary PNA surfaces still advertise actionable model controls, which weakens creator trust and can create unnecessary rejected requests.",
+      "solution": "Audited the checkpoint for direct provider bypasses and retained the guarded adapter boundary. Added one shared pause notice to thread navigation, the command palette, inspection rail, legacy drawer, and Stewardship settings; disabled legacy compose and profile-permission controls before mutation while keeping private records reviewable.",
+      "files": [
+        "client/src/components/pna/PNAOperationsPauseNotice.tsx",
+        "client/src/components/pna/PNAThreadRail.tsx",
+        "client/src/components/pna/PNACommandPalette.tsx",
+        "client/src/components/pna/PNAWorkspaceRail.tsx",
+        "client/src/components/PNAWorkspacePanel.tsx",
+        "client/src/pages/PNASettingsPage.tsx",
+        "client/src/index.css",
+        "server/tests/aiOperationsPause.contract.test.ts",
+        "docs/lnls/architecture/AI-OPERATIONS-PAUSE-ADR.md"
+      ],
+      "score": 0,
+      "tags": [
+        "ai-operations-pause",
+        "PNA",
+        "legacy-surface",
+        "command-palette",
+        "stewardship",
+        "provider-audit",
         "work-in-progress"
       ]
     }

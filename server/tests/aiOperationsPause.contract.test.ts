@@ -50,12 +50,25 @@ describe("AI operations pause", () => {
     const composer = read("client/src/components/pna/PNAComposerBar.tsx");
     const shell = read("client/src/pages/PNAShellPage.tsx");
     const frame = read("client/src/components/pna/PNAServiceFrame.tsx");
+    const commandPalette = read("client/src/components/pna/PNACommandPalette.tsx");
+    const threadRail = read("client/src/components/pna/PNAThreadRail.tsx");
+    const inspectionRail = read("client/src/components/pna/PNAWorkspaceRail.tsx");
+    const legacyPanel = read("client/src/components/PNAWorkspacePanel.tsx");
+    const settings = read("client/src/pages/PNASettingsPage.tsx");
+    const pauseNotice = read("client/src/components/pna/PNAOperationsPauseNotice.tsx");
     const worker = read("server/workers/visualQueue.ts");
 
     expect(composer).toContain("PNA is in active construction");
     expect(composer).toContain("isWorkInProgress");
     expect(shell).toContain("if (!AI_OPERATIONS_ENABLED)");
     expect(frame).toContain("WORK IN PROGRESS");
+    expect(commandPalette).toContain("Composer paused");
+    expect(threadRail).toContain("PNAOperationsPauseNotice");
+    expect(inspectionRail).toContain("Model operations paused");
+    expect(legacyPanel).toContain("disabled={!AI_OPERATIONS_ENABLED}");
+    expect(settings).toContain("disabled={!AI_OPERATIONS_ENABLED || save.isPending}");
+    expect(settings).toContain("no private source can be routed to a model");
+    expect(pauseNotice).toContain("Model operations paused");
     expect(worker).toContain("AI_OPERATIONS_ENABLED && song.coverArtUrl");
   });
 });

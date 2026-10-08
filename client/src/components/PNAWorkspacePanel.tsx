@@ -11,6 +11,8 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { useLocation } from "wouter";
 import { toast } from "sonner";
 import { PNAVisualProposalCard, type PNAVisualProposal } from "@/components/PNAVisualProposalCard";
+import { PNAOperationsPauseNotice } from "@/components/pna/PNAOperationsPauseNotice";
+import { AI_OPERATIONS_ENABLED, AI_OPERATIONS_PAUSE_MESSAGE } from "@shared/aiAvailability";
 import {
   getVisionPromptErrorMessage,
   getVisionPromptLength,
@@ -285,7 +287,7 @@ export default function PNAWorkspacePanel({ open, onClose }: PNAWorkspacePanelPr
 
   // Focus input when panel opens
   useEffect(() => {
-    if (open) {
+    if (open && AI_OPERATIONS_ENABLED) {
       setTimeout(() => inputRef.current?.focus(), 150);
     }
   }, [open]);
@@ -299,6 +301,10 @@ export default function PNAWorkspacePanel({ open, onClose }: PNAWorkspacePanelPr
   }, [open, onClose]);
 
   const handleSend = useCallback(async () => {
+    if (!AI_OPERATIONS_ENABLED) {
+      toast.info(AI_OPERATIONS_PAUSE_MESSAGE);
+      return;
+    }
     const text = input.trim();
     if (!text || isLoading) return;
     if (activeMode === "vision" && isVisionPromptOverLimit(text)) {
@@ -637,16 +643,18 @@ export default function PNAWorkspacePanel({ open, onClose }: PNAWorkspacePanelPr
             </div>
           ) : (
             <div
-              className="flex items-end gap-2 rounded-xl px-3 py-2"
+              className="relative flex items-end gap-2 rounded-xl px-3 py-2"
               style={{ background: "rgba(255,255,255,0.04)", border: `1px solid ${currentMode.accentColor}33` }}
             >
+              <PNAOperationsPauseNotice className="absolute -translate-y-[calc(100%+0.75rem)]" />
               <textarea
                 ref={inputRef}
                 value={input}
                 onChange={e => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder={activeMode === "vision" ? "Describe private cover art..." : `Ask your ${currentMode.displayLabel}...`}
-                aria-label={activeMode === "vision" ? "Private cover art prompt" : `Ask your ${currentMode.displayLabel}`}
+                disabled={!AI_OPERATIONS_ENABLED}
+                placeholder={!AI_OPERATIONS_ENABLED ? "PNA model operations are paused while this service is under construction." : activeMode === "vision" ? "Describe private cover art..." : `Ask your ${currentMode.displayLabel}...`}
+                aria-label={!AI_OPERATIONS_ENABLED ? "PNA model operations are paused" : activeMode === "vision" ? "Private cover art prompt" : `Ask your ${currentMode.displayLabel}`}
                 aria-invalid={activeMode === "vision" && isVisionPromptOverLimit(input)}
                 rows={1}
                 className="flex-1 bg-transparent outline-none resize-none"
@@ -666,7 +674,7 @@ export default function PNAWorkspacePanel({ open, onClose }: PNAWorkspacePanelPr
               />
               <button
                 onClick={handleSend}
-                disabled={!input.trim() || isLoading || (activeMode === "vision" && isVisionPromptOverLimit(input))}
+                disabled={!AI_OPERATIONS_ENABLED || !input.trim() || isLoading || (activeMode === "vision" && isVisionPromptOverLimit(input))}
                 className="flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center transition-all hover:opacity-80 disabled:opacity-30"
                 style={{ background: currentMode.accentColor, color: "#0A0806" }}
               >

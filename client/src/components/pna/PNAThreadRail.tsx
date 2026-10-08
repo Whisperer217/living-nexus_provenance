@@ -14,6 +14,7 @@ import {
   X,
 } from "lucide-react";
 import type { PNAMode, PNAModeOption, PNAThreadSummary } from "./pnaWorkspaceTypes";
+import { PNAOperationsPauseNotice } from "./PNAOperationsPauseNotice";
 
 interface PNAThreadRailProps {
   threads: PNAThreadSummary[];
@@ -110,6 +111,7 @@ export function PNAThreadRail({
             <div className="min-w-0 flex-1">
               <p className="truncate font-display text-[var(--text-sm)] tracking-[0.13em] uppercase" style={{ color: "var(--ln-parchment)" }}>PNA workspace</p>
               <p className="mt-0.5 truncate font-body text-[var(--text-xs)]" style={{ color: "var(--ln-smoke)" }}>Private creator continuity</p>
+              <PNAOperationsPauseNotice compact className="mt-1" />
             </div>
             {mobile ? (
               <button type="button" onClick={onClose} className="flex h-11 w-11 items-center justify-center rounded-lg focus-visible:outline-none focus-visible:ring-2" style={{ color: "var(--ln-smoke)", border: "1px solid var(--ln-panel-border)" }} aria-label="Close private navigation"><X size={16} /></button>

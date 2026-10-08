@@ -11,6 +11,8 @@ import {
   CommandShortcut,
 } from "@/components/ui/command";
 import type { PNAMode, PNAModeOption, PNAThreadSummary, PNAWorkspaceSurface } from "./pnaWorkspaceTypes";
+import { PNAOperationsPauseNotice } from "./PNAOperationsPauseNotice";
+import { AI_OPERATIONS_ENABLED } from "@shared/aiAvailability";
 
 interface PNACommandPaletteProps {
   open: boolean;
@@ -66,6 +68,7 @@ export function PNACommandPalette({
       className="border-[var(--ln-panel-border)] bg-[var(--ln-panel)] text-[var(--ln-parchment)] shadow-2xl"
     >
       <CommandInput placeholder="Search your private workspace…" />
+      <div className="px-3 pb-2"><PNAOperationsPauseNotice compact /></div>
       <CommandList>
         <CommandEmpty>No private workspace action found.</CommandEmpty>
         <CommandGroup heading="Workspace">
@@ -74,10 +77,10 @@ export function PNACommandPalette({
             <span>Begin private thread</span>
             <CommandShortcut>⌘N</CommandShortcut>
           </CommandItem>
-          <CommandItem onSelect={() => run(onFocusComposer)}>
+          <CommandItem disabled={!AI_OPERATIONS_ENABLED} onSelect={() => run(onFocusComposer)}>
             <Keyboard />
-            <span>Focus composer</span>
-            <CommandShortcut>⌘↵</CommandShortcut>
+            <span>{AI_OPERATIONS_ENABLED ? "Focus composer" : "Composer paused"}</span>
+            <CommandShortcut>{AI_OPERATIONS_ENABLED ? "⌘↵" : "PAUSED"}</CommandShortcut>
           </CommandItem>
           <CommandItem onSelect={() => run(() => onOpenSurface("conversation"))}>
             <Search />
