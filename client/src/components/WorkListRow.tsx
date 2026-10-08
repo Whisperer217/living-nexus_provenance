@@ -4,12 +4,11 @@
    Every work is displayed with intention.
 ═══════════════════════════════════════════════════════════════════ */
 import { useState, useCallback } from "react";
-import { Play, Pause, Shield, BookOpen, ListPlus, Heart, Headphones, FileText, Image, Gamepad2, Code2, Music, MessageSquare } from "lucide-react";
+import { Play, Pause, Shield, BookOpen, Headphones, FileText, Image, Gamepad2, Code2, Music, MessageSquare } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { usePlayer, type Track, type QueueContext } from "@/contexts/PlayerContext";
-import { useLike } from "../hooks/useLike";
 import { SupportCreatorDrawer, type SupportTarget } from "@/components/SupportCreatorDrawer";
-import { AddToMyListModal } from "@/components/AddToMyListModal";
+import { CreatorWorkQuickActions } from "@/components/CreatorWorkQuickActions";
 
 
 // ── Content type metadata ──────────────────────────────────────────
@@ -58,6 +57,7 @@ export interface WorkListRowItem {
     stripeAccountStatus?: string | null;
     status?: string;
     aiDisclosure?: string | null;
+    downloadPermission?: "none" | "free" | "tipped" | null;
   };
   creator?: {
     id: number;
@@ -82,13 +82,11 @@ interface Props {
 }
 
 // ── Component ──────────────────────────────────────────────────────
-export function WorkListRow({ item, index, prefetchedLiked, prefetchedLikeCount, queueTracks, queueIndex, queueContext }: Props) {
+export function WorkListRow({ item, index, prefetchedLiked, queueTracks, queueIndex, queueContext }: Props) {
   const { song, creator } = item;
   const { addAndPlay, playQueueAt, currentTrackId, state: playerState } = usePlayer();
   const [, navigate] = useLocation();
   const [showSupport, setShowSupport] = useState(false);
-  const [showAddToList, setShowAddToList] = useState(false);
-  const [addToListRect, setAddToListRect] = useState<DOMRect | null>(null);
   const [hovered, setHovered] = useState(false);
 
   const songIdStr = String(song.id);
@@ -98,8 +96,6 @@ export function WorkListRow({ item, index, prefetchedLiked, prefetchedLikeCount,
   const typeMeta = getTypeMeta(song.contentType);
 
   const hasPrefetch = prefetchedLiked !== undefined;
-  const { liked, toggle: toggleLike } = useLike(song.id, { skipQuery: hasPrefetch, initialLiked: prefetchedLiked });
-  const likeCount = prefetchedLikeCount ?? 0;
 
   const artistName = creator?.artistHandle ? `@${creator.artistHandle}` : (creator?.name || "Unknown");
   const displayDate = song.releaseDate || song.createdAt;
@@ -150,12 +146,6 @@ export function WorkListRow({ item, index, prefetchedLiked, prefetchedLikeCount,
   const handleSupportClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     setShowSupport(true);
-  }, []);
-
-  const handleAddToListClick = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    setAddToListRect(e.currentTarget.getBoundingClientRect());
-    setShowAddToList(true);
   }, []);
 
   const supportTarget: SupportTarget = {
@@ -305,23 +295,14 @@ export function WorkListRow({ item, index, prefetchedLiked, prefetchedLikeCount,
           >
             <MessageSquare className="h-3.5 w-3.5" />
           </Link>
-          {/* Like */}
-          <button
-            onClick={(e) => { e.stopPropagation(); toggleLike(); }}
-            aria-label={liked ? "Unlike this work" : "Like this work"}
-            className={`p-1.5 rounded-lg transition-all ${liked ? "text-rose-400" : "text-[var(--stone-shadow)] hover:text-rose-400 sm:opacity-0 sm:group-hover:opacity-100"}`}
-          >
-            <Heart className={`w-3.5 h-3.5 ${liked ? "fill-current" : ""}`} />
-          </button>
-
-          {/* Add to list */}
-          <button
-            onClick={handleAddToListClick}
-            aria-label="Add to collection"
-            className="p-1.5 rounded-lg text-[var(--stone-shadow)] hover:text-[var(--stone-light)] transition-all sm:opacity-0 sm:group-hover:opacity-100"
-          >
-            <ListPlus className="w-3.5 h-3.5" />
-          </button>
+          <CreatorWorkQuickActions
+            songId={song.id}
+            initialLiked={prefetchedLiked}
+            downloadPermission={song.downloadPermission}
+            deferLikeStatusQuery={hasPrefetch}
+            deferPlaylistStatusQuery={hasPrefetch}
+            className="max-sm:scale-90"
+          />
 
           {/* Support */}
           <button
@@ -343,16 +324,6 @@ export function WorkListRow({ item, index, prefetchedLiked, prefetchedLikeCount,
         />
       )}
 
-      {/* Add to list modal */}
-      {showAddToList && (
-        <AddToMyListModal
-          open={showAddToList}
-          songId={song.id}
-          songTitle={song.title}
-          onClose={() => setShowAddToList(false)}
-          originRect={addToListRect}
-        />
-      )}
     </>
   );
 }

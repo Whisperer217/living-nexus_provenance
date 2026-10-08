@@ -3,7 +3,8 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 
 const schemaPath = path.resolve(process.cwd(), "drizzle/schema.ts");
-const migrationPath = path.resolve(process.cwd(), "drizzle/0140_core_ingestion_review_i2.sql");
+const migrationPath = path.resolve(process.cwd(), "drizzle/legacy/untracked-pre-0134/0140_core_ingestion_review_i2.sql");
+const activeMigrationPath = path.resolve(process.cwd(), "drizzle/0140_core_ingestion_review_i2.sql");
 const servicePath = path.resolve(process.cwd(), "server/services/coreIngestion.ts");
 const routerPath = path.resolve(process.cwd(), "server/routers/coreIngestion.ts");
 const pagePath = path.resolve(process.cwd(), "client/src/pages/CoreIngestionReviewPage.tsx");
@@ -14,7 +15,7 @@ function withoutComments(source: string) {
 }
 
 describe("Core Ingestion review I2 boundaries", () => {
-  it("adds isolated proposal, confirmation, and private-Draft records without altering canonical record models", () => {
+  it("preserves archived review migration evidence without reactivating a pre-reconciliation SQL file", () => {
     const schema = fs.readFileSync(schemaPath, "utf8");
     const migration = fs.readFileSync(migrationPath, "utf8");
 
@@ -25,6 +26,7 @@ describe("Core Ingestion review I2 boundaries", () => {
     expect(migration).toContain("CREATE TABLE `coreIngestionDraftConfirmations`");
     expect(migration).toContain("CREATE TABLE `coreIngestionPrivateDrafts`");
     expect(migration).not.toMatch(/ALTER TABLE `(?:songs|wids|pnaThreads|pnaThreadMessages|keeperSkins|marketplaceItems)`/);
+    expect(fs.existsSync(activeMigrationPath)).toBe(false);
   });
 
   it("binds a private proposal to the exact inspected receipt and asset hash", () => {

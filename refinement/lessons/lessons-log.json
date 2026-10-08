@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-10-07",
-  "totalLessons": 59,
+  "lastUpdated": "2026-10-08",
+  "totalLessons": 60,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -1391,6 +1391,35 @@
         "stewardship",
         "provider-audit",
         "work-in-progress"
+      ]
+    },
+    {
+      "id": "LESSON-060",
+      "date": "2026-10-08",
+      "category": "architecture",
+      "problem": "Four regression contracts treated intentionally archived pre-0134 Drizzle SQL as active files, masking a reconciled migration lineage with false missing-file failures. Work shortcuts also differed by song-tile surface, forcing repeated implementation and making download access inconsistent.",
+      "solution": "Kept archived SQL out of the active journal, moved the affected contracts to inspect the preserved archive while asserting obsolete active paths remain absent, and extended lineage coverage. Reused one permission-aware Work action group in active creator rows, Explore cards and list rows, and Store tiles; it omits unavailable downloads and preserves existing heart, playlist, and tagged-download authority.",
+      "files": [
+        "drizzle/legacy/untracked-pre-0134/",
+        "server/tests/coreIngestionCommissionI1.test.ts",
+        "server/tests/coreIngestionReviewI2.test.ts",
+        "server/tests/creativeCathedral.contract.test.ts",
+        "server/tests/registryApiR1a.contract.test.ts",
+        "server/tests/drizzleMigrationLineage.contract.test.ts",
+        "client/src/components/CreatorWorkQuickActions.tsx",
+        "client/src/components/TrackCard.tsx",
+        "client/src/components/WorkListRow.tsx",
+        "client/src/components/StoreTrackCard.tsx"
+      ],
+      "score": 0,
+      "tags": [
+        "drizzle",
+        "migration-reconciliation",
+        "archive-provenance",
+        "regression-contracts",
+        "song-tiles",
+        "quick-actions",
+        "download-permissions"
       ]
     }
   ]

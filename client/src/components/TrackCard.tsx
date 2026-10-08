@@ -9,18 +9,14 @@
    Modal: AddToMyListModal uses ContextualModal — anchored to origin button
 ═══════════════════════════════════════════════════════════════════ */
 
-import { useState } from "react";
-import { Play, Heart, DollarSign, ExternalLink, ListPlus, SkipForward, Shield, Crown, Music } from "lucide-react";
+import { Play, DollarSign, ExternalLink, Shield, Crown, Music } from "lucide-react";
 import { AiDisclosurePill } from "@/components/AiDisclosurePill";
-import { AddToMyListModal } from "@/components/AddToMyListModal";
 import { Track, usePlayer } from "@/contexts/PlayerContext";
 import { Link, useLocation } from "wouter";
-import { useLike } from "@/hooks/useLike";
-import { trpc } from "@/lib/trpc";
-import { toast } from "sonner";
 import { MediaAsset } from "@/components/MediaAsset";
 import { getContentTypeColors } from "@/lib/contentTypeColors";
 import { CreatorHandle } from "@/components/CreatorHandle";
+import { CreatorWorkQuickActions } from "@/components/CreatorWorkQuickActions";
 
 interface Props {
   track: Track;
@@ -90,10 +86,8 @@ function GenrePills({ genre, maxVisible = 4, chipBg, chipBorder, textColor }: {
 
 // AiDisclosureBadge replaced by shared AiDisclosurePill component
 
-export default function TrackCard({ track, index, onTip, prefetchedLikeCount, prefetchedLiked, onPlay }: Props) {
-  const { state, addAndPlay, playNext, togglePlay, openNowPlayingPanel, currentTrackId } = usePlayer();
-  const [showAddToList, setShowAddToList] = useState(false);
-  const [addToListRect, setAddToListRect] = useState<DOMRect | null>(null);
+export default function TrackCard({ track, index, onTip, prefetchedLiked, onPlay }: Props) {
+  const { state, addAndPlay, togglePlay, openNowPlayingPanel, currentTrackId } = usePlayer();
   const [, navigate] = useLocation();
   const isActive = currentTrackId === String(track.id);
   const isPlaying = isActive && state.isPlaying;
@@ -113,18 +107,9 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
     openNowPlayingPanel();
   };
 
-  // DB-backed like state
+  // Prefetched state keeps dense Explore sections from issuing per-card reads.
   const numericId = typeof track.id === "string" ? parseInt(track.id, 10) : track.id;
   const hasPrefetch = prefetchedLiked !== undefined;
-  const { liked: isLiked, toggle: toggleLike } = useLike(
-    isNaN(numericId) ? 0 : numericId,
-    { skipQuery: hasPrefetch, initialLiked: prefetchedLiked ?? false }
-  );
-  const { data: likeCountData } = trpc.songs.getLikeCount.useQuery(
-    { songId: isNaN(numericId) ? 0 : numericId },
-    { enabled: prefetchedLikeCount === undefined && !isNaN(numericId) && numericId > 0 }
-  );
-  const likeCount = prefetchedLikeCount !== undefined ? prefetchedLikeCount : (likeCountData?.count ?? 0);
 
   // Derive cover object-position from track metadata
   const coverPos = `${track.coverPositionX ?? 50}% ${track.coverPositionY ?? 50}%`;
@@ -320,20 +305,8 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
             )}
           </div>
 
-          {/* Layer 6: Resonance — likes / tip / actions */}
+          {/* Layer 6: Resonance — stewardship actions */}
           <div className="flex items-center gap-1.5 flex-shrink-0">
-            <button
-              onClick={e => toggleLike(e)}
-              className={`flex items-center gap-0.5 p-0.5 transition-colors ${isLiked ? "text-pink-400" : "text-[#6B6555] hover:text-pink-400"}`}
-              title={isLiked ? "Unlike" : "Like"}
-            >
-              <Heart size={11} fill={isLiked ? "currentColor" : "none"} />
-              {likeCount > 0 && (
-                <span className="text-[11px] leading-none tabular-nums">
-                  {likeCount >= 1000 ? `${(likeCount / 1000).toFixed(1)}k` : likeCount}
-                </span>
-              )}
-            </button>
             {onTip && (
               <button
                 onClick={e => { e.stopPropagation(); onTip(track, (e.currentTarget as HTMLButtonElement).getBoundingClientRect()); }}
@@ -344,22 +317,14 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
               </button>
             )}
             {!isNaN(numericId) && numericId > 0 && (
-              <>
-                <button
-                  onClick={e => { e.stopPropagation(); playNext(track); toast.success(`"${track.title}" plays next`); }}
-                  className="p-0.5 text-[#6B6555] hover:text-[#C49A28] transition-colors"
-                  title="Play next"
-                >
-                  <SkipForward size={11} />
-                </button>
-                <button
-                  onClick={e => { e.stopPropagation(); setAddToListRect((e.currentTarget as HTMLButtonElement).getBoundingClientRect()); setShowAddToList(true); }}
-                  className="p-0.5 text-[#6B6555] hover:text-[#C49A28] transition-colors"
-                  title="Add to my list"
-                >
-                  <ListPlus size={11} />
-                </button>
-              </>
+              <CreatorWorkQuickActions
+                songId={numericId}
+                initialLiked={prefetchedLiked}
+                downloadPermission={track.downloadPermission}
+                deferLikeStatusQuery={hasPrefetch}
+                deferPlaylistStatusQuery={hasPrefetch}
+                className="max-sm:scale-90"
+              />
             )}
             <button
               onClick={e => { e.stopPropagation(); navigate(`/song/${track.id}`); }}
@@ -384,14 +349,6 @@ export default function TrackCard({ track, index, onTip, prefetchedLikeCount, pr
       </div>
     </div>
 
-    {/* Contextual modal — anchored to the ListPlus button that triggered it */}
-    <AddToMyListModal
-      open={showAddToList && !isNaN(numericId) && numericId > 0}
-      songId={numericId}
-      songTitle={track.title}
-      onClose={() => setShowAddToList(false)}
-      originRect={addToListRect}
-    />
   </>
   );
 }

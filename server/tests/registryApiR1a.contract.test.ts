@@ -48,7 +48,7 @@ describe("Registry API R1a credential foundation", () => {
     const legacyHelper = read("server/utils/db.ts");
     const r1Service = read("server/registry/credentialService.ts");
     const r1AdminRouter = read("server/routers/registryApiAdmin.ts");
-    const migration = read("drizzle/0138_registry_api_r1a_credentials.sql");
+    const migration = read("drizzle/legacy/untracked-pre-0134/0138_registry_api_r1a_credentials.sql");
 
     expect(legacyRouter).not.toMatch(/tier:\s*z\.enum/);
     expect(legacyHelper).toMatch(/const tier = "free" as const/);
@@ -63,6 +63,7 @@ describe("Registry API R1a credential foundation", () => {
     expect(r1Service).toMatch(/dailyLimit \?\? policy\.dailyLimit/);
     expect(r1Service).toMatch(/Registry client quota exceeds the server policy ceiling/);
     expect(r1Service).toMatch(/revokeRegistryApiClient/);
+    expect(() => read("drizzle/0138_registry_api_r1a_credentials.sql")).toThrow();
   });
 
   it("requires immediate lifecycle checks before scope and only consumes quota after authorization", () => {

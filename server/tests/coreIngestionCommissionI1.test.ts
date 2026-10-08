@@ -3,7 +3,8 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 
 const schemaPath = path.resolve(process.cwd(), "drizzle/schema.ts");
-const migrationPath = path.resolve(process.cwd(), "drizzle/0139_core_ingestion_commission_i1.sql");
+const migrationPath = path.resolve(process.cwd(), "drizzle/legacy/untracked-pre-0134/0139_core_ingestion_commission_i1.sql");
+const activeMigrationPath = path.resolve(process.cwd(), "drizzle/0139_core_ingestion_commission_i1.sql");
 const servicePath = path.resolve(process.cwd(), "server/services/coreIngestion.ts");
 const routerPath = path.resolve(process.cwd(), "server/routers/coreIngestion.ts");
 const schedulePath = path.resolve(process.cwd(), "server/routes/coreIngestionScheduleRoute.ts");
@@ -14,7 +15,7 @@ function withoutComments(source: string) {
 }
 
 describe("Core Ingestion Commission I1 boundaries", () => {
-  it("adds isolated Commission, job, and inspection-receipt persistence without modifying existing record models", () => {
+  it("preserves archived Commission migration evidence without reactivating a pre-reconciliation SQL file", () => {
     const schema = fs.readFileSync(schemaPath, "utf8");
     const migration = fs.readFileSync(migrationPath, "utf8");
 
@@ -27,6 +28,7 @@ describe("Core Ingestion Commission I1 boundaries", () => {
     expect(migration).toContain("No existing Work, WID, provenance, PNA, Quiver, Keeper, Guide, avatar");
     expect(migration).not.toMatch(/ALTER TABLE `(?:songs|wids|pnaThreads|pnaThreadMessages|keeperSkins|marketplaceItems)`/);
     expect(schema).toContain("creatorIdempotencyUnique");
+    expect(fs.existsSync(activeMigrationPath)).toBe(false);
   });
 
   it("keeps I1 deterministic and excludes model, provider, registration, publication, and avatar mutations", () => {

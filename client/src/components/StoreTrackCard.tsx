@@ -30,6 +30,7 @@ import { createPortal } from "react-dom";
 import { usePlayer } from "@/contexts/PlayerContext";
 import { toast } from "sonner";
 import type { Track } from "@/contexts/PlayerContext";
+import { CreatorWorkQuickActions } from "@/components/CreatorWorkQuickActions";
 
 interface SongData {
   id: number;
@@ -51,6 +52,7 @@ interface SongData {
   lyricsText?: string | null;
   totalFundingCents?: number | null;
   tipCount?: number | null;
+  downloadPermission?: "none" | "free" | "tipped" | null;
 }
 
 interface StoreTrackCardProps {
@@ -383,6 +385,21 @@ export function StoreTrackCard({ song, size = "md", allSongs, songIndex, isNew }
                 LIVE
               </div>
             )}
+
+            {/* Heart, playlist, and permitted download remain reachable without the menu. */}
+            <div
+              className="ln-store-track-actions absolute z-20"
+              style={{ top: isNew || isActive ? "2.4rem" : "0.625rem", left: "0.625rem" }}
+              onClick={(event) => event.preventDefault()}
+            >
+              <CreatorWorkQuickActions
+                songId={song.id}
+                downloadPermission={song.downloadPermission}
+                deferLikeStatusQuery={false}
+                deferPlaylistStatusQuery={false}
+                className="scale-90 origin-top-left"
+              />
+            </div>
 
             {/* ── LAYER 4: Play button — centered, hidden at rest, glowing on hover ── */}
             {hasAudio && (

@@ -246,12 +246,13 @@ describe("Creative Cathedral Slice 1 contracts", () => {
   });
 
   it("creates additive private tables without altering authoritative records", () => {
-    const migration = read("drizzle/migrations/0135_add_creative_cathedral_workspace.sql");
+    const migration = read("drizzle/legacy/untracked-pre-0134/0135_add_creative_cathedral_workspace.sql");
     expect(migration).toContain("creative_cathedral_sessions");
     expect(migration).toContain("creative_cathedral_suggestions");
     expect(migration).toContain("creative_cathedral_decisions");
     expect(migration).not.toMatch(/ALTER TABLE `?(songs|wids|workEvents|work_events)`?/i);
     expect(migration).not.toMatch(/DROP TABLE|TRUNCATE|DELETE FROM/i);
+    expect(() => read("drizzle/migrations/0135_add_creative_cathedral_workspace.sql")).toThrow();
   });
 
   it("applies suggestions to local Music Register setters only", () => {

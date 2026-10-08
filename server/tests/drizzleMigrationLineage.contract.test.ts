@@ -39,6 +39,10 @@ describe("Drizzle migration lineage", () => {
     expect(fs.existsSync(migrationPath)).toBe(true);
     expect(fs.existsSync(path.join(meta, "0134_snapshot.json"))).toBe(true);
     expect(fs.existsSync(archivedPath)).toBe(true);
+    expect(fs.readdirSync(archivedPath)).toContain("0135_add_creative_cathedral_workspace.sql");
+    expect(fs.readdirSync(archivedPath)).toContain("0138_registry_api_r1a_credentials.sql");
+    expect(fs.readdirSync(archivedPath)).toContain("0139_core_ingestion_commission_i1.sql");
+    expect(fs.readdirSync(archivedPath)).toContain("0140_core_ingestion_review_i2.sql");
     expect(fs.readdirSync(archivedPath)).toContain("0134_batch_upload_integrity_foundation.sql");
     expect(fs.readdirSync(archivedPath)).toContain("0142_external_display_authorization.sql");
   });

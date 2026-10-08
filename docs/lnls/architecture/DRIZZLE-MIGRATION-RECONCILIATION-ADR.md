@@ -56,6 +56,12 @@ For the existing live database, the canonical migration is recorded in `__drizzl
 
 Four early journal entries (`0075`, `0077`, `0078`, and `0081`) lack their original same-number snapshot files. Their immediately subsequent snapshots already contain their resulting structures (`0076`, `0079`, and `0082` respectively). Fabricating replacement snapshots today would misstate their original generation history, so this decision intentionally leaves those historical gaps visible rather than writing false provenance. They do not block current migration generation or application: the canonical `0134` snapshot is complete and verified against the live database.
 
+## Contract alignment record — 2026-10-08
+
+Four source contracts still attempted to read archived SQL through obsolete active paths: `0135_add_creative_cathedral_workspace.sql`, `0138_registry_api_r1a_credentials.sql`, `0139_core_ingestion_commission_i1.sql`, and `0140_core_ingestion_review_i2.sql`. The files themselves were present under `drizzle/legacy/untracked-pre-0134/`, exactly as this decision requires.
+
+The contracts now inspect those archived files as historical implementation evidence, explicitly assert that their former active paths are absent, and the migration-lineage contract records all four archive entries. This restores test coverage without reintroducing orphan migrations into the journal, modifying the active schema, or replaying DDL.
+
 ## Rollback
 
 No creator, Work, WID, or artifact data is changed by this decision. If migration metadata proves invalid before publication, restore the repository’s prior journal and metadata from the immediately preceding checkpoint, and remove only the reconciled ledger marker. Do not alter the live schema.

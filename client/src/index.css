@@ -5384,6 +5384,27 @@ button:active .ln-witness-sigil,
   }
 }
 
+/* Store cards retain essential actions on touch while keeping the artwork-led
+   desktop presentation calm until the card receives intent. */
+.ln-store-track-actions {
+  opacity: 1;
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .group .ln-store-track-actions {
+    opacity: 0;
+    transform: translateY(-2px);
+  }
+  .group:hover .ln-store-track-actions,
+  .group:focus-within .ln-store-track-actions {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ln-store-track-actions { transition: none; }
+}
+
 /* ── PNA operations-pause perimeter ────────────────────────────────────────
    The private workspace remains readable and inspectable while all model
    operations are paused. This must not change public registry surfaces. */
