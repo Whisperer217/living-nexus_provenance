@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-10-08",
-  "totalLessons": 60,
+  "lastUpdated": "2026-10-15",
+  "totalLessons": 61,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -1420,6 +1420,34 @@
         "song-tiles",
         "quick-actions",
         "download-permissions"
+      ]
+    },
+    {
+      "id": "LESSON-061",
+      "date": "2026-10-15",
+      "category": "security",
+      "problem": "A request to preserve a deceased creator's legacy could be implemented as a global administrator promotion or account transfer, either of which would blur creator identity and create unrelated platform authority.",
+      "solution": "Used one creator/steward-scoped, revocable Legacy Stewardship grant with server-enforced scope checks, an append-only custody ledger, immutable steward-attributed memorial records, and a read-only Work/WID reconciliation digest. The public Creator Domain renders memorials separately from creator testimony and Work provenance.",
+      "files": [
+        "drizzle/schema.ts",
+        "drizzle/0139_dapper_iron_patriot.sql",
+        "server/utils/legacyStewardship.ts",
+        "server/routers/legacyStewardship.ts",
+        "client/src/components/creator/LegacyMemorialSection.tsx",
+        "client/src/components/creator/LegacyStewardshipPanel.tsx",
+        "client/src/pages/loop/LoopCreatorPage.tsx",
+        "docs/lnls/architecture/LEGACY-STEWARDSHIP-AND-MEMORIAL-ADR.md",
+        "docs/lnls/audits/RANDALL-SMITH-NEROS-SHADOW-REGISTRY-RECONCILIATION-2026-10-15.md"
+      ],
+      "score": 0,
+      "tags": [
+        "legacy-stewardship",
+        "creator-identity",
+        "append-only",
+        "memorial",
+        "WID-reconciliation",
+        "authorization",
+        "custody-ledger"
       ]
     }
   ]

@@ -51,6 +51,7 @@ import { quiverRouter }              from "./quiver";
 import { domainRouter }              from "./domain";
 import { collectionsRouter }         from "./collections";
 import { correspondenceRouter }      from "./correspondence";
+import { legacyStewardshipRouter }   from "./legacyStewardship";
 
 // ── Payment domain ────────────────────────────────────────────────────────────
 import { paymentsRouter }         from "./payments";
@@ -149,6 +150,7 @@ export const appRouter = router({
   domain:              domainRouter,
   collections:         collectionsRouter,
   correspondence:      correspondenceRouter,
+  legacyStewardship:   legacyStewardshipRouter,
 
   // Payment domain
   payments:         paymentsRouter,

@@ -18,6 +18,8 @@ import {
 import { toast } from "sonner";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { CreatorSanctuaryStage } from "@/components/creator/CreatorSanctuaryStage";
+import { LegacyMemorialSection } from "@/components/creator/LegacyMemorialSection";
+import { LegacyStewardshipPanel } from "@/components/creator/LegacyStewardshipPanel";
 import { SanctuaryWorksOrganizer } from "@/components/creator/SanctuaryWorksOrganizer";
 import { DomainEditor } from "@/components/domain/DomainEditor";
 import { DomainRenderer } from "@/components/domain/DomainRenderer";
@@ -60,6 +62,14 @@ export default function LoopCreatorPage() {
   const { data: testimonies = [] } = trpc.testimony.getByCreator.useQuery(
     { creatorId },
     { enabled: !!creatorId, staleTime: 60_000 }
+  );
+  const { data: publicMemorials = [] } = trpc.legacyStewardship.publicMemorials.useQuery(
+    { creatorId },
+    { enabled: !!creatorId, staleTime: 60_000 },
+  );
+  const { data: legacyAuthority } = trpc.legacyStewardship.myAuthority.useQuery(
+    { creatorId },
+    { enabled: !!creatorId && !!user, staleTime: 30_000, retry: false },
   );
   const publicWitnessCount = trpc.witness.count.useQuery(
     { creatorId },
@@ -514,6 +524,17 @@ export default function LoopCreatorPage() {
           </Link>
         )}
       </section>
+
+      <LegacyMemorialSection
+        creatorName={displayName}
+        memorials={publicMemorials as any[]}
+      />
+
+      <LegacyStewardshipPanel
+        creatorId={creator.id}
+        creatorName={displayName}
+        authority={legacyAuthority as any}
+      />
 
       {isOwner && showDomainEditor && (
         <section className="max-w-5xl mx-auto px-4 sm:px-6 py-8">

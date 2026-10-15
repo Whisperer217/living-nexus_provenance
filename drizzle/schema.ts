@@ -2806,6 +2806,75 @@ export const correspondenceReports = mysqlTable("correspondenceReports", {
 export type CorrespondenceReport = typeof correspondenceReports.$inferSelect;
 export type InsertCorrespondenceReport = typeof correspondenceReports.$inferInsert;
 
+// ─── Legacy Stewardship and memorial custody ─────────────────────────────────
+// A Legacy Stewardship grant documents limited platform-preservation authority
+// after a creator can no longer manage their own Domain. It never changes Work
+// ownership, authorship, WIDs, testimony, hashes, payment data, or account access.
+export const legacyStewardshipGrants = mysqlTable("legacyStewardshipGrants", {
+  id: bigint("id", { mode: "number" }).autoincrement().primaryKey(),
+  creatorId: int("creatorId").notNull(),
+  stewardId: int("stewardId").notNull(),
+  // Non-null only while a grant is active. The unique index permits historical
+  // revoked grants while structurally preventing duplicate active pair grants.
+  activeKey: varchar("activeKey", { length: 64 }),
+  status: mysqlEnum("status", ["active", "revoked"]).notNull().default("active"),
+  scopeJson: json("scopeJson").$type<{
+    viewRegistry: boolean;
+    exportRecords: boolean;
+    managePublicPresentation: boolean;
+    appendMemorialStatement: boolean;
+  }>().notNull(),
+  reason: text("reason").notNull(),
+  authorityReference: varchar("authorityReference", { length: 256 }).notNull(),
+  grantedByUserId: int("grantedByUserId").notNull(),
+  grantedAt: timestamp("grantedAt").defaultNow().notNull(),
+  revokedByUserId: int("revokedByUserId"),
+  revokedAt: timestamp("revokedAt"),
+  revocationReason: text("revocationReason"),
+}, (t) => ({
+  activePairUnique: uniqueIndex("legacyStewardshipGrants_active_pair_uq").on(t.activeKey),
+  creatorStatusIdx: index("legacyStewardshipGrants_creator_status_idx").on(t.creatorId, t.status),
+  stewardStatusIdx: index("legacyStewardshipGrants_steward_status_idx").on(t.stewardId, t.status),
+}));
+export type LegacyStewardshipGrant = typeof legacyStewardshipGrants.$inferSelect;
+export type InsertLegacyStewardshipGrant = typeof legacyStewardshipGrants.$inferInsert;
+
+// The custody ledger is append-only. Grant status changes are explained here;
+// no actor can alter or erase a previous stewardship event through this model.
+export const legacyStewardshipEvents = mysqlTable("legacyStewardshipEvents", {
+  id: bigint("id", { mode: "number" }).autoincrement().primaryKey(),
+  grantId: bigint("grantId", { mode: "number" }).notNull(),
+  creatorId: int("creatorId").notNull(),
+  actorUserId: int("actorUserId").notNull(),
+  eventType: mysqlEnum("eventType", ["granted", "revoked", "reconciliation_recorded", "memorial_published"]).notNull(),
+  targetId: bigint("targetId", { mode: "number" }),
+  detailsJson: json("detailsJson").$type<Record<string, unknown>>().notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (t) => ({
+  grantCreatedIdx: index("legacyStewardshipEvents_grant_created_idx").on(t.grantId, t.createdAt),
+  creatorCreatedIdx: index("legacyStewardshipEvents_creator_created_idx").on(t.creatorId, t.createdAt),
+}));
+export type LegacyStewardshipEvent = typeof legacyStewardshipEvents.$inferSelect;
+export type InsertLegacyStewardshipEvent = typeof legacyStewardshipEvents.$inferInsert;
+
+// A memorial record is authored by the named Steward, but presented alongside
+// the Creator Domain with an explicit separation from the creator's testimony.
+export const legacyMemorialStatements = mysqlTable("legacyMemorialStatements", {
+  id: bigint("id", { mode: "number" }).autoincrement().primaryKey(),
+  creatorId: int("creatorId").notNull(),
+  stewardshipGrantId: bigint("stewardshipGrantId", { mode: "number" }).notNull(),
+  stewardId: int("stewardId").notNull(),
+  body: text("body").notNull(),
+  bodyHash: varchar("bodyHash", { length: 64 }).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (t) => ({
+  bodyHashUnique: uniqueIndex("legacyMemorialStatements_body_hash_uq").on(t.bodyHash),
+  creatorCreatedIdx: index("legacyMemorialStatements_creator_created_idx").on(t.creatorId, t.createdAt),
+  grantIdx: index("legacyMemorialStatements_grant_idx").on(t.stewardshipGrantId),
+}));
+export type LegacyMemorialStatement = typeof legacyMemorialStatements.$inferSelect;
+export type InsertLegacyMemorialStatement = typeof legacyMemorialStatements.$inferInsert;
+
 // ─── Witness Reservations ─────────────────────────────────────────────────────
 // A reserved manifestation in a witness's personal archive queue.
 // Created automatically by the reservation engine for Reserve+ subscribers.
