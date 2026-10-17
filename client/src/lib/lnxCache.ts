@@ -92,6 +92,7 @@ export const TTL = {
 // ── Key constants ─────────────────────────────────────────────────────────
 export const CACHE_KEYS = {
   VOLUME: "ui.volume",
+  MUTED: "ui.muted",
   SIDEBAR: "ui.sidebar",
   EXPLORE_TAB: "ui.explore.tab",
   EXPLORE_RESULTS: "explore.results",
