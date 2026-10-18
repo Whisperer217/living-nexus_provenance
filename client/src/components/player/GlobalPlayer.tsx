@@ -10,7 +10,7 @@
    but does not block it.
 ═══════════════════════════════════════════════════════════════════ */
 
-import { usePlayer } from "@/contexts/PlayerContext";
+import { usePlayer, type Track } from "@/contexts/PlayerContext";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { triggerTaggedDownload } from "@/lib/downloadTrack";
@@ -32,6 +32,8 @@ import React, { useState, useCallback, useRef, useEffect, useMemo, memo } from "
 import { createPortal } from "react-dom";
 import PlayerTipModal from "./PlayerTipModal";
 import { PlayerQueuePanel, type QueueTrack } from "./PlayerQueuePanel";
+import { CinematicCreatorGallery } from "./CinematicCreatorGallery";
+import { cinematicFeedRowToTrack, useCinematicCreatorCatalog } from "./useCinematicCreatorCatalog";
 import { toast } from "sonner";
 
 /* ── Gold design tokens ─────────────────────────────────────────── */
@@ -114,7 +116,7 @@ function GlobalPlayerInner() {
   const {
     state, audioRef, allTracks, togglePlay, nextTrack, prevTrack,
     toggleShuffle, toggleRepeat, toggleMute, setVolume, seek, playTrack,
-    isReady, appendToQueue, playNext,
+    isReady, appendToQueue, playNext, playQueueAt,
   } = usePlayer();
   const [location, navigate] = useLocation();
   const { user } = useAuth();
@@ -162,6 +164,9 @@ function GlobalPlayerInner() {
   /* ── Cinematic mode ── */
   const [cinematic, setCinematic] = useState(false);
   const [cinematicOverlay, setCinematicOverlay] = useState(true);
+  const cinematicTriggerRef = useRef<HTMLButtonElement>(null);
+  const [cinematicSelectedWorkId, setCinematicSelectedWorkId] = useState<number | null>(null);
+  const [cinematicCreatorExpanded, setCinematicCreatorExpanded] = useState(false);
   const cinematicHideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   function showCinematicOverlay() {
     setCinematicOverlay(true);
@@ -170,6 +175,10 @@ function GlobalPlayerInner() {
   }
   useEffect(() => { if (cinematic) showCinematicOverlay(); }, [cinematic]);
   useEffect(() => () => { if (cinematicHideTimer.current) clearTimeout(cinematicHideTimer.current); }, []);
+  const closeCinematic = useCallback(() => {
+    setCinematic(false);
+    window.setTimeout(() => cinematicTriggerRef.current?.focus(), 0);
+  }, []);
 
   /* ── Phase 164: Auto-expand DISABLED — player stays as mini bar until user taps expand ── */
   // Previously auto-expanded on mobile when playback started. Now the user must tap the
@@ -210,11 +219,11 @@ function GlobalPlayerInner() {
   useEffect(() => {
     if (!cinematic) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') { e.preventDefault(); setCinematic(false); }
+      if (e.key === 'Escape') { e.preventDefault(); closeCinematic(); }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [cinematic]);
+  }, [cinematic, closeCinematic]);
 
   /* ── Artwork swipe gesture — momentum physics ── */
   const artSwipeStartX = useRef<number | null>(null);
@@ -392,6 +401,74 @@ function GlobalPlayerInner() {
     { id: currentSongId! },
     { enabled: !!currentSongId && !isNaN(currentSongId!), staleTime: 60_000 }
   );
+  const cinematicCreatorId = songDetail?.creator?.id ?? currentTrack?.creatorId ?? null;
+  const cinematicCatalog = useCinematicCreatorCatalog({
+    creatorId: cinematicCreatorId,
+    enabled: cinematic && Boolean(cinematicCreatorId),
+  });
+  const cinematicCreator = useMemo(() => ({
+    id: cinematicCreatorId,
+    name: songDetail?.creator?.name || currentTrack?.artist || "Creator",
+    handle: songDetail?.creator?.artistHandle || currentTrack?.creatorHandle || null,
+    profilePhotoUrl: songDetail?.creator?.profilePhotoUrl || null,
+    bio: (songDetail?.creator as { bio?: string | null } | undefined)?.bio || null,
+  }), [cinematicCreatorId, currentTrack?.artist, currentTrack?.creatorHandle, songDetail?.creator]);
+  const cinematicSelectedRow = useMemo(
+    () => cinematicCatalog.items.find((row) => row.song.id === cinematicSelectedWorkId) ?? null,
+    [cinematicCatalog.items, cinematicSelectedWorkId],
+  );
+  const playableCreatorTracks = useMemo(
+    () => cinematicCatalog.items
+      .map(cinematicFeedRowToTrack)
+      .filter((track): track is Track => track !== null),
+    [cinematicCatalog.items],
+  );
+
+  useEffect(() => {
+    if (!cinematic) return;
+    setCinematicSelectedWorkId(currentSongId ?? null);
+    setCinematicCreatorExpanded(false);
+  }, [cinematic, cinematicCreatorId, currentSongId]);
+
+  const openCinematic = useCallback(() => {
+    setCinematicSelectedWorkId(currentSongId ?? null);
+    setCinematicCreatorExpanded(false);
+    setCinematic(true);
+  }, [currentSongId]);
+
+  const handleCinematicSelectWork = useCallback((workId: number) => {
+    // Presentation selection intentionally has no PlayerContext side effect.
+    setCinematicSelectedWorkId(workId);
+  }, []);
+
+  const handleCinematicPlayWork = useCallback((workId: number) => {
+    if (!cinematicCreatorId) return;
+    const selectedIndex = playableCreatorTracks.findIndex((track) => track.id === String(workId));
+    if (selectedIndex < 0) {
+      toast.info("This Work has no playable audio file.");
+      return;
+    }
+    playQueueAt(playableCreatorTracks, selectedIndex, "CREATOR_PAGE", `creator:${cinematicCreatorId}`);
+  }, [cinematicCreatorId, playableCreatorTracks, playQueueAt]);
+
+  const handleCinematicOpenWork = useCallback((workId: number) => {
+    closeCinematic();
+    navigate(`/song/${workId}`);
+  }, [closeCinematic, navigate]);
+
+  const handleCinematicOpenCreator = useCallback(() => {
+    closeCinematic();
+    if (cinematicCreator.id) navigate(`/creator/${cinematicCreator.id}`);
+    else if (cinematicCreator.handle) navigate(`/creator/${cinematicCreator.handle}`);
+  }, [cinematicCreator.handle, cinematicCreator.id, closeCinematic, navigate]);
+
+  const cinematicFeaturedWork = cinematicSelectedRow?.song ?? null;
+  const cinematicFeaturedTitle = cinematicFeaturedWork?.title ?? visTrack?.title ?? "Untitled Work";
+  const cinematicFeaturedArt = cinematicFeaturedWork?.coverArtUrl ?? visTrack?.artUrl ?? null;
+  const cinematicFeaturedWitnessId = cinematicFeaturedWork?.witnessId ?? visTrack?.witnessId ?? null;
+  const cinematicFeaturedIsPlaying = cinematicFeaturedWork
+    ? cinematicFeaturedWork.id === currentSongId
+    : true;
 
   /* ── Comments (after currentSongId is available) ── */
   const [commentsOpen, setCommentsOpen] = useState(false);
@@ -422,6 +499,14 @@ function GlobalPlayerInner() {
   }
   const creatorStripeAccountId = songDetail?.creator?.stripeAccountId ?? null;
   const tipsEnabled = !!creatorStripeAccountId;
+  const handleCinematicSupportCreator = useCallback(() => {
+    if (tipsEnabled && currentSongId) {
+      closeCinematic();
+      setTipOpen(true);
+      return;
+    }
+    handleCinematicOpenCreator();
+  }, [closeCinematic, currentSongId, handleCinematicOpenCreator, tipsEnabled]);
 
   // harmonicSig is now declared at the top of the component (line ~117) to
   // ensure it is available before the useWaveformVisualizer calls at line ~330.
@@ -1065,7 +1150,7 @@ function GlobalPlayerInner() {
             </button>
             <button onClick={e => { e.stopPropagation(); toggleGlow(); }} className="p-1.5 transition-all rounded" style={{ color: glowEnabled ? "#C084FC" : (isDesktop ? "rgba(212,175,55,0.4)" : "rgba(192,132,252,0.4)"), background: glowEnabled ? "rgba(192,132,252,0.08)" : "transparent" }} title={glowEnabled ? "Glow: ON" : "Glow: OFF"} aria-label={glowEnabled ? "Glow effect: on" : "Glow effect: off"} aria-pressed={glowEnabled}><Waves size={14} /></button>
             {/* Phase 164: Cinematic mode — deliberate button, not triggered by artwork tap */}
-            <button onClick={e => { e.stopPropagation(); setCinematic(true); }} className="p-1.5 transition-all rounded" style={{ color: cinematic ? (isDesktop ? GOLD : "rgba(192,132,252,0.9)") : (isDesktop ? "rgba(212,175,55,0.65)" : "rgba(192,132,252,0.5)"), background: cinematic ? (isDesktop ? "rgba(212,175,55,0.08)" : "rgba(138,43,226,0.08)") : "transparent" }} title="Cinematic View" aria-label="Cinematic view"><Maximize2 size={14} /></button>
+            <button ref={cinematicTriggerRef} onClick={e => { e.stopPropagation(); openCinematic(); }} className="p-1.5 transition-all rounded" style={{ color: cinematic ? (isDesktop ? GOLD : "rgba(192,132,252,0.9)") : (isDesktop ? "rgba(212,175,55,0.65)" : "rgba(192,132,252,0.5)"), background: cinematic ? (isDesktop ? "rgba(212,175,55,0.08)" : "rgba(138,43,226,0.08)") : "transparent" }} title="Cinematic View" aria-label="Open cinematic view"><Maximize2 size={14} /></button>
             <button ref={contextMenuBtnRef} onClick={e => { e.stopPropagation(); openContextMenu(); }} className="p-1.5 transition-colors" style={{ color: isDesktop ? "rgba(212,175,55,0.65)" : "rgba(192,132,252,0.6)" }} aria-label="More options" aria-haspopup="menu"><MoreHorizontal size={16} /></button>
             {/* Collapse button: EXPANDED → MINI (FLOAT zone removed) */}
             <button onClick={e => { e.stopPropagation(); setZone(z => z === "EXPANDED" ? "MINI" : "EXPANDED"); setDragHeight(null); }} className="p-1.5 transition-colors" style={{ color: isDesktop ? GOLD : "rgba(192,132,252,0.8)", filter: isDesktop ? `drop-shadow(0 0 6px rgba(212,175,55,0.5))` : `drop-shadow(0 0 6px rgba(138,43,226,0.5))` }} title={isExpanded ? "Collapse" : "Expand player"} aria-label={isExpanded ? "Collapse player" : "Expand player"} aria-expanded={isExpanded}>
@@ -1646,12 +1731,13 @@ function GlobalPlayerInner() {
         animation: "ln-cinematic-enter 0.45s cubic-bezier(0.32,0.72,0,1) both",
         paddingTop: "env(safe-area-inset-top, 0px)",
         paddingBottom: "env(safe-area-inset-bottom, 0px)",
+        overflowY: "auto",
       }}
     >
       {/* Ambient art blur — background depth only, very dim */}
-      {visTrack.artUrl && (
+      {cinematicFeaturedArt && (
         <div className="absolute inset-0 pointer-events-none" style={{
-          backgroundImage: `url(${visTrack.artUrl})`,
+          backgroundImage: `url(${cinematicFeaturedArt})`,
           backgroundSize: "cover",
           backgroundPosition: `${visTrack.coverPositionX ?? 50}% ${visTrack.coverPositionY ?? 50}%`,
           filter: "blur(80px) brightness(0.08) saturate(1.2)",
@@ -1662,18 +1748,20 @@ function GlobalPlayerInner() {
       {/* ── Top bar ── */}
       <div className="relative flex items-center justify-between px-5 pt-4 pb-2 flex-shrink-0">
         <button
-          onClick={() => setCinematic(false)}
+          onClick={closeCinematic}
           className="flex items-center gap-1.5 px-3 py-2 rounded-xl"
           style={{ background: "rgba(0,0,0,0.5)", backdropFilter: "blur(8px)", color: "rgba(255,255,255,0.75)", border: "1px solid rgba(255,255,255,0.08)" }}
+          aria-label="Exit cinematic view"
         >
           <ChevronDown size={16} />
           <span className="text-[11px] font-medium tracking-wide">Exit</span>
         </button>
         <span className="text-[9px] font-mono tracking-[0.3em] uppercase" style={{ color: "rgba(212,175,55,0.45)" }}>Cinematic</span>
-        {visTrack.witnessId ? (
-          <button onClick={() => { setCinematic(false); goToVerify(); }}
+        {cinematicFeaturedWitnessId ? (
+          <button onClick={() => { closeCinematic(); navigate(`/verify/${cinematicFeaturedWitnessId}`); }}
             className="flex items-center gap-1 px-2 py-1 rounded-full text-[9px] font-bold"
             style={{ background: "rgba(0,0,0,0.6)", border: "1px solid rgba(74,222,128,0.5)", color: "#4ade80", backdropFilter: "blur(4px)" }}
+            aria-label={`Verify ${cinematicFeaturedTitle}`}
           >
             <Shield size={8} /> WID
           </button>
@@ -1682,16 +1770,21 @@ function GlobalPlayerInner() {
 
       {/* ── Layer 1: Playback Context ── */}
       <div className="relative flex items-center gap-4 px-5 py-3 flex-shrink-0">
-        {visTrack.artUrl
-          ? <img src={visTrack.artUrl} alt={visTrack.title} className="rounded-xl object-cover flex-shrink-0"
+        {cinematicFeaturedArt
+          ? <img src={cinematicFeaturedArt} alt={cinematicFeaturedTitle} className="rounded-xl object-cover flex-shrink-0"
               style={{ width: 64, height: 64, objectPosition: `${visTrack.coverPositionX ?? 50}% ${visTrack.coverPositionY ?? 50}%`, boxShadow: "0 4px 20px rgba(0,0,0,0.7), 0 0 0 1px rgba(212,175,55,0.2)" }} />
           : <div className="rounded-xl flex items-center justify-center flex-shrink-0 text-3xl"
               style={{ width: 64, height: 64, background: visTrack.bg || "#1a0020" }}>{visTrack.emoji || "🎵"}</div>
         }
         <div className="flex-1 min-w-0">
-          <p className="text-[17px] font-bold leading-tight truncate" style={{ color: "#F5EDD8", fontFamily: "'Cinzel', serif" }}>{visTrack.title}</p>
-          <p className="text-[13px] mt-0.5 truncate" style={{ color: "rgba(212,175,55,0.8)" }}>{visTrack.artist}</p>
-          <p className="text-[10px] mt-0.5 tracking-widest uppercase" style={{ color: "rgba(212,175,55,0.4)", fontFamily: "'Cinzel', serif" }}>Witnessed on Living Nexus</p>
+          <p className="text-[10px] mt-0.5 tracking-widest uppercase" style={{ color: cinematicFeaturedIsPlaying ? "rgba(212,175,55,0.62)" : "rgba(232,184,64,0.78)", fontFamily: "'Cinzel', serif" }}>
+            {cinematicFeaturedIsPlaying ? "Listening now" : "Featured selection — audio continues"}
+          </p>
+          <p className="text-[17px] font-bold leading-tight truncate" style={{ color: "#F5EDD8", fontFamily: "'Cinzel', serif" }}>{cinematicFeaturedTitle}</p>
+          <p className="text-[13px] mt-0.5 truncate" style={{ color: "rgba(212,175,55,0.8)" }}>{cinematicCreator.name}</p>
+          <p className="text-[10px] mt-0.5 tracking-widest uppercase" style={{ color: "rgba(212,175,55,0.4)", fontFamily: "'Cinzel', serif" }}>
+            {cinematicFeaturedWitnessId || "Public Work record"}
+          </p>
         </div>
       </div>
 
@@ -1739,6 +1832,25 @@ function GlobalPlayerInner() {
           </button>
         ))}
       </div>
+
+      {/* ── Creator catalog: selection is visual; Play is explicit listener intent. ── */}
+      <CinematicCreatorGallery
+        creator={cinematicCreator}
+        items={cinematicCatalog.items}
+        selectedWorkId={cinematicSelectedWorkId}
+        activeWorkId={visTrack.id}
+        isLoading={cinematicCatalog.isLoading}
+        isFetchingNextPage={cinematicCatalog.isFetchingNextPage}
+        hasNextPage={Boolean(cinematicCatalog.hasNextPage)}
+        expanded={cinematicCreatorExpanded}
+        onExpandedChange={setCinematicCreatorExpanded}
+        onSelectWork={handleCinematicSelectWork}
+        onPlayWork={handleCinematicPlayWork}
+        onOpenWork={handleCinematicOpenWork}
+        onOpenCreator={handleCinematicOpenCreator}
+        onSupportCreator={handleCinematicSupportCreator}
+        onLoadMore={() => void cinematicCatalog.fetchNextPage()}
+      />
 
       {/* ── Waveform Stage — Primary Visual Authority ── */}
       <div className="relative flex-1 flex flex-col items-center justify-center px-4 py-2 min-h-0">
