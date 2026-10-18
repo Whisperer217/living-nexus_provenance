@@ -25,6 +25,7 @@ function LauncherGlyph({ id, size = 28 }: { id: string; size?: number }) {
     works: <><path d="m12 2 2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4Z"/><path d="m4 4 2 2m12 12 2 2"/></>,
     provenance: <><path d="M8 7h4l3 5-3 5H8l-3-5Z"/><path d="M16 7h2l3 5-3 5h-2M8 7l4 10M8 17l4-10"/></>,
     store: <><path d="M4 8h16v13H4zM3 8l2-5h14l2 5M8 8v13M16 8v13"/><path d="M9 13h6"/></>,
+    "randall-memorial": <><path d="M7 21v-8.5L9.5 9h5l2.5 3.5V21"/><path d="M9.5 9 8 4h8l-1.5 5M7 13h10M10 16h4"/><path d="M12 7.2c-1.45-1.9-4.5-.7-3.6 1.65.55 1.45 2.3 2.5 3.6 3.55 1.3-1.05 3.05-2.1 3.6-3.55.9-2.35-2.15-3.55-3.6-1.65Z"/></>,
     intake: <><path d="M3 4h18v16H3zM7 8h8M7 12h6"/><path d="m14 16 3 3 4-5"/></>,
     community: <><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/><path d="M12 4v4m0 8v4M4 12h4m8 0h4"/></>,
     messages: <><path d="M3 4h18v13H9l-5 4v-4H3z"/><path d="M7 8h10M7 12h7"/></>,

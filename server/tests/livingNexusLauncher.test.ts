@@ -6,7 +6,7 @@ import { LAUNCHER_ITEMS } from "../../client/src/components/layout/launcherDesti
 describe("Living Nexus launcher destinations", () => {
   it("has unique named tiles and sends every internal link to a declared site route", () => {
     const app = fs.readFileSync(path.resolve(process.cwd(), "client/src/App.tsx"), "utf8");
-    expect(LAUNCHER_ITEMS).toHaveLength(12);
+    expect(LAUNCHER_ITEMS).toHaveLength(13);
     expect(new Set(LAUNCHER_ITEMS.map(item => item.id)).size).toBe(LAUNCHER_ITEMS.length);
     for (const item of LAUNCHER_ITEMS) {
       expect(item.label.length).toBeGreaterThan(0);
@@ -19,6 +19,18 @@ describe("Living Nexus launcher destinations", () => {
         expect(item.path, `${item.label} must not imply a connected route`).toBeUndefined();
       }
     }
+  });
+
+  it("keeps the Avatar Registry store separate from the external Randall memorial entry", () => {
+    expect(LAUNCHER_ITEMS.find(item => item.id === "store")).toMatchObject({
+      destination: "route",
+      path: "/avatar-registry",
+    });
+    expect(LAUNCHER_ITEMS.find(item => item.id === "randall-memorial")).toMatchObject({
+      destination: "external",
+      label: "Randall Memorial",
+      path: "https://livingnexus.printful.me/product/forever-our-brother-randall-memorial-hoodie",
+    });
   });
 
   it("keeps Nexus and messaging visibly unconnected until their services exist", () => {

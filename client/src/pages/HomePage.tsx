@@ -21,6 +21,7 @@ import { useHarmonic } from "@/contexts/HarmonicContext";
 import TipModal from "@/components/TipModal";
 import { SKIN_IMAGES } from "@/components/FloatingAvatar";
 import { DiscordGlyph } from "@/components/icons/DiscordGlyph";
+import { ExternalMemorialProductCard } from "@/components/ExternalMemorialProductCard";
 import {
   DISCORD_COMMUNITY_URL,
   LOOP_PRODUCT,
@@ -704,6 +705,13 @@ export default function HomePage() {
                 </div>
               </section>
             )}
+          </div>
+        </section>
+
+        {/* ── In remembrance — external product link-out only ── */}
+        <section className="relative z-[1] px-6 py-12" style={{ borderTop: "1px solid var(--ln-panel-border)" }}>
+          <div className="max-w-5xl mx-auto">
+            <ExternalMemorialProductCard />
           </div>
         </section>
 
