@@ -152,7 +152,7 @@ function BioBlock({ userId, config }: { userId: number; config: BioBlockConfig }
             style={{ fontFamily: "var(--font-display)", letterSpacing: "0.14em" }}>
             About
           </h4>
-          <p className="text-sm text-white/60 leading-relaxed">{creator.bio}</p>
+          <p className="break-words text-sm text-white/60 leading-relaxed">{creator.bio}</p>
         </div>
       )}
       {config.showPhilosophy && creator.philosophy && (
@@ -161,7 +161,7 @@ function BioBlock({ userId, config }: { userId: number; config: BioBlockConfig }
             style={{ fontFamily: "var(--font-display)", letterSpacing: "0.14em" }}>
             Philosophy
           </h4>
-          <p className="text-sm text-white/60 leading-relaxed italic">{creator.philosophy}</p>
+          <p className="break-words text-sm text-white/60 leading-relaxed italic">{creator.philosophy}</p>
         </div>
       )}
       {config.showDoctrine && creator.doctrine && (
@@ -170,7 +170,7 @@ function BioBlock({ userId, config }: { userId: number; config: BioBlockConfig }
             style={{ fontFamily: "var(--font-display)", letterSpacing: "0.14em" }}>
             Doctrine
           </h4>
-          <p className="text-sm text-white/60 leading-relaxed">{creator.doctrine}</p>
+          <p className="break-words text-sm text-white/60 leading-relaxed">{creator.doctrine}</p>
         </div>
       )}
     </div>
@@ -209,7 +209,7 @@ function DistributionLinksBlock({ userId, config }: { userId: number; config: Di
             href={link.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs text-white/60 hover:text-white transition-colors"
+            className="flex max-w-full items-center gap-1.5 break-words px-3 py-1.5 rounded text-xs text-white/60 hover:text-white transition-colors"
             style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}
           >
             <ExternalLink className="w-3 h-3" />
@@ -277,13 +277,13 @@ function CustomTextBlock({ config }: { config: CustomTextBlockConfig }) {
   return (
     <div className={alignClass}>
       {config.heading && (
-        <h3 className="text-sm font-semibold text-white/70 mb-2"
+        <h3 className="break-words text-sm font-semibold text-white/70 mb-2"
           style={{ fontFamily: "var(--font-display)" }}>
           {config.heading}
         </h3>
       )}
       {config.content && (
-        <p className="text-sm text-white/50 leading-relaxed whitespace-pre-wrap">{config.content}</p>
+        <p className="break-words text-sm text-white/50 leading-relaxed whitespace-pre-wrap">{config.content}</p>
       )}
     </div>
   );
@@ -550,14 +550,14 @@ function GenrePathsBlock({
         {paths.map(([genre, count]) => (
           <span
             key={genre}
-            className="inline-flex items-center gap-2 rounded-full px-3 py-2"
+            className="inline-flex max-w-full items-center gap-2 rounded-full px-3 py-2"
             style={{
               border: "1px solid color-mix(in srgb, var(--ln-gold) 20%, transparent)",
               background: "color-mix(in srgb, var(--ln-gold) 7%, transparent)",
               color: "color-mix(in srgb, var(--ln-parchment) 75%, transparent)",
             }}
           >
-            <span className="text-xs">{genre}</span>
+            <span className="break-words text-xs">{genre}</span>
             <span className="font-mono text-[9px]" style={{ color: "var(--ln-gold)" }}>{count}</span>
           </span>
         ))}

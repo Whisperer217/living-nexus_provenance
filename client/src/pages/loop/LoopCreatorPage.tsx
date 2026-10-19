@@ -279,7 +279,7 @@ export default function LoopCreatorPage() {
             {isOwner ? "Creator sanctuary · your domain" : "Witness sanctuary · provenance hall"}
           </p>
 
-          <div className="flex items-end gap-5 mb-5">
+          <div className="flex min-w-0 items-end gap-5 mb-5">
             <div
               className="w-20 h-20 sm:w-28 sm:h-28 rounded-full overflow-hidden flex-shrink-0"
               style={{
@@ -301,9 +301,9 @@ export default function LoopCreatorPage() {
                 </div>
               )}
             </div>
-            <div className="min-w-0 pb-1">
+            <div className="min-w-0 flex-1 pb-1">
               <h1
-                className="text-4xl sm:text-6xl leading-[0.95] truncate"
+                className="break-words text-4xl leading-[0.95] sm:text-6xl sm:truncate"
                 style={{
                   fontFamily: "'Cinzel', serif",
                   color: "var(--ln-parchment)",
@@ -313,7 +313,7 @@ export default function LoopCreatorPage() {
                 {displayName}
               </h1>
               {creator.artistHandle && creator.name && creator.artistHandle !== creator.name && (
-                <p className="mt-2 text-sm" style={{ color: "color-mix(in srgb, var(--ln-parchment) 55%, transparent)" }}>
+                <p className="mt-2 break-words text-sm" style={{ color: "color-mix(in srgb, var(--ln-parchment) 55%, transparent)" }}>
                   {creator.name}
                 </p>
               )}
@@ -321,7 +321,7 @@ export default function LoopCreatorPage() {
           </div>
 
           <p
-            className="text-lg sm:text-xl max-w-2xl mb-4"
+            className="max-w-2xl break-words text-lg sm:text-xl mb-4"
             style={{
               fontFamily: "'Cormorant Garamond', serif",
               color: "color-mix(in srgb, var(--ln-parchment) 88%, transparent)",
@@ -332,7 +332,7 @@ export default function LoopCreatorPage() {
               : `${songs.length} registered work${songs.length === 1 ? "" : "s"} · ${witnessed} sealed with WID`}
           </p>
           <div
-            className="flex flex-wrap gap-x-4 gap-y-1 mb-8 text-[11px] uppercase tracking-[0.14em]"
+            className="flex max-w-full flex-wrap gap-x-4 gap-y-1 mb-8 break-words text-[11px] uppercase tracking-[0.14em]"
             style={{ color: "color-mix(in srgb, var(--ln-parchment) 45%, transparent)" }}
           >
             <span>Who · {displayName}</span>
@@ -515,7 +515,7 @@ export default function LoopCreatorPage() {
             {(testimonies as any[]).slice(0, 6).map((t) => (
               <li key={t.id || t.wid}>
                 <blockquote
-                  className="text-xl leading-relaxed"
+                  className="break-words text-xl leading-relaxed"
                   style={{
                     fontFamily: "'Cormorant Garamond', serif",
                     color: "color-mix(in srgb, var(--ln-parchment) 88%, transparent)",

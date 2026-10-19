@@ -174,7 +174,7 @@
 
 /* ── WSP (Witness Surface Player) layout variables ── */
 :root {
-  --wsp-top: 56px;    /* mobile: h-14 navbar */
+  --wsp-top: var(--ln-mobile-header-height, 56px); /* mobile: shared header height */
   --wsp-left: 0px;    /* mobile: no left offset */
   --wsp-height: 60px;
 }
@@ -811,14 +811,21 @@
   /* ── Bottom Stack Layout Tokens ─────────────────────────────────────
      Single source of truth for all bottom-anchored heights.
      ARCHITECTURE: No bottom tab bar. Navigation is off-canvas hamburger.
-     Only fixed bottom element = GlobalPlayer (68px) + safe-area-inset.
+     Only fixed bottom element = GlobalPlayer chrome + safe-area-inset.
      ─────────────────────────────────────────────────────────────────── */
   :root {
     --nav-height: 0px;                     /* No bottom nav bar — hamburger/off-canvas only */
-    --nav-safe: max(env(safe-area-inset-bottom, 0px), 8px); /* iOS home indicator clearance */
+    --ln-safe-top: env(safe-area-inset-top, 0px);
+    --ln-safe-bottom: max(env(safe-area-inset-bottom, 0px), 8px);
+    --nav-safe: var(--ln-safe-bottom);     /* legacy alias for existing surfaces */
     --nav-total: var(--nav-safe);          /* = safe area only (no nav bar) */
-    --player-height: 72px;                 /* GlobalPlayer SNAP.MINI = 72px (see GlobalPlayer.tsx) */
-    --player-safe: calc(var(--player-height) + var(--nav-safe)); /* player + safe area */
+    --ln-mobile-header-content-height: 56px;
+    --ln-mobile-header-height: calc(var(--ln-mobile-header-content-height) + var(--ln-safe-top));
+    --ln-mini-handle-height: 20px;
+    --ln-mini-progress-height: 2px;
+    --ln-mini-row-height: 52px;
+    --player-height: calc(var(--ln-mini-handle-height) + var(--ln-mini-progress-height) + var(--ln-mini-row-height));
+    --player-safe: calc(var(--player-height) + var(--ln-safe-bottom));
     --bottom-stack: var(--player-safe);    /* total reserved bottom on mobile */
     --card-pan-w: clamp(140px, 11vw, 200px);  /* Pan-row card width — fluid across zoom levels */
     --card-img-h: clamp(175px, 14vw, 240px);  /* Pan-row card image height — fluid across zoom levels */
@@ -6075,6 +6082,110 @@ button:active .ln-witness-sigil,
 
 @media (prefers-reduced-motion: reduce) {
   .ln-global-player[data-expanded="true"] .harmonic-glow-layer {
+    transition: none !important;
+  }
+}
+
+/* ── Mobile containment and hierarchy repair ───────────────────────────────
+   Local surfaces adapt to their own content before the shell's final
+   overflow guard is involved. These rules do not alter Work, Creator, WID,
+   queue, or playback authority. */
+.ln-mobile-header {
+  height: var(--ln-mobile-header-height);
+  min-height: var(--ln-mobile-header-height);
+  padding: calc(0.375rem + var(--ln-safe-top)) 1rem 0.375rem !important;
+}
+
+@media (max-width: 1023px) {
+  .ln-explore-header-controls--creators {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .ln-explore-header-controls--creators > label {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .ln-explore-header-controls--creators > label select {
+    width: 100%;
+  }
+
+  .ln-explore-search--creators {
+    width: 100%;
+  }
+}
+
+@media (max-width: 639px) {
+  .ln-mobile-header-secondary {
+    display: none !important;
+  }
+
+  .ln-mobile-brand {
+    flex: 1 1 0;
+    min-width: 44px;
+  }
+
+  .ln-mobile-wordmark {
+    display: none;
+  }
+
+  .ln-creator-card__footer {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .ln-creator-card__count {
+    width: 100%;
+  }
+
+  .ln-creator-card__actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  .ln-creator-card__actions > * {
+    min-width: 0;
+  }
+
+  .ln-creator-card__actions .ln-creator-card__action {
+    justify-content: center;
+    width: 100%;
+    min-height: 2.75rem;
+  }
+
+  .ln-creator-card__actions .ln-creator-card__domain {
+    display: none;
+  }
+}
+
+@media (max-width: 479px) {
+  .ln-sanctuary-work-row {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .ln-sanctuary-work-row .ln-sanctuary-work-actions {
+    flex: 1 0 100%;
+    justify-content: flex-end;
+    width: 100%;
+    margin-left: auto;
+    padding-left: calc(4rem + 1rem);
+  }
+}
+
+.ln-legacy-memorial :is(h2, blockquote, p),
+.ln-sanctuary :is(h1, h2, h3, p, span) {
+  overflow-wrap: anywhere;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ln-mobile-header,
+  .ln-creator-card__footer,
+  .ln-explore-header-controls--creators,
+  .ln-sanctuary-work-row {
     transition: none !important;
   }
 }

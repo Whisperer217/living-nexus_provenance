@@ -39,14 +39,14 @@ export function LegacyMemorialSection({
           >
             <Landmark size={17} />
           </div>
-          <div>
+          <div className="min-w-0">
             <p
               className="text-[11px] uppercase tracking-[0.19em]"
               style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-gold-hot, var(--ln-gold))" }}
             >
               Legacy memorial
             </p>
-            <h2 id="legacy-memorial-heading" className="mt-1 text-2xl sm:text-3xl" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>
+            <h2 id="legacy-memorial-heading" className="mt-1 break-words text-2xl sm:text-3xl" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>
               In remembrance of {creatorName}
             </h2>
           </div>
@@ -56,7 +56,7 @@ export function LegacyMemorialSection({
           {memorials.map((memorial) => (
             <article key={memorial.id}>
               <blockquote
-                className="whitespace-pre-line text-xl sm:text-2xl leading-relaxed"
+                className="whitespace-pre-line break-words text-xl sm:text-2xl leading-relaxed"
                 style={{
                   fontFamily: "'Cormorant Garamond', serif",
                   color: "color-mix(in srgb, var(--ln-parchment) 92%, transparent)",
@@ -68,7 +68,7 @@ export function LegacyMemorialSection({
               </blockquote>
               <div className="mt-4 flex items-start gap-2 text-sm" style={{ color: "color-mix(in srgb, var(--ln-parchment) 62%, transparent)" }}>
                 <ShieldCheck size={16} className="mt-0.5 shrink-0" style={{ color: "var(--ln-gold)" }} aria-hidden="true" />
-                <p>
+                <p className="break-words">
                   Append-only stewardship notice maintained by <span style={{ color: "var(--ln-parchment)" }}>{memorial.stewardHandle ? `@${memorial.stewardHandle}` : memorial.stewardName || "an authorized Legacy Steward"}</span>. It is distinct from {creatorName}&apos;s original Testimonies, Works, Witness IDs, and provenance records.
                 </p>
               </div>

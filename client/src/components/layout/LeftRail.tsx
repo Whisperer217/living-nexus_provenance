@@ -14,7 +14,7 @@
    capture touch events globally, or manipulate the body in any way.
 ═══════════════════════════════════════════════════════════════════ */
 import { useLocation, useRouter } from "wouter";
-import { Home, Compass, Upload, Archive, ExternalLink, Shield, LayoutGrid } from "lucide-react";
+import { Home, Compass, Upload, Archive, ExternalLink, Shield, LayoutGrid, Sparkles } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 import { LOOP_PRODUCT, DISCORD_COMMUNITY_URL } from "@/lib/loopProduct";
@@ -197,6 +197,40 @@ export default function LeftRail({
       {/* Divider before companion tools */}
       <div className="w-8 h-px mt-2 mb-2" style={{ background: "var(--ln-border-subtle)" }} />
 
+      {/* Compose remains primary-accessible when narrow mobile chrome collapses it. */}
+      {!!user && isMobile && (
+        <button
+          type="button"
+          title="Compose"
+          aria-label="Compose"
+          onClick={(event) => {
+            event.stopPropagation();
+            handleMobileClick("/keeper-compose", true);
+          }}
+          className="ln-dimensional-action relative flex flex-col items-center justify-center gap-0.5 transition-all duration-150 rounded-xl"
+          style={{
+            width: isMobile ? 72 : 60,
+            height: 56,
+            color: "var(--ln-text-muted)",
+            background: "transparent",
+            WebkitTapHighlightColor: "transparent",
+          }}
+          onMouseEnter={(event) => {
+            (event.currentTarget as HTMLElement).style.color = "var(--ln-gold)";
+            (event.currentTarget as HTMLElement).style.background = "var(--ln-surface-rail-hover)";
+          }}
+          onMouseLeave={(event) => {
+            (event.currentTarget as HTMLElement).style.color = "var(--ln-text-muted)";
+            (event.currentTarget as HTMLElement).style.background = "transparent";
+          }}
+        >
+          <Sparkles size={18} />
+          <span style={{ fontSize: 8, fontWeight: 600, letterSpacing: "0.04em", lineHeight: 1 }}>
+            COMPOSE
+          </span>
+        </button>
+      )}
+
       {/* Witnessing Circle — the signed-in person's private relationship directory. */}
       {!!user && (
         <button
@@ -338,6 +372,7 @@ export default function LeftRail({
 
       {/* Sidebar panel — transform only, GPU-composited, no layout reflow */}
       <aside
+        id="mobile-nav-rail"
         className="lg:hidden flex flex-col items-center py-3 gap-1"
         aria-label="Mobile navigation"
         aria-hidden={!mobileOpen}
@@ -345,7 +380,7 @@ export default function LeftRail({
           position: "fixed",
           top: 0,
           left: 0,
-          bottom: 0,
+          bottom: "var(--bottom-stack)",
           width: 72,
           background: "var(--ln-surface-rail)",
           borderRight: "1px solid var(--ln-panel-border)",

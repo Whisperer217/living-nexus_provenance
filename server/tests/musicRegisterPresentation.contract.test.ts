@@ -136,7 +136,7 @@ describe("Music Register presentation contracts", () => {
     expect(shell).toContain('overscrollBehavior: "contain"');
     expect(layout).toContain('const isManifestWorkspace = location === "/manifest" || location.startsWith("/manifest?")');
     expect(layout).toContain("!isManifestWorkspace && <SiteFooter />");
-    expect(layout).toContain("min-h-0 flex-1 overflow-y-auto overflow-x-hidden player-scroll-area");
+    expect(layout).toContain("min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden player-scroll-area");
     expect(studio).toContain('document.getElementById("main-scroll")?.scrollTo({ top: 0, behavior: "auto" })');
   });
 

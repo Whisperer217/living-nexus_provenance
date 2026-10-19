@@ -44,6 +44,6 @@ describe("Living Nexus launcher destinations", () => {
     const topBar = fs.readFileSync(path.resolve(process.cwd(), "client/src/components/layout/TopBar.tsx"), "utf8");
     const mainLayout = fs.readFileSync(path.resolve(process.cwd(), "client/src/components/layout/MainLayout.tsx"), "utf8");
     expect(topBar).toContain('className="hidden lg:block"');
-    expect(mainLayout).toContain('className="lg:hidden fixed top-0');
+    expect(mainLayout).toContain('className="ln-mobile-header lg:hidden fixed top-0');
   });
 });

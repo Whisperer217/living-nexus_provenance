@@ -762,7 +762,7 @@ export default function LoopWorkPage() {
 
       {/* Related works */}
       {related.length > 0 && (
-        <section className="max-w-6xl mx-auto px-4 sm:px-6 pb-28">
+        <section className="max-w-6xl mx-auto min-w-0 px-4 sm:px-6 pb-28">
           <p
             className="text-[11px] uppercase tracking-[0.22em] mb-3"
             style={{ color: "var(--ln-gold)", fontFamily: "'Cinzel', serif" }}
@@ -775,13 +775,13 @@ export default function LoopWorkPage() {
           >
             Related works
           </h2>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {related.map((item: any) => {
               const rSong = item.song ?? item;
               const rCreator = item.creator;
               return (
-                <Link key={rSong.id} href={`/song/${rSong.id}`}>
-                  <article className="group">
+                <Link key={rSong.id} href={`/song/${rSong.id}`} className="block min-w-0 w-full">
+                  <article className="group min-w-0 w-full">
                     <div
                       className="aspect-square mb-3 overflow-hidden"
                       style={{ background: "#111" }}
@@ -799,16 +799,16 @@ export default function LoopWorkPage() {
                       )}
                     </div>
                     <h3
-                      className="truncate"
+                      className="min-w-0 truncate"
                       style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}
                     >
                       {rSong.title}
                     </h3>
-                    <p className="text-sm truncate" style={{ color: "color-mix(in srgb, var(--ln-parchment) 50%, transparent)" }}>
+                    <p className="min-w-0 text-sm truncate" style={{ color: "color-mix(in srgb, var(--ln-parchment) 50%, transparent)" }}>
                       {rCreator?.artistHandle || rCreator?.name || ""}
                     </p>
                     {rSong.witnessId && (
-                      <p className="font-mono text-[10px] mt-1 truncate" style={{ color: "var(--ln-gold)" }}>
+                      <p className="min-w-0 font-mono text-[10px] mt-1 truncate" style={{ color: "var(--ln-gold)" }}>
                         <Shield size={9} className="inline mr-1" />
                         {rSong.witnessId}
                       </p>

@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-10-19T05:45:31.729Z",
-  "totalLessons": 63,
+  "lastUpdated": "2026-10-19T13:34:38.612Z",
+  "totalLessons": 64,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -1505,6 +1505,39 @@
         "security"
       ],
       "id": "LESSON-063"
+    },
+    {
+      "id": "LESSON-064",
+      "date": "2026-10-19",
+      "category": "accessibility",
+      "problem": "Public Creator Domains, Related Works, and Explore creator cards relied on implicit grid tracks or one-row action budgets while a fixed mobile header and mini player used mismatched safe-area reservations. Narrow devices could clip card content, make actions unreachable, or let fixed chrome obscure the last content.",
+      "solution": "Applied local mobile-first containment before shared geometry: explicit Related Works tracks, a two-row Creator Domain action fallback, creator-card footer reflow, and local wrapping for dynamic values. Consolidated header, scroller, mini-player, and mobile rail reservations with shared safe-area tokens; secondary header controls collapse on narrow screens while Compose stays reachable in the mobile rail. Preserved PlayerContext, queue, WID, provenance, routes, and relationship authority.",
+      "files": [
+        "client/src/components/layout/MainLayout.tsx",
+        "client/src/components/layout/LeftRail.tsx",
+        "client/src/components/player/GlobalPlayer.tsx",
+        "client/src/pages/ExplorePage.tsx",
+        "client/src/pages/loop/LoopWorkPage.tsx",
+        "client/src/pages/loop/LoopCreatorPage.tsx",
+        "client/src/components/creator/SanctuaryWorksOrganizer.tsx",
+        "client/src/components/domain/DomainRenderer.tsx",
+        "client/src/components/creator/LegacyMemorialSection.tsx",
+        "client/src/index.css",
+        "server/tests/mobileCrossPageLayout.contract.test.ts",
+        "docs/lnls/audits/MOBILE-CROSS-PAGE-LAYOUT-AUDIT-2026-10-19.md"
+      ],
+      "score": 0,
+      "tags": [
+        "mobile",
+        "cross-page-mobile-containment",
+        "safe-area",
+        "global-player",
+        "creator-domain",
+        "explore",
+        "related-works",
+        "accessibility",
+        "responsive-layout"
+      ]
     }
   ]
 }

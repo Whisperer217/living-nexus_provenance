@@ -36,7 +36,7 @@ import { WitnessingCirclePanel } from "@/components/layout/WitnessingCirclePanel
 import { WhatsNewModal } from "@/components/WhatsNewModal";
 import { trpc } from "@/lib/trpc";
 import { useTheme } from "@/contexts/ThemeContext";
-import { Menu, X, Bell, Sparkles } from "lucide-react";
+import { Menu, X, Bell } from "lucide-react";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { Z } from "@/lib/viewportLayers";
 import { DISCORD_COMMUNITY_URL } from "@/lib/loopProduct";
@@ -196,7 +196,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           No overlayController. No body lock.
       ============================================== */}
       <div
-        className="lg:hidden fixed top-0 left-0 right-0 flex items-center gap-3 px-4 py-3"
+        className="ln-mobile-header lg:hidden fixed top-0 left-0 right-0 flex items-center gap-2 px-4"
         style={{
           zIndex: Z.MOBILE_HEADER,
           background: MOBILE_HEADER_BG,
@@ -208,7 +208,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         {/* Hamburger — toggles LeftRail mobile state only */}
         <button
           onClick={mobileMenuOpen ? closeMobileMenu : openMobileMenu}
-          className="ln-dimensional-action p-2 rounded-lg transition-all"
+          className="ln-dimensional-action flex min-h-11 min-w-11 items-center justify-center rounded-lg transition-all"
           style={{ color: "var(--ln-text-muted)", WebkitTapHighlightColor: "transparent" }}
           aria-label={mobileMenuOpen ? "Close navigation" : "Open navigation"}
           aria-expanded={mobileMenuOpen}
@@ -218,17 +218,22 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         </button>
 
         {/* Logo + wordmark */}
-        <div className="flex items-center gap-2 flex-1">
+        <button
+          type="button"
+          onClick={() => navigate("/")}
+          className="ln-mobile-brand ln-dimensional-action flex min-h-11 min-w-11 items-center gap-2 rounded-lg transition-all"
+          aria-label="Living Nexus home"
+        >
           <img src={LOGO_URL} alt="LN" className="w-7 h-7 object-contain" />
           <span className="ln-mobile-wordmark font-display text-base gold-shimmer">Living Nexus</span>
-        </div>
+        </button>
 
         {/* Discord — always available on mobile */}
         <a
           href={DISCORD_COMMUNITY_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="ln-dimensional-action flex items-center justify-center rounded-lg transition-all"
+          className="ln-mobile-header-secondary ln-dimensional-action flex items-center justify-center rounded-lg transition-all"
           style={{ minWidth: 44, minHeight: 44, color: "var(--ln-gold)", WebkitTapHighlightColor: "transparent" }}
           aria-label="Join Discord"
           title="Join Living Nexus on Discord"
@@ -236,23 +241,11 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           <SharedDiscordGlyph size={18} />
         </a>
 
-        {/* Compose shortcut — mobile only */}
-        {!!user && (
-          <button
-            onClick={() => navigate("/keeper-compose")}
-            className="ln-dimensional-action flex items-center justify-center rounded-lg transition-all"
-            style={{ minWidth: 44, minHeight: 44, color: "var(--ln-text-muted)", WebkitTapHighlightColor: "transparent" }}
-            aria-label="Compose"
-          >
-            <Sparkles size={18} />
-          </button>
-        )}
-
-        {/* Witnessing Circle — a direct mobile path to the relationship panel. */}
+        {/* Witnessing Circle remains in the navigation rail on narrow screens. */}
         {!!user && (
           <button
             onClick={() => setWitnessingCircleOpen(true)}
-            className="ln-dimensional-action ln-witness-sigil-trigger flex items-center justify-center rounded-lg transition-all"
+            className="ln-mobile-header-secondary ln-dimensional-action ln-witness-sigil-trigger flex items-center justify-center rounded-lg transition-all"
             style={{ minWidth: 44, minHeight: 44, color: "var(--ln-gold)", WebkitTapHighlightColor: "transparent" }}
             aria-label="Open Witnessing Circle"
             title="Witnessing Circle"
@@ -295,16 +288,15 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           Mobile:  pt-14 (56px) to clear mobile header
       ============================================== */}
       <div
-        className={`flex-1 flex overflow-hidden pt-14 lg:pt-[56px] ${drawerOpen ? "lg:pl-[372px]" : "lg:pl-[72px]"}`}
+        className={`flex-1 flex min-w-0 overflow-hidden pt-[var(--ln-mobile-header-height)] lg:pt-[56px] ${drawerOpen ? "lg:pl-[372px]" : "lg:pl-[72px]"}`}
         style={{
           overscrollBehavior: "none",
           transition: "padding-left 220ms cubic-bezier(0.22,1,0.36,1)",
         }}
       >
-        <main className="min-h-0 flex-1 flex overflow-hidden" style={{ overscrollBehavior: "none" }}>
+        <main className="min-h-0 min-w-0 flex-1 flex overflow-hidden" style={{ overscrollBehavior: "none" }}>
           <style>{`
-            @media (min-width: 768px) and (max-width: 1023px) { .player-scroll-area { padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important; } }
-            @media (max-width: 767px) { .player-scroll-area { padding-bottom: var(--bottom-stack) !important; } }
+            @media (max-width: 1023px) { .player-scroll-area { padding-bottom: var(--bottom-stack) !important; } }
           `}</style>
 
           {/* ── Global pull-to-refresh indicator — covers every page ── */}
@@ -316,7 +308,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
           <div
             id="main-scroll"
-            className={`min-h-0 flex-1 overflow-y-auto overflow-x-hidden player-scroll-area ${rightRailOpen && !isCreatorFocus ? "lg:pr-[300px]" : ""}`}
+            className={`min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden player-scroll-area ${rightRailOpen && !isCreatorFocus ? "lg:pr-[300px]" : ""}`}
             style={{ overscrollBehaviorX: "none", overscrollBehaviorY: "none", touchAction: "pan-y" }}
           >
             {children}

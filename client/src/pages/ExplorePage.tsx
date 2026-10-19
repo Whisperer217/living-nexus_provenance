@@ -714,9 +714,9 @@ function CreatorDirectoryCard({
             <p className={`ln-caption ln-creator-card__ink ln-creator-card__supporting ${isWitnessingCreator ? "mt-3" : "mt-5"} line-clamp-3 !text-[var(--ln-bone)]`}>Explore this creator’s registered works and provenance record.</p>
           )}
         </Link>
-        <div className="mt-4 flex items-center justify-between gap-3 border-t border-white/15 pt-3">
-          <span className="ln-caption ln-creator-card__ink ln-creator-card__supporting !text-[var(--ln-bone)]">{creator.publishedCount} published work{creator.publishedCount === 1 ? "" : "s"}</span>
-          <div className="flex items-center gap-2">
+        <div className="ln-creator-card__footer mt-4 flex items-center justify-between gap-3 border-t border-white/15 pt-3">
+          <span className="ln-creator-card__count ln-caption ln-creator-card__ink ln-creator-card__supporting !text-[var(--ln-bone)]">{creator.publishedCount} published work{creator.publishedCount === 1 ? "" : "s"}</span>
+          <div className="ln-creator-card__actions flex items-center gap-2">
             {canFollowCreator && (
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -1039,11 +1039,13 @@ export default function ExplorePage() {
               <h1 className="ln-page-title">Explore</h1>
               <p className="ln-editorial mt-1 hidden sm:block">Songs & artists — music provenance discovery</p>
             </div>
-            <div className="flex items-center gap-2 sm:gap-3 flex-wrap justify-end">
-              <div className="flex items-center gap-1.5">
+            <div className={`ln-explore-header-controls flex items-center gap-2 sm:gap-3 flex-wrap justify-end ${viewMode === "creators" ? "ln-explore-header-controls--creators" : ""}`}>
+              {viewMode === "list" && (
+                <div className="flex items-center gap-1.5">
                 <span className="ln-mono hidden text-[var(--stone-shadow)] sm:inline">{randomize ? "Random" : "Newest"}</span>
                 <RandomizeSwitch value={randomize} onChange={handleRandomizeToggle} />
-              </div>
+                </div>
+              )}
               {viewMode === "list" && <WorkSortControl value={workSort} onChange={setWorkSort} />}
               {viewMode === "creators" && <CreatorSortControl value={creatorSort} onChange={setCreatorSort} />}
               <ViewToggle value={viewMode} onChange={handleViewChange} />
@@ -1054,7 +1056,7 @@ export default function ExplorePage() {
           </div>
           {/* Row 2: contextual discovery search + creator filter */}
           <div className="flex items-center gap-2 pb-3">
-            <div className="relative flex-shrink-0 w-40 sm:w-64">
+            <div className={`ln-explore-search relative flex-shrink-0 w-40 sm:w-64 ${viewMode === "creators" ? "ln-explore-search--creators" : ""}`}>
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[var(--stone-shadow)]" />
               <input type="text" aria-label={viewMode === "creators" ? "Search public creators" : "Search works, creators, or genres"} placeholder={viewMode === "creators" ? "Find creators, handles, statements…" : "Search works, creators, genres…"} value={search} onChange={(e) => setSearch(e.target.value)}
                 className="w-full bg-[var(--void-3)] border border-white/10 rounded-xl pl-9 pr-4 py-2 text-sm text-[var(--stone-light)] placeholder:text-[var(--stone-shadow)] focus:outline-none focus:border-[var(--gold)]/40 transition-colors" />

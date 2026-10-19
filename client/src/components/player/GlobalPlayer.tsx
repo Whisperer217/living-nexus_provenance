@@ -60,7 +60,7 @@ const CRYSTAL = "rgba(192,132,252,0.85)";
 
 /* ── Snap zone heights ──────────────────────────────────────────── */
 const SNAP = {
-  MINI: 72,       // compact strip — always visible
+  MINI: 74,       // drag handle (20) + progress (2) + control row (52)
   EXPANDED: 0,    // full height on mobile / centered modal on desktop
 } as const;
 // FLOAT zone removed — only MINI and EXPANDED are valid states.
@@ -923,7 +923,11 @@ function GlobalPlayerInner() {
         bottom: 0,
         left: 0,
         right: 0,
-        height: isDesktop && isExpanded ? undefined : `${playerHeight}px`,
+        height: isDesktop && isExpanded
+          ? undefined
+          : isDesktop
+            ? `${playerHeight}px`
+            : `max(${playerHeight}px, var(--player-safe))`,
         zIndex: 9000,
         willChange: "transform",
         contain: "layout paint",
@@ -1036,8 +1040,8 @@ function GlobalPlayerInner() {
         className="flex items-center gap-3 flex-shrink-0 px-3"
         style={{
           height: "52px",
-          /* Safe-area padding on mobile so mini bar content clears the iOS home indicator */
-          paddingBottom: isDesktop ? 0 : "env(safe-area-inset-bottom, 0px)",
+          /* The outer player reserves the safe area; this row remains a true control row. */
+          paddingBottom: 0,
           opacity: isExpanded ? 0 : 1,
           transition: "opacity 0.2s ease",
           pointerEvents: isExpanded ? "none" : "auto",

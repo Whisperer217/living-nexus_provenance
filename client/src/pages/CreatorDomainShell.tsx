@@ -283,7 +283,7 @@ export default function CreatorDomainShell() {
 
         {/* ── Identity header ── */}
         <div className="max-w-6xl mx-auto px-4 -mt-16 relative z-10">
-          <div className="flex items-end gap-4 mb-6">
+          <div className="flex min-w-0 items-end gap-4 mb-6">
             {/* Avatar */}
             <div className="w-24 h-24 md:w-32 md:h-32 rounded-2xl overflow-hidden flex-shrink-0 ring-4"
               style={{ background: "var(--ln-surface-panel)", outline: "4px solid var(--ln-surface-void)" }}>
@@ -296,18 +296,18 @@ export default function CreatorDomainShell() {
             </div>
             {/* Name + handle */}
             <div className="pb-2 flex-1 min-w-0">
-              <h1 className="text-2xl md:text-3xl font-bold truncate" style={{ fontFamily: "var(--ln-font-display)", color: "var(--ln-text-primary)" }}>
+              <h1 className="break-words text-2xl font-bold md:text-3xl md:truncate" style={{ fontFamily: "var(--ln-font-display)", color: "var(--ln-text-primary)" }}>
                 {displayName}
               </h1>
               <div className="flex items-center gap-2 flex-wrap mt-1">
-                <span className="text-sm font-mono" style={{ color: "var(--ln-gold)" }}>@{handle}</span>
+                <span className="break-all text-sm font-mono" style={{ color: "var(--ln-gold)" }}>@{handle}</span>
                 {keeperArchetype && (
                   <Badge variant="outline" className="text-xs capitalize" style={{ borderColor: "var(--ln-border-gold)", color: "var(--ln-gold)" }}>
                     {keeperArchetype}
                   </Badge>
                 )}
               </div>
-              {bio && <p className="text-sm mt-2 line-clamp-2" style={{ color: "var(--ln-text-secondary)" }}>{bio}</p>}
+              {bio && <p className="mt-2 break-words text-sm line-clamp-2" style={{ color: "var(--ln-text-secondary)" }}>{bio}</p>}
             </div>
           </div>
 

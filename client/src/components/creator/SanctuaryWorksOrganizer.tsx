@@ -152,7 +152,7 @@ export function SanctuaryWorksOrganizer({
             return (
               <li
                 key={song.id}
-                className="group flex items-center gap-4 py-4"
+                className="ln-sanctuary-work-row group flex min-w-0 items-center gap-4 py-4"
                 style={{
                   borderBottom: "1px solid color-mix(in srgb, var(--ln-gold) 12%, transparent)",
                   animation: "ln-breath-reveal 0.55s cubic-bezier(0.22,1,0.36,1) both",
@@ -193,7 +193,7 @@ export function SanctuaryWorksOrganizer({
                   </span>
                 </button>
 
-                <div className="flex-1 min-w-0">
+                <div className="min-w-0 flex-1">
                   <Link href={`/song/${song.id}`}>
                     <span
                       className="block truncate text-lg hover:underline"
@@ -225,7 +225,7 @@ export function SanctuaryWorksOrganizer({
                   songId={song.id}
                   initialLiked={song.initialLiked}
                   downloadPermission={song.downloadPermission}
-                  className="shrink-0"
+                  className="ln-sanctuary-work-actions shrink-0"
                 />
               </li>
             );
