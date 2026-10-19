@@ -4,7 +4,7 @@
 > **Living Nexus proprietary architecture planning artifact**
 > Copyright © 2026 BDDT Publishing LLC. Internal planning record; no rights, ownership, WIDs, provenance events, or stored assets are changed by this document.
 
-- **Status:** Planning complete — implementation not started
+- **Status:** Phase 1 implemented for review — Phase 2 deferred
 - **Date:** 2026-10-18
 - **Directive:** Implement and validate the Global Player cinematic creator-gallery experience before any AI-product retirement or Quiver/Creator Domain consolidation.
 - **Scope:** Two bounded phases only. No platform rewrite and no replacement AI product.
@@ -390,3 +390,28 @@ The approved Phase 1 slice is now limited to the existing `GlobalPlayer` cinemat
 ### Boundaries honored
 
 Phase 2 did not begin. Historical records, Quiver storage, AI interfaces, registry attribution, WIDs, Work records, and Creator Domain routes were not removed or modified.
+
+---
+
+## Phase 1 Cinematic Refinement Evidence — 2026-10-18
+
+The Phase 1 portal was refined in place after review. The component boundary remains unchanged: `GlobalPlayer` is the only cinematic host and `PlayerContext` remains the only playback authority.
+
+- The selected public Work’s canonical cover artwork now fills a presentation-only atmospheric layer (`cover`, blur, vignette, and readable dark gradient). A Creator-selected Work changes this environment, title, WID detail, and featured information without changing the active audio session.
+- The compact Creator panel continues to expand for the public biography, Creator Domain, Support Creator, and the truthful count of catalog rows currently loaded. It does not fabricate a total for a catalog that has more cursor pages.
+- The gallery stays cursor-paged at 12 public audio Works per request, offers **Load More Works** until exhaustion, and defensively removes duplicate Work IDs across loaded cursor pages.
+- The horizontal gallery supports native horizontal swipe/scroll, desktop previous/next controls, and left/right keyboard preview navigation. Each card explicitly separates **View** (preview), **Open** (record), and **Play** (listener intent).
+- The portal now distinguishes **Previewing** from **Listening now**, offers one action to return visual focus to the actual active Work, and keeps transport controls tied to the real PlayerContext Work rather than the previewed artwork.
+- The atmospheric swap honors `prefers-reduced-motion`, and the active 375×812 mobile portal was checked for no horizontal document overflow, a still-scrollable catalog, and 40px-or-larger rendered card-action targets.
+
+### Refined validation completed
+
+- TypeScript: `pnpm check` passed.
+- Focused player/catalog contracts: 3 files / 13 tests passed.
+- Full regression: 124 test files / 781 tests passed; 1 existing browser test remained skipped.
+- Production build: `pnpm build` passed. Existing large-chunk warnings remain warnings only.
+- Diff integrity: `git diff --check` passed.
+- Interactive browser evidence on `/song/360001`: previewing **Yahweh Lights My Way** changed the cinematic background and labelled preview while **Root of All Evil (Special Edition)** remained the active paused/playing control target. Loading the next page grew the rendered catalog from 12 to 24 unique Works without changing the active Work. Returning to **Listening Now** restored the Root visual focus without a queue action.
+- Visual evidence: desktop screenshot is recorded at `/home/ubuntu/screenshots/3000-iuccvnrqtspyquz_2026-10-19_00-06-51_9067.webp`; an active 375×812 mobile portal screenshot is recorded at `/home/ubuntu/screenshots/ln-cinematic-mobile-375x812-2026-10-19.png`.
+
+No schema, migration, Quiver storage, historical record, AI interface, registry attribution, WID, creator association, or publication behavior changed in this refinement. Phase 2 remains expressly deferred.

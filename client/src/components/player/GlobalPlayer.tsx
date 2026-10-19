@@ -15,6 +15,7 @@ import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { triggerTaggedDownload } from "@/lib/downloadTrack";
 import { useFrequencyGlow } from "@/hooks/useFrequencyGlow";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useHarmonic } from "@/contexts/HarmonicContext";
 import { useWaveformVisualizer } from "@/hooks/useWaveformVisualizer";
 import {
@@ -127,6 +128,7 @@ function GlobalPlayerInner() {
   const songPageId = songPageMatch ? songPageMatch[1] : null;
 
   const isDesktop = useIsDesktop();
+  const reduceMotion = useReducedMotion();
 
   /* ── Harmonic Signature — must be declared before useWaveformVisualizer calls ── */
   // Consumed from HarmonicContext (mounted above the entire app tree).
@@ -426,9 +428,12 @@ function GlobalPlayerInner() {
 
   useEffect(() => {
     if (!cinematic) return;
+    // Re-anchor only when the portal opens or the actual playing creator
+    // changes. Queue progression within one Creator must not overwrite a
+    // listener's intentionally previewed cinematic Work.
     setCinematicSelectedWorkId(currentSongId ?? null);
     setCinematicCreatorExpanded(false);
-  }, [cinematic, cinematicCreatorId, currentSongId]);
+  }, [cinematic, cinematicCreatorId]);
 
   const openCinematic = useCallback(() => {
     setCinematicSelectedWorkId(currentSongId ?? null);
@@ -440,6 +445,12 @@ function GlobalPlayerInner() {
     // Presentation selection intentionally has no PlayerContext side effect.
     setCinematicSelectedWorkId(workId);
   }, []);
+
+  const handleCinematicReturnToListening = useCallback(() => {
+    // Returning the visual focus is intentionally local: the session queue and
+    // its active audio are already owned by PlayerContext.
+    setCinematicSelectedWorkId(currentSongId ?? null);
+  }, [currentSongId]);
 
   const handleCinematicPlayWork = useCallback((workId: number) => {
     if (!cinematicCreatorId) return;
@@ -469,6 +480,7 @@ function GlobalPlayerInner() {
   const cinematicFeaturedIsPlaying = cinematicFeaturedWork
     ? cinematicFeaturedWork.id === currentSongId
     : true;
+  const cinematicPreviewing = Boolean(cinematicFeaturedWork && !cinematicFeaturedIsPlaying);
 
   /* ── Comments (after currentSongId is available) ── */
   const [commentsOpen, setCommentsOpen] = useState(false);
@@ -1724,26 +1736,27 @@ function GlobalPlayerInner() {
   /* ── Cinematic overlay portal — Waveform as Primary Visual Authority ── */
   const cinematicPortal = cinematic && visTrack ? createPortal(
     <div
-      className="fixed inset-0 flex flex-col"
+      className="ln-cinematic-portal fixed inset-0 flex flex-col"
+      data-has-art={cinematicFeaturedArt ? "true" : "false"}
+      data-reduced-motion={reduceMotion ? "true" : "false"}
       style={{
         zIndex: 99995,
-        background: "linear-gradient(180deg, #0a0008 0%, #0d0014 40%, #060008 100%)",
-        animation: "ln-cinematic-enter 0.45s cubic-bezier(0.32,0.72,0,1) both",
+        background: "var(--ln-void)",
+        animation: reduceMotion ? "none" : "ln-cinematic-enter 0.45s cubic-bezier(0.32,0.72,0,1) both",
         paddingTop: "env(safe-area-inset-top, 0px)",
         paddingBottom: "env(safe-area-inset-bottom, 0px)",
         overflowY: "auto",
       }}
     >
-      {/* Ambient art blur — background depth only, very dim */}
-      {cinematicFeaturedArt && (
-        <div className="absolute inset-0 pointer-events-none" style={{
-          backgroundImage: `url(${cinematicFeaturedArt})`,
-          backgroundSize: "cover",
-          backgroundPosition: `${visTrack.coverPositionX ?? 50}% ${visTrack.coverPositionY ?? 50}%`,
-          filter: "blur(80px) brightness(0.08) saturate(1.2)",
-          transform: "scale(1.2)",
-        }} />
-      )}
+      {/* Presentation-only atmosphere. Changing this never changes PlayerContext. */}
+      <div className="ln-cinematic-portal__atmosphere" aria-hidden="true">
+        <div
+          key={cinematicFeaturedArt ?? "cinematic-dark-fallback"}
+          className={`ln-cinematic-portal__art${cinematicFeaturedArt ? "" : " ln-cinematic-portal__art--fallback"}`}
+          style={cinematicFeaturedArt ? { backgroundImage: `url(${cinematicFeaturedArt})` } : undefined}
+        />
+      </div>
+      <div className="ln-cinematic-portal__vignette" aria-hidden="true" />
 
       {/* ── Top bar ── */}
       <div className="relative flex items-center justify-between px-5 pt-4 pb-2 flex-shrink-0">
@@ -1772,19 +1785,24 @@ function GlobalPlayerInner() {
       <div className="relative flex items-center gap-4 px-5 py-3 flex-shrink-0">
         {cinematicFeaturedArt
           ? <img src={cinematicFeaturedArt} alt={cinematicFeaturedTitle} className="rounded-xl object-cover flex-shrink-0"
-              style={{ width: 64, height: 64, objectPosition: `${visTrack.coverPositionX ?? 50}% ${visTrack.coverPositionY ?? 50}%`, boxShadow: "0 4px 20px rgba(0,0,0,0.7), 0 0 0 1px rgba(212,175,55,0.2)" }} />
+              style={{ width: 64, height: 64, objectPosition: "50% 50%", boxShadow: "0 4px 20px rgba(0,0,0,0.7), 0 0 0 1px color-mix(in srgb, var(--ln-gold) 20%, transparent)" }} />
           : <div className="rounded-xl flex items-center justify-center flex-shrink-0 text-3xl"
-              style={{ width: 64, height: 64, background: visTrack.bg || "#1a0020" }}>{visTrack.emoji || "🎵"}</div>
+              style={{ width: 64, height: 64, background: "var(--ln-iron)", color: "var(--ln-gold)" }}>{visTrack.emoji || "🎵"}</div>
         }
         <div className="flex-1 min-w-0">
-          <p className="text-[10px] mt-0.5 tracking-widest uppercase" style={{ color: cinematicFeaturedIsPlaying ? "rgba(212,175,55,0.62)" : "rgba(232,184,64,0.78)", fontFamily: "'Cinzel', serif" }}>
-            {cinematicFeaturedIsPlaying ? "Listening now" : "Featured selection — audio continues"}
+          <p className="text-[10px] mt-0.5 tracking-widest uppercase" style={{ color: cinematicFeaturedIsPlaying ? "var(--ln-gold)" : "var(--ln-gold-hot)", fontFamily: "var(--font-display)" }}>
+            {cinematicFeaturedIsPlaying ? "Listening now" : "Previewing — audio continues"}
           </p>
-          <p className="text-[17px] font-bold leading-tight truncate" style={{ color: "#F5EDD8", fontFamily: "'Cinzel', serif" }}>{cinematicFeaturedTitle}</p>
-          <p className="text-[13px] mt-0.5 truncate" style={{ color: "rgba(212,175,55,0.8)" }}>{cinematicCreator.name}</p>
-          <p className="text-[10px] mt-0.5 tracking-widest uppercase" style={{ color: "rgba(212,175,55,0.4)", fontFamily: "'Cinzel', serif" }}>
+          <p className="text-[17px] font-bold leading-tight truncate" style={{ color: "var(--ln-parchment)", fontFamily: "var(--font-display)" }}>{cinematicFeaturedTitle}</p>
+          <p className="text-[13px] mt-0.5 truncate" style={{ color: "var(--ln-gold-hot)" }}>{cinematicCreator.name}</p>
+          <p className="text-[10px] mt-0.5 tracking-widest uppercase" style={{ color: "var(--ln-bone)", fontFamily: "var(--font-display)" }}>
             {cinematicFeaturedWitnessId || "Public Work record"}
           </p>
+          {cinematicPreviewing && (
+            <p className="text-[11px] mt-1 truncate" style={{ color: "var(--ln-bone)" }}>
+              Listening now: {visTrack.title}
+            </p>
+          )}
         </div>
       </div>
 
@@ -1800,7 +1818,7 @@ function GlobalPlayerInner() {
       </div>
 
       {/* ── Layer 2: Primary Controls ── */}
-      <div className="relative flex items-center justify-between px-8 py-3 flex-shrink-0">
+      <div className="relative flex items-center justify-between px-8 py-3 flex-shrink-0" aria-label={`Playback controls for ${visTrack.title}`}>
         <button onClick={() => toggleShuffle()} style={{ padding: "10px", color: state.isShuffle ? GOLD : "rgba(212,175,55,0.35)", minWidth: 44, minHeight: 44, display: "flex", alignItems: "center", justifyContent: "center" }}><Shuffle size={20} /></button>
         <button onClick={() => prevTrack()} style={{ padding: "10px", color: "rgba(245,237,216,0.8)", minWidth: 44, minHeight: 44, display: "flex", alignItems: "center", justifyContent: "center" }}><SkipBack size={26} fill="currentColor" /></button>
         <button
@@ -1839,6 +1857,8 @@ function GlobalPlayerInner() {
         items={cinematicCatalog.items}
         selectedWorkId={cinematicSelectedWorkId}
         activeWorkId={visTrack.id}
+        listeningTitle={visTrack.title}
+        isPreviewing={cinematicPreviewing}
         isLoading={cinematicCatalog.isLoading}
         isFetchingNextPage={cinematicCatalog.isFetchingNextPage}
         hasNextPage={Boolean(cinematicCatalog.hasNextPage)}
@@ -1847,6 +1867,7 @@ function GlobalPlayerInner() {
         onSelectWork={handleCinematicSelectWork}
         onPlayWork={handleCinematicPlayWork}
         onOpenWork={handleCinematicOpenWork}
+        onReturnToListening={handleCinematicReturnToListening}
         onOpenCreator={handleCinematicOpenCreator}
         onSupportCreator={handleCinematicSupportCreator}
         onLoadMore={() => void cinematicCatalog.fetchNextPage()}

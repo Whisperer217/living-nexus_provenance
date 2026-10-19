@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-10-15",
-  "totalLessons": 61,
+  "lastUpdated": "2026-10-18",
+  "totalLessons": 62,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -1448,6 +1448,32 @@
         "WID-reconciliation",
         "authorization",
         "custody-ledger"
+      ]
+    },
+    {
+      "id": "LESSON-062",
+      "date": "2026-10-18",
+      "category": "architecture",
+      "problem": "A Creator catalog inside a cinematic player can accidentally make browsing appear to change playback, can fetch an unbounded catalog, or can visually replace the actual listening Work without explaining that audio continues.",
+      "solution": "Kept cinematic selection as local presentation state over the existing PlayerContext session, made Play the only queue-changing action, labeled Previewing and Listening now independently, added a return-to-listening action, cursor paging with duplicate Work-ID suppression, and browser-verified mobile horizontal catalog behavior.",
+      "files": [
+        "client/src/components/player/GlobalPlayer.tsx",
+        "client/src/components/player/CinematicCreatorGallery.tsx",
+        "client/src/components/player/useCinematicCreatorCatalog.ts",
+        "client/src/index.css",
+        "server/tests/globalPlayerCinematicCreatorGallery.contract.test.ts",
+        "docs/lnls/audits/GLOBAL-PLAYER-CREATOR-DOMAIN-CONSOLIDATION-IMPACT-REPORT-2026-10-18.md"
+      ],
+      "score": 0,
+      "tags": [
+        "global-player",
+        "cinematic",
+        "PlayerContext",
+        "cursor-pagination",
+        "accessibility",
+        "reduced-motion",
+        "mobile",
+        "registry-attribution"
       ]
     }
   ]

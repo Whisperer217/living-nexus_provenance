@@ -5748,3 +5748,187 @@ button:active .ln-witness-sigil,
     animation-iteration-count: 1 !important;
   }
 }
+
+/* ── Global Player cinematic atmosphere and full Creator catalog refinement ───
+   Presentation only: these rules layer the selected Work's canonical cover art
+   beneath the existing PlayerContext controls without introducing another media
+   surface or changing the session queue. */
+.ln-cinematic-portal {
+  isolation: isolate;
+  min-height: 100dvh;
+  color: var(--ln-parchment);
+}
+
+.ln-cinematic-portal__atmosphere,
+.ln-cinematic-portal__vignette {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.ln-cinematic-portal__atmosphere {
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 26%, color-mix(in srgb, var(--ln-gold) 10%, var(--ln-void)) 0%, transparent 42%),
+    var(--ln-void);
+}
+
+.ln-cinematic-portal__art {
+  position: absolute;
+  inset: -5%;
+  background-color: var(--ln-void);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  filter: blur(14px) brightness(0.48) saturate(1.16);
+  transform: scale(1.08);
+  animation: ln-cinematic-art-arrive 520ms ease both;
+}
+
+.ln-cinematic-portal__art--fallback {
+  background-image:
+    radial-gradient(circle at 50% 22%, color-mix(in srgb, var(--ln-gold) 14%, transparent) 0%, transparent 38%),
+    linear-gradient(146deg, var(--ln-iron) 0%, var(--ln-void) 52%, var(--ln-coal) 100%);
+  filter: none;
+}
+
+.ln-cinematic-portal__vignette {
+  background:
+    radial-gradient(ellipse 92% 72% at 50% 34%, transparent 0%, color-mix(in srgb, var(--ln-void) 24%, transparent) 58%, color-mix(in srgb, var(--ln-void) 88%, transparent) 100%),
+    linear-gradient(180deg, color-mix(in srgb, var(--ln-void) 74%, transparent) 0%, color-mix(in srgb, var(--ln-void) 20%, transparent) 36%, color-mix(in srgb, var(--ln-void) 86%, transparent) 100%);
+}
+
+.ln-cinematic-portal > :not(.ln-cinematic-portal__atmosphere):not(.ln-cinematic-portal__vignette) {
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes ln-cinematic-art-arrive {
+  from { opacity: 0; transform: scale(1.13); }
+  to { opacity: 1; transform: scale(1.08); }
+}
+
+.ln-cinematic-creator-gallery__heading-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.625rem;
+}
+
+.ln-cinematic-creator-gallery__return {
+  display: inline-flex;
+  min-height: 2.25rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid color-mix(in srgb, var(--ln-gold) 55%, transparent);
+  border-radius: 999px;
+  padding: 0.4rem 0.625rem;
+  background: color-mix(in srgb, var(--ln-void) 72%, transparent);
+  color: var(--ln-gold-hot);
+  font-family: var(--font-display);
+  font-size: var(--text-xs);
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
+}
+
+.ln-cinematic-creator-gallery__return:hover {
+  border-color: var(--ln-gold-hot);
+  background: color-mix(in srgb, var(--ln-gold) 16%, var(--ln-void));
+}
+
+.ln-cinematic-creator-panel__catalog-count {
+  color: var(--ln-smoke);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+}
+
+.ln-cinematic-creator-gallery__viewport {
+  position: relative;
+}
+
+.ln-cinematic-creator-gallery__scroll-controls {
+  position: absolute;
+  z-index: 2;
+  top: -2.95rem;
+  right: 0;
+  display: flex;
+  gap: 0.375rem;
+}
+
+.ln-cinematic-creator-gallery__scroll-controls button {
+  display: inline-grid;
+  width: 2.25rem;
+  min-height: 2.25rem;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--ln-gold) 40%, transparent);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--ln-void) 78%, transparent);
+  color: var(--ln-gold-hot);
+}
+
+.ln-cinematic-creator-gallery__scroll-controls button:hover {
+  border-color: var(--ln-gold-hot);
+  background: color-mix(in srgb, var(--ln-gold) 16%, var(--ln-void));
+}
+
+.ln-cinematic-work-card__actions {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.ln-cinematic-work-card__actions button:first-child {
+  color: var(--ln-bone);
+}
+
+.ln-cinematic-work-card__actions button:nth-child(2) {
+  color: var(--ln-smoke);
+}
+
+.ln-cinematic-creator-gallery :is(button, a):focus-visible {
+  outline: 2px solid var(--ln-gold-hot);
+  outline-offset: 3px;
+}
+
+@media (max-width: 639px) {
+  .ln-cinematic-portal__art {
+    filter: blur(10px) brightness(0.4) saturate(1.1);
+  }
+
+  .ln-cinematic-creator-gallery__heading {
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .ln-cinematic-creator-gallery__heading-actions {
+    align-items: flex-end;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .ln-cinematic-creator-gallery__return {
+    min-height: 2.5rem;
+    font-size: var(--text-xs);
+  }
+
+  .ln-cinematic-creator-gallery__scroll-controls {
+    display: none;
+  }
+
+  .ln-cinematic-work-card__actions button {
+    min-height: 2.5rem;
+    font-size: var(--text-xs);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ln-cinematic-portal__art {
+    animation: none;
+    transform: scale(1.04);
+  }
+
+  .ln-cinematic-creator-gallery__row,
+  .ln-cinematic-work-card__art img {
+    scroll-behavior: auto;
+    transition: none;
+  }
+}

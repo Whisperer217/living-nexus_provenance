@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { trpc } from "@/lib/trpc";
 import type { Track } from "@/contexts/PlayerContext";
 import type { FeedRow } from "@shared/coreDataTypes";
@@ -27,7 +28,19 @@ export function useCinematicCreatorCatalog(options: {
     },
   );
 
-  const items = query.data?.pages.flatMap((page) => page.items) ?? [];
+  /**
+   * Cursor pages should already be disjoint. The stable ID gate still protects
+   * the visual catalog and its explicit playback mapping if a public projection
+   * changes while a visitor is loading subsequent pages.
+   */
+  const items = useMemo(() => {
+    const seenWorkIds = new Set<number>();
+    return (query.data?.pages.flatMap((page) => page.items) ?? []).filter((row) => {
+      if (seenWorkIds.has(row.song.id)) return false;
+      seenWorkIds.add(row.song.id);
+      return true;
+    });
+  }, [query.data]);
 
   return {
     ...query,
