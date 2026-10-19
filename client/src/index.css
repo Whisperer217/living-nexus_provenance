@@ -6050,3 +6050,31 @@ button:active .ln-witness-sigil,
     transform: none;
   }
 }
+
+/* ── Global Player contrast floor ───────────────────────────────────────────
+   The compact player retains its translucent arrival. Once expanded, the
+   surface becomes a reliable reading plane so controls, Work identity, and
+   provenance remain distinct from animated art and harmonic ambience. */
+.ln-global-player[data-expanded="true"] {
+  background: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--ln-surface-elevated) 94%, var(--ln-void)) 0%,
+    color-mix(in srgb, var(--ln-coal) 97%, var(--ln-void)) 58%,
+    color-mix(in srgb, var(--ln-iron) 91%, var(--ln-void)) 100%
+  ) !important;
+}
+
+.ln-global-player[data-expanded="true"] .harmonic-glow-layer {
+  opacity: 0.3;
+}
+
+.ln-global-player[data-expanded="true"] .ln-player-action-dock,
+.ln-global-player[data-expanded="true"] .ln-queue-strip {
+  background-color: color-mix(in srgb, var(--ln-coal) 96%, var(--ln-void));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ln-global-player[data-expanded="true"] .harmonic-glow-layer {
+    transition: none !important;
+  }
+}

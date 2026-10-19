@@ -17,10 +17,7 @@
  */
 
 import { Router } from "express";
-import { getSongByWitnessId } from "../utils/db";
-import { getDb } from "../utils/db";
-import { shareArtifacts } from "../../drizzle/schema";
-import { eq } from "drizzle-orm";
+import { getPublicSongByWitnessId } from "../utils/db";
 
 const CANONICAL_ORIGIN = "https://www.livingnexus.org";
 const FALLBACK_IMAGE =
@@ -43,43 +40,29 @@ shareRouter.get("/share/:wid", async (req, res) => {
     return res.redirect(302, "/");
   }
 
-  // ── Fast path: serve precomputed HTML artifact if available ──────────────
-  // This is the "write-once, serve-forever" optimization.
-  // The artifact is generated at upload time and cached in the DB.
-  // Skip cache warm requests (?warm=1) so the artifact is always fresh.
-  if (!req.query.warm) {
-    try {
-      const db = await getDb();
-      const [artifact] = await db
-        .select({ htmlSnapshot: shareArtifacts.htmlSnapshot, status: shareArtifacts.status })
-        .from(shareArtifacts)
-        .where(eq(shareArtifacts.wid, wid))
-        .limit(1);
-
-      if (artifact?.status === "ready" && artifact.htmlSnapshot) {
-        res.setHeader("Content-Type", "text/html; charset=utf-8");
-        res.setHeader("X-Frame-Options", "ALLOWALL");
-        res.setHeader("Cache-Control", "public, max-age=300, stale-while-revalidate=60");
-        res.setHeader("X-Share-Cache", "HIT");
-        return res.status(200).end(artifact.htmlSnapshot);
-      }
-    } catch (cacheErr) {
-      // Cache miss or DB error — fall through to live render
-      console.warn("[PDL] Cache lookup failed, falling back to live render:", cacheErr);
-    }
+  // Confirm public Registry eligibility before touching the historical artifact
+  // cache. A cached share card must never keep a private, withdrawn, deleted,
+  // or duplicate-WID Work externally visible.
+  let publicWork: Awaited<ReturnType<typeof getPublicSongByWitnessId>>;
+  try {
+    publicWork = await getPublicSongByWitnessId(wid.trim());
+  } catch (lookupError) {
+    console.warn("[PDL] Public WID lookup unavailable:", lookupError);
+    return res.status(503).end("Share surface temporarily unavailable.");
   }
 
-  // ── Live render fallback ──────────────────────────────────────────────────
+  if (publicWork.state !== "resolved") {
+    return res.status(404).end("Public Work not found.");
+  }
+
+  const { song, creator } = publicWork.record;
+  const canonicalWid = (song as any).witnessId?.trim() || wid.trim().toUpperCase();
+
+  // Render from the canonical public Work projection on every request. The
+  // former HTML snapshot cache can retain a raw-cover card after the canonical
+  // renderer changes, which is precisely how different external services ended
+  // up seeing inconsistent identity/provenance presentation.
   try {
-    const result = await getSongByWitnessId(wid);
-
-    if (!result) {
-      // WID not found — redirect to home with a note
-      return res.redirect(302, `/?wid=${encodeURIComponent(wid)}`);
-    }
-
-    const { song, creator } = result;
-
     const artistName =
       (creator as any)?.artistHandle?.trim() ||
       (creator as any)?.name?.trim() ||
@@ -87,22 +70,24 @@ shareRouter.get("/share/:wid", async (req, res) => {
 
     const title = `${song.title} — ${artistName}`;
     const genrePart = (song as any).genre ? ` · ${(song as any).genre}` : "";
-    const description = `🎵 ${song.title} by ${artistName}${genrePart} · WID: ${wid} — Listen on Living Nexus`;
+    const description = `🎵 ${song.title} by ${artistName}${genrePart} · WID: ${canonicalWid} — Listen on Living Nexus`;
 
-    const coverArt = (song as any).coverArtUrl?.trim();
-    const thumbnailUrl = coverArt && coverArt.length > 0 ? coverArt : FALLBACK_IMAGE;
+    // Share the 1200×630 Living Nexus provenance card rather than a raw cover.
+    // It remains faithful to the Work artwork while keeping its WID legible in
+    // Facebook, Messenger, Discord, and other external card renderers.
+    const thumbnailUrl = `${CANONICAL_ORIGIN}/api/og/image/song/${song.id}`;
 
     const audioUrl = (song as any).fileUrl?.trim() || null;
     const embedVideoUrl = (song as any).embedVideoUrl?.trim() || null;
 
     const songPageUrl = `${CANONICAL_ORIGIN}/song/${song.id}`;
-    const shareUrl = `${CANONICAL_ORIGIN}/share/${encodeURIComponent(wid)}`;
+    const shareUrl = `${CANONICAL_ORIGIN}/share/${encodeURIComponent(canonicalWid)}`;
     const embedIframeUrl = `${CANONICAL_ORIGIN}/embed/song/${song.id}`;
     const oembedUrl = `${CANONICAL_ORIGIN}/api/oembed?wid=${encodeURIComponent(wid)}`;
 
     // Build the OG meta block
     const ogTags = [
-      `<meta property="og:type" content="music.song" />`,
+      `<meta property="og:type" content="video.other" />`,
       `<meta property="og:title" content="${esc(title)}" />`,
       `<meta property="og:description" content="${esc(description)}" />`,
       `<meta property="og:url" content="${esc(shareUrl)}" />`,
@@ -147,7 +132,7 @@ shareRouter.get("/share/:wid", async (req, res) => {
   <title>${esc(title)} | Living Nexus</title>
 
   <!-- Provenance Distribution Layer — Living Nexus WID Share Surface -->
-  <!-- WID: ${esc(wid)} -->
+  <!-- WID: ${esc(canonicalWid)} -->
   ${ogTags}
 
   <!-- Instant browser redirect to full song page -->
@@ -215,7 +200,7 @@ shareRouter.get("/share/:wid", async (req, res) => {
     <img class="cover" src="${esc(thumbnailUrl)}" alt="${esc(title)}" />
     <h1>${esc(song.title)}</h1>
     <div class="artist">${esc(artistName)}</div>
-    <div class="wid">${esc(wid)}</div>
+    <div class="wid">${esc(canonicalWid)}</div>
     <a href="${esc(songPageUrl)}">▶ Listen on Living Nexus</a>
   </div>
   <script>

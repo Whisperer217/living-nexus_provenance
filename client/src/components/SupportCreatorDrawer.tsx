@@ -142,7 +142,10 @@ export function SupportCreatorDrawer({ target, onClose }: Props) {
   };
 
   const handleShare = async () => {
-    const url = `${window.location.origin}/song/${target.songId}`;
+    const path = target.songWid
+      ? `/share/${encodeURIComponent(target.songWid)}`
+      : `/song/${target.songId}`;
+    const url = `${window.location.origin}${path}`;
     try {
       await navigator.clipboard.writeText(url);
       setCopied(true);
@@ -683,7 +686,11 @@ function SharePanel({
   onCopy: () => void;
   onBack: () => void;
 }) {
-  const url = `${typeof window !== "undefined" ? window.location.origin : ""}/song/${target.songId}`;
+  const origin = typeof window !== "undefined" ? window.location.origin : "";
+  const path = target.songWid
+    ? `/share/${encodeURIComponent(target.songWid)}`
+    : `/song/${target.songId}`;
+  const url = `${origin}${path}`;
   const text = `"${target.songTitle}" by ${target.creatorName} — registered on Living Nexus`;
 
   const socialLinks = [

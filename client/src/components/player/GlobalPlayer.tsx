@@ -44,8 +44,9 @@ const GOLD_GLOW = "color-mix(in srgb, var(--ln-gold) 60%, transparent)";
 /* Mobile glass — Nebula & Crystal deep space */
 const GLASS_BG_MOBILE = "linear-gradient(180deg, var(--ln-surface-rail) 0%, var(--ln-surface-card) 55%, var(--ln-surface-page) 100%)";
 const GLASS_BLUR_MOBILE = "blur(20px)";
-/* Desktop glass — slightly stronger separation (decision #8) */
-const GLASS_BG_DESKTOP = "color-mix(in srgb, var(--ln-surface-elevated) 88%, transparent)";
+/* Desktop glass — an opaque reading floor keeps the artwork atmosphere behind
+   the player without allowing controls and provenance to disappear into it. */
+const GLASS_BG_DESKTOP = "linear-gradient(160deg, color-mix(in srgb, var(--ln-surface-elevated) 92%, var(--ln-void)) 0%, color-mix(in srgb, var(--ln-coal) 96%, var(--ln-void)) 100%)";
 const GLASS_BLUR_DESKTOP = "blur(18px)";
 /* Mobile glow: nebula purple upward glow */
 const GOLD_SHADOW_MOBILE = `0 -4px 32px color-mix(in srgb, var(--ln-gold) 34%, transparent), 0 -2px 8px color-mix(in srgb, var(--ln-gold-hot) 16%, transparent)`;
@@ -483,6 +484,11 @@ function GlobalPlayerInner() {
     ? cinematicFeaturedWork.id === currentSongId
     : true;
   const cinematicPreviewing = Boolean(cinematicFeaturedWork && !cinematicFeaturedIsPlaying);
+  const canonicalSharePath = visTrack?.witnessId
+    ? `/share/${encodeURIComponent(visTrack.witnessId)}`
+    : currentSongId
+      ? `/song/${currentSongId}`
+      : null;
 
   /* ── Comments (after currentSongId is available) ── */
   const [commentsOpen, setCommentsOpen] = useState(false);
@@ -807,7 +813,8 @@ function GlobalPlayerInner() {
           type="button"
           onClick={async () => {
             closeContextMenu();
-            const url = `${window.location.origin}/song/${currentSongId}`;
+            if (!canonicalSharePath) return;
+            const url = `${window.location.origin}${canonicalSharePath}`;
             try { if (navigator.share) { await navigator.share({ title: visTrack?.title ?? "", url }); return; } } catch {}
             try { await navigator.clipboard.writeText(url); } catch {}
           }}
@@ -904,6 +911,8 @@ function GlobalPlayerInner() {
 
   const content = (
     <div
+      className="ln-global-player"
+      data-expanded={isExpanded ? "true" : "false"}
       ref={(el) => {
         // Attach both containerRef (for drag) and playerBarRef (for direct glow mutation on mobile)
         (containerRef as React.MutableRefObject<HTMLDivElement | null>).current = el;
@@ -1509,7 +1518,8 @@ function GlobalPlayerInner() {
               )}
               <button
                 onClick={async () => {
-                  const url = `${window.location.origin}/song/${currentSongId}`;
+                  if (!canonicalSharePath) return;
+                  const url = `${window.location.origin}${canonicalSharePath}`;
                   try { if (navigator.share) { await navigator.share({ title: visTrack?.title ?? '', url }); return; } } catch {}
                   try { await navigator.clipboard.writeText(url); } catch {}
                 }}
@@ -1685,7 +1695,8 @@ function GlobalPlayerInner() {
       <button
         onClick={async () => {
           setShowContextMenu(false);
-          const url = `${window.location.origin}/song/${currentSongId}`;
+          if (!canonicalSharePath) return;
+          const url = `${window.location.origin}${canonicalSharePath}`;
           try { if (navigator.share) { await navigator.share({ title: visTrack?.title ?? '', url }); return; } } catch {}
           try { await navigator.clipboard.writeText(url); } catch {}
         }}
@@ -1965,7 +1976,7 @@ function GlobalPlayerInner() {
         {[
           { icon: <Heart size={18} fill={isLiked ? "#ef4444" : "none"} />, label: "Like", color: isLiked ? "#ef4444" : "rgba(212,175,55,0.5)", action: () => { if (currentSongId) toggleLikeMutation.mutate({ songId: currentSongId }); } },
           { icon: <MessageCircle size={18} />, label: "Comment", color: "rgba(212,175,55,0.5)", action: () => { setCinematic(false); setCommentsOpen(true); } },
-          { icon: <Share2 size={18} />, label: "Share", color: "rgba(212,175,55,0.5)", action: () => { if (visTrack?.id) { navigator.clipboard?.writeText(`${window.location.origin}/song/${visTrack.id}`).then(() => toast.success("Link copied")); } } },
+          { icon: <Share2 size={18} />, label: "Share", color: "rgba(212,175,55,0.5)", action: () => { if (canonicalSharePath) { navigator.clipboard?.writeText(`${window.location.origin}${canonicalSharePath}`).then(() => toast.success("Link copied")); } } },
           { icon: <DollarSign size={18} />, label: "Tip", color: tipsEnabled ? "rgba(212,175,55,0.5)" : "rgba(212,175,55,0.2)", action: () => { if (tipsEnabled && currentSongId) { setCinematic(false); setTipOpen(true); } } },
           { icon: <Volume2 size={18} />, label: "Volume", color: state.isMuted ? "rgba(212,175,55,0.25)" : "rgba(212,175,55,0.5)", action: () => toggleMute() },
         ].map(({ icon, label, color, action }) => (

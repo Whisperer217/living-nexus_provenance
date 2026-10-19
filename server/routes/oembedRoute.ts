@@ -14,7 +14,7 @@
  */
 
 import { Router } from "express";
-import { getSongWithCreator, getCreatorForOg, getProjectBySlug } from "../utils/db";
+import { getSongWithCreator, getCreatorForOg, getProjectBySlug, getPublicSongByWitnessId } from "../utils/db";
 
 const CANONICAL_ORIGIN = "https://www.livingnexus.org";
 const FALLBACK_IMAGE =
@@ -40,14 +40,14 @@ oembedRouter.get("/api/oembed", async (req, res) => {
   // If wid= is provided directly, look up the song by WID
   if (wid) {
     try {
-      const { getSongByWitnessId } = await import("../utils/db");
-      const songResult = await getSongByWitnessId(wid);
+      const selection = await getPublicSongByWitnessId(wid.trim());
 
-      if (!songResult) {
-        return res.status(404).json({ error: "WID not found" });
+      if (selection.state !== "resolved") {
+        return res.status(404).json({ error: "public Work not found" });
       }
 
-      const { song, creator } = songResult;
+      const { song, creator } = selection.record;
+      const canonicalWid = (song as any).witnessId?.trim() || wid.trim().toUpperCase();
       const artistName =
         (creator as any)?.artistHandle?.trim() ||
         (creator as any)?.name?.trim() ||
@@ -55,13 +55,11 @@ oembedRouter.get("/api/oembed", async (req, res) => {
 
       const title = `${song.title} \u2014 ${artistName}`;
       const genrePart = (song as any).genre ? ` \u00b7 ${(song as any).genre}` : "";
-      const description = `\uD83C\uDFB5 ${song.title} by ${artistName}${genrePart} \u00b7 WID: ${wid} \u2014 Listen on Living Nexus`;
+      const description = `\uD83C\uDFB5 ${song.title} by ${artistName}${genrePart} \u00b7 WID: ${canonicalWid} \u2014 Listen on Living Nexus`;
 
-      const coverArt = (song as any).coverArtUrl?.trim();
-      const thumbnailUrl = coverArt && coverArt.length > 0 ? coverArt : FALLBACK_IMAGE;
+      const thumbnailUrl = `${CANONICAL_ORIGIN}/api/og/image/song/${song.id}`;
       const embedIframeUrl = `${CANONICAL_ORIGIN}/embed/song/${song.id}`;
-      const songUrl = `${CANONICAL_ORIGIN}/song/${song.id}`;
-      const shareUrl = `${CANONICAL_ORIGIN}/share/${encodeURIComponent(wid)}`;
+      const shareUrl = `${CANONICAL_ORIGIN}/share/${encodeURIComponent(canonicalWid)}`;
 
       const response = {
         version: "1.0",
@@ -121,8 +119,7 @@ oembedRouter.get("/api/oembed", async (req, res) => {
       const widPart = (song as any).witnessId ? ` · WID: ${(song as any).witnessId}` : "";
       const description = `🎵 ${song.title} by ${artistName}${genrePart}${widPart} — Listen on Living Nexus`;
 
-      const coverArt = (song as any).coverArtUrl?.trim();
-      const thumbnailUrl = coverArt && coverArt.length > 0 ? coverArt : FALLBACK_IMAGE;
+      const thumbnailUrl = `${CANONICAL_ORIGIN}/api/og/image/song/${songId}`;
 
       const embedVideoUrl = (song as any).embedVideoUrl?.trim() || null;
       const audioUrl = (song as any).fileUrl?.trim() || null;
