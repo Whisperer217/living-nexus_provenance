@@ -494,7 +494,7 @@ export default function CreatorProfilePage() {
     onError: (e) => toast.error(e.message),
   });
   const connectMutation = trpc.tips.connectOnboarding.useMutation({
-    onSuccess: (d: { url: string }) => { window.open(d.url, "_blank"); },
+    onSuccess: (d: { url: string }) => { window.location.href = d.url; },
     onError: (e: { message: string }) => toast.error(e.message),
   });
   const deleteMutation = trpc.songs.delete.useMutation({
@@ -1407,14 +1407,14 @@ export default function CreatorProfilePage() {
                           Edit Profile
                         </button>
                       </Link>
-                      {!creator.stripeAccountId && (
+                      {creator.stripeAccountStatus !== "enabled" && (
                         <button
                           onClick={() => connectMutation.mutate({ returnUrl: window.location.href })}
                           disabled={connectMutation.isPending}
                           className="px-4 py-2 rounded-lg text-xs transition-colors"
-                          style={{ border: "1px solid rgba(74,222,128,0.28)", color: "var(--ln-seal-bright)", background: "rgba(74,222,128,0.08)" }}
+                          style={{ border: "1px solid var(--ln-gold)", color: "#000", background: "var(--ln-gold)", fontWeight: 700 }}
                         >
-                          <DollarSign className="w-3 h-3 inline mr-1" />Enable Gifts
+                          <DollarSign className="w-3 h-3 inline mr-1" />{creator.stripeAccountId ? "Finish payout setup" : "Enable Gifts · Connect Stripe"}
                         </button>
                       )}
                     </>
@@ -1736,14 +1736,14 @@ export default function CreatorProfilePage() {
                         Edit Profile
                       </button>
                     </Link>
-                    {!creator.stripeAccountId && (
+                    {creator.stripeAccountStatus !== "enabled" && (
                       <button
                         onClick={() => connectMutation.mutate({ returnUrl: window.location.href })}
                         disabled={connectMutation.isPending}
                         className="px-4 py-2 rounded-lg text-xs transition-colors"
                         style={{ border: "1px solid rgba(74,222,128,0.28)", color: "var(--ln-seal-bright)", background: "rgba(74,222,128,0.08)" }}
                       >
-                        <DollarSign className="w-3 h-3 inline mr-1" />Enable Gifts
+                        <DollarSign className="w-3 h-3 inline mr-1" />{creator.stripeAccountId ? "Finish payout setup" : "Enable Gifts · Connect Stripe"}
                       </button>
                     )}
                   </>

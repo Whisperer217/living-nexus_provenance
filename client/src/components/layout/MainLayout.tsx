@@ -30,6 +30,7 @@ import WitnessSurfacePlayer from "@/components/player/WitnessSurfacePlayer";
 import TheaterPlayer from "@/components/player/TheaterPlayer";
 import ScrollToTopButton from "@/components/layout/ScrollToTopButton";
 import SiteFooter from "@/components/layout/SiteFooter";
+import PayoutSetupNudge from "@/components/layout/PayoutSetupNudge";
 import TopBar from "@/components/layout/TopBar";
 import LivingNexusLauncher from "@/components/layout/LivingNexusLauncher";
 import { WitnessingCirclePanel } from "@/components/layout/WitnessingCirclePanel";
@@ -319,6 +320,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
             className={`min-h-0 flex-1 overflow-y-auto overflow-x-hidden player-scroll-area ${rightRailOpen && !isCreatorFocus ? "lg:pr-[300px]" : ""}`}
             style={{ overscrollBehaviorX: "none", overscrollBehaviorY: "none", touchAction: "pan-y" }}
           >
+            <PayoutSetupNudge user={user as any} worksCount={archiveSongCount} />
             {children}
             {!isManifestWorkspace && <SiteFooter />}
           </div>

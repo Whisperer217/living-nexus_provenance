@@ -372,7 +372,7 @@ export default function DashboardPage() {
         </Dialog>
 
         {/* Stripe Setup Banner — shown when gifts account is pending or not connected */}
-        {(connectData?.status === "pending" || connectData?.status === "not_connected") && (
+        {(connectData?.status === "pending" || connectData?.status === "restricted" || connectData?.status === "not_connected") && (
           <div
             className="w-full rounded-xl mb-6 overflow-hidden"
             style={{ border: "1px solid #C49A28" }}
@@ -385,7 +385,7 @@ export default function DashboardPage() {
               <div className="flex items-center gap-3 min-w-0">
                 <AlertCircle className="w-5 h-5 flex-shrink-0" style={{ color: "var(--ln-coal)" }} />
                 <span className="text-sm font-semibold leading-snug" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>
-                  {connectData?.status === "pending"
+                  {connectData?.status === "pending" || connectData?.status === "restricted"
                     ? "Your gift account is incomplete. Finish setup to receive gifts."
                     : "Enable gifts to start receiving direct payments from fans."}
                 </span>
@@ -397,11 +397,11 @@ export default function DashboardPage() {
                 className="flex-shrink-0 font-bold text-sm"
                 style={{ background: "#000000", color: "var(--ln-gold)", border: "none" }}
               >
-                {connectMutation.isPending ? "Loading..." : connectData?.status === "pending" ? "Complete Setup" : "Enable Gifts"}
+                {connectMutation.isPending ? "Loading..." : connectData?.status === "pending" || connectData?.status === "restricted" ? "Complete Setup" : "Enable Gifts"}
               </Button>
             </div>
             {/* Bottom row: plain-English requirements when pending */}
-            {connectData?.status === "pending" && connectData?.requirementsLabels && connectData.requirementsLabels.length > 0 && (
+            {(connectData?.status === "pending" || connectData?.status === "restricted") && connectData?.requirementsLabels && connectData.requirementsLabels.length > 0 && (
               <div className="px-4 py-3" style={{ background: "var(--ln-coal)" }}>
                 <p className="text-xs font-semibold mb-2" style={{ color: "var(--lnx-orange)" }}>Still needed to activate your account:</p>
                 <div className="flex flex-wrap gap-2">
