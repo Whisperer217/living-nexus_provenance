@@ -3,7 +3,8 @@
  *
  * Creator payment provider settings.
  * Allows creators to enable/configure any supported payment provider:
- * Stripe, Bitcoin, Lightning (Strike/LNURL), USDC.
+ * Bitcoin, Lightning (Strike/LNURL), and USDC. Stripe Connect onboarding
+ * is intentionally owned by /settings/payouts.
  *
  * Route: /settings/payment-methods
  */
@@ -11,7 +12,7 @@
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { useLocation } from "wouter";
+import { Link, useLocation } from "wouter";
 import { toast } from "sonner";
 import {
   CreditCard, Bitcoin, Zap, Coins,
@@ -36,7 +37,7 @@ const SURFACE = "rgba(255,255,255,0.03)";
 const BORDER  = "rgba(255,255,255,0.08)";
 
 // ─── Provider definitions ─────────────────────────────────────────────────────
-type ProviderId = "stripe" | "bitcoin" | "lightning" | "usdc";
+type ProviderId = "bitcoin" | "lightning" | "usdc";
 
 interface ProviderDef {
   id: ProviderId;
@@ -59,24 +60,6 @@ interface FieldDef {
 }
 
 const PROVIDERS: ProviderDef[] = [
-  {
-    id: "stripe",
-    name: "Stripe",
-    tagline: "Card payments, Apple Pay, Google Pay — the fastest way to accept fiat.",
-    icon: <CreditCard size={22} />,
-    phase: "live",
-    type: "fiat",
-    learnMoreUrl: "https://stripe.com/connect",
-    fields: [
-      {
-        key: "accountId",
-        label: "Stripe Connected Account ID",
-        placeholder: "acct_1234567890",
-        hint: "Your Stripe Connect account ID. Found in your Stripe Dashboard → Settings → Account.",
-        required: true,
-      },
-    ],
-  },
   {
     id: "bitcoin",
     name: "Bitcoin",
@@ -419,6 +402,13 @@ export default function PaymentMethodsPage() {
           >
             <ArrowLeft size={16} /> Settings
           </button>
+          <Link
+            href="/settings/payouts"
+            className="ml-auto rounded-lg px-3 py-2 text-xs font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+            style={{ color: GOLD, border: `1px solid rgba(196,154,40,0.3)` }}
+          >
+            Creator Payouts
+          </Link>
           <Separator orientation="vertical" style={{ height: "16px", background: BORDER }} />
           <Settings2 size={18} color={GOLD} />
           <div>
@@ -457,6 +447,22 @@ export default function PaymentMethodsPage() {
           </div>
 
           {/* Provider cards */}
+          <Link
+            href="/settings/payouts"
+            className="mb-3 flex items-center justify-between gap-4 rounded-xl p-5 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+            style={{ background: "rgba(96,165,250,0.08)", border: "1px solid rgba(96,165,250,0.28)", color: "#F9FAFB" }}
+          >
+            <span className="flex items-center gap-3 min-w-0">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg" style={{ background: "rgba(96,165,250,0.14)", color: "#60A5FA" }}>
+                <CreditCard size={20} aria-hidden="true" />
+              </span>
+              <span>
+                <span className="block text-sm font-semibold">Stripe Connect payouts</span>
+                <span className="mt-1 block text-xs leading-relaxed" style={{ color: SMOKE }}>Connect or continue Stripe onboarding through one secure payout center.</span>
+              </span>
+            </span>
+            <ExternalLink className="shrink-0" size={17} style={{ color: "#60A5FA" }} aria-hidden="true" />
+          </Link>
           <div style={{ display: "grid", gap: "12px" }}>
             {PROVIDERS.map(def => {
               const saved = settings.find(s => s.providerId === def.id);

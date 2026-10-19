@@ -106,18 +106,18 @@ describe("jukebox success URL parameters", () => {
 // ── Connect Onboarding Tests ───────────────────────────────────────────────
 
 describe("Stripe Connect onboarding returnUrl", () => {
-  it("uses origin + /dashboard as returnUrl (not full href with query params)", () => {
+  it("uses origin + /settings/payouts as the canonical returnUrl", () => {
     // Simulate window.location.origin
     const origin = "https://livingnexus.org";
-    const returnUrl = `${origin}/dashboard`;
-    expect(returnUrl).toBe("https://livingnexus.org/dashboard");
+    const returnUrl = `${origin}/settings/payouts`;
+    expect(returnUrl).toBe("https://livingnexus.org/settings/payouts");
     expect(returnUrl).not.toContain("?");
   });
 
-  it("uses origin + /profile as returnUrl for profile page", () => {
+  it("does not use a profile-local callback for hosted onboarding", () => {
     const origin = "https://livingnexus.org";
-    const returnUrl = `${origin}/profile`;
-    expect(returnUrl).toBe("https://livingnexus.org/profile");
+    const returnUrl = `${origin}/settings/payouts`;
+    expect(returnUrl).not.toBe("https://livingnexus.org/profile");
     expect(returnUrl).not.toContain("?");
   });
 });

@@ -53,7 +53,6 @@ interface GuideFormData {
   lockCanonicalIdentity: boolean;
   allowGuideAppearances: boolean;
   revenueCreatorPct: number;
-  stripeConnected: boolean;
 }
 
 const DEFAULT_FORM: GuideFormData = {
@@ -82,7 +81,6 @@ const DEFAULT_FORM: GuideFormData = {
   lockCanonicalIdentity: true,
   allowGuideAppearances: true,
   revenueCreatorPct: 90,
-  stripeConnected: false,
 };
 
 // ─── Step Definitions ─────────────────────────────────────────────────────────
@@ -682,51 +680,39 @@ function Step4Rights({ form, setForm, guideId, onNext, onBack }: { form: GuideFo
 }
 
 // ─── Step 5: Connect Creator ──────────────────────────────────────────────────
-function Step5Connect({ form, setForm, user, onNext, onBack }: { form: GuideFormData; setForm: (f: GuideFormData) => void; user: { stripeAccountId?: string | null; stripeAccountStatus?: string | null }; onNext: () => void; onBack: () => void }) {
-  const [connecting, setConnecting] = useState(false);
-  const isConnected = !!(user?.stripeAccountId) || form.stripeConnected;
-
-  const handleConnect = async () => {
-    setConnecting(true);
-    // Stripe Connect onboarding — marks connected for now
-    setTimeout(() => {
-      setForm({ ...form, stripeConnected: true });
-      toast.success("Stripe account connected");
-      setConnecting(false);
-    }, 1200);
-  };
+function Step5Connect({ user, onNext, onBack }: { user: { stripeAccountId?: string | null; stripeAccountStatus?: string | null }; onNext: () => void; onBack: () => void }) {
+  const isPayoutsReady = user?.stripeAccountStatus === "enabled";
+  const hasStartedPayoutSetup = !!user?.stripeAccountId;
 
   return (
     <div>
-      <StepHeader num={5} title="Connect Creator" sub="Connect your Stripe account to receive revenue from guide usage and derivatives." />
-      {isConnected ? (
+      <StepHeader num={5} title="Creator Payouts" sub="Optionally connect Stripe through Creator Payouts. This does not change your guide record or its provenance." />
+      {isPayoutsReady ? (
         <div className="rounded-xl p-6 text-center space-y-3" style={{ background: "rgba(74,222,128,0.06)", border: "1px solid rgba(74,222,128,0.25)" }}>
           <Check size={32} className="mx-auto text-green-400" />
-          <p className="text-base font-semibold text-green-400">Stripe Connected</p>
-          <p className="text-sm" style={{ color: ATM.textDim }}>You're ready to receive revenue from your Personal Nexus Avatar.</p>
+          <p className="text-base font-semibold text-green-400">Payouts ready</p>
+          <p className="text-sm" style={{ color: ATM.textDim }}>Stripe reports this creator account can receive eligible support. This does not change the guide's ownership or provenance.</p>
         </div>
       ) : (
         <div className="space-y-6">
           <div className="rounded-xl p-6" style={{ background: "rgba(201,168,76,0.04)", border: "1px solid rgba(201,168,76,0.15)" }}>
             <Zap size={28} className="mb-3" style={{ color: ATM.gold }} />
-            <p className="text-sm font-medium mb-2" style={{ color: ATM.text }}>Connect Stripe for Payouts</p>
-            <p className="text-xs leading-relaxed" style={{ color: ATM.textDim }}>Connect your Stripe account to receive your share of revenue when creators use your Personal Nexus Avatar in their projects, derivatives, and appearances.</p>
+            <p className="text-sm font-medium mb-2" style={{ color: ATM.text }}>{hasStartedPayoutSetup ? "Stripe setup needs attention" : "Connect Stripe for Payouts"}</p>
+            <p className="text-xs leading-relaxed" style={{ color: ATM.textDim }}>Creator Payouts is the single secure place to begin or continue Stripe's hosted setup. Living Nexus does not collect bank or identity details here.</p>
           </div>
-          <Button className="w-full py-3 text-base font-bold" style={{ background: ATM.gold, color: "#000" }} onClick={handleConnect} disabled={connecting}>
-            {connecting ? <span className="flex items-center gap-2"><Loader2 size={16} className="animate-spin" /> Connecting…</span> : "Connect Stripe Account"}
+          <Button className="w-full py-3 text-base font-bold" style={{ background: ATM.gold, color: "#000" }} onClick={() => window.location.assign("/settings/payouts")}>
+            {hasStartedPayoutSetup ? "Open Creator Payouts" : "Connect Stripe in Creator Payouts"}
           </Button>
-          <button onClick={() => { setForm({ ...form, stripeConnected: false }); onNext(); }} className="w-full text-center text-xs underline" style={{ color: ATM.textFaint }}>
-            Skip for now — connect later
+          <button onClick={onNext} className="w-full text-center text-xs underline" style={{ color: ATM.textFaint }}>
+            Continue without payouts — connect later
           </button>
         </div>
       )}
       <div className="flex gap-3 mt-8">
         <Button variant="outline" className="flex-1" onClick={onBack}>← Back</Button>
-        {isConnected && (
-          <Button className="flex-1 py-3 font-bold" style={{ background: ATM.gold, color: "#000" }} onClick={onNext}>
-            Continue to Publish →
-          </Button>
-        )}
+        <Button className="flex-1 py-3 font-bold" style={{ background: ATM.gold, color: "#000" }} onClick={onNext}>
+          Continue to Publish →
+        </Button>
       </div>
     </div>
   );
@@ -945,7 +931,7 @@ export default function GuideUploadWizard() {
       case 2: return <Step2Extract form={form} setForm={setForm} guideId={guideId!} onNext={() => setStep(3)} onBack={() => setStep(1)} />;
       case 3: return <Step3Review form={form} setForm={setForm} guideId={guideId!} onNext={() => setStep(4)} onBack={() => setStep(2)} />;
       case 4: return <Step4Rights form={form} setForm={setForm} guideId={guideId!} onNext={() => setStep(5)} onBack={() => setStep(3)} />;
-      case 5: return <Step5Connect form={form} setForm={setForm} user={user as { stripeAccountId?: string | null; stripeAccountStatus?: string | null }} onNext={() => setStep(6)} onBack={() => setStep(4)} />;
+      case 5: return <Step5Connect user={user as { stripeAccountId?: string | null; stripeAccountStatus?: string | null }} onNext={() => setStep(6)} onBack={() => setStep(4)} />;
       case 6: return <Step6Publish form={form} guideId={guideId!} onBack={() => setStep(5)} />;
       default: return null;
     }

@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-10-18",
-  "totalLessons": 62,
+  "lastUpdated": "2026-10-19T05:45:31.729Z",
+  "totalLessons": 63,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -1475,6 +1475,36 @@
         "mobile",
         "registry-attribution"
       ]
+    },
+    {
+      "date": "2026-10-19",
+      "category": "security",
+      "problem": "Stripe Connect entry points were scattered across Profile, Dashboard, Creator Domain, payment settings, and guide-upload surfaces. Several launched hosted onboarding directly, and the onboarding callback origin was not constrained to the platform's canonical payout route.",
+      "solution": "Created one Creator Payouts center at /settings/payouts. All existing creator prompts now route there; only that page owns the browser-side onboarding mutation. The server accepts an origin only when it exactly matches the configured production or trusted preview origin, and both Stripe refresh and return URLs resolve to the server-owned payout route. Ready accounts render a confirmed, non-relaunching state.",
+      "files": [
+        "client/src/pages/PayoutsPage.tsx",
+        "client/src/pages/loop/LoopCreatorPage.tsx",
+        "client/src/components/layout/ContextDrawer.tsx",
+        "client/src/pages/ProfilePage.tsx",
+        "client/src/pages/DashboardPage.tsx",
+        "client/src/pages/GuideUploadWizard.tsx",
+        "client/src/pages/PaymentMethodsPage.tsx",
+        "server/routers/tips.ts",
+        "server/utils/stripeConnect.ts",
+        "server/tests/creatorPayouts.contract.test.ts",
+        "docs/lnls/architecture/CANONICAL-CREATOR-PAYOUTS-ADR.md"
+      ],
+      "score": 0,
+      "tags": [
+        "stripe-connect",
+        "creator-payouts",
+        "canonical-route",
+        "callback-allowlist",
+        "creator-domain",
+        "support",
+        "security"
+      ],
+      "id": "LESSON-063"
     }
   ]
 }

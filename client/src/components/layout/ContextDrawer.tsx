@@ -23,7 +23,7 @@ import {
   LayoutGrid, LayoutDashboard, X, ExternalLink,
   Download, PenTool, Palette,
   ScrollText, Scale, Heart, Library,
-  Layers, Plus, GitBranch,
+  Layers, Plus, GitBranch, DollarSign,
 } from "lucide-react";
 import { PLATFORM_VERSION } from "@/platformVersion";
 
@@ -162,6 +162,7 @@ const PANELS: Record<NavMode, ModePanel> = {
       {
         heading: "Account",
         links: [
+          { icon: <DollarSign size={14} />, label: "Creator Payouts", path: "/settings/payouts", description: "Connect Stripe and receive gifts", authOnly: true, gold: true },
           { icon: <Shield size={14} />, label: "Billing", path: "/settings/billing", authOnly: true },
           { icon: <LogOut size={14} />, label: "Log Out", path: "__logout__", authOnly: true, danger: true },
         ],

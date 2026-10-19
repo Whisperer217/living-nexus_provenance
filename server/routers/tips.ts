@@ -169,6 +169,11 @@ import {
   CANONICAL_TIP_DOWNLOAD_ORIGIN,
   tipDownloadCheckoutInput,
 } from "../services/tipDownloadCheckout";
+import {
+  buildCreatorBusinessProfileUrl,
+  resolvePayoutCallbackUrl,
+  resolveTrustedPayoutOrigin,
+} from "../utils/stripeConnect";
 
 const stripe = process.env.STRIPE_SECRET_KEY
   ? new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: "2024-06-20" as any })
@@ -190,16 +195,18 @@ const KEEPER_PRESETS = [
 
 export const tipsRouter = router({
     list: publicProcedure.input(z.object({ songId: z.number() })).query(async ({ input }) => getTipsBySong(input.songId)),
-    connectOnboarding: protectedProcedure.input(z.object({ returnUrl: z.string().url() })).mutation(async ({ ctx, input }) => {
+    connectOnboarding: protectedProcedure.input(z.object({ origin: z.string().max(255).optional() })).mutation(async ({ ctx, input }) => {
       const user = await getUserById(ctx.user.id);
       if (!user) throw new Error("User not found");
+      const payoutOrigin = resolveTrustedPayoutOrigin(input.origin);
+      const payoutCallbackUrl = resolvePayoutCallbackUrl(input.origin);
       let accountId = user.stripeAccountId;
       if (!accountId) {
-        // Build the creator's public profile URL for Stripe business_profile.url
-        const origin = input.returnUrl.replace(/\/dashboard.*$/, "");
-        const profileUrl = (user.website && user.website.startsWith("http"))
-          ? user.website
-          : `${origin}/creator/${ctx.user.id}`;
+        const profileUrl = buildCreatorBusinessProfileUrl(
+          payoutOrigin,
+          user.artistHandle,
+          ctx.user.id,
+        );
         const account = await stripe.accounts.create({
           controller: {
             stripe_dashboard: { type: "full" },
@@ -221,7 +228,12 @@ export const tipsRouter = router({
         accountId = account.id;
         await updateUserStripeAccount(ctx.user.id, { stripeAccountId: accountId, stripeAccountStatus: "pending" });
       }
-      const accountLink = await stripe.accountLinks.create({ account: accountId, refresh_url: input.returnUrl, return_url: input.returnUrl, type: "account_onboarding" });
+      const accountLink = await stripe.accountLinks.create({
+        account: accountId,
+        refresh_url: payoutCallbackUrl,
+        return_url: payoutCallbackUrl,
+        type: "account_onboarding",
+      });
       return { url: accountLink.url };
     }),
     connectStatus: protectedProcedure.query(async ({ ctx }) => {
@@ -368,4 +380,3 @@ export const tipsRouter = router({
       return { url: session.url };
     }),
   });
-

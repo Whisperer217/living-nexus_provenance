@@ -12,6 +12,7 @@ import {
   Loader2,
   Play,
   QrCode,
+  WalletCards,
   Settings,
   Share2,
 } from "lucide-react";
@@ -441,6 +442,18 @@ export default function LoopCreatorPage() {
                 >
                   <Settings size={14} /> Manage
                 </button>
+                <Link href="/settings/payouts">
+                  <span
+                    className="inline-flex items-center gap-2 px-4 py-3 rounded-full text-sm"
+                    style={{
+                      border: "1px solid rgba(196,154,40,0.3)",
+                      color: "var(--ln-gold)",
+                      background: "rgba(196,154,40,0.08)",
+                    }}
+                  >
+                    <WalletCards size={14} /> Creator payouts
+                  </span>
+                </Link>
               </>
             )}
           </div>

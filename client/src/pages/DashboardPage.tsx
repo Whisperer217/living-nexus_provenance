@@ -177,13 +177,6 @@ export default function DashboardPage() {
     onSuccess: (data: { url: string | null }) => { if (data.url) window.open(data.url, "_blank"); toast.info("Redirecting to checkout..."); },
     onError: (e: { message: string }) => toast.error(e.message),
   });
-  const connectMutation = trpc.tips.connectOnboarding.useMutation({
-    onSuccess: (data: { url: string }) => {
-      // Same-window redirect so Stripe Connect return_url works on mobile
-      window.location.href = data.url;
-    },
-    onError: (e: { message: string }) => toast.error(e.message),
-  });
 
   if (!isAuthenticated) return (
     <div className="min-h-screen flex items-center justify-center" style={{ background: "#000000" }}>
@@ -362,11 +355,10 @@ export default function DashboardPage() {
             </p>
             <Button
               className="w-full font-bold"
-              onClick={() => { setShowChecklist(false); connectMutation.mutate({ returnUrl: `${window.location.origin}/dashboard` }); }}
-              disabled={connectMutation.isPending}
+              onClick={() => { setShowChecklist(false); window.location.assign("/settings/payouts"); }}
               style={{ background: "var(--ln-gold)", color: "var(--ln-parchment)" }}
             >
-              {connectMutation.isPending ? "Opening Stripe..." : "I'm Ready — Start Setup"}
+              Open Creator Payouts
             </Button>
           </DialogContent>
         </Dialog>
@@ -392,12 +384,11 @@ export default function DashboardPage() {
               </div>
               <Button
                 size="sm"
-                onClick={() => connectData?.status === "not_connected" ? setShowChecklist(true) : connectMutation.mutate({ returnUrl: `${window.location.origin}/dashboard` })}
-                disabled={connectMutation.isPending}
+                onClick={() => window.location.assign("/settings/payouts")}
                 className="flex-shrink-0 font-bold text-sm"
                 style={{ background: "#000000", color: "var(--ln-gold)", border: "none" }}
               >
-                {connectMutation.isPending ? "Loading..." : connectData?.status === "pending" ? "Complete Setup" : "Enable Gifts"}
+                {connectData?.status === "pending" ? "Complete setup" : "Enable gifts"}
               </Button>
             </div>
             {/* Bottom row: plain-English requirements when pending */}
@@ -539,11 +530,10 @@ export default function DashboardPage() {
                 )}
                 <Button
                   size="sm" className="w-full" variant="outline"
-                  onClick={() => connectData?.status === "not_connected" ? setShowChecklist(true) : connectMutation.mutate({ returnUrl: `${window.location.origin}/dashboard` })}
-                  disabled={connectMutation.isPending}
+                  onClick={() => window.location.assign("/settings/payouts")}
                   style={{ borderColor: "rgba(58,138,86,0.4)", color: "var(--lnx-green)" }}
                 >
-                  {connectMutation.isPending ? "Loading..." : connectData?.status === "pending" ? "Continue Setup" : "Enable Gifts"}
+                  {connectData?.status === "pending" ? "Continue setup" : "Enable gifts"}
                 </Button>
               </>
             )}

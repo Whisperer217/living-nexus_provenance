@@ -307,17 +307,9 @@ export default function ProfilePage() {
   const { data: connectData, refetch: refetchConnect } = trpc.tips.connectStatus.useQuery(
     undefined, { enabled: !!user }
   );
-  const connectMutation = trpc.tips.connectOnboarding.useMutation({
-    onSuccess: (data) => {
-      // Same-window redirect so Stripe Connect return_url works on mobile
-      if (data.url) window.location.href = data.url;
-    },
-    onError: (err) => toast.error(err.message),
-  });
   const stripePayoutsReady = connectData?.status === "enabled";
   const stripeNeedsSetup = connectData?.status === "pending" || connectData?.status === "restricted";
   const stripeShortcutLabel = stripeNeedsSetup ? "Finish payout setup" : "Get paid · Connect Stripe";
-  const openStripeConnect = () => connectMutation.mutate({ returnUrl: `${window.location.origin}/profile` });
 
   // ── Mutations ────────────────────────────────────────────────────
   const updateProfile = trpc.profile.update.useMutation({
@@ -816,29 +808,17 @@ export default function ProfilePage() {
                     My Domain
                   </button>
                 </Link>
-                {stripePayoutsReady ? (
+                <Link href="/settings/payouts">
                   <span
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold"
-                    style={{ background: "rgba(196,154,40,0.08)", border: "1px solid rgba(196,154,40,0.22)", color: "var(--ln-gold)" }}
-                    title="Stripe payouts are connected"
-                  >
-                    <CheckCircle size={13} aria-hidden="true" />
-                    Payouts ready
-                  </span>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={openStripeConnect}
-                    disabled={connectMutation.isPending}
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all hover:opacity-90 disabled:opacity-50"
-                    style={{ background: "var(--ln-gold)", border: "1px solid var(--ln-gold)", color: "var(--ln-coal)" }}
-                    title="Open Stripe Connect setup"
-                    aria-label={stripeShortcutLabel}
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all hover:opacity-90"
+                    style={{ background: stripePayoutsReady ? "rgba(196,154,40,0.08)" : "var(--ln-gold)", border: "1px solid var(--ln-gold)", color: stripePayoutsReady ? "var(--ln-gold)" : "var(--ln-coal)" }}
+                    title="Open Creator Payouts"
+                    aria-label={stripePayoutsReady ? "Payouts ready — open Creator Payouts" : stripeShortcutLabel}
                   >
                     <DollarSign size={13} aria-hidden="true" />
-                    {connectMutation.isPending ? "Opening Stripe…" : stripeShortcutLabel}
-                  </button>
-                )}
+                    {stripePayoutsReady ? "Payouts ready" : stripeShortcutLabel}
+                  </span>
+                </Link>
                 <button
                   onClick={copyProfileLink}
                   className="w-9 h-9 rounded-lg flex items-center justify-center transition-colors"
@@ -1091,14 +1071,14 @@ export default function ProfilePage() {
                 ) : stripeNeedsSetup ? (
                   <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: "rgba(170,142,100,0.12)", color: "var(--ln-smoke)", border: "1px solid rgba(170,142,100,0.3)" }}>Pending</span>
                 ) : (
-                  <button
-                    onClick={openStripeConnect}
-                    disabled={connectMutation.isPending}
-                    className="text-[11px] px-3 py-1 rounded-lg font-body text-black disabled:opacity-50"
-                    style={{ background: "var(--ln-iron)" }}
-                  >
-                    {connectMutation.isPending ? "Opening Stripe…" : stripeShortcutLabel}
-                  </button>
+                  <Link href="/settings/payouts">
+                    <span
+                      className="inline-flex text-[11px] px-3 py-1 rounded-lg font-body"
+                      style={{ background: "var(--ln-gold)", color: "var(--ln-coal)" }}
+                    >
+                      {stripeShortcutLabel}
+                    </span>
+                  </Link>
                 )}
               </div>
               <p className="text-[11px] font-body text-white/50 mt-2">

@@ -8,17 +8,17 @@ const profilePageSource = readFileSync(
 );
 
 describe("Profile Stripe shortcut contract", () => {
-  it("keeps the existing protected Stripe status and onboarding procedures as the sole flow", () => {
+  it("keeps the existing protected Stripe status visible while routing setup to canonical payouts", () => {
     expect(profilePageSource).toContain("trpc.tips.connectStatus.useQuery");
-    expect(profilePageSource).toContain("trpc.tips.connectOnboarding.useMutation");
-    expect(profilePageSource).toContain("returnUrl: `${window.location.origin}/profile`");
+    expect(profilePageSource).toContain('href="/settings/payouts"');
+    expect(profilePageSource).not.toContain("trpc.tips.connectOnboarding.useMutation");
   });
 
   it("surfaces status-aware owner actions in the profile header", () => {
     expect(profilePageSource).toContain("Get paid · Connect Stripe");
     expect(profilePageSource).toContain("Finish payout setup");
     expect(profilePageSource).toContain("Payouts ready");
-    expect(profilePageSource).toContain("Open Stripe Connect setup");
+    expect(profilePageSource).toContain("Open Creator Payouts");
   });
 
   it("stacks the owner action cluster into a full-width mobile row", () => {

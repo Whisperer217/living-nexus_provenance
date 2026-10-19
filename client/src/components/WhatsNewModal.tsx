@@ -560,7 +560,7 @@ const UPDATES = [
       { icon: CreditCard, text: "Live Payments — Creator License ($88.88) and Fan Gifts are now powered by real Stripe payments. Your money goes directly to creators." },
       { icon: DollarSign, text: "Fan Gifts — gift any creator directly from their song page. Choose $1, $2, $5, $10, $25, or a custom amount. Creators keep 90%." },
       { icon: Download, text: "Gift-to-Download — creators can gate downloads behind a minimum tip. Pay once, download unlocks instantly." },
-      { icon: Zap, text: "Stripe Connect for Creators — go to Dashboard → Enable Gifts to connect your Stripe account and start receiving gifts directly to your bank." },
+      { icon: Zap, text: "Stripe Connect for Creators — open Creator Payouts in Settings to connect or continue onboarding and receive gifts." },
     ],
   },
   {

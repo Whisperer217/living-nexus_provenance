@@ -35,7 +35,7 @@ import {
   Layers, ChevronRight, AtSign, Star, Clock, Zap,
   Image, Video, Code2, FlaskConical, Gavel, Fingerprint,
   GitBranch, Archive, Users, Heart, Play, Download,
-  PenLine, Sparkles, Lock, Unlock, ArrowUpRight,
+  PenLine, Sparkles, Lock, Unlock, ArrowUpRight, WalletCards,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -595,6 +595,7 @@ export default function CreatorDomainShell() {
                       { label: "Domain Layout", description: "Customize your public domain", href: "/domain", icon: LayoutGrid },
                       { label: "Billing & Subscription", description: "Living Archive plan", href: "/settings/billing", icon: Star },
                       { label: "Playback Settings", description: "Audio quality, autoplay", href: "/settings/playback", icon: Play },
+                      { label: "Creator Payouts", description: "Connect Stripe to receive gifts", href: "/settings/payouts", icon: WalletCards },
                       { label: "Payment Methods", description: "Manage payment info", href: "/settings/payment-methods", icon: Zap },
                       { label: "Distribution", description: "DSP distribution settings", href: "/distribute", icon: Globe },
                     ].map(item => {

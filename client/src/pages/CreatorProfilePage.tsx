@@ -493,10 +493,6 @@ export default function CreatorProfilePage() {
     },
     onError: (e) => toast.error(e.message),
   });
-  const connectMutation = trpc.tips.connectOnboarding.useMutation({
-    onSuccess: (d: { url: string }) => { window.open(d.url, "_blank"); },
-    onError: (e: { message: string }) => toast.error(e.message),
-  });
   const deleteMutation = trpc.songs.delete.useMutation({
     onSuccess: () => { toast.success("Song deleted"); refetch(); },
     onError: (e) => toast.error(e.message),
@@ -1407,16 +1403,14 @@ export default function CreatorProfilePage() {
                           Edit Profile
                         </button>
                       </Link>
-                      {!creator.stripeAccountId && (
-                        <button
-                          onClick={() => connectMutation.mutate({ returnUrl: window.location.href })}
-                          disabled={connectMutation.isPending}
-                          className="px-4 py-2 rounded-lg text-xs transition-colors"
+                      <Link href="/settings/payouts">
+                        <span
+                          className="inline-block px-4 py-2 rounded-lg text-xs transition-colors"
                           style={{ border: "1px solid rgba(74,222,128,0.28)", color: "var(--ln-seal-bright)", background: "rgba(74,222,128,0.08)" }}
                         >
-                          <DollarSign className="w-3 h-3 inline mr-1" />Enable Gifts
-                        </button>
-                      )}
+                          <DollarSign className="w-3 h-3 inline mr-1" />Creator Payouts
+                        </span>
+                      </Link>
                     </>
                   ) : tipsEnabled ? (
                     <button
@@ -1736,16 +1730,14 @@ export default function CreatorProfilePage() {
                         Edit Profile
                       </button>
                     </Link>
-                    {!creator.stripeAccountId && (
-                      <button
-                        onClick={() => connectMutation.mutate({ returnUrl: window.location.href })}
-                        disabled={connectMutation.isPending}
-                        className="px-4 py-2 rounded-lg text-xs transition-colors"
+                    <Link href="/settings/payouts">
+                      <span
+                        className="inline-block px-4 py-2 rounded-lg text-xs transition-colors"
                         style={{ border: "1px solid rgba(74,222,128,0.28)", color: "var(--ln-seal-bright)", background: "rgba(74,222,128,0.08)" }}
                       >
-                        <DollarSign className="w-3 h-3 inline mr-1" />Enable Gifts
-                      </button>
-                    )}
+                        <DollarSign className="w-3 h-3 inline mr-1" />Creator Payouts
+                      </span>
+                    </Link>
                   </>
                 ) : tipsEnabled ? (
                   <button
