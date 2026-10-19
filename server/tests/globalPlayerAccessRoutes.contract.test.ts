@@ -27,14 +27,27 @@ describe("global player normal-zoom access and action-route contract", () => {
     expect(topBar).not.toContain("const [repeat, setRepeat]");
   });
 
-  it("opens the existing queue and retains direct song, creator, download, list, and share actions", () => {
+  it("opens the existing Songs list at the bottom of the expanded player and retains direct Work actions", () => {
     const player = source("client/src/components/player/GlobalPlayer.tsx");
+    const queue = source("client/src/components/player/PlayerQueuePanel.tsx");
 
     expect(player).toContain('setZone("EXPANDED")');
     expect(player).toContain("const queueSectionRef = useRef<HTMLDivElement>(null);");
-    expect(player).toContain("queueSectionRef.current?.scrollIntoView");
+    expect(player).toContain("function scrollPlayerSectionIntoView");
+    expect(player).toContain("scrollPlayerSectionIntoView(queueSectionRef)");
+    expect(player).toContain('behavior: reduceMotion ? "auto" : "smooth"');
     expect(player).toContain("<div ref={queueSectionRef} tabIndex={-1}>");
-    expect(player).toContain("View Queue");
+    expect(player).toContain('id="player-action-dock"');
+    expect(player).toContain("const actionMenuDockRef = useRef<HTMLElement>(null);");
+    expect(player).toContain("const [queueListRequest, setQueueListRequest] = useState(0);");
+    expect(player).toContain("openListRequest={queueListRequest}");
+    expect(player).toContain("View Songs");
+    expect(player).toContain("const expandedLayoutActive = zone === \"EXPANDED\"");
+    expect(player).toContain("if (expandedLayoutActive) {");
+    expect(player).toContain("showContextMenu && contextMenuPos && !expandedLayoutActive");
+    expect(queue).toContain("openListRequest?: number;");
+    expect(queue).toContain('if (openListRequest > 0) setMode("list");');
+    expect(queue).toContain('aria-label="Songs in the current queue"');
     expect(player).not.toContain('setShowContextMenu(false); navigate("/archive");');
     expect(player).toContain("Go to Song");
     expect(player).toContain("View Creator");

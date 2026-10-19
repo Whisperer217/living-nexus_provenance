@@ -145,6 +145,7 @@ function GlobalPlayerInner() {
   /* ── Drag state ── */
   const containerRef = useRef<HTMLDivElement>(null);
   const queueSectionRef = useRef<HTMLDivElement>(null);
+  const actionMenuDockRef = useRef<HTMLElement>(null);
   const dragStartY = useRef<number | null>(null);
   const dragStartHeight = useRef<number>(SNAP.MINI);
   const isDragging = useRef(false);
@@ -311,6 +312,7 @@ function GlobalPlayerInner() {
   const [tipOpen, setTipOpen] = useState(false);
   const [addToCollectionOpen, setAddToCollectionOpen] = useState(false);
   const [showContextMenu, setShowContextMenu] = useState(false);
+  const [queueListRequest, setQueueListRequest] = useState(0);
   const [showVolume, setShowVolume] = useState(false);
   const [contextMenuPos, setContextMenuPos] = useState<{ bottom: number; right: number } | null>(null);
   const [volumePopupPos, setVolumePopupPos] = useState<{ bottom: number; right: number } | null>(null);
@@ -615,9 +617,47 @@ function GlobalPlayerInner() {
     setDragHeight(null);
   }
 
-  /* ── Context menu ── */
+  // A drag can visually expand the player before its snap-zone state settles.
+  // Interaction surfaces must follow the visible layout, not the later state.
+  const expandedLayoutActive = zone === "EXPANDED"
+    || (dragHeight !== null && dragHeight > (SNAP.MINI + 200));
+
+  function scrollPlayerSectionIntoView(section: React.RefObject<HTMLElement | null>) {
+    window.setTimeout(() => {
+      section.current?.scrollIntoView({
+        behavior: reduceMotion ? "auto" : "smooth",
+        block: "end",
+      });
+      section.current?.focus({ preventScroll: true });
+    }, 0);
+  }
+
+  function closeContextMenu({ restoreFocus = false } = {}) {
+    setShowContextMenu(false);
+    if (restoreFocus) window.setTimeout(() => contextMenuBtnRef.current?.focus(), 0);
+  }
+
+  function openQueueAtBottom() {
+    closeContextMenu();
+    setDragHeight(null);
+    setZone("EXPANDED");
+    setQueueListRequest(request => request + 1);
+    scrollPlayerSectionIntoView(queueSectionRef);
+  }
+
+  /* ── Context actions ── */
   function openContextMenu() {
-    if (showContextMenu) { setShowContextMenu(false); return; }
+    if (showContextMenu) { closeContextMenu({ restoreFocus: true }); return; }
+
+    // Expanded player actions belong at the bottom of the player's own
+    // scrollable reading order. A viewport portal obscures the Work and the
+    // existing Songs list on constrained screens.
+    if (expandedLayoutActive) {
+      setShowContextMenu(true);
+      scrollPlayerSectionIntoView(actionMenuDockRef);
+      return;
+    }
+
     const btn = contextMenuBtnRef.current;
     if (!btn) return;
     const rect = btn.getBoundingClientRect();
@@ -642,12 +682,24 @@ function GlobalPlayerInner() {
   useEffect(() => {
     if (!showContextMenu) return;
     const handler = (e: MouseEvent) => {
+      if (expandedLayoutActive) return;
       if (contextMenuPortalRef.current?.contains(e.target as Node)) return;
       if (contextMenuBtnRef.current?.contains(e.target as Node)) return;
-      setShowContextMenu(false);
+      closeContextMenu();
     };
     const t = setTimeout(() => document.addEventListener("click", handler), 0);
     return () => { clearTimeout(t); document.removeEventListener("click", handler); };
+  }, [expandedLayoutActive, showContextMenu]);
+
+  useEffect(() => {
+    if (!showContextMenu) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      event.preventDefault();
+      closeContextMenu({ restoreFocus: true });
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
   }, [showContextMenu]);
 
   useEffect(() => {
@@ -719,8 +771,84 @@ function GlobalPlayerInner() {
   ══════════════════════════════════════════════════════════════ */
   // FLOAT zone removed — only MINI and EXPANDED are valid.
   // isExpanded is true when zone is EXPANDED or drag preview is above the midpoint.
-  const isExpanded = zone === "EXPANDED" || (dragHeight !== null && dragHeight > (SNAP.MINI + 200));
+  const isExpanded = expandedLayoutActive;
   const isMini = !isExpanded;
+
+  const expandedActionDock = showContextMenu && isExpanded ? (
+    <section
+      ref={actionMenuDockRef}
+      id="player-action-dock"
+      className="ln-player-action-dock"
+      aria-labelledby="player-action-dock-title"
+      tabIndex={-1}
+    >
+      <div className="ln-player-action-dock__header">
+        <div>
+          <p className="ln-player-action-dock__eyebrow">Current Work</p>
+          <h3 id="player-action-dock-title">Player actions</h3>
+        </div>
+        <button
+          type="button"
+          className="ln-player-action-dock__close"
+          onClick={() => closeContextMenu({ restoreFocus: true })}
+          aria-label="Close player actions"
+        >
+          <X size={16} aria-hidden="true" />
+        </button>
+      </div>
+      <div className="ln-player-action-dock__actions" aria-label="Current Work actions">
+        <button type="button" onClick={() => { closeContextMenu(); goToSong(); }}>
+          <ExternalLink size={15} aria-hidden="true" /> Go to Song
+        </button>
+        <button type="button" onClick={() => { closeContextMenu(); goToCreator(); }}>
+          <ExternalLink size={15} aria-hidden="true" /> View Creator
+        </button>
+        <button
+          type="button"
+          onClick={async () => {
+            closeContextMenu();
+            const url = `${window.location.origin}/song/${currentSongId}`;
+            try { if (navigator.share) { await navigator.share({ title: visTrack?.title ?? "", url }); return; } } catch {}
+            try { await navigator.clipboard.writeText(url); } catch {}
+          }}
+        >
+          <Share2 size={15} aria-hidden="true" /> Share Artifact
+        </button>
+        {currentSongId && (
+          <button type="button" onClick={() => { closeContextMenu(); setAddToCollectionOpen(true); }}>
+            <ListPlus size={15} aria-hidden="true" /> Add to My List
+          </button>
+        )}
+        {visTrack && (
+          <button type="button" onClick={() => { closeContextMenu(); playNext(visTrack); toast.success(`\"${visTrack.title}\" plays next`, { duration: 2000 }); }}>
+            <SkipForward size={15} aria-hidden="true" /> Play Next
+          </button>
+        )}
+        {(() => {
+          const dlPerm = (songDetail?.song as any)?.downloadPermission as string | undefined;
+          if (!dlPerm || dlPerm === "none") return null;
+          return (
+            <button
+              type="button"
+              onClick={() => {
+                closeContextMenu();
+                if (!user) { toast.info("Sign in to download this track"); return; }
+                if (!currentSongId) return;
+                triggerTaggedDownload(currentSongId).catch((error: unknown) => {
+                  toast.error(error instanceof Error ? error.message : "Download failed");
+                });
+              }}
+            >
+              <Download size={15} aria-hidden="true" /> Download
+            </button>
+          );
+        })()}
+        <button type="button" className="ln-player-action-dock__songs" onClick={openQueueAtBottom}>
+          <List size={15} aria-hidden="true" /> View Songs
+        </button>
+      </div>
+    </section>
+  ) : null;
 
   /* ── Desktop: TopBar is the persistent mini player.
      GlobalPlayer only renders on desktop when EXPANDED (centered modal).
@@ -1163,7 +1291,7 @@ function GlobalPlayerInner() {
             <button onClick={e => { e.stopPropagation(); toggleGlow(); }} className="p-1.5 transition-all rounded" style={{ color: glowEnabled ? "#C084FC" : (isDesktop ? "rgba(212,175,55,0.4)" : "rgba(192,132,252,0.4)"), background: glowEnabled ? "rgba(192,132,252,0.08)" : "transparent" }} title={glowEnabled ? "Glow: ON" : "Glow: OFF"} aria-label={glowEnabled ? "Glow effect: on" : "Glow effect: off"} aria-pressed={glowEnabled}><Waves size={14} /></button>
             {/* Phase 164: Cinematic mode — deliberate button, not triggered by artwork tap */}
             <button ref={cinematicTriggerRef} onClick={e => { e.stopPropagation(); openCinematic(); }} className="p-1.5 transition-all rounded" style={{ color: cinematic ? (isDesktop ? GOLD : "rgba(192,132,252,0.9)") : (isDesktop ? "rgba(212,175,55,0.65)" : "rgba(192,132,252,0.5)"), background: cinematic ? (isDesktop ? "rgba(212,175,55,0.08)" : "rgba(138,43,226,0.08)") : "transparent" }} title="Cinematic View" aria-label="Open cinematic view"><Maximize2 size={14} /></button>
-            <button ref={contextMenuBtnRef} onClick={e => { e.stopPropagation(); openContextMenu(); }} className="p-1.5 transition-colors" style={{ color: isDesktop ? "rgba(212,175,55,0.65)" : "rgba(192,132,252,0.6)" }} aria-label="More options" aria-haspopup="menu"><MoreHorizontal size={16} /></button>
+            <button ref={contextMenuBtnRef} onClick={e => { e.stopPropagation(); openContextMenu(); }} className="p-1.5 transition-colors" style={{ color: isDesktop ? "rgba(212,175,55,0.65)" : "rgba(192,132,252,0.6)" }} aria-label="More options" aria-controls="player-action-dock" aria-expanded={showContextMenu}><MoreHorizontal size={16} /></button>
             {/* Collapse button: EXPANDED → MINI (FLOAT zone removed) */}
             <button onClick={e => { e.stopPropagation(); setZone(z => z === "EXPANDED" ? "MINI" : "EXPANDED"); setDragHeight(null); }} className="p-1.5 transition-colors" style={{ color: isDesktop ? GOLD : "rgba(192,132,252,0.8)", filter: isDesktop ? `drop-shadow(0 0 6px rgba(212,175,55,0.5))` : `drop-shadow(0 0 6px rgba(138,43,226,0.5))` }} title={isExpanded ? "Collapse" : "Expand player"} aria-label={isExpanded ? "Collapse player" : "Expand player"} aria-expanded={isExpanded}>
               {isExpanded ? <ChevronDown size={15} /> : <ChevronUp size={15} />}
@@ -1468,6 +1596,8 @@ function GlobalPlayerInner() {
               </button>
             </div>
 
+            {expandedActionDock}
+
             {/* Queue Panel — horizontal strip + expandable list */}
             {queueTracks.length > 0 && (
               <div ref={queueSectionRef} tabIndex={-1}>
@@ -1475,6 +1605,7 @@ function GlobalPlayerInner() {
                   tracks={queueTracks}
                   currentIdx={state.currentIdx >= 0 ? state.currentIdx : 0}
                   isDesktop={isDesktop}
+                  openListRequest={queueListRequest}
                   onPlayIdx={(idx) => playTrack(idx)}
                 />
               </div>
@@ -1529,7 +1660,7 @@ function GlobalPlayerInner() {
   ) : null;
 
   /* ── Context menu portal ── */
-  const contextMenuPortal = showContextMenu && contextMenuPos ? createPortal(
+  const contextMenuPortal = showContextMenu && contextMenuPos && !expandedLayoutActive ? createPortal(
     <div
       ref={contextMenuPortalRef}
       style={{
@@ -1602,12 +1733,9 @@ function GlobalPlayerInner() {
         );
       })()}
       <button onClick={() => {
-        setShowContextMenu(false);
-        setDragHeight(null);
-        setZone("EXPANDED");
-        window.setTimeout(() => queueSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 0);
+        openQueueAtBottom();
       }} className="flex items-center gap-2.5 w-full px-4 py-2.5 text-[12px] transition-colors hover:bg-white/5 text-left border-t" style={{ color: "var(--ln-parchment)", borderColor: "rgba(44,52,56,0.5)" }}>
-        <List size={13} style={{ color: "rgba(255,255,255,0.4)" }} /> View Queue
+        <List size={13} style={{ color: "rgba(255,255,255,0.4)" }} /> View Songs
       </button>
     </div>,
     document.body

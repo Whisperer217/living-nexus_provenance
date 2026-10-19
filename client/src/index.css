@@ -5932,3 +5932,121 @@ button:active .ln-witness-sigil,
     transition: none;
   }
 }
+
+/* ── Expanded Player action dock ───────────────────────────────────────────
+   The overflow actions remain within the expanded player's reading order so
+   they never obscure the Work artwork or the Songs list on smaller screens. */
+.ln-player-action-dock {
+  display: grid;
+  gap: 0.75rem;
+  padding: 0.875rem;
+  border: 1px solid color-mix(in srgb, var(--ln-gold) 34%, var(--ln-panel-border));
+  border-radius: 0.875rem;
+  background: color-mix(in srgb, var(--ln-coal) 90%, var(--ln-gold));
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--ln-parchment) 9%, transparent), 0 12px 26px rgba(0, 0, 0, 0.2);
+}
+
+.ln-player-action-dock__header,
+.ln-player-action-dock__actions {
+  display: flex;
+  align-items: center;
+}
+
+.ln-player-action-dock__header {
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.ln-player-action-dock__eyebrow {
+  margin: 0;
+  color: var(--ln-gold-dim);
+  font-family: var(--font-display);
+  font-size: var(--text-xs);
+  letter-spacing: 0.12em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.ln-player-action-dock h3 {
+  margin: 0.15rem 0 0;
+  color: var(--ln-parchment);
+  font-family: var(--font-editorial);
+  font-size: var(--text-h4);
+  font-weight: 600;
+  line-height: 1;
+}
+
+.ln-player-action-dock__close,
+.ln-player-action-dock__actions button {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  border: 1px solid color-mix(in srgb, var(--ln-parchment) 16%, transparent);
+  border-radius: 0.55rem;
+  background: color-mix(in srgb, var(--ln-void) 62%, transparent);
+  color: var(--ln-bone);
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  transition: border-color 160ms ease, background-color 160ms ease, color 160ms ease, transform 160ms ease;
+}
+
+.ln-player-action-dock__close {
+  width: 2.75rem;
+  flex: 0 0 auto;
+  color: var(--ln-gold-hot);
+}
+
+.ln-player-action-dock__actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.ln-player-action-dock__actions button {
+  padding: 0.55rem 0.65rem;
+  text-align: left;
+}
+
+.ln-player-action-dock__actions button:hover,
+.ln-player-action-dock__close:hover {
+  border-color: color-mix(in srgb, var(--ln-gold-hot) 70%, transparent);
+  background: color-mix(in srgb, var(--ln-gold) 13%, var(--ln-void));
+  color: var(--ln-parchment);
+  transform: translateY(-1px);
+}
+
+.ln-player-action-dock__songs {
+  border-color: color-mix(in srgb, var(--ln-gold) 52%, transparent) !important;
+  color: var(--ln-gold-hot) !important;
+}
+
+.ln-player-action-dock :is(button, a):focus-visible,
+.ln-queue-strip :focus-visible {
+  outline: 2px solid var(--ln-gold-hot);
+  outline-offset: 3px;
+}
+
+@media (max-width: 639px) {
+  .ln-player-action-dock {
+    padding: 0.75rem;
+  }
+
+  .ln-player-action-dock__actions {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ln-player-action-dock__close,
+  .ln-player-action-dock__actions button {
+    transition: none;
+  }
+
+  .ln-player-action-dock__actions button:hover,
+  .ln-player-action-dock__close:hover {
+    transform: none;
+  }
+}

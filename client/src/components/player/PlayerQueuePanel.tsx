@@ -11,6 +11,7 @@ import React, { useRef, useState, useCallback, useEffect } from "react";
 import { List, LayoutList, FolderOpen, Music2, ExternalLink, BookmarkPlus } from "lucide-react";
 import { useLocation } from "wouter";
 import { SaveQueueAsPlaylistModal } from "./SaveQueueAsPlaylistModal";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 const GOLD = "#D4AF37";
 const GOLD_DIM = "rgba(212,175,55,0.65)";
@@ -30,6 +31,8 @@ interface PlayerQueuePanelProps {
   tracks: QueueTrack[];
   currentIdx: number;
   isDesktop: boolean;
+  /** Increment to reveal the full Songs list without changing PlayerContext. */
+  openListRequest?: number;
   onPlayIdx: (idx: number) => void;
 }
 
@@ -282,11 +285,13 @@ export function PlayerQueuePanel({
   tracks,
   currentIdx,
   isDesktop,
+  openListRequest = 0,
   onPlayIdx,
 }: PlayerQueuePanelProps) {
   const [, navigate] = useLocation();
   const [mode, setMode] = useState<"strip" | "list">("strip");
   const stripRef = useRef<HTMLDivElement>(null);
+  const reduceMotion = useReducedMotion();
 
   const accent = isDesktop ? GOLD : NEBULA;
   const accentDim = isDesktop ? GOLD_DIM : NEBULA_DIM;
@@ -302,8 +307,12 @@ export function PlayerQueuePanel({
     const cardWidth = card.offsetWidth;
     const containerWidth = el.clientWidth;
     const targetScroll = cardLeft - containerWidth / 2 + cardWidth / 2;
-    el.scrollTo({ left: Math.max(0, targetScroll), behavior: "smooth" });
-  }, [currentIdx, mode]);
+    el.scrollTo({ left: Math.max(0, targetScroll), behavior: reduceMotion ? "auto" : "smooth" });
+  }, [currentIdx, mode, reduceMotion]);
+
+  useEffect(() => {
+    if (openListRequest > 0) setMode("list");
+  }, [openListRequest]);
 
   // Drag-to-pan on strip (mouse + touch)
   const panStart = useRef<{ x: number; scrollLeft: number } | null>(null);
@@ -328,7 +337,7 @@ export function PlayerQueuePanel({
   if (tracks.length === 0) return null;
 
   return (
-    <div style={{ marginTop: "4px" }}>
+    <section aria-labelledby="player-songs-heading" style={{ marginTop: "4px" }}>
       {/* ── Section header ── */}
       <div
         style={{
@@ -341,6 +350,7 @@ export function PlayerQueuePanel({
         <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
           <List size={12} style={{ color: accentDim }} />
           <span
+            id="player-songs-heading"
             style={{
               fontSize: "10px",
               fontWeight: 700,
@@ -350,7 +360,7 @@ export function PlayerQueuePanel({
               fontFamily: "'Cinzel', serif",
             }}
           >
-            Queue
+            Songs
           </span>
           <span
             style={{
@@ -383,7 +393,9 @@ export function PlayerQueuePanel({
             fontFamily: "'Cinzel', serif",
             transition: "background 0.15s",
           }}
-          title={mode === "strip" ? "Switch to list view" : "Switch to strip view"}
+          title={mode === "strip" ? "Switch Songs to list view" : "Switch Songs to strip view"}
+          aria-label={mode === "strip" ? "Show Songs as a list" : "Show Songs as artwork cards"}
+          aria-pressed={mode === "list"}
         >
           {mode === "strip"
             ? <><LayoutList size={10} /> List</>
@@ -396,6 +408,7 @@ export function PlayerQueuePanel({
       {mode === "strip" && (
         <div
           ref={stripRef}
+          className="ln-queue-strip"
           onPointerDown={onStripPointerDown}
           onPointerMove={onStripPointerMove}
           onPointerUp={onStripPointerUp}
@@ -429,6 +442,8 @@ export function PlayerQueuePanel({
       {/* ── List mode ── */}
       {mode === "list" && (
         <div
+          role="list"
+          aria-label="Songs in the current queue"
           style={{
             maxHeight: "240px",
             overflowY: "auto",
@@ -498,7 +513,7 @@ export function PlayerQueuePanel({
         </div>
         <ExternalLink size={11} style={{ color: "rgba(255,255,255,0.25)" }} />
       </button>
-    </div>
+    </section>
   );
 }
 
