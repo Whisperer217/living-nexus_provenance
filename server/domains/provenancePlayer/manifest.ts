@@ -12,11 +12,8 @@ export type ProvenancePlayerManifestTrackSource = {
   witnessId: string | null;
   fileUrl: string | null;
   coverArtUrl: string | null;
-  externalDisplayEnabled: boolean;
-  externalDisplayRightsConfirmed: boolean;
-  externalDisplayAuthorizedAt: Date | null;
+  /** Individual withdrawal from the community-approved companion product. */
   externalDisplayRevokedAt: Date | null;
-  downloadPermission: string;
   participationMusic: string | null;
   participationLyrics: string | null;
   participationVoice: string | null;
@@ -102,11 +99,7 @@ function validateTrack(track: ProvenancePlayerManifestTrackSource): void {
     || track.isFlagged
     || !track.witnessId?.trim()
     || !isCleanPublicHttpsUrl(track.fileUrl)
-    || !track.externalDisplayEnabled
-    || !track.externalDisplayRightsConfirmed
-    || !track.externalDisplayAuthorizedAt
     || track.externalDisplayRevokedAt !== null
-    || track.downloadPermission !== "free"
   ) {
     unavailable();
   }

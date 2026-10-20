@@ -270,7 +270,7 @@ export default function AlbumDetailPage() {
       }
     } catch {
       toast.error("Manifest unavailable", {
-        description: "Every Work must be public, authorized for external display, and free to download.",
+        description: "Every Work must be public, published audio with a current WID and no companion-player withdrawal.",
       });
     } finally {
       setManifestAction(null);

@@ -17,11 +17,7 @@ function source(overrides: Partial<ProvenancePlayerManifestTrackSource> = {}): P
     witnessId: "WID-MUS-F61EC526-F2E36FBC",
     fileUrl: "https://media.example.test/push-forward.mp3",
     coverArtUrl: "https://media.example.test/push-forward.webp",
-    externalDisplayEnabled: true,
-    externalDisplayRightsConfirmed: true,
-    externalDisplayAuthorizedAt: new Date("2026-10-20T00:00:00.000Z"),
     externalDisplayRevokedAt: null,
-    downloadPermission: "free",
     participationMusic: "Both",
     participationLyrics: "Human",
     participationVoice: "None",
@@ -77,12 +73,16 @@ describe("Provenance Player manifest adapter", () => {
     })).toThrow(ProvenancePlayerManifestUnavailableError);
   });
 
+  it("delegates a public published Work under the community-approved player policy without a per-Work display or download declaration", () => {
+    expect(() => buildProvenancePlayerManifest({
+      tracks: [source()],
+    })).not.toThrow();
+  });
+
   it.each([
     ["private Work", { isPublic: false }],
     ["not published", { status: "Draft" }],
-    ["revoked delegation", { externalDisplayRevokedAt: new Date() }],
-    ["no external display rights", { externalDisplayRightsConfirmed: false }],
-    ["non-free media", { downloadPermission: "licensed" }],
+    ["individually withdrawn delegation", { externalDisplayRevokedAt: new Date() }],
     ["missing WID", { witnessId: null }],
     ["flagged Work", { isFlagged: true }],
   ] as const)("rejects the entire manifest for %s", (_label, overrides) => {

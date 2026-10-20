@@ -26,6 +26,10 @@ describe("Provenance Player copied-manifest boundary", () => {
     expect(db).toContain("orderBy(asc(playlistTracks.position)");
     expect(db).toContain("orderBy(asc(songs.trackOrder)");
     expect(db).toContain(".limit(501)");
+    const manifestReaders = db.slice(db.indexOf("getProvenancePlayerAlbumTrackSources"), db.indexOf("hasAmbiguousProvenancePlayerWids"));
+    expect(manifestReaders).not.toContain("externalDisplayRightsConfirmed");
+    expect(manifestReaders).not.toContain("externalDisplayAuthorizedAt");
+    expect(manifestReaders).not.toContain("downloadPermission");
   });
 
   it("uses a rechecked Living Nexus gateway rather than copied raw storage media", () => {
@@ -36,7 +40,9 @@ describe("Provenance Player copied-manifest boundary", () => {
     expect(manifest).toContain("/api/provenance-player/media/${track.id}");
     expect(manifest).toContain("isCleanPublicHttpsUrl(track.fileUrl)");
     expect(manifest).toContain("externalDisplayRevokedAt !== null");
-    expect(manifest).toContain('track.downloadPermission !== "free"');
+    expect(manifest).not.toContain("externalDisplayRightsConfirmed");
+    expect(manifest).not.toContain("externalDisplayAuthorizedAt");
+    expect(manifest).not.toContain("track.downloadPermission");
     expect(manifest).not.toContain("audioUrl: track.fileUrl");
 
     expect(mediaRoute).toContain("buildProvenancePlayerManifest({ tracks:");

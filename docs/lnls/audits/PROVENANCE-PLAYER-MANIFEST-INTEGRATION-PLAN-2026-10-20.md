@@ -1,8 +1,8 @@
 # Provenance Player Manifest Integration — Research, Tested Contract, and Plan
 
 **Date:** 2026-10-20
-**Status:** Research and contract validation complete. No Living Nexus manifest endpoint, automatic handoff, account connection, or player-infrastructure change has been implemented.
-**Decision requested next:** Approve the bounded public-manifest adapter and a separately reviewed external-player URL-import enhancement.
+**Status:** Research and contract validation complete; the owner-authorized manual manifest bridge was implemented separately on 2026-10-20. This record's former per-Work consent recommendation is superseded by the community-approved companion-product policy.
+**Decision requested next:** Review the separately implemented manual bridge; any automatic external-player URL import remains a separate enhancement.
 
 ## What is confirmed now
 
@@ -62,14 +62,13 @@ A Work is eligible only when all of the following are true:
 
 - It is a canonical audio Work with a nonempty WID and usable media URL.
 - Its record is `Published` and `isPublic`.
-- Its creator has positively authorized external display and that authorization has not been revoked.
-- The Work's media permission permits the external player’s current “Keep local” behavior. For the currently deployed external player, the conservative Phase 1 rule is `downloadPermission === "free"`.
+- It is covered by the Living Nexus creator community’s approval of Provenance Player as an approved product and has not been individually withdrawn from that companion surface.
 
-The last condition is intentional. The companion player can preserve or download a local copy of a remote link in its own browser. A manifest must not turn a Living Nexus stream-only Work into an uncontrolled external download path.
+The companion player can preserve remote media in its own browser. The implemented bridge therefore exposes no storage URL: Living Nexus supplies a revocable gateway and rechecks public Work, individual-withdrawal, and canonical-identity conditions on every media request.
 
 A Collection is eligible only when the collection itself is public and every live member is an eligible public audio Work. The adapter will order tracks by `songs.trackOrder ASC, songs.createdAt ASC`. If any live member is private, unpublished, deleted, lacks required permission, lacks a public WID, or lacks usable media, the collection manifest will return the same unavailable response rather than silently producing a partial album. This protects both creator intent and album identity.
 
-The adapter should emit a generic `404` unavailable result for ineligible public/private objects and should never disclose which private Work blocked a collection export. It must not use `externalDisplayEnabled` as a publication substitute: external display authorization and public publication are distinct consent layers, so both must be true.
+The adapter should emit a generic `404` unavailable result for ineligible public/private objects and should never disclose which private Work blocked a collection export. Community approval does not make private, unpublished, flagged, individually withdrawn, or identity-ambiguous records public; those remain non-delegable.
 
 ### Field mapping
 
@@ -85,24 +84,24 @@ The adapter should emit a generic `404` unavailable result for ineligible public
 
 The deployed external player has no URL, hash, query, `postMessage`, or server endpoint that imports a manifest automatically. A probe of `?manifest=https://example.invalid/test.json#/player` opened the ordinary empty Player route and did not fetch or import anything. Therefore an LN button cannot currently open the external player with an automatic manifest without changing the external player itself.[1]
 
-The correct later handoff is public-only and consent-gated:
+The correct later handoff is public-only and retains community approval plus individual-withdrawal safeguards:
 
-1. Living Nexus serves an eligibility-gated manifest at an HTTPS URL with CORS limited to the companion's needed read path.
+1. Living Nexus serves an eligibility-gated manifest at an HTTPS URL with the same community-policy and individual-withdrawal safeguards.
 2. The external player adds a query-based manifest loader that accepts only an HTTPS URL, fetches it, shows the Work or Collection title, creator, WID, track count, and a visible **Import** confirmation.
 3. The external player validates `schema === "living-nexus-player/1"` with the same field limits it already uses. It continues to label the imported metadata as supplied unless and until it performs an independent Living Nexus WID verification request.
 4. The Living Nexus action opens a separate tab. It does not pause or modify `PlayerContext`, the canonical Living Nexus queue, or the active audio element.
 
-The manifest URL must contain no account token, cookie, signed personal URL, or private Work identifier. Private, unlisted, stream-only, non-free, or non-authorized Works remain unavailable to this handoff. Secure account connection, listener library import, and synchronized playback are separate future projects that require explicit OAuth/consent, short-lived scoped grants, revocation behavior, audit trails, and a single-audio-authority design.
+The manifest URL must contain no account token, cookie, signed personal URL, or private Work identifier. Private, unpublished, flagged, individually withdrawn, malformed, or identity-ambiguous Works remain unavailable to this handoff. Secure account connection, listener library import, and synchronized playback are separate future projects that require explicit OAuth/consent, short-lived scoped grants, withdrawal behavior, audit trails, and a single-audio-authority design.
 
-## Implementation plan after approval
+## Historical implementation plan and remaining external-player work
 
-### Phase 1A — Read-only manifest adapter
+### Phase 1A — Read-only manifest adapter (implemented separately)
 
-1. Add a pure manifest builder and its tests. It maps only fields the player consumes and serializes stable ordered arrays.
-2. Add a dedicated public-eligibility resolver for Work and Collection manifests. It applies publication, visibility, external-display authorization, free-media permission, media, WID, and complete-album checks in one place.
-3. Add the two read-only Express routes and mount them beside the existing public Work routes.
-4. Add a dedicated public stream route for manifest-eligible Work media only. Do not reuse `/api/v1/stream/:id`.
-5. Add non-authoritative **Download Manifest** or **Copy Manifest** controls on eligible Work and Collection pages. These controls are useful even before automatic external-player import exists.
+1. Implemented: a pure manifest builder and its tests map only fields the player consumes and serialize stable ordered arrays.
+2. Implemented: a dedicated public-eligibility resolver applies publication, visibility, individual withdrawal, media, WID, and complete-album checks in one place.
+3. Implemented as owner-authorized tRPC projections for named playlists and canonical albums, rather than the originally proposed public manifest URLs.
+4. Implemented: a dedicated public companion-media gateway rechecks eligibility on each request; it does not reuse `/api/v1/stream/:id`.
+5. Implemented: owner-only **Copy manifest** and **Download JSON** controls on the named-playlist and canonical-album pages.
 
 Expected affected files are new manifest domain/route modules, `server/_core/index.ts`, narrowly scoped database helpers, existing Work/Collection presentation surfaces, and focused test files. No schema or migration is planned.
 
@@ -119,7 +118,7 @@ Only after both applications are independently validated should Living Nexus rep
 - A complete public Collection preserves `trackOrder` through import and external next-track playback.
 - Missing artwork produces a valid manifest and external fallback artwork.
 - A missing optional disclosure does not break import; a present disclosure is displayed only as supplied metadata.
-- Draft, private, unlisted, deleted, stream-only, non-free, externally unauthorized, and revoked Works are unavailable.
+- Draft, private, unlisted, deleted, malformed, individually withdrawn, and identity-ambiguous Works are unavailable.
 - A Collection containing any ineligible live member does not yield a partial manifest.
 - No manifest or handoff URL contains cookies, credentials, private object URLs, or listener/account identifiers.
 - Opening the external player preserves the existing Living Nexus player queue and playback unchanged.
