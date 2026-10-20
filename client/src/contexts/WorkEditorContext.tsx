@@ -136,6 +136,7 @@ export function WorkEditorProvider({ children }: { children: ReactNode }) {
         setTimeout(() => {
           utils.songs.getById.invalidate({ id: current.id });
           utils.songs.mySongs.invalidate();
+          utils.songs.getPublicCreatorDateHistory.invalidate({ songId: current.id });
         }, 0);
       }
       return null;

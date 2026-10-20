@@ -13,6 +13,10 @@ function describeChange(change: any) {
   return `${label}: ${before} → ${after}`;
 }
 
+function participationSummary(declaration: any) {
+  return `Music · ${declaration?.music ?? "not recorded"}  |  Lyrics · ${declaration?.lyrics ?? "not recorded"}  |  Voice · ${declaration?.voice ?? "not recorded"}`;
+}
+
 export function WorkProvenanceHistory({ songId }: WorkProvenanceHistoryProps) {
   const { data, isLoading } = trpc.songs.getPublicCreatorDateHistory.useQuery(
     { songId },
@@ -29,7 +33,7 @@ export function WorkProvenanceHistory({ songId }: WorkProvenanceHistoryProps) {
         Provenance History
       </h3>
       <p className="mt-1 text-xs leading-relaxed" style={{ color: "color-mix(in srgb, var(--ln-parchment) 52%, transparent)" }}>
-        Creator-declared chronology and recorded amendments. WID and publication custody remain separate system records.
+        Creator-declared chronology and recorded declaration corrections. WID and publication custody remain separate system records.
       </p>
 
       {isLoading ? (
@@ -38,7 +42,7 @@ export function WorkProvenanceHistory({ songId }: WorkProvenanceHistoryProps) {
         <div className="mt-4 flex gap-3 rounded border p-3" style={{ borderColor: "rgba(196,154,40,0.18)", background: "rgba(196,154,40,0.04)" }}>
           <ScrollText className="mt-0.5 size-4 shrink-0" style={{ color: "var(--ln-gold)" }} aria-hidden="true" />
           <p className="text-xs leading-relaxed" style={{ color: "color-mix(in srgb, var(--ln-parchment) 58%, transparent)" }}>
-            No creator-date amendments have been recorded for this Work.
+            No creator-declared amendments or participation corrections have been recorded for this Work.
           </p>
         </div>
       ) : (
@@ -46,13 +50,20 @@ export function WorkProvenanceHistory({ songId }: WorkProvenanceHistoryProps) {
           {events.map((event: any) => {
             const changes = Array.isArray(event.eventData?.changedFields) ? event.eventData.changedFields : [];
             const declaration = event.eventData ?? {};
+            const isParticipationCorrection = event.eventType === "creator_participation_declaration_corrected";
             return (
               <li key={`${event.eventType}-${event.occurredAt}`} className="relative">
                 <span className="absolute -left-[1.47rem] top-0 grid size-5 place-items-center rounded-full border" style={{ borderColor: "rgba(196,154,40,0.55)", background: "var(--ln-void, #0d0a12)" }}>
                   {event.eventType === "creator_historical_dates_declared" ? <Feather className="size-3" style={{ color: "var(--ln-gold)" }} aria-hidden="true" /> : <Clock3 className="size-3" style={{ color: "var(--ln-gold)" }} aria-hidden="true" />}
                 </span>
                 <p className="text-sm" style={{ color: "var(--ln-parchment)" }}>{event.eventLabel ?? "Creator chronology record"}</p>
-                {event.eventType === "creator_historical_dates_declared" ? (
+                {isParticipationCorrection ? (
+                  <div className="mt-1 space-y-1 text-xs" style={{ color: "color-mix(in srgb, var(--ln-parchment) 58%, transparent)" }}>
+                    <p><span style={{ color: "var(--ln-gold)" }}>Original declaration</span> · {participationSummary(declaration.previous)}</p>
+                    <p><span style={{ color: "var(--ln-gold-hot, var(--ln-gold))" }}>Corrected effective declaration</span> · {participationSummary(declaration.current)}</p>
+                    {declaration.explanation ? <p className="pt-1 italic" style={{ color: "color-mix(in srgb, var(--ln-parchment) 48%, transparent)" }}>Creator note: {declaration.explanation}</p> : null}
+                  </div>
+                ) : event.eventType === "creator_historical_dates_declared" ? (
                   <p className="mt-1 text-xs" style={{ color: "color-mix(in srgb, var(--ln-parchment) 58%, transparent)" }}>
                     {formatHistoricalDate(declaration.creationDate) && <>Created {formatHistoricalDate(declaration.creationDate)}</>}
                     {formatHistoricalDate(declaration.creationDate) && formatHistoricalDate(declaration.originalReleaseDate) && " · "}

@@ -5,6 +5,7 @@
 import Stripe from "stripe";
 import { z } from "zod";
 import { validateHistoricalDates } from "@shared/workHistoricalDates";
+import { prepareParticipationCorrection } from "../domains/work/participationCorrection";
 import { generateShareArtifact } from "../services/shareArtifactService";
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "../_core/cookies";
@@ -27,7 +28,7 @@ import {
   updateSongLyrics, updateSongLyricsWithWid, updateSongStatus, getRelatedSongs, updateSongVideo,
   updateUserProfile, updateUserStripeAccount,
   getLikedSongs, toggleLike, getLikeStatus, getLikeCount, getBulkLikeStatuses,
-  getSongByWitnessId, updateSongMetadata, getRecentTips,
+  getSongByWitnessId, updateSongMetadata, correctSongParticipationDeclaration, getRecentTips,
   getPlaylist, addToPlaylist, removeFromPlaylist, isInPlaylist,
   getUserTipTotalForSong, updateSongDownloadPermission,
   getAllUsersWithStats, markWelcomeSeen, recordTosAcceptance, getCreatorAnalytics,
@@ -349,7 +350,7 @@ export const songsRouter = router({
       const events = await getWorkEvents(input.songId);
       return {
         events: events
-          .filter((event: any) => event.eventType === "creator_historical_dates_declared" || event.eventType === "creator_historical_dates_revised")
+          .filter((event: any) => event.eventType === "creator_historical_dates_declared" || event.eventType === "creator_historical_dates_revised" || event.eventType === "creator_participation_declaration_corrected")
           .map((event: any) => ({
             eventType: event.eventType,
             eventLabel: event.eventLabel,
@@ -1124,6 +1125,51 @@ export const songsRouter = router({
       }
       return { success: true };
     }),
+
+    /**
+     * Corrects the current participation disclosure while preserving the
+     * original declaration as append-only historical evidence.
+     */
+    correctDeclaration: protectedProcedure.input(z.object({
+      songId: z.number().int().positive(),
+      participationMusic: z.enum(["Human", "AI", "Both", "None"]),
+      participationLyrics: z.enum(["Human", "AI", "Both", "None"]),
+      participationVoice: z.enum(["Human", "AI", "Both", "None"]),
+      explanation: z.string().trim().max(1000).optional(),
+    }).strict()).mutation(async ({ ctx, input }) => {
+      const existing = await getSongById(input.songId);
+      const previous = {
+        music: existing?.participationMusic ?? "Human",
+        lyrics: existing?.participationLyrics ?? "Human",
+        voice: existing?.participationVoice ?? "Human",
+      } as const;
+      const current = {
+        music: input.participationMusic,
+        lyrics: input.participationLyrics,
+        voice: input.participationVoice,
+      } as const;
+
+      const correction = prepareParticipationCorrection({
+        ownerId: existing?.userId,
+        actorId: ctx.user.id,
+        previous,
+        current,
+        witnessId: existing?.witnessId,
+        explanation: input.explanation,
+      });
+
+      await correctSongParticipationDeclaration({
+        songId: input.songId,
+        eventData: correction.eventData,
+        userId: ctx.user.id,
+        actorId: ctx.user.id,
+        actorName: ctx.user.name ?? undefined,
+        declaration: correction.current,
+      });
+
+      return { success: true, declaration: current };
+    }),
+
     updateMetadata: protectedProcedure.input(z.object({
       songId: z.number(),
       collectionId: z.number().int().positive().nullable().optional(),

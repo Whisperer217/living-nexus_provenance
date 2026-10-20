@@ -32,11 +32,12 @@ import {
   X, Upload, Loader2, CheckCircle2, AlertCircle, Trash2,
   Music, Flame, BookOpen, Shield, ChevronDown, ChevronUp,
   ImageIcon, Eye, Video, Sparkles, Hash, FileText,
-  ExternalLink, Plus, Pencil, Download,
+  ExternalLink, Plus, Pencil, Download, ScrollText,
 } from "lucide-react";
 import { EDIT_GENRES as GENRES } from "@shared/contentTypes";
 import { parseWorkGenres, toggleWorkGenre } from "@shared/workMetadata";
 import { validateHistoricalDates } from "@shared/workHistoricalDates";
+import type { ParticipationValue } from "@shared/loopRegistration";
 import { DepthAtmosphere } from "@/components/atmosphere/DepthAtmosphere";
 
 /* ─── Types ─────────────────────────────────────────────────────────────── */
@@ -63,6 +64,9 @@ export interface CreativeDrawerSong {
   videoWitnessId?: string | null;
   downloadPermission?: string | null;
   downloadTipThresholdCents?: number | null;
+  participationMusic?: ParticipationValue | null;
+  participationLyrics?: ParticipationValue | null;
+  participationVoice?: ParticipationValue | null;
 }
 
 interface CreativeDrawerProps {
@@ -89,6 +93,9 @@ type CreativeDrawerFormSnapshot = {
   coverUrl: string;
   downloadPermission: string;
   tipThresholdCents: number;
+  participationMusic: ParticipationValue;
+  participationLyrics: ParticipationValue;
+  participationVoice: ParticipationValue;
 };
 
 /* ─── Constants ─────────────────────────────────────────────────────────── */
@@ -110,6 +117,13 @@ const AI_CONSENT_OPTIONS = [
   { value: "prohibited",            label: "No AI Training",        desc: "Human-Made — prohibit all AI training use" },
   { value: "permitted_attribution", label: "Attribution Required",  desc: "AI-Assisted — training permitted with credit" },
   { value: "permitted",             label: "Open Training",         desc: "AI-Assisted Manifestation — open training" },
+];
+
+const PARTICIPATION_OPTIONS: Array<{ value: ParticipationValue; label: string }> = [
+  { value: "Human", label: "Human" },
+  { value: "AI", label: "AI" },
+  { value: "Both", label: "Both" },
+  { value: "None", label: "None / not present" },
 ];
 
 /* ─── Design Tokens ──────────────────────────────────────────────────────── */
@@ -191,6 +205,10 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
   const [aiConsent, setAiConsent]       = useState<string>(song.aiConsent ?? "prohibited");
   const [aiDisclosure, setAiDisclosure] = useState<string>(song.aiDisclosure ?? "original");
   const [originStory, setOriginStory]   = useState(song.haaiOriginStory ?? "");
+  const [participationMusic, setParticipationMusic] = useState<ParticipationValue>(song.participationMusic ?? "Human");
+  const [participationLyrics, setParticipationLyrics] = useState<ParticipationValue>(song.participationLyrics ?? "Human");
+  const [participationVoice, setParticipationVoice] = useState<ParticipationValue>(song.participationVoice ?? "Human");
+  const [declarationExplanation, setDeclarationExplanation] = useState("");
 
   const parseLinks = (raw?: string | null): Array<{ platform: string; url: string }> => {
     if (!raw) return [];
@@ -262,6 +280,8 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
   const [deleting, setDeleting]                     = useState(false);
   const [saved, setSaved]                           = useState(false);
   const [lyricsSaving, setLyricsSaving]             = useState(false);
+  const [declarationSaving, setDeclarationSaving]   = useState(false);
+  const [declarationReviewOpen, setDeclarationReviewOpen] = useState(false);
   const snapshotFromSong = (source: CreativeDrawerSong): CreativeDrawerFormSnapshot => ({
     id: source.id,
     title: source.title ?? "",
@@ -280,12 +300,15 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
     coverUrl: source.coverArtUrl ?? "",
     downloadPermission: source.downloadPermission ?? "none",
     tipThresholdCents: source.downloadTipThresholdCents ?? 179,
+    participationMusic: source.participationMusic ?? "Human",
+    participationLyrics: source.participationLyrics ?? "Human",
+    participationVoice: source.participationVoice ?? "Human",
   });
   const currentSnapshot = (): CreativeDrawerFormSnapshot => ({
     id: song.id, title, collectionId, genre, caption, description, status,
     aiConsent, aiDisclosure, originStory, externalLinks: JSON.stringify(extLinks),
     lyrics, creationDate, creatorReleaseDate, coverUrl, downloadPermission,
-    tipThresholdCents,
+    tipThresholdCents, participationMusic, participationLyrics, participationVoice,
   });
   const initialSnapshot = snapshotFromSong(song);
   const syncedSnapshotRef = useRef<CreativeDrawerFormSnapshot>(initialSnapshot);
@@ -314,6 +337,11 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
     setAiConsent(incoming.aiConsent);
     setAiDisclosure(incoming.aiDisclosure);
     setOriginStory(incoming.originStory);
+    setParticipationMusic(incoming.participationMusic);
+    setParticipationLyrics(incoming.participationLyrics);
+    setParticipationVoice(incoming.participationVoice);
+    setDeclarationExplanation("");
+    setDeclarationReviewOpen(false);
     setExtLinks(parseLinks(song.externalLinksJson));
     setLyrics(incoming.lyrics);
     setCreationDate(incoming.creationDate);
@@ -324,7 +352,7 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
     setTipThresholdInput((incoming.tipThresholdCents / 100).toFixed(2));
     syncedSnapshotRef.current = incoming;
     incomingSnapshotRef.current = incoming;
-  }, [song, title, collectionId, genre, caption, description, status, aiConsent, aiDisclosure, originStory, extLinks, lyrics, creationDate, creatorReleaseDate, coverUrl, downloadPermission, tipThresholdCents]);
+  }, [song, title, collectionId, genre, caption, description, status, aiConsent, aiDisclosure, originStory, extLinks, lyrics, creationDate, creatorReleaseDate, coverUrl, downloadPermission, tipThresholdCents, participationMusic, participationLyrics, participationVoice]);
 
   /* ── FREEZE FIX: 120ms delay before backdrop becomes interactive ── */
   const [backdropActive, setBackdropActive] = useState(false);
@@ -348,11 +376,13 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
   /* ── Mutations ── */
   const updateMetadata = trpc.songs.updateMetadata.useMutation();
   const updateStatus = trpc.songs.updateStatus.useMutation();
+  const correctDeclaration = trpc.songs.correctDeclaration.useMutation();
 
   function refreshWorkData() {
     void utils.songs.mySongs.invalidate();
     void utils.songs.getMyCollections.invalidate();
     void utils.songs.getById.invalidate({ id: song.id });
+    void utils.songs.getPublicCreatorDateHistory.invalidate({ songId: song.id });
     void utils.songs.exploreIndex.invalidate();
     void utils.collectionStudio.listMine.invalidate();
     void utils.collectionStudio.getAvailableSongs.invalidate();
@@ -488,6 +518,35 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
     });
   }
 
+  const declarationHasChanges = participationMusic !== (song.participationMusic ?? "Human")
+    || participationLyrics !== (song.participationLyrics ?? "Human")
+    || participationVoice !== (song.participationVoice ?? "Human");
+
+  async function handleCorrectDeclaration() {
+    if (!declarationHasChanges) {
+      toast.error("Choose a changed participation declaration before recording a correction.");
+      return;
+    }
+    setDeclarationSaving(true);
+    try {
+      await correctDeclaration.mutateAsync({
+        songId: song.id,
+        participationMusic,
+        participationLyrics,
+        participationVoice,
+        explanation: declarationExplanation.trim() || undefined,
+      });
+      refreshWorkData();
+      markCurrentFormSaved();
+      toast.success("Participation declaration corrected. The original declaration remains in the public record.");
+      onSaved();
+    } catch (err: unknown) {
+      toast.error((err as Error).message || "Could not correct the participation declaration");
+    } finally {
+      setDeclarationSaving(false);
+    }
+  }
+
   /* ── Save ── */
   async function handleSave() {
     const historicalDateError = validateHistoricalDates({
@@ -496,6 +555,10 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
     });
     if (historicalDateError) {
       toast.error(historicalDateError);
+      return;
+    }
+    if (declarationHasChanges) {
+      toast.error("Record the participation correction separately so the original declaration remains visible in history.");
       return;
     }
     if (!title.trim()) { toast.error("Title is required"); return; }
@@ -1413,6 +1476,82 @@ export function CreativeDrawer({ song, onClose, onSaved }: CreativeDrawerProps) 
                 </div>
               </div>
             </div>
+
+            {(song.contentType ?? "audio") === "audio" && (
+              <>
+                <SectionDivider label="Participation Declaration" icon={<ScrollText className="w-3.5 h-3.5" />} />
+                <div className="mb-7 rounded-xl p-4" style={{ background: "rgba(212,175,55,0.045)", border: `1px solid ${GOLD_BORDER}` }}>
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="text-sm" style={{ color: GOLD, fontFamily: "'Cinzel', serif", letterSpacing: "0.06em" }}>Correct a participation declaration</p>
+                      <p className="mt-1 text-xs leading-relaxed" style={{ color: TEXT_MUTED }}>
+                        This updates the current effective disclosure only. It does not replace the WID, media, ownership, or prior declaration.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setDeclarationReviewOpen((open) => !open)}
+                      className="shrink-0 rounded-lg px-3 py-2 text-xs transition-opacity hover:opacity-80"
+                      style={{ color: GOLD, border: `1px solid ${GOLD_BORDER}`, background: GOLD_DIM }}
+                      aria-expanded={declarationReviewOpen}
+                    >
+                      {declarationReviewOpen ? "Close" : "Review"}
+                    </button>
+                  </div>
+
+                  {declarationReviewOpen && (
+                    <div className="mt-5 space-y-5">
+                      <div className="rounded-lg p-3 text-xs leading-relaxed" style={{ background: "rgba(4,2,10,0.42)", border: "1px solid rgba(255,255,255,0.08)", color: TEXT_MUTED }}>
+                        <p><span style={{ color: GOLD }}>Current effective declaration</span> · Music {song.participationMusic ?? "Human"} · Lyrics {song.participationLyrics ?? "Human"} · Voice {song.participationVoice ?? "Human"}</p>
+                        {declarationHasChanges && <p className="mt-1"><span style={{ color: GOLD_BRIGHT }}>Proposed correction</span> · Music {participationMusic} · Lyrics {participationLyrics} · Voice {participationVoice}</p>}
+                      </div>
+
+                      <div className="grid gap-4 sm:grid-cols-3">
+                        {([
+                          { label: "Music", value: participationMusic, setValue: setParticipationMusic },
+                          { label: "Lyrics", value: participationLyrics, setValue: setParticipationLyrics },
+                          { label: "Voice", value: participationVoice, setValue: setParticipationVoice },
+                        ] as const).map(({ label, value, setValue }) => (
+                          <div key={label}>
+                            <FieldLabel>{label} participation</FieldLabel>
+                            <Select value={value} onValueChange={(next) => setValue(next as ParticipationValue)}>
+                              <SelectTrigger style={{ background: SURFACE2, border: `1px solid ${GOLD_BORDER}`, color: "rgba(255,255,255,0.82)" }}>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent {...(drawerContainerEl ? { container: drawerContainerEl } : {})} style={{ background: "#0c0a1c", border: `1px solid ${GOLD_BORDER}` }}>
+                                {PARTICIPATION_OPTIONS.map((option) => <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>)}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div>
+                        <FieldLabel hint="Optional. This becomes a read-only note on the public correction record.">Why is this correction needed?</FieldLabel>
+                        <Textarea
+                          value={declarationExplanation}
+                          onChange={(event) => setDeclarationExplanation(event.target.value.slice(0, 1000))}
+                          rows={3}
+                          placeholder="For example: Music participation was initially recorded as AI; the current effective disclosure is Both."
+                          style={{ background: SURFACE2, border: `1px solid ${GOLD_BORDER}`, color: "rgba(255,255,255,0.82)", resize: "vertical" }}
+                        />
+                      </div>
+
+                      <Button
+                        type="button"
+                        onClick={handleCorrectDeclaration}
+                        disabled={!declarationHasChanges || declarationSaving}
+                        className="w-full"
+                        style={{ background: GOLD, color: "#120d03", fontFamily: "'Cinzel', serif", letterSpacing: "0.06em" }}
+                      >
+                        {declarationSaving ? <Loader2 className="mr-2 size-4 animate-spin" /> : <Shield className="mr-2 size-4" />}
+                        Confirm &amp; Record Correction
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
 
             {/* ═══ CREATION DISCLOSURE ═════════════════════════════════════ */}
             <SectionDivider label="Creation Disclosure" icon={<FileText className="w-3.5 h-3.5" />} />

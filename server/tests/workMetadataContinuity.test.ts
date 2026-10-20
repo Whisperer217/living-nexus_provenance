@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { applySuggestedWorkGenres, getSuggestedWorkGenres, parseWorkGenres, serializeWorkGenres, toggleWorkGenre } from "@shared/workMetadata";
 import { formatHistoricalDateValue, parseHistoricalDate, validateHistoricalDates } from "@shared/workHistoricalDates";
+import { buildParticipationCorrectionEventData, declarationsMatch } from "@shared/participationDeclaration";
 
 const root = resolve(import.meta.dirname, "../..");
 const read = (relativePath: string) => readFileSync(resolve(root, relativePath), "utf8");
@@ -154,8 +155,90 @@ describe("Work metadata continuity", () => {
     expect(publicHistory).toContain("getSongWithCreator(input.songId)");
     expect(publicHistory).toContain('eventType === "creator_historical_dates_declared"');
     expect(publicHistory).toContain('eventType === "creator_historical_dates_revised"');
+    expect(publicHistory).toContain('eventType === "creator_participation_declaration_corrected"');
     expect(publicHistory).not.toContain("actorId:");
     expect(history).toContain("Public record · read-only");
     expect(history).toContain("Creator declaration");
+    expect(history).toContain("Corrected effective declaration");
+  });
+
+  it("builds a correction event with immutable before/after declaration evidence and an optional creator note", () => {
+    const previous = { music: "AI", lyrics: "Human", voice: "None" } as const;
+    const current = { music: "Both", lyrics: "Human", voice: "None" } as const;
+
+    expect(declarationsMatch(previous, current)).toBe(false);
+    expect(buildParticipationCorrectionEventData({
+      previous,
+      current,
+      witnessId: "WID-MUS-EXAMPLE",
+      explanation: "  Music participation should have been Both.  ",
+    })).toEqual({
+      previous,
+      current,
+      witnessId: "WID-MUS-EXAMPLE",
+      explanation: "Music participation should have been Both.",
+    });
+  });
+
+  it("keeps participation corrections owner-only, narrow, append-only, and separate from ordinary metadata edits", () => {
+    const router = read("server/routers/songs.ts");
+    const db = read("server/utils/db.ts");
+    const policy = read("server/domains/work/participationCorrection.ts");
+    const correction = router.slice(router.indexOf("correctDeclaration: protectedProcedure"), router.indexOf("updateMetadata: protectedProcedure"));
+
+    expect(correction).toContain('participationMusic: z.enum(["Human", "AI", "Both", "None"])');
+    expect(correction).toContain('participationLyrics: z.enum(["Human", "AI", "Both", "None"])');
+    expect(correction).toContain('participationVoice: z.enum(["Human", "AI", "Both", "None"])');
+    expect(correction).toContain("prepareParticipationCorrection({");
+    expect(correction).toContain("ownerId: existing?.userId");
+    expect(correction).toContain("actorId: ctx.user.id");
+    expect(correction).toContain("correctSongParticipationDeclaration");
+    expect(correction).toContain("eventData: correction.eventData");
+    expect(correction).not.toContain("fileUrl");
+    expect(correction).not.toContain("fileKey");
+    expect(correction).not.toContain("coverArtUrl");
+    expect(correction).not.toContain("lyricsText");
+    expect(correction).not.toContain("parentSongId");
+    expect(correction).not.toContain("collectionId");
+    expect(db).toContain("export async function correctSongParticipationDeclaration(data:");
+    expect(db).toContain("return db.transaction(async (tx: any) => {");
+    expect(db).toContain("Number(updateResult?.affectedRows ?? 0) !== 1");
+    expect(db).toContain("participationMusic: data.declaration.music");
+    expect(db).toContain("participationLyrics: data.declaration.lyrics");
+    expect(db).toContain("participationVoice: data.declaration.voice");
+    expect(db).toContain('eventType: "creator_participation_declaration_corrected"');
+    expect(db).toContain("isSystemEvent: false");
+    expect(policy).toContain("buildParticipationCorrectionEventData");
+    expect(policy).toContain("declarationsMatch");
+  });
+
+  it("carries persisted participation values into every active owner editor entry point", () => {
+    const editorFiles: Record<string, number> = {
+      "client/src/pages/ArchivePage.tsx": 2,
+      "client/src/pages/CreatorDomainPage.tsx": 1,
+      "client/src/pages/CreatorProfilePage.tsx": 1,
+      "client/src/pages/DashboardPage.tsx": 1,
+      "client/src/pages/ProfilePage.tsx": 1,
+      "client/src/pages/SongDetailPage.tsx": 3,
+      "client/src/pages/loop/LoopManagePage.tsx": 1,
+      "client/src/pages/loop/LoopWorkPage.tsx": 1,
+    };
+
+    const drawer = read("client/src/components/CreativeDrawer.tsx");
+    expect(drawer).toContain("participationMusic?: ParticipationValue | null");
+    expect(drawer).toContain("trpc.songs.correctDeclaration.useMutation()");
+    expect(drawer).toContain("Confirm &amp; Record Correction");
+    expect(drawer).toContain("This updates the current effective disclosure only.");
+
+    for (const [path, expectedCalls] of Object.entries(editorFiles)) {
+      const calls = read(path).split("openEditor({").slice(1);
+      expect(calls).toHaveLength(expectedCalls);
+      for (const call of calls) {
+        const payload = call.slice(0, call.indexOf("})"));
+        expect(payload).toContain("participationMusic:");
+        expect(payload).toContain("participationLyrics:");
+        expect(payload).toContain("participationVoice:");
+      }
+    }
   });
 });

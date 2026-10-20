@@ -458,17 +458,38 @@ function VersionHistoryPanel({ collectionId }: { collectionId: number }) {
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
+function getCollectionLoadDiagnosticId(error: unknown): string {
+  const code = error
+    && typeof error === "object"
+    && "data" in error
+    && typeof (error as { data?: { code?: unknown } }).data?.code === "string"
+    ? (error as { data: { code: string } }).data.code
+    : "UNKNOWN";
+
+  return `CS-GET-COLLECTION-${code.replace(/[^A-Za-z0-9_]/g, "_").toUpperCase()}`;
+}
+
 export default function CollectionStudioPage() {
   const { id } = useParams<{ id: string }>();
   const [, navigate] = useLocation();
-  const { user } = useAuth();
-  const collectionId = parseInt(id ?? "0", 10);
+  const { user, loading: authLoading, error: authError, refresh: refreshAuth } = useAuth();
+  const collectionId = Number(id);
+  const hasValidCollectionId = Number.isSafeInteger(collectionId) && collectionId > 0;
+  const archiveCollectionHref = hasValidCollectionId
+    ? `/archive?tab=collections&collection=${collectionId}`
+    : "/archive?tab=collections";
 
   // ── Data ──────────────────────────────────────────────────────────────────
   const utils = trpc.useUtils();
-  const { data, isLoading, error } = trpc.collectionStudio.getCollection.useQuery(
+  const {
+    data,
+    isLoading: collectionLoading,
+    isFetching: collectionIsFetching,
+    error: collectionError,
+    refetch: refetchCollection,
+  } = trpc.collectionStudio.getCollection.useQuery(
     { collectionId },
-    { enabled: !!user && collectionId > 0, retry: false, refetchOnWindowFocus: false }
+    { enabled: !authLoading && !!user && hasValidCollectionId, retry: false, refetchOnWindowFocus: false }
   );
 
   // ── Local state ──────────────────────────────────────────────────────────
@@ -689,6 +710,34 @@ export default function CollectionStudioPage() {
   };
 
   // ── Render states ─────────────────────────────────────────────────────────
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-3" role="status" aria-live="polite">
+        <Loader2 className="w-6 h-6 animate-spin text-[var(--gold)]" aria-hidden="true" />
+        <p className="text-sm text-muted-foreground">Preparing Collection Studio…</p>
+      </div>
+    );
+  }
+
+  if (authError && !user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-4">
+        <div className="w-full max-w-md rounded-xl p-6 text-center" style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.28)" }}>
+          <p className="font-heading text-base" style={{ color: "var(--ln-parchment)" }}>We could not confirm this Studio session.</p>
+          <p className="mt-2 text-sm leading-relaxed" style={{ color: "var(--ln-smoke)" }}>Your collection has not changed. Try confirming your session again, or return to the Archive.</p>
+          <div className="mt-5 flex flex-wrap justify-center gap-3">
+            <Button type="button" onClick={() => void refreshAuth()} variant="outline">
+              <RefreshCw className="mr-2 size-4" /> Retry session
+            </Button>
+            <Button type="button" onClick={() => navigate(archiveCollectionHref)} variant="ghost">
+              <ArrowLeft className="mr-2 size-4" /> Back to Archive
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -697,22 +746,45 @@ export default function CollectionStudioPage() {
     );
   }
 
-  if (isLoading) {
+  if (!hasValidCollectionId) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="w-6 h-6 animate-spin text-[var(--gold)]" />
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 px-4 text-center">
+        <p className="text-muted-foreground">This Collection Studio reference is not valid.</p>
+        <Button variant="outline" onClick={() => navigate(archiveCollectionHref)}>
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back to Archive
+        </Button>
       </div>
     );
   }
 
-  if (error || !data) {
+  if (collectionLoading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4">
-        <p className="text-muted-foreground">Collection not found or access denied.</p>
-        <Button variant="outline" onClick={() => navigate("/archive?tab=collections")}>
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Archive
-        </Button>
+      <div className="min-h-screen flex flex-col items-center justify-center gap-3" role="status" aria-live="polite">
+        <Loader2 className="w-6 h-6 animate-spin text-[var(--gold)]" aria-hidden="true" />
+        <p className="text-sm text-muted-foreground">Opening Collection Studio…</p>
+      </div>
+    );
+  }
+
+  if (collectionError || !data) {
+    const diagnosticId = getCollectionLoadDiagnosticId(collectionError);
+    return (
+      <div className="min-h-screen flex items-center justify-center px-4">
+        <div className="w-full max-w-md rounded-xl p-6 text-center" style={{ background: "var(--ln-coal)", border: "1px solid rgba(196,154,40,0.28)" }}>
+          <p className="font-heading text-base" style={{ color: "var(--ln-parchment)" }}>Collection Studio could not open.</p>
+          <p className="mt-2 text-sm leading-relaxed" style={{ color: "var(--ln-smoke)" }}>The collection and your active player have been left unchanged. Retry this collection, or return to its place in the Archive.</p>
+          <p className="mt-3 select-all font-mono text-[11px]" style={{ color: "var(--ln-smoke)" }}>Diagnostic reference: {diagnosticId}</p>
+          <div className="mt-5 flex flex-wrap justify-center gap-3">
+            <Button type="button" onClick={() => void refetchCollection()} disabled={collectionIsFetching} className="bg-[var(--ln-gold)] text-[var(--ln-coal)] hover:bg-[var(--ln-gold-hot)]" aria-label="Retry loading this collection">
+              {collectionIsFetching ? <Loader2 className="mr-2 size-4 animate-spin" /> : <RefreshCw className="mr-2 size-4" />}
+              Retry
+            </Button>
+            <Button type="button" variant="outline" onClick={() => navigate(archiveCollectionHref)}>
+              <ArrowLeft className="mr-2 size-4" /> Back to Archive
+            </Button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -734,7 +806,7 @@ export default function CollectionStudioPage() {
         <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">
             <Link
-              href={`/archive?tab=collections&collection=${collectionId}`}
+              href={archiveCollectionHref}
               className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
             >
               <ArrowLeft className="w-4 h-4" />

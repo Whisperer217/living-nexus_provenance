@@ -906,6 +906,56 @@ export async function updateSongMetadata(
   await db.update(songs).set(updateSet).where(and(eq(songs.id, songId), eq(songs.userId, userId)));
 }
 
+/**
+ * Corrects the current effective participation declaration and records its
+ * append-only historical event in one transaction. This deliberately grants
+ * no access to Work identity, media, ownership, or relationship fields.
+ */
+export async function correctSongParticipationDeclaration(data: {
+  songId: number;
+  userId: number;
+  declaration: {
+    music: "Human" | "AI" | "Both" | "None";
+    lyrics: "Human" | "AI" | "Both" | "None";
+    voice: "Human" | "AI" | "Both" | "None";
+  };
+  eventData: Record<string, unknown>;
+  actorId: number;
+  actorName?: string;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+
+  return db.transaction(async (tx: any) => {
+    const [updateResult] = await tx
+      .update(songs)
+      .set({
+        participationMusic: data.declaration.music,
+        participationLyrics: data.declaration.lyrics,
+        participationVoice: data.declaration.voice,
+        updatedAt: new Date(),
+      })
+      .where(and(eq(songs.id, data.songId), eq(songs.userId, data.userId)));
+
+    if (Number(updateResult?.affectedRows ?? 0) !== 1) {
+      throw new Error("Participation declaration correction could not be authorized for this Work.");
+    }
+
+    const [eventResult] = await tx.insert(workEvents).values({
+      songId: data.songId,
+      eventType: "creator_participation_declaration_corrected",
+      eventLabel: "Creator participation declaration corrected",
+      eventData: data.eventData as any,
+      actorId: data.actorId,
+      actorName: data.actorName,
+      isSystemEvent: false,
+      occurredAt: new Date(),
+    } as any);
+
+    return { updateResult, eventResult };
+  });
+}
+
 // ─── Sovereign Stamp ─────────────────────────────────────────────────────────
 // getSongById already exists above (line ~289) — no duplicate needed.
 
