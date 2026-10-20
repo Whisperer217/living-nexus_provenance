@@ -149,6 +149,7 @@ export default function LoopCreatorPage() {
   const perspective = isOwner ? "creator" : "witness";
   const displayName = creator.artistHandle || creator.name || "Creator";
   const bio = creator.bio || creator.originStatement || creator.tagline || "";
+  const completeBiography = creator.bio?.trim() || "";
   const why = creator.originStatement || creator.creativeMission || creator.bio || "";
   const where = creator.location || "";
   const whenJoined = creator.createdAt
@@ -483,6 +484,39 @@ export default function LoopCreatorPage() {
           </div>
         ))}
       </section>
+
+      {completeBiography && (
+        <section
+          className="max-w-5xl mx-auto px-4 sm:px-6 py-12"
+          aria-labelledby="creator-biography-heading"
+          style={{ borderBottom: "1px solid rgba(196,154,40,0.12)" }}
+        >
+          <p
+            className="text-[11px] uppercase tracking-[0.22em] mb-3"
+            style={{ color: "var(--ln-gold)", fontFamily: "'Cinzel', serif" }}
+          >
+            Creator identity
+          </p>
+          <h2
+            id="creator-biography-heading"
+            className="text-3xl mb-6"
+            style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}
+          >
+            Biography
+          </h2>
+          <p
+            className="max-w-3xl min-w-0 break-words text-base sm:text-lg leading-relaxed"
+            style={{
+              color: "color-mix(in srgb, var(--ln-parchment) 82%, transparent)",
+              fontFamily: "'Cormorant Garamond', serif",
+              whiteSpace: "pre-wrap",
+              overflowWrap: "anywhere",
+            }}
+          >
+            {completeBiography}
+          </p>
+        </section>
+      )}
 
       {/* Testimonies */}
       <section

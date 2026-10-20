@@ -52,4 +52,23 @@ describe("creator route continuity contract", () => {
     expect(router).toContain("saveLayout: protectedProcedure");
     expect(router).toContain("ctx.user.id");
   });
+
+  it("keeps the hero synopsis while rendering an optional full plain-text biography on the canonical Creator Domain", () => {
+    const page = read("client/src/pages/loop/LoopCreatorPage.tsx");
+    const fullBiography = page.slice(
+      page.indexOf('const completeBiography = creator.bio?.trim() || "";'),
+      page.indexOf("{/* Testimonies */}"),
+    );
+
+    expect(page).toContain('why.slice(0, 180)');
+    expect(fullBiography).toContain('{completeBiography && (');
+    expect(fullBiography).toContain('aria-labelledby="creator-biography-heading"');
+    expect(fullBiography).toContain('id="creator-biography-heading"');
+    expect(fullBiography).toMatch(/>\s*Biography\s*<\/h2>/);
+    expect(fullBiography).toContain("max-w-3xl min-w-0 break-words");
+    expect(fullBiography).toContain('whiteSpace: "pre-wrap"');
+    expect(fullBiography).toContain('overflowWrap: "anywhere"');
+    expect(fullBiography).toContain("{completeBiography}");
+    expect(fullBiography).not.toContain("completeBiography.slice(");
+  });
 });
