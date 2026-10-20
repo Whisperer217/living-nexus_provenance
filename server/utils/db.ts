@@ -1085,6 +1085,19 @@ export async function getCommentsBySong(songId: number) {
   // Return newest top-level first
   return topLevel.reverse();
 }
+
+/** Minimal parent identity lookup for reply-to-Work integrity checks. */
+export async function getCommentById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const rows = await db
+    .select({ id: comments.id, songId: comments.songId })
+    .from(comments)
+    .where(eq(comments.id, id))
+    .limit(1);
+  return rows[0];
+}
+
 const SIGNAL_MENTION_PATTERN = /(?:^|[^A-Za-z0-9_])@([A-Za-z0-9][A-Za-z0-9_.-]{0,63})/g;
 
 /**

@@ -11,6 +11,7 @@ import { adminProcedure, protectedProcedure, publicProcedure, router } from "../
 import { storagePut } from "../utils/storage";
 import { micronize } from "../services/imageProcessing";
 import { invokeLLM } from "../_core/llm";
+import { requirePublicCommentTarget } from "../domains/comments/commentTargetPolicy";
 import { adminNotifications, notifications, users } from "../../drizzle/schema";
 import { eq } from "drizzle-orm";
 import {
@@ -318,10 +319,9 @@ export const notificationsRouter = router({
         if (notif.type !== "comment") throw new TRPCError({ code: "BAD_REQUEST", message: "Can only reply to comment signals" });
         const songId = notif.refId;
         if (!songId) throw new TRPCError({ code: "BAD_REQUEST", message: "Signal has no referenced work" });
-        // Fetch the song to confirm it exists and get the title
-        const song = await getSongById(songId);
-        if (!song) throw new TRPCError({ code: "NOT_FOUND", message: "Referenced work not found" });
-        const replierName = ctx.user.name || "Creator";
+        // Resolve the same public Work policy used by the canonical Voices router.
+        const song = requirePublicCommentTarget(await getSongById(songId));
+        const replierName = ctx.user.artistHandle || ctx.user.name || "Creator";
         // Post the reply as a comment on the song
         await createEvent({
           type: "COMMENT",
@@ -350,5 +350,4 @@ export const notificationsRouter = router({
         return { ok: true };
       }),
   });
-
 

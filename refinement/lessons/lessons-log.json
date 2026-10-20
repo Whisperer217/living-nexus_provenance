@@ -1595,6 +1595,37 @@
         "playback-safety",
         "accessibility"
       ]
+    },
+    {
+      "id": "LESSON-067",
+      "date": "2026-10-20",
+      "category": "architecture",
+      "problem": "Global Player Voices retained a listener draft while deriving its query, drawer header, and submission Work from the moving PlayerContext track. Automatic advance or a manual skip could therefore retarget an unfinished comment without listener action. The server accepted caller-supplied Work IDs before resolving public availability, and replies did not prove parent/Work coherence.",
+      "solution": "Capture a stable canonical Work snapshot when the player composer opens, retain drafts keyed by Work ID, and permit target change only through an explicit Switch to Current Track action. Resolve public/published target availability before every list or write, and reject reply parents from another Work before side effects. Keep route-bound Work Voices and PlayerContext queue authority independent.",
+      "files": [
+        "client/src/components/player/GlobalPlayer.tsx",
+        "client/src/components/player/commentComposerState.ts",
+        "server/domains/comments/commentTargetPolicy.ts",
+        "server/utils/db.ts",
+        "server/routers/comments.ts",
+        "server/routers/notifications.ts",
+        "server/tests/playerCommentComposerState.test.ts",
+        "server/tests/commentTargetPolicy.test.ts",
+        "server/tests/comments.targetIntegrity.test.ts",
+        "server/tests/globalPlayerCommentAttribution.contract.test.ts",
+        "docs/lnls/adr/COMMENT-ATTRIBUTION-PLAYBACK-CONTINUITY-2026-10-20.md"
+      ],
+      "score": 0,
+      "tags": [
+        "global-player",
+        "comment-attribution",
+        "listener-intent",
+        "per-work-draft",
+        "server-authorization",
+        "reply-integrity",
+        "playback-continuity",
+        "evidence-first"
+      ]
     }
   ]
 }

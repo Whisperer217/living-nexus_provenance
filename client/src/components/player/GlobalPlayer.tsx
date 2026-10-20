@@ -35,6 +35,15 @@ import PlayerTipModal from "./PlayerTipModal";
 import { PlayerQueuePanel, type QueueTrack } from "./PlayerQueuePanel";
 import { CinematicCreatorGallery } from "./CinematicCreatorGallery";
 import { cinematicFeedRowToTrack, useCinematicCreatorCatalog } from "./useCinematicCreatorCatalog";
+import {
+  clearPlayerCommentDraft,
+  currentPlayerCommentDraft,
+  initialPlayerCommentComposerState,
+  openPlayerCommentComposer,
+  setPlayerCommentDraft,
+  switchPlayerCommentTarget,
+  type PlayerCommentTarget,
+} from "./commentComposerState";
 import { toast } from "sonner";
 
 /* ── Gold design tokens ─────────────────────────────────────────── */
@@ -493,15 +502,49 @@ function GlobalPlayerInner() {
   /* ── Comments (after currentSongId is available) ── */
   const [commentsOpen, setCommentsOpen] = useState(false);
   const [reportingCommentId, setReportingCommentId] = useState<number | null>(null);
-  const [commentText, setCommentText] = useState("");
+  const [commentComposer, setCommentComposer] = useState(initialPlayerCommentComposerState);
   const [commentSubmitting, setCommentSubmitting] = useState(false);
+  const commentTargetForCurrentTrack = useMemo<PlayerCommentTarget | null>(() => {
+    if (!currentSongId || Number.isNaN(currentSongId)) return null;
+    return {
+      songId: currentSongId,
+      title: visTrack?.title || currentTrack?.title || "Untitled Work",
+      creator: visTrack?.artist || currentTrack?.artist || "Creator",
+      artUrl: visTrack?.artUrl ?? currentTrack?.artUrl ?? null,
+    };
+  }, [
+    currentSongId,
+    currentTrack?.artUrl,
+    currentTrack?.artist,
+    currentTrack?.title,
+    visTrack?.artUrl,
+    visTrack?.artist,
+    visTrack?.title,
+  ]);
+  const commentTarget = commentComposer.target;
+  const commentText = currentPlayerCommentDraft(commentComposer);
+  const openCommentsForCurrentTrack = useCallback(() => {
+    if (!commentTargetForCurrentTrack) return;
+    setCommentComposer((previous) => openPlayerCommentComposer(previous, commentTargetForCurrentTrack));
+    setCommentsOpen(true);
+  }, [commentTargetForCurrentTrack]);
+  const switchCommentsToCurrentTrack = useCallback(() => {
+    if (!commentTargetForCurrentTrack) return;
+    setCommentComposer((previous) => switchPlayerCommentTarget(previous, commentTargetForCurrentTrack));
+  }, [commentTargetForCurrentTrack]);
   const { data: commentsData, refetch: refetchComments } = trpc.comments.list.useQuery(
-    { songId: currentSongId ?? 0 },
-    { enabled: !!currentSongId && !isNaN(currentSongId) && commentsOpen, staleTime: 30_000 }
+    { songId: commentTarget?.songId ?? 0 },
+    { enabled: !!commentTarget && commentsOpen, staleTime: 30_000 }
   );
   const comments = commentsData ?? [];
   const addCommentMutation = trpc.comments.add.useMutation({
-    onSuccess: () => { setCommentText(""); refetchComments(); },
+    onSuccess: (_result, variables) => {
+      setCommentComposer((previous) => clearPlayerCommentDraft(previous, variables.songId));
+      void refetchComments();
+    },
+    onError: (error: { message: string }) => {
+      toast.error(error.message || "Your signal was not posted. Your draft is still here.");
+    },
   });
   const reportCommentMutation = trpc.comments.report.useMutation({
     onSuccess: (res: { alreadyReported: boolean }) => {
@@ -512,9 +555,13 @@ function GlobalPlayerInner() {
     onError: (e: { message: string }) => { toast.error(e.message); setReportingCommentId(null); },
   });
   async function handleSubmitComment() {
-    if (!user || !commentText.trim() || !currentSongId) return;
+    if (!user || !commentText.trim() || !commentTarget) return;
     setCommentSubmitting(true);
-    try { await addCommentMutation.mutateAsync({ songId: currentSongId, content: commentText.trim() }); }
+    try {
+      await addCommentMutation.mutateAsync({ songId: commentTarget.songId, content: commentText.trim() });
+    } catch {
+      // onError reports the failure and the per-Work draft is intentionally retained.
+    }
     finally { setCommentSubmitting(false); }
   }
   const creatorStripeAccountId = songDetail?.creator?.stripeAccountId ?? null;
@@ -1284,7 +1331,7 @@ function GlobalPlayerInner() {
               </button>
             )}
             {currentSongId && (
-              <button onClick={e => { e.stopPropagation(); setCommentsOpen(true); }} className="p-1.5 transition-colors" style={{ color: isDesktop ? "rgba(212,175,55,0.65)" : "rgba(192,132,252,0.6)" }} title="Comments" aria-label="Open comments">
+              <button onClick={e => { e.stopPropagation(); openCommentsForCurrentTrack(); }} className="p-1.5 transition-colors" style={{ color: isDesktop ? "rgba(212,175,55,0.65)" : "rgba(192,132,252,0.6)" }} title="Comments" aria-label="Open comments">
                 <MessageCircle size={14} />
               </button>
             )}
@@ -1509,7 +1556,7 @@ function GlobalPlayerInner() {
                 </button>
               )}
               {currentSongId && (
-                <button onClick={() => setCommentsOpen(true)} className="flex flex-col items-center gap-1 transition-colors" style={{ color: isDesktop ? "rgba(255,255,255,0.5)" : "rgba(192,132,252,0.6)" }}>
+                <button onClick={openCommentsForCurrentTrack} className="flex flex-col items-center gap-1 transition-colors" style={{ color: isDesktop ? "rgba(255,255,255,0.5)" : "rgba(192,132,252,0.6)" }}>
                   <MessageCircle size={22} />
                   <span className="text-[9px] uppercase tracking-widest">Comments</span>
                 </button>
@@ -1757,7 +1804,7 @@ function GlobalPlayerInner() {
   ) : null;
 
   /* ── Comments drawer portal ── */
-  const commentsDrawer = commentsOpen && currentSongId ? createPortal(
+  const commentsDrawer = commentsOpen && commentTarget ? createPortal(
     <div
       style={{
         position: "fixed",
@@ -1801,14 +1848,29 @@ function GlobalPlayerInner() {
             <X size={14} />
           </button>
         </div>
-        {/* Track info */}
+        {/* Bound Work identity: listener intent stays stable even when playback moves. */}
         <div className="flex items-center gap-3 px-4 py-2 flex-shrink-0" style={{ borderBottom: "1px solid rgba(212,175,55,0.06)" }}>
-          {visTrack?.artUrl && <img src={visTrack.artUrl} alt="" className="w-8 h-8 rounded-lg object-cover flex-shrink-0" />}
+          {commentTarget.artUrl && <img src={commentTarget.artUrl} alt="" className="w-8 h-8 rounded-lg object-cover flex-shrink-0" />}
           <div className="min-w-0">
-            <p className="text-[11px] font-semibold truncate" style={{ color: "#F5EDD8" }}>{visTrack?.title}</p>
-            <p className="text-[10px] truncate" style={{ color: "rgba(212,175,55,0.6)" }}>{visTrack?.artist}</p>
+            <p className="text-[11px] font-semibold truncate" style={{ color: "#F5EDD8" }}>Commenting on {commentTarget.title}</p>
+            <p className="text-[10px] truncate" style={{ color: "rgba(212,175,55,0.6)" }}>{commentTarget.creator}</p>
           </div>
         </div>
+        {commentTargetForCurrentTrack && commentTarget.songId !== commentTargetForCurrentTrack.songId && (
+          <div className="px-4 py-2 flex items-center justify-between gap-3 flex-shrink-0" style={{ background: "rgba(212,175,55,0.06)", borderBottom: "1px solid rgba(212,175,55,0.1)" }}>
+            <p className="text-[10px] leading-relaxed" style={{ color: "rgba(245,237,216,0.68)" }}>
+              Listening now: <span style={{ color: "var(--ln-parchment)" }}>{commentTargetForCurrentTrack.title}</span>
+            </p>
+            <button
+              type="button"
+              onClick={switchCommentsToCurrentTrack}
+              className="flex-shrink-0 rounded-full px-2.5 py-1 text-[10px] font-semibold transition-colors hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+              style={{ color: "var(--ln-gold-hot)", border: "1px solid rgba(212,175,55,0.36)" }}
+            >
+              Switch to Current Track
+            </button>
+          </div>
+        )}
         {/* Comments list */}
         <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
           {comments.length === 0 ? (
@@ -1854,7 +1916,7 @@ function GlobalPlayerInner() {
             <input
               type="text"
               value={commentText}
-              onChange={e => setCommentText(e.target.value)}
+              onChange={e => setCommentComposer((previous) => setPlayerCommentDraft(previous, e.target.value))}
               onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSubmitComment(); } }}
               placeholder={user ? "Add a comment…" : "Sign in to comment"}
               disabled={!user || commentSubmitting}
@@ -1979,7 +2041,7 @@ function GlobalPlayerInner() {
       <div className="relative flex items-center justify-between px-4 py-2 flex-shrink-0" style={{ borderTop: "1px solid rgba(212,175,55,0.08)", borderBottom: "1px solid rgba(212,175,55,0.08)" }}>
         {[
           { icon: <Heart size={18} fill={isLiked ? "#ef4444" : "none"} />, label: "Like", color: isLiked ? "#ef4444" : "rgba(212,175,55,0.5)", action: () => { if (currentSongId) toggleLikeMutation.mutate({ songId: currentSongId }); } },
-          { icon: <MessageCircle size={18} />, label: "Comment", color: "rgba(212,175,55,0.5)", action: () => { setCinematic(false); setCommentsOpen(true); } },
+          { icon: <MessageCircle size={18} />, label: "Comment", color: "rgba(212,175,55,0.5)", action: () => { setCinematic(false); openCommentsForCurrentTrack(); } },
           { icon: <Share2 size={18} />, label: "Share", color: "rgba(212,175,55,0.5)", action: () => { if (canonicalSharePath) { navigator.clipboard?.writeText(`${window.location.origin}${canonicalSharePath}`).then(() => toast.success("Link copied")); } } },
           { icon: <DollarSign size={18} />, label: "Tip", color: tipsEnabled ? "rgba(212,175,55,0.5)" : "rgba(212,175,55,0.2)", action: () => { if (tipsEnabled && currentSongId) { setCinematic(false); setTipOpen(true); } } },
           { icon: <Volume2 size={18} />, label: "Volume", color: state.isMuted ? "rgba(212,175,55,0.25)" : "rgba(212,175,55,0.5)", action: () => toggleMute() },

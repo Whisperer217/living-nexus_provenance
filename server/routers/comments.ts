@@ -12,8 +12,12 @@ import { storagePut } from "../utils/storage";
 import { micronize } from "../services/imageProcessing";
 import { invokeLLM } from "../_core/llm";
 import {
+  requireCommentParentForWork,
+  requirePublicCommentTarget,
+} from "../domains/comments/commentTargetPolicy";
+import {
   addComment, createSong, deleteSong, getAllCreators, searchCreatorHandles,
-  getCommentsBySong, getPublicSongs, getSongById,
+  getCommentById, getCommentsBySong, getPublicSongs, getSongById,
   getSongsByUser, getSongWithCreator, getTipsBySong, reorderSongs, getNextDisplayOrder,
   getUserById, incrementPlayCount, recordDownload,
   recordLicense, recordSlotPurchase, recordTip,
@@ -196,7 +200,11 @@ async function notifySignalMentions(input: {
       actorName: input.actorName,
       refId: input.songId,
       refType: "song",
-    })));
+  })));
+}
+
+async function resolvePublicCommentTarget(songId: number) {
+  return requirePublicCommentTarget(await getSongById(songId));
 }
 
 // ── Build stats — updated via env vars on each deploy ──
@@ -213,14 +221,18 @@ const KEEPER_PRESETS = [
 ];
 
 export const commentsRouter = router({
-    list: publicProcedure.input(z.object({ songId: z.number() })).query(async ({ input }) => getCommentsBySong(input.songId)),
+    list: publicProcedure.input(z.object({ songId: z.number().int().positive() })).query(async ({ input }) => {
+      await resolvePublicCommentTarget(input.songId);
+      return getCommentsBySong(input.songId);
+    }),
     mentionCandidates: publicProcedure.input(z.object({ query: z.string().trim().min(1).max(64) }))
       .query(async ({ input }) => searchCreatorHandles(input.query)),
     add: protectedProcedure.input(z.object({
-      songId: z.number(),
+      songId: z.number().int().positive(),
       content: z.string().min(1).max(1000),
       mentionedCreatorHandles: z.array(creatorHandleInput).max(5).optional(),
     })).mutation(async ({ ctx, input }) => {
+      const song = await resolvePublicCommentTarget(input.songId);
       // Always use the authenticated user's identity — never fall back to Anonymous
       const actorName = ctx.user.artistHandle || ctx.user.name || "Creator";
       await createEvent({
@@ -241,8 +253,7 @@ export const commentsRouter = router({
         mentionedCreatorHandles: input.mentionedCreatorHandles,
       });
       // Notify the song owner if commenter is a different user
-      const song = await getSongById(input.songId);
-      if (song && song.userId && song.userId !== ctx.user.id) {
+      if (song.userId && song.userId !== ctx.user.id) {
         if (!comment.mentions.some((mention: { userId: number }) => mention.userId === song.userId)) {
           await createNotification({
             userId: song.userId,
@@ -269,12 +280,14 @@ export const commentsRouter = router({
     }),
     addReply: protectedProcedure
       .input(z.object({
-        songId: z.number(),
-        parentId: z.number(),
+        songId: z.number().int().positive(),
+        parentId: z.number().int().positive(),
         content: z.string().min(1).max(1000),
         mentionedCreatorHandles: z.array(creatorHandleInput).max(5).optional(),
       }))
       .mutation(async ({ ctx, input }) => {
+        const song = await resolvePublicCommentTarget(input.songId);
+        requireCommentParentForWork(await getCommentById(input.parentId), input.songId);
         const actorName = ctx.user.artistHandle || ctx.user.name || "Creator";
         // Insert reply with parentId
         const comment = await addComment({
@@ -286,8 +299,7 @@ export const commentsRouter = router({
           mentionedCreatorHandles: input.mentionedCreatorHandles,
         });
         // Notify the song owner if commenter is a different user
-        const song = await getSongById(input.songId);
-        if (song && song.userId && song.userId !== ctx.user.id) {
+        if (song.userId && song.userId !== ctx.user.id) {
           if (!comment.mentions.some((mention: { userId: number }) => mention.userId === song.userId)) {
             await createNotification({
               userId: song.userId,
