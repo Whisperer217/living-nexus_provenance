@@ -221,6 +221,7 @@ If profiling confirms playback-clock re-render pressure, the preferred repair is
 - Final full regression suite: **129 files passed, 808 tests passed; 1 browser-only test intentionally skipped**.
 - Final production build passed. `git diff --check` passed.
 - Local guest Studio route was browser-checked: it resolved to the signed-out state rather than a stalled loader. A public Work route was browser-checked: the read-only provenance history rendered normally with its revised copy and no correction event.
+- Authenticated owner recovery was browser-checked against a deliberately nonexistent collection ID: the primary-request failure showed the stable `CS-GET-COLLECTION-NOT_FOUND` reference and both recovery actions; Retry remained in the same safe state, and Back returned to Archive while retaining the collection query parameter. No collection data, Work data, queue, or player state was changed.
 - `pnpm refine` measured **70/100 (C)**. This is the existing cross-platform typography/doctrine/design-drift baseline; no claim is made that this narrow reliability and provenance repair improved it.
 
 ### What remains unproven
