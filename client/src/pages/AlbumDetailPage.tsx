@@ -11,12 +11,16 @@ import { useRoute, useLocation, Link } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { usePlayer } from "@/contexts/PlayerContext";
 import type { Track } from "@/contexts/PlayerContext";
-import { Play, ChevronLeft, Music, Clock, Disc3, Share2, Heart, MessageSquare, Download, ExternalLink } from "lucide-react";
+import { Play, ChevronLeft, Music, Clock, Disc3, Share2, Heart, MessageSquare, Download, ExternalLink, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useLike } from "@/hooks/useLike";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { triggerTaggedDownload } from "@/lib/downloadTrack";
+import {
+  copyProvenancePlayerManifest,
+  downloadProvenancePlayerManifest,
+} from "@/lib/provenancePlayerManifest";
 
 // ─── Per-track row with like / comment / share ─────────────────────────────
 
@@ -198,6 +202,9 @@ export default function AlbumDetailPage() {
   const [, params] = useRoute("/album/:collectionWid");
   const [, navigate] = useLocation();
   const collectionWid = params?.collectionWid ?? "";
+  const { user } = useAuth();
+  const utils = trpc.useUtils();
+  const [manifestAction, setManifestAction] = useState<"copy" | "download" | null>(null);
 
   const { data, isLoading, error } = trpc.songs.getPublicAlbum.useQuery(
     { collectionWid },
@@ -240,6 +247,34 @@ export default function AlbumDetailPage() {
       ? `${window.location.origin}/album/${encodeURIComponent(data.collection.collectionWid)}`
       : window.location.href;
     navigator.clipboard.writeText(url).then(() => toast.success("Album link copied!"));
+  };
+
+  const exportProvenancePlayerManifest = async (action: "copy" | "download") => {
+    setManifestAction(action);
+    try {
+      const manifest = await utils.songs.copyProvenancePlayerAlbumManifest.fetch({ collectionWid });
+      const albumName = data?.collection?.name ?? "living-nexus-album";
+
+      if (action === "download") {
+        downloadProvenancePlayerManifest(manifest, albumName);
+        toast.success("Manifest downloaded", { description: "Import this JSON in Provenance Player: Add → LN manifest." });
+        return;
+      }
+
+      const copied = await copyProvenancePlayerManifest(manifest);
+      if (copied) {
+        toast.success("Manifest copied", { description: "In Provenance Player, choose Add → LN manifest → Paste → Import." });
+      } else {
+        downloadProvenancePlayerManifest(manifest, albumName);
+        toast.success("Clipboard unavailable — manifest downloaded", { description: "Import the JSON file in Provenance Player." });
+      }
+    } catch {
+      toast.error("Manifest unavailable", {
+        description: "Every Work must be public, authorized for external display, and free to download.",
+      });
+    } finally {
+      setManifestAction(null);
+    }
   };
 
   // ── Album download — uses per-track downloadPermission, no project gate ───────
@@ -319,6 +354,7 @@ export default function AlbumDetailPage() {
   }
 
   const { collection, tracks, creator } = data;
+  const isManifestOwner = collection.visibility === "public" && user?.id === collection.creatorId;
   const playableTracks = tracks.filter((t: any) => t.fileUrl);
   const playableIndices = tracks.reduce((acc: number[], t: any, i: number) => {
     if (t.fileUrl) acc.push(i);
@@ -452,7 +488,38 @@ export default function AlbumDetailPage() {
               <Share2 size={15} />
               Share
             </button>
+            {isManifestOwner && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => exportProvenancePlayerManifest("copy")}
+                  disabled={manifestAction !== null}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-full font-semibold text-sm transition-all hover:opacity-80 active:scale-95 disabled:opacity-50"
+                  style={{ background: "rgba(196,154,40,0.10)", border: "1px solid rgba(196,154,40,0.28)", color: "var(--ln-gold, #C49A28)", fontFamily: "'Cinzel', serif" }}
+                  title="Copy an ordered manifest for Provenance Player"
+                >
+                  {manifestAction === "copy" ? <Disc3 size={15} className="animate-spin" /> : <Copy size={15} />}
+                  Copy manifest
+                </button>
+                <button
+                  type="button"
+                  onClick={() => exportProvenancePlayerManifest("download")}
+                  disabled={manifestAction !== null}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-full font-semibold text-sm transition-all hover:opacity-80 active:scale-95 disabled:opacity-50"
+                  style={{ background: "rgba(196,154,40,0.10)", border: "1px solid rgba(196,154,40,0.28)", color: "var(--ln-gold, #C49A28)", fontFamily: "'Cinzel', serif" }}
+                  title="Download an ordered manifest for Provenance Player"
+                >
+                  {manifestAction === "download" ? <Disc3 size={15} className="animate-spin" /> : <Download size={15} />}
+                  Download manifest
+                </button>
+              </>
+            )}
           </div>
+          {isManifestOwner && (
+            <p className="text-[11px] leading-relaxed" style={{ color: "var(--ln-smoke, #8a8a9a)" }}>
+              Provenance Player: copy this album’s ordered manifest, then choose Add → LN manifest → Paste → Import.
+            </p>
+          )}
         </div>
       </div>
 

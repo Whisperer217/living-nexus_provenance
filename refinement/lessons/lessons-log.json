@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-10-20T21:46:39.293835Z",
-  "totalLessons": 69,
+  "lastUpdated": "2026-10-20T22:42:04.992331+00:00",
+  "totalLessons": 70,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -1672,6 +1672,40 @@
         "queue-continuity",
         "no-wid-handoff",
         "reversible"
+      ]
+    },
+    {
+      "id": "LESSON-070",
+      "date": "2026-10-20",
+      "category": "security",
+      "problem": "A manual manifest bridge to the separate Provenance Player could have exposed raw media URLs, bypassed current creator consent or revocation, emitted a misleading partial album/playlist, or treated a WID share URL as canonical despite duplicate Work identities. Browser-visible playlist rows and legacy public stream routes do not encode that external-delegation boundary.",
+      "solution": "Build manifest JSON only through owner-authorized, bounded server projections that preserve canonical list order and fail closed for every ineligible member. Put only a revocable Living Nexus media gateway in audioUrl; it rechecks the exact eligibility and duplicate-WID policy on each fetch. Keep copy/download local to the owner surface and independent from PlayerContext, queues, account sync, automatic external launch, and registry mutation.",
+      "files": [
+        "server/domains/provenancePlayer/manifest.ts",
+        "server/routes/provenancePlayerMediaRoute.ts",
+        "server/routers/playlists.ts",
+        "server/routers/songs.ts",
+        "server/utils/db.ts",
+        "client/src/lib/provenancePlayerManifest.ts",
+        "client/src/pages/PlaylistsPage.tsx",
+        "client/src/pages/AlbumDetailPage.tsx",
+        "server/tests/provenancePlayerManifest.test.ts",
+        "server/tests/provenancePlayerManifestRouter.test.ts",
+        "server/tests/provenancePlayerManifestExport.contract.test.ts",
+        "docs/lnls/adr/PROVENANCE-PLAYER-MANIFEST-COPY-2026-10-20.md"
+      ],
+      "score": 0,
+      "tags": [
+        "provenance-player",
+        "manifest-export",
+        "external-delegation",
+        "creator-consent",
+        "revocation",
+        "wid-ambiguity",
+        "ordered-playlists",
+        "album-order",
+        "player-authority",
+        "fail-closed"
       ]
     }
   ]

@@ -11,6 +11,7 @@ import { adminProcedure, protectedProcedure, publicProcedure, router } from "../
 import { storagePut } from "../utils/storage";
 import { micronize } from "../services/imageProcessing";
 import { invokeLLM } from "../_core/llm";
+import { buildProvenancePlayerManifest, ProvenancePlayerManifestUnavailableError } from "../domains/provenancePlayer/manifest";
 import {
   addComment, createSong, deleteSong, getAllCreators,
   getCommentsBySong, getPublicSongs, getSongById,
@@ -32,6 +33,7 @@ import {
   getWitnessNetwork, createReference, getReferencesForSong, getReferencesForUser,
   createPlaylist, getPlaylistsByUser, getPlaylistById, updatePlaylist, deletePlaylist,
   getPlaylistTracks, addTrackToPlaylist, removeTrackFromPlaylist,
+  getProvenancePlayerPlaylistTrackSources, hasAmbiguousProvenancePlayerWids,
   getPlaylistCollaborators, inviteCollaborator, acceptPlaylistInvite, removeCollaborator,
   isPlaylistMember,
   createNotification, getNotifications, markNotificationRead, markAllNotificationsRead,
@@ -206,6 +208,35 @@ export const playlistsRouter = router({
           getPlaylistCollaborators(input.id),
         ]);
         return { playlist, tracks, collaborators };
+      }),
+    /**
+     * Owner-only portable projection for the separately hosted companion player.
+     * It fails closed for the entire ordered playlist if one current Work cannot
+     * be delegated under the explicit external-display and free-media policy.
+     */
+    copyProvenancePlayerManifest: protectedProcedure
+      .input(z.object({ id: z.number().int().positive() }))
+      .query(async ({ ctx, input }) => {
+        const playlist = await getPlaylistById(input.id);
+        if (!playlist || playlist.ownerId !== ctx.user.id) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Manifest unavailable" });
+        }
+
+        try {
+          const rows = await getProvenancePlayerPlaylistTrackSources(input.id);
+          if (await hasAmbiguousProvenancePlayerWids(rows.map((row: any) => row.song?.witnessId ?? ""))) {
+            throw new ProvenancePlayerManifestUnavailableError();
+          }
+          return buildProvenancePlayerManifest({
+            tracks: rows.map((row: any) => ({ ...row.song, creator: row.creator })),
+            fallbackArtworkUrl: playlist.coverArtUrl,
+          });
+        } catch (error) {
+          if (error instanceof ProvenancePlayerManifestUnavailableError) {
+            throw new TRPCError({ code: "NOT_FOUND", message: "Manifest unavailable" });
+          }
+          throw error;
+        }
       }),
     /** Create a new playlist */
     create: protectedProcedure
@@ -487,5 +518,3 @@ export const playlistsRouter = router({
         return { playlist, tracks, owner };
       }),
   });
-
-

@@ -2172,6 +2172,54 @@ export async function getPlaylistTracks(playlistId: number) {
   return rows;
 }
 
+/**
+ * Full current Work projections for an owner-authorized companion manifest.
+ * This intentionally does not authorize or filter Works: the manifest domain
+ * policy must see every ordered member and reject atomically if one is unsafe.
+ */
+export async function getProvenancePlayerPlaylistTrackSources(playlistId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  const { playlistTracks } = await import("../../drizzle/schema");
+
+  return (db as any)
+    .select({
+      playlistTrackId: playlistTracks.id,
+      position: playlistTracks.position,
+      playlistTrackCreatedAt: playlistTracks.createdAt,
+      song: {
+        id: songs.id,
+        title: songs.title,
+        contentType: songs.contentType,
+        status: songs.status,
+        isPublic: songs.isPublic,
+        isFlagged: songs.isFlagged,
+        witnessId: songs.witnessId,
+        fileUrl: songs.fileUrl,
+        coverArtUrl: songs.coverArtUrl,
+        externalDisplayEnabled: songs.externalDisplayEnabled,
+        externalDisplayRightsConfirmed: songs.externalDisplayRightsConfirmed,
+        externalDisplayAuthorizedAt: songs.externalDisplayAuthorizedAt,
+        externalDisplayRevokedAt: songs.externalDisplayRevokedAt,
+        downloadPermission: songs.downloadPermission,
+        participationMusic: songs.participationMusic,
+        participationLyrics: songs.participationLyrics,
+        participationVoice: songs.participationVoice,
+      },
+      creator: {
+        artistHandle: users.artistHandle,
+        name: users.name,
+      },
+    })
+    .from(playlistTracks)
+    .leftJoin(songs, eq(songs.id, playlistTracks.songId))
+    .leftJoin(users, eq(users.id, songs.userId))
+    .where(eq(playlistTracks.playlistId, playlistId))
+    .orderBy(asc(playlistTracks.position), asc(playlistTracks.createdAt), asc(playlistTracks.id))
+    // 501 is enough to reject the external player's 500-track maximum without a bulk read.
+    .limit(501);
+}
+
 export async function addTrackToPlaylist(playlistId: number, songId: number, addedByUserId: number) {
   const db = await getDb();
   if (!db) return;
@@ -2613,6 +2661,112 @@ export async function getSongsByCollectionId(collectionId: number) {
   return db.select().from(songs)
     .where(and(eq(songs.collectionId, collectionId), sql`${songs.status} != 'Deleted'`))
     .orderBy(songs.trackOrder, songs.createdAt); // trackOrder preserves batch upload sequence; createdAt as tiebreaker
+}
+
+/**
+ * Complete current album membership for an owner-authorized companion manifest.
+ * Unlike the display helper above, deleted and otherwise ineligible rows are
+ * retained so the manifest policy can fail closed rather than emit a partial album.
+ */
+export async function getProvenancePlayerAlbumTrackSources(collectionId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return (db as any)
+    .select({
+      song: {
+        id: songs.id,
+        title: songs.title,
+        contentType: songs.contentType,
+        status: songs.status,
+        isPublic: songs.isPublic,
+        isFlagged: songs.isFlagged,
+        witnessId: songs.witnessId,
+        fileUrl: songs.fileUrl,
+        coverArtUrl: songs.coverArtUrl,
+        externalDisplayEnabled: songs.externalDisplayEnabled,
+        externalDisplayRightsConfirmed: songs.externalDisplayRightsConfirmed,
+        externalDisplayAuthorizedAt: songs.externalDisplayAuthorizedAt,
+        externalDisplayRevokedAt: songs.externalDisplayRevokedAt,
+        downloadPermission: songs.downloadPermission,
+        participationMusic: songs.participationMusic,
+        participationLyrics: songs.participationLyrics,
+        participationVoice: songs.participationVoice,
+        trackOrder: songs.trackOrder,
+        createdAt: songs.createdAt,
+      },
+      creator: {
+        artistHandle: users.artistHandle,
+        name: users.name,
+      },
+    })
+    .from(songs)
+    .leftJoin(users, eq(users.id, songs.userId))
+    .where(eq(songs.collectionId, collectionId))
+    .orderBy(asc(songs.trackOrder), asc(songs.createdAt), asc(songs.id))
+    // 501 is enough to reject the external player's 500-track maximum without a bulk read.
+    .limit(501);
+}
+
+/** Current Work projection for the revocable companion-media gateway. */
+export async function getProvenancePlayerTrackSourceById(songId: number) {
+  const db = await getDb();
+  if (!db) return null;
+
+  const rows = await (db as any)
+    .select({
+      song: {
+        id: songs.id,
+        title: songs.title,
+        contentType: songs.contentType,
+        status: songs.status,
+        isPublic: songs.isPublic,
+        isFlagged: songs.isFlagged,
+        witnessId: songs.witnessId,
+        fileUrl: songs.fileUrl,
+        coverArtUrl: songs.coverArtUrl,
+        externalDisplayEnabled: songs.externalDisplayEnabled,
+        externalDisplayRightsConfirmed: songs.externalDisplayRightsConfirmed,
+        externalDisplayAuthorizedAt: songs.externalDisplayAuthorizedAt,
+        externalDisplayRevokedAt: songs.externalDisplayRevokedAt,
+        downloadPermission: songs.downloadPermission,
+        participationMusic: songs.participationMusic,
+        participationLyrics: songs.participationLyrics,
+        participationVoice: songs.participationVoice,
+      },
+      creator: {
+        artistHandle: users.artistHandle,
+        name: users.name,
+      },
+    })
+    .from(songs)
+    .leftJoin(users, eq(users.id, songs.userId))
+    .where(eq(songs.id, songId))
+    .limit(1);
+
+  return rows[0] ?? null;
+}
+
+/**
+ * A copied manifest names `/share/:wid` as its source. Reject instead of
+ * exporting whenever more than one current song row carries a requested WID.
+ */
+export async function hasAmbiguousProvenancePlayerWids(witnessIds: readonly string[]): Promise<boolean> {
+  const normalized = Array.from(new Set(witnessIds.map((wid) => wid.trim()).filter(Boolean)));
+  if (normalized.length === 0) return false;
+
+  const db = await getDb();
+  if (!db) return true;
+  const rows = await (db as any)
+    .select({ witnessId: songs.witnessId })
+    .from(songs)
+    .where(inArray(songs.witnessId, normalized));
+  const counts = new Map<string, number>();
+  for (const row of rows) {
+    if (!row.witnessId) continue;
+    counts.set(row.witnessId, (counts.get(row.witnessId) ?? 0) + 1);
+  }
+  return Array.from(counts.values()).some((count) => count > 1);
 }
 
 /** Get the collection a song belongs to (if any). */

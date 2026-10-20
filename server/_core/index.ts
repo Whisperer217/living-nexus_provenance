@@ -20,6 +20,7 @@ import { dbExportRouter } from "../routes/dbExportRoute";
 import { sovereignArchiveRouter } from "../routes/sovereignArchiveRoute";
 import { harmonicRouter } from "../routes/harmonicRoute";
 import { publicApiRouter } from "../routes/publicApiRoute";
+import { provenancePlayerMediaRouter } from "../routes/provenancePlayerMediaRoute";
 import { oembedRouter } from "../routes/oembedRoute";
 import { ogApiRouter } from "../routes/ogApiRoutes";
 import { shareRouter } from "../routes/shareRoute";
@@ -201,6 +202,8 @@ async function startServer() {
   app.use("/api/harmonic", harmonicRouter);
   // Public REST API v1 (Plex/Jellyfin/external clients)
   app.use(publicApiRouter);
+  // Revocable, eligibility-gated media for copied Provenance Player manifests.
+  app.use(provenancePlayerMediaRouter);
   // Registry API R1 — governed public/scoped read models only; no direct DB route.
   app.use(registryApiRouter);
   // Short-lived Living Nexus identity assertions for the separate Nexus service.

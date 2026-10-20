@@ -6,6 +6,7 @@ import Stripe from "stripe";
 import { z } from "zod";
 import { validateHistoricalDates } from "@shared/workHistoricalDates";
 import { prepareParticipationCorrection } from "../domains/work/participationCorrection";
+import { buildProvenancePlayerManifest, ProvenancePlayerManifestUnavailableError } from "../domains/provenancePlayer/manifest";
 import { generateShareArtifact } from "../services/shareArtifactService";
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "../_core/cookies";
@@ -49,7 +50,7 @@ import {
   createPromoCode, listPromoCodes, deactivatePromoCode, reactivatePromoCode, redeemPromoCode,
   recordNameChange, getNameHistory, getOriginalName,
   createCollection, updateCollectionPdf, linkSongsToCollection,
-  getCollectionByWid, getSongsByCollectionId, getCollectionForSong,
+  getCollectionByWid, getSongsByCollectionId, getCollectionForSong, getProvenancePlayerAlbumTrackSources, hasAmbiguousProvenancePlayerWids,
   getCollectionsByCreator, updateCollectionCover, updateCollectionDefaultView,
   getAllSupporters, getSupporterByUserId, recordPlatformGift, getPublishedCountByUser,
   getNewEventCountForCreator, touchActivityVisit, touchDashboardVisit, getDashboardDeltas,
@@ -1959,5 +1960,31 @@ ${workType === "manuscript" || workType === "comic" ? "Category" : "Genre"}: ${i
         const creator = await getUserById(collection.creatorId);
         const projectId = await getProjectIdByCollectionId(collection.id);
         return { collection, tracks, creator, projectId };
+      }),
+    /** Owner-authorized portable projection for a canonical public WID-ALB. */
+    copyProvenancePlayerAlbumManifest: protectedProcedure
+      .input(z.object({ collectionWid: z.string().min(1).max(64) }))
+      .query(async ({ ctx, input }) => {
+        const collection = await getCollectionByWid(input.collectionWid);
+        if (!collection || collection.creatorId !== ctx.user.id || collection.visibility !== "public") {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Manifest unavailable" });
+        }
+
+        try {
+          const rows = await getProvenancePlayerAlbumTrackSources(collection.id);
+          if (await hasAmbiguousProvenancePlayerWids(rows.map((row: any) => row.song?.witnessId ?? ""))) {
+            throw new ProvenancePlayerManifestUnavailableError();
+          }
+          return buildProvenancePlayerManifest({
+            tracks: rows.map((row: any) => ({ ...row.song, creator: row.creator })),
+            album: collection.name,
+            fallbackArtworkUrl: collection.coverArtUrl,
+          });
+        } catch (error) {
+          if (error instanceof ProvenancePlayerManifestUnavailableError) {
+            throw new TRPCError({ code: "NOT_FOUND", message: "Manifest unavailable" });
+          }
+          throw error;
+        }
       }),
   });

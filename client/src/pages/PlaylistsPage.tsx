@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import {
   Plus, ListMusic, Users, Lock, Globe, Trash2, Play,
   UserPlus, Check, X, Music, ChevronRight, Loader2,
-  Search, PlusCircle, Share2,
+  Search, PlusCircle, Share2, Copy, Download,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,6 +23,10 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { usePlayer } from "@/contexts/PlayerContext";
+import {
+  copyProvenancePlayerManifest,
+  downloadProvenancePlayerManifest,
+} from "@/lib/provenancePlayerManifest";
 
 function useDebouncedValue<T>(value: T, delayMs: number): T {
   const [debouncedValue, setDebouncedValue] = useState(value);
@@ -334,6 +338,7 @@ function PlaylistDetail({
   const utils = trpc.useUtils();
   const [inviteHandle, setInviteHandle] = useState("");
   const [showInvite, setShowInvite] = useState(false);
+  const [manifestAction, setManifestAction] = useState<"copy" | "download" | null>(null);
 
   const { data, isLoading } = trpc.playlists.getById.useQuery({ id: playlistId });
   const { data: allCreators = [] } = trpc.profile.allCreators.useQuery();
@@ -397,6 +402,32 @@ function PlaylistDetail({
     invite.mutate({ playlistId, userId: match.id });
   };
 
+  const exportProvenancePlayerManifest = async (action: "copy" | "download") => {
+    setManifestAction(action);
+    try {
+      const manifest = await utils.playlists.copyProvenancePlayerManifest.fetch({ id: playlistId });
+      if (action === "download") {
+        downloadProvenancePlayerManifest(manifest, playlist.name);
+        toast.success("Manifest downloaded", { description: "Import this JSON in Provenance Player: Add → LN manifest." });
+        return;
+      }
+
+      const copied = await copyProvenancePlayerManifest(manifest);
+      if (copied) {
+        toast.success("Manifest copied", { description: "In Provenance Player, choose Add → LN manifest → Paste → Import." });
+      } else {
+        downloadProvenancePlayerManifest(manifest, playlist.name);
+        toast.success("Clipboard unavailable — manifest downloaded", { description: "Import the JSON file in Provenance Player." });
+      }
+    } catch {
+      toast.error("Manifest unavailable", {
+        description: "Every Work must be public, authorized for external display, and free to download.",
+      });
+    } finally {
+      setManifestAction(null);
+    }
+  };
+
   return (
     <div>
       {/* Header */}
@@ -448,6 +479,42 @@ function PlaylistDetail({
           </Button>
         )}
       </div>
+
+      {isOwner && (
+        <section className="mb-5 rounded-xl border border-[#C49A28]/20 bg-[#C49A28]/[0.04] px-3 py-3">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
+              <p className="text-xs font-heading tracking-wide text-[#E7C66A]">PROVENANCE PLAYER MANIFEST</p>
+              <p className="mt-1 text-[11px] leading-relaxed text-white/50">
+                Copy this ordered listening path, then import it in Provenance Player: Add → LN manifest.
+              </p>
+            </div>
+            <div className="flex shrink-0 flex-wrap gap-2">
+              <Button
+                type="button"
+                onClick={() => exportProvenancePlayerManifest("copy")}
+                disabled={manifestAction !== null}
+                size="sm"
+                className="bg-[#C49A28] text-black hover:bg-[#E7C66A] text-xs font-heading"
+              >
+                {manifestAction === "copy" ? <Loader2 size={12} className="mr-1 animate-spin" /> : <Copy size={12} className="mr-1" />}
+                Copy manifest
+              </Button>
+              <Button
+                type="button"
+                onClick={() => exportProvenancePlayerManifest("download")}
+                disabled={manifestAction !== null}
+                size="sm"
+                variant="outline"
+                className="border-[#C49A28]/30 bg-transparent text-[#E7C66A] hover:bg-[#C49A28]/10 text-xs"
+              >
+                {manifestAction === "download" ? <Loader2 size={12} className="mr-1 animate-spin" /> : <Download size={12} className="mr-1" />}
+                Download JSON
+              </Button>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Invite input */}
       {showInvite && (
