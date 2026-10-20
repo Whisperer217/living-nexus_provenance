@@ -22,6 +22,13 @@
 import { useEffect, useState } from "react";
 import { Download, RefreshCw, X } from "lucide-react";
 import { playbackDiag } from "@/lib/playbackDiag";
+import {
+  SW_UPDATE_APPLY_EVENT,
+  SW_UPDATE_APPLYING_EVENT,
+  SW_UPDATE_AVAILABLE_EVENT,
+  SW_UPDATE_FAILED_EVENT,
+  type ServiceWorkerUpdateFailure,
+} from "@/lib/serviceWorkerUpdate";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -34,7 +41,9 @@ interface BeforeInstallPromptEvent extends Event {
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const DISMISSED_KEY = "ln-pwa-install-dismissed";
-const DISMISSED_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+const DISMISSED_TTL_MS = 7 * 24 * 60 * 60; // 7 days
+
+type UpdateState = "ready" | "activating" | "failed";
 
 function wasDismissedRecently(): boolean {
   try {
@@ -60,6 +69,8 @@ export function PWAInstallBanner() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showInstall, setShowInstall] = useState(false);
   const [showUpdate, setShowUpdate] = useState(false);
+  const [updateState, setUpdateState] = useState<UpdateState>("ready");
+  const [updateFailure, setUpdateFailure] = useState<ServiceWorkerUpdateFailure | null>(null);
 
   // ── Install prompt listener ──────────────────────────────────────────────
   useEffect(() => {
@@ -77,9 +88,30 @@ export function PWAInstallBanner() {
 
   // ── SW update listener ───────────────────────────────────────────────────
   useEffect(() => {
-    const handler = () => setShowUpdate(true);
-    window.addEventListener("sw-update-available", handler);
-    return () => window.removeEventListener("sw-update-available", handler);
+    const handleAvailable = () => {
+      setShowUpdate(true);
+      setUpdateState("ready");
+      setUpdateFailure(null);
+    };
+    const handleApplying = () => {
+      setShowUpdate(true);
+      setUpdateState("activating");
+      setUpdateFailure(null);
+    };
+    const handleFailed = (event: Event) => {
+      setShowUpdate(true);
+      setUpdateState("failed");
+      setUpdateFailure((event as CustomEvent<ServiceWorkerUpdateFailure>).detail ?? "activation_timeout");
+    };
+
+    window.addEventListener(SW_UPDATE_AVAILABLE_EVENT, handleAvailable);
+    window.addEventListener(SW_UPDATE_APPLYING_EVENT, handleApplying);
+    window.addEventListener(SW_UPDATE_FAILED_EVENT, handleFailed);
+    return () => {
+      window.removeEventListener(SW_UPDATE_AVAILABLE_EVENT, handleAvailable);
+      window.removeEventListener(SW_UPDATE_APPLYING_EVENT, handleApplying);
+      window.removeEventListener(SW_UPDATE_FAILED_EVENT, handleFailed);
+    };
   }, []);
 
   // ── Handlers ─────────────────────────────────────────────────────────────
@@ -100,43 +132,45 @@ export function PWAInstallBanner() {
   };
 
   const handleReload = () => {
-    // Tell a waiting worker to take control only after the listener explicitly
-    // chooses to update. main.tsx reloads upon that controller change.
+    if (updateState === "activating") return;
+    // main.tsx owns worker activation and the single controller-change reload.
+    // This component owns only listener feedback and retry affordances.
     playbackDiag("PWA_UPDATE_RELOAD_CLICK");
-    navigator.serviceWorker?.getRegistration().then((reg) => {
-      if (reg?.waiting) {
-        reg.waiting.postMessage({ type: "SKIP_WAITING" });
-        return;
-      }
-      // The update is no longer waiting (or SW is unavailable); this is a
-      // listener-approved manual refresh rather than an unsolicited takeover.
-      window.location.reload();
-    });
+    window.dispatchEvent(new CustomEvent(SW_UPDATE_APPLY_EVENT));
   };
 
   // ── Update banner (higher priority — show above install banner) ──────────
   if (showUpdate) {
+    const isActivating = updateState === "activating";
+    const updateMessage = isActivating
+      ? "Applying the update… playback will pause while the page refreshes."
+      : updateState === "failed"
+        ? updateFailure === "registration_unavailable"
+          ? "The update connection was unavailable. You can try again."
+          : "The update did not finish. You can try again."
+        : "A new version of Living Nexus is available.";
+
     return (
       <div
         className="fixed bottom-[72px] left-0 right-0 z-[99990] mx-4 mb-2 flex items-center justify-between gap-3 rounded-xl border border-amber-500/30 bg-[#0d1117] px-4 py-3 shadow-lg"
-        role="status"
-        aria-live="polite"
       >
-        <div className="flex items-center gap-2 text-sm text-amber-400">
-          <RefreshCw size={15} className="shrink-0" />
-          <span>A new version of Living Nexus is available.</span>
+        <div className="flex items-center gap-2 text-sm text-amber-400" role="status" aria-live="polite">
+          <RefreshCw size={15} className={`shrink-0 ${isActivating ? "animate-spin" : ""}`} />
+          <span>{updateMessage}</span>
         </div>
         <div className="flex items-center gap-2">
           <button
             onClick={handleReload}
-            className="rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-semibold text-black transition-opacity hover:opacity-90"
+            disabled={isActivating}
+            className="rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-semibold text-black transition-opacity hover:opacity-90 disabled:cursor-wait disabled:opacity-70"
           >
-            Reload
+            {isActivating ? "Updating…" : updateState === "failed" ? "Retry" : "Reload"}
           </button>
           <button
             onClick={() => setShowUpdate(false)}
+            disabled={isActivating}
             className="text-zinc-500 transition-colors hover:text-zinc-300"
-            aria-label="Dismiss update notice"
+            aria-label={isActivating ? "Update is being applied" : "Dismiss update notice"}
           >
             <X size={15} />
           </button>

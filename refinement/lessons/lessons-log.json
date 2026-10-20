@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-10-19T20:46:00.000Z",
-  "totalLessons": 65,
+  "lastUpdated": "2026-10-20T00:26:00.000Z",
+  "totalLessons": 66,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -1568,6 +1568,32 @@
         "retry",
         "player-continuity",
         "evidence-first"
+      ]
+    },
+    {
+      "id": "LESSON-066",
+      "date": "2026-10-19",
+      "category": "architecture",
+      "problem": "The PWA update banner could appear after an initial uncontrolled tab had gained its first service-worker controller, but update reload logic relied on a hadController snapshot captured only at startup. A listener-selected waiting update could therefore activate without reloading, while the banner provided no progress, failure, or retry state.",
+      "solution": "Bound update application to explicit listener consent rather than startup controller state. The banner now requests a central one-shot activation handshake, announces Updating while duplicate clicks are blocked, and remains actionable with Retry after a bounded failure. Bootstrap reloads exactly once only after a consented controller change; initial clients.claim remains reload-free. Cache strategy and listener-approved SKIP_WAITING remain intact.",
+      "files": [
+        "client/src/lib/serviceWorkerUpdate.ts",
+        "client/src/main.tsx",
+        "client/src/components/PWAInstallBanner.tsx",
+        "server/tests/pwaUpdateHandshake.contract.test.ts",
+        "server/tests/playbackContinuityDiagnostics.contract.test.ts",
+        "docs/lnls/adr/PWA-UPDATE-HANDSHAKE-REPAIR-2026-10-19.md"
+      ],
+      "score": 0,
+      "tags": [
+        "pwa",
+        "service-worker",
+        "update-handshake",
+        "listener-consent",
+        "cache-freshness",
+        "retry",
+        "playback-safety",
+        "accessibility"
       ]
     }
   ]

@@ -59,11 +59,14 @@ describe("playback continuity diagnostics", () => {
     const boundary = read("client/src/components/ErrorBoundary.tsx");
 
     expect(bootstrap.indexOf("AUTH_REDIRECT_TO_LOGIN")).toBeLessThan(bootstrap.indexOf("window.location.href = getLoginUrl()"));
+    expect(bootstrap).toContain("listenerAcceptedUpdate");
+    expect(bootstrap).toContain("updateActivationRequested");
+    expect(bootstrap).not.toContain("const hadController");
     expect(bootstrap.indexOf("SERVICE_WORKER_CONTROLLER_RELOAD")).toBeLessThan(bootstrap.indexOf("window.location.reload()"));
     const pullRefreshDiagnostic = layout.indexOf("PULL_TO_REFRESH_RELOAD");
     expect(pullRefreshDiagnostic).toBeGreaterThan(-1);
     expect(pullRefreshDiagnostic).toBeLessThan(layout.indexOf("window.location.reload()", pullRefreshDiagnostic));
-    expect(pwaBanner.indexOf("PWA_UPDATE_RELOAD_CLICK")).toBeLessThan(pwaBanner.indexOf("window.location.reload()"));
+    expect(pwaBanner.indexOf("PWA_UPDATE_RELOAD_CLICK")).toBeLessThan(pwaBanner.indexOf("new CustomEvent(SW_UPDATE_APPLY_EVENT)"));
     expect(boundary.indexOf("CHUNK_LOAD_AUTO_RELOAD")).toBeLessThan(boundary.indexOf("window.location.reload()"));
     expect(app).toContain('playbackDiag("ROUTE_CHANGE", { location })');
   });
@@ -71,14 +74,17 @@ describe("playback continuity diagnostics", () => {
   it("keeps a new service worker waiting during active listening until the listener chooses the update", () => {
     const worker = read("client/public/sw.js");
     const pwaBanner = read("client/src/components/PWAInstallBanner.tsx");
+    const bootstrap = read("client/src/main.tsx");
     const installStart = worker.indexOf('self.addEventListener("install"');
     const activateStart = worker.indexOf('self.addEventListener("activate"');
     const installHandler = worker.slice(installStart, activateStart);
 
     expect(installHandler).not.toContain("self.skipWaiting()");
     expect(worker).toContain('if (event.data?.type === "SKIP_WAITING") self.skipWaiting()');
-    expect(pwaBanner).toContain("if (reg?.waiting)");
-    expect(pwaBanner).toContain('reg.waiting.postMessage({ type: "SKIP_WAITING" })');
+    expect(pwaBanner).toContain("SW_UPDATE_APPLY_EVENT");
+    expect(pwaBanner).toContain('new CustomEvent(SW_UPDATE_APPLY_EVENT)');
+    expect(bootstrap).toContain('registration.waiting.postMessage({ type: "SKIP_WAITING" })');
+    expect(bootstrap).toContain("if (reg.waiting) announceUpdate()");
     expect(pwaBanner).toContain("PWA_UPDATE_RELOAD_CLICK");
   });
 });

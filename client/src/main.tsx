@@ -18,6 +18,14 @@ import { UploadEngineProvider } from "./contexts/UploadEngineContext";
 import { getLoginUrl } from "./const";
 import { hadSession } from "./lib/sessionFlags";
 import { playbackDiag } from "./lib/playbackDiag";
+import {
+  dispatchServiceWorkerUpdateEvent,
+  SW_UPDATE_APPLY_EVENT,
+  SW_UPDATE_APPLYING_EVENT,
+  SW_UPDATE_AVAILABLE_EVENT,
+  SW_UPDATE_FAILED_EVENT,
+  type ServiceWorkerUpdateFailure,
+} from "./lib/serviceWorkerUpdate";
 import "./index.css";
 
 const queryClient = new QueryClient({
@@ -145,11 +153,66 @@ window.addEventListener("unhandledrejection", (e) => {
 // competing with critical resource fetches.
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
+    const UPDATE_ACTIVATION_TIMEOUT_MS = 8_000;
+    let activeController = navigator.serviceWorker.controller;
+    let listenerAcceptedUpdate = false;
+    let updateActivationRequested = false;
+    let activationTimeout: number | null = null;
+
+    const clearActivationTimeout = () => {
+      if (activationTimeout !== null) {
+        window.clearTimeout(activationTimeout);
+        activationTimeout = null;
+      }
+    };
+
+    const failListenerAcceptedUpdate = (reason: ServiceWorkerUpdateFailure) => {
+      clearActivationTimeout();
+      listenerAcceptedUpdate = false;
+      updateActivationRequested = false;
+      playbackDiag("SERVICE_WORKER_UPDATE_FAILED", { reason });
+      dispatchServiceWorkerUpdateEvent(SW_UPDATE_FAILED_EVENT, reason);
+    };
+
+    const announceUpdate = () => {
+      if (!navigator.serviceWorker.controller) return;
+      dispatchServiceWorkerUpdateEvent(SW_UPDATE_AVAILABLE_EVENT);
+    };
+
+    const applyWaitingUpdate = async () => {
+      if (updateActivationRequested) return;
+
+      updateActivationRequested = true;
+      dispatchServiceWorkerUpdateEvent(SW_UPDATE_APPLYING_EVENT);
+      try {
+        const registration = await navigator.serviceWorker.getRegistration();
+        if (!registration?.waiting) {
+          failListenerAcceptedUpdate("registration_unavailable");
+          return;
+        }
+
+        listenerAcceptedUpdate = true;
+        registration.waiting.postMessage({ type: "SKIP_WAITING" });
+        activationTimeout = window.setTimeout(() => {
+          if (listenerAcceptedUpdate) failListenerAcceptedUpdate("activation_timeout");
+        }, UPDATE_ACTIVATION_TIMEOUT_MS);
+      } catch {
+        failListenerAcceptedUpdate("registration_unavailable");
+      }
+    };
+
+    window.addEventListener(SW_UPDATE_APPLY_EVENT, () => {
+      void applyWaitingUpdate();
+    });
+
     navigator.serviceWorker
       .register("/sw.js", { scope: "/" })
       .then((reg) => {
         console.log("[SW] Registered, scope:", reg.scope);
-        // Listen for a new SW waiting — prompt user to reload for update
+        // A tab can open while an update is already waiting. Do not require a
+        // new updatefound event to give the listener the approved-update action.
+        if (reg.waiting) announceUpdate();
+        // Listen for a new SW waiting — prompt user to reload for update.
         reg.addEventListener("updatefound", () => {
           const newWorker = reg.installing;
           if (!newWorker) return;
@@ -158,8 +221,7 @@ if ("serviceWorker" in navigator) {
               newWorker.state === "installed" &&
               navigator.serviceWorker.controller
             ) {
-              // New content available — the PWAInstallBanner will handle reload UX
-              window.dispatchEvent(new CustomEvent("sw-update-available"));
+              announceUpdate();
             }
           });
         });
@@ -167,26 +229,29 @@ if ("serviceWorker" in navigator) {
       .catch((err) => {
         console.warn("[SW] Registration failed:", err);
       });
-    // When the SW controller changes (new SW took over after skipWaiting),
-    // reload the page so stale chunk hashes are never used.
-    //
-    // CRITICAL GUARD: only reload if there was ALREADY a controller before
-    // this change. On a fresh tab or after cache clear, there is no previous
-    // controller. The new SW installs and calls clients.claim(), which fires
-    // controllerchange — but no reload is needed. Without this guard, every
-    // fresh visit triggers an automatic reload ~1-3 minutes after landing.
-    //
-    // hadController is captured BEFORE the listener fires so it reflects the
-    // state at registration time, not at the moment of the change event.
-    const hadController = !!navigator.serviceWorker.controller;
+
     navigator.serviceWorker.addEventListener("controllerchange", () => {
-      if (!hadController) {
-        // First activation — SW just claimed an uncontrolled page. No reload.
-        console.log("[SW] Controller set for first time — no reload needed");
+      const nextController = navigator.serviceWorker.controller;
+      const controllerChanged = nextController !== activeController;
+      activeController = nextController;
+
+      if (!listenerAcceptedUpdate) {
+        // Initial clients.claim() and other unrequested controller changes must
+        // never reload a listening page.
+        console.log("[SW] Controller changed without listener approval — no reload");
         return;
       }
-      // Genuine update: a waiting SW was told SKIP_WAITING and took over.
-      // Reload so the browser fetches fresh chunk hashes.
+
+      clearActivationTimeout();
+      listenerAcceptedUpdate = false;
+      updateActivationRequested = false;
+      if (!controllerChanged) {
+        dispatchServiceWorkerUpdateEvent(SW_UPDATE_FAILED_EVENT, "activation_timeout");
+        return;
+      }
+
+      // A listener-approved waiting worker took over. Reload exactly once so
+      // fresh chunk hashes are fetched under the new controller.
       playbackDiag("SERVICE_WORKER_CONTROLLER_RELOAD");
       console.log("[SW] Controller changed after update — reloading for fresh chunks");
       window.location.reload();
