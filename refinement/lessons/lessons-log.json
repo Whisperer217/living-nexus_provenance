@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-10-20T21:26:39.276472Z",
-  "totalLessons": 68,
+  "lastUpdated": "2026-10-20T21:46:39.293835Z",
+  "totalLessons": 69,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -1647,6 +1647,31 @@
         "accessibility",
         "responsive-layout",
         "incremental-refinement"
+      ]
+    },
+    {
+      "id": "LESSON-069",
+      "date": "2026-10-20",
+      "category": "architecture",
+      "problem": "Living Nexus needed a discoverable Provenance Player entry without implying account connection, WID verification, track authorization, shared playback, or a second audio authority. The existing cinematic entry is desktop-only, so adding a link only to desktop/cinematic controls would leave the companion unavailable from the actual mobile expanded-player surface.",
+      "solution": "Use static target=_blank noopener anchors to one fixed external URL in the desktop action dock, cinematic panel, and reachable mobile expanded section. Keep the disclosure identical on each surface, add token-based visible focus styling and reduced-motion-safe transitions, and prohibit all onClick, navigation, PlayerContext, queue, Work, WID, account, or registry data handoffs. Validate the mobile entry at 375px with containment and target-attribute checks.",
+      "files": [
+        "client/src/components/player/GlobalPlayer.tsx",
+        "client/src/index.css",
+        "server/tests/globalPlayerAccessRoutes.contract.test.ts",
+        "server/tests/globalPlayerCinematicCreatorGallery.contract.test.ts",
+        "docs/lnls/adr/PROVENANCE-PLAYER-COMPANION-ENTRY-2026-10-20.md"
+      ],
+      "score": 0,
+      "tags": [
+        "provenance-player",
+        "experimental-companion",
+        "external-link",
+        "mobile-parity",
+        "player-authority",
+        "queue-continuity",
+        "no-wid-handoff",
+        "reversible"
       ]
     }
   ]

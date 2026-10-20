@@ -62,6 +62,7 @@ const GOLD_SHADOW_MOBILE = `0 -4px 32px color-mix(in srgb, var(--ln-gold) 34%, t
 /* Desktop glow: directional — upward light + depth (decision #9) */
 const GOLD_SHADOW_DESKTOP = `0 -8px 24px color-mix(in srgb, var(--ln-gold) 38%, transparent), var(--ln-ambient-shadow)`;
 const GOLD_BORDER = `1px solid var(--ln-border-subtle)`;
+const PROVENANCE_PLAYER_URL = "https://provenanceplayer.netlify.app/#/home";
 /* Nebula palette — mobile only */
 const NEBULA = "rgba(138,43,226,0.85)";
 const NEBULA_BORDER = "1px solid rgba(138,43,226,0.30)";
@@ -868,6 +869,15 @@ function GlobalPlayerInner() {
         >
           <Share2 size={15} aria-hidden="true" /> Share Artifact
         </button>
+        <a
+          href={PROVENANCE_PLAYER_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="ln-player-action-dock__companion"
+          aria-label="Open Provenance Player — experimental companion, opens in a new tab"
+        >
+          <ExternalLink size={15} aria-hidden="true" /> Open Provenance Player
+        </a>
         {currentSongId && (
           <button type="button" onClick={() => { closeContextMenu(); setAddToCollectionOpen(true); }}>
             <ListPlus size={15} aria-hidden="true" /> Add to My List
@@ -901,6 +911,9 @@ function GlobalPlayerInner() {
           <List size={15} aria-hidden="true" /> View Songs
         </button>
       </div>
+      <p className="ln-player-action-dock__companion-note">
+        Experimental companion — no Living Nexus account sync, WID verification, or shared playback.
+      </p>
     </section>
   ) : null;
 
@@ -1594,6 +1607,23 @@ function GlobalPlayerInner() {
               )}
             </div>
 
+            {!isDesktop && (
+              <div className="ln-mobile-player-companion">
+                <a
+                  href={PROVENANCE_PLAYER_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="ln-mobile-player-companion-link"
+                  aria-label="Open Provenance Player — experimental companion, opens in a new tab"
+                >
+                  <ExternalLink size={15} aria-hidden="true" /> Open Provenance Player
+                </a>
+                <p className="ln-mobile-player-companion-note">
+                  Experimental companion — no Living Nexus account sync, WID verification, or shared playback.
+                </p>
+              </div>
+            )}
+
             {/* Provenance strip */}
             {visTrack?.witnessId && (
               <button
@@ -2054,6 +2084,20 @@ function GlobalPlayerInner() {
             <span className="text-[9px] tracking-wide uppercase" style={{ color: "rgba(212,175,55,0.4)" }}>{label}</span>
           </button>
         ))}
+      </div>
+      <div className="relative px-4 pt-2 pb-3 flex-shrink-0">
+        <a
+          href={PROVENANCE_PLAYER_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="ln-cinematic-companion-link"
+          aria-label="Open Provenance Player — experimental companion, opens in a new tab"
+        >
+          <ExternalLink size={15} aria-hidden="true" /> Open Provenance Player
+        </a>
+        <p className="ln-cinematic-companion-note">
+          Experimental companion — no Living Nexus account sync, WID verification, or shared playback.
+        </p>
       </div>
 
       {/* ── Creator catalog: selection is visual; Play is explicit listener intent. ── */}

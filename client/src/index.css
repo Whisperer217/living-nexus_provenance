@@ -5984,7 +5984,7 @@ button:active .ln-witness-sigil,
 }
 
 .ln-player-action-dock__close,
-.ln-player-action-dock__actions button {
+.ln-player-action-dock__actions :is(button, a) {
   display: inline-flex;
   min-height: 2.75rem;
   align-items: center;
@@ -6012,12 +6012,13 @@ button:active .ln-witness-sigil,
   gap: 0.5rem;
 }
 
-.ln-player-action-dock__actions button {
+.ln-player-action-dock__actions :is(button, a) {
   padding: 0.55rem 0.65rem;
   text-align: left;
+  text-decoration: none;
 }
 
-.ln-player-action-dock__actions button:hover,
+.ln-player-action-dock__actions :is(button, a):hover,
 .ln-player-action-dock__close:hover {
   border-color: color-mix(in srgb, var(--ln-gold-hot) 70%, transparent);
   background: color-mix(in srgb, var(--ln-gold) 13%, var(--ln-void));
@@ -6028,6 +6029,21 @@ button:active .ln-witness-sigil,
 .ln-player-action-dock__songs {
   border-color: color-mix(in srgb, var(--ln-gold) 52%, transparent) !important;
   color: var(--ln-gold-hot) !important;
+}
+
+.ln-player-action-dock__companion {
+  border-color: color-mix(in srgb, var(--ln-gold) 42%, transparent) !important;
+  color: var(--ln-gold-hot) !important;
+}
+
+.ln-player-action-dock__companion-note,
+.ln-cinematic-companion-note,
+.ln-mobile-player-companion-note {
+  margin: 0;
+  color: var(--ln-smoke);
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  line-height: 1.45;
 }
 
 .ln-player-action-dock :is(button, a):focus-visible,
@@ -6048,13 +6064,67 @@ button:active .ln-witness-sigil,
 
 @media (prefers-reduced-motion: reduce) {
   .ln-player-action-dock__close,
-  .ln-player-action-dock__actions button {
+  .ln-player-action-dock__actions :is(button, a) {
     transition: none;
   }
 
-  .ln-player-action-dock__actions button:hover,
+  .ln-player-action-dock__actions :is(button, a):hover,
   .ln-player-action-dock__close:hover {
     transform: none;
+  }
+}
+
+/* ── Provenance Player companion entry ─────────────────────────────────────
+   External-only by design: it opens a separate experimental companion and
+   never receives Living Nexus account, WID, queue, or playback state. */
+.ln-cinematic-companion-link,
+.ln-mobile-player-companion-link {
+  display: flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  border: 1px solid color-mix(in srgb, var(--ln-gold) 42%, transparent);
+  border-radius: 0.625rem;
+  background: color-mix(in srgb, var(--ln-void) 70%, transparent);
+  color: var(--ln-gold-hot);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  text-decoration: none;
+}
+
+.ln-cinematic-companion-link:hover,
+.ln-mobile-player-companion-link:hover {
+  border-color: var(--ln-gold-hot);
+  background: color-mix(in srgb, var(--ln-gold) 13%, var(--ln-void));
+  color: var(--ln-parchment);
+}
+
+.ln-cinematic-companion-link:focus-visible,
+.ln-mobile-player-companion-link:focus-visible {
+  outline: 2px solid var(--ln-gold-hot);
+  outline-offset: 3px;
+}
+
+.ln-cinematic-companion-note {
+  margin-top: 0.45rem;
+  text-align: center;
+}
+
+.ln-mobile-player-companion {
+  display: grid;
+  gap: 0.45rem;
+  padding: 0.15rem 0;
+}
+
+.ln-mobile-player-companion-note {
+  text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ln-cinematic-companion-link,
+  .ln-mobile-player-companion-link {
+    transition: none;
   }
 }
 

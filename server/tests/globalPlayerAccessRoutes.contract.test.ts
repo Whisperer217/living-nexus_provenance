@@ -5,6 +5,14 @@ import { describe, expect, it } from "vitest";
 const root = path.resolve(import.meta.dirname, "../..");
 const source = (relativePath: string) => fs.readFileSync(path.join(root, relativePath), "utf8");
 
+function between(sourceText: string, start: string, end: string) {
+  const startIndex = sourceText.indexOf(start);
+  const endIndex = sourceText.indexOf(end, startIndex + start.length);
+  expect(startIndex, `missing start marker: ${start}`).toBeGreaterThanOrEqual(0);
+  expect(endIndex, `missing end marker: ${end}`).toBeGreaterThan(startIndex);
+  return sourceText.slice(startIndex, endIndex);
+}
+
 describe("global player normal-zoom access and action-route contract", () => {
   it("does not reserve stale desktop bottom-player space and keeps an expanded player within the visual viewport", () => {
     const layout = source("client/src/components/layout/MainLayout.tsx");
@@ -55,5 +63,27 @@ describe("global player normal-zoom access and action-route contract", () => {
     expect(player).toContain("Add to My List");
     expect(player).toContain("Play Next");
     expect(player).toContain("triggerTaggedDownload");
+  });
+
+  it("offers the Provenance Player only as a separate-tab experimental companion without changing Living Nexus playback", () => {
+    const player = source("client/src/components/player/GlobalPlayer.tsx");
+    const dock = between(player, "const expandedActionDock", "/* ── Desktop:");
+    const mobileExpandedContent = between(player, "{/* ── EXPANDED CONTENT ── */}", "{/* Provenance strip */}");
+    const companion = between(dock, 'href={PROVENANCE_PLAYER_URL}', "</a>");
+    const mobileCompanion = between(mobileExpandedContent, 'href={PROVENANCE_PLAYER_URL}', "</a>");
+
+    expect(player).toContain('const PROVENANCE_PLAYER_URL = "https://provenanceplayer.netlify.app/#/home";');
+    expect(companion).toContain('target="_blank"');
+    expect(companion).toContain('rel="noopener noreferrer"');
+    expect(companion).toContain("Open Provenance Player");
+    expect(dock).toContain("Experimental companion");
+    expect(dock).toContain("no Living Nexus account sync, WID verification, or shared playback");
+    expect(companion).not.toMatch(/onClick|navigate|togglePlay|playTrack|playQueueAt|appendToQueue|playNext|setZone|setCinematic/);
+    expect(mobileExpandedContent).toContain("!isDesktop && (");
+    expect(mobileExpandedContent).toContain("ln-mobile-player-companion");
+    expect(mobileExpandedContent).toContain("Experimental companion");
+    expect(mobileCompanion).toContain('target="_blank"');
+    expect(mobileCompanion).toContain('rel="noopener noreferrer"');
+    expect(mobileCompanion).not.toMatch(/onClick|navigate|togglePlay|playTrack|playQueueAt|appendToQueue|playNext|setZone|setCinematic/);
   });
 });

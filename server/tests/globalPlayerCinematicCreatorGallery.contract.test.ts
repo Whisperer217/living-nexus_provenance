@@ -96,6 +96,24 @@ describe("Global Player cinematic Creator gallery", () => {
     expect(styles).toContain("@media (prefers-reduced-motion: reduce)");
   });
 
+  it("offers Provenance Player as an explicit external experimental companion without connecting cinematic controls to playback", () => {
+    const player = read("client/src/components/player/GlobalPlayer.tsx");
+    const cinematicControls = between(
+      player,
+      "/* ── Layer 3: Secondary Actions ── */",
+      "/* ── Creator catalog:",
+    );
+    const companion = between(cinematicControls, 'href={PROVENANCE_PLAYER_URL}', "</a>");
+
+    expect(cinematicControls).toContain('target="_blank"');
+    expect(cinematicControls).toContain('rel="noopener noreferrer"');
+    expect(cinematicControls).toContain("Open Provenance Player");
+    expect(cinematicControls).toContain("Experimental companion");
+    expect(cinematicControls).toContain("no Living Nexus account sync, WID verification, or shared playback");
+    expect(companion).not.toMatch(/onClick|navigate|togglePlay|playTrack|playQueueAt|appendToQueue|playNext|setCinematic/);
+    expect(player.match(/href=\{PROVENANCE_PLAYER_URL\}/g)).toHaveLength(3);
+  });
+
   it("clearly separates Previewing from Listening Now and makes the playback target explicit", () => {
     const player = read("client/src/components/player/GlobalPlayer.tsx");
     const gallery = read("client/src/components/player/CinematicCreatorGallery.tsx");
