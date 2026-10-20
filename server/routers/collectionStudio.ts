@@ -25,6 +25,8 @@ import {
   addToCollectionById,
   replaceInCollectionById,
   getCreatorSongsNotInCollection,
+  assertCollectionCompositionMutable,
+  CollectionCompositionSealedError,
 } from "../db/songs";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -41,6 +43,17 @@ async function requireOwnedCollection(collectionId: number, callerId: number) {
     });
   }
   return col;
+}
+
+async function requireMutableCollectionComposition(collectionId: number) {
+  try {
+    await assertCollectionCompositionMutable(collectionId);
+  } catch (error) {
+    if (error instanceof CollectionCompositionSealedError) {
+      throw new TRPCError({ code: "CONFLICT", message: error.message });
+    }
+    throw error;
+  }
 }
 
 // ─── Router ───────────────────────────────────────────────────────────────────
@@ -156,6 +169,7 @@ export const collectionStudioRouter = router({
     }))
     .mutation(async ({ ctx, input }) => {
       await requireOwnedCollection(input.collectionId, ctx.user.id);
+      await requireMutableCollectionComposition(input.collectionId);
       // Get song title for the version log
       const { getSongById } = await import("../utils/db");
       const song = await getSongById(input.songId);
@@ -179,6 +193,7 @@ export const collectionStudioRouter = router({
     }))
     .mutation(async ({ ctx, input }) => {
       await requireOwnedCollection(input.collectionId, ctx.user.id);
+      await requireMutableCollectionComposition(input.collectionId);
       const { getSongById } = await import("../utils/db");
       const song = await getSongById(input.songId);
       await addToCollectionById(input.collectionId, input.songId, ctx.user.id);
@@ -202,6 +217,7 @@ export const collectionStudioRouter = router({
     }))
     .mutation(async ({ ctx, input }) => {
       await requireOwnedCollection(input.collectionId, ctx.user.id);
+      await requireMutableCollectionComposition(input.collectionId);
       const { getSongById } = await import("../utils/db");
       const [oldSong, newSong] = await Promise.all([
         getSongById(input.oldSongId),

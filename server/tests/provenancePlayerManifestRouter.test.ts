@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { appRouter } from "../routers/index";
 import type { TrpcContext } from "../_core/context";
+import { collectionWidFromCollectiveHash, computeCollectionCollectiveHash } from "../domains/collections/collectionCompositionSeal";
 
 vi.mock("../utils/db", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../utils/db")>();
@@ -96,19 +97,43 @@ describe("Provenance Player export procedures", () => {
   });
 
   it("exports only a public album owned by the requesting creator and preserves its track order", async () => {
+    const orderedSources = [source(4, "WID-MUS-FOUR"), source(1, "WID-MUS-ONE")];
+    const collectiveHash = computeCollectionCollectiveHash(orderedSources.map((row) => row.song.witnessId));
     (getCollectionByWid as any).mockResolvedValue({
       id: 11,
       creatorId: 42,
       visibility: "public",
       name: "Ordered Album",
       coverArtUrl: "https://media.example.test/album.webp",
+      collectiveHash,
+      collectionWid: collectionWidFromCollectiveHash(collectiveHash),
+      trackCount: orderedSources.length,
     });
-    (getProvenancePlayerAlbumTrackSources as any).mockResolvedValue([source(4, "WID-MUS-FOUR"), source(1, "WID-MUS-ONE")]);
+    (getProvenancePlayerAlbumTrackSources as any).mockResolvedValue(orderedSources);
 
     const result = await appRouter.createCaller(context()).songs.copyProvenancePlayerAlbumManifest({ collectionWid: "WID-ALB-ORDERED" });
 
     expect(result.tracks.map(track => track.workId)).toEqual(["4", "1"]);
     expect(result.tracks.every(track => track.album === "Ordered Album")).toBe(true);
+  });
+
+  it("does not export a current album manifest when its stored WID-ALB origin membership is stale", async () => {
+    const orderedSources = [source(4, "WID-MUS-FOUR"), source(1, "WID-MUS-ONE")];
+    const collectiveHash = computeCollectionCollectiveHash(["WID-MUS-FOUR", "WID-MUS-THREE"]);
+    (getCollectionByWid as any).mockResolvedValue({
+      id: 11,
+      creatorId: 42,
+      visibility: "public",
+      name: "Stale Album",
+      collectiveHash,
+      collectionWid: collectionWidFromCollectiveHash(collectiveHash),
+      trackCount: orderedSources.length,
+    });
+    (getProvenancePlayerAlbumTrackSources as any).mockResolvedValue(orderedSources);
+
+    await expect(appRouter.createCaller(context()).songs.copyProvenancePlayerAlbumManifest({ collectionWid: "WID-ALB-STALE" }))
+      .rejects.toMatchObject({ code: "NOT_FOUND", message: "Manifest unavailable" });
+    expect(hasAmbiguousProvenancePlayerWids).not.toHaveBeenCalled();
   });
 
   it("does not export a private or differently owned album", async () => {

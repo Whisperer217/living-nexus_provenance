@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-10-20T23:04:02.008509+00:00",
-  "totalLessons": 70,
+  "lastUpdated": "2026-10-20T23:50:29.193731+00:00",
+  "totalLessons": 71,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -1706,6 +1706,42 @@
         "album-order",
         "player-authority",
         "fail-closed"
+      ]
+    },
+    {
+      "id": "LESSON-071",
+      "date": "2026-10-20",
+      "category": "security",
+      "problem": "Legacy WID-ALB collections permitted current membership changes after their collective hash and WID were issued, while public routes could disclose private membership and named-playlist operations trusted unscoped row or Work IDs. That risked false current provenance claims and cross-container relationship changes without changing the historical record.",
+      "solution": "Treat WID-ALB as an immutable origin membership seal. Replay its historical sorted-WID SHA-256 algorithm at every trust-bearing current-composition boundary; fail closed for public detail, verification, certificates, companion manifests, and ZIP exports on mismatch; preserve only presentation edits and same-member ordering. Bind playlist mutation to membership-row IDs, exact-set validation, container predicates, and one transaction. Defer changed membership to an explicit future edition, never hash/WID overwrite.",
+      "files": [
+        "server/domains/collections/collectionCompositionSeal.ts",
+        "server/domains/playlists/playlistMembershipIntegrity.ts",
+        "server/db/songs.ts",
+        "server/utils/db.ts",
+        "server/routers/songs.ts",
+        "server/routers/collectionStudio.ts",
+        "server/routers/playlists.ts",
+        "server/routes/downloadRoute.ts",
+        "client/src/components/MyListsTab.tsx",
+        "server/tests/collectionCompositionSeal.test.ts",
+        "server/tests/playlistMembershipIntegrity.test.ts",
+        "server/tests/collectionStage0Integrity.contract.test.ts",
+        "docs/lnls/adr/COLLECTION-SEAL-COMPATIBILITY-STAGE-0-2026-10-20.md"
+      ],
+      "score": 0,
+      "tags": [
+        "wid-alb",
+        "origin-membership-seal",
+        "collective-hash",
+        "fail-closed",
+        "private-collection-containment",
+        "certificate-integrity",
+        "playlist-membership-row",
+        "transaction",
+        "creator-sovereignty",
+        "edition-deferred",
+        "stage-0"
       ]
     }
   ]

@@ -32,7 +32,8 @@ import {
   witnessCreator, unwatchCreator, isWitnessing, getWitnessCount,
   getWitnessNetwork, createReference, getReferencesForSong, getReferencesForUser,
   createPlaylist, getPlaylistsByUser, getPlaylistById, updatePlaylist, deletePlaylist,
-  getPlaylistTracks, addTrackToPlaylist, removeTrackFromPlaylist,
+  getPlaylistTracks, addTrackToPlaylist, removeTrackFromPlaylist, reorderPlaylistMembership,
+  PlaylistMembershipIntegrityError,
   getProvenancePlayerPlaylistTrackSources, hasAmbiguousProvenancePlayerWids,
   getPlaylistCollaborators, inviteCollaborator, acceptPlaylistInvite, removeCollaborator,
   isPlaylistMember,
@@ -291,7 +292,8 @@ export const playlistsRouter = router({
       .mutation(async ({ ctx, input }) => {
         const isMember = await isPlaylistMember(input.playlistId, ctx.user.id);
         if (!isMember) throw new TRPCError({ code: "FORBIDDEN" });
-        await removeTrackFromPlaylist(input.playlistTrackId);
+        const removed = await removeTrackFromPlaylist(input.playlistTrackId, input.playlistId);
+        if (!removed) throw new TRPCError({ code: "NOT_FOUND", message: "Playlist track not found." });
         return { ok: true };
       }),
     /** Invite a collaborator by userId */
@@ -340,24 +342,19 @@ export const playlistsRouter = router({
     reorder: protectedProcedure
       .input(z.object({
         playlistId: z.number().int().positive(),
-        orderedSongIds: z.array(z.number().int().positive()),
+        orderedPlaylistTrackIds: z.array(z.number().int().positive()),
       }))
       .mutation(async ({ ctx, input }) => {
         const isMember = await isPlaylistMember(input.playlistId, ctx.user.id);
         if (!isMember) throw new TRPCError({ code: "FORBIDDEN" });
-        const { getDb } = await import("../utils/db");
-        const { playlistTracks: pt } = await import("../../drizzle/schema");
-        const { eq: eqOp } = await import("drizzle-orm");
-        const db = await getDb();
-        // Update position for each songId in the new order
-        await Promise.all(
-          input.orderedSongIds.map((songId, idx) =>
-            db.update(pt)
-              .set({ position: idx })
-              .where(eqOp(pt.playlistId, input.playlistId))
-              .where(eqOp(pt.songId, songId))
-          )
-        );
+        try {
+          await reorderPlaylistMembership(input.playlistId, input.orderedPlaylistTrackIds);
+        } catch (error) {
+          if (error instanceof PlaylistMembershipIntegrityError) {
+            throw new TRPCError({ code: "CONFLICT", message: error.message });
+          }
+          throw error;
+        }
         return { ok: true };
       }),
     /** Save a version snapshot of the current playlist ordering */

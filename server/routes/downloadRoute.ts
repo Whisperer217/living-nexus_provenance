@@ -24,6 +24,7 @@ import JSZip from "jszip";
 import { ZipArchive } from "archiver";
 import { Readable } from "stream";
 import { getSongWithCreator, getUserTipTotalForSong, recordDownload, getSongsByUser, getCollectionByWid, getSongsByCollectionId, getUserById } from "../utils/db";
+import { collectionCompositionSealMatches } from "../domains/collections/collectionCompositionSeal";
 import { ENV } from "../_core/env";
 import { sdk } from "../_core/sdk";
 import type { Song } from "../../drizzle/schema";
@@ -497,15 +498,19 @@ downloadRouter.get("/api/download/album/:collectionWid", async (req: Request, re
 
   // 1. Load collection
   const collection = await getCollectionByWid(collectionWid);
-  if (!collection) {
+  if (!collection || collection.visibility !== "public") {
     res.status(404).json({ error: "Album not found." });
     return;
   }
 
   // 2. Load tracks in track order
   const allTracks = await getSongsByCollectionId(collection.id);
+  if (!collectionCompositionSealMatches(collection, allTracks)) {
+    res.status(409).json({ error: "Collection composition cannot be verified." });
+    return;
+  }
   const freeTracks = (allTracks as Song[]).filter(
-    (t: Song) => t.downloadPermission === "free" && t.fileUrl
+    (t: Song) => t.downloadPermission === "free" && t.fileUrl && t.isPublic && t.status === "Published" && !t.isFlagged
   );
 
   if (freeTracks.length === 0) {

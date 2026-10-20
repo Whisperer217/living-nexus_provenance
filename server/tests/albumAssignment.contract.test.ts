@@ -100,6 +100,19 @@ describe("creator album assignment contracts", () => {
     expect(metadata).toContain('eventType: "creator_historical_dates_revised"');
   });
 
+  it("preflights sealed WID-ALB membership before Work persistence while retaining only batch finalization as initial assembly", () => {
+    const router = read("server/routers/songs.ts");
+    const upload = router.slice(router.indexOf("upload: protectedProcedure"), router.indexOf("batchUpload:"));
+    const metadata = router.slice(router.indexOf("updateMetadata: protectedProcedure"), router.indexOf("// Legacy play counter"));
+    const collectionDb = read("server/db/songs.ts");
+
+    expect(upload.indexOf("requireMutableCollectionComposition(input.collectionId)")).toBeLessThan(upload.indexOf("createSong({"));
+    expect(metadata.indexOf("requireMutableCollectionComposition(existing.collectionId)")).toBeLessThan(metadata.indexOf("updateSongMetadata(songId"));
+    expect(metadata.indexOf("requireMutableCollectionComposition(collectionId)")).toBeLessThan(metadata.indexOf("updateSongMetadata(songId"));
+    expect(router).toContain("if (songIds.length > 0) await linkSongsToCollection(songIds, collectionId);");
+    expect(collectionDb).toContain("CollectionCompositionSealedError");
+  });
+
   it("refreshes owner Work and album projections after registration or edits without overwriting dirty forms", () => {
     const register = read("client/src/pages/manifestation-studio/environments/MusicEnvironment.tsx");
     const drawer = read("client/src/components/CreativeDrawer.tsx");

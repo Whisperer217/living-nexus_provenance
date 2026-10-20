@@ -2168,6 +2168,31 @@ export async function updateCollectionMeta(
   return true;
 }
 
+export class CollectionCompositionSealedError extends Error {
+  constructor() {
+    super("This album's composition is sealed by its WID-ALB. Create a new edition to change membership.");
+    this.name = "CollectionCompositionSealedError";
+  }
+}
+
+/**
+ * WID-ALB seals bind origin membership. Presentation edits and reordering of
+ * the same member set remain valid; add/remove/replace must wait for editions.
+ */
+export async function assertCollectionCompositionMutable(collectionId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  const [collection] = await db
+    .select({ collectionWid: collections.collectionWid, collectiveHash: collections.collectiveHash })
+    .from(collections)
+    .where(eq(collections.id, collectionId))
+    .limit(1);
+  if (!collection) throw new Error("Collection not found.");
+  if (collection.collectionWid?.trim() || collection.collectiveHash?.trim()) {
+    throw new CollectionCompositionSealedError();
+  }
+}
+
 /** Reorder tracks in a WID-ALB collection by providing the full ordered list of song IDs. */
 export async function reorderCollectionTracks(
   collectionId: number,
@@ -2196,6 +2221,7 @@ export async function removeFromCollectionById(
   songId: number,
   creatorId: number
 ) {
+  await assertCollectionCompositionMutable(collectionId);
   const db = await getDb();
   if (!db) return;
   await db
@@ -2214,6 +2240,7 @@ export async function addToCollectionById(
   songId: number,
   creatorId: number
 ) {
+  await assertCollectionCompositionMutable(collectionId);
   const db = await getDb();
   if (!db) return;
   const [maxRow] = await db
@@ -2242,6 +2269,7 @@ export async function replaceInCollectionById(
   newSongId: number,
   creatorId: number
 ) {
+  await assertCollectionCompositionMutable(collectionId);
   const db = await getDb();
   if (!db) return;
   const [oldSong] = await db

@@ -7,6 +7,7 @@ import { z } from "zod";
 import { validateHistoricalDates } from "@shared/workHistoricalDates";
 import { prepareParticipationCorrection } from "../domains/work/participationCorrection";
 import { buildProvenancePlayerManifest, ProvenancePlayerManifestUnavailableError } from "../domains/provenancePlayer/manifest";
+import { collectionCompositionSealMatches } from "../domains/collections/collectionCompositionSeal";
 import { generateShareArtifact } from "../services/shareArtifactService";
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "../_core/cookies";
@@ -19,7 +20,13 @@ import { storagePut } from "../utils/storage";
 import { micronize } from "../services/imageProcessing";
 import { invokeLLM } from "../_core/llm";
 import { getBestPlayedThisWeek } from "../db/songs";
-import { addToCollectionById, getCollectionById, removeFromCollectionById } from "../db/songs";
+import {
+  addToCollectionById,
+  assertCollectionCompositionMutable,
+  CollectionCompositionSealedError,
+  getCollectionById,
+  removeFromCollectionById,
+} from "../db/songs";
 import {
   addComment, createSong, deleteSong, hardDeleteSong, getAllCreators,
   getCommentsBySong, getPublicSongs, getSongById,
@@ -50,8 +57,8 @@ import {
   createPromoCode, listPromoCodes, deactivatePromoCode, reactivatePromoCode, redeemPromoCode,
   recordNameChange, getNameHistory, getOriginalName,
   createCollection, updateCollectionPdf, linkSongsToCollection,
-  getCollectionByWid, getSongsByCollectionId, getCollectionForSong, getProvenancePlayerAlbumTrackSources, hasAmbiguousProvenancePlayerWids,
-  getCollectionsByCreator, updateCollectionCover, updateCollectionDefaultView,
+  getCollectionByWid, getSongsByCollectionId, getPublicSongsByCollectionId, getCollectionForSong, getProvenancePlayerAlbumTrackSources, hasAmbiguousProvenancePlayerWids,
+  getCollectionsByCreator, getPublicCollectionsByCreator, updateCollectionCover, updateCollectionDefaultView,
   getAllSupporters, getSupporterByUserId, recordPlatformGift, getPublishedCountByUser,
   getNewEventCountForCreator, touchActivityVisit, touchDashboardVisit, getDashboardDeltas,
   getSongReactions, toggleSongReaction,
@@ -185,6 +192,17 @@ const stripe = process.env.STRIPE_SECRET_KEY
   ? new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: "2024-06-20" as any })
   : null as unknown as Stripe;
 const PLATFORM_FEE_PERCENT = 10;
+
+async function requireMutableCollectionComposition(collectionId: number) {
+  try {
+    await assertCollectionCompositionMutable(collectionId);
+  } catch (error) {
+    if (error instanceof CollectionCompositionSealedError) {
+      throw new TRPCError({ code: "CONFLICT", message: error.message });
+    }
+    throw error;
+  }
+}
 
 // ── Build stats — updated via env vars on each deploy ──
 const BUGS_FIXED = parseInt(process.env.BUGS_FIXED ?? "222", 10);
@@ -672,6 +690,7 @@ export const songsRouter = router({
         if (!collection || collection.creatorId !== ctx.user.id) {
           throw new TRPCError({ code: "FORBIDDEN", message: "The selected album is not available to your creator account." });
         }
+        await requireMutableCollectionComposition(input.collectionId);
       }
       // Founders have slotLimit = null (infinite). Regular users are capped by songSlotsTotal.
       const isFounder = user.role === "founder" || user.slotLimit === null;
@@ -1016,8 +1035,11 @@ export const songsRouter = router({
     verifyCollection: publicProcedure.input(z.object({ collectionWid: z.string().min(1) })).query(async ({ input }) => {
       let collection;
       try { collection = await getCollectionByWid(input.collectionWid); } catch { collection = undefined; }
-      if (!collection) throw new TRPCError({ code: "NOT_FOUND", message: "No collection found for this WID-ALB" });
+      if (!collection || collection.visibility !== "public") throw new TRPCError({ code: "NOT_FOUND", message: "No collection found for this WID-ALB" });
       const tracks = await getSongsByCollectionId(collection.id);
+      if (!collectionCompositionSealMatches(collection, tracks)) {
+        throw new TRPCError({ code: "CONFLICT", message: "Collection composition cannot be verified." });
+      }
       const creator = await getUserById(collection.creatorId);
       const creatorName = creator?.artistHandle || creator?.name || "Unknown Artist";
       return {
@@ -1239,6 +1261,10 @@ export const songsRouter = router({
           if (!collection || collection.creatorId !== ctx.user.id) {
             throw new TRPCError({ code: "FORBIDDEN", message: "The selected album is not available to your creator account." });
           }
+        }
+        if (collectionId !== existing.collectionId) {
+          if (existing.collectionId) await requireMutableCollectionComposition(existing.collectionId);
+          if (collectionId) await requireMutableCollectionComposition(collectionId);
         }
       }
       if (existing?.userId === ctx.user.id) {
@@ -1788,6 +1814,9 @@ ${workType === "manuscript" || workType === "comic" ? "Category" : "Genre"}: ${i
         if (!collection) throw new TRPCError({ code: "NOT_FOUND", message: "Collection not found" });
         if (collection.creatorId !== ctx.user.id) throw new TRPCError({ code: "FORBIDDEN", message: "Not your collection" });
         const tracks = await getSongsByCollectionId(collection.id);
+        if (!collectionCompositionSealMatches(collection, tracks)) {
+          throw new TRPCError({ code: "CONFLICT", message: "Collection composition cannot be verified." });
+        }
         const creator = await getUserById(collection.creatorId);
         const creatorName = creator?.artistHandle || creator?.name || "Unknown Artist";
         const year = new Date().getFullYear();
@@ -1879,13 +1908,19 @@ ${workType === "manuscript" || workType === "comic" ? "Category" : "Genre"}: ${i
     getCollectionsByCreator: publicProcedure
       .input(z.object({ creatorId: z.number() }))
       .query(async ({ input }) => {
-        return getCollectionsByCreator(input.creatorId);
+        return getPublicCollectionsByCreator(input.creatorId);
       }),
     // ── Get tracks for a WID-ALB collection (Archive page) ─────────────────────────────────────
     getCollectionTracks: publicProcedure
       .input(z.object({ collectionId: z.number().int().positive() }))
-      .query(async ({ input }) => {
-        return getSongsByCollectionId(input.collectionId);
+      .query(async ({ ctx, input }) => {
+        const collection = await getCollectionById(input.collectionId);
+        if (!collection) throw new TRPCError({ code: "NOT_FOUND", message: "Collection not found." });
+        if (collection.creatorId === ctx.user?.id) return getSongsByCollectionId(input.collectionId);
+        if (collection.visibility !== "public" || !collectionCompositionSealMatches(collection, await getSongsByCollectionId(input.collectionId))) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Collection not found." });
+        }
+        return getPublicSongsByCollectionId(input.collectionId);
       }),
     // ── Update Collection Cover Position ─────────────────────────────────────────────────────
     updateCollectionCoverPosition: protectedProcedure.input(z.object({
@@ -1955,8 +1990,12 @@ ${workType === "manuscript" || workType === "comic" ? "Category" : "Genre"}: ${i
       .input(z.object({ collectionWid: z.string().min(1) }))
       .query(async ({ input }) => {
         const collection = await getCollectionByWid(input.collectionWid);
-        if (!collection) throw new TRPCError({ code: "NOT_FOUND", message: "Album not found." });
-        const tracks = await getSongsByCollectionId(collection.id);
+        if (!collection || collection.visibility !== "public") throw new TRPCError({ code: "NOT_FOUND", message: "Album not found." });
+        const currentMembership = await getSongsByCollectionId(collection.id);
+        if (!collectionCompositionSealMatches(collection, currentMembership)) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Album not found." });
+        }
+        const tracks = await getPublicSongsByCollectionId(collection.id);
         const creator = await getUserById(collection.creatorId);
         const projectId = await getProjectIdByCollectionId(collection.id);
         return { collection, tracks, creator, projectId };
@@ -1972,6 +2011,9 @@ ${workType === "manuscript" || workType === "comic" ? "Category" : "Genre"}: ${i
 
         try {
           const rows = await getProvenancePlayerAlbumTrackSources(collection.id);
+          if (!collectionCompositionSealMatches(collection, rows.map((row: any) => row.song))) {
+            throw new ProvenancePlayerManifestUnavailableError();
+          }
           if (await hasAmbiguousProvenancePlayerWids(rows.map((row: any) => row.song?.witnessId ?? ""))) {
             throw new ProvenancePlayerManifestUnavailableError();
           }

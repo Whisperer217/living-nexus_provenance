@@ -84,7 +84,12 @@ import {
   classifyPublicWitnessCandidates,
   type PublicWitnessProjection,
 } from "../domains/registry/publicWitnessProjection";
+import {
+  assertExactPlaylistMembershipIds,
+  PlaylistMembershipIntegrityError,
+} from "../domains/playlists/playlistMembershipIntegrity";
 export type { SearchResults } from "../../shared/searchTypes";
+export { PlaylistMembershipIntegrityError } from "../domains/playlists/playlistMembershipIntegrity";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let _db: any = null;
@@ -2232,11 +2237,46 @@ export async function addTrackToPlaylist(playlistId: number, songId: number, add
   await (db as any).insert(playlistTracks).values({ playlistId, songId, addedByUserId, position: nextPos });
 }
 
-export async function removeTrackFromPlaylist(playlistTrackId: number) {
+export async function removeTrackFromPlaylist(playlistTrackId: number, playlistId: number): Promise<boolean> {
   const db = await getDb();
-  if (!db) return;
+  if (!db) return false;
   const { playlistTracks } = await import("../../drizzle/schema");
-  await (db as any).delete(playlistTracks).where(eq(playlistTracks.id, playlistTrackId));
+  const result = await (db as any)
+    .delete(playlistTracks)
+    .where(and(eq(playlistTracks.id, playlistTrackId), eq(playlistTracks.playlistId, playlistId)));
+  const affectedRows = Number((result as any)?.[0]?.affectedRows ?? (result as any)?.affectedRows ?? 0);
+  return affectedRows === 1;
+}
+
+/**
+ * Reorder exact playlist membership rows atomically. Membership-row IDs are
+ * required because the same Work may intentionally occur more than once.
+ */
+export async function reorderPlaylistMembership(playlistId: number, orderedPlaylistTrackIds: number[]) {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  const { playlistTracks } = await import("../../drizzle/schema");
+
+  await (db as any).transaction(async (tx: any) => {
+    const current = await tx
+      .select({ id: playlistTracks.id })
+      .from(playlistTracks)
+      .where(eq(playlistTracks.playlistId, playlistId));
+    const currentIds = current.map((row: { id: number }) => row.id);
+    assertExactPlaylistMembershipIds(currentIds, orderedPlaylistTrackIds);
+
+    for (let position = 0; position < orderedPlaylistTrackIds.length; position++) {
+      const result = await tx
+        .update(playlistTracks)
+        .set({ position })
+        .where(and(
+          eq(playlistTracks.id, orderedPlaylistTrackIds[position]),
+          eq(playlistTracks.playlistId, playlistId),
+        ));
+      const affectedRows = Number((result as any)?.[0]?.affectedRows ?? (result as any)?.affectedRows ?? 0);
+      if (affectedRows !== 1) throw new PlaylistMembershipIntegrityError();
+    }
+  });
 }
 
 export async function getPlaylistCollaborators(playlistId: number) {
@@ -2663,6 +2703,20 @@ export async function getSongsByCollectionId(collectionId: number) {
     .orderBy(songs.trackOrder, songs.createdAt); // trackOrder preserves batch upload sequence; createdAt as tiebreaker
 }
 
+/** Public availability projection for a public WID-ALB; owner Studio reads stay separate. */
+export async function getPublicSongsByCollectionId(collectionId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(songs)
+    .where(and(
+      eq(songs.collectionId, collectionId),
+      eq(songs.isPublic, true),
+      eq(songs.status, "Published"),
+      eq(songs.isFlagged, false),
+    ))
+    .orderBy(songs.trackOrder, songs.createdAt);
+}
+
 /**
  * Complete current album membership for an owner-authorized companion manifest.
  * Unlike the display helper above, deleted and otherwise ineligible rows are
@@ -2789,6 +2843,31 @@ export async function getCollectionsByCreator(creatorId: number) {
     .groupBy(collections.id)
     .orderBy(desc(collections.createdAt));
   // Filter out empty shells (all tracks deleted) and attach live count
+  return rows
+    .filter((r: { liveTrackCount: number }) => Number(r.liveTrackCount) > 0)
+    .map((r: { collection: typeof collections.$inferSelect; liveTrackCount: number }) => ({
+      ...r.collection,
+      trackCount: Number(r.liveTrackCount),
+    }));
+}
+
+/** Public creator-album projection; owner Studio and Archive use the full reader above. */
+export async function getPublicCollectionsByCreator(creatorId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db
+    .select({
+      collection: collections,
+      liveTrackCount: sql<number>`count(${songs.id})`,
+    })
+    .from(collections)
+    .leftJoin(songs, and(
+      eq(songs.collectionId, collections.id),
+      sql`${songs.status} != 'Deleted'`,
+    ))
+    .where(and(eq(collections.creatorId, creatorId), eq(collections.visibility, "public")))
+    .groupBy(collections.id)
+    .orderBy(desc(collections.createdAt));
   return rows
     .filter((r: { liveTrackCount: number }) => Number(r.liveTrackCount) > 0)
     .map((r: { collection: typeof collections.$inferSelect; liveTrackCount: number }) => ({

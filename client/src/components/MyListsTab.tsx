@@ -301,7 +301,7 @@ function PlaylistManagePanel({ playlist }: { playlist: any }) {
   );
 
   const reorder = trpc.playlists.reorder.useMutation({
-    onError: () => toast.error("Failed to save order"),
+    onError: (error) => toast.error(error.message || "Failed to save order"),
   });
 
   const saveVersion = trpc.playlists.saveVersion.useMutation({
@@ -322,14 +322,15 @@ function PlaylistManagePanel({ playlist }: { playlist: any }) {
   });
 
   const rawTracks = playlistData?.tracks ?? [];
-  const trackItems = rawTracks.map((t: any) => ({ ...t, id: t.songId }));
+  // Playlist membership IDs remain distinct when the same Work occurs twice.
+  const trackItems = rawTracks.map((t: any) => ({ ...t, id: t.id }));
 
   const { items, handleDragStart, handleDragEnter, handleDragEnd } = useDragReorder(
     trackItems,
     (reordered) => {
       reorder.mutate({
         playlistId: playlist.id,
-        orderedSongIds: reordered.map((t: any) => t.songId),
+        orderedPlaylistTrackIds: reordered.map((t: any) => t.id),
       });
     }
   );
