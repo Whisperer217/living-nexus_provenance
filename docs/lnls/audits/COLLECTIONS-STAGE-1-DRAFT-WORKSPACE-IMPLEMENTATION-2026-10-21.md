@@ -62,6 +62,10 @@ Therefore this checkpoint provides the private editing half of the approved Draf
 
 Stage 0 WID-ALB composition sealing and named-playlist membership integrity remain in force. The workspace contains no PlayerContext, queue reset, audio instance, or playback action. Existing owner-authorized Provenance Player manifest copy flows remain unchanged for legacy albums and named playlists; Draft Releases cannot export a companion manifest until they are honestly sealed and currently eligible.
 
+### Legacy WID-ALB recovery follow-up
+
+The focused recovery repair documented in [`LEGACY-WID-ALB-CREATOR-DOMAIN-RECOVERY-2026-10-21.md`](./LEGACY-WID-ALB-CREATOR-DOMAIN-RECOVERY-2026-10-21.md) preserves the Stage 0 fail-closed rule for a legacy album whose current membership cannot reproduce its historic collective hash. It adds an owner-only **Create Draft from Current Works** action that creates a separate private Draft Release with observational legacy lineage, never a repaired or replaced WID-ALB. Public Creator Domain shelves now omit any collection whose current members cannot truthfully support its public WID-ALB claim.
+
 ## Validation evidence
 
 | Check | Result |

@@ -1,10 +1,11 @@
-import { and, asc, desc, eq, inArray, isNotNull } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNotNull, sql } from "drizzle-orm";
 import { createHash } from "node:crypto";
 import {
   albumReleaseDraftRevisions,
   albumReleaseDraftTracks,
   albumReleaseDrafts,
   albumReleaseFamilies,
+  collections,
   songs,
   users,
 } from "../../drizzle/schema";
@@ -222,6 +223,86 @@ export async function createDraftRelease(
     if (!draft) throw new Error("Draft creation did not return a record");
     await recordDraftRevision(tx, creatorId, draft, "created");
     return { draft, created: true };
+  });
+}
+
+/**
+ * Creates a new, private editable release relationship from an owner's current
+ * legacy-album members. The legacy WID-ALB record is an observational source
+ * only: this never edits its membership, collective hash, certificate, Work
+ * WIDs, media, or participation declarations.
+ */
+export async function createDraftReleaseFromLegacyCollection(
+  creatorId: number,
+  createRequestId: string,
+  legacyCollectionId: number,
+) {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+
+  return (db as any).transaction(async (tx: any) => {
+    const [existing] = await tx
+      .select()
+      .from(albumReleaseDrafts)
+      .where(and(
+        eq(albumReleaseDrafts.creatorId, creatorId),
+        eq(albumReleaseDrafts.createRequestId, createRequestId),
+      ))
+      .limit(1);
+    if (existing) return { draft: existing, created: false };
+
+    const [legacy] = await tx
+      .select()
+      .from(collections)
+      .where(and(
+        eq(collections.id, legacyCollectionId),
+        eq(collections.creatorId, creatorId),
+      ))
+      .limit(1);
+    if (!legacy) unavailable();
+
+    const sourceMembers = await tx
+      .select({ id: songs.id })
+      .from(songs)
+      .where(and(
+        eq(songs.collectionId, legacy.id),
+        sql`${songs.status} != 'Deleted'`,
+      ))
+      .orderBy(asc(songs.trackOrder), asc(songs.id));
+    const songIdsInOrder: number[] = sourceMembers.map((member: { id: number }) => member.id);
+    const candidates = await selectEligibleCandidates(tx, songIdsInOrder);
+    // Validate the whole current set before creating a family or a draft so a
+    // partial relationship cannot be represented as an edition candidate.
+    assertDraftMembershipCandidates(creatorId, songIdsInOrder, candidates);
+
+    const familyResult = await tx.insert(albumReleaseFamilies).values({
+      creatorId,
+      sourceKind: "legacy_collection",
+      legacyCollectionId: legacy.id,
+      legacyCollectionWidSnapshot: legacy.collectionWid,
+    });
+    const releaseFamilyId = Number(familyResult.insertId);
+    const draftResult = await tx.insert(albumReleaseDrafts).values({
+      releaseFamilyId,
+      creatorId,
+      title: legacy.name,
+      description: legacy.description ?? null,
+      coverArtUrl: legacy.coverArtUrl ?? null,
+      visibilityIntent: legacy.visibility,
+      createRequestId,
+    });
+    const draftId = Number(draftResult.insertId);
+    await tx.insert(albumReleaseDraftTracks).values(songIdsInOrder.map((songId: number, position: number) => ({
+      draftId,
+      songId,
+      position,
+      addedByUserId: creatorId,
+    })));
+    const [draft] = await tx.select().from(albumReleaseDrafts).where(eq(albumReleaseDrafts.id, draftId)).limit(1);
+    if (!draft) throw new Error("Draft creation did not return a record");
+    await recordDraftRevision(tx, creatorId, draft, "created");
+    const tracks = await selectDraftTracks(tx, draftId);
+    return { draft, tracks, created: true };
   });
 }
 

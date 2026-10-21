@@ -42,7 +42,7 @@ import {
   recordNameChange, getNameHistory, getOriginalName,
   createCollection, updateCollectionPdf, linkSongsToCollection,
   getCollectionByWid, getSongsByCollectionId, getCollectionForSong,
-  getCollectionsByCreator, updateCollectionCover,
+  getCollectionsByCreator, getPublicCollectionsByCreator, updateCollectionCover,
   getAllSupporters, getSupporterByUserId, recordPlatformGift, getPublishedCountByUser,
   getNewEventCountForCreator, touchActivityVisit, touchDashboardVisit, getDashboardDeltas,
   getSongReactions, toggleSongReaction,
@@ -378,9 +378,8 @@ export const profileRouter = router({
           updatedAt: p.updatedAt ?? null,
         }));
 
-      const albumRows = await getCollectionsByCreator(input.creatorId);
-      const publicAlbums = (albumRows as any[])
-        .filter((album: any) => album.visibility === "public")
+      const publicAlbumRows = await getPublicCollectionsByCreator(input.creatorId);
+      const publicAlbums = (publicAlbumRows as any[])
         .map((album: any) => ({
           id: album.id,
           name: album.name,
@@ -632,9 +631,8 @@ Rules:
      */
     creatorHub: publicProcedure
       .input(z.object({ creatorId: z.number().int().positive() }))
-      .query(async ({ input, ctx }) => {
+      .query(async ({ input }) => {
         const { creatorId } = input;
-        const isOwner = ctx.user?.id === creatorId;
 
         // All public published songs for this creator
         const allSongs = await getSongsByUser(creatorId);
@@ -652,10 +650,7 @@ Rules:
         const publicPlaylists = (playlistRows as any[]).filter((p: any) => p.isPublic !== false);
 
         // Collections (album-style)
-        const allCollectionRows = await getCollectionsByCreator(creatorId);
-        const collectionRows = isOwner
-          ? allCollectionRows
-          : (allCollectionRows as any[]).filter((collection: any) => collection.visibility === 'public');
+        const collectionRows = await getPublicCollectionsByCreator(creatorId);
 
         // Testimony
         const testimonyCount = await getTestimonyCount(creatorId);
@@ -711,7 +706,7 @@ Rules:
         limit: z.number().int().min(1).max(500).default(200),
         offset: z.number().int().min(0).default(0),
       }))
-      .query(async ({ input, ctx }) => {
+      .query(async ({ input }) => {
         const { medium, limit, offset } = input;
         // Resolve creator from handle (string) or creatorId (number)
         let creator: Awaited<ReturnType<typeof getUserById>> | undefined;
@@ -724,10 +719,7 @@ Rules:
         const creatorId = creator.id;
 
         if (medium === 'albums') {
-          const allCollections = await getCollectionsByCreator(creatorId);
-          const cols = ctx.user?.id === creatorId
-            ? allCollections
-            : (allCollections as any[]).filter((collection: any) => collection.visibility === 'public');
+          const cols = await getPublicCollectionsByCreator(creatorId);
           return { creator, works: [] as any[], collections: cols as any[], playlists: [] as any[] };
         }
 
@@ -768,4 +760,3 @@ Rules:
         return { creator, works: filtered, collections: [] as any[], playlists: [] as any[], totalCount };
       }),
   });
-

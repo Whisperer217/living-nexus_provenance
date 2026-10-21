@@ -43,9 +43,23 @@ describe("Creator Collections workspace", () => {
     expect(repository).toContain("assertExactDraftMembershipIds");
   });
 
-  it("does not reuse legacy collection relationships for modern draft membership", () => {
+  it("keeps ordinary Draft Release membership independent from legacy albums while allowing the explicit recovery snapshot", () => {
     expect(repository).toContain("albumReleaseDraftTracks");
-    expect(repository).not.toContain("songs.collectionId");
     expect(repository).not.toContain("updateSongMetadata");
+    const ordinaryDraftOperations = repository.slice(
+      repository.indexOf("export async function createDraftRelease("),
+      repository.indexOf("export async function createDraftReleaseFromLegacyCollection("),
+    );
+    expect(ordinaryDraftOperations).not.toContain("songs.collectionId");
+  });
+
+  it("lets only the owner create a separate private draft from a preserved legacy album", () => {
+    expect(drafts).toContain("createFromLegacyCollection: protectedProcedure");
+    expect(workspace).toContain("Create Draft from Current Works");
+    expect(repository).toContain("createDraftReleaseFromLegacyCollection");
+    expect(repository).toContain('sourceKind: "legacy_collection"');
+    expect(repository).toContain("legacyCollectionWidSnapshot: legacy.collectionWid");
+    expect(repository).toContain("assertDraftMembershipCandidates(creatorId, songIdsInOrder, candidates)");
+    expect(repository).toContain("never edits its membership, collective hash, certificate, Work");
   });
 });

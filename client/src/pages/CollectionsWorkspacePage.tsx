@@ -265,6 +265,18 @@ export default function CollectionsWorkspacePage() {
     },
     onError: (error) => toast.error(error.message),
   });
+  const createDraftFromLegacy = trpc.releaseDrafts.createFromLegacyCollection.useMutation({
+    onSuccess: async ({ draft }) => {
+      setActiveDraftId(draft.id);
+      await utils.releaseDrafts.listMine.invalidate();
+      toast.success("Private Draft Release created from current Works.", {
+        description: "The historic WID-ALB record remains preserved and unchanged.",
+      });
+    },
+    onError: (error) => toast.error(error.message, {
+      description: "A draft can include only your current published public audio Works with existing WIDs.",
+    }),
+  });
 
   const content = useMemo(() => ({ drafts: drafts.data ?? [], albums: legacyAlbums.data ?? [], playlists: namedPlaylists.data ?? [] }), [drafts.data, legacyAlbums.data, namedPlaylists.data]);
 
@@ -313,7 +325,7 @@ export default function CollectionsWorkspacePage() {
       <section aria-labelledby="sealed-albums-heading">
         <div className="mb-3 flex flex-wrap items-end justify-between gap-3"><div><p className="text-[11px] font-bold tracking-[0.14em]" style={{ color: "var(--ln-gold)", fontFamily: "'Cinzel', serif" }}>HISTORICAL</p><h2 id="sealed-albums-heading" className="text-xl" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>Legacy WID-ALB Sealed Albums</h2></div><span className="text-xs" style={{ color: "var(--ln-smoke)" }}>{content.albums.length} preserved album{content.albums.length === 1 ? "" : "s"}</span></div>
         <p className="mb-3 text-sm" style={{ color: "var(--ln-smoke)" }}>These origin records remain intact. Their membership and collective hash are not edited here; use the linked Studio for permitted presentation changes only.</p>
-        <div className="grid gap-3 md:grid-cols-2">{content.albums.map((album: any) => <article key={album.id} className="min-w-0 rounded-2xl border p-4" style={{ borderColor: "rgba(255,255,255,0.1)", background: "var(--ln-coal)" }}><div className="flex min-w-0 gap-3"><div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg" style={{ background: "rgba(196,154,40,0.08)" }}>{album.coverArtUrl ? <img src={album.coverArtUrl} alt="" className="h-full w-full object-cover" /> : <Album className="m-3 h-6 w-6" style={{ color: "var(--ln-gold)" }} />}</div><div className="min-w-0 flex-1"><p className="truncate text-sm" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>{album.name}</p><p className="mt-1 truncate font-mono text-[10px]" style={{ color: "rgba(196,154,40,0.52)" }}>{album.collectionWid}</p><p className="mt-1 text-xs" style={{ color: "var(--ln-smoke)" }}>{album.trackCount ?? 0} tracks · {album.visibility}</p></div></div><div className="mt-3 flex flex-wrap gap-2"><Link href={`/album/${encodeURIComponent(album.collectionWid)}`} className="rounded-lg px-2.5 py-1.5 text-xs" style={{ color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.25)" }}>View / copy manifest</Link><Link href={`/studio/collection/${album.id}`} className="rounded-lg px-2.5 py-1.5 text-xs" style={{ color: "var(--ln-smoke)", border: "1px solid rgba(255,255,255,0.1)" }}>Presentation Studio</Link></div></article>)}</div>
+        <div className="grid gap-3 md:grid-cols-2">{content.albums.map((album: any) => <article key={album.id} className="min-w-0 rounded-2xl border p-4" style={{ borderColor: "rgba(255,255,255,0.1)", background: "var(--ln-coal)" }}><div className="flex min-w-0 gap-3"><div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg" style={{ background: "rgba(196,154,40,0.08)" }}>{album.coverArtUrl ? <img src={album.coverArtUrl} alt="" className="h-full w-full object-cover" /> : <Album className="m-3 h-6 w-6" style={{ color: "var(--ln-gold)" }} />}</div><div className="min-w-0 flex-1"><p className="truncate text-sm" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>{album.name}</p><p className="mt-1 truncate font-mono text-[10px]" style={{ color: "rgba(196,154,40,0.52)" }}>{album.collectionWid}</p><p className="mt-1 text-xs" style={{ color: "var(--ln-smoke)" }}>{album.trackCount ?? 0} tracks · {album.visibility}</p></div></div><div className="mt-3 flex flex-wrap gap-2"><Link href={`/album/${encodeURIComponent(album.collectionWid)}`} className="rounded-lg px-2.5 py-1.5 text-xs" style={{ color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.25)" }}>View / copy manifest</Link><Link href={`/studio/collection/${album.id}`} className="rounded-lg px-2.5 py-1.5 text-xs" style={{ color: "var(--ln-smoke)", border: "1px solid rgba(255,255,255,0.1)" }}>Presentation Studio</Link><button type="button" disabled={createDraftFromLegacy.isPending} onClick={() => createDraftFromLegacy.mutate({ requestId: crypto.randomUUID(), legacyCollectionId: album.id })} className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs disabled:opacity-50" style={{ color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.38)", background: "rgba(196,154,40,0.08)" }}>{createDraftFromLegacy.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Plus className="h-3 w-3" />} Create Draft from Current Works</button></div></article>)}</div>
       </section>
 
       <section aria-labelledby="named-playlists-heading" className="rounded-2xl border p-4 sm:p-6" style={{ borderColor: "rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.02)" }}>

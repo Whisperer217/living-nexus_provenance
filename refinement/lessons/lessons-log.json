@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-10-21T01:23:22.737593+00:00",
-  "totalLessons": 72,
+  "lastUpdated": "2026-10-21T04:59:20.344195+00:00",
+  "totalLessons": 73,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -1779,6 +1779,39 @@
         "no-player-reset",
         "additive-migration",
         "stage-1"
+      ]
+    },
+    {
+      "id": "LESSON-073",
+      "date": "2026-10-21",
+      "category": "security",
+      "problem": "A public legacy WID-ALB whose current Work membership no longer reproduced its stored collective hash correctly failed at its canonical album route, but broad Creator Domain projections could still advertise the unresolved album and gave its owner no single relationship-first recovery path.",
+      "solution": "Keep the historical WID-ALB fail-closed. Reuse the exact composition-seal replay in the shared public Creator Domain album reader; give only the owner a transactional action that snapshots the current eligible Works into a separate private Draft Release with observational legacy lineage. Never update legacy membership, collective hash, certificate, Work WIDs, media, HAAI declarations, or companion-player authority.",
+      "files": [
+        "server/db/albumReleases.ts",
+        "server/routers/releaseDrafts.ts",
+        "server/utils/db.ts",
+        "server/routers/profile.ts",
+        "client/src/pages/CollectionsWorkspacePage.tsx",
+        "client/src/pages/AlbumDetailPage.tsx",
+        "server/tests/legacyAlbumRecovery.contract.test.ts",
+        "server/tests/collectionWorkspace.contract.test.ts",
+        "server/tests/creatorDomainAlbumShowcase.contract.test.ts",
+        "docs/lnls/audits/LEGACY-WID-ALB-CREATOR-DOMAIN-RECOVERY-2026-10-21.md"
+      ],
+      "score": 0,
+      "tags": [
+        "wid-alb",
+        "collective-hash",
+        "creator-domain",
+        "public-projection",
+        "legacy-recovery",
+        "draft-release",
+        "owner-authorized",
+        "fail-closed",
+        "historical-preservation",
+        "no-wid-replacement",
+        "no-player-reset"
       ]
     }
   ]

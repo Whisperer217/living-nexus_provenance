@@ -4,6 +4,7 @@ import { protectedProcedure, router } from "../_core/trpc";
 import {
   abandonDraftRelease,
   createDraftRelease,
+  createDraftReleaseFromLegacyCollection,
   getOwnedDraftRelease,
   listEligibleDraftReleaseWorks,
   listOwnedDraftReleases,
@@ -58,6 +59,28 @@ export const releaseDraftsRouter = router({
     .mutation(async ({ ctx, input }) => {
       try {
         return await createDraftRelease(ctx.user.id, input.requestId, input.metadata);
+      } catch (error) {
+        return mapDraftError(error);
+      }
+    }),
+
+  /**
+   * Owner-only recovery path from a preserved WID-ALB origin record. It creates
+   * a separate private Draft Release from the current eligible Work set; it
+   * never repairs, replaces, or mutates the historic album certificate.
+   */
+  createFromLegacyCollection: protectedProcedure
+    .input(z.object({
+      requestId: z.string().uuid(),
+      legacyCollectionId: z.number().int().positive(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      try {
+        return await createDraftReleaseFromLegacyCollection(
+          ctx.user.id,
+          input.requestId,
+          input.legacyCollectionId,
+        );
       } catch (error) {
         return mapDraftError(error);
       }

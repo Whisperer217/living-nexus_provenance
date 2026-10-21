@@ -349,6 +349,15 @@ export default function AlbumDetailPage() {
         >
           <ChevronLeft size={14} className="mr-1" /> Go back
         </Button>
+        {user && (
+          <Link
+            href="/creator/collections"
+            className="inline-flex min-h-9 items-center rounded-md border px-3 text-sm focus-visible:outline-none focus-visible:ring-2"
+            style={{ borderColor: "rgba(196,154,40,0.35)", color: "var(--ln-gold)" }}
+          >
+            Manage Collections
+          </Link>
+        )}
       </div>
     );
   }

@@ -88,6 +88,7 @@ import {
   assertExactPlaylistMembershipIds,
   PlaylistMembershipIntegrityError,
 } from "../domains/playlists/playlistMembershipIntegrity";
+import { collectionCompositionSealMatches } from "../domains/collections/collectionCompositionSeal";
 export type { SearchResults } from "../../shared/searchTypes";
 export { PlaylistMembershipIntegrityError } from "../domains/playlists/playlistMembershipIntegrity";
 
@@ -2868,8 +2869,26 @@ export async function getPublicCollectionsByCreator(creatorId: number) {
     .where(and(eq(collections.creatorId, creatorId), eq(collections.visibility, "public")))
     .groupBy(collections.id)
     .orderBy(desc(collections.createdAt));
-  return rows
-    .filter((r: { liveTrackCount: number }) => Number(r.liveTrackCount) > 0)
+  const candidateRows = rows.filter((r: { liveTrackCount: number }) => Number(r.liveTrackCount) > 0);
+  if (!candidateRows.length) return [];
+  const memberRows = await db
+    .select({ collectionId: songs.collectionId, witnessId: songs.witnessId })
+    .from(songs)
+    .where(and(
+      inArray(songs.collectionId, candidateRows.map((row: { collection: typeof collections.$inferSelect }) => row.collection.id)),
+      sql`${songs.status} != 'Deleted'`,
+    ));
+  const membersByCollection = new Map<number, Array<{ witnessId: string | null }>>();
+  for (const member of memberRows) {
+    if (member.collectionId === null) continue;
+    const members = membersByCollection.get(member.collectionId) ?? [];
+    members.push({ witnessId: member.witnessId });
+    membersByCollection.set(member.collectionId, members);
+  }
+  return candidateRows
+    .filter((row: { collection: typeof collections.$inferSelect }) =>
+      collectionCompositionSealMatches(row.collection, membersByCollection.get(row.collection.id) ?? []),
+    )
     .map((r: { collection: typeof collections.$inferSelect; liveTrackCount: number }) => ({
       ...r.collection,
       trackCount: Number(r.liveTrackCount),

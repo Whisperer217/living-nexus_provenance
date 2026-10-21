@@ -14,12 +14,13 @@ describe("creator-domain album showcase contracts", () => {
     expect(hub).toContain('isAlbumModule ? "col-span-2 lg:col-span-2"');
   });
 
-  it("keeps visitor album projections public while owners retain their private management view", () => {
+  it("keeps Creator Domain album projections public and seal-valid while owners retain private management outside that projection", () => {
     const profile = read("server/routers/profile.ts");
-    expect(profile).toContain("const isOwner = ctx.user?.id === creatorId");
-    expect(profile).toContain("collection.visibility === 'public'");
-    expect(profile).toContain("ctx.user?.id === creatorId");
-    expect(profile).toContain("getCollectionsByCreator(creatorId)");
+    const db = read("server/utils/db.ts");
+    expect(profile).toContain("getPublicCollectionsByCreator(creatorId)");
+    expect(db).toContain("export async function getPublicCollectionsByCreator");
+    expect(db).toContain("collectionCompositionSealMatches(row.collection");
+    expect(profile).not.toContain("ctx.user?.id === creatorId\n          ? allCollections");
   });
 
   it("does not introduce a second album linkage or modify registry authority", () => {
