@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useParams } from "wouter";
 import {
   Album,
@@ -256,22 +256,35 @@ export default function CollectionsWorkspacePage() {
   const [newTitle, setNewTitle] = useState("");
   const [newVisibility, setNewVisibility] = useState<VisibilityIntent>("public");
   const [manifestPlaylistId, setManifestPlaylistId] = useState<number | null>(null);
+  const openDraft = (draftId: number) => {
+    setActiveDraftId(draftId);
+    navigate(`/studio/release/${draftId}`);
+  };
+
+  useEffect(() => {
+    const parsed = Number(routeDraftId);
+    const nextDraftId = Number.isSafeInteger(parsed) && parsed > 0 ? parsed : null;
+    setActiveDraftId((current) => current === nextDraftId ? current : nextDraftId);
+  }, [routeDraftId]);
+
   const createDraft = trpc.releaseDrafts.create.useMutation({
     onSuccess: async ({ draft }) => {
       setNewTitle("");
-      setActiveDraftId(draft.id);
       await utils.releaseDrafts.listMine.invalidate();
-      toast.success("Private Draft Release created.");
+      toast.success("Private Draft Release created.", {
+        description: "Opening its private workspace. Your existing Works remain unchanged.",
+      });
+      openDraft(draft.id);
     },
     onError: (error) => toast.error(error.message),
   });
   const createDraftFromLegacy = trpc.releaseDrafts.createFromLegacyCollection.useMutation({
     onSuccess: async ({ draft }) => {
-      setActiveDraftId(draft.id);
       await utils.releaseDrafts.listMine.invalidate();
       toast.success("Private Draft Release created from current Works.", {
-        description: "The historic WID-ALB record remains preserved and unchanged.",
+        description: "Opening its private workspace. The historic WID-ALB record remains preserved and unchanged.",
       });
+      openDraft(draft.id);
     },
     onError: (error) => toast.error(error.message, {
       description: "A draft can include only your current published public audio Works with existing WIDs.",
@@ -307,7 +320,7 @@ export default function CollectionsWorkspacePage() {
       <p className="mt-3 text-sm leading-relaxed sm:text-base" style={{ color: "var(--ln-smoke)" }}>Arrange existing registered Works without duplicating media or replacing WIDs. Draft Releases are private and editable; sealed editions and named playlists retain their own distinct history.</p>
     </header>
 
-    {activeDraftId ? <DraftReleaseEditor draftId={activeDraftId} onClose={() => { setActiveDraftId(null); if (routeDraftId) navigate("/creator/collections", { replace: true }); }} /> : <div className="space-y-8">
+    {activeDraftId ? <DraftReleaseEditor draftId={activeDraftId} onClose={() => { setActiveDraftId(null); navigate("/creator/collections"); }} /> : <div className="space-y-8">
       <section className="rounded-2xl border p-4 sm:p-6" style={{ borderColor: "rgba(196,154,40,0.30)", background: "linear-gradient(135deg, rgba(196,154,40,0.08), rgba(0,0,0,0.08))" }}>
         <div className="flex flex-wrap items-start justify-between gap-4"><div><p className="text-[11px] font-bold tracking-[0.14em]" style={{ color: "var(--ln-gold)", fontFamily: "'Cinzel', serif" }}>NEW RELEASE</p><h2 className="mt-1 text-xl" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>Begin a private Draft Release</h2><p className="mt-1 text-sm" style={{ color: "var(--ln-smoke)" }}>Add Works, choose their order, and revise freely. Nothing is public or sealed here.</p></div><Sparkles className="h-8 w-8" style={{ color: "var(--ln-gold)" }} /></div>
         <form className="mt-4 flex flex-col gap-2 sm:flex-row" onSubmit={(event) => { event.preventDefault(); if (newTitle.trim()) createDraft.mutate({ requestId: crypto.randomUUID(), metadata: { title: newTitle.trim(), visibilityIntent: newVisibility } }); }}>
@@ -319,7 +332,7 @@ export default function CollectionsWorkspacePage() {
 
       <section aria-labelledby="draft-releases-heading">
         <div className="mb-3 flex flex-wrap items-end justify-between gap-3"><div><p className="text-[11px] font-bold tracking-[0.14em]" style={{ color: "var(--ln-gold)", fontFamily: "'Cinzel', serif" }}>EDITABLE</p><h2 id="draft-releases-heading" className="text-xl" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>Draft Releases</h2></div><span className="text-xs" style={{ color: "var(--ln-smoke)" }}>{content.drafts.length} private draft{content.drafts.length === 1 ? "" : "s"}</span></div>
-        {drafts.isLoading ? <div className="h-28 animate-pulse rounded-2xl" style={{ background: "var(--ln-coal)" }} /> : content.drafts.length === 0 ? <p className="rounded-2xl border border-dashed p-6 text-sm" style={{ borderColor: "rgba(196,154,40,0.2)", color: "var(--ln-smoke)" }}>No Draft Releases yet. Start with existing published audio Works when you are ready.</p> : <div className="grid gap-3 md:grid-cols-2">{content.drafts.map((draft: any) => <button key={draft.id} type="button" onClick={() => setActiveDraftId(draft.id)} className="group min-w-0 rounded-2xl border p-4 text-left transition hover:-translate-y-0.5 hover:border-[rgba(196,154,40,0.52)] focus-visible:ring-2" style={{ borderColor: "rgba(196,154,40,0.22)", background: "var(--ln-coal)" }}><div className="flex items-start justify-between gap-3"><div className="min-w-0"><p className="truncate text-base" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>{draft.title}</p><p className="mt-1 text-xs" style={{ color: "var(--ln-smoke)" }}>{draft.trackCount} Work{draft.trackCount === 1 ? "" : "s"} · revision {draft.revision}</p></div><span className="rounded-full px-2 py-1 text-[10px] font-bold" style={{ color: "var(--ln-gold)", background: "rgba(196,154,40,0.12)" }}>DRAFT</span></div><p className="mt-4 text-xs" style={{ color: "var(--ln-gold)" }}>Open private workspace →</p></button>)}</div>}
+        {drafts.isLoading ? <div className="h-28 animate-pulse rounded-2xl" style={{ background: "var(--ln-coal)" }} /> : content.drafts.length === 0 ? <p className="rounded-2xl border border-dashed p-6 text-sm" style={{ borderColor: "rgba(196,154,40,0.2)", color: "var(--ln-smoke)" }}>No Draft Releases yet. Start with existing published audio Works when you are ready.</p> : <div className="grid gap-3 md:grid-cols-2">{content.drafts.map((draft: any) => <button key={draft.id} type="button" onClick={() => openDraft(draft.id)} className="group min-w-0 rounded-2xl border p-4 text-left transition hover:-translate-y-0.5 hover:border-[rgba(196,154,40,0.52)] focus-visible:ring-2" style={{ borderColor: "rgba(196,154,40,0.22)", background: "var(--ln-coal)" }}><div className="flex items-start justify-between gap-3"><div className="min-w-0"><p className="truncate text-base" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>{draft.title}</p><p className="mt-1 text-xs" style={{ color: "var(--ln-smoke)" }}>{draft.trackCount} Work{draft.trackCount === 1 ? "" : "s"} · revision {draft.revision}</p></div><span className="rounded-full px-2 py-1 text-[10px] font-bold" style={{ color: "var(--ln-gold)", background: "rgba(196,154,40,0.12)" }}>DRAFT</span></div><p className="mt-4 text-xs" style={{ color: "var(--ln-gold)" }}>Open private workspace →</p></button>)}</div>}
       </section>
 
       <section aria-labelledby="sealed-albums-heading">

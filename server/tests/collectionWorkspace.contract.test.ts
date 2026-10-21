@@ -62,4 +62,15 @@ describe("Creator Collections workspace", () => {
     expect(repository).toContain("assertDraftMembershipCandidates(creatorId, songIdsInOrder, candidates)");
     expect(repository).toContain("never edits its membership, collective hash, certificate, Work");
   });
+
+  it("opens created, recovered, and reopened drafts through the private route with clear feedback", () => {
+    expect(app).toContain('path="/studio/release/:id"');
+    expect(workspace).toContain("const openDraft = (draftId: number)");
+    expect(workspace).toContain("navigate(`/studio/release/${draftId}`)");
+    expect(workspace).toContain("Opening its private workspace.");
+    expect(workspace).toContain("useEffect(() => {");
+    expect(workspace).toContain("setActiveDraftId((current) => current === nextDraftId ? current : nextDraftId)");
+    expect(workspace).toContain("onClick={() => openDraft(draft.id)}");
+    expect(workspace).toContain('navigate("/creator/collections")');
+  });
 });
