@@ -9,6 +9,7 @@ import { Helmet } from "react-helmet-async";
 import { Link, useLocation, useParams } from "wouter";
 import {
   LayoutGrid,
+  LibraryBig,
   Loader2,
   Play,
   QrCode,
@@ -443,6 +444,18 @@ export default function LoopCreatorPage() {
                 >
                   <Settings size={14} /> Manage
                 </button>
+                <Link href="/creator/collections">
+                  <span
+                    className="inline-flex items-center gap-2 px-4 py-3 rounded-full text-sm"
+                    style={{
+                      border: "1px solid rgba(196,154,40,0.3)",
+                      color: "var(--ln-gold)",
+                      background: "rgba(196,154,40,0.08)",
+                    }}
+                  >
+                    <LibraryBig size={14} /> Collections
+                  </span>
+                </Link>
                 <Link href="/settings/payouts">
                   <span
                     className="inline-flex items-center gap-2 px-4 py-3 rounded-full text-sm"

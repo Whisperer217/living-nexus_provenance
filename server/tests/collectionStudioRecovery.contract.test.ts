@@ -46,7 +46,7 @@ describe("Collection Studio recovery contracts", () => {
     expect(helper).not.toContain("Math.random");
   });
 
-  it("returns recovery and success links to the selected Archive collection", () => {
+  it("returns recovery and success links to the selected Archive collection, which preserves a direct legacy Studio path after workspace unification", () => {
     const source = studio();
     const archive = read("client/src/pages/ArchivePage.tsx");
 
@@ -54,7 +54,8 @@ describe("Collection Studio recovery contracts", () => {
     expect(source).toContain("navigate(archiveCollectionHref)");
     expect(source).toContain("href={archiveCollectionHref}");
     expect(archive).toContain("deepLinkCollectionId");
-    expect(archive).toContain("initialExpandedId={deepLinkCollectionId}");
+    expect(archive).toContain('href="/creator/collections"');
+    expect(archive).toContain('href={`/studio/collection/${deepLinkCollectionId}`}');
   });
 
   it("keeps Version History after primary success and retains the existing global player authority", () => {

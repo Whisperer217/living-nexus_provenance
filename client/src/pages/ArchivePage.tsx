@@ -779,16 +779,25 @@ export default function ArchivePage() {
         </div>
 
         {activeTab === "collections" && (
-          <div className="space-y-8">
-            {/* ── Batch Upload Albums (userCollections) ── */}
-            <CollectionsSection initialExpandedId={deepLinkCollectionId} />
-            {/* ── Named Playlists ── */}
-            <div>
-              <h3 className="text-xs font-bold tracking-widest mb-3 flex items-center gap-2"
-                style={{ color: "var(--ln-smoke)", fontFamily: "'Cinzel', serif" }}>
-                <ListMusic size={13} /> NAMED PLAYLISTS
-              </h3>
-              <MyListsTab />
+          <div className="rounded-2xl border p-5 sm:p-7" style={{ borderColor: "rgba(196,154,40,0.26)", background: "linear-gradient(135deg, rgba(196,154,40,0.07), rgba(0,0,0,0.08))" }}>
+            <p className="text-[11px] font-bold tracking-[0.16em]" style={{ color: "var(--ln-gold)", fontFamily: "'Cinzel', serif" }}>CREATOR DOMAIN</p>
+            <h2 className="mt-2 text-xl" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>Collections Workspace</h2>
+            <p className="mt-2 max-w-2xl text-sm leading-relaxed" style={{ color: "var(--ln-smoke)" }}>
+              Create private Draft Releases from your existing Works, manage named playlists, and view preserved WID-album records in one place. No media or Witness ID is duplicated.
+            </p>
+            <div className="mt-5 flex flex-wrap gap-2">
+              <Link href="/creator/collections">
+                <span className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold" style={{ background: "var(--ln-gold)", color: "var(--ln-coal)" }}>
+                  <Layers2 size={15} /> Open Collections Workspace
+                </span>
+              </Link>
+              {deepLinkCollectionId && (
+                <Link href={`/studio/collection/${deepLinkCollectionId}`}>
+                  <span className="inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm" style={{ borderColor: "rgba(196,154,40,0.30)", color: "var(--ln-gold)" }}>
+                    <Pencil size={14} /> Open linked legacy Studio
+                  </span>
+                </Link>
+              )}
             </div>
           </div>
         )}

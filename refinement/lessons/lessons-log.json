@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-10-20T23:50:29.193731+00:00",
-  "totalLessons": 71,
+  "lastUpdated": "2026-10-21T01:23:22.737593+00:00",
+  "totalLessons": 72,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -1742,6 +1742,43 @@
         "creator-sovereignty",
         "edition-deferred",
         "stage-0"
+      ]
+    },
+    {
+      "id": "LESSON-072",
+      "date": "2026-10-21",
+      "category": "architecture",
+      "problem": "Creators needed one relationship-first Collections surface for arranging existing registered Works, but legacy WID-ALB records are immutable origin-membership seals and the approved WID-ALB2 edition identity cannot be issued safely until the creator signing-key lifecycle is security-reviewed.",
+      "solution": "Add a separate owner-private Draft Release domain with scoped draft membership rows, optimistic revisions, and append-only revision snapshots; route Creator Domain and Archive entry points to one workspace; keep legacy sealed albums presentation-only and named playlists in their one canonical editor. Apply only additive schema changes. Hold all WID-ALB2 sealing, publication, verifier, and Draft manifest export behind a truthful signing-readiness response rather than manufacturing an unsigned certificate.",
+      "files": [
+        "drizzle/schema.ts",
+        "drizzle/0140_outgoing_ink.sql",
+        "drizzle/0141_shiny_betty_brant.sql",
+        "shared/albumReleaseTypes.ts",
+        "server/domains/releases/releasePolicy.ts",
+        "server/db/albumReleases.ts",
+        "server/routers/releaseDrafts.ts",
+        "server/routers/index.ts",
+        "client/src/pages/CollectionsWorkspacePage.tsx",
+        "client/src/App.tsx",
+        "client/src/pages/ArchivePage.tsx",
+        "client/src/pages/loop/LoopCreatorPage.tsx",
+        "server/tests/releaseDraftPolicy.test.ts",
+        "server/tests/collectionWorkspace.contract.test.ts",
+        "docs/lnls/audits/COLLECTIONS-STAGE-1-DRAFT-WORKSPACE-IMPLEMENTATION-2026-10-21.md"
+      ],
+      "score": 0,
+      "tags": [
+        "collections-workspace",
+        "draft-release",
+        "relationship-first",
+        "owner-authorized",
+        "append-only-draft-ledger",
+        "legacy-wid-alb-preserved",
+        "wid-alb2-signing-hold",
+        "no-player-reset",
+        "additive-migration",
+        "stage-1"
       ]
     }
   ]

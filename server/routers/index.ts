@@ -52,6 +52,7 @@ import { domainRouter }              from "./domain";
 import { collectionsRouter }         from "./collections";
 import { correspondenceRouter }      from "./correspondence";
 import { legacyStewardshipRouter }   from "./legacyStewardship";
+import { releaseDraftsRouter }       from "./releaseDrafts";
 
 // ── Payment domain ────────────────────────────────────────────────────────────
 import { paymentsRouter }         from "./payments";
@@ -151,6 +152,7 @@ export const appRouter = router({
   collections:         collectionsRouter,
   correspondence:      correspondenceRouter,
   legacyStewardship:   legacyStewardshipRouter,
+  releaseDrafts:       releaseDraftsRouter,
 
   // Payment domain
   payments:         paymentsRouter,

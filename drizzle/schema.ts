@@ -1194,6 +1194,221 @@ export const collections = mysqlTable("collections", {
 export type Collection = typeof collections.$inferSelect;
 export type InsertCollection = typeof collections.$inferInsert;
 
+// ─── Modern Album Releases (WID-ALB2) ───────────────────────────────────────
+//
+// These tables are intentionally separate from legacy `collections` and
+// `songs.collectionId`. A draft is a private, mutable relationship between
+// existing Works. A future sealed edition will snapshot that relationship and
+// receive its own WID-ALB2 without changing a Work WID, media record, HAAI
+// disclosure, or legacy WID-ALB origin seal.
+export const albumReleaseFamilies = mysqlTable("albumReleaseFamilies", {
+  id: int("id").autoincrement().primaryKey(),
+  creatorId: int("creatorId").notNull(),
+  sourceKind: mysqlEnum("sourceKind", ["new_release", "legacy_collection"]).default("new_release").notNull(),
+  // Optional observational bridge only. It never grants mutation authority over
+  // the linked legacy WID-ALB collection.
+  legacyCollectionId: int("legacyCollectionId"),
+  legacyCollectionWidSnapshot: varchar("legacyCollectionWidSnapshot", { length: 64 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => [
+  index("albumReleaseFamilies_creator_created_idx").on(table.creatorId, table.createdAt),
+  index("albumReleaseFamilies_legacy_collection_idx").on(table.legacyCollectionId),
+]);
+export type AlbumReleaseFamily = typeof albumReleaseFamilies.$inferSelect;
+export type InsertAlbumReleaseFamily = typeof albumReleaseFamilies.$inferInsert;
+
+export const albumReleaseDrafts = mysqlTable("albumReleaseDrafts", {
+  id: int("id").autoincrement().primaryKey(),
+  releaseFamilyId: int("releaseFamilyId").notNull(),
+  creatorId: int("creatorId").notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  coverArtUrl: text("coverArtUrl"),
+  releaseDate: timestamp("releaseDate"),
+  visibilityIntent: mysqlEnum("visibilityIntent", ["public", "unlisted", "private"]).default("public").notNull(),
+  status: mysqlEnum("status", ["draft", "publishing", "published", "abandoned"]).default("draft").notNull(),
+  revision: int("revision").default(1).notNull(),
+  // Client-generated request ID makes create retry-safe without allowing a
+  // duplicate Draft Release to be created on a network retry.
+  createRequestId: varchar("createRequestId", { length: 64 }).notNull(),
+  publishedEditionId: int("publishedEditionId"),
+  archivedByUserId: int("archivedByUserId"),
+  archivedAt: timestamp("archivedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => [
+  uniqueIndex("albumReleaseDrafts_creator_create_request_uq").on(table.creatorId, table.createRequestId),
+  index("albumReleaseDrafts_creator_status_updated_idx").on(table.creatorId, table.status, table.updatedAt),
+  index("albumReleaseDrafts_family_status_idx").on(table.releaseFamilyId, table.status),
+]);
+export type AlbumReleaseDraft = typeof albumReleaseDrafts.$inferSelect;
+export type InsertAlbumReleaseDraft = typeof albumReleaseDrafts.$inferInsert;
+
+export const albumReleaseDraftTracks = mysqlTable("albumReleaseDraftTracks", {
+  id: int("id").autoincrement().primaryKey(),
+  draftId: int("draftId").notNull(),
+  songId: int("songId").notNull(),
+  position: int("position").notNull(),
+  creatorNote: text("creatorNote"),
+  addedByUserId: int("addedByUserId"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => [
+  uniqueIndex("albumReleaseDraftTracks_draft_song_uq").on(table.draftId, table.songId),
+  uniqueIndex("albumReleaseDraftTracks_draft_position_uq").on(table.draftId, table.position),
+  index("albumReleaseDraftTracks_song_idx").on(table.songId),
+]);
+export type AlbumReleaseDraftTrack = typeof albumReleaseDraftTracks.$inferSelect;
+export type InsertAlbumReleaseDraftTrack = typeof albumReleaseDraftTracks.$inferInsert;
+
+/** Immutable snapshots of each accepted private-draft revision. */
+export const albumReleaseDraftRevisions = mysqlTable("albumReleaseDraftRevisions", {
+  id: int("id").autoincrement().primaryKey(),
+  draftId: int("draftId").notNull(),
+  revision: int("revision").notNull(),
+  actorUserId: int("actorUserId").notNull(),
+  operation: mysqlEnum("operation", ["created", "metadata_updated", "membership_replaced", "membership_reordered", "archived", "published"]).notNull(),
+  canonicalSnapshot: text("canonicalSnapshot").notNull(),
+  snapshotHash: varchar("snapshotHash", { length: 64 }).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => [
+  uniqueIndex("albumReleaseDraftRevisions_draft_revision_uq").on(table.draftId, table.revision),
+  uniqueIndex("albumReleaseDraftRevisions_draft_snapshot_uq").on(table.draftId, table.snapshotHash),
+  index("albumReleaseDraftRevisions_draft_created_idx").on(table.draftId, table.createdAt),
+]);
+export type AlbumReleaseDraftRevision = typeof albumReleaseDraftRevisions.$inferSelect;
+export type InsertAlbumReleaseDraftRevision = typeof albumReleaseDraftRevisions.$inferInsert;
+
+// These immutable evidence tables are additive but remain write-disabled until
+// the approved creator-key lifecycle is implemented. Their presence prevents a
+// future sealing slice from reusing mutable draft rows as historical evidence.
+export const albumEditions = mysqlTable("albumEditions", {
+  id: int("id").autoincrement().primaryKey(),
+  releaseFamilyId: int("releaseFamilyId").notNull(),
+  sourceDraftId: int("sourceDraftId").notNull(),
+  sourceDraftRevision: int("sourceDraftRevision").notNull(),
+  creatorId: int("creatorId").notNull(),
+  editionNumber: int("editionNumber").notNull(),
+  editionWid: varchar("editionWid", { length: 96 }).notNull(),
+  manifestSchema: varchar("manifestSchema", { length: 64 }).notNull(),
+  canonicalManifest: text("canonicalManifest").notNull(),
+  manifestHash: varchar("manifestHash", { length: 64 }).notNull(),
+  membershipHash: varchar("membershipHash", { length: 64 }).notNull(),
+  registryEventId: varchar("registryEventId", { length: 96 }).notNull(),
+  creatorPublicKey: text("creatorPublicKey").notNull(),
+  creatorKeyId: varchar("creatorKeyId", { length: 64 }).notNull(),
+  creatorSignature: text("creatorSignature").notNull(),
+  sealRequestId: varchar("sealRequestId", { length: 64 }).notNull(),
+  visibility: mysqlEnum("visibility", ["public", "unlisted", "private"]).notNull(),
+  availability: mysqlEnum("availability", ["available", "withdrawn", "flagged"]).default("available").notNull(),
+  sealedAt: timestamp("sealedAt").defaultNow().notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => [
+  uniqueIndex("albumEditions_wid_uq").on(table.editionWid),
+  uniqueIndex("albumEditions_manifest_hash_uq").on(table.manifestHash),
+  uniqueIndex("albumEditions_family_edition_uq").on(table.releaseFamilyId, table.editionNumber),
+  uniqueIndex("albumEditions_registry_event_uq").on(table.registryEventId),
+  uniqueIndex("albumEditions_creator_seal_request_uq").on(table.creatorId, table.sealRequestId),
+  uniqueIndex("albumEditions_draft_revision_uq").on(table.sourceDraftId, table.sourceDraftRevision),
+  index("albumEditions_creator_sealed_idx").on(table.creatorId, table.sealedAt),
+]);
+export type AlbumEdition = typeof albumEditions.$inferSelect;
+export type InsertAlbumEdition = typeof albumEditions.$inferInsert;
+
+export const albumEditionTracks = mysqlTable("albumEditionTracks", {
+  id: int("id").autoincrement().primaryKey(),
+  editionId: int("editionId").notNull(),
+  position: int("position").notNull(),
+  sourceSongId: int("sourceSongId").notNull(),
+  workWidSnapshot: varchar("workWidSnapshot", { length: 64 }).notNull(),
+  titleSnapshot: varchar("titleSnapshot", { length: 255 }).notNull(),
+  creatorSnapshot: varchar("creatorSnapshot", { length: 255 }).notNull(),
+  contentHashSnapshot: varchar("contentHashSnapshot", { length: 64 }),
+  mediaHashSnapshot: varchar("mediaHashSnapshot", { length: 64 }),
+  participationMusicSnapshot: mysqlEnum("participationMusicSnapshot", ["Human", "AI", "Both", "None"]),
+  participationLyricsSnapshot: mysqlEnum("participationLyricsSnapshot", ["Human", "AI", "Both", "None"]),
+  participationVoiceSnapshot: mysqlEnum("participationVoiceSnapshot", ["Human", "AI", "Both", "None"]),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => [
+  uniqueIndex("albumEditionTracks_edition_position_uq").on(table.editionId, table.position),
+  uniqueIndex("albumEditionTracks_edition_song_uq").on(table.editionId, table.sourceSongId),
+  index("albumEditionTracks_source_song_idx").on(table.sourceSongId),
+]);
+export type AlbumEditionTrack = typeof albumEditionTracks.$inferSelect;
+export type InsertAlbumEditionTrack = typeof albumEditionTracks.$inferInsert;
+
+export const albumEditionArtifacts = mysqlTable("albumEditionArtifacts", {
+  id: int("id").autoincrement().primaryKey(),
+  editionId: int("editionId").notNull(),
+  artifactType: mysqlEnum("artifactType", ["certificate", "manifest", "cover_rendition", "verification_receipt"]).notNull(),
+  artifactUrl: text("artifactUrl").notNull(),
+  artifactKey: text("artifactKey"),
+  sha256: varchar("sha256", { length: 64 }).notNull(),
+  mediaType: varchar("mediaType", { length: 128 }).notNull(),
+  generatorVersion: varchar("generatorVersion", { length: 64 }).notNull(),
+  manifestHash: varchar("manifestHash", { length: 64 }).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => [
+  index("albumEditionArtifacts_edition_created_idx").on(table.editionId, table.createdAt),
+]);
+export type AlbumEditionArtifact = typeof albumEditionArtifacts.$inferSelect;
+export type InsertAlbumEditionArtifact = typeof albumEditionArtifacts.$inferInsert;
+
+/** Mutable availability projection; it never stores or changes sealed identity. */
+export const albumEditionPublication = mysqlTable("albumEditionPublication", {
+  id: int("id").autoincrement().primaryKey(),
+  editionId: int("editionId").notNull(),
+  status: mysqlEnum("status", ["sealed", "published", "withdrawn"]).default("sealed").notNull(),
+  visibility: mysqlEnum("visibility", ["public", "unlisted", "private"]).notNull(),
+  projectionRevision: int("projectionRevision").default(1).notNull(),
+  publishedAt: timestamp("publishedAt"),
+  withdrawnAt: timestamp("withdrawnAt"),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => [
+  uniqueIndex("albumEditionPublication_edition_uq").on(table.editionId),
+  index("albumEditionPublication_status_visibility_idx").on(table.status, table.visibility),
+]);
+export type AlbumEditionPublication = typeof albumEditionPublication.$inferSelect;
+export type InsertAlbumEditionPublication = typeof albumEditionPublication.$inferInsert;
+
+/** Append-only availability history chained independently from a sealed edition. */
+export const albumEditionPublicationEvents = mysqlTable("albumEditionPublicationEvents", {
+  id: int("id").autoincrement().primaryKey(),
+  editionId: int("editionId").notNull(),
+  sequence: int("sequence").notNull(),
+  actorUserId: int("actorUserId").notNull(),
+  eventType: mysqlEnum("eventType", ["sealed", "published", "withdrawn"]).notNull(),
+  canonicalPayload: text("canonicalPayload").notNull(),
+  payloadHash: varchar("payloadHash", { length: 64 }).notNull(),
+  previousHash: varchar("previousHash", { length: 64 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => [
+  uniqueIndex("albumEditionPublicationEvents_edition_sequence_uq").on(table.editionId, table.sequence),
+  uniqueIndex("albumEditionPublicationEvents_edition_payload_uq").on(table.editionId, table.payloadHash),
+  index("albumEditionPublicationEvents_edition_created_idx").on(table.editionId, table.createdAt),
+]);
+export type AlbumEditionPublicationEvent = typeof albumEditionPublicationEvents.$inferSelect;
+export type InsertAlbumEditionPublicationEvent = typeof albumEditionPublicationEvents.$inferInsert;
+
+/** Insert-only typed bridge from a WID to an immutable non-Work resource. */
+export const widResourceBindings = mysqlTable("widResourceBindings", {
+  id: int("id").autoincrement().primaryKey(),
+  wid: varchar("wid", { length: 96 }).notNull(),
+  resourceType: mysqlEnum("resourceType", ["album_edition"]).notNull(),
+  resourceId: int("resourceId").notNull(),
+  canonicalHash: varchar("canonicalHash", { length: 64 }).notNull(),
+  eventId: varchar("eventId", { length: 96 }).notNull(),
+  immutable: boolean("immutable").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => [
+  uniqueIndex("widResourceBindings_wid_uq").on(table.wid),
+  uniqueIndex("widResourceBindings_resource_uq").on(table.resourceType, table.resourceId),
+  uniqueIndex("widResourceBindings_event_uq").on(table.eventId),
+]);
+export type WidResourceBinding = typeof widResourceBindings.$inferSelect;
+export type InsertWidResourceBinding = typeof widResourceBindings.$inferInsert;
+
 // ─── Platform Supporters (Founder's Era) ─────────────────────────────────────
 // Records every platform-level gift made to Living Nexus itself (not to a creator).
 // Tier is computed from totalGifted: supporter=$1+, patron=$25+, covenant=$100+.

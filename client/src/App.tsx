@@ -58,6 +58,7 @@ const ManifestationStudio = lazy(() => import("./pages/manifestation-studio/Mani
 const BatchUploadPage = lazy(() => import("./pages/BatchUploadPage"));
 const LikedPage = lazy(() => import("./pages/LikedPage"));
 const ArchivePage = lazy(() => import("./pages/ArchivePage"));
+const CollectionsWorkspacePage = lazy(() => import("./pages/CollectionsWorkspacePage"));
 const CreatorDataExportPage = lazy(() => import("./pages/CreatorDataExportPage"));
 // TrackPage deprecated — /track/:id now redirects to /song/:id
 const SongDetailPage = lazy(() => import("./pages/loop/LoopWorkPage"));
@@ -334,6 +335,8 @@ function Router() {
                 <Route path="/batch-upload" component={BatchUploadPage} />
                 <Route path="/liked" component={LikedPage} />
                 <Route path="/archive" component={ArchivePage} />
+                <Route path="/creator/collections" component={CollectionsWorkspacePage} />
+                <Route path="/studio/release/:id" component={CollectionsWorkspacePage} />
           <Route path="/my-archive/export" component={CreatorDataExportPage} />
                 <Route path="/studio/collection/:id" component={CollectionStudioPage} />
                 <Route path="/licensed-downloads" component={LicensedDownloadsPage} />
