@@ -1,6 +1,6 @@
 # Creator Studio Extraction Assessment
 
-**Status:** Assessment only — no application, schema, migration, deployment, or publication change.
+**Status:** Governing architecture decision. The low-risk same-origin Creator Studio hub has been implemented and validated in the current development state; see [`CREATOR-STUDIO-SAME-ORIGIN-CONSOLIDATION-IMPLEMENTATION-2026-10-21.md`](../audits/CREATOR-STUDIO-SAME-ORIGIN-CONSOLIDATION-IMPLEMENTATION-2026-10-21.md). The separately built frontend boundary, authoring-service extraction, and all separate-origin deployment work remain unimplemented. No deployment or publication has occurred.
 
 **Risk classification:** High. A separately deployed Creator Studio would handle authenticated owner reads, Work mutations, uploads, private drafts, and provenance-adjacent records. It must preserve the existing server as the sole authority for permissions, WIDs, historical evidence, media, and database writes.
 

@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-10-21T12:51:49.727562+00:00",
-  "totalLessons": 75,
+  "lastUpdated": "2026-10-21T16:18:56.632560+00:00",
+  "totalLessons": 76,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -1864,6 +1864,37 @@
         "no-raw-media-url",
         "no-player-reset",
         "companion-interoperability"
+      ]
+    },
+    {
+      "id": "LESSON-076",
+      "date": "2026-10-21",
+      "category": "architecture",
+      "problem": "Creator workflows lived across several same-origin routes, while the dormant Creator Studio route was not a usable supported product boundary. Moving immediately to a separate origin would duplicate or broaden authorization, session, API, database, and playback responsibilities before the private authoring boundary was proven.",
+      "solution": "Create a lazy same-origin /studio hub that composes only existing owner-authorized routes and read models: canonical registration, Creator Domain identity, current Work editing through WorkEditorContext, Collections, Archive export, payouts, and the external companion player. Keep the existing Living Nexus backend, session, database, WID/registry policy, media authority, and single PlayerContext untouched. Do not activate WID-ALB2 signing or create a separate Studio origin until its separate security gates are approved.",
+      "files": [
+        "client/src/studio/CreatorStudioHome.tsx",
+        "client/src/App.tsx",
+        "client/src/pages/loop/LoopCreatorPage.tsx",
+        "client/src/pages/loop/LoopManagePage.tsx",
+        "server/tests/creatorStudioConsolidation.contract.test.ts",
+        "docs/lnls/audits/CREATOR-STUDIO-SAME-ORIGIN-CONSOLIDATION-IMPLEMENTATION-2026-10-21.md",
+        "docs/lnls/adr/CREATOR-STUDIO-EXTRACTION-ASSESSMENT-2026-10-21.md"
+      ],
+      "score": 0,
+      "tags": [
+        "creator-studio",
+        "same-origin",
+        "frontend-composition",
+        "one-backend-authority",
+        "owner-authorization",
+        "lazy-route",
+        "collections",
+        "work-editor-context",
+        "player-continuity",
+        "wid-alb2-hold",
+        "no-second-database",
+        "no-deployment"
       ]
     }
   ]

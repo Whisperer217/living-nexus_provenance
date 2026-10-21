@@ -59,6 +59,7 @@ const BatchUploadPage = lazy(() => import("./pages/BatchUploadPage"));
 const LikedPage = lazy(() => import("./pages/LikedPage"));
 const ArchivePage = lazy(() => import("./pages/ArchivePage"));
 const CollectionsWorkspacePage = lazy(() => import("./pages/CollectionsWorkspacePage"));
+const CreatorStudioHome = lazy(() => import("./studio/CreatorStudioHome"));
 const CreatorDataExportPage = lazy(() => import("./pages/CreatorDataExportPage"));
 // TrackPage deprecated — /track/:id now redirects to /song/:id
 const SongDetailPage = lazy(() => import("./pages/loop/LoopWorkPage"));
@@ -119,7 +120,6 @@ const BookDetailPage = lazy(() => import("./pages/BookDetailPage"));
 const GameDetailPage = lazy(() => import("./pages/GameDetailPage"));
 const GcodeDetailPage = lazy(() => import("./pages/GcodeDetailPage"));
 const PlatformGuidesPage = lazy(() => import("./pages/PlatformGuidesPage"));
-const CreatorStudioPage = lazy(() => import("./pages/CreatorStudioPage"));
 const KeeperPage = lazy(() => import("./pages/KeeperPage"));
 const KeeperComposePage = lazy(() => import("./pages/KeeperComposePage"));
 const FirstWitnessPage = lazy(() => import("./pages/FirstWitnessPage"));
@@ -339,6 +339,7 @@ function Router() {
                 <Route path="/studio/release/:id" component={CollectionsWorkspacePage} />
           <Route path="/my-archive/export" component={CreatorDataExportPage} />
                 <Route path="/studio/collection/:id" component={CollectionStudioPage} />
+                <Route path="/studio" component={CreatorStudioHome} />
                 <Route path="/licensed-downloads" component={LicensedDownloadsPage} />
                 <Route path="/song/:id" component={SongDetailPage} />
                 <Route path="/book/:id"><Redirect to="/explore" /></Route>
