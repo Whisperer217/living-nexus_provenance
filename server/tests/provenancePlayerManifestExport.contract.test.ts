@@ -29,7 +29,13 @@ describe("Provenance Player copied-manifest boundary", () => {
     expect(db).toContain("orderBy(asc(playlistTracks.position)");
     expect(db).toContain("orderBy(asc(songs.trackOrder)");
     expect(db).toContain(".limit(501)");
+    const playlistManifestReader = db.slice(
+      db.indexOf("getProvenancePlayerPlaylistTrackSources"),
+      db.indexOf("export async function addTrackToPlaylist"),
+    );
     const manifestReaders = db.slice(db.indexOf("getProvenancePlayerAlbumTrackSources"), db.indexOf("hasAmbiguousProvenancePlayerWids"));
+    expect(playlistManifestReader).toContain("id: users.id");
+    expect(manifestReaders.match(/id: users\.id/g)).toHaveLength(2);
     expect(manifestReaders).not.toContain("externalDisplayRightsConfirmed");
     expect(manifestReaders).not.toContain("externalDisplayAuthorizedAt");
     expect(manifestReaders).not.toContain("downloadPermission");

@@ -60,7 +60,7 @@ function source(id: number, witnessId: string) {
       participationLyrics: "Human",
       participationVoice: "None",
     },
-    creator: { artistHandle: "manifestcreator", name: "Manifest Creator" },
+    creator: { id: 42, artistHandle: "manifestcreator", name: "Manifest Creator" },
   };
 }
 
@@ -80,6 +80,28 @@ describe("Provenance Player export procedures", () => {
     expect(result.tracks.map(track => track.workId)).toEqual(["9", "2"]);
     expect(result.tracks.map(track => track.wid)).toEqual(["WID-MUS-NINE", "WID-MUS-TWO"]);
     expect(hasAmbiguousProvenancePlayerWids).toHaveBeenCalledWith(["WID-MUS-NINE", "WID-MUS-TWO"]);
+  });
+
+  it("exports a valid name-only Creator rather than treating a null handle as absent attribution", async () => {
+    (getPlaylistById as any).mockResolvedValue({ id: 7, ownerId: 42, coverArtUrl: null });
+    const namedCreator = source(9, "WID-MUS-NAMED-CREATOR");
+    namedCreator.creator = { id: 6330001, artistHandle: null, name: "MAKER & THE MaiTRIX" };
+    (getProvenancePlayerPlaylistTrackSources as any).mockResolvedValue([namedCreator]);
+
+    const result = await appRouter.createCaller(context()).playlists.copyProvenancePlayerManifest({ id: 7 });
+
+    expect(result.tracks).toHaveLength(1);
+    expect(result.tracks[0]?.creator).toBe("MAKER & THE MaiTRIX");
+  });
+
+  it("rejects the entire owner playlist when a Creator record is genuinely absent", async () => {
+    (getPlaylistById as any).mockResolvedValue({ id: 7, ownerId: 42, coverArtUrl: null });
+    const missingCreator = source(9, "WID-MUS-NO-CREATOR");
+    missingCreator.creator = null;
+    (getProvenancePlayerPlaylistTrackSources as any).mockResolvedValue([missingCreator]);
+
+    await expect(appRouter.createCaller(context()).playlists.copyProvenancePlayerManifest({ id: 7 }))
+      .rejects.toMatchObject({ code: "NOT_FOUND", message: "Manifest unavailable" });
   });
 
   it("does not disclose a non-owner playlist through manifest export", async () => {

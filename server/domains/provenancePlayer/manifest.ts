@@ -18,9 +18,10 @@ export type ProvenancePlayerManifestTrackSource = {
   participationLyrics: string | null;
   participationVoice: string | null;
   creator: {
+    id: number;
     artistHandle: string | null;
     name: string | null;
-  };
+  } | null;
 };
 
 export type ProvenancePlayerManifestTrack = {
@@ -82,10 +83,13 @@ function currentParticipationDisclosure(track: ProvenancePlayerManifestTrackSour
 }
 
 function creatorLabel(track: ProvenancePlayerManifestTrackSource): string {
-  const handle = track.creator.artistHandle?.trim();
+  const creator = track.creator;
+  if (!creator) return unavailable();
+
+  const handle = creator.artistHandle?.trim();
   if (handle) return handle.startsWith("@") ? handle : `@${handle}`;
 
-  const name = track.creator.name?.trim();
+  const name = creator.name?.trim();
   if (name) return name;
 
   return unavailable();

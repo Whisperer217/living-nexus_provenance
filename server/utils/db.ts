@@ -2213,6 +2213,7 @@ export async function getProvenancePlayerPlaylistTrackSources(playlistId: number
         participationVoice: songs.participationVoice,
       },
       creator: {
+        id: users.id,
         artistHandle: users.artistHandle,
         name: users.name,
       },
@@ -2747,6 +2748,7 @@ export async function getProvenancePlayerAlbumTrackSources(collectionId: number)
         createdAt: songs.createdAt,
       },
       creator: {
+        id: users.id,
         artistHandle: users.artistHandle,
         name: users.name,
       },
@@ -2783,6 +2785,7 @@ export async function getProvenancePlayerTrackSourceById(songId: number) {
         participationVoice: songs.participationVoice,
       },
       creator: {
+        id: users.id,
         artistHandle: users.artistHandle,
         name: users.name,
       },

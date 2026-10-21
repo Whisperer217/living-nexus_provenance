@@ -21,7 +21,7 @@ function source(overrides: Partial<ProvenancePlayerManifestTrackSource> = {}): P
     participationMusic: "Both",
     participationLyrics: "Human",
     participationVoice: "None",
-    creator: { artistHandle: "DocSMercer", name: "Doc Seraph Mercer" },
+    creator: { id: 1, artistHandle: "DocSMercer", name: "Doc Seraph Mercer" },
     ...overrides,
   };
 }
@@ -77,6 +77,19 @@ describe("Provenance Player manifest adapter", () => {
     expect(() => buildProvenancePlayerManifest({
       tracks: [source()],
     })).not.toThrow();
+  });
+
+  it("preserves Creator attribution when a valid Creator has no handle", () => {
+    const manifest = buildProvenancePlayerManifest({
+      tracks: [source({ creator: { id: 6330001, artistHandle: null, name: "MAKER & THE MaiTRIX" } })],
+    });
+
+    expect(manifest.tracks[0]?.creator).toBe("MAKER & THE MaiTRIX");
+  });
+
+  it("rejects the entire manifest through the existing unavailable path when a Creator join is genuinely absent", () => {
+    expect(() => buildProvenancePlayerManifest({ tracks: [source({ creator: null })] }))
+      .toThrow(ProvenancePlayerManifestUnavailableError);
   });
 
   it.each([
