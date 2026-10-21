@@ -283,11 +283,13 @@ export default function UploadPage() {
       const parsed = parseInt(qEditId, 10);
       if (!isNaN(parsed) && parsed > 0) setEditId(parsed);
     }
-    // Clean the URL so refreshing doesn't re-apply
-    if (qTitle || qGenre || qMood || qTags || qType || qEditId) {
+    // Preserve all continuation context through OAuth. The protected Draft
+    // read runs only after an authenticated owner session exists; removing the
+    // edit ID while still a guest would send sign-in back to a bare Upload page.
+    if (isAuthenticated && (qTitle || qGenre || qMood || qTags || qType || qEditId)) {
       window.history.replaceState({}, "", window.location.pathname);
     }
-  }, []);
+  }, [isAuthenticated]);
 
   // Hydrate form fields from draft data (runs once when draftData arrives)
   useEffect(() => {
@@ -890,7 +892,7 @@ export default function UploadPage() {
         <Shield className="w-12 h-12 mx-auto mb-4 opacity-30" style={{ color: "var(--ln-gold)" }} />
         <h2 className="text-xl font-bold mb-2" style={{ fontFamily: "'Cinzel', serif", color: "var(--ln-parchment)" }}>Sign In Required</h2>
         <p className="text-sm mb-6" style={{ color: "#E2E8F0" }}>Sign in to upload tracks to Living Nexus.</p>
-        <Button onClick={() => window.location.href = getLoginUrl()} style={{ background: "var(--ln-gold)", color: "var(--ln-parchment)" }}>Sign In</Button>
+        <Button onClick={() => window.location.href = getLoginUrl(`${window.location.pathname}${window.location.search}`)} style={{ background: "var(--ln-gold)", color: "var(--ln-parchment)" }}>Sign In</Button>
       </div>
       </div>
     </div>

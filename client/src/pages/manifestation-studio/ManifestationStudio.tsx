@@ -326,9 +326,14 @@ export default function ManifestationStudio() {
       const haaiVocalConveyance = params.get("haaiVocalConveyance"); if (haaiVocalConveyance) prefill.haaiVocalConveyance = haaiVocalConveyance;
       const parentGuideWid = params.get("parentGuideWid"); if (parentGuideWid) prefill.parentGuideWid = parentGuideWid;
       if (Object.keys(prefill).length > 0) setKeeperPrefill(prefill);
-      window.history.replaceState({}, "", window.location.pathname);
+      // Keep the original ordinary-registration context through OAuth. A full
+      // sign-in navigation remounts this surface, so clearing the query while
+      // still a guest would lose the prefill before the creator can enter.
+      if (isAuthenticated) {
+        window.history.replaceState({}, "", window.location.pathname);
+      }
     }
-  }, []);
+  }, [isAuthenticated]);
 
   useEffect(() => {
     if (mp3Queue.length === 0) {
@@ -398,7 +403,7 @@ export default function ManifestationStudio() {
             {LOOP_PRODUCT.supporting}
           </p>
           <a
-            href={getLoginUrl("/manifest")}
+            href={getLoginUrl(`${window.location.pathname}${window.location.search}`)}
             className="inline-flex items-center gap-2 px-6 py-3 rounded-full text-sm font-semibold transition-all hover:scale-105"
             style={{ background: "var(--ln-gold)", color: "var(--ln-coal)", boxShadow: "0 4px 20px rgba(212,175,55,0.3)" }}
           >

@@ -18,6 +18,7 @@ import { useQrScanLogger } from "./hooks/useQrScanLogger";
 import { useScrollRestoration } from "./hooks/useScrollRestoration";
 import { overlayCloseAll } from "@/lib/overlayController";
 import { playbackDiag } from "@/lib/playbackDiag";
+import { resolveUploadEntry } from "@/lib/uploadEntryRoute";
 import { useWorkEditorActions } from "./contexts/WorkEditorContext";
 import { PWAInstallBanner } from "./components/PWAInstallBanner";
 import CinematicSplash, { shouldShowSplash } from "./components/CinematicSplash";
@@ -38,6 +39,20 @@ function TrackRedirect() {
     if (id) navigate(`/song/${id}`, { replace: true });
   }, [id, navigate]);
   return null;
+}
+
+/**
+ * Keeps the historic owner Draft-resume URL alive without reviving the legacy
+ * upload surface for ordinary registration. The existing UploadPage owns the
+ * protected `songs.getMyDraft` hydration contract; all other Upload URLs keep
+ * their query context while moving to the canonical Manifestation Studio.
+ */
+function UploadEntryRoute() {
+  const destination = resolveUploadEntry(window.location.search);
+
+  return destination.kind === "draft-resume"
+    ? <UploadPage />
+    : <Redirect to={destination.href} />;
 }
 
 /**
@@ -329,7 +344,7 @@ function Router() {
                 <Route path="/explore" component={ExplorePage} />
                 <Route path="/explore/:medium"><Redirect to="/explore" /></Route>
                 <Route path="/search" component={SearchResultsPage} />
-               <Route path="/upload"><Redirect to="/manifest" /></Route>
+                <Route path="/upload" component={UploadEntryRoute} />
                 <Route path="/manifest" component={ManifestationStudio} />
                 <Route path="/ingestion/review" component={CoreIngestionReviewPage} />
                 <Route path="/batch-upload" component={BatchUploadPage} />
