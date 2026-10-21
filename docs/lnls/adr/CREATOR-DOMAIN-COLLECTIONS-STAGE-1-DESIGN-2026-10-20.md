@@ -1,7 +1,7 @@
 # ADR — Creator Domain Collections: Draft Releases, Sealed Editions, and Named Playlists (Stage 1 Design)
 
 **Date:** 2026-10-20  
-**Status:** Design only — awaiting review and explicit implementation approval  
+**Status:** Design direction and technical validation approved; implementation, migration, deployment, and publication remain blocked pending a separate approval
 **Precondition:** Stage 0 collection security and registry-integrity checkpoint `7355ac02` remains the preserved baseline.  
 **Scope:** Map one creator-facing Collections workflow using existing published Works. No application code, schema, migration, data, deployment, or publication is authorized by this record.
 
@@ -186,7 +186,7 @@ Creator
 |---|---|---|
 | `albumReleaseFamilies` | Stable conceptual lineage across editions | Creator-owned. Optionally links one legacy collection for observation only. Never replaces legacy identity. |
 | `albumReleaseDrafts` | Owner-private mutable release workspace | Has `draft`, `publishing`, `published`, or `abandoned` state; title, cover, description, visibility intent, revision, and idempotency key. One active draft per family is enforced transactionally. |
-| `albumReleaseDraftTracks` | Ordered relationship from a draft to existing Works | Contains membership-row ID, `draftId`, `songId`, position, and optional creator note. Unique `(draftId, position)`. The policy on repeat appearances must be explicit; default recommendation is to allow them because the legacy membership hash is a multiset. |
+| `albumReleaseDraftTracks` | Ordered relationship from a draft to existing Works | Contains membership-row ID, `draftId`, `songId`, position, and optional creator note. Unique `(draftId, position)` and `(draftId, songId)`: the approved v1 edition policy requires each Work once per Draft/Edition. |
 | `albumEditions` | Immutable sealed release identity | Stores `releaseFamilyId`, source-draft ID, edition number, `editionWid`, algorithm/version, membership hash, full manifest hash, registry event ID, visibility/availability state, and timestamps. No mutation of core identity fields after seal. |
 | `albumEditionTracks` | Ordered Work-at-seal snapshots | Stores edition ID, position, source Work ID if retained, Work WID snapshot, content/media hashes, creator/title/credit snapshot, and HAAI declaration snapshot. Live `songs` remains a convenience projection, never the historical edition truth. |
 | `albumEditionArtifacts` | Certificates, canonical manifests, cover renditions, and related derived artifacts | Appends artifact URL/key, SHA-256, media type, generator/version, and manifest hash. It never overwrites a historical certificate pointer. |
@@ -195,13 +195,13 @@ A future `albumEditionAppendices` chain is deferred. It can carry availability c
 
 ### New-edition WID semantics
 
-**Recommendation:** distinguish the legacy WID-ALB v1 algorithm from a modern edition seal.
+**Approved direction:** distinguish the legacy WID-ALB v1 algorithm from a modern edition seal.
 
 - **Legacy WID-ALB v1:** existing SHA-256 of sorted Work WIDs. It proves membership multiset, not order, HAAI, title, cover, or media version.
 - **Modern edition:** canonical, versioned full-manifest hash. It captures ordered membership occurrences, Work-WID snapshots, selected Work-content/media hashes, HAAI snapshots, release presentation, schema version, and edition number.
-- **Identifier:** use a distinct prefix such as `WID-ALB2-…`, displayed in the product as an **Edition Witness ID**. This prevents legacy verification code from incorrectly treating a modern full-manifest seal as a v1 sorted-membership hash.
+- **Identifier:** use the distinct prefix `WID-ALB2-…`, displayed in the product as an **Edition Witness ID**. This prevents legacy verification code from incorrectly treating a modern full-manifest seal as a v1 sorted-membership hash.
 
-If product insists on the `WID-ALB-…` text prefix, the algorithm/version must become mandatory in every reader and verifier. The safer design is the explicit `WID-ALB2` prefix.
+The `WID-ALB-…` legacy prefix is not reused for new editions. Canonical serialization, hashing, signature/event linkage, and verification are specified in `WID-ALB2-STAGE-1-TECHNICAL-VALIDATION-2026-10-20.md`.
 
 ---
 
@@ -305,10 +305,10 @@ The order is intentional: do not make a draft look sealed, and do not make a new
 
 ### Before implementation approval
 
-- Confirm the new edition identifier/version policy: recommended `WID-ALB2` full-manifest edition identity.
-- Confirm whether a Draft Release may be public before sealing. Recommendation: private-only in the first release to avoid public mutable-membership ambiguity.
-- Confirm duplicate Work occurrences in a Draft Release. Recommendation: permit them with occurrence identity, because membership is ordered occurrences.
-- Confirm first-release collaborator posture. Recommendation: creator-owner administration only until the existing playlist viewer/editor authorization policy is explicitly normalized.
+- **Confirmed:** new editions use `WID-ALB2` full-manifest identity; legacy WID-ALB remains untouched.
+- **Confirmed:** Draft Releases are private-only until explicit publication; a Draft has no public route, WID, certificate, or manifest.
+- **Confirmed:** a v1 Draft/Edition requires unique Work membership. Named Playlists retain duplicate Work occurrences through their existing membership-row identity. Future edition track-slot support is separately deferred.
+- **Confirmed:** creator-owner administration only for v1 Drafts/Editions. Existing creator attribution and Work relationships remain unchanged; collaborator editing is deferred.
 
 ### Required validation after implementation
 
