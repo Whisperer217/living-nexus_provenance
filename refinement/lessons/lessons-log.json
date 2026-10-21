@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-10-21T05:20:06.345582+00:00",
-  "totalLessons": 74,
+  "lastUpdated": "2026-10-21T12:51:49.727562+00:00",
+  "totalLessons": 75,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -1835,6 +1835,35 @@
         "fail-closed",
         "creator-experience",
         "no-wid-change"
+      ]
+    },
+    {
+      "id": "LESSON-075",
+      "date": "2026-10-21",
+      "category": "architecture",
+      "problem": "Owners could export approved Provenance Player manifests for their named playlists and albums, but had no equivalent manifest action at the canonical individual Work surface. This forced a creator to assemble or recover a one-track payload outside the Work they intended to carry into the companion player.",
+      "solution": "Reuse the existing protected manifest adapter and revocable Living Nexus media gateway for a one-Work export. Require current Work ownership server-side, keep the actual WID and canonical share source, exclude raw storage URLs, and provide only copy/download JSON controls that leave the existing PlayerContext queue untouched. Test direct gateway authorization and failure cases independently from the UI.",
+      "files": [
+        "server/utils/db.ts",
+        "server/routers/songs.ts",
+        "client/src/pages/SongDetailPage.tsx",
+        "server/tests/provenancePlayerManifestRouter.test.ts",
+        "server/tests/provenancePlayerManifestExport.contract.test.ts",
+        "server/tests/provenancePlayerMediaRoute.test.ts",
+        "docs/lnls/adr/PROVENANCE-PLAYER-MANIFEST-COPY-2026-10-20.md",
+        "docs/lnls/audits/PROVENANCE-PLAYER-MANIFEST-COPY-IMPLEMENTATION-2026-10-20.md"
+      ],
+      "score": 0,
+      "tags": [
+        "provenance-player",
+        "manifest-export",
+        "individual-work",
+        "owner-authorized",
+        "revocable-media-gateway",
+        "wid-preserved",
+        "no-raw-media-url",
+        "no-player-reset",
+        "companion-interoperability"
       ]
     }
   ]

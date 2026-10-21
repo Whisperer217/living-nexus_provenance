@@ -2759,7 +2759,7 @@ export async function getProvenancePlayerAlbumTrackSources(collectionId: number)
     .limit(501);
 }
 
-/** Current Work projection for the revocable companion-media gateway. */
+/** Current Work projection for the revocable companion-media gateway and owner export. */
 export async function getProvenancePlayerTrackSourceById(songId: number) {
   const db = await getDb();
   if (!db) return null;
@@ -2768,6 +2768,7 @@ export async function getProvenancePlayerTrackSourceById(songId: number) {
     .select({
       song: {
         id: songs.id,
+        userId: songs.userId,
         title: songs.title,
         contentType: songs.contentType,
         status: songs.status,

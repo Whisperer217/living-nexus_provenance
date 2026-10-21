@@ -1,8 +1,8 @@
-# ADR — Provenance Player Manifest Copy for Playlists and Albums
+# ADR — Provenance Player Manifest Copy for Works, Playlists, and Albums
 
 **Date:** 2026-10-20  
 **Status:** Implemented and validated in development — not published  
-**Scope:** Owner-authorized named playlists (`/playlists`) and canonical WID albums (`/album/:collectionWid`).
+**Scope:** Owner-authorized individual Works (`/song/:id`), named playlists (`/playlists`), and canonical WID albums (`/album/:collectionWid`).
 
 ## Context
 
@@ -10,12 +10,15 @@ The Provenance Player accepts pasted `living-nexus-player/1` JSON but has no sec
 
 ## Decision
 
-Living Nexus provides two protected, read-only tRPC projections:
+Living Nexus provides three protected, read-only tRPC projections:
 
+- `songs.copyProvenancePlayerWorkManifest({ songId })` for the current Work owner.
 - `playlists.copyProvenancePlayerManifest({ id })` for the named-playlist owner.
 - `songs.copyProvenancePlayerAlbumManifest({ collectionWid })` for the public canonical-album creator.
 
 The owner receives **Copy manifest** and **Download JSON** controls. A clipboard failure downloads the same JSON locally. These handlers never open the companion tab, call `PlayerContext`, alter the current queue, or write registry data.
+
+The individual-Work path was added after a direct external-player validation confirmed that the deployed companion accepts the same adapter payload and can play through the Living Nexus gateway. It does not add automatic handoff: the creator still intentionally copies or downloads JSON and imports it in **Provenance Player → Add → LN manifest**.
 
 The adapter preserves server-side playlist position and album `trackOrder` exactly. It outputs only the deployed player’s supported fields: `schema`, ordered `tracks`, `title`, creator, optional album, safe artwork, canonical `/share/:wid` source URL, Work ID, WID, current participation disclosure when present, and a Living Nexus media gateway URL.
 
@@ -37,13 +40,14 @@ The copied JSON never contains raw `fileUrl`, signed URLs, tokens, cookies, or a
 ## Validation
 
 - `pnpm check` passed.
-- Focused manifest, router, playlist, and album contracts: **5 files / 27 tests passed** after the community-policy amendment.
-- Full regression suite: **137 files / 852 tests passed; 1 intentionally skipped**.
+- Focused manifest, router, gateway, playlist, and album contracts: **5 files / 32 tests passed** after the individual-Work extension.
+- Full regression suite: **145 files / 899 tests passed; 1 intentionally skipped**.
 - `pnpm build` passed. Existing large-chunk advisories remain unrelated.
 - `git diff --check` passed.
 - The adapter unit tests prove ordered output, WID/source binding, participation disclosure mapping, clean URL requirements, no raw media URL in JSON, 500-track handling, and atomic rejection.
 - Router tests prove owner authorization, non-owner rejection, private/non-owner album rejection, ambiguity rejection, and preserved server-provided order.
 - A read-only canonical-record check produced an ordered 11-track public album manifest with every `audioUrl` pointing to the Living Nexus gateway. A local header-only gateway request returned `302`, `Access-Control-Allow-Origin: *`, and `Cache-Control: no-store`; its redirect location was intentionally not logged.
+- The individual Work adapter produced one safe manifest track from canonical Work `60001`: actual WID, canonical share source, gateway-only audio reference, no raw storage URL, and an owner ID available to the protected procedure. Direct gateway tests cover preflight, withdrawal, ambiguity, and malformed-ID denial.
 
 ## Real-data readiness finding
 

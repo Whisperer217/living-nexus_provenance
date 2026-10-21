@@ -2,16 +2,17 @@
 
 **Date:** 2026-10-20  
 **Status:** Development implementation complete and validated; not published  
-**Scope:** Owner-authorized named playlists and public canonical albums only.
+**Scope:** Owner-authorized individual Works, named playlists, and public canonical albums.
 
 ## What changed
 
-Living Nexus now has two protected, read-only ways to build a `living-nexus-player/1` JSON manifest for manual import into Provenance Player:
+Living Nexus now has three protected, read-only ways to build a `living-nexus-player/1` JSON manifest for manual import into Provenance Player:
 
+- **Individual Work:** `/song/:id`, for its current creator.
 - **Organized playlist:** `/playlists` detail, for its owner.
 - **Canonical album:** `/album/:collectionWid`, for its public-album creator.
 
-Each owner surface offers **Copy manifest** plus **Download JSON**. Copy sends no request to Provenance Player. The creator pastes the result there using **Add → LN manifest → Paste → Import**. If browser clipboard access is unavailable, the same manifest downloads as JSON.
+Each owner surface offers **Copy manifest** plus **Download manifest**. Copy sends no request to Provenance Player. The creator pastes the result there using **Add → LN manifest → Paste → Import**. If browser clipboard access is unavailable, the same manifest downloads as JSON.
 
 The controls do not open a new tab, start, pause, or replace Living Nexus audio, change `PlayerContext`, change queues, write registry data, or change WIDs.
 
@@ -27,27 +28,29 @@ The JSON does not expose raw media storage URLs, signed URLs, user sessions, tok
 
 - `server/domains/provenancePlayer/manifest.ts` — pure schema, current-declaration mapping, eligibility, limits, and safe field mapping.
 - `server/routers/playlists.ts` — `playlists.copyProvenancePlayerManifest` owner procedure.
-- `server/routers/songs.ts` — `songs.copyProvenancePlayerAlbumManifest` owner procedure.
+- `server/routers/songs.ts` — `songs.copyProvenancePlayerWorkManifest` and `songs.copyProvenancePlayerAlbumManifest` owner procedures.
 - `server/routes/provenancePlayerMediaRoute.ts` — current-eligibility gateway for copied playback URLs.
 - `server/utils/db.ts` — bounded ordered source readers and duplicate-WID check.
-- `client/src/pages/PlaylistsPage.tsx` and `client/src/pages/AlbumDetailPage.tsx` — owner controls.
+- `client/src/pages/SongDetailPage.tsx`, `client/src/pages/PlaylistsPage.tsx`, and `client/src/pages/AlbumDetailPage.tsx` — owner controls.
 - `client/src/lib/provenancePlayerManifest.ts` — browser clipboard/download handling only.
+- `server/tests/provenancePlayerMediaRoute.test.ts` — direct CORS, revocation, ambiguity, and malformed-ID gateway behavior.
 
 ## Validation
 
 | Check | Result |
 |---|---|
 | TypeScript | `pnpm check` passed |
-| Focused manifest tests | 5 files / 27 tests passed |
-| Full regression | 137 files / 852 tests passed; 1 intentionally skipped |
+| Focused manifest tests | 5 files / 32 tests passed |
+| Full regression | 145 files / 899 tests passed; 1 intentionally skipped |
 | Production build | Passed |
 | Diff integrity | Passed |
 | Desktop guest playlist route | Rendered normally; owner controls correctly absent |
 | Mobile guest playlist route | Rendered normally; unrelated release-note overlay was present |
 | Real-record adapter validation | One current public 11-track album produced its canonical 11-item order; every `audioUrl` used the Living Nexus gateway |
 | Gateway header validation | One real public Work returned `302`, `Access-Control-Allow-Origin: *`, and `Cache-Control: no-store`; redirect location was not printed |
+| Individual Work adapter validation | Canonical Work `60001` produced one safe manifest track with a real WID, canonical share URL, gateway-only audio URL, no raw-media leak, and an owner ID available for server authorization |
 
-The behavioral tests prove server owner checks, non-owner/private rejection, atomic WID-ambiguity rejection, and exact server-provided order. Adapter tests prove no raw `fileUrl` appears in the copied JSON, current disclosure mapping, clean-URL requirements, and strict limits.
+The behavioral tests prove server owner checks for an individual Work, non-owner/private rejection, atomic WID-ambiguity rejection, and exact server-provided list order. The direct gateway test proves CORS preflight, `no-store`, eligible redirect, individual-withdrawal denial, identity-ambiguity denial, and malformed-ID rejection. Adapter tests prove no raw `fileUrl` appears in the copied JSON, current disclosure mapping, clean-URL requirements, and strict limits.
 
 ## Readiness finding and remaining risk
 

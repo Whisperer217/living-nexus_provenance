@@ -11,6 +11,7 @@ vi.mock("../utils/db", async (importOriginal) => {
     getProvenancePlayerPlaylistTrackSources: vi.fn(),
     getCollectionByWid: vi.fn(),
     getProvenancePlayerAlbumTrackSources: vi.fn(),
+    getProvenancePlayerTrackSourceById: vi.fn(),
     hasAmbiguousProvenancePlayerWids: vi.fn(),
   };
 });
@@ -20,6 +21,7 @@ import {
   getProvenancePlayerPlaylistTrackSources,
   getCollectionByWid,
   getProvenancePlayerAlbumTrackSources,
+  getProvenancePlayerTrackSourceById,
   hasAmbiguousProvenancePlayerWids,
 } from "../utils/db";
 
@@ -44,6 +46,7 @@ function source(id: number, witnessId: string) {
   return {
     song: {
       id,
+      userId: 42,
       title: `Track ${id}`,
       contentType: "audio",
       status: "Published",
@@ -142,5 +145,40 @@ describe("Provenance Player export procedures", () => {
     await expect(appRouter.createCaller(context()).songs.copyProvenancePlayerAlbumManifest({ collectionWid: "WID-ALB-PRIVATE" }))
       .rejects.toMatchObject({ code: "NOT_FOUND", message: "Manifest unavailable" });
     expect(getProvenancePlayerAlbumTrackSources).not.toHaveBeenCalled();
+  });
+
+  it("exports one eligible Work only for its current creator through the same gateway-only manifest adapter", async () => {
+    const work = source(60001, "WID-MUS-PUSH-FORWARD");
+    (getProvenancePlayerTrackSourceById as any).mockResolvedValue(work);
+
+    const result = await appRouter.createCaller(context()).songs.copyProvenancePlayerWorkManifest({ songId: 60001 });
+
+    expect(result.tracks).toHaveLength(1);
+    expect(result.tracks[0]).toMatchObject({
+      title: "Track 60001",
+      workId: "60001",
+      wid: "WID-MUS-PUSH-FORWARD",
+      audioUrl: "https://www.livingnexus.org/api/provenance-player/media/60001",
+    });
+    expect(JSON.stringify(result)).not.toContain("https://media.example.test/60001.mp3");
+    expect(hasAmbiguousProvenancePlayerWids).toHaveBeenCalledWith(["WID-MUS-PUSH-FORWARD"]);
+  });
+
+  it("does not disclose a non-owner Work manifest", async () => {
+    const work = source(60001, "WID-MUS-OTHER-CREATOR");
+    work.song.userId = 99;
+    (getProvenancePlayerTrackSourceById as any).mockResolvedValue(work);
+
+    await expect(appRouter.createCaller(context()).songs.copyProvenancePlayerWorkManifest({ songId: 60001 }))
+      .rejects.toMatchObject({ code: "NOT_FOUND", message: "Manifest unavailable" });
+    expect(hasAmbiguousProvenancePlayerWids).not.toHaveBeenCalled();
+  });
+
+  it("rejects an individual Work whose canonical WID is ambiguous", async () => {
+    (getProvenancePlayerTrackSourceById as any).mockResolvedValue(source(60001, "WID-MUS-DUPLICATE"));
+    (hasAmbiguousProvenancePlayerWids as any).mockResolvedValue(true);
+
+    await expect(appRouter.createCaller(context()).songs.copyProvenancePlayerWorkManifest({ songId: 60001 }))
+      .rejects.toMatchObject({ code: "NOT_FOUND", message: "Manifest unavailable" });
   });
 });

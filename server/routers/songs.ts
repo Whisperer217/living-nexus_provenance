@@ -57,7 +57,7 @@ import {
   createPromoCode, listPromoCodes, deactivatePromoCode, reactivatePromoCode, redeemPromoCode,
   recordNameChange, getNameHistory, getOriginalName,
   createCollection, updateCollectionPdf, linkSongsToCollection,
-  getCollectionByWid, getSongsByCollectionId, getPublicSongsByCollectionId, getCollectionForSong, getProvenancePlayerAlbumTrackSources, hasAmbiguousProvenancePlayerWids,
+  getCollectionByWid, getSongsByCollectionId, getPublicSongsByCollectionId, getCollectionForSong, getProvenancePlayerAlbumTrackSources, getProvenancePlayerTrackSourceById, hasAmbiguousProvenancePlayerWids,
   getCollectionsByCreator, getPublicCollectionsByCreator, updateCollectionCover, updateCollectionDefaultView,
   getAllSupporters, getSupporterByUserId, recordPlatformGift, getPublishedCountByUser,
   getNewEventCountForCreator, touchActivityVisit, touchDashboardVisit, getDashboardDeltas,
@@ -2021,6 +2021,29 @@ ${workType === "manuscript" || workType === "comic" ? "Category" : "Genre"}: ${i
             tracks: rows.map((row: any) => ({ ...row.song, creator: row.creator })),
             album: collection.name,
             fallbackArtworkUrl: collection.coverArtUrl,
+          });
+        } catch (error) {
+          if (error instanceof ProvenancePlayerManifestUnavailableError) {
+            throw new TRPCError({ code: "NOT_FOUND", message: "Manifest unavailable" });
+          }
+          throw error;
+        }
+      }),
+    /** Owner-authorized portable projection for one current Work. */
+    copyProvenancePlayerWorkManifest: protectedProcedure
+      .input(z.object({ songId: z.number().int().positive() }))
+      .query(async ({ ctx, input }) => {
+        const source = await getProvenancePlayerTrackSourceById(input.songId);
+        if (!source?.song || !source.creator || source.song.userId !== ctx.user.id) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Manifest unavailable" });
+        }
+
+        try {
+          if (await hasAmbiguousProvenancePlayerWids([source.song.witnessId ?? ""])) {
+            throw new ProvenancePlayerManifestUnavailableError();
+          }
+          return buildProvenancePlayerManifest({
+            tracks: [{ ...source.song, creator: source.creator }],
           });
         } catch (error) {
           if (error instanceof ProvenancePlayerManifestUnavailableError) {
