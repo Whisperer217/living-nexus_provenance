@@ -16,6 +16,7 @@ import {
   assertExactDraftMembershipIds,
   ReleaseDraftPolicyError,
 } from "../domains/releases/releasePolicy";
+import { requireInsertId } from "../domains/releases/insertResult";
 
 export type DraftReleaseMetadata = {
   title: string;
@@ -208,7 +209,7 @@ export async function createDraftRelease(
     if (existing) return { draft: existing, created: false };
 
     const familyResult = await tx.insert(albumReleaseFamilies).values({ creatorId });
-    const releaseFamilyId = Number(familyResult.insertId);
+    const releaseFamilyId = requireInsertId(familyResult);
     const draftResult = await tx.insert(albumReleaseDrafts).values({
       releaseFamilyId,
       creatorId,
@@ -218,7 +219,7 @@ export async function createDraftRelease(
       visibilityIntent: metadata.visibilityIntent ?? "public",
       createRequestId,
     });
-    const draftId = Number(draftResult.insertId);
+    const draftId = requireInsertId(draftResult);
     const [draft] = await tx.select().from(albumReleaseDrafts).where(eq(albumReleaseDrafts.id, draftId)).limit(1);
     if (!draft) throw new Error("Draft creation did not return a record");
     await recordDraftRevision(tx, creatorId, draft, "created");
@@ -281,7 +282,7 @@ export async function createDraftReleaseFromLegacyCollection(
       legacyCollectionId: legacy.id,
       legacyCollectionWidSnapshot: legacy.collectionWid,
     });
-    const releaseFamilyId = Number(familyResult.insertId);
+    const releaseFamilyId = requireInsertId(familyResult);
     const draftResult = await tx.insert(albumReleaseDrafts).values({
       releaseFamilyId,
       creatorId,
@@ -291,7 +292,7 @@ export async function createDraftReleaseFromLegacyCollection(
       visibilityIntent: legacy.visibility,
       createRequestId,
     });
-    const draftId = Number(draftResult.insertId);
+    const draftId = requireInsertId(draftResult);
     await tx.insert(albumReleaseDraftTracks).values(songIdsInOrder.map((songId: number, position: number) => ({
       draftId,
       songId,

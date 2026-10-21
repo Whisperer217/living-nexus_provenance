@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-10-21T04:59:20.344195+00:00",
-  "totalLessons": 73,
+  "lastUpdated": "2026-10-21T05:20:06.345582+00:00",
+  "totalLessons": 74,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -1812,6 +1812,29 @@
         "historical-preservation",
         "no-wid-replacement",
         "no-player-reset"
+      ]
+    },
+    {
+      "id": "LESSON-074",
+      "date": "2026-10-21",
+      "category": "architecture",
+      "problem": "Draft Release creation assumed that an insert executed through a MySQL transaction returns a direct ResultSetHeader. The transaction returned a tuple, so reading result.insertId yielded NaN and the related draft insert failed before any creator-visible draft could be created.",
+      "solution": "Centralize transaction insert-ID normalization in a fail-closed helper that accepts direct and tuple-shaped MySQL responses, rejects invalid IDs before related writes, and maps that impossible persistence state to a clear retry-safe creator message. Apply it to both fresh and legacy-derived Draft Release creation paths.",
+      "files": [
+        "server/domains/releases/insertResult.ts",
+        "server/db/albumReleases.ts",
+        "server/routers/releaseDrafts.ts",
+        "server/tests/releaseDraftInsertResult.test.ts"
+      ],
+      "score": 0,
+      "tags": [
+        "draft-release",
+        "mysql",
+        "transaction",
+        "insert-id",
+        "fail-closed",
+        "creator-experience",
+        "no-wid-change"
       ]
     }
   ]

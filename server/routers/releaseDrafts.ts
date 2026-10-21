@@ -13,6 +13,7 @@ import {
   updateDraftReleaseMetadata,
 } from "../db/albumReleases";
 import { ReleaseDraftPolicyError } from "../domains/releases/releasePolicy";
+import { ReleaseDraftPersistenceError } from "../domains/releases/insertResult";
 import { RELEASE_SIGNING_HOLD } from "../../shared/albumReleaseTypes";
 
 const visibilityIntent = z.enum(["public", "unlisted", "private"]);
@@ -29,6 +30,12 @@ function mapDraftError(error: unknown): never {
       : error.code === "DRAFT_UNAVAILABLE" ? "NOT_FOUND"
       : "BAD_REQUEST";
     throw new TRPCError({ code, message: error.message });
+  }
+  if (error instanceof ReleaseDraftPersistenceError) {
+    throw new TRPCError({
+      code: "INTERNAL_SERVER_ERROR",
+      message: "Draft Release could not be created. Nothing was saved. Please try again.",
+    });
   }
   throw error;
 }
