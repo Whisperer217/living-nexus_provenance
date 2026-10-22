@@ -27,7 +27,9 @@ describe("mobile cross-page containment contract", () => {
     expect(player).toContain("max(${playerHeight}px, var(--player-safe))");
     expect(player).toContain("paddingBottom: 0");
     expect(rail).toContain('id="mobile-nav-rail"');
+    expect(rail).toContain('top: "var(--ln-mobile-header-height)"');
     expect(rail).toContain('bottom: "var(--bottom-stack)"');
+    expect(rail).toContain('width: "min(21rem, calc(100vw - 2.5rem))"');
   });
 
   it("gives Related Works an explicit one-column mobile grid and local width containment", () => {

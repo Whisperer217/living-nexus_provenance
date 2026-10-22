@@ -21,7 +21,7 @@
  *  40  SURFACE_PLAYER     — WitnessSurfacePlayer SurfaceBar (mobile, partially retired)
  *  50  EDIT_PANEL         — EditTrackPanel, sheet overlays
  *  60  THEATER_PLAYER     — TheaterPlayer cinematic mode
- *  80  GLOBAL_PLAYER      — GlobalPlayer floating card + expanded modal
+ * 9000 GLOBAL_PLAYER      — GlobalPlayer dock and expanded sheet
  *  91  MINI_PLAYER_BAR    — GlobalPlayer MiniBar (above nav bar)
  * 100  CONTEXT_DRAWER     — ContextDrawer (desktop left panel)
  * 300  MOBILE_HEADER      — Mobile top header bar (hamburger button)
@@ -32,6 +32,9 @@
  * 700  MODAL              — Generic modals, dialogs
  * 800  TOAST              — Toast notifications (Sonner)
  * 900  TOOLTIP            — Tooltips, popovers
+ * 8998 GLOBAL_PLAYER_BACKDROP — Mobile expanded-player backdrop
+ * 9100 MOBILE_NAV_BACKDROP — Mobile LeftRail dismissal surface
+ * 9110 MOBILE_NAV_DRAWER  — Mobile LeftRail readable navigation drawer
  * 99995 CINEMATIC_PORTAL  — GlobalPlayer cinematic portal (must be above all)
  * 99999 DEBUG_OVERLAY     — Debug overlays (dev only)
  */
@@ -44,7 +47,7 @@ export const Z = {
   SURFACE_PLAYER: 40,
   EDIT_PANEL: 50,
   THEATER_PLAYER: 60,
-  GLOBAL_PLAYER: 80,
+  GLOBAL_PLAYER: 9_000,
   MINI_PLAYER_BAR: 91,
   CONTEXT_DRAWER: 100,
   MOBILE_HEADER: 300,
@@ -55,6 +58,9 @@ export const Z = {
   MODAL: 700,
   TOAST: 800,
   TOOLTIP: 900,
+  GLOBAL_PLAYER_BACKDROP: 8_998,
+  MOBILE_NAV_BACKDROP: 9_100,
+  MOBILE_NAV_DRAWER: 9_110,
   CINEMATIC_PORTAL: 99995,
   DEBUG_OVERLAY: 99999,
 } as const;

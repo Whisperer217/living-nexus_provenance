@@ -14,7 +14,7 @@
    Desktop: LeftRail (72px fixed) + ContextDrawer + MainColumn + RightRail
    Mobile:  LeftRail (off-canvas) + mobile header (hamburger + logo + bell)
 =================================================================== */
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { PullToRefreshIndicator } from "@/components/PullToRefreshIndicator";
 import LeftRail from "@/components/layout/LeftRail";
@@ -43,6 +43,7 @@ import { DISCORD_COMMUNITY_URL } from "@/lib/loopProduct";
 import { DiscordGlyph as SharedDiscordGlyph } from "@/components/icons/DiscordGlyph";
 import { WitnessSigil } from "@/components/icons/WitnessSigil";
 import { playbackDiag } from "@/lib/playbackDiag";
+import { getLoginUrl } from "@/const";
 
 const LOGO_URL = "/manus-storage/living-nexus-logo-2025_19c2d497.png";
 
@@ -95,18 +96,99 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     }
   }, [drawerOpen, activeMode]);
 
-  // ── Mobile: sidebar open state ─────────────────────────────────────
-  // DOCTRINE: This is pure React state. No overlayController. No body lock.
-  // The LeftRail component handles the off-canvas transform presentation.
+  // ── Mobile: one coordinated navigation panel ────────────────────────
+  // The LeftRail remains the sole navigation authority. This shell owns only
+  // presentation lifecycle: page-scroll isolation, Android Back, Escape, and
+  // collapsing the existing player sheet before navigation becomes interactive.
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const mobileMenuHistoryEntryRef = useRef(false);
 
-  const openMobileMenu = useCallback(() => setMobileMenuOpen(true), []);
-  const closeMobileMenu = useCallback(() => setMobileMenuOpen(false), []);
+  const restoreMobileMenuTrigger = useCallback(() => {
+    window.setTimeout(() => {
+      document.querySelector<HTMLButtonElement>("[data-mobile-menu-trigger='true']")?.focus();
+    }, 0);
+  }, []);
+
+  const closeMobileMenu = useCallback((afterClose?: () => void) => {
+    if (!mobileMenuOpen) {
+      afterClose?.();
+      return;
+    }
+
+    const finish = () => {
+      setMobileMenuOpen(false);
+      restoreMobileMenuTrigger();
+      afterClose?.();
+    };
+
+    // Opening the drawer adds a same-URL history entry. Pop it before a
+    // navigation item changes route so Android Back closes the panel first
+    // without leaving a stale, invisible history entry behind.
+    const hasCurrentSentinel = mobileMenuHistoryEntryRef.current
+      && window.history.state?.lnMobileMenu === true;
+    mobileMenuHistoryEntryRef.current = false;
+    if (!hasCurrentSentinel) {
+      finish();
+      return;
+    }
+
+    window.addEventListener("popstate", finish, { once: true });
+    window.history.back();
+  }, [mobileMenuOpen, restoreMobileMenuTrigger]);
+
+  const openMobileMenu = useCallback(() => {
+    // Navigation should never compete with an expanded player sheet or a
+    // desktop contextual drawer. The PlayerContext and queue are untouched.
+    setDrawerOpen(false);
+    window.dispatchEvent(new CustomEvent("ln:close-right-drawers"));
+    window.dispatchEvent(new CustomEvent("ln:player-collapse"));
+
+    if (window.history.state?.lnMobileMenu !== true) {
+      window.history.pushState(
+        { ...(window.history.state ?? {}), lnMobileMenu: true },
+        "",
+        window.location.href,
+      );
+      mobileMenuHistoryEntryRef.current = true;
+    }
+    setMobileMenuOpen(true);
+  }, []);
+
+  const handleMobileNavigation = useCallback((path: string, authRequired?: boolean) => {
+    closeMobileMenu(() => {
+      if (authRequired && !user) {
+        window.location.href = getLoginUrl(path);
+        return;
+      }
+      navigate(path);
+    });
+  }, [closeMobileMenu, navigate, user]);
 
   // Close mobile menu on route change
   useEffect(() => {
     setMobileMenuOpen(false);
   }, [location]);
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && mobileMenuOpen) {
+        event.preventDefault();
+        closeMobileMenu();
+      }
+    };
+    const onPopState = () => {
+      if (!mobileMenuOpen) return;
+      mobileMenuHistoryEntryRef.current = false;
+      setMobileMenuOpen(false);
+      restoreMobileMenuTrigger();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("popstate", onPopState);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("popstate", onPopState);
+    };
+  }, [closeMobileMenu, mobileMenuOpen, restoreMobileMenuTrigger]);
 
   // ── What's New modal ───────────────────────────────────────────────
   const [whatsNewOpen, setWhatsNewOpen] = useState(false);
@@ -176,6 +258,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         onRailClick={handleRailClick}
         mobileOpen={mobileMenuOpen}
         onMobileClose={closeMobileMenu}
+        onMobileNavigate={handleMobileNavigation}
         archiveSongCount={archiveSongCount}
       />
 
@@ -207,7 +290,11 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       >
         {/* Hamburger — toggles LeftRail mobile state only */}
         <button
-          onClick={mobileMenuOpen ? closeMobileMenu : openMobileMenu}
+          onClick={() => {
+            if (mobileMenuOpen) closeMobileMenu();
+            else openMobileMenu();
+          }}
+          data-mobile-menu-trigger="true"
           className="ln-dimensional-action flex min-h-11 min-w-11 items-center justify-center rounded-lg transition-all"
           style={{ color: "var(--ln-text-muted)", WebkitTapHighlightColor: "transparent" }}
           aria-label={mobileMenuOpen ? "Close navigation" : "Open navigation"}
@@ -294,7 +381,12 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           transition: "padding-left 220ms cubic-bezier(0.22,1,0.36,1)",
         }}
       >
-        <main className="min-h-0 min-w-0 flex-1 flex overflow-hidden" style={{ overscrollBehavior: "none" }}>
+        <main
+          className="min-h-0 min-w-0 flex-1 flex overflow-hidden"
+          style={{ overscrollBehavior: "none" }}
+          aria-hidden={mobileMenuOpen || undefined}
+          inert={mobileMenuOpen || undefined}
+        >
           <style>{`
             @media (max-width: 1023px) { .player-scroll-area { padding-bottom: var(--bottom-stack) !important; } }
           `}</style>
@@ -309,7 +401,12 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           <div
             id="main-scroll"
             className={`min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden player-scroll-area ${rightRailOpen && !isCreatorFocus ? "lg:pr-[300px]" : ""}`}
-            style={{ overscrollBehaviorX: "none", overscrollBehaviorY: "none", touchAction: "pan-y" }}
+            style={{
+              overscrollBehaviorX: "none",
+              overscrollBehaviorY: "none",
+              overflowY: mobileMenuOpen ? "hidden" : "auto",
+              touchAction: mobileMenuOpen ? "none" : "pan-y",
+            }}
           >
             {children}
             {!isManifestWorkspace && <SiteFooter />}

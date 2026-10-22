@@ -14,12 +14,14 @@
    capture touch events globally, or manipulate the body in any way.
 ═══════════════════════════════════════════════════════════════════ */
 import { useLocation, useRouter } from "wouter";
+import { useEffect, useRef } from "react";
 import { Home, Compass, Upload, Archive, ExternalLink, Shield, LayoutGrid, Sparkles } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 import { LOOP_PRODUCT, DISCORD_COMMUNITY_URL } from "@/lib/loopProduct";
 import { DiscordGlyph } from "@/components/icons/DiscordGlyph";
 import { WitnessSigil } from "@/components/icons/WitnessSigil";
+import { Z } from "@/lib/viewportLayers";
 
 export type NavMode = "home" | "explore" | "upload" | "manage" | "archive";
 
@@ -48,6 +50,7 @@ interface LeftRailProps {
   // Mobile state — owned by MainLayout, passed down
   mobileOpen?: boolean;
   onMobileClose?: () => void;
+  onMobileNavigate?: (path: string, authRequired?: boolean) => void;
   // Badge counts
   archiveSongCount?: number;
 }
@@ -58,10 +61,20 @@ export default function LeftRail({
   onRailClick,
   mobileOpen = false,
   onMobileClose,
+  onMobileNavigate,
   archiveSongCount = 0,
 }: LeftRailProps) {
   const [location, navigate] = useLocation();
   const { user } = useAuth();
+  const mobileRailRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const frame = window.requestAnimationFrame(() => {
+      mobileRailRef.current?.querySelector<HTMLElement>("[data-mobile-nav-primary='true']")?.focus();
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [mobileOpen]);
 
   const isRouteActive = (path: string) => {
     if (path === "/" && (location === "/" || location === "/home")) return true;
@@ -86,6 +99,10 @@ export default function LeftRail({
 
   // Mobile: navigate directly, then close the sidebar
   const handleMobileClick = (path: string, authRequired?: boolean) => {
+    if (onMobileNavigate) {
+      onMobileNavigate(path, authRequired);
+      return;
+    }
     if (authRequired && !user) {
       window.location.href = getLoginUrl(path);
       return;
@@ -112,10 +129,10 @@ export default function LeftRail({
           ? () => handleMobileClick(path, authRequired)
           : (e) => handleDesktopClick(e as React.MouseEvent, id)
         }
-        className="ln-dimensional-action relative flex flex-col items-center justify-center gap-0.5 transition-all duration-150 rounded-xl"
+        className={`ln-dimensional-action relative flex items-center transition-all duration-150 rounded-xl ${isMobile ? "ln-mobile-nav-item flex-row justify-start gap-3 px-4" : "flex-col justify-center gap-0.5"}`}
         style={{
-          width: isMobile ? 72 : 60,
-          height: 56,
+          width: isMobile ? "100%" : 60,
+          height: isMobile ? 52 : 56,
           background: active ? "var(--ln-surface-rail-active)" : "transparent",
           color: active ? "var(--ln-gold)" : "var(--ln-text-muted)",
           boxShadow: active
@@ -164,7 +181,7 @@ export default function LeftRail({
             </span>
           )}
         </div>
-        <span style={{ fontSize: 9, fontWeight: 600, letterSpacing: "0.04em", lineHeight: 1 }}>
+        <span style={{ fontSize: isMobile ? 12 : 9, fontWeight: 600, letterSpacing: isMobile ? "0.08em" : "0.04em", lineHeight: 1 }}>
           {label.toUpperCase()}
         </span>
       </button>
@@ -174,6 +191,11 @@ export default function LeftRail({
   // ── Shared inner content (same icons, same labels, same hierarchy) ─
   const railContent = (isMobile: boolean) => (
     <>
+      {isMobile && (
+        <div className="w-full px-4 pt-1 pb-2">
+          <span className="ln-overline" style={{ color: "var(--ln-gold-dim)" }}>Navigate</span>
+        </div>
+      )}
       {/* Logo */}
       <button
         onClick={isMobile
@@ -183,19 +205,27 @@ export default function LeftRail({
         className="mb-3 flex items-center justify-center rounded-xl transition-all"
         title="Navigation"
         aria-label={`${LOOP_PRODUCT.name} home`}
-        style={{ width: 56, height: 48, WebkitTapHighlightColor: "transparent" }}
+        data-mobile-nav-primary={isMobile ? "true" : undefined}
+        style={{
+          width: isMobile ? "calc(100% - 24px)" : 56,
+          height: isMobile ? 52 : 48,
+          justifyContent: isMobile ? "flex-start" : "center",
+          padding: isMobile ? "0 12px" : undefined,
+          WebkitTapHighlightColor: "transparent",
+        }}
       >
         <img src={LOGO_URL} alt={LOOP_PRODUCT.name} style={{ width: 32, height: 32, borderRadius: 8 }} />
+        {isMobile && <span className="ml-3 font-display text-sm" style={{ color: "var(--ln-parchment)" }}>Living Nexus</span>}
       </button>
 
       {/* Divider */}
-      <div className="w-8 h-px mb-2" style={{ background: "var(--ln-border-subtle)" }} />
+      <div className={`${isMobile ? "w-full" : "w-8"} h-px mb-2`} style={{ background: "var(--ln-border-subtle)" }} />
 
       {/* Nav items */}
       {RAIL_ITEMS.map(item => renderItem(item, isMobile))}
 
       {/* Divider before companion tools */}
-      <div className="w-8 h-px mt-2 mb-2" style={{ background: "var(--ln-border-subtle)" }} />
+      <div className={`${isMobile ? "w-full" : "w-8"} h-px mt-2 mb-2`} style={{ background: "var(--ln-border-subtle)" }} />
 
       {/* Compose remains primary-accessible when narrow mobile chrome collapses it. */}
       {!!user && isMobile && (
@@ -207,10 +237,9 @@ export default function LeftRail({
             event.stopPropagation();
             handleMobileClick("/keeper-compose", true);
           }}
-          className="ln-dimensional-action relative flex flex-col items-center justify-center gap-0.5 transition-all duration-150 rounded-xl"
+          className="ln-dimensional-action ln-mobile-nav-item relative flex w-full flex-row items-center justify-start gap-3 rounded-xl px-4 transition-all duration-150"
           style={{
-            width: isMobile ? 72 : 60,
-            height: 56,
+            height: 52,
             color: "var(--ln-text-muted)",
             background: "transparent",
             WebkitTapHighlightColor: "transparent",
@@ -225,7 +254,7 @@ export default function LeftRail({
           }}
         >
           <Sparkles size={18} />
-          <span style={{ fontSize: 8, fontWeight: 600, letterSpacing: "0.04em", lineHeight: 1 }}>
+          <span style={{ fontSize: 12, fontWeight: 600, letterSpacing: "0.08em", lineHeight: 1 }}>
             COMPOSE
           </span>
         </button>
@@ -242,10 +271,10 @@ export default function LeftRail({
             window.dispatchEvent(new Event("ln:open-witnessing-circle"));
             if (isMobile) onMobileClose?.();
           }}
-          className="ln-dimensional-action ln-witness-sigil-trigger relative flex flex-col items-center justify-center gap-0.5 transition-all duration-150 rounded-xl"
+          className={`ln-dimensional-action ln-witness-sigil-trigger relative flex items-center transition-all duration-150 rounded-xl ${isMobile ? "ln-mobile-nav-item flex-row justify-start gap-3 px-4" : "flex-col justify-center gap-0.5"}`}
           style={{
-            width: isMobile ? 72 : 60,
-            height: 56,
+            width: isMobile ? "100%" : 60,
+            height: isMobile ? 52 : 56,
             color: "var(--ln-text-muted)",
             background: "transparent",
             WebkitTapHighlightColor: "transparent",
@@ -260,7 +289,7 @@ export default function LeftRail({
           }}
         >
           <WitnessSigil size={18} />
-          <span style={{ fontSize: 8, fontWeight: 600, letterSpacing: "0.04em", lineHeight: 1, textAlign: "center" }}>
+          <span style={{ fontSize: isMobile ? 12 : 8, fontWeight: 600, letterSpacing: isMobile ? "0.08em" : "0.04em", lineHeight: 1, textAlign: "center" }}>
             WITNESSING
           </span>
         </button>
@@ -304,10 +333,10 @@ export default function LeftRail({
         title="Celestial Codex"
         aria-label="Celestial Codex — open companion tool"
         onClick={e => { e.stopPropagation(); if (isMobile) onMobileClose?.(); }}
-        className="relative flex flex-col items-center justify-center gap-0.5 transition-all duration-150 rounded-xl no-underline"
+        className={`relative flex items-center transition-all duration-150 rounded-xl no-underline ${isMobile ? "ln-mobile-nav-item flex-row justify-start gap-3 px-4" : "flex-col justify-center gap-0.5"}`}
         style={{
-          width: isMobile ? 72 : 60,
-          height: 56,
+          width: isMobile ? "100%" : 60,
+          height: isMobile ? 52 : 56,
           color: "color-mix(in srgb, var(--ln-gold) 72%, transparent)",
           background: "transparent",
           textDecoration: "none",
@@ -323,7 +352,7 @@ export default function LeftRail({
         }}
       >
         <ExternalLink size={15} />
-        <span style={{ fontSize: 8, fontWeight: 600, letterSpacing: "0.04em", lineHeight: 1, textAlign: "center" }}>
+        <span style={{ fontSize: isMobile ? 12 : 8, fontWeight: 600, letterSpacing: isMobile ? "0.08em" : "0.04em", lineHeight: 1, textAlign: "center" }}>
           CODEX
         </span>
       </a>
@@ -352,17 +381,21 @@ export default function LeftRail({
         {railContent(false)}
       </aside>
 
-      {/* ── MOBILE RAIL (< lg): off-canvas, slides in via transform only ── */}
-      {/* Backdrop — dismissal surface ONLY. No body lock. No touch capture. */}
+      {/* ── MOBILE RAIL (< lg): readable drawer, same LeftRail authority ── */}
+      {/* Backdrop is capped above the persistent player dock. MainLayout locks
+          only #main-scroll; the player remains available and owns no menu state. */}
       <div
         aria-hidden="true"
         className="lg:hidden"
         onClick={onMobileClose}
         style={{
           position: "fixed",
-          inset: 0,
+          top: "var(--ln-mobile-header-height)",
+          right: 0,
+          bottom: "var(--bottom-stack)",
+          left: 0,
           background: "var(--ln-ambient-overlay)",
-          zIndex: 299,
+          zIndex: Z.MOBILE_NAV_BACKDROP,
           opacity: mobileOpen ? 1 : 0,
           pointerEvents: mobileOpen ? "auto" : "none",
           transition: "opacity 220ms ease",
@@ -373,18 +406,23 @@ export default function LeftRail({
       {/* Sidebar panel — transform only, GPU-composited, no layout reflow */}
       <aside
         id="mobile-nav-rail"
+        ref={mobileRailRef}
         className="lg:hidden flex flex-col items-center py-3 gap-1"
         aria-label="Mobile navigation"
         aria-hidden={!mobileOpen}
+        role="dialog"
+        aria-modal="true"
+        tabIndex={-1}
         style={{
           position: "fixed",
-          top: 0,
+          top: "var(--ln-mobile-header-height)",
           left: 0,
           bottom: "var(--bottom-stack)",
-          width: 72,
+          width: "min(21rem, calc(100vw - 2.5rem))",
           background: "var(--ln-surface-rail)",
           borderRight: "1px solid var(--ln-panel-border)",
-          zIndex: 300,
+          boxShadow: "18px 0 48px color-mix(in srgb, var(--ln-void) 72%, transparent)",
+          zIndex: Z.MOBILE_NAV_DRAWER,
           overflowY: "auto",
           overflowX: "hidden",
           // Off-canvas transform — the ONLY mechanism for show/hide

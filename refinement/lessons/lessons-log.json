@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-10-22T17:07:49.430Z",
-  "totalLessons": 80,
+  "lastUpdated": "2026-10-22T18:53:22.173Z",
+  "totalLessons": 81,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -1995,6 +1995,36 @@
         "no-deployment"
       ],
       "id": "LESSON-080"
+    },
+    {
+      "date": "2026-10-22",
+      "checkpointVersion": "pending",
+      "category": "architecture",
+      "problem": "On narrow browser viewports, Living Nexus navigation remained a 72px icon rail with no coordinated dismissal lifecycle, while an independently fixed Global Player sheet could compete with it. The result was cramped navigation, page interaction behind the menu, and unreliable Android Back/Escape behavior.",
+      "solution": "Keep LeftRail as the one navigation authority and place mobile presentation lifecycle in MainLayout: a readable focus-managed off-canvas drawer, one shared layer registry, main-scroll isolation, Escape and same-URL history dismissal, and a player-collapse event without changing PlayerContext or queues. Track visualViewport height in the existing GlobalPlayer so its expanded sheet remains inside the visible mobile browser viewport. Future native clients should preserve these contracts but replace DOM history, inert/focus, visualViewport, and CSS safe-area primitives with their platform-native equivalents.",
+      "files": [
+        "client/src/components/layout/MainLayout.tsx",
+        "client/src/components/layout/LeftRail.tsx",
+        "client/src/components/player/GlobalPlayer.tsx",
+        "client/src/lib/viewportLayers.ts",
+        "server/tests/mobileCrossPageLayout.contract.test.ts",
+        "server/tests/mobileShellStabilization.contract.test.ts"
+      ],
+      "score": 0,
+      "tags": [
+        "mobile-shell",
+        "responsive",
+        "LeftRail",
+        "GlobalPlayer",
+        "PlayerContext",
+        "viewport-layers",
+        "android-back",
+        "escape",
+        "visualViewport",
+        "native-app-readiness",
+        "no-deployment"
+      ],
+      "id": "LESSON-081"
     }
   ]
 }

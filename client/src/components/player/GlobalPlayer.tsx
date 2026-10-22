@@ -45,6 +45,7 @@ import {
   type PlayerCommentTarget,
 } from "./commentComposerState";
 import { toast } from "sonner";
+import { Z } from "@/lib/viewportLayers";
 
 /* ── Gold design tokens ─────────────────────────────────────────── */
 const GOLD = "var(--ln-gold)";
@@ -140,6 +141,29 @@ function GlobalPlayerInner() {
 
   const isDesktop = useIsDesktop();
   const reduceMotion = useReducedMotion();
+  const [availableViewportHeight, setAvailableViewportHeight] = useState(() =>
+    typeof window === "undefined"
+      ? 800
+      : Math.round(window.visualViewport?.height ?? window.innerHeight)
+  );
+
+  // Android browser chrome and the virtual keyboard can change the visible
+  // viewport without remounting the player. Keep the existing internal player
+  // scroll surface, but resize its expanded sheet before it can cover the
+  // shared mobile header or extend beneath the visible viewport.
+  useEffect(() => {
+    const updateAvailableViewportHeight = () => {
+      setAvailableViewportHeight(Math.round(window.visualViewport?.height ?? window.innerHeight));
+    };
+    const visualViewport = window.visualViewport;
+    window.addEventListener("resize", updateAvailableViewportHeight);
+    visualViewport?.addEventListener("resize", updateAvailableViewportHeight);
+    updateAvailableViewportHeight();
+    return () => {
+      window.removeEventListener("resize", updateAvailableViewportHeight);
+      visualViewport?.removeEventListener("resize", updateAvailableViewportHeight);
+    };
+  }, []);
 
   /* ── Harmonic Signature — must be declared before useWaveformVisualizer calls ── */
   // Consumed from HarmonicContext (mounted above the entire app tree).
@@ -613,10 +637,13 @@ function GlobalPlayerInner() {
   }, [currentTrack, navigate]);
 
   /* ── Computed player height ── */
-  const viewportH = typeof window !== "undefined" ? window.innerHeight : 800;
-  // Mobile: use 85% of viewport as max — prevents large empty void below Up Next
-  // Desktop modal uses a larger cap (820px) since it's a centered overlay
-  const expandedH = isDesktop ? Math.min(viewportH * 0.85, 820) : Math.min(viewportH * 0.82, 700);
+  const viewportH = availableViewportHeight;
+  // Mobile leaves the fixed shared header readable even after Android browser
+  // chrome or the virtual keyboard changes the visual viewport. Expanded
+  // content retains its established internal scroll surface.
+  const expandedH = isDesktop
+    ? Math.min(viewportH * 0.85, 820)
+    : Math.max(SNAP.MINI, Math.min(viewportH * 0.82, viewportH - 80, 700));
 
   function getSnapHeight(z: SnapZone): number {
     if (z === "MINI") return SNAP.MINI;
@@ -988,7 +1015,7 @@ function GlobalPlayerInner() {
           : isDesktop
             ? `${playerHeight}px`
             : `max(${playerHeight}px, var(--player-safe))`,
-        zIndex: 9000,
+        zIndex: Z.GLOBAL_PLAYER,
         willChange: "transform",
         contain: "layout paint",
         background: glassBg,
@@ -2202,7 +2229,7 @@ function GlobalPlayerInner() {
       style={{
         position: "fixed",
         inset: 0,
-        zIndex: 8998,
+        zIndex: Z.GLOBAL_PLAYER_BACKDROP,
         background: "rgba(0,0,0,0.72)",
         backdropFilter: "blur(3px)",
         WebkitBackdropFilter: "blur(3px)",
