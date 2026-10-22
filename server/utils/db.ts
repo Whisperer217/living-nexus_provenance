@@ -2811,7 +2811,10 @@ export async function hasAmbiguousProvenancePlayerWids(witnessIds: readonly stri
   const rows = await (db as any)
     .select({ witnessId: songs.witnessId })
     .from(songs)
-    .where(inArray(songs.witnessId, normalized));
+    .where(and(
+      inArray(songs.witnessId, normalized),
+      ne(songs.status, "Deleted"),
+    ));
   const counts = new Map<string, number>();
   for (const row of rows) {
     if (!row.witnessId) continue;

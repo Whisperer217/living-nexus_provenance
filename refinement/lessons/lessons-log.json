@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-10-22T05:49:06.683Z",
-  "totalLessons": 77,
+  "lastUpdated": "2026-10-22T15:18:21.300Z",
+  "totalLessons": 78,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -1922,6 +1922,29 @@
         "no-deployment"
       ],
       "id": "LESSON-077"
+    },
+    {
+      "date": "2026-10-22",
+      "category": "security",
+      "problem": "The Provenance Player duplicate-WID guard counted Deleted historical Work rows as current identity collisions. This correctly preserved the history but incorrectly blocked a public successor Work from exporting and playing through the revocable gateway.",
+      "solution": "Define manifest ambiguity across non-Deleted current rows only. Preserve every Deleted historical Work, its WID, media reference, and evidence untouched, but exclude it from current portable-delegation ambiguity. Continue to reject two or more non-Deleted rows sharing a WID; use the same helper for export and gateway rechecks.",
+      "files": [
+        "server/utils/db.ts",
+        "server/tests/provenancePlayerManifestExport.contract.test.ts"
+      ],
+      "score": 0,
+      "tags": [
+        "portable-witness",
+        "provenance-player",
+        "wid-ambiguity",
+        "deleted-history",
+        "canonical-identity",
+        "fail-closed",
+        "gateway-recheck",
+        "no-data-mutation",
+        "no-deployment"
+      ],
+      "id": "LESSON-078"
     }
   ]
 }

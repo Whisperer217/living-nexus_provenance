@@ -41,6 +41,15 @@ describe("Provenance Player copied-manifest boundary", () => {
     expect(manifestReaders).not.toContain("downloadPermission");
   });
 
+  it("ignores only Deleted historical WID rows when checking current manifest identity ambiguity", () => {
+    const db = read("server/utils/db.ts");
+    const helper = db.slice(db.indexOf("export async function hasAmbiguousProvenancePlayerWids"), db.indexOf("/** Get the collection a song belongs"));
+
+    expect(helper).toContain('inArray(songs.witnessId, normalized)');
+    expect(helper).toContain('ne(songs.status, "Deleted")');
+    expect(helper).toContain("return Array.from(counts.values()).some((count) => count > 1)");
+  });
+
   it("uses a rechecked Living Nexus gateway rather than copied raw storage media", () => {
     const manifest = read("server/domains/provenancePlayer/manifest.ts");
     const mediaRoute = read("server/routes/provenancePlayerMediaRoute.ts");
