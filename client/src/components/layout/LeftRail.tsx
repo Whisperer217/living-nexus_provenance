@@ -221,8 +221,23 @@ export default function LeftRail({
       {/* Divider */}
       <div className={`${isMobile ? "w-full" : "w-8"} h-px mb-2`} style={{ background: "var(--ln-border-subtle)" }} />
 
-      {/* Nav items */}
-      {RAIL_ITEMS.map(item => renderItem(item, isMobile))}
+      {/* Nav items — mobile preserves the same routes but gives the drawer
+          an intentional reading order instead of an undifferentiated rail. */}
+      {isMobile ? (
+        <>
+          <div className="w-full px-4 pt-1 pb-1" aria-hidden="true">
+            <span className="ln-overline" style={{ color: "var(--ln-gold-dim)" }}>Discover</span>
+          </div>
+          {RAIL_ITEMS.slice(0, 2).map(item => renderItem(item, true))}
+
+          <div className="w-full px-4 pt-4 pb-1" aria-hidden="true">
+            <span className="ln-overline" style={{ color: "var(--ln-gold-dim)" }}>Create &amp; manage</span>
+          </div>
+          {RAIL_ITEMS.slice(2).map(item => renderItem(item, true))}
+        </>
+      ) : (
+        RAIL_ITEMS.map(item => renderItem(item, false))
+      )}
 
       {/* Divider before companion tools */}
       <div className={`${isMobile ? "w-full" : "w-8"} h-px mt-2 mb-2`} style={{ background: "var(--ln-border-subtle)" }} />
@@ -258,6 +273,12 @@ export default function LeftRail({
             COMPOSE
           </span>
         </button>
+      )}
+
+      {isMobile && (
+        <div className="w-full px-4 pt-3 pb-1" aria-hidden="true">
+          <span className="ln-overline" style={{ color: "var(--ln-gold-dim)" }}>Community &amp; tools</span>
+        </div>
       )}
 
       {/* Witnessing Circle — the signed-in person's private relationship directory. */}
@@ -303,10 +324,10 @@ export default function LeftRail({
         title="Join Discord"
         aria-label="Join Living Nexus on Discord"
         onClick={e => { e.stopPropagation(); if (isMobile) onMobileClose?.(); }}
-        className="relative flex flex-col items-center justify-center gap-0.5 transition-all duration-150 rounded-xl no-underline"
+        className={`ln-dimensional-action relative flex items-center transition-all duration-150 rounded-xl no-underline ${isMobile ? "ln-mobile-nav-item flex-row justify-start gap-3 px-4" : "flex-col justify-center gap-0.5"}`}
         style={{
-          width: isMobile ? 72 : 60,
-          height: 56,
+          width: isMobile ? "100%" : 60,
+          height: isMobile ? 52 : 56,
           color: "var(--ln-gold)",
           background: "transparent",
           textDecoration: "none",
@@ -320,7 +341,7 @@ export default function LeftRail({
         }}
       >
         <DiscordGlyph size={15} />
-        <span style={{ fontSize: 8, fontWeight: 600, letterSpacing: "0.04em", lineHeight: 1, textAlign: "center" }}>
+        <span style={{ fontSize: isMobile ? 12 : 8, fontWeight: 600, letterSpacing: isMobile ? "0.08em" : "0.04em", lineHeight: 1, textAlign: "center" }}>
           DISCORD
         </span>
       </a>
@@ -419,7 +440,10 @@ export default function LeftRail({
           left: 0,
           bottom: "var(--bottom-stack)",
           width: "min(21rem, calc(100vw - 2.5rem))",
-          background: "var(--ln-surface-rail)",
+          // Mobile navigation must read as its own solid vessel. The backdrop
+          // preserves spatial context; page typography cannot compete beneath
+          // drawer routes.
+          background: "var(--ln-void)",
           borderRight: "1px solid var(--ln-panel-border)",
           boxShadow: "18px 0 48px color-mix(in srgb, var(--ln-void) 72%, transparent)",
           zIndex: Z.MOBILE_NAV_DRAWER,

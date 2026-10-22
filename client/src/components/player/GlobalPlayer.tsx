@@ -71,7 +71,7 @@ const CRYSTAL = "rgba(192,132,252,0.85)";
 
 /* ── Snap zone heights ──────────────────────────────────────────── */
 const SNAP = {
-  MINI: 74,       // drag handle (20) + progress (2) + control row (52)
+  MINI: 64,       // mobile drag handle (14) + progress (2) + control row (48)
   EXPANDED: 0,    // full height on mobile / centered modal on desktop
 } as const;
 // FLOAT zone removed — only MINI and EXPANDED are valid states.
@@ -1074,7 +1074,7 @@ function GlobalPlayerInner() {
       {/* ── DRAG HANDLE (mobile) / CLICK TOGGLE HEADER (desktop) ── */}
       <div
         className="flex items-center justify-center flex-shrink-0 cursor-grab active:cursor-grabbing"
-        style={{ height: "20px", paddingTop: "6px", position: "relative",
+        style={{ height: isDesktop ? "20px" : "14px", paddingTop: isDesktop ? "6px" : "2px", position: "relative",
           // touchAction:none here (on the drag handle only) enables the vertical
           // drag-to-expand gesture without blocking touch events on the rest of the player.
           touchAction: "none",
@@ -1126,7 +1126,7 @@ function GlobalPlayerInner() {
       <div
         className="flex items-center gap-3 flex-shrink-0 px-3"
         style={{
-          height: "52px",
+          height: isDesktop ? "52px" : "48px",
           /* The outer player reserves the safe area; this row remains a true control row. */
           paddingBottom: 0,
           opacity: isExpanded ? 0 : 1,

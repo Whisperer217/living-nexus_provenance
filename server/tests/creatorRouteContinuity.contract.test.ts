@@ -56,7 +56,7 @@ describe("creator route continuity contract", () => {
   it("keeps the hero synopsis while rendering an optional full plain-text biography on the canonical Creator Domain", () => {
     const page = read("client/src/pages/loop/LoopCreatorPage.tsx");
     const fullBiography = page.slice(
-      page.indexOf('const completeBiography = creator.bio?.trim() || "";'),
+      page.indexOf("const completeBiography = firstCreatorNarrative(creator.bio);"),
       page.indexOf("{/* Testimonies */}"),
     );
 

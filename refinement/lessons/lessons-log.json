@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-10-22T18:53:22.173Z",
-  "totalLessons": 81,
+  "lastUpdated": "2026-10-22T19:46:54.486Z",
+  "totalLessons": 82,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -2025,6 +2025,38 @@
         "no-deployment"
       ],
       "id": "LESSON-081"
+    },
+    {
+      "date": "2026-10-22",
+      "checkpointVersion": "pending",
+      "category": "architecture",
+      "problem": "The first mobile-shell stabilization established drawer lifecycle and player coordination, but real 360px inspection still showed Creator Domain art and typography bleeding through the mobile drawer because the shared rail surface token retained transparency. The same pass also exposed a literal unfinished creator prompt in public narrative fields and narrow layouts that needed stronger summary-fact containment.",
+      "solution": "Use one shared solid mobile drawer vessel over the existing capped backdrop, not a second navigation system or page-specific override. Retain the one LeftRail authority, MainLayout focus/Back/Escape lifecycle, and GlobalPlayer/PlayerContext ownership. Filter only known incomplete authoring prompts at render time, retain authored testimony, and render Who/What/When/Why as narrow-safe facts with wrapped actions. Validate a true 360px DevTools pass for zero horizontal overflow, drawer focus return, closed off-canvas state, and player coexistence before checkpointing.",
+      "files": [
+        "client/src/components/layout/LeftRail.tsx",
+        "client/src/components/player/GlobalPlayer.tsx",
+        "client/src/index.css",
+        "client/src/pages/loop/LoopCreatorPage.tsx",
+        "server/tests/mobileShellStabilization.contract.test.ts",
+        "server/tests/mobileCrossPageLayout.contract.test.ts",
+        "server/tests/mobileCreatorDomainAlignment.contract.test.ts",
+        "server/tests/creatorRouteContinuity.contract.test.ts"
+      ],
+      "score": 0,
+      "tags": [
+        "mobile-alignment",
+        "solid-drawer",
+        "CreatorDomain",
+        "GlobalPlayer",
+        "PlayerContext",
+        "narrow-viewport",
+        "focus-return",
+        "escape",
+        "android-back",
+        "no-data-change",
+        "no-deployment"
+      ],
+      "id": "LESSON-082"
     }
   ]
 }

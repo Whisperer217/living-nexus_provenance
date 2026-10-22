@@ -18,6 +18,13 @@ describe("mobile shell stabilization contract", () => {
     expect(rail).toContain('data-mobile-nav-primary={isMobile ? "true" : undefined}');
     expect(rail).toContain("MOBILE_NAV_DRAWER");
     expect(rail).toContain("MOBILE_NAV_BACKDROP");
+    expect(rail).toContain(">Discover</span>");
+    expect(rail).toContain(">Create &amp; manage</span>");
+    expect(rail).toContain(">Community &amp; tools</span>");
+    expect(rail).toContain('background: "var(--ln-void)"');
+    expect(rail).toContain("RAIL_ITEMS.slice(0, 2)");
+    expect(rail).toContain("RAIL_ITEMS.slice(2)");
+    expect(rail).toContain('width: isMobile ? "100%" : 60');
     expect(layers).toContain("MOBILE_NAV_BACKDROP: 9_100");
     expect(layers).toContain("MOBILE_NAV_DRAWER: 9_110");
   });

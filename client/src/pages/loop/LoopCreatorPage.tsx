@@ -34,6 +34,23 @@ import { LOOP_PRODUCT } from "@/lib/loopProduct";
 import { trpc } from "@/lib/trpc";
 import { LOOP_DEFAULT_DOMAIN_LAYOUT, LOOP_DOMAIN_ALLOWED_BLOCKS } from "@shared/domainTypes";
 
+const INCOMPLETE_CREATOR_TEXT = new Set([
+  "type some",
+  "type something",
+  "tell us about yourself",
+  "add your story",
+]);
+
+function isIncompleteCreatorText(value: unknown): boolean {
+  return typeof value === "string" && INCOMPLETE_CREATOR_TEXT.has(value.trim().toLowerCase());
+}
+
+function firstCreatorNarrative(...values: unknown[]): string {
+  return values.find((value): value is string =>
+    typeof value === "string" && value.trim().length > 0 && !isIncompleteCreatorText(value),
+  )?.trim() ?? "";
+}
+
 export default function LoopCreatorPage() {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
@@ -149,9 +166,9 @@ export default function LoopCreatorPage() {
   const isOwner = !!user && user.id === creator.id;
   const perspective = isOwner ? "creator" : "witness";
   const displayName = creator.artistHandle || creator.name || "Creator";
-  const bio = creator.bio || creator.originStatement || creator.tagline || "";
-  const completeBiography = creator.bio?.trim() || "";
-  const why = creator.originStatement || creator.creativeMission || creator.bio || "";
+  const bio = firstCreatorNarrative(creator.bio, creator.originStatement, creator.tagline);
+  const completeBiography = firstCreatorNarrative(creator.bio);
+  const why = firstCreatorNarrative(creator.originStatement, creator.creativeMission, creator.bio);
   const where = creator.location || "";
   const whenJoined = creator.createdAt
     ? new Date(creator.createdAt).toLocaleDateString(undefined, { year: "numeric", month: "short" })
@@ -305,7 +322,7 @@ export default function LoopCreatorPage() {
             </div>
             <div className="min-w-0 flex-1 pb-1">
               <h1
-                className="break-words text-4xl leading-[0.95] sm:text-6xl sm:truncate"
+                className="break-words text-3xl leading-[0.95] sm:text-6xl sm:truncate"
                 style={{
                   fontFamily: "'Cinzel', serif",
                   color: "var(--ln-parchment)",
@@ -334,17 +351,36 @@ export default function LoopCreatorPage() {
               : `${songs.length} registered work${songs.length === 1 ? "" : "s"} · ${witnessed} sealed with WID`}
           </p>
           <div
-            className="flex max-w-full flex-wrap gap-x-4 gap-y-1 mb-8 break-words text-[11px] uppercase tracking-[0.14em]"
-            style={{ color: "color-mix(in srgb, var(--ln-parchment) 45%, transparent)" }}
+            className="grid max-w-3xl grid-cols-1 gap-2 mb-8 min-[420px]:grid-cols-2 sm:flex sm:flex-wrap"
+            aria-label="Creator record summary"
           >
-            <span>Who · {displayName}</span>
-            <span>What · {what}</span>
-            {whenJoined && <span>When · {whenJoined}</span>}
-            {where && <span>Where · {where}</span>}
-            <span>Why · {why ? "Testified" : "Pending"}</span>
+            {[
+              { label: "Who", value: displayName },
+              { label: "What", value: what },
+              ...(whenJoined ? [{ label: "When", value: whenJoined }] : []),
+              ...(where ? [{ label: "Where", value: where }] : []),
+              { label: "Why", value: why ? "Testified" : "Pending" },
+            ].map((fact) => (
+              <div
+                key={fact.label}
+                data-creator-domain-fact={fact.label.toLowerCase()}
+                className="min-w-0 rounded-lg px-3 py-2 sm:flex-none"
+                style={{
+                  border: "1px solid color-mix(in srgb, var(--ln-gold) 16%, transparent)",
+                  background: "color-mix(in srgb, var(--ln-void) 64%, transparent)",
+                }}
+              >
+                <span className="block text-[9px] uppercase tracking-[0.16em]" style={{ color: "var(--ln-gold-dim)" }}>
+                  {fact.label}
+                </span>
+                <span className="block break-words text-xs leading-snug" style={{ color: "color-mix(in srgb, var(--ln-parchment) 74%, transparent)" }}>
+                  {fact.value}
+                </span>
+              </div>
+            ))}
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex max-w-full flex-wrap gap-2 sm:gap-3">
             <button
               type="button"
               onClick={playAll}

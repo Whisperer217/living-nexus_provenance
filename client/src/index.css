@@ -821,9 +821,9 @@
     --nav-total: var(--nav-safe);          /* = safe area only (no nav bar) */
     --ln-mobile-header-content-height: 56px;
     --ln-mobile-header-height: calc(var(--ln-mobile-header-content-height) + var(--ln-safe-top));
-    --ln-mini-handle-height: 20px;
+    --ln-mini-handle-height: 14px;
     --ln-mini-progress-height: 2px;
-    --ln-mini-row-height: 52px;
+    --ln-mini-row-height: 48px;
     --player-height: calc(var(--ln-mini-handle-height) + var(--ln-mini-progress-height) + var(--ln-mini-row-height));
     --player-safe: calc(var(--player-height) + var(--ln-safe-bottom));
     --bottom-stack: var(--player-safe);    /* total reserved bottom on mobile */
