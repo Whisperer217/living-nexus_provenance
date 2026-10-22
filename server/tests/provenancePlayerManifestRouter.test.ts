@@ -42,6 +42,10 @@ function context(userId = 42): TrpcContext {
   return { user, req: { headers: {}, cookies: {} } as any, res: { clearCookie: vi.fn(), cookie: vi.fn() } as any };
 }
 
+function guestContext(): TrpcContext {
+  return { user: null, req: { headers: {}, cookies: {} } as any, res: { clearCookie: vi.fn(), cookie: vi.fn() } as any };
+}
+
 function source(id: number, witnessId: string) {
   return {
     song: {
@@ -169,11 +173,11 @@ describe("Provenance Player export procedures", () => {
     expect(getProvenancePlayerAlbumTrackSources).not.toHaveBeenCalled();
   });
 
-  it("exports one eligible Work only for its current creator through the same gateway-only manifest adapter", async () => {
+  it("exports one eligible public Work to an anonymous visitor through the same gateway-only manifest adapter", async () => {
     const work = source(60001, "WID-MUS-PUSH-FORWARD");
     (getProvenancePlayerTrackSourceById as any).mockResolvedValue(work);
 
-    const result = await appRouter.createCaller(context()).songs.copyProvenancePlayerWorkManifest({ songId: 60001 });
+    const result = await appRouter.createCaller(guestContext()).songs.copyProvenancePlayerWorkManifest({ songId: 60001 });
 
     expect(result.tracks).toHaveLength(1);
     expect(result.tracks[0]).toMatchObject({
@@ -186,14 +190,29 @@ describe("Provenance Player export procedures", () => {
     expect(hasAmbiguousProvenancePlayerWids).toHaveBeenCalledWith(["WID-MUS-PUSH-FORWARD"]);
   });
 
-  it("does not disclose a non-owner Work manifest", async () => {
+  it("exports another creator's eligible public Work without relying on requester ownership", async () => {
     const work = source(60001, "WID-MUS-OTHER-CREATOR");
     work.song.userId = 99;
+    work.creator = { id: 99, artistHandle: "othercreator", name: "Other Creator" };
     (getProvenancePlayerTrackSourceById as any).mockResolvedValue(work);
 
-    await expect(appRouter.createCaller(context()).songs.copyProvenancePlayerWorkManifest({ songId: 60001 }))
+    const result = await appRouter.createCaller(context(17)).songs.copyProvenancePlayerWorkManifest({ songId: 60001 });
+
+    expect(result.tracks[0]).toMatchObject({
+      workId: "60001",
+      wid: "WID-MUS-OTHER-CREATOR",
+      creator: "@othercreator",
+    });
+    expect(hasAmbiguousProvenancePlayerWids).toHaveBeenCalledWith(["WID-MUS-OTHER-CREATOR"]);
+  });
+
+  it("does not disclose a private Work manifest to an anonymous visitor", async () => {
+    const work = source(60001, "WID-MUS-PRIVATE");
+    work.song.isPublic = false;
+    (getProvenancePlayerTrackSourceById as any).mockResolvedValue(work);
+
+    await expect(appRouter.createCaller(guestContext()).songs.copyProvenancePlayerWorkManifest({ songId: 60001 }))
       .rejects.toMatchObject({ code: "NOT_FOUND", message: "Manifest unavailable" });
-    expect(hasAmbiguousProvenancePlayerWids).not.toHaveBeenCalled();
   });
 
   it("rejects an individual Work whose canonical WID is ambiguous", async () => {

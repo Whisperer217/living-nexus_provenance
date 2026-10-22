@@ -2029,12 +2029,12 @@ ${workType === "manuscript" || workType === "comic" ? "Category" : "Genre"}: ${i
           throw error;
         }
       }),
-    /** Owner-authorized portable projection for one current Work. */
-    copyProvenancePlayerWorkManifest: protectedProcedure
+    /** Public portable projection for one currently eligible Work. */
+    copyProvenancePlayerWorkManifest: publicProcedure
       .input(z.object({ songId: z.number().int().positive() }))
-      .query(async ({ ctx, input }) => {
+      .query(async ({ input }) => {
         const source = await getProvenancePlayerTrackSourceById(input.songId);
-        if (!source?.song || !source.creator || source.song.userId !== ctx.user.id) {
+        if (!source?.song || !source.creator) {
           throw new TRPCError({ code: "NOT_FOUND", message: "Manifest unavailable" });
         }
 

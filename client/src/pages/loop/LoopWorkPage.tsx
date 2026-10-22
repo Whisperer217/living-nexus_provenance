@@ -278,8 +278,8 @@ export default function LoopWorkPage() {
 
   /**
    * This is a portable projection of the canonical Work, not another registry
-   * record or a second playback path. The protected procedure remains the
-   * authority for ownership and current companion-player eligibility.
+   * record or a second playback path. The public procedure remains the
+   * authority for current companion-player eligibility.
    */
   const exportProvenancePlayerManifest = async (action: "copy" | "download") => {
     if (!song) return;
@@ -617,7 +617,7 @@ export default function LoopWorkPage() {
                 <Link href={`/verify/${wid}`} className="text-xs underline" style={{ color: "color-mix(in srgb, var(--ln-parchment) 60%, transparent)" }}>
                   Verify
                 </Link>
-                {isOwner && wid && (
+                {wid && (
                   <div className="flex flex-wrap items-center gap-2" aria-label="Portable Witness manifest">
                     <span
                       className="text-[10px] font-semibold uppercase tracking-[0.16em]"
@@ -647,7 +647,7 @@ export default function LoopWorkPage() {
                     </button>
                   </div>
                 )}
-                {isOwner && wid && (
+                {wid && (
                   <p className="w-full text-[11px] leading-relaxed" style={{ color: "var(--ln-smoke)" }}>
                     Portable Witness Record · Provenance Player → Add → LN manifest → Paste.
                   </p>

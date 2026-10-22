@@ -2,7 +2,7 @@
 
 **Date:** 2026-10-20  
 **Status:** Implemented and validated in development — not published  
-**Scope:** Owner-authorized individual Works (`/song/:id`), named playlists (`/playlists`), and canonical WID albums (`/album/:collectionWid`).
+**Scope:** Public-eligible individual Works (`/song/:id`), owner-authorized named playlists (`/playlists`), and owner-authorized canonical WID albums (`/album/:collectionWid`).
 
 ## Context
 
@@ -10,13 +10,13 @@ The Provenance Player accepts pasted `living-nexus-player/1` JSON but has no sec
 
 ## Decision
 
-Living Nexus provides three protected, read-only tRPC projections:
+Living Nexus provides three read-only tRPC projections:
 
-- `songs.copyProvenancePlayerWorkManifest({ songId })` for the current Work owner.
+- `songs.copyProvenancePlayerWorkManifest({ songId })` for any visitor of an eligible public Work.
 - `playlists.copyProvenancePlayerManifest({ id })` for the named-playlist owner.
 - `songs.copyProvenancePlayerAlbumManifest({ collectionWid })` for the public canonical-album creator.
 
-The owner receives **Copy manifest** and **Download JSON** controls. A clipboard failure downloads the same JSON locally. These handlers never open the companion tab, call `PlayerContext`, alter the current queue, or write registry data.
+Any visitor receives **Copy manifest** and **Download JSON** controls on an eligible public Work. Named-playlist and canonical-album controls remain owner-only. A clipboard failure downloads the same JSON locally. These handlers never open the companion tab, call `PlayerContext`, alter the current queue, or write registry data.
 
 The individual-Work path was added after a direct external-player validation confirmed that the deployed companion accepts the same adapter payload and can play through the Living Nexus gateway. It does not add automatic handoff: the creator still intentionally copies or downloads JSON and imports it in **Provenance Player → Add → LN manifest**.
 
@@ -53,4 +53,4 @@ The copied JSON never contains raw `fileUrl`, signed URLs, tokens, cookies, or a
 
 A read-only scan of four saved playlists and the first fifty collections found no immediately exportable list under the now-superseded per-Work consent boundary. Across 483 inspected memberships, the dominant blockers were external-display disabled, rights unconfirmed, and missing authorization (465 each), alongside deleted, private, non-audio, and unsafe-media entries. The approved creator-community product policy removes that initial per-Work gate.
 
-A real owner acceptance test now needs only a public, published audio list with valid WIDs, clean media references, and no individual companion-player withdrawals. It remains required before publication, together with a checked individual-withdrawal gateway denial.
+A public visitor acceptance test now needs only a public, published audio Work with a valid WID, clean media reference, and no individual companion-player withdrawal. It remains required before publication, together with a checked individual-withdrawal gateway denial.

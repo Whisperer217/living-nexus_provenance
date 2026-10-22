@@ -6,7 +6,7 @@ const root = path.resolve(import.meta.dirname, "../..");
 const read = (relativePath: string) => fs.readFileSync(path.join(root, relativePath), "utf8");
 
 describe("Provenance Player copied-manifest boundary", () => {
-  it("keeps Work, playlist, and album export procedures owner-authorized, ordered where applicable, and fail-closed", () => {
+  it("keeps individual Work export public-eligible while playlist and album exports remain owner-authorized, ordered where applicable, and fail-closed", () => {
     const playlistRouter = read("server/routers/playlists.ts");
     const songsRouter = read("server/routers/songs.ts");
     const db = read("server/utils/db.ts");
@@ -22,9 +22,9 @@ describe("Provenance Player copied-manifest boundary", () => {
     expect(songsRouter).toContain('collection.visibility !== "public"');
     expect(songsRouter).toContain("getProvenancePlayerAlbumTrackSources");
     expect(songsRouter).toContain("hasAmbiguousProvenancePlayerWids");
-    expect(songsRouter).toContain("copyProvenancePlayerWorkManifest: protectedProcedure");
+    expect(songsRouter).toContain("copyProvenancePlayerWorkManifest: publicProcedure");
     expect(songsRouter).toContain("getProvenancePlayerTrackSourceById(input.songId)");
-    expect(songsRouter).toContain("source.song.userId !== ctx.user.id");
+    expect(songsRouter).not.toContain("source.song.userId !== ctx.user.id");
 
     expect(db).toContain("orderBy(asc(playlistTracks.position)");
     expect(db).toContain("orderBy(asc(songs.trackOrder)");
@@ -72,7 +72,7 @@ describe("Provenance Player copied-manifest boundary", () => {
     expect(server).toContain("app.use(provenancePlayerMediaRouter)");
   });
 
-  it("wires only owner surfaces to copy or download JSON and never calls playback from those handlers", () => {
+  it("wires owner collection surfaces and the public canonical Work surface to copy or download JSON without calling playback", () => {
     const playlists = read("client/src/pages/PlaylistsPage.tsx");
     const album = read("client/src/pages/AlbumDetailPage.tsx");
     const work = read("client/src/pages/loop/LoopWorkPage.tsx");
@@ -88,7 +88,8 @@ describe("Provenance Player copied-manifest boundary", () => {
     expect(playlists).toContain("utils.playlists.copyProvenancePlayerManifest.fetch");
     expect(album).toContain("utils.songs.copyProvenancePlayerAlbumManifest.fetch");
     expect(work).toContain("utils.songs.copyProvenancePlayerWorkManifest.fetch");
-    expect(work).toContain("{isOwner && wid && (");
+    expect(work).toContain("{wid && (");
+    expect(work).not.toContain("{isOwner && wid && (");
     expect(work).toContain("Portable Witness Record");
     expect(legacyWork).not.toContain("copyProvenancePlayerWorkManifest");
     expect(playlists).not.toMatch(/exportProvenancePlayerManifest[\s\S]{0,1200}playQueueAt\(/);

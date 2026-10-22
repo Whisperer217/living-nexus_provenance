@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-10-22T15:18:21.300Z",
-  "totalLessons": 78,
+  "lastUpdated": "2026-10-22T16:15:49.851Z",
+  "totalLessons": 79,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -1945,6 +1945,32 @@
         "no-deployment"
       ],
       "id": "LESSON-078"
+    },
+    {
+      "date": "2026-10-22",
+      "category": "architecture",
+      "problem": "The individual Work Portable Witness exporter was limited to the Work owner even though the creator community approved eligible public Work portability as a discoverable companion-player experience. This hid the canonical action from listeners and blocked cross-creator manifest access unnecessarily.",
+      "solution": "Make only the individual Work living-nexus-player/1 projection public. The canonical Work surface shows the existing Copy/Download controls to visitors with a WID, while a public server procedure still enforces published public audio, unflagged status, valid Creator attribution, clean HTTPS media, current non-ambiguous WID, and no companion withdrawal. Keep playlists and albums owner-controlled, preserve gateway-only audio with rechecks/no-store, and never touch PlayerContext or queues.",
+      "files": [
+        "server/routers/songs.ts",
+        "client/src/pages/loop/LoopWorkPage.tsx",
+        "server/tests/provenancePlayerManifestRouter.test.ts",
+        "server/tests/provenancePlayerManifestExport.contract.test.ts",
+        "docs/lnls/adr/PROVENANCE-PLAYER-MANIFEST-COPY-2026-10-20.md"
+      ],
+      "score": 0,
+      "tags": [
+        "portable-witness",
+        "provenance-player",
+        "public-eligible-work",
+        "cross-creator",
+        "gateway-only-media",
+        "revocable-access",
+        "playlist-owner-control",
+        "no-player-reset",
+        "no-deployment"
+      ],
+      "id": "LESSON-079"
     }
   ]
 }
