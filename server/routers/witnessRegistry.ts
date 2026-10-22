@@ -195,10 +195,11 @@ export const witnessRegistryRouter = router({
         type: z.enum(["all", "full_works", "lyrics"]).default("all"),
         cursor: z.number().int().nonnegative().default(0),
         limit: z.number().int().min(1).max(100).default(50),
+        query: z.string().trim().max(120).optional(),
       }))
       .query(async ({ input }) => {
-        const { type, cursor, limit } = input;
-        const rows = await getWitnessRegistry({ type, offset: cursor, limit: limit + 1 });
+        const { type, cursor, limit, query } = input;
+        const rows = await getWitnessRegistry({ type, offset: cursor, limit: limit + 1, query });
         const hasMore = rows.length > limit;
         return {
           items: hasMore ? rows.slice(0, limit) : rows,
@@ -206,5 +207,4 @@ export const witnessRegistryRouter = router({
         };
       }),
   });
-
 

@@ -3,11 +3,22 @@ import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Music, FileText, Video, Image, ChevronDown, ExternalLink, ShieldCheck } from "lucide-react";
+import { Music, FileText, Video, Image, ChevronDown, ExternalLink, Search, ShieldCheck, X } from "lucide-react";
 
 type RegistryType = "all" | "full_works" | "lyrics";
 
 const LIMIT = 50;
+
+function useDebouncedValue<T>(value: T, delayMs: number): T {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => setDebouncedValue(value), delayMs);
+    return () => window.clearTimeout(timeoutId);
+  }, [delayMs, value]);
+
+  return debouncedValue;
+}
 
 function AssetBadges({
   hasAudio,
@@ -124,11 +135,24 @@ export default function WitnessRegistryPage() {
   const [cursor, setCursor] = useState(0);
   const [allItems, setAllItems] = useState<any[]>([]);
   const [hasMore, setHasMore] = useState(true);
+  const [search, setSearch] = useState("");
+  const trimmedSearch = search.trim();
+  const debouncedSearch = useDebouncedValue(trimmedSearch, 300);
+  const activeSearch = trimmedSearch ? debouncedSearch : "";
+  const searchIsUpdating = trimmedSearch !== debouncedSearch;
 
   const { data, isLoading, isFetching } = trpc.witnessRegistry.list.useQuery(
-    { type: activeTab, cursor, limit: LIMIT },
+    { type: activeTab, cursor, limit: LIMIT, query: activeSearch || undefined },
     { staleTime: 30_000 }
   );
+
+  // A new type or search begins its own cursor sequence. The Registry still
+  // requests only one bounded page at a time rather than materializing all WIDs.
+  useEffect(() => {
+    setCursor(0);
+    setAllItems([]);
+    setHasMore(true);
+  }, [activeSearch, activeTab]);
 
   // Accumulate pages when cursor advances
   useEffect(() => {
@@ -170,6 +194,43 @@ export default function WitnessRegistryPage() {
             A public ledger of every Witness ID issued on Living Nexus. Each entry is a
             cryptographic timestamp linking a creative work to its creator. Click any WID
             to verify provenance.
+          </p>
+        </div>
+      </div>
+
+      {/* Search — one public ledger path for Creator, Work, and WID discovery */}
+      <div className="border-b border-zinc-800 px-4 sm:px-6">
+        <div className="max-w-4xl mx-auto py-4">
+          <label htmlFor="witness-registry-search" className="block text-[11px] font-medium uppercase tracking-[0.14em] text-amber-400/80 mb-2">
+            Find in the Registry
+          </label>
+          <div className="relative max-w-2xl">
+            <Search aria-hidden="true" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 pointer-events-none" />
+            <input
+              id="witness-registry-search"
+              type="search"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Search Creator, @handle, Work title, or WID…"
+              aria-describedby="witness-registry-search-help"
+              className="w-full min-w-0 rounded-xl border border-zinc-700 bg-zinc-950 py-2.5 pl-10 pr-10 text-sm text-zinc-100 placeholder:text-zinc-600 transition-colors focus:border-amber-400/70 focus:outline-none"
+            />
+            {search && (
+              <button
+                type="button"
+                onClick={() => setSearch("")}
+                className="absolute right-2 top-1/2 inline-flex -translate-y-1/2 items-center justify-center rounded-md p-1.5 text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-zinc-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-400"
+                aria-label="Clear Registry search"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+          <p id="witness-registry-search-help" className="mt-2 text-xs text-zinc-500">
+            Search published Registry records by Creator name, handle, Work title, or Witness ID.
+          </p>
+          <p className="sr-only" aria-live="polite">
+            {searchIsUpdating ? "Updating Registry search" : isFetching ? "Searching the Registry" : ""}
           </p>
         </div>
       </div>
@@ -227,9 +288,11 @@ export default function WitnessRegistryPage() {
         ) : displayItems.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 text-center">
             <ShieldCheck className="w-12 h-12 text-zinc-700 mb-4" />
-            <p className="text-zinc-500 text-sm">No witnessed works in this category yet.</p>
+            <p className="text-zinc-500 text-sm">
+              {activeSearch ? "No published Registry records match this search." : "No witnessed works in this category yet."}
+            </p>
             <p className="text-zinc-600 text-xs mt-1">
-              Upload and witness a track to appear in the registry.
+              {activeSearch ? "Try a Creator name, @handle, Work title, or Witness ID." : "Upload and witness a track to appear in the registry."}
             </p>
           </div>
         ) : (
@@ -256,7 +319,7 @@ export default function WitnessRegistryPage() {
 
             {!hasMore && displayItems.length > 0 && (
               <div className="text-center py-6 text-xs text-zinc-600">
-                {displayItems.length} records — end of registry
+                {displayItems.length} {activeSearch ? "matching record" : "record"}{displayItems.length === 1 ? "" : "s"} — end of registry
               </div>
             )}
           </>

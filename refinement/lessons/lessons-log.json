@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-10-22T16:15:49.851Z",
-  "totalLessons": 79,
+  "lastUpdated": "2026-10-22T17:07:49.430Z",
+  "totalLessons": 80,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -1971,6 +1971,30 @@
         "no-deployment"
       ],
       "id": "LESSON-079"
+    },
+    {
+      "date": "2026-10-22",
+      "category": "creator_experience",
+      "problem": "The public Witness Registry exposed only a newest-first 50-record page. Creators, Works, and WIDs outside that initial page were not directly findable, encouraging duplicate discovery surfaces or browser-only filtering that could not reach the full ledger.",
+      "solution": "Extend the existing public cursor-paginated Witness Registry procedure with a bounded optional query. Search the existing published WID projection by Work title, Witness ID, Creator name, and Creator handle (accepting a display-style @ prefix), reset pagination on a new query, debounce the responsive input, and retain the same canonical /song, /creator, and /verify links. No separate ledger, manifest store, schema, registry record, or playback authority is introduced.",
+      "files": [
+        "client/src/pages/WitnessRegistryPage.tsx",
+        "server/routers/witnessRegistry.ts",
+        "server/utils/db.ts",
+        "server/tests/witnessRegistrySearch.contract.test.ts"
+      ],
+      "score": 0,
+      "tags": [
+        "witness-registry",
+        "public-ledger",
+        "creator-discovery",
+        "wid-search",
+        "server-pagination",
+        "debounce",
+        "no-new-authority",
+        "no-deployment"
+      ],
+      "id": "LESSON-080"
     }
   ]
 }

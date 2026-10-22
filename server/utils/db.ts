@@ -2451,10 +2451,12 @@ export async function getWitnessRegistry({
   type,
   offset,
   limit,
+  query,
 }: {
   type: "all" | "full_works" | "lyrics";
   offset: number;
   limit: number;
+  query?: string;
 }) {
   const db = await getDb();
   if (!db) return [];
@@ -2468,9 +2470,23 @@ export async function getWitnessRegistry({
       : type === "lyrics"
       ? sql`${songs.isLyricsOnly} = 1 OR (${songs.lyricsText} IS NOT NULL AND ${songs.fileUrl} IS NULL)`
       : undefined;
-  const whereClause = typeCondition
-    ? and(...baseConditions, typeCondition)
-    : and(...baseConditions);
+  // Creators commonly type their public handle with an @ prefix. The stored
+  // handle omits it, so normalize it only for matching—not for display.
+  const searchNeedle = (query ?? "").trim().replace(/^@+/, "");
+  const searchPattern = `%${searchNeedle.replace(/[\\%_]/g, "\\$&")}%`;
+  const searchCondition = searchNeedle
+    ? or(
+        like(songs.title, searchPattern),
+        like(songs.witnessId, searchPattern),
+        like(users.name, searchPattern),
+        like(users.artistHandle, searchPattern),
+      )
+    : undefined;
+  const whereClause = and(
+    ...baseConditions,
+    ...(typeCondition ? [typeCondition] : []),
+    ...(searchCondition ? [searchCondition] : []),
+  );
   const rows = await db
     .select({
       id: songs.id,
