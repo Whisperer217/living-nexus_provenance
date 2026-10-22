@@ -66,7 +66,8 @@ describe("Provenance Player copied-manifest boundary", () => {
   it("wires only owner surfaces to copy or download JSON and never calls playback from those handlers", () => {
     const playlists = read("client/src/pages/PlaylistsPage.tsx");
     const album = read("client/src/pages/AlbumDetailPage.tsx");
-    const work = read("client/src/pages/SongDetailPage.tsx");
+    const work = read("client/src/pages/loop/LoopWorkPage.tsx");
+    const legacyWork = read("client/src/pages/SongDetailPage.tsx");
 
     for (const source of [playlists, album, work]) {
       expect(source).toContain("copyProvenancePlayerManifest");
@@ -78,7 +79,9 @@ describe("Provenance Player copied-manifest boundary", () => {
     expect(playlists).toContain("utils.playlists.copyProvenancePlayerManifest.fetch");
     expect(album).toContain("utils.songs.copyProvenancePlayerAlbumManifest.fetch");
     expect(work).toContain("utils.songs.copyProvenancePlayerWorkManifest.fetch");
-    expect(work).toContain("{isOwner && (");
+    expect(work).toContain("{isOwner && wid && (");
+    expect(work).toContain("Portable Witness Record");
+    expect(legacyWork).not.toContain("copyProvenancePlayerWorkManifest");
     expect(playlists).not.toMatch(/exportProvenancePlayerManifest[\s\S]{0,1200}playQueueAt\(/);
     expect(album).not.toMatch(/exportProvenancePlayerManifest[\s\S]{0,1200}playQueueAt\(/);
     expect(work).not.toMatch(/exportProvenancePlayerManifest[\s\S]{0,1200}playQueueAt\(/);

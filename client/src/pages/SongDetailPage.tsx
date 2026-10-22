@@ -59,10 +59,6 @@ import { IdentityColumn } from "@/components/IdentityColumn";
 import { ExperienceColumn } from "@/components/ExperienceColumn";
 import { EvidenceColumn } from "@/components/EvidenceColumn";
 import { LivingContextRail } from "@/components/LivingContextRail";
-import {
-  copyProvenancePlayerManifest,
-  downloadProvenancePlayerManifest,
-} from "@/lib/provenancePlayerManifest";
 
 // Slug keys stored in DB (safe ASCII, no charset issues); emoji shown in UI
 const REACTION_SLUGS = ["fire", "love", "wow", "clap", "thumbsup", "thumbsdown", "mindblown", "+"];
@@ -146,7 +142,6 @@ export default function SongDetailPage() {
   });
   const [shareOpen, setShareOpen] = useState(false);
   const [versionHistoryOpen, setVersionHistoryOpen] = useState(false);
-  const [manifestAction, setManifestAction] = useState<"copy" | "download" | null>(null);
   const { openEditor } = useWorkEditorActions();
   // Derive play state from global player — this page is a remote control only
   const isThisTrackActive = currentTrackId === String(songId);
@@ -405,34 +400,6 @@ export default function SongDetailPage() {
     navigator.clipboard.writeText(shareUrl);
     toast.success("Link copied!");
     setShareOpen(false);
-  };
-
-  const exportProvenancePlayerManifest = async (action: "copy" | "download") => {
-    if (!song) return;
-    setManifestAction(action);
-    try {
-      const manifest = await utils.songs.copyProvenancePlayerWorkManifest.fetch({ songId: song.id });
-
-      if (action === "download") {
-        downloadProvenancePlayerManifest(manifest, song.title);
-        toast.success("Manifest downloaded", { description: "Import this JSON in Provenance Player: Add → LN manifest." });
-        return;
-      }
-
-      const copied = await copyProvenancePlayerManifest(manifest);
-      if (copied) {
-        toast.success("Manifest copied", { description: "In Provenance Player, choose Add → LN manifest → Paste → Import." });
-      } else {
-        downloadProvenancePlayerManifest(manifest, song.title);
-        toast.success("Clipboard unavailable — manifest downloaded", { description: "Import the JSON file in Provenance Player." });
-      }
-    } catch {
-      toast.error("Manifest unavailable", {
-        description: "This Work must be published public audio with a current WID and no companion-player withdrawal.",
-      });
-    } finally {
-      setManifestAction(null);
-    }
   };
 
   // Never show skeleton indefinitely — if the query errored or songId is invalid, fall through to not-found.
@@ -1213,30 +1180,6 @@ export default function SongDetailPage() {
               )}
               {!isOwner && (
                 <FlagContentButton workId={song.id} workType="audio" workTitle={song.title} size="sm" className="px-2 py-1 rounded border border-zinc-800 hover:border-red-800/60" />
-              )}
-              {isOwner && (
-                <>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => void exportProvenancePlayerManifest("copy")}
-                    disabled={manifestAction !== null}
-                    className="gap-1.5 transition-all hover:scale-105 active:scale-95"
-                    style={{ borderColor: "rgba(196,154,40,0.35)", color: "var(--ln-gold)", background: "rgba(196,154,40,0.04)" }}
-                  >
-                    <Copy className="w-3.5 h-3.5" />{manifestAction === "copy" ? "Copying…" : "Copy manifest"}
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => void exportProvenancePlayerManifest("download")}
-                    disabled={manifestAction !== null}
-                    className="gap-1.5 transition-all hover:scale-105 active:scale-95"
-                    style={{ borderColor: "rgba(196,154,40,0.25)", color: "var(--ln-bone)", background: "rgba(255,255,255,0.02)" }}
-                  >
-                    <Download className="w-3.5 h-3.5" />{manifestAction === "download" ? "Preparing…" : "Download manifest"}
-                  </Button>
-                </>
               )}
               {isOwner && (
                 <Button

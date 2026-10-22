@@ -35,6 +35,10 @@ import { getLoginUrl } from "@/const";
 import { parseWorkGenres } from "@shared/workMetadata";
 import { WorkProvenanceHistory } from "@/components/WorkProvenanceHistory";
 import { WorkVoices } from "@/components/WorkVoices";
+import {
+  copyProvenancePlayerManifest,
+  downloadProvenancePlayerManifest,
+} from "@/lib/provenancePlayerManifest";
 
 function formatParticipation(axis: "Music" | "Lyrics" | "Voice", value: string | null | undefined) {
   if (value === "None") return `No ${axis.toLowerCase()} declared`;
@@ -49,6 +53,8 @@ export default function LoopWorkPage() {
   const { openEditor } = useWorkEditorActions();
   const [supportOpen, setSupportOpen] = useState(false);
   const [showLyrics, setShowLyrics] = useState(false);
+  const [manifestAction, setManifestAction] = useState<"copy" | "download" | null>(null);
+  const utils = trpc.useUtils();
 
   const { data: songData, isLoading, isError } = trpc.songs.getById.useQuery(
     { id: songId },
@@ -267,6 +273,46 @@ export default function LoopWorkPage() {
       }
     } catch {
       /* user cancelled */
+    }
+  };
+
+  /**
+   * This is a portable projection of the canonical Work, not another registry
+   * record or a second playback path. The protected procedure remains the
+   * authority for ownership and current companion-player eligibility.
+   */
+  const exportProvenancePlayerManifest = async (action: "copy" | "download") => {
+    if (!song) return;
+
+    setManifestAction(action);
+    try {
+      const manifest = await utils.songs.copyProvenancePlayerWorkManifest.fetch({ songId: song.id });
+
+      if (action === "download") {
+        downloadProvenancePlayerManifest(manifest, song.title);
+        toast.success("Manifest downloaded", {
+          description: "Import this JSON in Provenance Player: Add → LN manifest.",
+        });
+        return;
+      }
+
+      const copied = await copyProvenancePlayerManifest(manifest);
+      if (copied) {
+        toast.success("Manifest copied", {
+          description: "In Provenance Player, choose Add → LN manifest → Paste → Import.",
+        });
+      } else {
+        downloadProvenancePlayerManifest(manifest, song.title);
+        toast.success("Clipboard unavailable — manifest downloaded", {
+          description: "Import the JSON file in Provenance Player.",
+        });
+      }
+    } catch {
+      toast.error("Manifest unavailable", {
+        description: "This Work must be published public audio with a current WID and no companion-player withdrawal.",
+      });
+    } finally {
+      setManifestAction(null);
     }
   };
 
@@ -571,6 +617,41 @@ export default function LoopWorkPage() {
                 <Link href={`/verify/${wid}`} className="text-xs underline" style={{ color: "color-mix(in srgb, var(--ln-parchment) 60%, transparent)" }}>
                   Verify
                 </Link>
+                {isOwner && wid && (
+                  <div className="flex flex-wrap items-center gap-2" aria-label="Portable Witness manifest">
+                    <span
+                      className="text-[10px] font-semibold uppercase tracking-[0.16em]"
+                      style={{ color: "var(--ln-gold-dim, var(--ln-gold))", fontFamily: "'Cinzel', serif" }}
+                    >
+                      Manifest
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => void exportProvenancePlayerManifest("copy")}
+                      disabled={manifestAction !== null}
+                      className="inline-flex min-h-9 items-center gap-1.5 rounded-lg border px-2.5 text-xs transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2"
+                      style={{ borderColor: "rgba(196,154,40,0.34)", color: "var(--ln-gold)", background: "rgba(196,154,40,0.06)" }}
+                    >
+                      {manifestAction === "copy" ? <Loader2 size={13} className="animate-spin" /> : <Copy size={13} />}
+                      {manifestAction === "copy" ? "Copying…" : "Copy manifest"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => void exportProvenancePlayerManifest("download")}
+                      disabled={manifestAction !== null}
+                      className="inline-flex min-h-9 items-center gap-1.5 rounded-lg border px-2.5 text-xs transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2"
+                      style={{ borderColor: "rgba(196,154,40,0.25)", color: "var(--ln-bone)", background: "rgba(255,255,255,0.02)" }}
+                    >
+                      {manifestAction === "download" ? <Loader2 size={13} className="animate-spin" /> : <Download size={13} />}
+                      {manifestAction === "download" ? "Preparing…" : "Download .json"}
+                    </button>
+                  </div>
+                )}
+                {isOwner && wid && (
+                  <p className="w-full text-[11px] leading-relaxed" style={{ color: "var(--ln-smoke)" }}>
+                    Portable Witness Record · Provenance Player → Add → LN manifest → Paste.
+                  </p>
+                )}
               </div>
             ) : (
               <p className="mb-6 text-sm font-body" style={{ color: "color-mix(in srgb, var(--ln-parchment) 50%, transparent)" }}>
