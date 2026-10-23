@@ -4,7 +4,7 @@ set -euo pipefail
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 project="$root/LivingNexus.Jellyfin/LivingNexus.Jellyfin.csproj"
 output="$root/repository/artifacts"
-version="${1:-0.1.0}"
+version="${1:-0.1.0.0}"
 assembly="$root/LivingNexus.Jellyfin/bin/Release/net10.0/LivingNexus.Jellyfin.dll"
 package="$output/living-nexus_${version}.zip"
 

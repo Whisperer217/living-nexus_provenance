@@ -1,0 +1,20 @@
+[
+  {
+    "guid": "4bb75dc8-b3db-4bd7-8db3-4e16d378d84e",
+    "name": "Living Nexus",
+    "description": "Read-only Living Nexus Portable Witness discovery channel. Living Nexus remains the authority for WIDs, creator attribution, publication, revocation, and media authorization.",
+    "overview": "Discover eligible public Living Nexus Works through the Portable Witness gateway.",
+    "owner": "BDDT Publishing LLC",
+    "category": "Music",
+    "versions": [
+      {
+        "version": "0.1.0.0",
+        "changelog": "Release candidate: read-only Portable Witness discovery through the revocable Living Nexus media gateway.",
+        "targetAbi": "12.2.0.0",
+        "sourceUrl": "https://github.com/Whisperer217/living-nexus_provenance/releases/download/jellyfin-v0.1.0.0/living-nexus_0.1.0.0.zip",
+        "checksum": "49bf0232e21b6fbfcd5155754a88939e",
+        "timestamp": "2026-10-23T05:22:00Z"
+      }
+    ]
+  }
+]
