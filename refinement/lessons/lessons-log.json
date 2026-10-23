@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-10-23T05:03:47.319Z",
-  "totalLessons": 83,
+  "lastUpdated": "2026-10-23T15:12:46.994Z",
+  "totalLessons": 84,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -2089,6 +2089,35 @@
         "repository-manifest-hold"
       ],
       "id": "LESSON-083"
+    },
+    {
+      "date": "2026-10-23",
+      "checkpointVersion": "c6c6bd80",
+      "category": "architecture",
+      "problem": "The Jellyfin 12.2 channel correctly preserved the revocable Living Nexus gateway but returned remote MediaSourceInfo without a declared container or Audio stream. Jellyfin Web therefore could not select an audio stream and failed before fetching the gateway. The catalog has no authoritative format field and includes at least one WAV object, so fixed MP3 metadata would have fabricated a media claim.",
+      "solution": "Keep the gateway as the sole playback path. For each channel candidate, make a bounded 16-byte HTTPS range request with concurrency capped at eight; accept a direct MPEG frame or an ID3v2 header only when the transiently resolved object path ends in .mp3. Discard response bytes and resolved URLs, emit complete MP3/Audio MediaSourceInfo only for verified sources, and omit non-MP3 candidates. Validate a fresh Jellyfin 12.2 host through catalog discovery, gateway-only PlaybackInfo, browser playback, pause/resume/seek, and fail-closed media regression tests.",
+      "files": [
+        "integrations/jellyfin/LivingNexus.Jellyfin/Channel/LivingNexusChannel.cs",
+        "integrations/jellyfin/LivingNexus.Jellyfin.Tests/LivingNexusChannelTests.cs",
+        "integrations/jellyfin/LivingNexus.Jellyfin/LivingNexus.Jellyfin.csproj",
+        "integrations/jellyfin/build.yaml",
+        "docs/lnls/adr/JELLYFIN-REMOTE-MP3-PLAYBACK-COMPATIBILITY-2026-10-23.md"
+      ],
+      "score": 0,
+      "tags": [
+        "jellyfin",
+        "remote-media",
+        "mp3",
+        "gateway-only-media",
+        "revocable-access",
+        "media-source-info",
+        "audio-stream",
+        "bounded-range-probe",
+        "no-raw-storage-url",
+        "private-candidate",
+        "no-deployment"
+      ],
+      "id": "LESSON-084"
     }
   ]
 }

@@ -8,6 +8,14 @@
     "category": "Music",
     "versions": [
       {
+        "version": "0.1.1.0",
+        "changelog": "Compatibility patch: declares verified remote MP3 sources with a default Audio stream while retaining Living Nexus gateway-only, revocable playback.",
+        "targetAbi": "12.2.0.0",
+        "sourceUrl": "https://github.com/Whisperer217/living-nexus_provenance/releases/download/jellyfin-v0.1.1.0/living-nexus_0.1.1.0.zip",
+        "checksum": "caa134e55b2f23c13155145174ef5b9a",
+        "timestamp": "2026-10-23T15:35:59Z"
+      },
+      {
         "version": "0.1.0.0",
         "changelog": "Release candidate: read-only Portable Witness discovery through the revocable Living Nexus media gateway.",
         "targetAbi": "12.2.0.0",
