@@ -21,8 +21,20 @@
  */
 
 import { Router, Request, Response, NextFunction } from "express";
-import { getPublicSongs, getSongWithCreator, getUserById, getDb } from "../utils/db";
+import {
+  getAmbiguousProvenancePlayerWids,
+  getDb,
+  getProvenancePlayerCatalogCandidates,
+  getPublicSongs,
+  getSongWithCreator,
+  getUserById,
+} from "../utils/db";
 import { buildRokuHome } from "../services/rokuCatalog";
+import {
+  buildProvenancePlayerCatalogPage,
+  MAX_PROVENANCE_PLAYER_CATALOG_PAGE_SIZE,
+  MAX_PROVENANCE_PLAYER_CATALOG_SCAN_SIZE,
+} from "../domains/provenancePlayer/catalog";
 
 export const publicApiRouter = Router();
 
@@ -77,6 +89,57 @@ publicApiRouter.get("/api/v1/health", (_req: Request, res: Response) => {
     timestamp: new Date().toISOString(),
     doctrine: "Command Domains LLC · BDDT Publishing · Sovereign Shutter Framework",
   });
+});
+
+function boundedNonNegativeInteger(value: unknown, fallback: number, maximum: number): number {
+  const parsed = typeof value === "string" ? Number.parseInt(value, 10) : Number.NaN;
+  if (!Number.isSafeInteger(parsed) || parsed < 0) return fallback;
+  return Math.min(parsed, maximum);
+}
+
+// ── Portable Witness discovery catalog ───────────────────────────────────────
+// GET /api/v1/provenance-player/catalog?limit=50&offset=0
+// This is intentionally distinct from the legacy generic catalog and its raw
+// storage redirect. Every returned item has already passed the current portable
+// manifest eligibility policy and delegates playback through the revocable gateway.
+publicApiRouter.get("/api/v1/provenance-player/catalog", async (req: Request, res: Response) => {
+  try {
+    const limit = Math.max(1, boundedNonNegativeInteger(
+      req.query.limit,
+      50,
+      MAX_PROVENANCE_PLAYER_CATALOG_PAGE_SIZE,
+    ));
+    const offset = boundedNonNegativeInteger(req.query.offset, 0, Number.MAX_SAFE_INTEGER);
+    const scanLimit = Math.min(
+      Math.max(limit, limit * 5),
+      MAX_PROVENANCE_PLAYER_CATALOG_SCAN_SIZE,
+    );
+    const candidates = await getProvenancePlayerCatalogCandidates({
+      offset,
+      limit: scanLimit + 1,
+    });
+    const hasMoreCandidates = candidates.length > scanLimit;
+    const scannedCandidates = candidates.slice(0, scanLimit);
+    const ambiguousWids = await getAmbiguousProvenancePlayerWids(
+      scannedCandidates.map((candidate: { song: { witnessId: string | null } }) => candidate.song.witnessId ?? ""),
+    );
+    const catalog = buildProvenancePlayerCatalogPage({
+      offset,
+      limit,
+      scannedCandidates: scannedCandidates.map((candidate: { song: object; creator: object | null }) => ({
+        ...(candidate.song as object),
+        creator: candidate.creator,
+      })) as any,
+      hasMoreCandidates,
+      ambiguousWids,
+    });
+
+    res.setHeader("Cache-Control", "no-store");
+    res.json(catalog);
+  } catch (err) {
+    console.error("[API] /provenance-player/catalog error:", err);
+    res.status(503).json({ error: "Companion catalog unavailable" });
+  }
 });
 
 // ── Catalog ───────────────────────────────────────────────────────────────────

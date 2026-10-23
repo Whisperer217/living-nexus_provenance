@@ -35,7 +35,11 @@ describe("Provenance Player copied-manifest boundary", () => {
     );
     const manifestReaders = db.slice(db.indexOf("getProvenancePlayerAlbumTrackSources"), db.indexOf("hasAmbiguousProvenancePlayerWids"));
     expect(playlistManifestReader).toContain("id: users.id");
-    expect(manifestReaders.match(/id: users\.id/g)).toHaveLength(2);
+    // Album, individual Work, and catalog candidates all supply a non-null
+    // Creator identity to the shared adapter. The catalog reader is the same
+    // safe source shape reused by remote companion discovery.
+    expect(manifestReaders.match(/id: users\.id/g)).toHaveLength(3);
+    expect(manifestReaders).toContain("getProvenancePlayerCatalogCandidates");
     expect(manifestReaders).not.toContain("externalDisplayRightsConfirmed");
     expect(manifestReaders).not.toContain("externalDisplayAuthorizedAt");
     expect(manifestReaders).not.toContain("downloadPermission");
@@ -43,11 +47,14 @@ describe("Provenance Player copied-manifest boundary", () => {
 
   it("ignores only Deleted historical WID rows when checking current manifest identity ambiguity", () => {
     const db = read("server/utils/db.ts");
+    const reader = db.slice(db.indexOf("export async function getAmbiguousProvenancePlayerWids"), db.indexOf("/** Get the collection a song belongs"));
     const helper = db.slice(db.indexOf("export async function hasAmbiguousProvenancePlayerWids"), db.indexOf("/** Get the collection a song belongs"));
 
-    expect(helper).toContain('inArray(songs.witnessId, normalized)');
-    expect(helper).toContain('ne(songs.status, "Deleted")');
-    expect(helper).toContain("return Array.from(counts.values()).some((count) => count > 1)");
+    expect(reader).toContain('inArray(songs.witnessId, normalized)');
+    expect(reader).toContain('ne(songs.status, "Deleted")');
+    expect(reader).toContain("return new Set(Array.from(counts.entries())");
+    expect(helper).toContain("getAmbiguousProvenancePlayerWids(witnessIds)");
+    expect(helper).toContain(".size > 0");
   });
 
   it("uses a rechecked Living Nexus gateway rather than copied raw storage media", () => {

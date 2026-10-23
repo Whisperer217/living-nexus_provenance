@@ -1,0 +1,12 @@
+name: "Living Nexus"
+guid: "4bb75dc8-b3db-4bd7-8db3-4e16d378d84e"
+version: "0.1.0"
+targetAbi: "12.2.0.0"
+framework: "net10.0"
+overview: "Read-only Living Nexus Portable Witness discovery channel."
+description: >
+  Discovers eligible public Living Nexus Works through the revocable Portable
+  Witness gateway. Living Nexus remains the source of truth for WIDs,
+  attribution, publication, revocation, and media authorization.
+category: "Music"
+owner: "BDDT Publishing LLC"

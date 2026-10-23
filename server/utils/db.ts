@@ -2815,15 +2815,68 @@ export async function getProvenancePlayerTrackSourceById(songId: number) {
 }
 
 /**
- * A copied manifest names `/share/:wid` as its source. Reject instead of
- * exporting whenever more than one current song row carries a requested WID.
+ * Read-only, stable-order candidate projection for external companion catalogs.
+ * This deliberately returns the same source shape used by the portable manifest
+ * adapter; callers must still run the adapter and ambiguity checks before exposing
+ * a record outside Living Nexus.
  */
-export async function hasAmbiguousProvenancePlayerWids(witnessIds: readonly string[]): Promise<boolean> {
+export async function getProvenancePlayerCatalogCandidates(input: {
+  offset: number;
+  limit: number;
+}) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return (db as any)
+    .select({
+      song: {
+        id: songs.id,
+        title: songs.title,
+        contentType: songs.contentType,
+        status: songs.status,
+        isPublic: songs.isPublic,
+        isFlagged: songs.isFlagged,
+        witnessId: songs.witnessId,
+        fileUrl: songs.fileUrl,
+        coverArtUrl: songs.coverArtUrl,
+        externalDisplayRevokedAt: songs.externalDisplayRevokedAt,
+        participationMusic: songs.participationMusic,
+        participationLyrics: songs.participationLyrics,
+        participationVoice: songs.participationVoice,
+        createdAt: songs.createdAt,
+      },
+      creator: {
+        id: users.id,
+        artistHandle: users.artistHandle,
+        name: users.name,
+      },
+    })
+    .from(songs)
+    .leftJoin(users, eq(users.id, songs.userId))
+    .where(and(
+      eq(songs.contentType, "audio"),
+      eq(songs.status, "Published"),
+      eq(songs.isPublic, true),
+      eq(songs.isFlagged, false),
+      isNotNull(songs.witnessId),
+      isNotNull(songs.fileUrl),
+      isNull(songs.externalDisplayRevokedAt),
+    ))
+    .orderBy(asc(songs.createdAt), asc(songs.id))
+    .limit(input.limit)
+    .offset(input.offset);
+}
+
+/**
+ * Returns current (non-Deleted) WIDs that cannot safely identify one Work.
+ * Callers use this to fail closed before publishing a portable media delegation.
+ */
+export async function getAmbiguousProvenancePlayerWids(witnessIds: readonly string[]): Promise<Set<string>> {
   const normalized = Array.from(new Set(witnessIds.map((wid) => wid.trim()).filter(Boolean)));
-  if (normalized.length === 0) return false;
+  if (normalized.length === 0) return new Set();
 
   const db = await getDb();
-  if (!db) return true;
+  if (!db) return new Set(normalized);
   const rows = await (db as any)
     .select({ witnessId: songs.witnessId })
     .from(songs)
@@ -2836,7 +2889,17 @@ export async function hasAmbiguousProvenancePlayerWids(witnessIds: readonly stri
     if (!row.witnessId) continue;
     counts.set(row.witnessId, (counts.get(row.witnessId) ?? 0) + 1);
   }
-  return Array.from(counts.values()).some((count) => count > 1);
+  return new Set(Array.from(counts.entries())
+    .filter(([, count]) => count > 1)
+    .map(([wid]) => wid));
+}
+
+/**
+ * A copied manifest names `/share/:wid` as its source. Reject instead of
+ * exporting whenever more than one current song row carries a requested WID.
+ */
+export async function hasAmbiguousProvenancePlayerWids(witnessIds: readonly string[]): Promise<boolean> {
+  return (await getAmbiguousProvenancePlayerWids(witnessIds)).size > 0;
 }
 
 /** Get the collection a song belongs to (if any). */

@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-10-22T19:46:54.486Z",
-  "totalLessons": 82,
+  "lastUpdated": "2026-10-23T05:03:47.319Z",
+  "totalLessons": 83,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -2057,6 +2057,38 @@
         "no-deployment"
       ],
       "id": "LESSON-082"
+    },
+    {
+      "date": "2026-10-23",
+      "checkpointVersion": "pending",
+      "category": "architecture",
+      "problem": "External media clients could use the legacy public catalog and raw stream redirect, which did not guarantee Portable Witness eligibility, current WID uniqueness, creator attribution, revocation handling, or gateway-only media. Jellyfin 12.2 also requires plug-ins to register IChannel through its service collection; an assembly that merely implements IChannel is not discoverable.",
+      "solution": "Add a separate no-store companion catalog that derives each entry through the existing living-nexus-player/1 eligibility adapter, excludes ambiguous active WIDs, preserves stable pagination, and emits only the existing revocable provenance-player gateway URL. Package a Jellyfin 12.2 IChannel plug-in that accepts only that schema and host/gateway path, then register it through IPluginServiceRegistrator as a singleton IChannel. Validate a disposable host registration; do not publish a repository manifest until an immutable hosted ZIP download URL and its checksum can be verified.",
+      "files": [
+        "server/utils/db.ts",
+        "server/domains/provenancePlayer/catalog.ts",
+        "server/routes/publicApiRoute.ts",
+        "server/tests/provenancePlayerCatalog.test.ts",
+        "server/tests/provenancePlayerCatalogRoute.test.ts",
+        "integrations/jellyfin/LivingNexus.Jellyfin/LivingNexusChannel.cs",
+        "integrations/jellyfin/LivingNexus.Jellyfin/LivingNexusServiceRegistrator.cs",
+        "integrations/jellyfin/LivingNexus.Jellyfin.Tests/LivingNexusChannelTests.cs"
+      ],
+      "score": 0,
+      "tags": [
+        "jellyfin",
+        "remote-media",
+        "portable-witness",
+        "provenance-player",
+        "public-catalog",
+        "gateway-only-media",
+        "revocable-access",
+        "IPluginServiceRegistrator",
+        "WID-ambiguity",
+        "no-deployment",
+        "repository-manifest-hold"
+      ],
+      "id": "LESSON-083"
     }
   ]
 }

@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <AssemblyName>LivingNexus.Jellyfin</AssemblyName>
+    <RootNamespace>LivingNexus.Jellyfin</RootNamespace>
+    <Version>0.1.0</Version>
+    <Authors>BDDT Publishing LLC</Authors>
+    <Description>Read-only Living Nexus Portable Witness discovery channel for Jellyfin 12.2.</Description>
+    <PackageId>LivingNexus.Jellyfin</PackageId>
+    <RepositoryUrl>https://github.com/Whisperer217/living-nexus_provenance</RepositoryUrl>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Jellyfin.Controller" Version="10.11.11" PrivateAssets="all" />
+    <PackageReference Include="Jellyfin.Model" Version="10.11.11" PrivateAssets="all" />
+  </ItemGroup>
+</Project>
