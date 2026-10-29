@@ -10,6 +10,8 @@
     "check": "tsc --noEmit",
     "format": "prettier --write .",
     "test": "vitest run",
+    "test:visual-lab": "vitest run --config scripts/visual-vitest.config.ts --reporter=dot && node scripts/verify-visual-boundary.test.mjs",
+    "verify:visual-boundary": "node scripts/verify-visual-boundary.mjs",
     "db:push": "drizzle-kit generate && drizzle-kit migrate",
     "refine": "tsx refinement/steward.ts"
   },

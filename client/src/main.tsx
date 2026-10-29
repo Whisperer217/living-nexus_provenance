@@ -26,8 +26,20 @@ import {
   SW_UPDATE_FAILED_EVENT,
   type ServiceWorkerUpdateFailure,
 } from "./lib/serviceWorkerUpdate";
+import { shouldRenderVisualLab } from "./visual-safe/visualLabGate";
 import "./index.css";
 
+const shouldBootVisualLab = shouldRenderVisualLab({
+  dev: import.meta.env.DEV,
+  enabled: import.meta.env.VITE_LN_VISUAL_LAB,
+  pathname: window.location.pathname,
+});
+
+if (shouldBootVisualLab) {
+  void import("./visual-dev/VisualLabPage").then(({ VisualLabPage }) => {
+    createRoot(document.getElementById("root")!).render(<VisualLabPage />);
+  });
+} else {
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -291,6 +303,7 @@ createRoot(document.getElementById("root")!).render(
           </KeeperAttrsProvider>
         </ThemeProvider>
       </QueryClientProvider>
-    </trpc.Provider>
+      </trpc.Provider>
   </HelmetProvider>
 );
+}
