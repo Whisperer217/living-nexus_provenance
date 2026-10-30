@@ -171,10 +171,34 @@ interface HarmonicBarProps {
   className?: string;
 }
 
+function normalizeProgress(value: number): number {
+  if (!Number.isFinite(value)) return 0;
+  return Math.min(1, Math.max(0, value));
+}
+
+function normalizeSeconds(value: number): number {
+  if (!Number.isFinite(value)) return 0;
+  return Math.max(0, value);
+}
+
 function formatTime(seconds: number): string {
-  const m = Math.floor(seconds / 60);
-  const s = Math.floor(seconds % 60);
-  return `${m}:${s.toString().padStart(2, "0")}`;
+  const normalizedSeconds = Math.floor(normalizeSeconds(seconds));
+  const minutes = Math.floor(normalizedSeconds / 60);
+  const remainingSeconds = normalizedSeconds % 60;
+  return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
+}
+
+function formatSpokenTime(seconds: number): string {
+  const normalizedSeconds = Math.floor(normalizeSeconds(seconds));
+  const minutes = Math.floor(normalizedSeconds / 60);
+  const remainingSeconds = normalizedSeconds % 60;
+
+  if (minutes > 0 && remainingSeconds > 0) {
+    return `${minutes} ${minutes === 1 ? "minute" : "minutes"} ${remainingSeconds} ${remainingSeconds === 1 ? "second" : "seconds"}`;
+  }
+
+  if (minutes > 0) return `${minutes} ${minutes === 1 ? "minute" : "minutes"}`;
+  return `${remainingSeconds} ${remainingSeconds === 1 ? "second" : "seconds"}`;
 }
 
 export function HarmonicBar({
@@ -187,63 +211,133 @@ export function HarmonicBar({
   onSeek,
   className,
 }: HarmonicBarProps) {
-  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!onSeek) return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    const p = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-    onSeek(p);
+  const interactive = typeof onSeek === "function";
+  const normalizedProgress = normalizeProgress(progress);
+  const percentage = normalizedProgress * 100;
+  const normalizedDuration = normalizeSeconds(duration);
+  const hasValidDuration = Number.isFinite(duration) && duration > 0;
+  const interactiveCurrentTime = hasValidDuration
+    ? Math.min(normalizedDuration, normalizedProgress * normalizedDuration)
+    : 0;
+  const visibleCurrentTime = interactive ? interactiveCurrentTime : normalizeSeconds(currentTime);
+  const accessibleProgressText = hasValidDuration
+    ? `${formatSpokenTime(interactiveCurrentTime)} of ${formatSpokenTime(normalizedDuration)}`
+    : `${Math.round(percentage)}% playback progress`;
+
+  const emitProgress = (candidate: number) => {
+    const next = normalizeProgress(candidate);
+    if (next !== normalizedProgress) onSeek?.(next);
+  };
+
+  const handleNativeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    emitProgress(Number(event.currentTarget.value) / 100);
+  };
+
+  const handleRangeKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    let candidate: number | undefined;
+
+    switch (event.key) {
+      case "ArrowRight":
+      case "ArrowUp":
+        candidate = normalizedProgress + 0.01;
+        break;
+      case "ArrowLeft":
+      case "ArrowDown":
+        candidate = normalizedProgress - 0.01;
+        break;
+      case "PageUp":
+        candidate = normalizedProgress + 0.1;
+        break;
+      case "PageDown":
+        candidate = normalizedProgress - 0.1;
+        break;
+      case "Home":
+        candidate = 0;
+        break;
+      case "End":
+        candidate = 1;
+        break;
+      default:
+        return;
+    }
+
+    event.preventDefault();
+    emitProgress(candidate);
   };
 
   return (
     <div className={cn("flex flex-col gap-1", className)}>
-      {/* Progress track */}
+      {/* The interactive target is intentionally 44px while the visual harmonic line remains compact. */}
       <div
-        className={cn("relative w-full rounded-full overflow-hidden", onSeek && "cursor-pointer")}
-        style={{ height, background: "rgba(44,52,56,0.80)" }}
-        onClick={handleClick}
-        role={onSeek ? "slider" : undefined}
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-valuenow={Math.round(progress * 100)}
-        aria-label="Playback progress"
+        className={cn("relative w-full", interactive && "min-h-11")}
+        style={interactive ? undefined : { height }}
       >
-        {/* Filled portion */}
         <div
-          className="absolute left-0 top-0 h-full rounded-full transition-[width] duration-100"
-          style={{
-            width: `${progress * 100}%`,
-            background: "linear-gradient(to right, #B8820A, #C49A28, #E8B840)",
-          }}
-        />
-        {/* Playhead dot */}
-        {onSeek && (
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 top-1/2 -translate-y-1/2 overflow-hidden rounded-full"
+          style={{ height, background: "color-mix(in srgb, var(--ln-ash) 80%, transparent)" }}
+        >
           <div
-            className={cn("absolute top-1/2 -translate-y-1/2 -translate-x-1/2 rounded-full", playing && "progress-playhead")}
+            className="absolute left-0 top-0 h-full rounded-full transition-[width] duration-100 motion-reduce:transition-none"
             style={{
-              left: `${progress * 100}%`,
-              width: height + 8,
-              height: height + 8,
-              background: "radial-gradient(circle at 40% 35%, #E8DFC8, #C49A28 55%, #6B6555)",
-              border: "2px solid rgba(230,205,174,0.95)",
+              width: `${percentage}%`,
+              background: "linear-gradient(to right, var(--ln-gold-dim), var(--ln-gold), var(--ln-gold-hot))",
+            }}
+          />
+          {interactive && (
+            <div
+              className={cn("absolute top-1/2 -translate-y-1/2 -translate-x-1/2 rounded-full motion-reduce:animate-none", playing && "progress-playhead")}
+              style={{
+                left: `${percentage}%`,
+                width: height + 8,
+                height: height + 8,
+                background: "radial-gradient(circle at 40% 35%, var(--ln-parchment), var(--ln-gold) 55%, var(--ln-smoke))",
+                border: "2px solid var(--ln-bone)",
+              }}
+            />
+          )}
+        </div>
+
+        {interactive && (
+          <input
+            className="peer absolute inset-0 z-10 h-full w-full cursor-pointer appearance-none opacity-0"
+            type="range"
+            min="0"
+            max="100"
+            step="any"
+            value={percentage}
+            aria-label="Playback progress"
+            aria-valuetext={accessibleProgressText}
+            onChange={handleNativeChange}
+            onKeyDown={handleRangeKeyDown}
+          />
+        )}
+
+        {interactive && (
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -inset-1 rounded-md opacity-0 transition-opacity duration-150 motion-reduce:transition-none peer-focus-visible:opacity-100"
+            style={{
+              border: "2px solid var(--ln-gold)",
+              boxShadow: "0 0 0 1px color-mix(in srgb, var(--ln-gold-hot) 54%, transparent)",
             }}
           />
         )}
       </div>
 
-      {/* Time labels */}
       {showTime && (
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between" aria-hidden={interactive || undefined}>
           <span
             className="text-[11px]"
-            style={{ fontFamily: "'Space Mono', monospace", color: "#6B6555" }}
+            style={{ fontFamily: "'Space Mono', monospace", color: "var(--ln-bone)" }}
           >
-            {formatTime(currentTime)}
+            {formatTime(visibleCurrentTime)}
           </span>
           <span
             className="text-[11px]"
-            style={{ fontFamily: "'Space Mono', monospace", color: "#6B6555" }}
+            style={{ fontFamily: "'Space Mono', monospace", color: "var(--ln-bone)" }}
           >
-            {formatTime(duration)}
+            {formatTime(normalizedDuration)}
           </span>
         </div>
       )}

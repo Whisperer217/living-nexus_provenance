@@ -1,0 +1,26 @@
+[data-ln-visual-lab-preview] {
+  --ln-vl-page: var(--ln-void);
+  --ln-vl-surface: var(--ln-coal);
+  --ln-vl-card: var(--ln-iron);
+  --ln-vl-text: var(--ln-parchment);
+  --ln-vl-muted: var(--ln-smoke);
+  --ln-vl-accent: var(--ln-gold);
+  --ln-vl-border: var(--ln-ash);
+  --ln-vl-card-radius: 12px;
+  --ln-vl-button-radius: 8px;
+  --ln-vl-border-width: 1px;
+  --ln-vl-space: 16px;
+  --ln-vl-section-space: 36px;
+  --ln-vl-body-scale: 1;
+  --ln-vl-heading-scale: 1;
+  --ln-vl-line-height: 1.65;
+  --ln-vl-card-width: 292px;
+  --ln-vl-card-height: 336px;
+  --ln-vl-nav-height: 56px;
+  --ln-vl-player-height: 64px;
+  --ln-vl-modal-width: 480px;
+  --ln-vl-sheet-radius: 20px;
+  --ln-vl-shadow-alpha: 0.32;
+  --ln-vl-blur: 12px;
+  --ln-vl-transition: 220ms;
+}
