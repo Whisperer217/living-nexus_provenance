@@ -7,6 +7,8 @@ assert.equal(classifyPath("client/src/visual-safe/visualLabGate.ts"), "visual-sa
 assert.equal(classifyPath("server/routers/songs.ts"), "locked");
 assert.equal(classifyPath("client/src/main.tsx"), "locked");
 assert.equal(classifyPath("client/src/index.css"), "controlled");
+assert.equal(classifyPath("scripts/harmonicbar-vitest.config.ts"), "infrastructure");
+assert.equal(classifyPath("docs/lnls/architecture/ADR-HARMONICBAR-NATIVE-RANGE-ACCESSIBILITY.md"), "infrastructure");
 assert.equal(classifyPath("client/src/new-runtime.ts"), "unknown");
 assert.equal(classifyPath("docs/lnls/architecture/ADR-NEXUS-ICON-KIT-SEMANTICS.md"), "infrastructure");
 
@@ -20,6 +22,15 @@ const ordinaryVisual = evaluateChanges([{ status: "M", paths: ["client/src/main.
 assert.equal(ordinaryVisual[0].outcome, "fail");
 const infrastructureVisual = evaluateChanges([{ status: "M", paths: ["client/src/main.tsx"] }], "visual-infrastructure", new Set());
 assert.equal(infrastructureVisual[0].outcome, "review");
+const harmonicBarInfrastructure = evaluateChanges([
+  { status: "M", paths: ["client/src/design-system/platform.tsx"] },
+  { status: "A", paths: ["client/src/design-system/platform.harmonicbar.test.tsx"] },
+  { status: "M", paths: ["pnpm-lock.yaml"] },
+  { status: "M", paths: ["refinement/lessons/lessons-log.json"] },
+], "visual-infrastructure", new Set());
+assert.equal(harmonicBarInfrastructure.every((result) => result.outcome === "review"), true);
+const harmonicBarOrdinaryVisual = evaluateChanges([{ status: "M", paths: ["client/src/design-system/platform.tsx"] }], "visual", new Set());
+assert.equal(harmonicBarOrdinaryVisual[0].outcome, "fail");
 const protectedRename = evaluateChanges([{ status: "R100", paths: ["server/routes/a.ts", "client/src/visual-safe/a.ts"] }], "visual", new Set());
 assert.equal(protectedRename.some((result) => result.outcome === "fail"), true);
 const deletedSafeFile = evaluateChanges([{ status: "D", paths: ["client/src/visual-safe/visualLabGate.ts"] }], "visual", new Set());

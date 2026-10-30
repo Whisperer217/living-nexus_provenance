@@ -7,6 +7,12 @@ const ROOT = path.resolve(import.meta.dirname, "..");
 const INFRASTRUCTURE_EXCEPTIONS = new Set([
   "client/src/main.tsx",
   "package.json",
+  "pnpm-lock.yaml",
+  "refinement/lessons/lessons-log.json",
+  "client/src/design-system/platform.tsx",
+  "client/src/design-system/platform.harmonicbar.test.tsx",
+  "scripts/harmonicbar-vitest.config.ts",
+  "docs/lnls/architecture/ADR-HARMONICBAR-NATIVE-RANGE-ACCESSIBILITY.md",
   "client/src/visual-dev/VisualLabPage.tsx",
   "client/src/visual-dev/VisualControlsPanel.tsx",
   "client/src/visual-dev/VisualSpecimens.tsx",
@@ -34,7 +40,7 @@ export function classifyPath(pathname) {
   if (pathname.startsWith("client/src/visual-safe/")) return "visual-safe";
   if (pathname === "docs/lnls/design/VISUAL_CHANGELOG.md") return "visual-safe";
   if (isLocked(pathname)) return "locked";
-  if (pathname.startsWith("client/src/visual-dev/") || pathname.startsWith("scripts/verify-visual-boundary") || pathname === "scripts/visual-vitest.config.ts" || pathname === "docs/VISUAL_ARCHITECTURE.md" || pathname === "docs/VISUAL_CHANGE_POLICY.md" || pathname === "docs/lnls/architecture/ADR-NEXUS-ICON-KIT-SEMANTICS.md") return "infrastructure";
+  if (pathname.startsWith("client/src/visual-dev/") || pathname.startsWith("scripts/verify-visual-boundary") || pathname === "scripts/visual-vitest.config.ts" || pathname === "scripts/harmonicbar-vitest.config.ts" || pathname === "docs/VISUAL_ARCHITECTURE.md" || pathname === "docs/VISUAL_CHANGE_POLICY.md" || pathname === "docs/lnls/architecture/ADR-NEXUS-ICON-KIT-SEMANTICS.md" || pathname === "docs/lnls/architecture/ADR-HARMONICBAR-NATIVE-RANGE-ACCESSIBILITY.md") return "infrastructure";
   if (pathname === "client/src/index.css" || pathname.startsWith("client/src/pages/") || pathname.startsWith("client/src/components/") || pathname.startsWith("client/src/design-system/")) return "controlled";
   return "unknown";
 }
@@ -113,7 +119,7 @@ export function evaluateChanges(changes, scope, allowControlled) {
       } else if (category === "locked") {
         outcome = scope === "visual-infrastructure" && INFRASTRUCTURE_EXCEPTIONS.has(pathname) ? "review" : "fail";
       } else if (category === "controlled") {
-        outcome = allowControlled.has(pathname) ? "review" : "fail";
+        outcome = (scope === "visual-infrastructure" && INFRASTRUCTURE_EXCEPTIONS.has(pathname)) || allowControlled.has(pathname) ? "review" : "fail";
       } else if (category === "infrastructure") {
         outcome = scope === "visual-infrastructure" ? "review" : "fail";
       } else if (category === "unknown") {
