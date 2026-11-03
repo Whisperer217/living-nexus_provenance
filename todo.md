@@ -74,6 +74,16 @@
 - [x] Preserve WIDs, registry history, permissions, playback, and collection authority; no activity table or migration added.
 - [x] Validate focused contract coverage, TypeScript, whitespace, responsive layout, and production build.
 
+### P1.5 Work Desk album management — DONE
+
+- [x] Add Existing Albums and Draft Releases modes to Work Desk using existing projections and routes.
+- [x] Add owner-authorized album search, identity/WID/status presentation, presentation metadata editing, and ordered track inspection.
+- [x] Add desktop drag handles plus accessible Move Up/Move Down controls for touch and keyboard use.
+- [x] Save metadata and order through `collectionStudio.updateMeta` and `collectionStudio.reorderTracks` with cache invalidation and error/retry feedback.
+- [x] Keep sealed legacy membership immutable; route Draft Release membership changes to the existing revision-aware editor.
+- [x] Add unsaved-change protection and focused contract coverage; no schema, WID, media, registry, playback, or new backend authority added.
+- [x] Validate full tests, TypeScript, production build, whitespace, and desktop/mobile smoke captures.
+
 ### P1.2 Activity and Signals architecture — NEXT
 
 **Outcome:** Community activity becomes a contained secondary voice rather than an overlay chorus.

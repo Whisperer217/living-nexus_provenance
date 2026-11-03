@@ -1,12 +1,15 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "wouter";
 import {
   Activity,
+  ArrowDown,
+  ArrowUp,
   Archive,
   ArrowRight,
   ChevronRight,
   FolderKanban,
+  GripVertical,
   LibraryBig,
   ListMusic,
   Loader2,
@@ -14,6 +17,7 @@ import {
   Pencil,
   Plus,
   Search,
+  Save,
   ShieldCheck,
   Sparkles,
 } from "lucide-react";
@@ -22,6 +26,7 @@ import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
 import { useWorkEditorActions } from "@/contexts/WorkEditorContext";
 import type { CreativeDrawerSong } from "@/components/CreativeDrawer";
+import { toast } from "sonner";
 
 const PROVENANCE_PLAYER_URL = "https://provenanceplayer.netlify.app/#/home";
 
@@ -77,6 +82,108 @@ function DeskLink({ href, icon: Icon, eyebrow, title, description, meta }: {
   );
 }
 
+function AlbumManagementPanel({
+  albums,
+  drafts,
+  isAuthenticated,
+}: {
+  albums: any[];
+  drafts: any[];
+  isAuthenticated: boolean;
+}) {
+  const utils = trpc.useUtils();
+  const [mode, setMode] = useState<"existing" | "draft">("existing");
+  const [search, setSearch] = useState("");
+  const [selectedId, setSelectedId] = useState<number | null>(albums[0]?.id ?? null);
+  const [tracks, setTracks] = useState<any[]>([]);
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [visibility, setVisibility] = useState<"public" | "unlisted" | "private">("public");
+  const [dirty, setDirty] = useState(false);
+  const [draggedId, setDraggedId] = useState<number | null>(null);
+  const albumQuery = trpc.collectionStudio.getCollection.useQuery(
+    { collectionId: selectedId ?? 1 },
+    { enabled: isAuthenticated && mode === "existing" && !!selectedId, retry: false, refetchOnWindowFocus: false },
+  );
+  const updateMeta = trpc.collectionStudio.updateMeta.useMutation({
+    onSuccess: async () => {
+      await utils.collectionStudio.getCollection.invalidate({ collectionId: selectedId ?? 1 });
+      await utils.songs.getMyCollections.invalidate();
+      setDirty(false);
+      toast.success("Album presentation saved.");
+    },
+    onError: (error) => toast.error(error.message),
+  });
+  const reorderTracks = trpc.collectionStudio.reorderTracks.useMutation({
+    onSuccess: async () => {
+      await utils.collectionStudio.getCollection.invalidate({ collectionId: selectedId ?? 1 });
+      await utils.songs.getMyCollections.invalidate();
+      setDirty(false);
+      toast.success("Album order saved.");
+    },
+    onError: (error) => toast.error(error.message, { description: "The album was not changed. Refresh and try again." }),
+  });
+
+  useEffect(() => {
+    const collection = albumQuery.data?.collection as any;
+    if (!collection || dirty) return;
+    setName(collection.name ?? "");
+    setDescription(collection.description ?? "");
+    setVisibility((collection.visibility as any) ?? "public");
+    setTracks((albumQuery.data?.tracks as any[]) ?? []);
+  }, [albumQuery.data, dirty]);
+
+  useEffect(() => {
+    const onBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (!dirty) return;
+      event.preventDefault();
+      event.returnValue = "";
+    };
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => window.removeEventListener("beforeunload", onBeforeUnload);
+  }, [dirty]);
+
+  const filteredAlbums = useMemo(() => {
+    const needle = search.trim().toLowerCase();
+    return albums.filter((album) => !needle || [album.name, album.collectionWid, album.visibility].some((value) => String(value ?? "").toLowerCase().includes(needle)));
+  }, [albums, search]);
+
+  const chooseAlbum = (id: number) => {
+    if (dirty && !window.confirm("Discard your unsaved album changes?")) return;
+    setDirty(false);
+    setSelectedId(id);
+  };
+  const moveTrack = (index: number, direction: -1 | 1) => {
+    const nextIndex = index + direction;
+    if (nextIndex < 0 || nextIndex >= tracks.length) return;
+    setTracks((current) => {
+      const next = [...current];
+      [next[index], next[nextIndex]] = [next[nextIndex], next[index]];
+      return next;
+    });
+    setDirty(true);
+  };
+  const saveOrder = () => {
+    if (!selectedId || tracks.length === 0) return;
+    reorderTracks.mutate({ collectionId: selectedId, orderedSongIds: tracks.map((track) => track.id) });
+  };
+  const saveMeta = () => {
+    if (!selectedId) return;
+    updateMeta.mutate({ collectionId: selectedId, name, description, visibility });
+  };
+
+  return (
+    <section aria-labelledby="work-desk-albums" className="mt-4 rounded-2xl border p-4 sm:p-5" style={{ borderColor: "rgba(196,154,40,0.28)", background: "linear-gradient(145deg, rgba(196,154,40,0.08), rgba(0,0,0,0.2))" }}>
+      <div className="flex flex-wrap items-start justify-between gap-3"><div><p className="flex items-center gap-2 font-display text-[10px] tracking-[0.18em]" style={{ color: "var(--ln-gold)" }}><LibraryBig size={14} /> 06 · ALBUM MANAGEMENT</p><h2 id="work-desk-albums" className="mt-1 text-2xl" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>Albums</h2><p className="mt-1 max-w-2xl text-sm" style={{ color: "var(--ln-smoke)" }}>Tend existing album presentation and order without changing Work IDs, WIDs, or historical membership.</p></div><span className="rounded-full border px-2.5 py-1 text-xs" style={{ borderColor: "rgba(196,154,40,0.25)", color: "var(--ln-gold)" }}>Owner-authorized</span></div>
+      <div className="mt-5 flex rounded-xl border p-1" style={{ borderColor: "rgba(196,154,40,0.2)", background: "rgba(0,0,0,0.18)" }}><button type="button" onClick={() => setMode("existing")} className="min-h-10 flex-1 rounded-lg px-3 text-sm font-semibold" style={{ color: mode === "existing" ? "var(--ln-parchment)" : "var(--ln-smoke)", background: mode === "existing" ? "rgba(196,154,40,0.16)" : "transparent" }}>Existing Albums</button><button type="button" onClick={() => setMode("draft")} className="min-h-10 flex-1 rounded-lg px-3 text-sm font-semibold" style={{ color: mode === "draft" ? "var(--ln-parchment)" : "var(--ln-smoke)", background: mode === "draft" ? "rgba(196,154,40,0.16)" : "transparent" }}>Draft Releases</button></div>
+      {mode === "draft" ? <div className="mt-4 space-y-3">{drafts.length === 0 ? <p className="rounded-xl border border-dashed p-5 text-sm" style={{ borderColor: "rgba(196,154,40,0.22)", color: "var(--ln-smoke)" }}>No private Draft Releases yet. Create one from Collections, then manage membership through the existing revision-aware editor.</p> : drafts.map((draft) => <Link key={draft.id} href={`/studio/release/${draft.id}`} className="ln-nav-interactive flex min-w-0 items-center gap-3 rounded-xl border p-3" style={{ borderColor: "rgba(196,154,40,0.18)", background: "rgba(255,255,255,0.025)" }}><span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg" style={{ color: "var(--ln-gold)", background: "rgba(196,154,40,0.09)" }}><LibraryBig size={17} /></span><span className="min-w-0 flex-1"><span className="block truncate text-sm" style={{ color: "var(--ln-parchment)" }}>{draft.title}</span><span className="mt-1 block text-xs" style={{ color: "var(--ln-smoke)" }}>{draft.trackCount ?? 0} Works · revision {draft.revision} · private draft</span></span><ArrowRight size={16} style={{ color: "var(--ln-gold)" }} /></Link>)}</div> : <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(220px,.72fr)_minmax(0,1.28fr)]">
+        <div><label className="relative block"><Search size={15} className="absolute left-3 top-3.5" style={{ color: "var(--ln-smoke)" }} /><input value={search} onChange={(event) => setSearch(event.target.value)} type="search" aria-label="Search existing albums" placeholder="Search albums or WID…" className="min-h-11 w-full rounded-lg border bg-black/20 pl-9 pr-3 text-sm outline-none focus-visible:ring-2" style={{ borderColor: "rgba(196,154,40,0.28)", color: "var(--ln-parchment)" }} /></label><div className="mt-3 space-y-2" role="listbox" aria-label="Existing albums">{filteredAlbums.length === 0 ? <p className="rounded-xl border border-dashed p-4 text-sm" style={{ borderColor: "rgba(196,154,40,0.22)", color: "var(--ln-smoke)" }}>No albums match this search.</p> : filteredAlbums.map((album) => <button key={album.id} type="button" role="option" aria-selected={selectedId === album.id} onClick={() => chooseAlbum(album.id)} className="ln-nav-interactive flex w-full min-w-0 items-center gap-3 rounded-xl border p-3 text-left" style={{ borderColor: selectedId === album.id ? "var(--ln-gold)" : "rgba(196,154,40,0.16)", background: selectedId === album.id ? "rgba(196,154,40,0.12)" : "rgba(255,255,255,0.025)" }}><span className="h-11 w-11 shrink-0 overflow-hidden rounded-lg" style={{ background: "rgba(196,154,40,0.09)" }}>{album.coverArtUrl ? <img src={album.coverArtUrl} alt="" className="h-full w-full object-cover" /> : <LibraryBig className="m-3.5" size={18} style={{ color: "var(--ln-gold)" }} />}</span><span className="min-w-0 flex-1"><span className="block truncate text-sm" style={{ color: "var(--ln-parchment)" }}>{album.name}</span><span className="mt-1 block truncate font-mono text-[10px]" style={{ color: "var(--ln-gold-dim)" }}>{album.collectionWid}</span><span className="mt-1 block text-xs" style={{ color: "var(--ln-smoke)" }}>{album.trackCount ?? 0} Works · {album.visibility}</span></span></button>)}</div></div>
+        <div className="min-w-0 rounded-xl border p-4" style={{ borderColor: "rgba(196,154,40,0.18)", background: "rgba(0,0,0,0.16)" }}>{albumQuery.isLoading ? <div className="flex justify-center py-12"><Loader2 className="h-5 w-5 animate-spin" style={{ color: "var(--ln-gold)" }} /></div> : albumQuery.error ? <div className="rounded-xl border border-dashed p-5 text-sm" style={{ borderColor: "rgba(196,154,40,0.25)", color: "var(--ln-smoke)" }}>This album could not be opened. <button type="button" onClick={() => albumQuery.refetch()} className="underline" style={{ color: "var(--ln-gold)" }}>Retry</button></div> : !albumQuery.data ? <p className="p-5 text-sm" style={{ color: "var(--ln-smoke)" }}>Choose an existing album to inspect it.</p> : <><div className="flex flex-wrap items-start justify-between gap-3"><div className="min-w-0"><p className="truncate text-lg" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>{name}</p><p className="mt-1 break-all font-mono text-[10px]" style={{ color: "var(--ln-gold-dim)" }}>{(albumQuery.data.collection as any).collectionWid}</p></div><span className="rounded-full px-2.5 py-1 text-xs" style={{ color: "var(--ln-parchment)", background: "rgba(196,154,40,0.14)" }}>Sealed membership</span></div><div className="mt-4 grid gap-2 sm:grid-cols-2"><label className="text-xs" style={{ color: "var(--ln-smoke)" }}>Presentation title<input value={name} onChange={(event) => { setName(event.target.value); setDirty(true); }} className="mt-1 min-h-10 w-full rounded-lg border bg-black/20 px-3 text-sm" style={{ borderColor: "rgba(196,154,40,0.2)", color: "var(--ln-parchment)" }} /></label><label className="text-xs" style={{ color: "var(--ln-smoke)" }}>Visibility<select value={visibility} onChange={(event) => { setVisibility(event.target.value as any); setDirty(true); }} className="mt-1 min-h-10 w-full rounded-lg border bg-black/20 px-3 text-sm" style={{ borderColor: "rgba(196,154,40,0.2)", color: "var(--ln-parchment)" }}><option value="public">Public</option><option value="unlisted">Unlisted</option><option value="private">Private</option></select></label></div><label className="mt-3 block text-xs" style={{ color: "var(--ln-smoke)" }}>Description<textarea value={description} onChange={(event) => { setDescription(event.target.value); setDirty(true); }} rows={2} className="mt-1 w-full rounded-lg border bg-black/20 px-3 py-2 text-sm" style={{ borderColor: "rgba(196,154,40,0.2)", color: "var(--ln-parchment)" }} /></label><div className="mt-4 flex flex-wrap items-center justify-between gap-2"><p className="flex items-center gap-2 text-xs" style={{ color: "var(--ln-smoke)" }}><ShieldCheck size={14} style={{ color: "var(--ln-gold)" }} /> Membership additions/removals remain locked; order and presentation are editable.</p><button type="button" disabled={!dirty || updateMeta.isPending} onClick={saveMeta} className="ln-nav-interactive inline-flex min-h-10 items-center gap-2 rounded-lg px-3 text-xs font-semibold disabled:opacity-50" style={{ background: "var(--ln-gold)", color: "var(--ln-coal)" }}><Save size={14} /> Save presentation</button></div><div className="mt-5 border-t pt-4" style={{ borderColor: "rgba(255,255,255,0.08)" }}><div className="flex flex-wrap items-end justify-between gap-2"><div><p className="text-sm font-semibold" style={{ color: "var(--ln-parchment)" }}>Track order</p><p className="mt-1 text-xs" style={{ color: "var(--ln-smoke)" }}>Drag on desktop; use Move Up/Down on touch screens.</p></div><button type="button" disabled={!dirty || reorderTracks.isPending} onClick={saveOrder} className="ln-nav-interactive inline-flex min-h-10 items-center gap-2 rounded-lg border px-3 text-xs font-semibold disabled:opacity-50" style={{ borderColor: "rgba(196,154,40,0.35)", color: "var(--ln-gold)" }}><Save size={14} /> {reorderTracks.isPending ? "Saving…" : "Save order"}</button></div><div className="mt-3 space-y-2">{tracks.map((track, index) => <div key={track.id} draggable onDragStart={() => setDraggedId(track.id)} onDragOver={(event) => event.preventDefault()} onDrop={() => { if (draggedId === null || draggedId === track.id) return; const from = tracks.findIndex((entry) => entry.id === draggedId); const to = index; setTracks((current) => { const next = [...current]; const [moved] = next.splice(from, 1); next.splice(to, 0, moved); return next; }); setDraggedId(null); setDirty(true); }} className="flex min-w-0 items-center gap-2 rounded-xl border p-2.5" style={{ borderColor: "rgba(196,154,40,0.14)", background: "rgba(255,255,255,0.025)" }}><GripVertical className="hidden shrink-0 sm:block" size={16} style={{ color: "var(--ln-gold-dim)" }} aria-label="Drag handle" /><span className="w-5 shrink-0 text-right font-mono text-xs" style={{ color: "var(--ln-gold-dim)" }}>{index + 1}</span><span className="min-w-0 flex-1 truncate text-sm" style={{ color: "var(--ln-parchment)" }}>{track.title}</span><button type="button" onClick={() => moveTrack(index, -1)} disabled={index === 0} aria-label={`Move ${track.title} up`} className="ln-nav-interactive rounded-md p-2 disabled:opacity-30" style={{ color: "var(--ln-gold)" }}><ArrowUp size={15} /></button><button type="button" onClick={() => moveTrack(index, 1)} disabled={index === tracks.length - 1} aria-label={`Move ${track.title} down`} className="ln-nav-interactive rounded-md p-2 disabled:opacity-30" style={{ color: "var(--ln-gold)" }}><ArrowDown size={15} /></button></div>)}</div></div></>}</div>
+      </div>}
+    </section>
+  );
+}
+
 type ActivityItem = {
   id: string;
   kind: "work" | "release" | "playlist";
@@ -119,6 +226,7 @@ export default function WorkDeskPage() {
   const worksQuery = trpc.songs.mySongs.useQuery(undefined, { enabled: isAuthenticated, staleTime: 30_000 });
   const releasesQuery = trpc.releaseDrafts.listMine.useQuery(undefined, { enabled: isAuthenticated, staleTime: 30_000 });
   const playlistsQuery = trpc.playlists.mine.useQuery(undefined, { enabled: isAuthenticated, staleTime: 30_000 });
+  const albumsQuery = trpc.songs.getMyCollections.useQuery(undefined, { enabled: isAuthenticated, staleTime: 30_000 });
 
   const works = (worksQuery.data ?? []) as Work[];
   const visibleWorks = useMemo(() => {
@@ -199,7 +307,9 @@ export default function WorkDeskPage() {
           {recentActivity.length === 0 ? <div className="mt-4 rounded-xl border border-dashed p-5 text-sm" style={{ borderColor: "rgba(196,154,40,0.22)", color: "var(--ln-smoke)" }}>Recent edits will appear here as you work on registered Works and collections.</div> : <div className="mt-4 grid gap-2 md:grid-cols-2">{recentActivity.map((item) => <ActivityRow key={item.id} item={item} onSelectWork={setSelectedId} />)}</div>}
         </section>
 
-        <section aria-labelledby="work-desk-relationships" className="mt-4 grid gap-4 md:grid-cols-2"><DeskLink href="/creator/collections" icon={LibraryBig} eyebrow="04 · RELEASE RELATIONSHIPS" title="Draft Releases & Collections" description="Open the existing Collections workspace to create or continue private Draft Releases from registered Works." meta={`${releasesQuery.data?.length ?? 0} draft releases`} /><DeskLink href="/profile?tab=collections" icon={Plus} eyebrow="05 · LISTENING RELATIONSHIPS" title="Named Playlists" description="Manage editable listening paths without duplicating Works or creating new Witness IDs." meta={`${playlistsQuery.data?.length ?? 0} named playlists`} /></section>
+        <AlbumManagementPanel albums={(albumsQuery.data ?? []) as any[]} drafts={(releasesQuery.data ?? []) as any[]} isAuthenticated={isAuthenticated} />
+
+        <section aria-labelledby="work-desk-relationships" className="mt-4 grid gap-4 md:grid-cols-2"><DeskLink href="/creator/collections" icon={LibraryBig} eyebrow="05 · RELEASE RELATIONSHIPS" title="Draft Releases & Collections" description="Open the existing Collections workspace to create or continue private Draft Releases from registered Works." meta={`${releasesQuery.data?.length ?? 0} draft releases`} /><DeskLink href="/profile?tab=collections" icon={Plus} eyebrow="06 · LISTENING RELATIONSHIPS" title="Named Playlists" description="Manage editable listening paths without duplicating Works or creating new Witness IDs." meta={`${playlistsQuery.data?.length ?? 0} named playlists`} /></section>
         <section className="mt-4 flex flex-col gap-4 rounded-2xl border p-5 sm:flex-row sm:items-center sm:justify-between" style={{ borderColor: "rgba(196,154,40,0.2)", background: "rgba(196,154,40,0.04)" }}><div><p className="flex items-center gap-2 font-display text-[10px] tracking-[0.18em]" style={{ color: "var(--ln-gold)" }}><ShieldCheck size={14} /> ONE AUTHORITY</p><h2 className="mt-2 text-lg" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>The record stays canonical.</h2><p className="mt-1 text-sm" style={{ color: "var(--ln-smoke)" }}>Legacy Studio, Archive, Collections, and Work routes remain available while this Desk becomes the clearer starting point.</p></div><a href={PROVENANCE_PLAYER_URL} target="_blank" rel="noopener noreferrer" className="ln-nav-interactive inline-flex min-h-11 shrink-0 items-center gap-2 rounded-lg border px-4 text-sm" style={{ borderColor: "rgba(196,154,40,0.34)", color: "var(--ln-gold)" }}><Sparkles size={15} /> Companion Player</a></section>
         <p className="mt-5 flex items-center gap-2 text-xs" style={{ color: "var(--ln-smoke)" }}><Archive size={13} /> Existing management pages are preserved during this validation phase.</p>
       </div>

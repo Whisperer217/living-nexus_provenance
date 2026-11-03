@@ -45,4 +45,22 @@ describe("Work Desk consolidation", () => {
     expect(desk).toContain("onSelectWork={setSelectedId}");
     expect(desk).not.toContain("createActivity");
   });
+
+  it("reuses protected album procedures and keeps sealed membership immutable", () => {
+    const desk = read("client/src/pages/WorkDeskPage.tsx");
+    const studio = read("client/src/pages/CollectionStudioPage.tsx");
+    const router = read("server/routers/collectionStudio.ts");
+    expect(desk).toContain("trpc.songs.getMyCollections.useQuery");
+    expect(desk).toContain("trpc.collectionStudio.getCollection.useQuery");
+    expect(desk).toContain("trpc.collectionStudio.reorderTracks.useMutation");
+    expect(desk).toContain("trpc.collectionStudio.updateMeta.useMutation");
+    expect(desk).toContain("Membership additions/removals remain locked");
+    expect(desk).toContain("Move ${track.title} up");
+    expect(desk).toContain("Move ${track.title} down");
+    expect(desk).toContain('href={`/studio/release/${draft.id}`}');
+    expect(studio).toContain("trpc.collectionStudio.reorderTracks.useMutation");
+    expect(router).toContain("requireMutableCollectionComposition");
+    expect(router).toContain("reorderTracks: protectedProcedure");
+    expect(router).toContain("updateMeta: protectedProcedure");
+  });
 });
