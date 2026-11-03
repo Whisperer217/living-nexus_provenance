@@ -16,9 +16,17 @@ describe("public Work hero composition contract", () => {
   });
 
   it("keeps the first testimony and provenance headings visually legible after the hero", () => {
-    expect(workPage).toContain("font-heading text-3xl sm:text-4xl mb-6");
-    expect(workPage).toContain("font-heading text-3xl sm:text-4xl mb-4");
+    expect(workPage).toContain("ln-work-section-title mb-6");
+    expect(workPage).toContain("ln-work-section-title mb-4");
+    expect(workPage).toContain("ln-work-hero-lead max-w-none ml-0 ln-breath-rule");
+    expect(workPage).toContain("ln-work-wid");
     expect(workPage).toContain("py-10 sm:py-12 ln-breath-reveal");
+  });
+
+  it("uses shared semantic typography roles for the hero instead of page-local sizes", () => {
+    expect(workPage).toContain('className="ln-work-hero-title mb-5');
+    expect(workPage).toContain('className="ln-work-hero-lead mb-8');
+    expect(workPage).not.toContain("text-4xl sm:text-6xl md:text-7xl leading-[0.95]");
   });
 
   it("does not introduce Work, WID, provenance, or publication writers into the presentation repair", () => {

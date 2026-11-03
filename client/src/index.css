@@ -290,6 +290,8 @@
   --text-xs:    clamp(0.6875rem, 0.65rem + 0.2vw, 0.75rem);   /* 11–12px — badges, WID labels */
   --text-sm:    clamp(0.8125rem, 0.78rem + 0.2vw, 0.9375rem); /* 13–15px — captions, meta */
   --text-base:  clamp(0.9375rem, 0.9rem + 0.25vw, 1.0625rem); /* 15–17px — body copy */
+  --text-lead:  clamp(1.125rem, 1rem + 0.55vw, 1.375rem);      /* 18–22px — readable introductions */
+  --text-meta:  clamp(0.75rem, 0.7rem + 0.2vw, 0.875rem);      /* 12–14px — supporting metadata */
   --text-h4:    clamp(1.125rem, 1.05rem + 0.4vw, 1.375rem);   /* 18–22px — card titles */
   --text-h3:    clamp(1.375rem, 1.25rem + 0.6vw, 1.75rem);    /* 22–28px — panel headings */
   --text-h2:    clamp(1.625rem, 1.4rem + 1.1vw, 2.25rem);     /* 26–36px — section headings */
@@ -297,6 +299,7 @@
 
   /* ── Line Heights ── */
   --leading-body:  1.75;  /* body — generous for true-black readability */
+  --leading-lead:  1.55;  /* lead copy — editorial, calm, and scannable */
   --leading-h4:    1.5;   /* h4 — comfortable for card/label context */
   --leading-h3:    1.4;   /* h3 — panel headings */
   --leading-h2:    1.2;   /* h2 — section headings (tighter, more monumental) */
@@ -313,6 +316,7 @@
   /* ── Letter Spacing ── */
   --tracking-body:     0em;     /* DM Sans — no tracking needed */
   --tracking-ui:       0.015em; /* UI labels — subtle open */
+  --tracking-meta:     0.035em; /* supporting metadata — quiet separation */
   --tracking-h4:       0.025em; /* Cormorant h4 — editorial warmth */
   --tracking-h3:       0.035em; /* Cormorant h3 — slight lift */
   --tracking-h2:       0.06em;  /* Cinzel h2 — architectural spacing */
@@ -4649,6 +4653,61 @@ h1, h2, h3, h4, h5, h6,
 .ln-breath-shell {
   position: relative;
   isolation: isolate;
+}
+
+/* Canonical Work reading grammar — shared roles, not page-local sizes. */
+.ln-work-hero-title {
+  max-width: 18ch;
+  margin-inline: auto;
+  font-family: var(--font-display);
+  font-size: var(--text-h1);
+  font-weight: var(--weight-h1);
+  line-height: var(--leading-h1);
+  letter-spacing: var(--tracking-h1);
+  text-wrap: balance;
+}
+
+.ln-work-hero-lead {
+  max-width: 58ch;
+  margin-inline: auto;
+  font-family: var(--font-editorial);
+  font-size: var(--text-lead);
+  line-height: var(--leading-lead);
+  text-wrap: pretty;
+}
+
+.ln-work-section-title {
+  font-family: var(--font-editorial);
+  font-size: var(--text-h2);
+  font-weight: var(--weight-h3);
+  line-height: var(--leading-h2);
+  letter-spacing: var(--tracking-h3);
+  text-wrap: balance;
+}
+
+.ln-work-meta {
+  font-family: var(--font-body);
+  font-size: var(--text-meta);
+  line-height: 1.5;
+  letter-spacing: var(--tracking-meta);
+}
+
+.ln-work-wid {
+  overflow-wrap: anywhere;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: var(--text-sm);
+  letter-spacing: 0.045em;
+}
+
+@media (max-width: 640px) {
+  .ln-work-hero-title {
+    max-width: 14ch;
+    letter-spacing: 0.045em;
+  }
+
+  .ln-work-hero-lead {
+    max-width: 38ch;
+  }
 }
 
 /* Soft radial that slowly brightens — color via --ln-breath-hue */

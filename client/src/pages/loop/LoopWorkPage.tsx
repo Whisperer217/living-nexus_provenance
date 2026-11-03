@@ -365,9 +365,8 @@ export default function LoopWorkPage() {
             {LOOP_PRODUCT.name}
           </p>
           <h1
-            className="text-4xl sm:text-6xl md:text-7xl leading-[0.95] mb-5 mx-auto max-w-4xl ln-breath-reveal ln-breath-reveal-d1"
+            className="ln-work-hero-title mb-5 ln-breath-reveal ln-breath-reveal-d1"
             style={{
-              fontFamily: "'Cinzel', serif",
               color: "var(--ln-parchment)",
               textShadow: "0 2px 32px rgba(0,0,0,0.55)",
             }}
@@ -375,9 +374,8 @@ export default function LoopWorkPage() {
             {song.title}
           </h1>
           <p
-            className="font-body text-lg sm:text-xl mb-8 mx-auto max-w-2xl ln-breath-reveal ln-breath-reveal-d2"
+            className="ln-work-hero-lead mb-8 ln-breath-reveal ln-breath-reveal-d2"
             style={{
-              fontFamily: "'Cormorant Garamond', serif",
               color: "color-mix(in srgb, var(--ln-parchment) 88%, transparent)",
             }}
           >
@@ -553,16 +551,15 @@ export default function LoopWorkPage() {
               Testimony
             </p>
             <h2
-              className="font-heading text-3xl sm:text-4xl mb-6"
+              className="ln-work-section-title mb-6"
               style={{ color: "var(--ln-parchment)" }}
             >
               Origin
             </h2>
             {origin ? (
               <blockquote
-                className="font-body text-xl sm:text-2xl leading-relaxed ln-breath-rule"
+                className="ln-work-hero-lead max-w-none ml-0 ln-breath-rule"
                 style={{
-                  fontFamily: "'Cormorant Garamond', serif",
                   color: "color-mix(in srgb, var(--ln-parchment) 92%, transparent)",
                   borderLeft: `2px solid hsla(${breath.hue.toFixed(1)}, 65%, 55%, 0.65)`,
                   paddingLeft: 16,
@@ -577,7 +574,7 @@ export default function LoopWorkPage() {
             )}
             {(song.genre || song.bpm) && (
               <div
-                className="flex flex-wrap gap-4 mt-8 text-xs uppercase tracking-[0.14em]"
+                className="ln-work-meta flex flex-wrap gap-4 mt-8 uppercase"
                 style={{ color: "color-mix(in srgb, var(--ln-parchment) 45%, transparent)" }}
               >
                 {parseWorkGenres(song.genre).map((workGenre) => <span key={workGenre}>{workGenre}</span>)}
@@ -597,7 +594,7 @@ export default function LoopWorkPage() {
               Provenance
             </p>
             <h2
-              className="font-heading text-3xl sm:text-4xl mb-4"
+              className="ln-work-section-title mb-4"
               style={{ color: "var(--ln-parchment)" }}
             >
               Chain of record
@@ -608,7 +605,7 @@ export default function LoopWorkPage() {
                 style={{ borderTop: "1px solid rgba(196,154,40,0.2)", borderBottom: "1px solid rgba(196,154,40,0.2)" }}
               >
                 <ShieldCheck size={18} style={{ color: "#4ADE80" }} />
-                <code className="font-mono text-sm" style={{ color: "var(--ln-gold)" }}>
+                <code className="ln-work-wid" style={{ color: "var(--ln-gold)" }}>
                   {wid}
                 </code>
                 <button type="button" onClick={copyWid} className="p-1.5 opacity-70 hover:opacity-100" aria-label="Copy WID">

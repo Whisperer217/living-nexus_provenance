@@ -47,6 +47,14 @@
 
 ## Release track 1 — Make the core Work readable
 
+### P1.0 Work typography/readability slice — DONE
+
+- [x] Add shared semantic hero, lead, section-title, metadata, and WID typography roles.
+- [x] Apply the roles to the canonical `/song/:id` Work hero, Testimony, Chain of Record, and metadata.
+- [x] Improve long-title wrapping, editorial line-height, and long-WID wrapping at narrow widths.
+- [x] Add focused Work hero regression coverage; no registry, playback, route, or data behavior changed.
+- [x] Validate focused tests, TypeScript, production build, whitespace, and a 375px canonical Work screenshot.
+
 ### P1.1 Canonical Work header — NOW
 
 **Outcome:** Every public Work surface has the same readable identity block.
