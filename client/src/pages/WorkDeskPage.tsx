@@ -2,11 +2,13 @@ import { useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "wouter";
 import {
+  Activity,
   Archive,
   ArrowRight,
   ChevronRight,
   FolderKanban,
   LibraryBig,
+  ListMusic,
   Loader2,
   Music2,
   Pencil,
@@ -75,6 +77,39 @@ function DeskLink({ href, icon: Icon, eyebrow, title, description, meta }: {
   );
 }
 
+type ActivityItem = {
+  id: string;
+  kind: "work" | "release" | "playlist";
+  title: string;
+  detail: string;
+  timestamp: Date | string | null | undefined;
+  href?: string;
+  workId?: number;
+};
+
+function relativeActivityTime(value: ActivityItem["timestamp"]) {
+  if (!value) return "Recent";
+  const elapsed = Date.now() - new Date(value).getTime();
+  if (!Number.isFinite(elapsed) || elapsed < 0) return "Just now";
+  const minutes = Math.floor(elapsed / 60_000);
+  if (minutes < 1) return "Just now";
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days}d ago`;
+  return new Date(value).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
+
+function ActivityRow({ item, onSelectWork }: { item: ActivityItem; onSelectWork: (workId: number) => void }) {
+  const Icon = item.kind === "work" ? Music2 : item.kind === "release" ? LibraryBig : ListMusic;
+  const content = <><span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg" style={{ color: "var(--ln-gold)", background: "rgba(196,154,40,0.09)" }}><Icon size={15} aria-hidden /></span><span className="min-w-0 flex-1"><span className="block truncate text-sm" style={{ color: "var(--ln-parchment)" }}>{item.title}</span><span className="mt-1 block truncate text-xs" style={{ color: "var(--ln-smoke)" }}>{item.detail}</span></span><span className="shrink-0 text-right text-[11px]" style={{ color: "var(--ln-gold-dim)" }}>{relativeActivityTime(item.timestamp)}</span></>;
+  if (item.kind === "work" && item.workId) {
+    return <button type="button" onClick={() => onSelectWork(item.workId!)} className="ln-nav-interactive flex min-w-0 w-full items-center gap-3 rounded-xl border p-2.5 text-left focus-visible:outline-none" style={{ borderColor: "rgba(196,154,40,0.16)", background: "rgba(255,255,255,0.025)" }}>{content}</button>;
+  }
+  return <Link href={item.href ?? "/creator/collections"} className="ln-nav-interactive flex min-w-0 items-center gap-3 rounded-xl border p-2.5 focus-visible:outline-none" style={{ borderColor: "rgba(196,154,40,0.16)", background: "rgba(255,255,255,0.025)" }}>{content}</Link>;
+}
+
 export default function WorkDeskPage() {
   const { user, loading, isAuthenticated } = useAuth();
   const { openEditor } = useWorkEditorActions();
@@ -99,6 +134,37 @@ export default function WorkDeskPage() {
   }, [filter, search, works]);
   const selected = works.find((work) => work.id === selectedId) ?? visibleWorks[0] ?? null;
   const publishedCount = works.filter((work) => (work.status ?? "Published") === "Published").length;
+  const recentActivity = useMemo<ActivityItem[]>(() => {
+    const workItems: ActivityItem[] = works
+      .filter((work) => work.status !== "Deleted")
+      .map((work) => ({
+        id: `work-${work.id}`,
+        kind: "work",
+        title: work.title,
+        detail: work.witnessId ?? `WORK-${work.id}`,
+        timestamp: work.updatedAt ?? work.createdAt,
+        workId: work.id,
+      }));
+    const releaseItems: ActivityItem[] = (releasesQuery.data ?? []).map((release: any) => ({
+      id: `release-${release.id}`,
+      kind: "release",
+      title: release.title || "Untitled Draft Release",
+      detail: `${release.trackCount ?? 0} Works · private draft`,
+      timestamp: release.updatedAt ?? release.createdAt,
+      href: "/creator/collections",
+    }));
+    const playlistItems: ActivityItem[] = (playlistsQuery.data ?? []).map((playlist: any) => ({
+      id: `playlist-${playlist.id}`,
+      kind: "playlist",
+      title: playlist.name || "Untitled Playlist",
+      detail: playlist.isPublic ? "public listening path" : "private listening path",
+      timestamp: playlist.updatedAt ?? playlist.createdAt,
+      href: "/profile?tab=collections",
+    }));
+    return [...workItems, ...releaseItems, ...playlistItems]
+      .sort((left, right) => new Date(right.timestamp ?? 0).getTime() - new Date(left.timestamp ?? 0).getTime())
+      .slice(0, 8);
+  }, [playlistsQuery.data, releasesQuery.data, works]);
 
   if (loading) return <main className="flex min-h-[60vh] items-center justify-center"><Loader2 className="h-7 w-7 animate-spin" style={{ color: "var(--ln-gold)" }} /></main>;
   if (!user) return <main className="mx-auto flex min-h-[65vh] max-w-xl flex-col items-center justify-center px-5 text-center"><p className="font-display text-xs tracking-[0.22em]" style={{ color: "var(--ln-gold)" }}>WORK DESK</p><h1 className="mt-3 text-3xl" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>Your registered Works, in one place.</h1><p className="mt-4 text-base leading-relaxed" style={{ color: "var(--ln-smoke)" }}>Sign in to open the canonical Work Desk.</p><a href={getLoginUrl("/work-desk")} className="mt-7 inline-flex min-h-11 items-center rounded-lg px-5 text-sm font-semibold" style={{ background: "var(--ln-gold)", color: "var(--ln-coal)" }}>Sign in</a></main>;
@@ -128,7 +194,12 @@ export default function WorkDeskPage() {
           </section>
         </div>
 
-        <section aria-labelledby="work-desk-relationships" className="mt-4 grid gap-4 md:grid-cols-2"><DeskLink href="/creator/collections" icon={LibraryBig} eyebrow="03 · RELEASE RELATIONSHIPS" title="Draft Releases & Collections" description="Open the existing Collections workspace to create or continue private Draft Releases from registered Works." meta={`${releasesQuery.data?.length ?? 0} draft releases`} /><DeskLink href="/profile?tab=collections" icon={Plus} eyebrow="04 · LISTENING RELATIONSHIPS" title="Named Playlists" description="Manage editable listening paths without duplicating Works or creating new Witness IDs." meta={`${playlistsQuery.data?.length ?? 0} named playlists`} /></section>
+        <section aria-labelledby="work-desk-activity" className="mt-4 rounded-2xl border p-4 sm:p-5" style={{ borderColor: "rgba(196,154,40,0.25)", background: "linear-gradient(145deg, rgba(196,154,40,0.06), rgba(0,0,0,0.2))" }}>
+          <div className="flex flex-wrap items-start justify-between gap-3"><div><p className="flex items-center gap-2 font-display text-[10px] tracking-[0.18em]" style={{ color: "var(--ln-gold)" }}><Activity size={14} /> 03 · RECENT ACTIVITY</p><h2 id="work-desk-activity" className="mt-1 text-2xl" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>Latest edited records</h2><p className="mt-1 text-sm" style={{ color: "var(--ln-smoke)" }}>A quick return to the Works and collections you touched most recently.</p></div><span className="rounded-full border px-2.5 py-1 text-xs" style={{ borderColor: "rgba(196,154,40,0.25)", color: "var(--ln-gold)" }}>Read-only view</span></div>
+          {recentActivity.length === 0 ? <div className="mt-4 rounded-xl border border-dashed p-5 text-sm" style={{ borderColor: "rgba(196,154,40,0.22)", color: "var(--ln-smoke)" }}>Recent edits will appear here as you work on registered Works and collections.</div> : <div className="mt-4 grid gap-2 md:grid-cols-2">{recentActivity.map((item) => <ActivityRow key={item.id} item={item} onSelectWork={setSelectedId} />)}</div>}
+        </section>
+
+        <section aria-labelledby="work-desk-relationships" className="mt-4 grid gap-4 md:grid-cols-2"><DeskLink href="/creator/collections" icon={LibraryBig} eyebrow="04 · RELEASE RELATIONSHIPS" title="Draft Releases & Collections" description="Open the existing Collections workspace to create or continue private Draft Releases from registered Works." meta={`${releasesQuery.data?.length ?? 0} draft releases`} /><DeskLink href="/profile?tab=collections" icon={Plus} eyebrow="05 · LISTENING RELATIONSHIPS" title="Named Playlists" description="Manage editable listening paths without duplicating Works or creating new Witness IDs." meta={`${playlistsQuery.data?.length ?? 0} named playlists`} /></section>
         <section className="mt-4 flex flex-col gap-4 rounded-2xl border p-5 sm:flex-row sm:items-center sm:justify-between" style={{ borderColor: "rgba(196,154,40,0.2)", background: "rgba(196,154,40,0.04)" }}><div><p className="flex items-center gap-2 font-display text-[10px] tracking-[0.18em]" style={{ color: "var(--ln-gold)" }}><ShieldCheck size={14} /> ONE AUTHORITY</p><h2 className="mt-2 text-lg" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>The record stays canonical.</h2><p className="mt-1 text-sm" style={{ color: "var(--ln-smoke)" }}>Legacy Studio, Archive, Collections, and Work routes remain available while this Desk becomes the clearer starting point.</p></div><a href={PROVENANCE_PLAYER_URL} target="_blank" rel="noopener noreferrer" className="ln-nav-interactive inline-flex min-h-11 shrink-0 items-center gap-2 rounded-lg border px-4 text-sm" style={{ borderColor: "rgba(196,154,40,0.34)", color: "var(--ln-gold)" }}><Sparkles size={15} /> Companion Player</a></section>
         <p className="mt-5 flex items-center gap-2 text-xs" style={{ color: "var(--ln-smoke)" }}><Archive size={13} /> Existing management pages are preserved during this validation phase.</p>
       </div>

@@ -33,4 +33,16 @@ describe("Work Desk consolidation", () => {
     expect(studio).toContain('href="/creator/collections"');
     expect(studio).toContain('href="/manage"');
   });
+
+  it("composes recent activity from existing Works and collection projections", () => {
+    const desk = read("client/src/pages/WorkDeskPage.tsx");
+    expect(desk).toContain("updatedAt ?? work.createdAt");
+    expect(desk).toContain("releasesQuery.data");
+    expect(desk).toContain("playlistsQuery.data");
+    expect(desk).toContain("Latest edited records");
+    expect(desk).toContain("Read-only view");
+    expect(desk).toContain("slice(0, 8)");
+    expect(desk).toContain("onSelectWork={setSelectedId}");
+    expect(desk).not.toContain("createActivity");
+  });
 });

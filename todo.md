@@ -67,6 +67,13 @@
 - [ ] Remove duplicate title, creator, and WID presentations from the first viewport.
 - [ ] Add focused contract coverage for title, creator, WID, action order, and missing-art states.
 
+### P1.4 Recent activity return path — DONE
+
+- [x] Add a read-only latest-edited panel to Work Desk using existing Work, Draft Release, and Named Playlist timestamps.
+- [x] Cap the merged activity view to eight records and link each record back to its canonical editor or collection surface.
+- [x] Preserve WIDs, registry history, permissions, playback, and collection authority; no activity table or migration added.
+- [x] Validate focused contract coverage, TypeScript, whitespace, responsive layout, and production build.
+
 ### P1.2 Activity and Signals architecture — NEXT
 
 **Outcome:** Community activity becomes a contained secondary voice rather than an overlay chorus.
