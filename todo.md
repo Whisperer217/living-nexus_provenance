@@ -86,6 +86,17 @@
 - [x] Prove the preview does not create a second audio element or playback authority.
 - [x] Validate full tests, TypeScript, production build, whitespace, and desktop/mobile smoke captures.
 
+### P1.6 Playlist Rack integration — DONE
+
+- [x] Add a Playlist Rack beside Album Case using existing Named Playlist projections.
+- [x] Add selected registered Works through the protected `playlists.addTrack` procedure.
+- [x] Display playlist occurrences while preserving intentional duplicates as distinct membership records.
+- [x] Support desktop drag ordering and mobile/touch Move Up/Down controls through `playlists.reorder`.
+- [x] Support occurrence removal through `playlists.removeTrack` with existing membership authorization.
+- [x] Add unsaved-order warning, explicit Save Order, retry/error feedback, and cache invalidation.
+- [x] Add contract coverage proving no new playlist authority, schema, or duplicate Work system was introduced.
+- [x] Validate full tests, TypeScript, production build, and whitespace.
+
 ### P1.2 Activity and Signals architecture — NEXT
 
 **Outcome:** Community activity becomes a contained secondary voice rather than an overlay chorus.

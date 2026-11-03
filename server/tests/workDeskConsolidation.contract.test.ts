@@ -75,4 +75,22 @@ describe("Work Desk consolidation", () => {
     expect(desk).not.toContain("new Audio(");
     expect(desk).not.toContain("<audio");
   });
+
+  it("connects Playlist Rack to existing Named Playlist authority", () => {
+    const desk = read("client/src/pages/WorkDeskPage.tsx");
+    const router = read("server/routers/playlists.ts");
+    expect(desk).toContain("function PlaylistRack");
+    expect(desk).toContain("trpc.playlists.getById.useQuery");
+    expect(desk).toContain("trpc.playlists.addTrack.useMutation");
+    expect(desk).toContain("trpc.playlists.removeTrack.useMutation");
+    expect(desk).toContain("trpc.playlists.reorder.useMutation");
+    expect(desk).toContain("selectedWork.id");
+    expect(desk).toContain("duplicates remain distinct");
+    expect(desk).toContain("Playlist Rack");
+    expect(router).toContain("addTrack: protectedProcedure");
+    expect(router).toContain("removeTrack: protectedProcedure");
+    expect(router).toContain("reorder: protectedProcedure");
+    expect(router).toContain("isPlaylistMember(input.playlistId, ctx.user.id)");
+    expect(desk).not.toContain("createPlaylist({");
+  });
 });

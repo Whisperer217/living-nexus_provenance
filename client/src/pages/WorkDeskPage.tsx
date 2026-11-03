@@ -230,6 +230,82 @@ function AlbumManagementPanel({
   );
 }
 
+function PlaylistRack({
+  playlists,
+  selectedWork,
+  isAuthenticated,
+}: {
+  playlists: any[];
+  selectedWork: Work | null;
+  isAuthenticated: boolean;
+}) {
+  const utils = trpc.useUtils();
+  const [selectedPlaylistId, setSelectedPlaylistId] = useState<number | null>(playlists[0]?.id ?? null);
+  const [trackItems, setTrackItems] = useState<any[]>([]);
+  const [draggedTrackId, setDraggedTrackId] = useState<number | null>(null);
+  const [orderDirty, setOrderDirty] = useState(false);
+  const playlistQuery = trpc.playlists.getById.useQuery(
+    { id: selectedPlaylistId ?? 1 },
+    { enabled: isAuthenticated && !!selectedPlaylistId, staleTime: 30_000, retry: false },
+  );
+  const addTrack = trpc.playlists.addTrack.useMutation({
+    onSuccess: async () => {
+      await utils.playlists.getById.invalidate({ id: selectedPlaylistId ?? 1 });
+      await utils.playlists.mine.invalidate();
+      toast.success(`Added “${selectedWork?.title ?? "Work"}” to the playlist.`);
+    },
+    onError: (error) => toast.error(error.message || "The Work could not be added."),
+  });
+  const removeTrack = trpc.playlists.removeTrack.useMutation({
+    onSuccess: async () => {
+      await utils.playlists.getById.invalidate({ id: selectedPlaylistId ?? 1 });
+      await utils.playlists.mine.invalidate();
+      toast.success("Playlist occurrence removed.");
+    },
+    onError: (error) => toast.error(error.message || "The playlist occurrence could not be removed."),
+  });
+  const reorder = trpc.playlists.reorder.useMutation({
+    onSuccess: async () => {
+      await utils.playlists.getById.invalidate({ id: selectedPlaylistId ?? 1 });
+      await utils.playlists.mine.invalidate();
+      setOrderDirty(false);
+      toast.success("Playlist order saved.");
+    },
+    onError: (error) => toast.error(error.message || "Playlist order could not be saved."),
+  });
+
+  useEffect(() => {
+    if (!orderDirty) setTrackItems((playlistQuery.data?.tracks as any[]) ?? []);
+  }, [playlistQuery.data, orderDirty]);
+
+  const choosePlaylist = (id: number) => {
+    if (orderDirty && !window.confirm("Discard your unsaved playlist order?")) return;
+    setOrderDirty(false);
+    setSelectedPlaylistId(id);
+  };
+  const moveTrack = (index: number, direction: -1 | 1) => {
+    const nextIndex = index + direction;
+    if (nextIndex < 0 || nextIndex >= trackItems.length) return;
+    setTrackItems((current) => {
+      const next = [...current];
+      [next[index], next[nextIndex]] = [next[nextIndex], next[index]];
+      return next;
+    });
+    setOrderDirty(true);
+  };
+  const saveOrder = () => {
+    if (!selectedPlaylistId || trackItems.length === 0) return;
+    reorder.mutate({ playlistId: selectedPlaylistId, orderedPlaylistTrackIds: trackItems.map((track) => track.id) });
+  };
+
+  return (
+    <section aria-labelledby="work-desk-playlist-rack" className="mt-4 rounded-2xl border p-4 sm:p-5" style={{ borderColor: "rgba(196,154,40,0.28)", background: "linear-gradient(145deg, rgba(196,154,40,0.08), rgba(0,0,0,0.2))" }}>
+      <div className="flex flex-wrap items-start justify-between gap-3"><div><p className="flex items-center gap-2 font-display text-[10px] tracking-[0.18em]" style={{ color: "var(--ln-gold)" }}><ListMusic size={14} /> 07 · PLAYLIST RACK</p><h2 id="work-desk-playlist-rack" className="mt-1 text-2xl" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>Playlist Rack</h2><p className="mt-1 max-w-2xl text-sm" style={{ color: "var(--ln-smoke)" }}>Carry the selected Work into an editable listening path without changing its Registry identity.</p></div><span className="rounded-full border px-2.5 py-1 text-xs" style={{ borderColor: "rgba(196,154,40,0.25)", color: "var(--ln-gold)" }}>Existing authority</span></div>
+      {playlists.length === 0 ? <div className="mt-4 rounded-xl border border-dashed p-5 text-sm" style={{ borderColor: "rgba(196,154,40,0.22)", color: "var(--ln-smoke)" }}>No Named Playlists yet. Create one in the existing Collections workspace, then return here to arrange it.</div> : <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(220px,.72fr)_minmax(0,1.28fr)]"><div className="space-y-2" role="listbox" aria-label="Named Playlists">{playlists.map((playlist) => <button key={playlist.id} type="button" role="option" aria-selected={selectedPlaylistId === playlist.id} onClick={() => choosePlaylist(playlist.id)} className="ln-nav-interactive flex w-full min-w-0 items-center gap-3 rounded-xl border p-3 text-left" style={{ borderColor: selectedPlaylistId === playlist.id ? "var(--ln-gold)" : "rgba(196,154,40,0.16)", background: selectedPlaylistId === playlist.id ? "rgba(196,154,40,0.12)" : "rgba(255,255,255,0.025)" }}><span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg" style={{ color: "var(--ln-gold)", background: "rgba(196,154,40,0.09)" }}><ListMusic size={17} /></span><span className="min-w-0 flex-1"><span className="block truncate text-sm" style={{ color: "var(--ln-parchment)" }}>{playlist.name}</span><span className="mt-1 block text-xs" style={{ color: "var(--ln-smoke)" }}>{playlist.trackCount ?? 0} occurrences · {playlist.isPublic ? "public" : "private"}</span></span></button>)}</div><div className="min-w-0 rounded-xl border p-4" style={{ borderColor: "rgba(196,154,40,0.18)", background: "rgba(0,0,0,0.16)" }}>{playlistQuery.isLoading ? <div className="flex justify-center py-10"><Loader2 className="h-5 w-5 animate-spin" style={{ color: "var(--ln-gold)" }} /></div> : playlistQuery.error ? <p className="p-4 text-sm" style={{ color: "var(--ln-smoke)" }}>This playlist could not be opened. <button type="button" onClick={() => playlistQuery.refetch()} className="underline" style={{ color: "var(--ln-gold)" }}>Retry</button></p> : <><div className="flex flex-wrap items-start justify-between gap-3"><div><p className="text-lg" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>{playlistQuery.data?.playlist?.name}</p><p className="mt-1 text-xs" style={{ color: "var(--ln-smoke)" }}>{trackItems.length} playlist occurrences · duplicates remain distinct</p></div><button type="button" disabled={!selectedWork || addTrack.isPending} onClick={() => selectedPlaylistId && selectedWork && addTrack.mutate({ playlistId: selectedPlaylistId, songId: selectedWork.id })} className="ln-nav-interactive inline-flex min-h-10 items-center gap-2 rounded-lg px-3 text-xs font-semibold disabled:opacity-50" style={{ background: "var(--ln-gold)", color: "var(--ln-coal)" }}><Plus size={14} /> {selectedWork ? `Add “${selectedWork.title}”` : "Select a Work first"}</button></div><p className="mt-3 flex items-center gap-2 text-xs" style={{ color: "var(--ln-smoke)" }}><ShieldCheck size={14} style={{ color: "var(--ln-gold)" }} /> Adding and ordering use existing playlist ownership and integrity rules.</p><div className="mt-4 space-y-2">{trackItems.length === 0 ? <p className="rounded-xl border border-dashed p-5 text-sm" style={{ borderColor: "rgba(196,154,40,0.22)", color: "var(--ln-smoke)" }}>No occurrences yet. Select a Work in the cabinet, then add it here.</p> : trackItems.map((track, index) => <div key={track.id} draggable onDragStart={() => setDraggedTrackId(track.id)} onDragOver={(event) => event.preventDefault()} onDrop={() => { if (draggedTrackId === null || draggedTrackId === track.id) return; const from = trackItems.findIndex((entry) => entry.id === draggedTrackId); const to = index; setTrackItems((current) => { const next = [...current]; const [moved] = next.splice(from, 1); next.splice(to, 0, moved); return next; }); setDraggedTrackId(null); setOrderDirty(true); }} className="flex min-w-0 items-center gap-2 rounded-xl border p-2.5" style={{ borderColor: "rgba(196,154,40,0.14)", background: "rgba(255,255,255,0.025)" }}><span className="w-5 shrink-0 text-right font-mono text-xs" style={{ color: "var(--ln-gold-dim)" }}>{index + 1}</span><span className="min-w-0 flex-1 truncate text-sm" style={{ color: "var(--ln-parchment)" }}>{track.title ?? track.song?.title ?? "Untitled Work"}</span><button type="button" onClick={() => moveTrack(index, -1)} disabled={index === 0} aria-label={`Move ${track.title ?? "track"} up`} className="ln-nav-interactive rounded-md p-2 disabled:opacity-30" style={{ color: "var(--ln-gold)" }}><ArrowUp size={15} /></button><button type="button" onClick={() => moveTrack(index, 1)} disabled={index === trackItems.length - 1} aria-label={`Move ${track.title ?? "track"} down`} className="ln-nav-interactive rounded-md p-2 disabled:opacity-30" style={{ color: "var(--ln-gold)" }}><ArrowDown size={15} /></button><button type="button" onClick={() => selectedPlaylistId && removeTrack.mutate({ playlistTrackId: track.id, playlistId: selectedPlaylistId })} aria-label={`Remove ${track.title ?? "track"}`} className="ln-nav-interactive rounded-md px-2 py-1 text-[11px]" style={{ color: "var(--ln-smoke)" }}>Remove</button></div>)}</div><div className="mt-4 flex flex-wrap items-center justify-between gap-2"><p className="text-xs" style={{ color: orderDirty ? "var(--ln-gold)" : "var(--ln-smoke)" }}>{orderDirty ? "Unsaved playlist order" : "Playlist order saved"}</p><button type="button" disabled={!orderDirty || reorder.isPending} onClick={saveOrder} className="ln-nav-interactive inline-flex min-h-10 items-center gap-2 rounded-lg border px-3 text-xs font-semibold disabled:opacity-50" style={{ borderColor: "rgba(196,154,40,0.35)", color: "var(--ln-gold)" }}><Save size={14} /> {reorder.isPending ? "Saving…" : "Save order"}</button></div></>}</div></div>}
+    </section>
+  );
+}
+
 type ActivityItem = {
   id: string;
   kind: "work" | "release" | "playlist";
@@ -354,8 +430,9 @@ export default function WorkDeskPage() {
         </section>
 
         <AlbumManagementPanel albums={(albumsQuery.data ?? []) as any[]} drafts={(releasesQuery.data ?? []) as any[]} isAuthenticated={isAuthenticated} />
+        <PlaylistRack playlists={(playlistsQuery.data ?? []) as any[]} selectedWork={selected} isAuthenticated={isAuthenticated} />
 
-        <section aria-labelledby="work-desk-relationships" className="mt-4 grid gap-4 md:grid-cols-2"><DeskLink href="/creator/collections" icon={LibraryBig} eyebrow="05 · RELEASE RELATIONSHIPS" title="Draft Releases & Collections" description="Open the existing Collections workspace to create or continue private Draft Releases from registered Works." meta={`${releasesQuery.data?.length ?? 0} draft releases`} /><DeskLink href="/profile?tab=collections" icon={Plus} eyebrow="06 · LISTENING RELATIONSHIPS" title="Named Playlists" description="Manage editable listening paths without duplicating Works or creating new Witness IDs." meta={`${playlistsQuery.data?.length ?? 0} named playlists`} /></section>
+        <section aria-labelledby="work-desk-relationships" className="mt-4 grid gap-4 md:grid-cols-2"><DeskLink href="/creator/collections" icon={LibraryBig} eyebrow="08 · RELEASE RELATIONSHIPS" title="Draft Releases & Collections" description="Open the existing Collections workspace to create or continue private Draft Releases from registered Works." meta={`${releasesQuery.data?.length ?? 0} draft releases`} /><DeskLink href="/profile?tab=collections" icon={Plus} eyebrow="09 · LISTENING RELATIONSHIPS" title="Named Playlists" description="Manage editable listening paths without duplicating Works or creating new Witness IDs." meta={`${playlistsQuery.data?.length ?? 0} named playlists`} /></section>
         <section className="mt-4 flex flex-col gap-4 rounded-2xl border p-5 sm:flex-row sm:items-center sm:justify-between" style={{ borderColor: "rgba(196,154,40,0.2)", background: "rgba(196,154,40,0.04)" }}><div><p className="flex items-center gap-2 font-display text-[10px] tracking-[0.18em]" style={{ color: "var(--ln-gold)" }}><ShieldCheck size={14} /> ONE AUTHORITY</p><h2 className="mt-2 text-lg" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>The record stays canonical.</h2><p className="mt-1 text-sm" style={{ color: "var(--ln-smoke)" }}>Legacy Studio, Archive, Collections, and Work routes remain available while this Desk becomes the clearer starting point.</p></div><a href={PROVENANCE_PLAYER_URL} target="_blank" rel="noopener noreferrer" className="ln-nav-interactive inline-flex min-h-11 shrink-0 items-center gap-2 rounded-lg border px-4 text-sm" style={{ borderColor: "rgba(196,154,40,0.34)", color: "var(--ln-gold)" }}><Sparkles size={15} /> Companion Player</a></section>
         <p className="mt-5 flex items-center gap-2 text-xs" style={{ color: "var(--ln-smoke)" }}><Archive size={13} /> Existing management pages are preserved during this validation phase.</p>
       </div>
