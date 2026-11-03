@@ -63,4 +63,16 @@ describe("Work Desk consolidation", () => {
     expect(router).toContain("reorderTracks: protectedProcedure");
     expect(router).toContain("updateMeta: protectedProcedure");
   });
+
+  it("keeps album enhancements lightweight and uses the canonical playback authority", () => {
+    const desk = read("client/src/pages/WorkDeskPage.tsx");
+    expect(desk).toContain("formatTrackDuration(track.durationSeconds)");
+    expect(desk).toContain("selectedTrackIds");
+    expect(desk).toContain("Move selected to top");
+    expect(desk).toContain("Move selected to bottom");
+    expect(desk).toContain("addAndPlay({");
+    expect(desk).toContain("Album preview");
+    expect(desk).not.toContain("new Audio(");
+    expect(desk).not.toContain("<audio");
+  });
 });

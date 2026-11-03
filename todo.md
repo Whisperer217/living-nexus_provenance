@@ -82,6 +82,8 @@
 - [x] Save metadata and order through `collectionStudio.updateMeta` and `collectionStudio.reorderTracks` with cache invalidation and error/retry feedback.
 - [x] Keep sealed legacy membership immutable; route Draft Release membership changes to the existing revision-aware editor.
 - [x] Add unsaved-change protection and focused contract coverage; no schema, WID, media, registry, playback, or new backend authority added.
+- [x] Display track durations, add checkbox multi-select with bulk move-to-top/bottom, and add lightweight Preview/Pause through the existing PlayerContext.
+- [x] Prove the preview does not create a second audio element or playback authority.
 - [x] Validate full tests, TypeScript, production build, whitespace, and desktop/mobile smoke captures.
 
 ### P1.2 Activity and Signals architecture — NEXT
