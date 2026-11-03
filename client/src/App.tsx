@@ -68,6 +68,7 @@ export function shouldRenderCinematicSplash(pathname: string, freshSession: bool
 // This cuts initial bundle size significantly; pages load on first visit only
 const HomePage = lazy(() => import("./pages/HomePage"));
 const ExplorePage = lazy(() => import("./pages/ExplorePage"));
+const CreatorFieldGuidePage = lazy(() => import("./pages/CreatorFieldGuidePage"));
 const UploadPage = lazy(() => import("./pages/UploadPage"));
 const ManifestationStudio = lazy(() => import("./pages/manifestation-studio/ManifestationStudio"));
 const BatchUploadPage = lazy(() => import("./pages/BatchUploadPage"));
@@ -394,6 +395,7 @@ function Router() {
                 <Route path="/lexicon" component={LexiconPage} />
                 <Route path="/glossary"><Redirect to="/lexicon" /></Route>
                 <Route path="/learn" component={LearnPage} />
+                <Route path="/creator-field-guide" component={CreatorFieldGuidePage} />
                 <Route path="/playlists" component={PlaylistsPage} />
                 <Route path="/notifications" component={NotificationsPage} />
                 <Route path="/witness-registry" component={WitnessRegistryPage} />

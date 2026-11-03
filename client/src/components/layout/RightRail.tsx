@@ -116,7 +116,7 @@ export default function RightRail() {
       <button
         onClick={toggle}
         title={isOpen ? "Collapse right panel" : "Expand right panel"}
-        className="hidden lg:flex items-center justify-center"
+        className="ln-right-rail-desktop hidden lg:flex items-center justify-center"
         style={{
           position: "fixed",
           top: "50%",
@@ -140,14 +140,14 @@ export default function RightRail() {
       </button>
 
       <aside
-        className="hidden lg:flex flex-col overflow-y-auto"
+        className="ln-right-rail-desktop hidden lg:flex flex-col overflow-y-auto"
         style={{
           position: "fixed",
           top: 56, /* clear the 56px fixed TopBar */
-          right: isOpen ? 0 : -300,
-          bottom: 0,
-          width: 300,
-          background: "var(--ln-surface-rail)",
+          right: isOpen ? 0 : -320,
+          bottom: "var(--bottom-stack, 64px)",
+          width: 320,
+          background: "var(--ln-coal)",
           borderLeft: "1px solid var(--ln-border-subtle)",
           /* z-index: 80 — below ContextDrawer (300) and LeftRail (310),
              but above page content so it never disappears behind it */

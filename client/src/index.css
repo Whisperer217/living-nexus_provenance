@@ -6259,3 +6259,100 @@ button:active .ln-witness-sigil,
     transition: none !important;
   }
 }
+
+
+/* ── Cathedral Interface Standard v1 — visual modes ────────────────────────
+   Presentation-only tokens. These do not alter Work, WID, playback, or
+   Registry authority. Apply with data-ln-visual-mode on a page/work shell.
+   Public = listen and witness; Creator Domain = tend and organize;
+   Registry = inspect and verify. */
+:root {
+  --ln-mode-surface: var(--ln-void);
+  --ln-mode-panel: var(--ln-coal);
+  --ln-mode-raised: var(--ln-iron);
+  --ln-mode-border: color-mix(in srgb, var(--ln-gold) 22%, transparent);
+  --ln-mode-border-strong: color-mix(in srgb, var(--ln-gold) 42%, transparent);
+  --ln-mode-text: var(--ln-bone);
+  --ln-mode-heading: var(--ln-parchment);
+  --ln-mode-muted: var(--ln-smoke);
+  --ln-mode-accent: var(--ln-gold);
+  --ln-mode-accent-hot: var(--ln-gold-hot);
+  --ln-mode-status: var(--ln-seal-bright);
+  --ln-mode-density: 1;
+  --ln-mode-max-reading: 68ch;
+  --ln-icon-xs: 14px;
+  --ln-icon-sm: 16px;
+  --ln-icon-md: 20px;
+  --ln-icon-lg: 24px;
+  --ln-icon-stroke: 1.75;
+  --ln-control-min: 44px;
+  --ln-control-radius: 0.625rem;
+  --ln-focus-ring: 0 0 0 3px color-mix(in srgb, var(--ln-gold-hot) 42%, transparent);
+}
+
+[data-ln-visual-mode="public"] {
+  --ln-mode-surface: var(--ln-void);
+  --ln-mode-panel: var(--ln-coal);
+  --ln-mode-raised: var(--ln-iron);
+  --ln-mode-border: color-mix(in srgb, var(--ln-gold) 18%, transparent);
+  --ln-mode-text: var(--ln-bone);
+  --ln-mode-heading: var(--ln-parchment);
+  --ln-mode-muted: color-mix(in srgb, var(--ln-bone) 66%, transparent);
+  --ln-mode-accent: var(--ln-gold);
+  --ln-mode-status: var(--ln-seal-bright);
+  --ln-mode-density: 1;
+}
+
+[data-ln-visual-mode="creator-domain"] {
+  --ln-mode-surface: var(--ln-void);
+  --ln-mode-panel: var(--ln-coal);
+  --ln-mode-raised: var(--ln-iron);
+  --ln-mode-border: color-mix(in srgb, var(--ln-gold) 28%, transparent);
+  --ln-mode-border-strong: color-mix(in srgb, var(--ln-gold-hot) 54%, transparent);
+  --ln-mode-text: var(--ln-bone);
+  --ln-mode-heading: var(--ln-parchment);
+  --ln-mode-muted: var(--ln-smoke);
+  --ln-mode-accent: var(--ln-gold-hot);
+  --ln-mode-status: var(--ln-gold-hot);
+  --ln-mode-density: 0.96;
+  --ln-mode-max-reading: 74ch;
+}
+
+[data-ln-visual-mode="registry"] {
+  --ln-mode-surface: var(--ln-void);
+  --ln-mode-panel: var(--ln-coal);
+  --ln-mode-raised: var(--ln-iron);
+  --ln-mode-border: color-mix(in srgb, var(--ln-gold) 34%, transparent);
+  --ln-mode-border-strong: color-mix(in srgb, var(--ln-gold-hot) 58%, transparent);
+  --ln-mode-text: var(--ln-bone);
+  --ln-mode-heading: var(--ln-parchment);
+  --ln-mode-muted: var(--ln-smoke);
+  --ln-mode-accent: var(--ln-gold);
+  --ln-mode-status: var(--ln-seal-bright);
+  --ln-mode-density: 0.92;
+  --ln-mode-max-reading: 82ch;
+}
+
+.ln-icon-button {
+  min-width: var(--ln-control-min);
+  min-height: var(--ln-control-min);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--ln-control-radius);
+  color: var(--ln-mode-accent);
+  transition: background-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
+}
+
+.ln-icon-button:hover { background: color-mix(in srgb, var(--ln-mode-accent) 10%, transparent); }
+.ln-icon-button:focus-visible { outline: none; box-shadow: var(--ln-focus-ring); }
+
+@media (max-width: 1279px) {
+  /* Emergency containment: the desktop signal rail must never cover a Work
+     surface in a narrow desktop/tablet viewport. */
+  .ln-right-rail-desktop { display: none !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ln-icon-button { transition: none; }
+}

@@ -14,7 +14,7 @@
  */
 
 import { useState, useRef, useCallback, useEffect } from "react";
-import { useLocation } from "wouter";
+import { Link, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
@@ -217,7 +217,7 @@ function CovenantStep({ onAccept, isSaving }: { onAccept: () => void; isSaving: 
 
             <div className="space-y-3">
               <p className="text-xs font-mono uppercase tracking-widest" style={{ color: "var(--ln-gold)" }}>Article V — The Testimony Obligation</p>
-              <p className="leading-loose">As a creator in this archive, you are encouraged — not required — to leave testimony. Testimony is a statement about your work, your process, or your creative identity. It becomes part of the permanent record. Future witnesses of your work will read it. Write with intention.</p>
+              <p className="leading-loose">As a creator in this archive, you are expected to leave testimony for the Works you register. Testimony is a statement about your work, your process, or your creative identity. It becomes part of the permanent record. Future witnesses of your work will read it. Write with intention.</p>
             </div>
 
             <div className="space-y-3">
@@ -486,8 +486,8 @@ function TestimonyStep({
         style={{ background: "rgba(220,38,38,0.06)", border: "1px solid rgba(220,38,38,0.2)", color: "var(--ln-smoke)" }}
       >
         <p className="font-semibold mb-2" style={{ color: "#DC2626" }}>What is Testimony?</p>
-        <p>Testimony is a statement that lives in the archive permanently. It can be about a specific work (linked to a WID), about your creative process, or about something you want the archive to remember.</p>
-        <p className="mt-2 opacity-70">Unlike your origin statement, testimony is immutable once submitted. Write with intention.</p>
+        <p>Testimony is the human account that makes a Work witness-ready. It can describe a specific work, your creative process, or something you want the archive to remember.</p>
+        <p className="mt-2 opacity-70">Unlike an editable profile description, testimony becomes part of the permanent record once submitted. You may skip this step temporarily, but complete it before treating a Work as fully witnessed.</p>
       </div>
 
       <div className="space-y-2">
@@ -826,8 +826,17 @@ export default function OnboardingManifest() {
             <Star className="w-4 h-4" style={{ color: "var(--ln-gold)" }} />
             <span className="text-xs font-mono uppercase tracking-widest" style={{ color: "var(--ln-gold)" }}>Living Nexus</span>
           </button>
-          <div className="text-xs opacity-40 font-mono">
-            Step {currentStepIdx + 1} of {STEPS.length}
+          <div className="flex items-center gap-4">
+            <Link
+              href="/creator-field-guide"
+              className="hidden sm:inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-widest transition-opacity hover:opacity-100"
+              style={{ color: "var(--ln-gold)", opacity: 0.7 }}
+            >
+              <BookOpen className="w-3 h-3" /> Field Guide
+            </Link>
+            <div className="text-xs opacity-40 font-mono">
+              Step {currentStepIdx + 1} of {STEPS.length}
+            </div>
           </div>
         </div>
 

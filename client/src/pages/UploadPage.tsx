@@ -5,7 +5,7 @@
 ═══════════════════════════════════════════════════════════════════ */
 
 import { useState, useRef, useCallback, useEffect } from "react";
-import { useLocation } from "wouter";
+import { Link, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import {
@@ -959,13 +959,22 @@ export default function UploadPage() {
                 {uploadMode === "audio" ? "Register your music with cryptographic provenance — BDDT Publishing / Command Domains LLC" : uploadMode === "lyrics" ? "Register your lyrics with a cryptographic Witness ID — authorship sealed at creation" : uploadMode === "manuscript" ? "Seal your manuscript with provenance — every word, dated and verified" : uploadMode === "game" ? "Register your game as a witnessed manifestation — playable, versioned, provenance-sealed" : uploadMode === "visual" ? "Register your visual works — photography, art, and imagery sealed with a Witness ID" : "Register your comic or novel — art and story, sealed with a Witness ID"}
               </p>
             </div>
-            <button
-              onClick={() => navigate("/batch-upload")}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-body flex-shrink-0 transition-all"
-              style={{ background: "var(--ln-coal)", border: "1px solid #C49A28", color: "var(--ln-gold)" }}
-            >
-              <Upload size={12} /> Batch Upload
-            </button>
+            <div className="flex flex-col items-end gap-2 sm:flex-row sm:items-center">
+              <Link
+                href="/creator-field-guide"
+                className="inline-flex items-center gap-1 text-[10px] font-heading uppercase tracking-widest transition-opacity hover:opacity-100"
+                style={{ color: "var(--ln-gold)", opacity: 0.75 }}
+              >
+                <Shield size={12} /> Need the guide?
+              </Link>
+              <button
+                onClick={() => navigate("/batch-upload")}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-body flex-shrink-0 transition-all"
+                style={{ background: "var(--ln-coal)", border: "1px solid #C49A28", color: "var(--ln-gold)" }}
+              >
+                <Upload size={12} /> Batch Upload
+              </button>
+            </div>
           </div>
         </div>
 
