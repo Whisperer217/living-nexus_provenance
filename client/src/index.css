@@ -5030,6 +5030,38 @@ button:active .ln-witness-sigil,
 
 .ln-dimensional-action:active { transform: translateY(1px); }
 
+.ln-nav-interactive {
+  transition:
+    transform 180ms ease,
+    color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.ln-nav-interactive:hover {
+  transform: translateY(-1px);
+}
+
+.ln-nav-interactive:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.ln-nav-interactive:focus-visible {
+  outline: 2px solid var(--ln-gold-hot);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ln-nav-interactive {
+    transition: none;
+  }
+
+  .ln-nav-interactive:hover,
+  .ln-nav-interactive:active {
+    transform: none;
+  }
+}
+
 .ln-voice-comment { transition: border-color 180ms ease, box-shadow 180ms ease; }
 .ln-voice-comment:hover { border-color: color-mix(in srgb, var(--ln-gold) 28%, transparent) !important; }
 .ln-voice-comment__avatar { border: 1px solid color-mix(in srgb, var(--ln-gold) 30%, transparent); box-shadow: inset 0 1px 0 rgba(255,255,255,0.09), 0 3px 8px rgba(0,0,0,0.24); }
