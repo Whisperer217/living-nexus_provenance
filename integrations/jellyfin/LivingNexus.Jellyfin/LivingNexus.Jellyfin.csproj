@@ -6,7 +6,7 @@
     <LangVersion>latest</LangVersion>
     <AssemblyName>LivingNexus.Jellyfin</AssemblyName>
     <RootNamespace>LivingNexus.Jellyfin</RootNamespace>
-    <Version>0.1.0</Version>
+    <Version>0.1.1</Version>
     <Authors>BDDT Publishing LLC</Authors>
     <Description>Read-only Living Nexus Portable Witness discovery channel for Jellyfin 12.2.</Description>
     <PackageId>LivingNexus.Jellyfin</PackageId>

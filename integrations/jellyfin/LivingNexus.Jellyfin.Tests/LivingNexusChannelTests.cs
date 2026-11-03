@@ -2,6 +2,7 @@ using System.Net;
 using System.Text;
 using LivingNexus.Jellyfin.Channel;
 using MediaBrowser.Controller.Channels;
+using MediaBrowser.Model.Entities;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
@@ -43,7 +44,7 @@ public sealed class LivingNexusChannelTests
           }]
         }
         """;
-        var channel = CreateChannel(payload);
+        var (channel, handler) = CreateChannelWithHandler(payload, MpegFrameAtStart);
 
         var result = await channel.GetChannelItems(new InternalChannelItemQuery { StartIndex = 0, Limit = 50 }, CancellationToken.None);
 
@@ -54,7 +55,101 @@ public sealed class LivingNexusChannelTests
         var source = Assert.Single(item.MediaSources);
         Assert.Equal("https://www.livingnexus.org/api/provenance-player/media/60001", source.Path);
         Assert.True(source.IsRemote);
+        Assert.Equal("mp3", source.Container);
+        Assert.Equal(new[] { "mp3" }, source.Formats);
+        Assert.True(source.SupportsDirectPlay);
+        Assert.False(source.SupportsDirectStream);
+        Assert.True(source.SupportsTranscoding);
+        var audioStream = Assert.Single(source.MediaStreams);
+        Assert.Equal(MediaStreamType.Audio, audioStream.Type);
+        Assert.Equal("mp3", audioStream.Codec);
+        Assert.Equal(0, audioStream.Index);
+        Assert.True(audioStream.IsDefault);
+        Assert.True(handler.SawGatewayProbe);
+        Assert.Equal("bytes=0-15", handler.GatewayProbeRange);
         Assert.Equal("https://www.livingnexus.org/share/WID-MUS-PUSH-FORWARD", item.HomePageUrl);
+    }
+
+    [Fact]
+    public async Task Accepts_an_id3_header_only_when_the_transient_gateway_resolution_declares_an_mp3_object()
+    {
+        var payload = """
+        {
+          "schema": "living-nexus-provenance-catalog/1",
+          "offset": 0,
+          "limit": 50,
+          "nextOffset": null,
+          "items": [{
+            "title": "ID3-backed track",
+            "creator": "@Creator",
+            "workId": "4",
+            "wid": "WID-MUS-ID3",
+            "sourceUrl": "https://www.livingnexus.org/share/WID-MUS-ID3",
+            "audioUrl": "https://www.livingnexus.org/api/provenance-player/media/4"
+          }]
+        }
+        """;
+        var (channel, _) = CreateChannelWithHandler(payload, Id3HeaderOnly);
+
+        var result = await channel.GetChannelItems(new InternalChannelItemQuery(), CancellationToken.None);
+
+        Assert.Equal("mp3", Assert.Single(Assert.Single(result.Items).MediaSources).Container);
+    }
+
+    [Fact]
+    public async Task Omits_an_id3_header_when_the_transient_gateway_resolution_declares_a_non_mp3_object()
+    {
+        var payload = """
+        {
+          "schema": "living-nexus-provenance-catalog/1",
+          "offset": 0,
+          "limit": 50,
+          "nextOffset": null,
+          "items": [{
+            "title": "WAV object",
+            "creator": "@Creator",
+            "workId": "5",
+            "wid": "WID-MUS-WAV",
+            "sourceUrl": "https://www.livingnexus.org/share/WID-MUS-WAV",
+            "audioUrl": "https://www.livingnexus.org/api/provenance-player/media/5"
+          }]
+        }
+        """;
+        var (channel, _) = CreateChannelWithHandler(
+            payload,
+            Id3HeaderOnly,
+            new Uri("https://storage.example.test/verified.wav"));
+
+        var result = await channel.GetChannelItems(new InternalChannelItemQuery(), CancellationToken.None);
+
+        Assert.Empty(result.Items);
+    }
+
+    [Fact]
+    public async Task Omits_a_gateway_track_when_a_transient_probe_cannot_verify_an_mp3_bitstream()
+    {
+        var payload = """
+        {
+          "schema": "living-nexus-provenance-catalog/1",
+          "offset": 0,
+          "limit": 50,
+          "nextOffset": null,
+          "items": [{
+            "title": "Unknown container",
+            "creator": "@Creator",
+            "workId": "3",
+            "wid": "WID-MUS-UNKNOWN",
+            "sourceUrl": "https://www.livingnexus.org/share/WID-MUS-UNKNOWN",
+            "audioUrl": "https://www.livingnexus.org/api/provenance-player/media/3"
+          }]
+        }
+        """;
+        var (channel, handler) = CreateChannelWithHandler(payload, new byte[] { 0x52, 0x49, 0x46, 0x46 });
+
+        var result = await channel.GetChannelItems(new InternalChannelItemQuery(), CancellationToken.None);
+
+        Assert.Empty(result.Items);
+        Assert.True(handler.SawGatewayProbe);
     }
 
     [Fact]
@@ -94,19 +189,67 @@ public sealed class LivingNexusChannelTests
     }
 
     private static LivingNexusChannel CreateChannel(string payload) =>
-        new(new FixedHttpClientFactory(new HttpClient(new StaticResponseHandler(payload))));
+        CreateChannelWithHandler(payload).Channel;
+
+    private static (LivingNexusChannel Channel, StaticResponseHandler Handler) CreateChannelWithHandler(
+        string payload,
+        byte[]? mediaBytes = null,
+        Uri? resolvedMediaUri = null)
+    {
+        var handler = new StaticResponseHandler(
+            payload,
+            mediaBytes ?? Id3HeaderOnly,
+            resolvedMediaUri ?? new Uri("https://storage.example.test/verified.mp3"));
+        return (new LivingNexusChannel(new FixedHttpClientFactory(new HttpClient(handler))), handler);
+    }
+
+    private static readonly byte[] Id3HeaderOnly =
+    {
+        0x49, 0x44, 0x33, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    };
+
+    private static readonly byte[] MpegFrameAtStart =
+    {
+        0xff, 0xfb, 0x90, 0x64,
+    };
 
     private sealed class StaticResponseHandler : HttpMessageHandler
     {
         private readonly string _payload;
+        private readonly byte[] _mediaBytes;
+        private readonly Uri _resolvedMediaUri;
 
-        public StaticResponseHandler(string payload) => _payload = payload;
+        public StaticResponseHandler(string payload, byte[] mediaBytes, Uri resolvedMediaUri)
+        {
+            _payload = payload;
+            _mediaBytes = mediaBytes;
+            _resolvedMediaUri = resolvedMediaUri;
+        }
 
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) =>
-            Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+        public bool SawGatewayProbe { get; private set; }
+
+        public string? GatewayProbeRange { get; private set; }
+
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            if (request.RequestUri?.AbsolutePath.StartsWith("/api/provenance-player/media/", StringComparison.Ordinal) == true)
+            {
+                SawGatewayProbe = true;
+                GatewayProbeRange = request.Headers.Range?.ToString();
+                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.PartialContent)
+                {
+                    // A generic storage MIME response must not be used to invent
+                    // the codec; the probe validates the delivered bytes instead.
+                    Content = new ByteArrayContent(_mediaBytes),
+                    RequestMessage = new HttpRequestMessage(HttpMethod.Get, _resolvedMediaUri),
+                });
+            }
+
+            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
             {
                 Content = new StringContent(_payload, Encoding.UTF8, "application/json"),
             });
+        }
     }
 
     private sealed class FixedHttpClientFactory : IHttpClientFactory
