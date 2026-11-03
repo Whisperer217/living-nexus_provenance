@@ -29,6 +29,12 @@ describe("public Work hero composition contract", () => {
     expect(workPage).not.toContain("text-4xl sm:text-6xl md:text-7xl leading-[0.95]");
   });
 
+  it("keeps feedback attached to real Work actions and provenance controls", () => {
+    expect(workPage).toContain("ln-work-action inline-flex");
+    expect(workPage).toContain("ln-work-wid-copy");
+    expect(workPage).toContain("ln-work-verify-link");
+  });
+
   it("does not introduce Work, WID, provenance, or publication writers into the presentation repair", () => {
     expect(workPage).not.toContain("createWorkEvent");
     expect(workPage).not.toContain("generateWID");

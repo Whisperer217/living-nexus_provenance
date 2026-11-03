@@ -389,7 +389,7 @@ export default function LoopWorkPage() {
             <button
               type="button"
               onClick={handlePlay}
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-full text-sm font-semibold transition-transform hover:scale-[1.03]"
+              className="ln-work-action inline-flex items-center gap-2 px-6 py-3 rounded-full text-sm font-semibold"
               style={{ background: "var(--ln-gold)", color: "#0A0806" }}
             >
               {isPlaying ? <Pause size={16} fill="currentColor" /> : <Play size={16} fill="currentColor" />}
@@ -411,7 +411,7 @@ export default function LoopWorkPage() {
                       void runFreeDownload();
                     }}
                     disabled={downloadMutation.isPending}
-                    className="inline-flex items-center gap-2 px-5 py-3 rounded-full text-sm"
+                    className="ln-work-action inline-flex items-center gap-2 px-5 py-3 rounded-full text-sm"
                     style={{
                       border: "1px solid rgba(34,197,94,0.45)",
                       color: "rgba(74,222,128,0.95)",
@@ -436,7 +436,7 @@ export default function LoopWorkPage() {
                     }}
                     disabled={tipDownloadMutation.isPending}
                     title={`Gift $${(tipCents / 100).toFixed(2)} to unlock download`}
-                    className="inline-flex items-center gap-2 px-5 py-3 rounded-full text-sm font-semibold"
+                    className="ln-work-action inline-flex items-center gap-2 px-5 py-3 rounded-full text-sm font-semibold"
                     style={{
                       border: "1px solid rgba(196,154,40,0.55)",
                       color: "var(--ln-gold-hot, var(--ln-gold))",
@@ -457,7 +457,7 @@ export default function LoopWorkPage() {
               <button
                 type="button"
                 onClick={() => setSupportOpen(true)}
-                className="inline-flex items-center gap-2 px-5 py-3 rounded-full text-sm"
+                className="ln-work-action inline-flex items-center gap-2 px-5 py-3 rounded-full text-sm"
                 style={{
                   border: "1px solid rgba(196,154,40,0.4)",
                   color: "var(--ln-parchment)",
@@ -470,7 +470,7 @@ export default function LoopWorkPage() {
             <button
               type="button"
               onClick={() => toggleLike()}
-              className="p-3 rounded-full"
+              className="ln-work-action p-3 rounded-full"
               style={{
                 border: "1px solid rgba(196,154,40,0.25)",
                 color: liked ? "var(--ln-gold)" : "color-mix(in srgb, var(--ln-parchment) 70%, transparent)",
@@ -482,7 +482,7 @@ export default function LoopWorkPage() {
             <button
               type="button"
               onClick={share}
-              className="p-3 rounded-full"
+              className="ln-work-action p-3 rounded-full"
               style={{ border: "1px solid rgba(196,154,40,0.25)", color: "color-mix(in srgb, var(--ln-parchment) 70%, transparent)" }}
               aria-label="Share"
             >
@@ -491,7 +491,7 @@ export default function LoopWorkPage() {
             <button
               type="button"
               onClick={openVoices}
-              className="inline-flex items-center gap-2 rounded-full px-4 py-3 text-sm transition-colors hover:bg-[var(--ln-gold)]/10"
+              className="ln-work-action inline-flex items-center gap-2 rounded-full px-4 py-3 text-sm"
               style={{ border: "1px solid rgba(196,154,40,0.30)", color: "var(--ln-parchment)" }}
               aria-label="Open Voices conversation"
               title="Open Voices conversation"
@@ -528,7 +528,7 @@ export default function LoopWorkPage() {
                     downloadTipThresholdCents: song.downloadTipThresholdCents ?? null,
                   })
                 }
-                className="inline-flex items-center gap-2 px-4 py-3 rounded-full text-sm"
+                className="ln-work-action inline-flex items-center gap-2 px-4 py-3 rounded-full text-sm"
                 style={{ color: "var(--ln-gold)" }}
               >
                 <Pencil size={14} /> Edit
@@ -608,10 +608,10 @@ export default function LoopWorkPage() {
                 <code className="ln-work-wid" style={{ color: "var(--ln-gold)" }}>
                   {wid}
                 </code>
-                <button type="button" onClick={copyWid} className="p-1.5 opacity-70 hover:opacity-100" aria-label="Copy WID">
+                <button type="button" onClick={copyWid} className="ln-work-wid-copy p-1.5 opacity-70 hover:opacity-100" aria-label="Copy WID">
                   <Copy size={14} style={{ color: "var(--ln-parchment)" }} />
                 </button>
-                <Link href={`/verify/${wid}`} className="text-xs underline" style={{ color: "color-mix(in srgb, var(--ln-parchment) 60%, transparent)" }}>
+                <Link href={`/verify/${wid}`} className="ln-work-verify-link text-xs underline" style={{ color: "color-mix(in srgb, var(--ln-parchment) 60%, transparent)" }}>
                   Verify
                 </Link>
                 {wid && (
