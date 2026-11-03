@@ -78,6 +78,7 @@ describe("Work Desk consolidation", () => {
 
   it("connects Playlist Rack to existing Named Playlist authority", () => {
     const desk = read("client/src/pages/WorkDeskPage.tsx");
+    const styles = read("client/src/index.css");
     const router = read("server/routers/playlists.ts");
     expect(desk).toContain("function PlaylistRack");
     expect(desk).toContain("trpc.playlists.getById.useQuery");
@@ -87,6 +88,14 @@ describe("Work Desk consolidation", () => {
     expect(desk).toContain("selectedWork.id");
     expect(desk).toContain("duplicates remain distinct");
     expect(desk).toContain("Playlist Rack");
+    expect(desk).toContain("draggedTrackId");
+    expect(desk).toContain("dragOverTrackId");
+    expect(desk).toContain("ln-playlist-rack-row--dragging");
+    expect(desk).toContain("ln-playlist-rack-row--drop-target");
+    expect(styles).toContain(".ln-playlist-rack-row:hover");
+    expect(styles).toContain(".ln-playlist-rack-row--dragging");
+    expect(styles).toContain(".ln-playlist-rack-row--drop-target");
+    expect(styles).toContain(".ln-playlist-rack-row");
     expect(router).toContain("addTrack: protectedProcedure");
     expect(router).toContain("removeTrack: protectedProcedure");
     expect(router).toContain("reorder: protectedProcedure");

@@ -96,6 +96,8 @@
 - [x] Add unsaved-order warning, explicit Save Order, retry/error feedback, and cache invalidation.
 - [x] Add contract coverage proving no new playlist authority, schema, or duplicate Work system was introduced.
 - [x] Validate full tests, TypeScript, production build, and whitespace.
+- [x] Add subtle row hover lift, dragged-row emphasis, drop-target highlight, and reduced-motion-safe transitions without changing reorder mutations.
+- [x] Extend Work Desk contract coverage for all Playlist Rack motion states.
 
 ### P1.2 Activity and Signals architecture — NEXT
 
