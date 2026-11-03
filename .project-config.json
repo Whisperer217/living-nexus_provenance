@@ -6,8 +6,8 @@
   ],
   "dev_command": "pnpm run dev",
   "env_vars": {
-    "DATABASE_URL": "mysql://4ArHJRmPMKBQTkw.aeab2210d229:2ypZRlZl0lvo3b0d9F3K@gateway02.us-east-1.prod.aws.tidbcloud.com:4000/7kHkqvMBX9Ci3pQfWTqqQr?ssl={\"rejectUnauthorized\":true}",
-    "DRIZZLE_DATABASE_URL": "mysql://4ArHJRmPMKBQTkw.aeab2210d229:2ypZRlZl0lvo3b0d9F3K@gateway02.us-east-1.prod.aws.tidbcloud.com:4000/7kHkqvMBX9Ci3pQfWTqqQr?ssl={\"rejectUnauthorized\":true}",
+    "DATABASE_URL": "mysql://4ArHJRmPMKBQTkw.aeab2210d229:1TI4cR3P88FKE7eucIXq@gateway02.us-east-1.prod.aws.tidbcloud.com:4000/7kHkqvMBX9Ci3pQfWTqqQr?ssl={\"rejectUnauthorized\":true}",
+    "DRIZZLE_DATABASE_URL": "mysql://4ArHJRmPMKBQTkw.aeab2210d229:1TI4cR3P88FKE7eucIXq@gateway02.us-east-1.prod.aws.tidbcloud.com:4000/7kHkqvMBX9Ci3pQfWTqqQr?ssl={\"rejectUnauthorized\":true}",
     "MANUS_WEBDEV_PROJECT_ID": "7kHkqvMBX9Ci3pQfWTqqQr"
   },
   "experiments": [
@@ -15,10 +15,10 @@
   ],
   "git_remote": {
     "repo_url": "s3://vida-prod-gitrepo/webdev-git/310519663123503966/7kHkqvMBX9Ci3pQfWTqqQr",
-    "access_key_id": "ASIAZV3A2ECZILIOP75K",
-    "secret_access_key": "mqBPz8wbOacvMYElji37KbI/ftpWDvcu7JcV1lJ3",
-    "session_token": "IQoJb3JpZ2luX2VjELf//////////wEaCXVzLWVhc3QtMSJHMEUCIFRzrEHbb0z2VI6DIjy66JKms0uSZl/XQyf9BrH2qgrpAiEAwQT+yTFcJmEYeEhP4WtP/sNbtk7HWTXrn4FMjBC6aBgq9QMIfxAEGgw2NjUzODYwOTg4NjYiDLaSaO/QF1sxvzBmPSrSA2zob/9HY8NWwJ4S0yyDnAkyZoaUeQJf2tRNgF37paATn/i+Q4QTaN+ot+MlyIxUUSMcC7R9GhWAjk1mGZ2VMHOneCoNGvXpVTryVlnPgZMfQQiqXms1hafOfnf0i+IUtixpde2XGHnDKomyR3bg2kv/d8k6WXsjPwJl5v7scX8EukcuPcX3Gv8P316tX5samlScKokhY8mYuZdpqDB/fhfwv6J4++wRSBKRzC+XgtpBHLCHZpYhfNkrwnivZzgvhgRCpcDaEQhraa/0IDMtA5zCr0n1bpdCKUrvyHfQM5X+Zyw6YC/JETxgIl/uQsC5X4ou6Ma5mXETiAP4rggrKWTFE329ndux6ZaOE5YhMn715mlVpA5ssHiW/5GhHD1vhqPElQKQq/qi+JHESreQ8ABwnmzma7WKdhG+vh6+fsnxid4cFsXYyDdbqjyh/1JcOnEcaeA7KT1XMvzXkzkM8H2TmsVATrDZThSyrDZaoKd/9mw9geaCphY4Q6zWc1265Qm8M/DQRGo0Mlbbkq3mj+riPleaxyk1uVvougYq/J/kOxrEMyV3PfKcatnePfWZuXnHtedUiUDtjfLfD17ZTgTz+xOnwmVFFwTVM63a728kdQEw9tj51QY6nQGxb7l3wxEhU15wZkWjeTRXyGY7pAu/2AO7z610w3BI5i86/X2+iLdNf9LmCAp9PjObYzu7P1P5i78rsamoFDQjSFobd+Gr+dyqsdHMpkD9mmswiOZQ1CVDSvvVoTB6Hj9qzAOfqTkxBdL8oIapeO/seh0+Odi0/zhrH+Y9Dgf7grsxjnJ7SXtK18DlWyrdw7qrZYU5NdM7NP1Nyccv",
-    "expiration": "2026-10-02T02:21:42.000Z",
+    "access_key_id": "ASIAZV3A2ECZAJHJVQ3J",
+    "secret_access_key": "KFl4XgZAop8ZcKArh4XyBkYXcJ1BFpFphbx3OLlA",
+    "session_token": "IQoJb3JpZ2luX2VjEM///////////wEaCXVzLWVhc3QtMSJIMEYCIQClCakUDQDbPlRjL0PhDTUMzhqrj7ORCWGK2+tmdJRdyQIhAOxkUFg2qca0aM9AR2v9+47FkEhAR506XzhOOa9PSCBNKv4DCJf//////////wEQBBoMNjY1Mzg2MDk4ODY2Igx96YD4AMfEhLJ+ES8q0gNAQxMghWusmCNo8LW4RI4kGoxWwOGKVR5TosVvynDEb3JiGP2KGHOcZZWGKhGiwjCwOuGO6oU2etixKYSm6Cc/F2jHmraF1phrsiFF4n08UZ85KK//Y3B9/h4+WnoAwrdnhEsUKBCWOvJWtgfsyIC/yie0JH3n77SJsNaQFYlrz/rl+ccEasVAARBVTSjGRboIMGFHnW3/0dc1yD1X2W6caHiBGlu1pk2UKDbzA/qGV+hLvFt6+O3QRTP4nC/fxXpnx0h6//FTDO2yXLtMW7TjAXoLhILiWdMtrecocxP4og2Gedj4SW0wt5IbyLV9jYwxpg/seEAWsL6MDxrCkjvWc45mmLGF/syPlZCcoED5fca5EXXjSSdOL9C+Qorp4Sx7Ft5e9G1qPG4gyFLxN6KHMXBYaaLbTzGIrjzW84dGIHLPdxFLY2KExtR/Fe6hdw6tLwvzaoRdpFMgh4EgwU2O6b7mrmvRNFkx+H+1ROI+fkXZVFO96ds40E6g5NKK9eMZbIekE1QG980oRNUziEGODRJMNmcouvCUGvAhzMmfubTVC9iymkcjZMJfM4WbCAg+39/HswyMB2mz6j1ioKEtLTDW/co3L2C31mVGsXBRy5vhMPrcp9cGOpwBVO1npfZLrbS8MdAQIKLIVcI92P9XKONqGNd8nihPPSN5Tjk6x1cdHMkCYy4v04HkwTCXbtqPB15oMqDBVjr6Gi951u5iZo4k5l0fB4+AViF9qytM1hbmByuFKPXurE8TWKKuPbQ9p7QBO2bBbQuEhWYKoe566FTtI/yF6PO+P5daqsIyvv56LY2VopiVMG5yP6d/Qx01Pu/h0yAD",
+    "expiration": "2026-11-04T02:23:54.000Z",
     "backend": "GIT_BACKEND_S3"
   },
   "name": "living-nexus",

@@ -146,6 +146,7 @@
 - [ ] Move advanced tools such as PNA, companion player, Marketplace, and advanced Registry actions into contextual or secondary entry points.
 - [ ] Remove duplicate routes and duplicate management surfaces from first-level navigation.
 - [ ] Keep contextual back paths and breadcrumbs reliable.
+- [x] Add the Work Desk as a primary additive composition surface for registered Works, the existing editor, Draft Releases, and Named Playlists; preserve legacy routes during validation.
 - [x] Apply shared hover, press, focus, and reduced-motion-safe feedback to the LeftRail, mobile drawer, hamburger, and mobile chrome.
 - [ ] Add route-level navigation regression coverage.
 
