@@ -92,6 +92,14 @@ describe("Work Desk consolidation", () => {
     expect(desk).toContain("dragOverTrackId");
     expect(desk).toContain("ln-playlist-rack-row--dragging");
     expect(desk).toContain("ln-playlist-rack-row--drop-target");
+    expect(desk).toContain("Actions for ${playlist.name}");
+    expect(desk).toContain("Edit playlist");
+    expect(desk).toContain("Share playlist");
+    expect(desk).toContain("Remove playlist");
+    expect(desk).toContain("trpc.playlists.delete.useMutation");
+    expect(desk).toContain("trpc.playlists.generateShareSlug.useMutation");
+    expect(desk).toContain("/p/${playlist.shareSlug}");
+    expect(desk).toContain("Its Works and WIDs will remain unchanged.");
     expect(styles).toContain(".ln-playlist-rack-row:hover");
     expect(styles).toContain(".ln-playlist-rack-row--dragging");
     expect(styles).toContain(".ln-playlist-rack-row--drop-target");

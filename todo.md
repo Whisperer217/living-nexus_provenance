@@ -98,6 +98,10 @@
 - [x] Validate full tests, TypeScript, production build, and whitespace.
 - [x] Add subtle row hover lift, dragged-row emphasis, drop-target highlight, and reduced-motion-safe transitions without changing reorder mutations.
 - [x] Extend Work Desk contract coverage for all Playlist Rack motion states.
+- [x] Add an accessible per-playlist contextual menu with Edit, Share playlist, and Remove playlist actions.
+- [x] Reuse owner-authorized `playlists.delete` and `playlists.generateShareSlug`; share copies the existing public `/p/:slug` link.
+- [x] Require confirmation before removal and explicitly preserve Works and WIDs.
+- [x] Extend Playlist Rack contract coverage for menu labels, share links, owner mutations, and preservation copy.
 
 ### P1.2 Activity and Signals architecture — NEXT
 
