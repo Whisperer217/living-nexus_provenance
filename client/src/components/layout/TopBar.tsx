@@ -489,15 +489,9 @@ export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCoun
             <span className="hidden xl:inline">Discord</span>
           </a>
 
-          {/* ◉ Provenance — enter PNA cockpit (sign-in if guest) */}
+          {/* Player collections replace the retired PNA entry. */}
           <button
-            onClick={() => {
-              if (user) {
-                goTo("/pna");
-              } else {
-                window.location.assign(getLoginUrl("/pna"));
-              }
-            }}
+            onClick={() => goTo("/player-collections")}
             className="ln-dimensional-action flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-all"
             style={{
               fontSize: "clamp(9px, 0.7vw, 11px)",
@@ -516,10 +510,10 @@ export default function TopBar({ archiveSongCount: _archiveSongCount, unreadCoun
               (e.currentTarget as HTMLElement).style.color = "var(--ln-gold)";
               (e.currentTarget as HTMLElement).style.borderColor = "rgba(196,154,40,0.2)";
             }}
-            title="Provenance Nexus Avatar — stewarded companion intelligence"
+            title="Player Collections — music and audiobooks"
           >
             <span style={{ fontSize: "0.7rem", lineHeight: 1 }}>◉</span>
-            <span className="hidden xl:inline">Provenance</span>
+            <span className="hidden xl:inline">Collections</span>
           </button>
 
           {/* Register Work */}

@@ -267,3 +267,14 @@ The retired ledgers are preserved at:
 `docs/lnls/archives/work-ledger/2026-11-02/`
 
 They remain historical records, not active instructions.
+
+## Player Collections — November 4, 2026
+- [x] Draft public successor to PNA/avatar promotion, with homepage feature and vertical curation list.
+- [x] Add explicit public-display opt-in, separate product terms acceptance, selection limits and loading manifest.
+- [x] Add illustrative 3MF preview; preserve canonical player and historical records.
+- [x] Generate and inspect additive migration; do not apply to managed database locally.
+- [x] Run 25 focused checks and production build; document unavailable environment-dependent checks.
+- [ ] Apply reviewed migration and exercise real submissions in managed environment.
+- [ ] Complete desktop/mobile visual QA and exact-device compatibility tests.
+- [ ] Settle product terms, accounting, edition snapshots and unit-limit enforcement before physical sales.
+- [ ] Publish through the managed interface.

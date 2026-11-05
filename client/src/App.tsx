@@ -1,3 +1,4 @@
+import "./playerCollections.css";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import React, { lazy, Suspense, useEffect, useLayoutEffect, useState } from "react";
@@ -6,13 +7,12 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import MainLayout from "./components/layout/MainLayout";
 import QueueLoader from "./components/QueueLoader";
 import { WhatsNewModal } from "./components/WhatsNewModal";
-import { PNAServiceFrame } from "./components/pna/PNAServiceFrame";
+
 import WelcomeModal from "./components/WelcomeModal";
 import { TosAcceptanceModal } from "./components/TosAcceptanceModal";
 import { CommunityToastProvider } from "./components/CommunityToast";
 import { AmbientPlayerProvider } from "./contexts/AmbientPlayerContext";
 import { HarmonicProvider } from "./contexts/HarmonicContext";
-import KeeperAvatarWidget from "./components/KeeperAvatarWidget";
 import ProvenanceUploadEngine from "./components/ProvenanceUploadEngine";
 import { useQrScanLogger } from "./hooks/useQrScanLogger";
 import { useScrollRestoration } from "./hooks/useScrollRestoration";
@@ -125,7 +125,7 @@ const LivingArchiveBillingPage = lazy(() => import("./pages/LivingArchiveBilling
 const PlaybackSettingsPage = lazy(() => import("./pages/PlaybackSettingsPage"));
 const PaymentMethodsPage = lazy(() => import("./pages/PaymentMethodsPage"));
 const PayoutsPage = lazy(() => import("./pages/PayoutsPage"));
-const PNASettingsPage = lazy(() => import("./pages/PNASettingsPage"));
+
 const SharedPromptPage = lazy(() => import("./pages/SharedPromptPage"));
 const TermsPage = lazy(() => import("./pages/TermsPage"));
 const TosComparePage = lazy(() => import("./pages/TosComparePage"));
@@ -141,8 +141,8 @@ const KeeperPage = lazy(() => import("./pages/KeeperPage"));
 const KeeperComposePage = lazy(() => import("./pages/KeeperComposePage"));
 const FirstWitnessPage = lazy(() => import("./pages/FirstWitnessPage"));
 const MarketplacePage = lazy(() => import("./pages/MarketplacePage"));
-const AvatarMarketplacePage = lazy(() => import("./pages/AvatarMarketplacePage"));
-const PNAShellPage = lazy(() => import("./pages/PNAShellPage"));
+
+const PlayerCollectionsPage = lazy(() => import("./pages/PlayerCollectionsPage"));
 const CreatorSurface = lazy(() => import("./pages/CreatorSurface"));
 const GuideUploadWizard = lazy(() => import("./pages/GuideUploadWizard"));
 const GuideDirectoryPage = lazy(() => import("./pages/GuideDirectoryPage"));
@@ -184,27 +184,9 @@ function PageLoader() {
   );
 }
 
-function isPNAServiceLocation(location: string, hostname: string): boolean {
-  const isPNASubdomain = hostname.split(".")[0]?.toLowerCase() === "pna";
-  return isPNASubdomain || location === "/pna" || location.startsWith("/pna/") || location === "/settings/stewardship";
-}
-
-/**
- * Both PNA entry points use the same private-service frame. The public site
- * MainLayout owns discovery chrome and its global player; PNA owns its own
- * navigation, inspection, and thread-bound playback surface.
- */
-function PNAServiceRouter() {
-  const [location] = useLocation();
-  const isStewardship = location === "/settings/stewardship";
-
-  return (
-    <PNAServiceFrame surface={isStewardship ? "settings" : "workspace"}>
-      <Suspense fallback={<PageLoader />}>
-        {isStewardship ? <PNASettingsPage /> : <PNAShellPage />}
-      </Suspense>
-    </PNAServiceFrame>
-  );
+function RetiredPnaDomainRedirect() {
+  useEffect(() => { window.location.replace("https://www.livingnexus.org/player-collections"); }, []);
+  return <p role="status">Opening Player Collections…</p>;
 }
 
 /**
@@ -284,16 +266,16 @@ function OEmbedUpdater() {
 
 function Router() {
   const [location] = useLocation();
-  // Subdomain detection — pna.livingnexus.org serves the PNA creator workspace
+  // Subdomain detection — preserve legacy PNA links through a canonical redirect
   const hostname = typeof window !== "undefined" ? window.location.hostname : "";
   const subdomain = hostname.split(".")[0]?.toLowerCase();
   const isPNASubdomain = subdomain === "pna";
   const isAPISubdomain = subdomain === "api";
   const isDocsSubdomain = subdomain === "docs";
 
-  // PNA subdomain — render creator workspace directly, no MainLayout
+  // Retired PNA subdomain — move to the canonical collection page
   if (isPNASubdomain) {
-    return <PNAServiceRouter />;
+    return <RetiredPnaDomainRedirect />;
   }
 
   // API subdomain — redirect to developer dashboard
@@ -330,9 +312,10 @@ function Router() {
         <Route path="/admin" component={AdminControlPlanePage} />
         {/* DIAGNOSTIC — Strip to Bone: zero nav infrastructure, raw React only */}
         <Route path="/diag/strip-to-bone" component={StripToBone} />
-        {/* PNA is a focused creator service, not an ordinary discovery page. */}
-        <Route path="/pna"><PNAServiceRouter /></Route>
-        <Route path="/settings/stewardship"><PNAServiceRouter /></Route>
+        {/* Legacy PNA links now lead to Player Collections. */}
+        <Route path="/pna"><Redirect to="/player-collections" /></Route>
+        <Route path="/pna/:rest*"><Redirect to="/player-collections" /></Route>
+        <Route path="/settings/stewardship"><Redirect to="/player-collections" /></Route>
 
         {/* App pages inside MainLayout */}
         <Route>
@@ -355,6 +338,7 @@ function Router() {
                 <Route path="/creator/collections" component={CollectionsWorkspacePage} />
                 <Route path="/studio/release/:id" component={CollectionsWorkspacePage} />
                 <Route path="/work-desk" component={WorkDeskPage} />
+                <Route path="/player-collections" component={PlayerCollectionsPage} />
           <Route path="/my-archive/export" component={CreatorDataExportPage} />
                 <Route path="/studio/collection/:id" component={CollectionStudioPage} />
                 <Route path="/studio" component={CreatorStudioHome} />
@@ -427,7 +411,7 @@ function Router() {
                 <Route path="/first-witness" component={FirstWitnessPage} />
                 <Route path="/store"><Redirect to="/avatar-registry" /></Route>
                 <Route path="/marketplace"><Redirect to="/avatar-registry" /></Route>
-                <Route path="/avatar-registry" component={AvatarMarketplacePage} />
+                <Route path="/avatar-registry"><Redirect to="/player-collections" /></Route>
                 <Route path="/distribute" component={DistributionPage} />
                 <Route path="/identity/:id" component={CreatorIdentityPage} />
                 <Route path="/domain"><Redirect to="/manage" /></Route>
@@ -475,7 +459,7 @@ export default function App() {
   const pathname = typeof window !== "undefined" ? window.location.pathname : "";
   const hostname = typeof window !== "undefined" ? window.location.hostname : "";
   const isSpatialRegistryMock = pathname === "/prototype/spatial-registry";
-  const isPNAService = isPNAServiceLocation(location, hostname);
+  const isPNAService = false; // Retired PNA routes use the standard public shell.
   const [splashDone, setSplashDone] = useState(() => {
     return isSpatialRegistryMock || !shouldRenderCinematicSplash(pathname, shouldShowSplash());
   });
@@ -515,8 +499,8 @@ export default function App() {
           <OverlayRouteGuard />
           <ScrollRestorationManager />
           <QrScanLogger />
-          {/* PNA owns its focused service chrome; public global overlays stay outside. */}
-          {!isSpatialRegistryMock && !isPNAService && <KeeperAvatarWidget />}
+          {/* Public overlays share the canonical player; avatar overlay retired. */}
+          {/* Retired avatar overlay; historical assets and records are preserved. */}
           {!isSpatialRegistryMock && !isPNAService && <ProvenanceUploadEngine />}
           {!isSpatialRegistryMock && !isPNAService && <PWAInstallBanner />}
           <Router />

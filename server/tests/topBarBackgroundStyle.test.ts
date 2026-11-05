@@ -14,11 +14,11 @@ describe("TopBar harmonic background style", () => {
     expect(source).toContain("background-color 0.4s ease");
   });
 
-  it("uses browser navigation for the external guest PNA sign-in URL", () => {
+  it("opens public Player Collections without a sign-in gate", () => {
     const source = fs.readFileSync(topBarPath, "utf8");
 
-    expect(source).toContain('window.location.assign(getLoginUrl("/pna"))');
-    expect(source).not.toContain('goTo(getLoginUrl("/pna"))');
+    expect(source).toContain('onClick={() => goTo("/player-collections")}');
+    expect(source).not.toContain('getLoginUrl("/pna")');
   });
 
   it("preserves the inline player while removing the competing TopBar search surface", () => {

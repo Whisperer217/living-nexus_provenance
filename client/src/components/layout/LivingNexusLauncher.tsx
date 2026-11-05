@@ -13,7 +13,7 @@ import { Z } from "@/lib/viewportLayers";
 import { LAUNCHER_ITEMS, type LauncherItem } from "./launcherDestinations";
 import "./living-nexus-launcher.css";
 
-const DEFAULT_FAVORITES = ["nexus", "player", "creators", "registry", "store"];
+const DEFAULT_FAVORITES = ["store", "player", "creators", "registry"];
 
 function LauncherGlyph({ id, size = 28 }: { id: string; size?: number }) {
   const shared = { fill: "none", stroke: "currentColor", strokeWidth: 1.55, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };

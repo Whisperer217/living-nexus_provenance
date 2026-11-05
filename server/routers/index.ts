@@ -7,6 +7,7 @@
  * Each import below is a dedicated file with a single router({...}) export.
  */
 
+import { playerCollectionsRouter } from "./playerCollections";
 import { router } from "../_core/trpc";
 import { systemRouter } from "../_core/systemRouter";
 
@@ -200,6 +201,7 @@ export const appRouter = router({
 
   // Collection Studio
   collectionStudio: collectionStudioRouter,
+  playerCollections: playerCollectionsRouter,
 
   // Platform Guides
   platformGuides: platformGuidesRouter,
