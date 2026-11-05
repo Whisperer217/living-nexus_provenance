@@ -6,28 +6,15 @@ const root = process.cwd();
 const read = (relativePath: string) => fs.readFileSync(path.resolve(root, relativePath), "utf8");
 
 describe("PNA focused service shell", () => {
-  it("routes main-domain PNA and the PNA subdomain through one service router", () => {
+  it("retires PNA entry points into the curated player page", () => {
     const app = read("client/src/App.tsx");
-
-    expect(app).toContain("function PNAServiceRouter()");
-    expect(app).toContain("if (isPNASubdomain) {");
-    expect(app).toContain("<PNAServiceRouter />");
-    expect(app).toContain('<Route path="/pna">');
-    expect(app).toContain('<Route path="/settings/stewardship">');
-    expect(app).toContain("<MainLayout>");
-    expect(app).not.toContain('<Route path="/pna" component={PNAShellPage} />');
-    expect(app).not.toContain('<Route path="/settings/stewardship" component={PNASettingsPage} />');
-  });
-
-  it("suppresses public-shell overlays and global PNA collisions on focused service routes", () => {
-    const app = read("client/src/App.tsx");
-
-    expect(app).toContain("function isPNAServiceLocation(");
-    expect(app).toContain("const isPNAService = isPNAServiceLocation(location, hostname);");
-    expect(app).toContain("!isSpatialRegistryMock && !isPNAService && <WhatsNewModal />");
-    expect(app).toContain("!isSpatialRegistryMock && !isPNAService && <KeeperAvatarWidget />");
-    expect(app).toContain("!isSpatialRegistryMock && !isPNAService && <ProvenanceUploadEngine />");
-    expect(app).toContain("!isSpatialRegistryMock && !isPNAService && <PWAInstallBanner />");
+    expect(app).not.toContain("<PNAServiceRouter />");
+    expect(app).toContain('<Route path="/pna"><Redirect to="/player-collections" /></Route>');
+    expect(app).toContain('<Route path="/avatar-registry"><Redirect to="/player-collections" /></Route>');
+    expect(app).toContain('<Route path="/player-collections" component={PlayerCollectionsPage} />');
+    expect(app).not.toContain("&& <KeeperAvatarWidget />");
+    const launcher = read("client/src/components/layout/launcherDestinations.ts");
+    expect(launcher).not.toContain('label: "Nexus AI"');
   });
 
   it("keeps an error boundary and an explicit return path inside the PNA service", () => {

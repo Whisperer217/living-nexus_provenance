@@ -295,7 +295,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
             else openMobileMenu();
           }}
           data-mobile-menu-trigger="true"
-          className="ln-dimensional-action flex min-h-11 min-w-11 items-center justify-center rounded-lg transition-all"
+          className="ln-dimensional-action ln-nav-interactive flex min-h-11 min-w-11 items-center justify-center rounded-lg transition-all"
           style={{ color: "var(--ln-text-muted)", WebkitTapHighlightColor: "transparent" }}
           aria-label={mobileMenuOpen ? "Close navigation" : "Open navigation"}
           aria-expanded={mobileMenuOpen}
@@ -308,7 +308,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         <button
           type="button"
           onClick={() => navigate("/")}
-          className="ln-mobile-brand ln-dimensional-action flex min-h-11 min-w-11 items-center gap-2 rounded-lg transition-all"
+          className="ln-mobile-brand ln-dimensional-action ln-nav-interactive flex min-h-11 min-w-11 items-center gap-2 rounded-lg transition-all"
           aria-label="Living Nexus home"
         >
           <img src={LOGO_URL} alt="LN" className="w-7 h-7 object-contain" />
@@ -320,7 +320,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           href={DISCORD_COMMUNITY_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="ln-mobile-header-secondary ln-dimensional-action flex items-center justify-center rounded-lg transition-all"
+          className="ln-mobile-header-secondary ln-dimensional-action ln-nav-interactive flex items-center justify-center rounded-lg transition-all"
           style={{ minWidth: 44, minHeight: 44, color: "var(--ln-gold)", WebkitTapHighlightColor: "transparent" }}
           aria-label="Join Discord"
           title="Join Living Nexus on Discord"
@@ -332,7 +332,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         {!!user && (
           <button
             onClick={() => setWitnessingCircleOpen(true)}
-            className="ln-mobile-header-secondary ln-dimensional-action ln-witness-sigil-trigger flex items-center justify-center rounded-lg transition-all"
+            className="ln-mobile-header-secondary ln-dimensional-action ln-nav-interactive ln-witness-sigil-trigger flex items-center justify-center rounded-lg transition-all"
             style={{ minWidth: 44, minHeight: 44, color: "var(--ln-gold)", WebkitTapHighlightColor: "transparent" }}
             aria-label="Open Witnessing Circle"
             title="Witnessing Circle"
@@ -351,7 +351,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         {!!user && (
           <button
             onClick={() => navigate("/notifications")}
-            className="ln-dimensional-action relative flex items-center justify-center rounded-lg transition-all"
+            className="ln-dimensional-action ln-nav-interactive relative flex items-center justify-center rounded-lg transition-all"
             style={{ minWidth: 44, minHeight: 44, color: "var(--ln-text-muted)", WebkitTapHighlightColor: "transparent" }}
             aria-label="Notifications"
           >

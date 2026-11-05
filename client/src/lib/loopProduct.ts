@@ -25,6 +25,7 @@ export const LOOP_PRODUCT = {
 export const LOOP_NAV = [
   { id: "home", label: "Home", path: "/" },
   { id: "explore", label: "Explore", path: "/explore" },
+  { id: "player-collections", label: "Collections", path: "/player-collections" },
   { id: "register", label: "Register", path: "/manifest", authRequired: true },
   { id: "manage", label: "Manage", path: "/manage", authRequired: true },
   { id: "archive", label: "Archive", path: "/archive", authRequired: true },
@@ -85,12 +86,12 @@ export const LOOP_REDIRECTS: Record<string, string> = {
   "/new-manifestation": "/manifest",
   "/projects": "/explore",
   "/my-projects": "/manage",
-  "/marketplace": "/avatar-registry",
+  "/marketplace": "/player-collections",
   "/visual-works": "/explore",
-  "/keeper-compose": "/pna",
-  "/store": "/avatar-registry",
+  "/keeper-compose": "/player-collections",
+  "/store": "/player-collections",
   "/dashboard": "/manage",
-  "/creator-surface": "/pna",
+  "/creator-surface": "/player-collections",
   "/domain": "/manage",
 };
 

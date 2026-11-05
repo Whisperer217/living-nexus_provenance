@@ -3605,3 +3605,40 @@ export const creatorPlatforms = mysqlTable("creatorPlatforms", {
 }));
 export type CreatorPlatform = typeof creatorPlatforms.$inferSelect;
 export type InsertCreatorPlatform = typeof creatorPlatforms.$inferInsert;
+
+// Player collections: additive curation, not a new Work/provenance authority.
+export const playerEditions = mysqlTable("playerEditions", {
+  id: int("id").autoincrement().primaryKey(),
+  title: varchar("title", { length: 200 }).notNull(),
+  description: text("description").notNull(),
+  targetTracks: int("targetTracks").default(50).notNull(),
+  capacityBytes: bigint("capacityBytes", { mode: "number" }), // measured, never inferred from model family
+  status: mysqlEnum("status", ["open", "closed"]).default("open").notNull(),
+  createdBy: int("createdBy").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export const playerSubmissions = mysqlTable("playerSubmissions", {
+  id: int("id").autoincrement().primaryKey(),
+  editionId: int("editionId").notNull(),
+  songId: int("songId").notNull(),
+  creatorId: int("creatorId").notNull(),
+  kind: mysqlEnum("kind", ["music", "audiobook"]).notNull(),
+  audienceNotes: varchar("audienceNotes", { length: 1000 }).notNull(),
+  publicConsent: boolean("publicConsent").default(false).notNull(),
+  displayTermsVersion: varchar("displayTermsVersion", { length: 64 }).notNull(),
+  status: mysqlEnum("status", ["submitted", "shortlisted", "selected", "withdrawn"]).default("submitted").notNull(),
+  position: int("position").default(0).notNull(),
+  // Private, exact product terms. Never sent through the public list endpoint.
+  productTerms: text("productTerms"),
+  acceptedTerms: text("acceptedTerms"),
+  acceptedAt: timestamp("acceptedAt"),
+  sourceHash: varchar("sourceHash", { length: 64 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, t => ({ uniqueWork: uniqueIndex("playerSubmissions_edition_song_uq").on(t.editionId, t.songId) }));
+export const playerCurationEvents = mysqlTable("playerCurationEvents", {
+  id: int("id").autoincrement().primaryKey(),
+  submissionId: int("submissionId").notNull(),
+  actorId: int("actorId").notNull(),
+  action: varchar("action", { length: 64 }).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});

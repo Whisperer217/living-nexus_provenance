@@ -129,7 +129,7 @@ export default function LeftRail({
           ? () => handleMobileClick(path, authRequired)
           : (e) => handleDesktopClick(e as React.MouseEvent, id)
         }
-        className={`ln-dimensional-action relative flex items-center transition-all duration-150 rounded-xl ${isMobile ? "ln-mobile-nav-item flex-row justify-start gap-3 px-4" : "flex-col justify-center gap-0.5"}`}
+        className={`ln-dimensional-action ln-nav-interactive relative flex items-center transition-all duration-150 rounded-xl ${isMobile ? "ln-mobile-nav-item flex-row justify-start gap-3 px-4" : "flex-col justify-center gap-0.5"}`}
         style={{
           width: isMobile ? "100%" : 60,
           height: isMobile ? 52 : 56,
@@ -202,7 +202,7 @@ export default function LeftRail({
           ? () => handleMobileClick("/")
           : (e) => handleDesktopClick(e as React.MouseEvent, activeMode ?? "home")
         }
-        className="mb-3 flex items-center justify-center rounded-xl transition-all"
+        className="ln-nav-interactive mb-3 flex items-center justify-center rounded-xl transition-all"
         title="Navigation"
         aria-label={`${LOOP_PRODUCT.name} home`}
         data-mobile-nav-primary={isMobile ? "true" : undefined}
@@ -252,7 +252,7 @@ export default function LeftRail({
             event.stopPropagation();
             handleMobileClick("/keeper-compose", true);
           }}
-          className="ln-dimensional-action ln-mobile-nav-item relative flex w-full flex-row items-center justify-start gap-3 rounded-xl px-4 transition-all duration-150"
+          className="ln-dimensional-action ln-nav-interactive ln-mobile-nav-item relative flex w-full flex-row items-center justify-start gap-3 rounded-xl px-4 transition-all duration-150"
           style={{
             height: 52,
             color: "var(--ln-text-muted)",
@@ -292,7 +292,7 @@ export default function LeftRail({
             window.dispatchEvent(new Event("ln:open-witnessing-circle"));
             if (isMobile) onMobileClose?.();
           }}
-          className={`ln-dimensional-action ln-witness-sigil-trigger relative flex items-center transition-all duration-150 rounded-xl ${isMobile ? "ln-mobile-nav-item flex-row justify-start gap-3 px-4" : "flex-col justify-center gap-0.5"}`}
+          className={`ln-dimensional-action ln-nav-interactive ln-witness-sigil-trigger relative flex items-center transition-all duration-150 rounded-xl ${isMobile ? "ln-mobile-nav-item flex-row justify-start gap-3 px-4" : "flex-col justify-center gap-0.5"}`}
           style={{
             width: isMobile ? "100%" : 60,
             height: isMobile ? 52 : 56,
@@ -324,7 +324,7 @@ export default function LeftRail({
         title="Join Discord"
         aria-label="Join Living Nexus on Discord"
         onClick={e => { e.stopPropagation(); if (isMobile) onMobileClose?.(); }}
-        className={`ln-dimensional-action relative flex items-center transition-all duration-150 rounded-xl no-underline ${isMobile ? "ln-mobile-nav-item flex-row justify-start gap-3 px-4" : "flex-col justify-center gap-0.5"}`}
+        className={`ln-dimensional-action ln-nav-interactive relative flex items-center transition-all duration-150 rounded-xl no-underline ${isMobile ? "ln-mobile-nav-item flex-row justify-start gap-3 px-4" : "flex-col justify-center gap-0.5"}`}
         style={{
           width: isMobile ? "100%" : 60,
           height: isMobile ? 52 : 56,
@@ -354,7 +354,7 @@ export default function LeftRail({
         title="Celestial Codex"
         aria-label="Celestial Codex — open companion tool"
         onClick={e => { e.stopPropagation(); if (isMobile) onMobileClose?.(); }}
-        className={`relative flex items-center transition-all duration-150 rounded-xl no-underline ${isMobile ? "ln-mobile-nav-item flex-row justify-start gap-3 px-4" : "flex-col justify-center gap-0.5"}`}
+        className={`ln-nav-interactive relative flex items-center transition-all duration-150 rounded-xl no-underline ${isMobile ? "ln-mobile-nav-item flex-row justify-start gap-3 px-4" : "flex-col justify-center gap-0.5"}`}
         style={{
           width: isMobile ? "100%" : 60,
           height: isMobile ? 52 : 56,

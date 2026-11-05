@@ -8,7 +8,7 @@ import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { toast } from "sonner";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Zap, Package, Star, ChevronRight, Info, CheckCircle2, Shield, Music2, CreditCard } from "lucide-react";
+import { Zap, Package, Star, ChevronRight, Info, CheckCircle2, Shield, Music2, CreditCard, Tag } from "lucide-react";
 import { Link, useLocation } from "wouter";
 
 // ── Design tokens ──────────────────────────────────────────────────────────────
@@ -159,6 +159,7 @@ function SettingsSubNav() {
   const [location] = useLocation();
   const TABS = [
     { path: "/settings/billing", label: "Billing", icon: <Zap size={13} /> },
+    { path: "/redeem", label: "Access Code", icon: <Tag size={13} /> },
     { path: "/settings/playback", label: "Playback", icon: <Music2 size={13} /> },
     { path: "/settings/payouts", label: "Creator Payouts", icon: <CreditCard size={13} /> },
     { path: "/settings/payment-methods", label: "Payment Methods", icon: <CreditCard size={13} /> },
@@ -311,6 +312,39 @@ export default function LivingArchiveBillingPage() {
               )}
             </div>
           )}
+
+          {/* ── Creator access code ── */}
+          <section
+            className="rounded-2xl p-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+            style={{ background: "rgba(196,154,40,0.07)", border: GOLD_BORDER, boxShadow: "0 2px 16px rgba(0,0,0,0.35)" }}
+          >
+            <div className="flex items-start gap-3 min-w-0">
+              <Tag size={18} className="mt-0.5 flex-shrink-0" style={{ color: GOLD }} aria-hidden="true" />
+              <div>
+                <h2
+                  className="text-sm font-bold uppercase tracking-[0.14em]"
+                  style={{ fontFamily: "'Cinzel', serif", color: PARCHMENT }}
+                >
+                  Have a Creator Access Code?
+                </h2>
+                <p
+                  className="mt-1 text-sm leading-relaxed"
+                  style={{ fontFamily: "'Cormorant Garamond', serif", color: SMOKE, fontSize: "16px" }}
+                >
+                  Enter a code from the Living Nexus team to activate your Creator License or add upload slots.
+                </p>
+              </div>
+            </div>
+            <Link href="/redeem" className="flex-shrink-0">
+              <button
+                type="button"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-[11px] font-bold uppercase tracking-widest transition-all hover:brightness-110 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                style={{ background: `linear-gradient(135deg, ${GOLD} 0%, ${GOLD_HOT} 100%)`, color: COAL, fontFamily: "'Cinzel', serif", boxShadow: GOLD_GLOW }}
+              >
+                Enter Code <ChevronRight size={14} />
+              </button>
+            </Link>
+          </section>
 
           {/* ── Micro packages ── */}
           <section>

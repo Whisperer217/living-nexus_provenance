@@ -290,6 +290,8 @@
   --text-xs:    clamp(0.6875rem, 0.65rem + 0.2vw, 0.75rem);   /* 11–12px — badges, WID labels */
   --text-sm:    clamp(0.8125rem, 0.78rem + 0.2vw, 0.9375rem); /* 13–15px — captions, meta */
   --text-base:  clamp(0.9375rem, 0.9rem + 0.25vw, 1.0625rem); /* 15–17px — body copy */
+  --text-lead:  clamp(1.125rem, 1rem + 0.55vw, 1.375rem);      /* 18–22px — readable introductions */
+  --text-meta:  clamp(0.75rem, 0.7rem + 0.2vw, 0.875rem);      /* 12–14px — supporting metadata */
   --text-h4:    clamp(1.125rem, 1.05rem + 0.4vw, 1.375rem);   /* 18–22px — card titles */
   --text-h3:    clamp(1.375rem, 1.25rem + 0.6vw, 1.75rem);    /* 22–28px — panel headings */
   --text-h2:    clamp(1.625rem, 1.4rem + 1.1vw, 2.25rem);     /* 26–36px — section headings */
@@ -297,6 +299,7 @@
 
   /* ── Line Heights ── */
   --leading-body:  1.75;  /* body — generous for true-black readability */
+  --leading-lead:  1.55;  /* lead copy — editorial, calm, and scannable */
   --leading-h4:    1.5;   /* h4 — comfortable for card/label context */
   --leading-h3:    1.4;   /* h3 — panel headings */
   --leading-h2:    1.2;   /* h2 — section headings (tighter, more monumental) */
@@ -313,6 +316,7 @@
   /* ── Letter Spacing ── */
   --tracking-body:     0em;     /* DM Sans — no tracking needed */
   --tracking-ui:       0.015em; /* UI labels — subtle open */
+  --tracking-meta:     0.035em; /* supporting metadata — quiet separation */
   --tracking-h4:       0.025em; /* Cormorant h4 — editorial warmth */
   --tracking-h3:       0.035em; /* Cormorant h3 — slight lift */
   --tracking-h2:       0.06em;  /* Cinzel h2 — architectural spacing */
@@ -4651,6 +4655,114 @@ h1, h2, h3, h4, h5, h6,
   isolation: isolate;
 }
 
+/* Canonical Work reading grammar — shared roles, not page-local sizes. */
+.ln-work-hero-title {
+  max-width: 18ch;
+  margin-inline: auto;
+  font-family: var(--font-display);
+  font-size: var(--text-h1);
+  font-weight: var(--weight-h1);
+  line-height: var(--leading-h1);
+  letter-spacing: var(--tracking-h1);
+  text-wrap: balance;
+}
+
+.ln-work-hero-lead {
+  max-width: 58ch;
+  margin-inline: auto;
+  font-family: var(--font-editorial);
+  font-size: var(--text-lead);
+  line-height: var(--leading-lead);
+  text-wrap: pretty;
+}
+
+.ln-work-section-title {
+  font-family: var(--font-editorial);
+  font-size: var(--text-h2);
+  font-weight: var(--weight-h3);
+  line-height: var(--leading-h2);
+  letter-spacing: var(--tracking-h3);
+  text-wrap: balance;
+}
+
+.ln-work-meta {
+  font-family: var(--font-body);
+  font-size: var(--text-meta);
+  line-height: 1.5;
+  letter-spacing: var(--tracking-meta);
+}
+
+.ln-work-wid {
+  overflow-wrap: anywhere;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: var(--text-sm);
+  letter-spacing: 0.045em;
+}
+
+.ln-work-action {
+  transition:
+    transform 180ms ease,
+    color 180ms ease,
+    background-color 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.ln-work-action:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--ln-gold-hot) 72%, transparent);
+  box-shadow: 0 8px 22px color-mix(in srgb, var(--ln-gold) 13%, transparent);
+}
+
+.ln-work-action:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.ln-work-action:focus-visible,
+.ln-work-verify-link:focus-visible,
+.ln-work-wid-copy:focus-visible {
+  outline: 2px solid var(--ln-gold-hot);
+  outline-offset: 3px;
+}
+
+.ln-work-wid-copy,
+.ln-work-verify-link {
+  transition: color 180ms ease, opacity 180ms ease, background-color 180ms ease;
+}
+
+.ln-work-wid-copy:hover {
+  opacity: 1;
+  background: color-mix(in srgb, var(--ln-gold) 12%, transparent);
+}
+
+.ln-work-verify-link:hover {
+  color: var(--ln-gold-hot) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ln-work-action,
+  .ln-work-wid-copy,
+  .ln-work-verify-link {
+    transition: none;
+  }
+
+  .ln-work-action:hover,
+  .ln-work-action:active {
+    transform: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .ln-work-hero-title {
+    max-width: 14ch;
+    letter-spacing: 0.045em;
+  }
+
+  .ln-work-hero-lead {
+    max-width: 38ch;
+  }
+}
+
 /* Soft radial that slowly brightens — color via --ln-breath-hue */
 .ln-breath-plane {
   position: absolute;
@@ -4917,6 +5029,74 @@ button:active .ln-witness-sigil,
 }
 
 .ln-dimensional-action:active { transform: translateY(1px); }
+
+.ln-nav-interactive {
+  transition:
+    transform 180ms ease,
+    color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.ln-nav-interactive:hover {
+  transform: translateY(-1px);
+}
+
+.ln-nav-interactive:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.ln-nav-interactive:focus-visible {
+  outline: 2px solid var(--ln-gold-hot);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ln-nav-interactive {
+    transition: none;
+  }
+
+  .ln-nav-interactive:hover,
+  .ln-nav-interactive:active {
+    transform: none;
+  }
+}
+
+/* Playlist Rack rows: restrained feedback for inventory-style ordering. */
+.ln-playlist-rack-row {
+  transition: transform 180ms ease, border-color 180ms ease, background-color 180ms ease, box-shadow 180ms ease;
+}
+
+.ln-playlist-rack-row:hover {
+  transform: translateY(-1px);
+  border-color: rgba(196, 154, 40, 0.34) !important;
+  background-color: rgba(196, 154, 40, 0.07) !important;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.16);
+}
+
+.ln-playlist-rack-row--dragging {
+  opacity: 0.58;
+  transform: scale(0.985);
+  border-color: rgba(196, 154, 40, 0.62) !important;
+  box-shadow: 0 0 0 1px rgba(196, 154, 40, 0.2), 0 12px 26px rgba(0, 0, 0, 0.24);
+}
+
+.ln-playlist-rack-row--drop-target {
+  transform: translateY(-2px);
+  border-color: var(--ln-gold) !important;
+  background-color: rgba(196, 154, 40, 0.14) !important;
+  box-shadow: 0 0 0 2px rgba(196, 154, 40, 0.16), 0 10px 24px rgba(196, 154, 40, 0.1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ln-playlist-rack-row,
+  .ln-playlist-rack-row:hover,
+  .ln-playlist-rack-row--dragging,
+  .ln-playlist-rack-row--drop-target {
+    transition: none;
+    transform: none;
+  }
+}
 
 .ln-voice-comment { transition: border-color 180ms ease, box-shadow 180ms ease; }
 .ln-voice-comment:hover { border-color: color-mix(in srgb, var(--ln-gold) 28%, transparent) !important; }
@@ -6258,4 +6438,101 @@ button:active .ln-witness-sigil,
   .ln-sanctuary-work-row {
     transition: none !important;
   }
+}
+
+
+/* ── Cathedral Interface Standard v1 — visual modes ────────────────────────
+   Presentation-only tokens. These do not alter Work, WID, playback, or
+   Registry authority. Apply with data-ln-visual-mode on a page/work shell.
+   Public = listen and witness; Creator Domain = tend and organize;
+   Registry = inspect and verify. */
+:root {
+  --ln-mode-surface: var(--ln-void);
+  --ln-mode-panel: var(--ln-coal);
+  --ln-mode-raised: var(--ln-iron);
+  --ln-mode-border: color-mix(in srgb, var(--ln-gold) 22%, transparent);
+  --ln-mode-border-strong: color-mix(in srgb, var(--ln-gold) 42%, transparent);
+  --ln-mode-text: var(--ln-bone);
+  --ln-mode-heading: var(--ln-parchment);
+  --ln-mode-muted: var(--ln-smoke);
+  --ln-mode-accent: var(--ln-gold);
+  --ln-mode-accent-hot: var(--ln-gold-hot);
+  --ln-mode-status: var(--ln-seal-bright);
+  --ln-mode-density: 1;
+  --ln-mode-max-reading: 68ch;
+  --ln-icon-xs: 14px;
+  --ln-icon-sm: 16px;
+  --ln-icon-md: 20px;
+  --ln-icon-lg: 24px;
+  --ln-icon-stroke: 1.75;
+  --ln-control-min: 44px;
+  --ln-control-radius: 0.625rem;
+  --ln-focus-ring: 0 0 0 3px color-mix(in srgb, var(--ln-gold-hot) 42%, transparent);
+}
+
+[data-ln-visual-mode="public"] {
+  --ln-mode-surface: var(--ln-void);
+  --ln-mode-panel: var(--ln-coal);
+  --ln-mode-raised: var(--ln-iron);
+  --ln-mode-border: color-mix(in srgb, var(--ln-gold) 18%, transparent);
+  --ln-mode-text: var(--ln-bone);
+  --ln-mode-heading: var(--ln-parchment);
+  --ln-mode-muted: color-mix(in srgb, var(--ln-bone) 66%, transparent);
+  --ln-mode-accent: var(--ln-gold);
+  --ln-mode-status: var(--ln-seal-bright);
+  --ln-mode-density: 1;
+}
+
+[data-ln-visual-mode="creator-domain"] {
+  --ln-mode-surface: var(--ln-void);
+  --ln-mode-panel: var(--ln-coal);
+  --ln-mode-raised: var(--ln-iron);
+  --ln-mode-border: color-mix(in srgb, var(--ln-gold) 28%, transparent);
+  --ln-mode-border-strong: color-mix(in srgb, var(--ln-gold-hot) 54%, transparent);
+  --ln-mode-text: var(--ln-bone);
+  --ln-mode-heading: var(--ln-parchment);
+  --ln-mode-muted: var(--ln-smoke);
+  --ln-mode-accent: var(--ln-gold-hot);
+  --ln-mode-status: var(--ln-gold-hot);
+  --ln-mode-density: 0.96;
+  --ln-mode-max-reading: 74ch;
+}
+
+[data-ln-visual-mode="registry"] {
+  --ln-mode-surface: var(--ln-void);
+  --ln-mode-panel: var(--ln-coal);
+  --ln-mode-raised: var(--ln-iron);
+  --ln-mode-border: color-mix(in srgb, var(--ln-gold) 34%, transparent);
+  --ln-mode-border-strong: color-mix(in srgb, var(--ln-gold-hot) 58%, transparent);
+  --ln-mode-text: var(--ln-bone);
+  --ln-mode-heading: var(--ln-parchment);
+  --ln-mode-muted: var(--ln-smoke);
+  --ln-mode-accent: var(--ln-gold);
+  --ln-mode-status: var(--ln-seal-bright);
+  --ln-mode-density: 0.92;
+  --ln-mode-max-reading: 82ch;
+}
+
+.ln-icon-button {
+  min-width: var(--ln-control-min);
+  min-height: var(--ln-control-min);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--ln-control-radius);
+  color: var(--ln-mode-accent);
+  transition: background-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
+}
+
+.ln-icon-button:hover { background: color-mix(in srgb, var(--ln-mode-accent) 10%, transparent); }
+.ln-icon-button:focus-visible { outline: none; box-shadow: var(--ln-focus-ring); }
+
+@media (max-width: 1279px) {
+  /* Emergency containment: the desktop signal rail must never cover a Work
+     surface in a narrow desktop/tablet viewport. */
+  .ln-right-rail-desktop { display: none !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ln-icon-button { transition: none; }
 }

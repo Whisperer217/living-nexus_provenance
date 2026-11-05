@@ -20,10 +20,10 @@ describe("external Randall memorial storefront contract", () => {
     expect(contract).not.toContain("trpc.");
   });
 
-  it("keeps the Avatar Registry store destination and adds a separate external memorial destination", () => {
+  it("keeps the Player Collections destination and adds a separate external memorial destination", () => {
     expect(LAUNCHER_ITEMS.find(item => item.id === "store")).toMatchObject({
       destination: "route",
-      path: "/avatar-registry",
+      path: "/player-collections",
     });
     expect(LAUNCHER_ITEMS.find(item => item.id === "randall-memorial")).toMatchObject({
       label: "Randall Memorial",

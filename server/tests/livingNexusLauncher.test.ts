@@ -6,7 +6,7 @@ import { LAUNCHER_ITEMS } from "../../client/src/components/layout/launcherDesti
 describe("Living Nexus launcher destinations", () => {
   it("has unique named tiles and sends every internal link to a declared site route", () => {
     const app = fs.readFileSync(path.resolve(process.cwd(), "client/src/App.tsx"), "utf8");
-    expect(LAUNCHER_ITEMS).toHaveLength(13);
+    expect(LAUNCHER_ITEMS).toHaveLength(12);
     expect(new Set(LAUNCHER_ITEMS.map(item => item.id)).size).toBe(LAUNCHER_ITEMS.length);
     for (const item of LAUNCHER_ITEMS) {
       expect(item.label.length).toBeGreaterThan(0);
@@ -21,10 +21,10 @@ describe("Living Nexus launcher destinations", () => {
     }
   });
 
-  it("keeps the Avatar Registry store separate from the external Randall memorial entry", () => {
+  it("keeps Player Collections separate from the external Randall memorial entry", () => {
     expect(LAUNCHER_ITEMS.find(item => item.id === "store")).toMatchObject({
       destination: "route",
-      path: "/avatar-registry",
+      path: "/player-collections",
     });
     expect(LAUNCHER_ITEMS.find(item => item.id === "randall-memorial")).toMatchObject({
       destination: "external",
@@ -34,7 +34,8 @@ describe("Living Nexus launcher destinations", () => {
   });
 
   it("keeps Nexus and messaging visibly unconnected until their services exist", () => {
-    for (const id of ["nexus", "messages"]) {
+    expect(LAUNCHER_ITEMS.some(item => item.id === "nexus")).toBe(false);
+    for (const id of ["messages"]) {
       expect(LAUNCHER_ITEMS.find(item => item.id === id)?.destination).toBe("unavailable");
     }
     expect(LAUNCHER_ITEMS.find(item => item.id === "player")?.destination).toBe("player");

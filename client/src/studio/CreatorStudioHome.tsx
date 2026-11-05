@@ -16,6 +16,7 @@ import {
   Settings,
   ShieldCheck,
   Sparkles,
+  LayoutDashboard,
 } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
@@ -186,6 +187,15 @@ export default function CreatorStudioHome() {
             Organize your existing Works and relationships without duplicating media, changing Witness IDs, or creating a second registry. Each destination remains the established Living Nexus authority for that part of your record.
           </p>
         </header>
+
+        <section aria-labelledby="work-desk-entry-heading" className="mt-8 flex flex-col gap-4 rounded-2xl border p-5 sm:flex-row sm:items-center sm:justify-between" style={{ borderColor: "rgba(196,154,40,0.34)", background: "linear-gradient(145deg, rgba(196,154,40,0.12), rgba(0,0,0,0.18))" }}>
+          <div className="min-w-0">
+            <p className="flex items-center gap-2 text-[11px] font-semibold tracking-[0.18em]" style={{ color: "var(--ln-gold)", fontFamily: "'Cinzel', serif" }}><LayoutDashboard size={14} /> PRIMARY WORK SURFACE</p>
+            <h2 id="work-desk-entry-heading" className="mt-2 text-xl" style={{ color: "var(--ln-parchment)", fontFamily: "'Cinzel', serif" }}>Open the Work Desk</h2>
+            <p className="mt-1 max-w-2xl text-sm leading-relaxed" style={{ color: "var(--ln-smoke)" }}>Search registered Works once, open the existing editor, or continue into Draft Releases and Named Playlists. Older management pages remain available while this surface is validated.</p>
+          </div>
+          <Link href="/work-desk" className="ln-nav-interactive inline-flex min-h-11 shrink-0 items-center gap-2 rounded-lg px-4 text-sm font-semibold focus-visible:outline-none" style={{ background: "var(--ln-gold)", color: "var(--ln-coal)" }}><LayoutDashboard size={15} /> Open Work Desk</Link>
+        </section>
 
         <section aria-labelledby="studio-overview-heading" className="mt-10">
           <h2 id="studio-overview-heading" className="sr-only">Creator Studio destinations</h2>

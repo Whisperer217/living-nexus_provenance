@@ -15,6 +15,7 @@ describe("mobile shell stabilization contract", () => {
     expect(rail).toContain('bottom: "var(--bottom-stack)"');
     expect(rail).toContain('width: "min(21rem, calc(100vw - 2.5rem))"');
     expect(rail).toContain("ln-mobile-nav-item flex-row justify-start gap-3 px-4");
+    expect(rail).toContain("ln-nav-interactive");
     expect(rail).toContain('data-mobile-nav-primary={isMobile ? "true" : undefined}');
     expect(rail).toContain("MOBILE_NAV_DRAWER");
     expect(rail).toContain("MOBILE_NAV_BACKDROP");
@@ -27,6 +28,16 @@ describe("mobile shell stabilization contract", () => {
     expect(rail).toContain('width: isMobile ? "100%" : 60');
     expect(layers).toContain("MOBILE_NAV_BACKDROP: 9_100");
     expect(layers).toContain("MOBILE_NAV_DRAWER: 9_110");
+  });
+
+  it("keeps navigation feedback shared across the drawer and hamburger trigger", () => {
+    const rail = source("client/src/components/layout/LeftRail.tsx");
+    const layout = source("client/src/components/layout/MainLayout.tsx");
+
+    expect(rail).toContain("ln-nav-interactive");
+    expect(layout).toContain("ln-dimensional-action ln-nav-interactive flex min-h-11");
+    expect(layout).toContain("ln-mobile-brand ln-dimensional-action ln-nav-interactive");
+    expect(layout).toContain("ln-mobile-header-secondary ln-dimensional-action ln-nav-interactive");
   });
 
   it("coordinates drawer opening with the existing player without adding an audio owner", () => {
