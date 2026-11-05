@@ -11,6 +11,7 @@
     "format": "prettier --write .",
     "test": "vitest run",
     "db:push": "drizzle-kit generate && drizzle-kit migrate",
+    "seed:player-collections:staging": "NODE_ENV=staging LN_STAGING=true LN_ALLOW_SYNTHETIC_SEED=true tsx scripts/seed-player-collections-staging.ts",
     "refine": "tsx refinement/steward.ts"
   },
   "dependencies": {

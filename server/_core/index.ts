@@ -271,6 +271,11 @@ async function startServer() {
 
   server.listen(port, () => {
     console.log(`Server running on http://localhost:${port}/`);
+    const workersDisabled = process.env.LN_DISABLE_WORKERS === "true";
+    if (workersDisabled) {
+      console.log("[Runtime] Background workers disabled by LN_DISABLE_WORKERS=true");
+      return;
+    }
     // Start the visual generation worker after the server is up.
     // Backfill any published songs that don't have visuals yet.
     backfillVisualQueue().catch(err => console.error("[VisualQueue] Backfill error:", err));
