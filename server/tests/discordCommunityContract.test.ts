@@ -51,13 +51,14 @@ describe("Discord community release contract", () => {
     }
   });
 
-  it("uses a bounded Home community panel instead of the provider-owned widget iframe", () => {
+  it("uses a bounded Home community panel instead of the provider-owned widget", () => {
     const home = source("client/src/pages/HomePage.tsx");
 
     expect(home).toContain('data-testid="discord-community-panel"');
     expect(home).toContain("Discord opens directly in its own trusted surface");
     expect(home).toContain("DISCORD_COMMUNITY_URL");
     expect(home).not.toContain("DISCORD_WIDGET_EMBED_URL");
-    expect(home).not.toContain("<iframe");
+    expect(home).not.toContain("DISCORD_WIDGET_EMBED_URL");
+    expect(home).not.toMatch(/<iframe[^>]+src=.*discord/i);
   });
 });

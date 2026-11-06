@@ -6,12 +6,12 @@
  * so cream and dark cascades stay legible.
  */
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ElementType } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "wouter";
 import {
   ShieldCheck, Users, ExternalLink, Play, Music, Heart,
-  Sparkles, Compass, Upload, Fingerprint,
+  Sparkles, Compass, Upload, Fingerprint, Layers3,
 } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
@@ -104,6 +104,34 @@ const AVATAR_PREVIEWS = [
   { id: "archivist", name: "The Archivist" },
   { id: "cipher", name: "The Cipher" },
 ] as const;
+
+function CompanionCard({ eyebrow, title, description, url, accent, icon: Icon, note }: {
+  eyebrow: string;
+  title: string;
+  description: string;
+  url: string;
+  accent: string;
+  icon: ElementType;
+  note: string;
+}) {
+  return (
+    <article className="group flex min-w-0 flex-col overflow-hidden rounded-2xl" style={{ background: "color-mix(in srgb, var(--ln-iron, #1C1A14) 78%, transparent)", border: `1px solid color-mix(in srgb, ${accent} 36%, transparent)` }}>
+      <div className="relative aspect-[16/9] overflow-hidden border-b" style={{ borderColor: `color-mix(in srgb, ${accent} 13%, transparent)` }}>
+        <iframe src={url} title={`${title} companion preview`} loading="lazy" sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts" referrerPolicy="strict-origin-when-cross-origin" className="h-full w-full bg-black" />
+        <span className="absolute left-3 top-3 rounded-full px-2 py-1 text-[10px] uppercase tracking-[0.16em]" style={{ background: "rgba(10,8,6,0.82)", border: `1px solid color-mix(in srgb, ${accent} 40%, transparent)`, color: accent, fontFamily: "'Cinzel', serif" }}>External companion</span>
+      </div>
+      <div className="flex flex-1 flex-col gap-3 p-5">
+        <div className="flex items-start gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl" style={{ background: `color-mix(in srgb, ${accent} 10%, transparent)`, border: `1px solid color-mix(in srgb, ${accent} 27%, transparent)`, color: accent }}><Icon size={18} aria-hidden="true" /></div>
+          <div className="min-w-0"><div className="text-[10px] uppercase tracking-[0.18em]" style={{ color: `color-mix(in srgb, ${accent} 74%, transparent)`, fontFamily: "'Cinzel', serif" }}>{eyebrow}</div><h3 className="mt-1 text-2xl leading-none" style={{ color: "var(--ln-parchment)", fontFamily: "'Cormorant Garamond', serif" }}>{title}</h3></div>
+        </div>
+        <p className="text-sm leading-6" style={{ color: "var(--ln-bone)" }}>{description}</p>
+        <p className="text-xs leading-5" style={{ color: "var(--ln-smoke)" }}>{note}</p>
+        <a href={url} target="_blank" rel="noopener noreferrer" className="mt-auto inline-flex min-h-10 items-center justify-center gap-2 rounded-lg px-4 text-xs uppercase tracking-[0.12em] transition-colors hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E8B840]" style={{ border: `1px solid color-mix(in srgb, ${accent} 34%, transparent)`, color: accent, fontFamily: "'Cinzel', serif" }}>Open full experience <ExternalLink size={13} aria-hidden="true" /></a>
+      </div>
+    </article>
+  );
+}
 
 export default function HomePage() {
   const { isAuthenticated, loading: authLoading } = useAuth();
@@ -363,6 +391,21 @@ export default function HomePage() {
                   </p>
                 </div>
               ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── Companion spaces ── */}
+        <section className="relative z-[1] px-6 py-12" style={{ borderTop: "1px solid var(--ln-panel-border)" }} aria-labelledby="companion-spaces-heading">
+          <div className="max-w-5xl mx-auto">
+            <div className="mb-5 flex items-end justify-between gap-4">
+              <div><p className="font-heading text-[10px] uppercase tracking-[0.22em] mb-2" style={{ color: "var(--ln-gold)" }}>Companion spaces</p><h2 id="companion-spaces-heading" className="font-heading" style={{ fontSize: "1.45rem", color: "var(--ln-parchment)" }}>Continue the work elsewhere</h2></div>
+              <Layers3 size={22} style={{ color: "var(--ln-gold)" }} aria-hidden="true" />
+            </div>
+            <p className="font-body mb-5 max-w-2xl" style={{ fontSize: "1rem", color: "var(--ln-smoke)", lineHeight: 1.65 }}>These are independent companion experiences. They open their own surfaces and do not imply Living Nexus account sync, WID verification, or shared playback.</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <CompanionCard eyebrow="Public transmission" title="Manifest Theatre" description="A living public roll of manifested Works, creator attribution, WIDs, and a local listening order." url="https://fabulous-concha-fe39e4.netlify.app/" accent="var(--ln-gold-hot, var(--ln-gold))" icon={Layers3} note="Independent public snapshot; Living Nexus remains the registry authority." />
+              <CompanionCard eyebrow="Local-first pilot" title="Provenance Player" description="A tactile local player for authorized manifests, local audio, and creator-controlled listening." url="https://provenanceplayer.netlify.app/#/home" accent="var(--ln-gold)" icon={Compass} note="Experimental companion; it does not currently connect to the Living Nexus Registry." />
             </div>
           </div>
         </section>
