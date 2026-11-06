@@ -42,6 +42,8 @@ function SignalIcon({ type }: { type: string }) {
   return <Zap size={12} style={style} />;
 }
 
+type ActivityCategory = "signals" | "live-activity" | "manifestations" | "registry" | "recently-witnessed";
+
 /** Routes where the RightRail should be suppressed (Creator Focus Mode + Transactional Focus State) */
 const CREATOR_FOCUS_ROUTES = [
   "/upload",
@@ -149,6 +151,7 @@ export default function RightRail() {
         role="complementary"
         aria-label="Signals, connected manifestations, and Witness Registry"
         data-activity-surface="right-rail"
+        data-mobile-disclosure="desktop-rail-hidden-below-lg"
         style={{
           position: "fixed",
           top: 56, /* clear the 56px fixed TopBar */
@@ -170,9 +173,12 @@ export default function RightRail() {
       <div className="flex flex-col gap-4 p-4 pb-32">
 
         {/* ── Signals ─────────────────────────────────────────────── */}
-        <section>
+        <section
+          data-activity-category={(user ? "signals" : "live-activity") satisfies ActivityCategory}
+          aria-labelledby="ln-activity-signals-heading"
+        >
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] font-bold tracking-widest" style={{ color: "color-mix(in srgb, var(--ln-gold) 60%, transparent)" }}>
+            <span id="ln-activity-signals-heading" className="text-[10px] font-bold tracking-widest" style={{ color: "color-mix(in srgb, var(--ln-gold) 60%, transparent)" }}>
               {user ? "SIGNALS" : "LIVE ACTIVITY"}
             </span>
             {user && (
@@ -265,11 +271,11 @@ export default function RightRail() {
         </section>
 
         {/* -- Provenance Verified ----------------------------------------- */}
-        <section>
+        <section data-activity-category="manifestations" aria-labelledby="ln-activity-manifestations-heading">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-1.5">
               <Shield size={11} style={{ color: "rgba(212,175,55,0.6)" }} />
-              <span className="text-[10px] font-bold tracking-widest" style={{ color: "rgba(212,175,55,0.6)" }}>
+              <span id="ln-activity-manifestations-heading" className="text-[10px] font-bold tracking-widest" style={{ color: "rgba(212,175,55,0.6)" }}>
                 CONNECTED MANIFESTATIONS
               </span>
             </div>
@@ -397,10 +403,10 @@ export default function RightRail() {
 
 
         {/* ── Witness Registry Stats ───────────────────────────────── */}
-        <section>
+        <section data-activity-category="registry" aria-labelledby="ln-activity-registry-heading">
           <div className="flex items-center gap-1.5 mb-2">
             <Eye size={11} style={{ color: "color-mix(in srgb, var(--ln-gold) 60%, transparent)" }} />
-            <span className="text-[10px] font-bold tracking-widest" style={{ color: "color-mix(in srgb, var(--ln-gold) 60%, transparent)" }}>
+            <span id="ln-activity-registry-heading" className="text-[10px] font-bold tracking-widest" style={{ color: "color-mix(in srgb, var(--ln-gold) 60%, transparent)" }}>
               WITNESS REGISTRY
             </span>
           </div>
@@ -440,10 +446,10 @@ export default function RightRail() {
 
         {/* ── Recently Witnessed ─────────────────────────────────────────── */}
         {registryItems.length > 0 && (
-          <section>
+          <section data-activity-category="recently-witnessed" aria-labelledby="ln-activity-recent-heading">
             <div className="flex items-center gap-1.5 mb-2">
               <Clock size={11} style={{ color: "rgba(212,175,55,0.6)" }} />
-              <span className="text-[10px] font-bold tracking-widest" style={{ color: "rgba(212,175,55,0.6)" }}>
+              <span id="ln-activity-recent-heading" className="text-[10px] font-bold tracking-widest" style={{ color: "rgba(212,175,55,0.6)" }}>
                 RECENTLY WITNESSED
               </span>
             </div>

@@ -38,4 +38,18 @@ describe("activity surface contract", () => {
     expect(css).toContain("@media (max-width: 1279px)");
     expect(css).toContain(".ln-right-rail-desktop { display: none !important; }");
   });
+
+  it("labels the existing activity categories for assistive technology and future disclosure", () => {
+    const rail = source("client/src/components/layout/RightRail.tsx");
+
+    expect(rail).toContain('data-mobile-disclosure="desktop-rail-hidden-below-lg"');
+    expect(rail).toContain('data-activity-category={(user ? "signals" : "live-activity") satisfies ActivityCategory}');
+    expect(rail).toContain('data-activity-category="manifestations"');
+    expect(rail).toContain('data-activity-category="registry"');
+    expect(rail).toContain('data-activity-category="recently-witnessed"');
+    expect(rail).toContain('aria-labelledby="ln-activity-signals-heading"');
+    expect(rail).toContain('aria-labelledby="ln-activity-manifestations-heading"');
+    expect(rail).toContain('aria-labelledby="ln-activity-registry-heading"');
+    expect(rail).toContain('aria-labelledby="ln-activity-recent-heading"');
+  });
 });
