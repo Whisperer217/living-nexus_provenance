@@ -172,6 +172,16 @@
 - [x] Validate focused contract 8/8, full suite 944 passed/1 skipped, `pnpm check`, production build, whitespace, desktop/mobile captures, and live state-cycle smoke test.
 - [x] Save unpublished checkpoint `640cacec`; no migration, route retirement, media mutation, deployment, or publication.
 
+### P3.0.1 Explore surface depth refinement — DONE
+
+- [x] Condense the sticky Explore header while preserving identity, search, randomization, sorting, refresh, filter, and view controls.
+- [x] Add distinct layered surfaces for the global canvas, discovery header, Creator Domains rail, creator cards, and Work registry.
+- [x] Add restrained bronze/gold depth, edge shadows, inner highlights, and responsive narrow-viewport rules without changing discovery behavior.
+- [x] Preserve creator selection, artwork, WID/Work links, filters, PlayerContext, and Global Player continuity.
+- [x] Validate focused Explore contracts (13/13), full suite (945 passed, 1 skipped), TypeScript, production build, and whitespace.
+- [x] Capture updated desktop/mobile visual evidence after the final title-token compatibility repair.
+- [ ] Save the resulting unpublished checkpoint.
+
 ### P3.1 Four image treatments — NEXT
 
 - [ ] Define Artifact treatment for Registry and archival views.

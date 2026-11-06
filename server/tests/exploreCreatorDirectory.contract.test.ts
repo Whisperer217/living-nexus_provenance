@@ -87,4 +87,13 @@ describe("Explore creator directory", () => {
     expect(explore).toContain("ln-explore-gallery__scroller");
     expect(explore).not.toContain("CreatorGalleryDrawer");
   });
+
+  it("keeps the Explore refinement presentation-only and gives the header, domains, and registry distinct spatial hooks", () => {
+    expect(explore).toContain("ln-explore-header");
+    expect(explore).toContain("ln-explore-header__identity");
+    expect(explore).toContain("ln-explore-header__search-row");
+    expect(explore).toContain("ln-explore-registry");
+    expect(explore).toContain("WorkListRow");
+    expect(explore).not.toContain("audioTracks.slice");
+  });
 });

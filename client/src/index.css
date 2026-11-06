@@ -1803,6 +1803,55 @@ body.overlay-active-full:has([data-slot="dialog-content"]) {
     from { transform: scaleY(1); }
     to { transform: scaleY(0.25); }
   }
+
+  /* ── Explore spatial refinement — layered discovery surfaces ── */
+  .ln-explore-header {
+    background:
+      linear-gradient(180deg, color-mix(in srgb, var(--ln-coal, #0f0f0d) 96%, var(--ln-bronze, #4a3821)), color-mix(in srgb, var(--ln-void, #090908) 94%, var(--ln-bronze, #4a3821)));
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.22), inset 0 -1px 0 rgba(214, 168, 76, 0.05);
+  }
+  .ln-explore-header__inner { padding-top: 0.6rem; padding-bottom: 0.65rem; }
+  .ln-explore-header__top { min-height: 3.35rem; }
+  .ln-explore-header .ln-page-title { font-size: clamp(1.45rem, 1.15rem + 1vw, 2rem); line-height: 1; }
+  .ln-explore-header__search-row { margin-top: 0.35rem; }
+  .ln-explore-header__search-row .ln-explore-search { width: min(28rem, 100%); }
+  .ln-explore-header__search-row input {
+    background: color-mix(in srgb, var(--ln-bronze, #4a3821) 22%, var(--ln-void-3, #171613));
+    border-color: rgba(214, 168, 76, 0.16);
+  }
+  .ln-explore-spatial-shell {
+    gap: 1rem;
+  }
+  .ln-explore-gallery {
+    background: linear-gradient(180deg, rgba(43, 31, 18, 0.42), rgba(16, 15, 13, 0.78));
+    border-color: rgba(214, 168, 76, 0.16);
+    box-shadow: 0 16px 34px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 228, 168, 0.04);
+  }
+  .ln-explore-gallery__header { border-bottom-color: rgba(214, 168, 76, 0.12); }
+  .ln-explore-gallery__scroller { scrollbar-color: rgba(214, 168, 76, 0.35) transparent; }
+  .ln-creator-card__footer { border-top-color: rgba(214, 168, 76, 0.12); }
+  .ln-explore-registry {
+    background: linear-gradient(180deg, rgba(24, 22, 18, 0.64), rgba(12, 12, 11, 0.88));
+    border: 1px solid rgba(214, 168, 76, 0.12);
+    border-radius: 1rem;
+    padding-inline: 0.75rem;
+    box-shadow: 0 18px 38px rgba(0, 0, 0, 0.16), inset 0 1px 0 rgba(255, 228, 168, 0.03);
+  }
+  .ln-explore-registry > * { max-width: 100%; }
+  .ln-explore-registry .ln-subsection-header { letter-spacing: 0.08em; }
+  @media (max-width: 767px) {
+    .ln-explore-header__inner { padding-top: 0.5rem; padding-bottom: 0.55rem; }
+    .ln-explore-header__top { min-height: 2.8rem; }
+    .ln-explore-header__identity { flex: 1 1 auto; }
+    .ln-explore-header__identity .ln-editorial { display: none; }
+    .ln-explore-header-controls { gap: 0.35rem; }
+    .ln-explore-header__search-row { align-items: stretch; flex-wrap: wrap; }
+    .ln-explore-header__search-row .ln-explore-search { flex: 1 1 13rem; width: auto; }
+    .ln-explore-registry { margin-inline: -0.25rem; padding-inline: 0.55rem; border-radius: 0.85rem; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ln-explore-header, .ln-explore-registry { scroll-behavior: auto; }
+  }
   .live-wave.paused span { animation-play-state: paused; }
 
   /* ── Pulse dot — warm amber live indicator ── */

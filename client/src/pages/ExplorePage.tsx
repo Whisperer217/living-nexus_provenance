@@ -1098,17 +1098,17 @@ export default function ExplorePage() {
     <DepthAtmosphere className="min-h-screen" hue={43} variant="page">
       {/* ── Sticky header ─────────────────────────────────────────── */}
       <div
-        className="sticky top-0 z-30 border-b"
+        className="ln-explore-header sticky top-0 z-30 border-b"
         style={{
           background: "color-mix(in srgb, var(--ln-void, var(--void)) 88%, transparent)",
           borderColor: "color-mix(in srgb, var(--ln-gold) 14%, transparent)",
           backdropFilter: "saturate(1.1)",
         }}
       >
-        <div className="mx-auto max-w-[1360px] px-4 sm:px-6">
+        <div className="ln-explore-header__inner mx-auto max-w-[1360px] px-4 sm:px-6">
           {/* Row 1: Title + controls */}
-          <div className="flex items-center justify-between pt-4 pb-2 gap-3 flex-wrap">
-            <div className="flex-shrink-0">
+          <div className="ln-explore-header__top flex items-center justify-between gap-3 flex-wrap">
+            <div className="ln-explore-header__identity min-w-0 flex-shrink-0">
               <p
                 className="ln-overline mb-1"
                 style={{ color: "var(--ln-gold)" }}
@@ -1134,7 +1134,7 @@ export default function ExplorePage() {
             </div>
           </div>
           {/* Row 2: contextual discovery search + creator filter */}
-          <div className="flex items-center gap-2 pb-3">
+          <div className="ln-explore-header__search-row flex items-center gap-2">
             <div className={`ln-explore-search relative flex-shrink-0 w-40 sm:w-64 ${viewMode === "creators" ? "ln-explore-search--creators" : ""}`}>
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[var(--stone-shadow)]" />
               <input type="text" aria-label={viewMode === "creators" ? "Search public creators" : "Search works, creators, or genres"} placeholder={viewMode === "creators" ? "Find creators, handles, statements…" : "Search works, creators, genres…"} value={search} onChange={(e) => setSearch(e.target.value)}
@@ -1210,7 +1210,7 @@ export default function ExplorePage() {
 
             {/* ── List view (flat, all types) ── */}
             {viewMode === "list" && (
-              <div className="pt-6">
+              <div className="ln-explore-registry pt-6">
                 <AllWorksListView
                   rows={worksIndex.rows}
                   likedMap={likedMap}
