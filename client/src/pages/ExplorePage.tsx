@@ -813,7 +813,7 @@ function CreatorGalleryRail({
   onSelect: (creatorId: number | null) => void;
   onStateChange: (state: GalleryState) => void;
 }) {
-  const orderedCreators = useMemo(() => creators.slice(0, 24), [creators]);
+  const orderedCreators = useMemo(() => creators, [creators]);
   const isHidden = galleryState === "hidden";
 
   return (
