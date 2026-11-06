@@ -41,6 +41,7 @@ type SupplementalKey = typeof SUPPLEMENTAL_SECTIONS[number]["key"];
 type ViewMode = "list" | "creators";
 type WorkSort = "curated" | "newest" | "title" | "creator";
 type CreatorSort = "newest" | "popular";
+type GalleryState = "expanded" | "compact" | "hidden";
 
 const WORK_SORT_OPTIONS: { value: WorkSort; label: string; icon: React.ReactNode }[] = [
   { value: "curated", label: "Registry order", icon: <Sparkles className="h-3.5 w-3.5" /> },
@@ -799,6 +800,83 @@ function CreatorDirectorySkeleton() {
   );
 }
 
+function CreatorGalleryRail({
+  creators,
+  selectedCreatorId,
+  galleryState,
+  onSelect,
+  onStateChange,
+}: {
+  creators: CreatorSummary[];
+  selectedCreatorId: number | null;
+  galleryState: GalleryState;
+  onSelect: (creatorId: number | null) => void;
+  onStateChange: (state: GalleryState) => void;
+}) {
+  const orderedCreators = useMemo(() => creators.slice(0, 24), [creators]);
+  const isHidden = galleryState === "hidden";
+
+  return (
+    <aside
+      className={`ln-explore-gallery ln-explore-gallery--${galleryState}`}
+      aria-label="Creator gallery"
+      data-gallery-state={galleryState}
+      data-gallery-count={orderedCreators.length}
+    >
+      <div className="ln-explore-gallery__header">
+        <div className="min-w-0">
+          <p className="ln-overline">Creator domains</p>
+          {!isHidden && <p className="ln-caption mt-1 text-[var(--stone-shadow)]">Choose a world to explore</p>}
+        </div>
+        <div className="flex items-center gap-1">
+          {galleryState !== "expanded" && (
+            <button type="button" className="ln-explore-gallery__control" onClick={() => onStateChange("expanded")} aria-label="Expand creator gallery" title="Expand creator gallery">
+              <ChevronRight className="h-4 w-4" aria-hidden="true" />
+            </button>
+          )}
+          {galleryState === "expanded" && (
+            <button type="button" className="ln-explore-gallery__control" onClick={() => onStateChange("compact")} aria-label="Compact creator gallery" title="Compact creator gallery">
+              <ChevronLeft className="h-4 w-4" aria-hidden="true" />
+            </button>
+          )}
+          <button type="button" className="ln-explore-gallery__control" onClick={() => onStateChange(isHidden ? "expanded" : "hidden")} aria-label={isHidden ? "Show creator gallery" : "Hide creator gallery"} title={isHidden ? "Show creator gallery" : "Hide creator gallery"}>
+            {isHidden ? <Users className="h-4 w-4" aria-hidden="true" /> : <X className="h-4 w-4" aria-hidden="true" />}
+          </button>
+        </div>
+      </div>
+      {!isHidden && (
+        <div className="ln-explore-gallery__scroller" role="list" aria-label="Public creator domains">
+          {orderedCreators.map((creator) => {
+            const identity = creator.name ?? creator.artistHandle ?? `Creator ${creator.id}`;
+            const isSelected = selectedCreatorId === creator.id;
+            return (
+              <button
+                key={creator.id}
+                type="button"
+                role="listitem"
+                aria-pressed={isSelected}
+                onClick={() => onSelect(isSelected ? null : creator.id)}
+                className={`ln-explore-gallery__item ${isSelected ? "is-selected" : ""}`}
+                title={`Explore ${identity}`}
+              >
+                {creator.bannerUrl ? (
+                  <img src={creator.bannerUrl} alt="" aria-hidden="true" loading="lazy" decoding="async" />
+                ) : (
+                  <span className="ln-explore-gallery__fallback" aria-hidden="true"><Users className="h-5 w-5" /></span>
+                )}
+                <span className="ln-explore-gallery__identity">
+                  <strong>{identity}</strong>
+                  {galleryState === "expanded" && <small>{creator.publishedCount} published work{creator.publishedCount === 1 ? "" : "s"}</small>}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </aside>
+  );
+}
+
 function AllCreatorsView({
   creators,
   search,
@@ -892,6 +970,7 @@ export default function ExplorePage() {
   }, [routeSearch]);
   const [randomize, setRandomize] = useState(true);
   const [selectedCreatorId, setSelectedCreatorId] = useState<number | null>(null);
+  const [galleryState, setGalleryState] = useState<GalleryState>("expanded");
   const [workSort, setWorkSort] = useState<WorkSort>("curated");
   const [creatorSort, setCreatorSort] = useState<CreatorSort>("newest");
   const [subscriptionOverrides, setSubscriptionOverrides] = useState<Record<number, CreatorSubscriptionTier>>({});
@@ -1073,7 +1152,16 @@ export default function ExplorePage() {
       </div>
 
       {/* ── Main content ──────────────────────────────────────────── */}
-      <div className="mx-auto max-w-[1360px] px-4 pb-32 sm:px-6">
+      <div className="mx-auto max-w-[1480px] px-4 pb-32 sm:px-6">
+        <div className={`ln-explore-spatial-shell ln-explore-spatial-shell--${galleryState}`}>
+          <CreatorGalleryRail
+            creators={creators}
+            selectedCreatorId={selectedCreatorId}
+            galleryState={galleryState}
+            onSelect={setSelectedCreatorId}
+            onStateChange={setGalleryState}
+          />
+          <div className="min-w-0">
         {/* Loading state */}
         {isLoading && (viewMode === "creators" ? (
           <CreatorDirectorySkeleton />
@@ -1155,6 +1243,8 @@ export default function ExplorePage() {
             </div>
           </>
         )}
+          </div>
+        </div>
       </div>
     </DepthAtmosphere>
   );

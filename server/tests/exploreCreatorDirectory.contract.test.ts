@@ -76,4 +76,15 @@ describe("Explore creator directory", () => {
     expect(explore).not.toContain('viewMode === "columns"');
     expect(explore).not.toContain("LayoutGrid");
   });
+
+  it("adds an Explore-owned gallery with desktop states and mobile snap semantics without a second navigation authority", () => {
+    expect(explore).toContain('type GalleryState = "expanded" | "compact" | "hidden"');
+    expect(explore).toContain("function CreatorGalleryRail({");
+    expect(explore).toContain("data-gallery-state={galleryState}");
+    expect(explore).toContain("onClick={() => onSelect(isSelected ? null : creator.id)}");
+    expect(explore).toContain('loading="lazy"');
+    expect(explore).toContain("ln-explore-spatial-shell");
+    expect(explore).toContain("ln-explore-gallery__scroller");
+    expect(explore).not.toContain("CreatorGalleryDrawer");
+  });
 });
