@@ -183,6 +183,15 @@
 - [x] Capture updated desktop/mobile visual evidence after the final title-token compatibility repair.
 - [x] Save the unpublished Explore refinement checkpoint `5c172207`.
 
+### P3.0.2 Explore mobile architecture correction — DONE
+
+- [x] Reflow the mobile header into identity → Explore heading → full-width search → Settings disclosure.
+- [x] Preserve the existing horizontal snap Creator Domains gallery and canonical creator selection state.
+- [x] Present Explore Works with opt-in mobile genre and `m:ss` duration metadata while reusing the existing WorkListRow playback/actions.
+- [x] Add narrow-viewport card spacing, 320px safeguards, and bottom-stack clearance without changing Global Player authority.
+- [x] Validate focused Explore/activity contracts (29/29), full suite (949 passed, 1 skipped), TypeScript, production build, and whitespace.
+- [x] Save unpublished checkpoint `58198e73`; deployment and publication remain unperformed.
+
 ### P3.1 Four image treatments — NEXT
 
 - [ ] Define Artifact treatment for Registry and archival views.
