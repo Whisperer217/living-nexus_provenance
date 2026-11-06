@@ -2,7 +2,7 @@
 
 **Ledger revision:** 2026-11-02
 **Canonical branch:** `app/main`
-**Current checkpoint:** `265c8065`
+**Current checkpoint:** `640cacec`
 **Operating mode:** Consolidation, legibility, and release stabilization
 **Feature posture:** No new feature families until the core public and creator surfaces are coherent
 
@@ -162,6 +162,15 @@
 - [x] State clearly that the companions do not provide Living Nexus account sync, WID verification, shared playback, or shared registry authority.
 - [x] Validate focused contracts (14/14), full suite (943 passed, 1 skipped), TypeScript, production build, responsive browser surface, and `git diff --check`.
 - [x] Save unpublished checkpoint `265c8065`; deployment and publication remain separate and unperformed.
+
+### P3.0 Explore spatial discovery — DONE
+
+- [x] Add the Explore-owned Creator Gallery Rail using the existing public creator projection, canonical IDs, and original artwork.
+- [x] Provide Expanded, Compact, and Hidden desktop states plus a mobile horizontal snap rail; keep `LeftRail` as the only navigation authority.
+- [x] Keep creator identity below artwork, preserve `selectedCreatorId`, filters, Work/WID links, PlayerContext, and Global Player continuity.
+- [x] Add lazy image loading, keyboard focus, selected-state semantics, reduced-motion handling, and no-display-cap creator rendering.
+- [x] Validate focused contract 8/8, full suite 944 passed/1 skipped, `pnpm check`, production build, whitespace, desktop/mobile captures, and live state-cycle smoke test.
+- [x] Save unpublished checkpoint `640cacec`; no migration, route retirement, media mutation, deployment, or publication.
 
 ### P3.1 Four image treatments — NEXT
 
