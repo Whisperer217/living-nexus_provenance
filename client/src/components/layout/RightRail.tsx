@@ -116,7 +116,11 @@ export default function RightRail() {
       <button
         onClick={toggle}
         title={isOpen ? "Collapse right panel" : "Expand right panel"}
-        className="ln-right-rail-desktop hidden lg:flex items-center justify-center"
+        className="ln-right-rail-desktop ln-activity-surface__toggle hidden lg:flex items-center justify-center"
+        aria-expanded={isOpen}
+        aria-controls="ln-right-rail-panel"
+        aria-label={isOpen ? "Collapse activity and registry panel" : "Expand activity and registry panel"}
+        data-activity-surface-toggle="right-rail"
         style={{
           position: "fixed",
           top: "50%",
@@ -140,7 +144,11 @@ export default function RightRail() {
       </button>
 
       <aside
-        className="ln-right-rail-desktop hidden lg:flex flex-col overflow-y-auto"
+        id="ln-right-rail-panel"
+        className="ln-right-rail-desktop ln-activity-surface hidden lg:flex flex-col overflow-y-auto"
+        role="complementary"
+        aria-label="Signals, connected manifestations, and Witness Registry"
+        data-activity-surface="right-rail"
         style={{
           position: "fixed",
           top: 56, /* clear the 56px fixed TopBar */
@@ -149,6 +157,9 @@ export default function RightRail() {
           width: 320,
           background: "var(--ln-coal)",
           borderLeft: "1px solid var(--ln-border-subtle)",
+          minHeight: 0,
+          overscrollBehavior: "contain",
+          isolation: "isolate",
           /* z-index: 80 — below ContextDrawer (300) and LeftRail (310),
              but above page content so it never disappears behind it */
           zIndex: 80,

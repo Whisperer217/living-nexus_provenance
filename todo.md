@@ -103,15 +103,16 @@
 - [x] Require confirmation before removal and explicitly preserve Works and WIDs.
 - [x] Extend Playlist Rack contract coverage for menu labels, share links, owner mutations, and preservation copy.
 
-### P1.2 Activity and Signals architecture — NEXT
+### P1.2 Activity and Signals architecture — IN PROGRESS
 
 **Outcome:** Community activity becomes a contained secondary voice rather than an overlay chorus.
 
 - [ ] Define activity categories: Signal, Comment, Registry event, Playback activity, System notice.
-- [ ] Give activity a single owned surface: rail, drawer, or dedicated section per visual mode.
-- [ ] Prevent activity text from rendering over primary Work identity or busy artwork.
-- [ ] Add priority, dismissal, wrapping, and mobile disclosure rules.
-- [ ] Add regression coverage for narrow desktop, mobile, keyboard focus, and persistent player coexistence.
+- [x] Keep the mounted RightRail as the single passive activity authority; do not mount a second LiveActivityPanel.
+- [x] Prevent activity text from rendering over primary Work identity or busy artwork by isolating the rail and capping it above the bottom stack.
+- [x] Add bounded wrapping, isolated scrolling, focus-visible feedback, and reduced-motion-safe surface transitions.
+- [x] Add focused regression coverage for rail ownership, aria state, narrow desktop containment, focus, and persistent-player coexistence.
+- [ ] Define the full activity category taxonomy and priority/dismissal/mobile disclosure rules.
 
 ### P1.3 Provenance status grammar — NEXT
 
@@ -180,7 +181,7 @@
 - [x] Preserve creator selection, artwork, WID/Work links, filters, PlayerContext, and Global Player continuity.
 - [x] Validate focused Explore contracts (13/13), full suite (945 passed, 1 skipped), TypeScript, production build, and whitespace.
 - [x] Capture updated desktop/mobile visual evidence after the final title-token compatibility repair.
-- [ ] Save the resulting unpublished checkpoint.
+- [x] Save the unpublished Explore refinement checkpoint `5c172207`.
 
 ### P3.1 Four image treatments — NEXT
 

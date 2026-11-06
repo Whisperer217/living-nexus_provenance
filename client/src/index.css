@@ -6710,10 +6710,22 @@ button:active .ln-witness-sigil,
   color: var(--ln-mode-accent);
   transition: background-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
 }
-
 .ln-icon-button:hover { background: color-mix(in srgb, var(--ln-mode-accent) 10%, transparent); }
 .ln-icon-button:focus-visible { outline: none; box-shadow: var(--ln-focus-ring); }
 
+/* The mounted RightRail is the single passive activity surface. Keep its
+   content visually separate from the page and contained above the player
+   stack; activity must never become a second navigation or playback layer. */
+.ln-activity-surface {
+  box-shadow: inset 1px 0 0 color-mix(in srgb, var(--ln-gold) 5%, transparent), -12px 0 28px rgba(0, 0, 0, 0.16);
+  overflow-wrap: anywhere;
+  scrollbar-gutter: stable;
+  transition: right 180ms ease, box-shadow 180ms ease;
+}
+.ln-activity-surface__toggle:focus-visible {
+  outline: none;
+  box-shadow: var(--ln-focus-ring), -4px 0 16px color-mix(in srgb, var(--ln-gold) 12%, transparent);
+}
 @media (max-width: 1279px) {
   /* Emergency containment: the desktop signal rail must never cover a Work
      surface in a narrow desktop/tablet viewport. */
@@ -6721,5 +6733,6 @@ button:active .ln-witness-sigil,
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ln-icon-button { transition: none; }
+  .ln-icon-button,
+  .ln-activity-surface { transition: none; }
 }
