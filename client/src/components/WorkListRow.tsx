@@ -79,10 +79,12 @@ interface Props {
   queueIndex?: number;
   /** Queue context label for the player */
   queueContext?: string;
+  /** Opt-in metadata visibility for the mobile Explore registry. */
+  mobileMetadata?: boolean;
 }
 
 // ── Component ──────────────────────────────────────────────────────
-export function WorkListRow({ item, index, prefetchedLiked, queueTracks, queueIndex, queueContext }: Props) {
+export function WorkListRow({ item, index, prefetchedLiked, queueTracks, queueIndex, queueContext, mobileMetadata = false }: Props) {
   const { song, creator } = item;
   const { addAndPlay, playQueueAt, currentTrackId, state: playerState } = usePlayer();
   const [, navigate] = useLocation();
@@ -233,12 +235,12 @@ export function WorkListRow({ item, index, prefetchedLiked, queueTracks, queueIn
         </div>
 
         {/* Genre — hidden on small screens */}
-        <div className="hidden md:block w-24 flex-shrink-0">
+        <div className={`${mobileMetadata ? "block sm:hidden md:block" : "hidden md:block"} w-24 flex-shrink-0`}>
           <span className="text-xs text-[var(--stone-shadow)] truncate block">{song.genre || "—"}</span>
         </div>
 
         {/* Duration — hidden on small screens */}
-        <div className="hidden lg:block w-14 flex-shrink-0 text-right">
+        <div className={`${mobileMetadata ? "block sm:hidden lg:block" : "hidden lg:block"} w-14 flex-shrink-0 text-right`}>
           <span className="text-xs text-[var(--stone-shadow)] font-mono">{formatDuration(song.durationSeconds)}</span>
         </div>
 

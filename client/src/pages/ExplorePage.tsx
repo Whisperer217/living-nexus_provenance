@@ -9,6 +9,7 @@ import { trpc } from "@/lib/trpc";
 import { Link, useLocation, useParams, useSearch } from "wouter";
 import {
   Search, RefreshCw, Shield, Music, Eye, Flame,
+  SlidersHorizontal,
   Sparkles, Star, ChevronRight, ChevronLeft, LayoutList,
   FileText, Users, X, Lock, ArrowDownAZ, CalendarArrowDown, UserRound,
   Play, FileAudio, File, Heart, Loader2,
@@ -560,10 +561,10 @@ function AllWorksListView({
 
   return (
     <div className="space-y-4">
-      <div className="divide-y divide-white/5 rounded-xl overflow-hidden border border-white/5">
+      <div className="ln-explore-works divide-y divide-white/5 rounded-xl overflow-hidden border border-white/5">
         {rows.map((row, i) => {
           const qIdx = audioTracks.findIndex(t => t.id === String(row.song.id));
-          return <WorkListRow key={row.song.id} item={feedRowToListItem(row)} index={i} queueTracks={audioTracks} queueIndex={qIdx >= 0 ? qIdx : undefined} queueContext="EXPLORE" prefetchedLiked={likedMap[row.song.id] ?? false} />;
+          return <WorkListRow key={row.song.id} item={feedRowToListItem(row)} index={i} mobileMetadata queueTracks={audioTracks} queueIndex={qIdx >= 0 ? qIdx : undefined} queueContext="EXPLORE" prefetchedLiked={likedMap[row.song.id] ?? false} />;
         })}
       </div>
       {hasNextPage && (
@@ -971,6 +972,7 @@ export default function ExplorePage() {
   const [randomize, setRandomize] = useState(true);
   const [selectedCreatorId, setSelectedCreatorId] = useState<number | null>(null);
   const [galleryState, setGalleryState] = useState<GalleryState>("expanded");
+  const [mobileSettingsOpen, setMobileSettingsOpen] = useState(false);
   const [workSort, setWorkSort] = useState<WorkSort>("curated");
   const [creatorSort, setCreatorSort] = useState<CreatorSort>("newest");
   const [subscriptionOverrides, setSubscriptionOverrides] = useState<Record<number, CreatorSubscriptionTier>>({});
@@ -1118,6 +1120,16 @@ export default function ExplorePage() {
               <h1 className="ln-page-title">Explore</h1>
               <p className="ln-editorial mt-1 hidden sm:block">Songs & artists — music provenance discovery</p>
             </div>
+            <button
+              type="button"
+              className="ln-explore-mobile-settings-toggle"
+              onClick={() => setMobileSettingsOpen((open) => !open)}
+              aria-expanded={mobileSettingsOpen}
+              aria-controls="explore-mobile-settings"
+            >
+              <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
+              <span>Settings</span>
+            </button>
             <div className={`ln-explore-header-controls flex items-center gap-2 sm:gap-3 flex-wrap justify-end ${viewMode === "creators" ? "ln-explore-header-controls--creators" : ""}`}>
               {viewMode === "list" && (
                 <div className="flex items-center gap-1.5">
@@ -1147,6 +1159,22 @@ export default function ExplorePage() {
             )}
             <div className="flex-1" />
             {creators.length > 0 && <CreatorFilter creators={creators} selected={selectedCreatorId} onSelect={setSelectedCreatorId} />}
+          </div>
+          <div id="explore-mobile-settings" className={`ln-explore-mobile-settings ${mobileSettingsOpen ? "is-open" : ""}`}>
+            {viewMode === "list" && (
+              <div className="flex items-center justify-between gap-3">
+                <span className="ln-mono text-[var(--stone-shadow)]">{randomize ? "Random order" : "Newest first"}</span>
+                <RandomizeSwitch value={randomize} onChange={handleRandomizeToggle} />
+              </div>
+            )}
+            <div className="ln-explore-mobile-settings__row">
+              {viewMode === "list" ? <WorkSortControl value={workSort} onChange={setWorkSort} /> : <CreatorSortControl value={creatorSort} onChange={setCreatorSort} />}
+              <ViewToggle value={viewMode} onChange={handleViewChange} />
+              <button onClick={handleRefresh} disabled={isRefreshing} title="Refresh discovery" className="flex min-h-11 items-center gap-1.5 rounded-xl border border-white/10 px-3 text-xs text-[var(--stone-shadow)] transition-all hover:border-[var(--gold)]/30 hover:text-[var(--gold)] disabled:cursor-wait disabled:opacity-60">
+                <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? "animate-spin" : ""}`} aria-hidden="true" />
+                <span>{isRefreshing ? "Refreshing" : "Refresh"}</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
