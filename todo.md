@@ -2,7 +2,7 @@
 
 **Ledger revision:** 2026-11-02
 **Canonical branch:** `app/main`
-**Current checkpoint:** `97681295`
+**Current checkpoint:** `265c8065`
 **Operating mode:** Consolidation, legibility, and release stabilization
 **Feature posture:** No new feature families until the core public and creator surfaces are coherent
 
@@ -154,6 +154,14 @@
 - [ ] Increase visual silence between major sections.
 
 ## Release track 3 — Imagery and art direction
+
+### P2.3 Homepage companion spaces — DONE
+
+- [x] Add branded companion cards to the active `HomePage` for Manifest Theatre and Provenance Player.
+- [x] Use lazy sandboxed previews and explicit new-tab links without creating a second registry or playback authority.
+- [x] State clearly that the companions do not provide Living Nexus account sync, WID verification, shared playback, or shared registry authority.
+- [x] Validate focused contracts (14/14), full suite (943 passed, 1 skipped), TypeScript, production build, responsive browser surface, and `git diff --check`.
+- [x] Save unpublished checkpoint `265c8065`; deployment and publication remain separate and unperformed.
 
 ### P3.1 Four image treatments — NEXT
 
