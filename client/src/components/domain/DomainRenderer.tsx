@@ -96,7 +96,7 @@ function HeroBlock({ userId, config }: { userId: number; config: HeroBlockConfig
                 className="w-full h-full object-cover" />
             </div>
             {/* WID badge */}
-            {creator.witnessId && (
+            {creator.founderWid && (
               <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center"
                 style={{ background: "#000", border: "1px solid rgba(212,175,55,0.5)" }}>
                 <Shield className="w-3 h-3 text-[#D4AF37]" />
@@ -141,7 +141,7 @@ function BioBlock({ userId, config }: { userId: number; config: BioBlockConfig }
 
   if (!creator) return null;
 
-  const hasContent = creator.philosophy || creator.doctrine || creator.bio;
+  const hasContent = creator.creativePhilosophy || creator.creativeDoctrine || creator.bio;
   if (!hasContent) return null;
 
   return (
@@ -155,22 +155,22 @@ function BioBlock({ userId, config }: { userId: number; config: BioBlockConfig }
           <p className="break-words text-sm text-white/60 leading-relaxed">{creator.bio}</p>
         </div>
       )}
-      {config.showPhilosophy && creator.philosophy && (
+      {config.showPhilosophy && creator.creativePhilosophy && (
         <div>
           <h4 className="text-xs tracking-widest uppercase text-white/30 mb-2"
             style={{ fontFamily: "var(--font-display)", letterSpacing: "0.14em" }}>
             Philosophy
           </h4>
-          <p className="break-words text-sm text-white/60 leading-relaxed italic">{creator.philosophy}</p>
+          <p className="break-words text-sm text-white/60 leading-relaxed italic">{creator.creativePhilosophy}</p>
         </div>
       )}
-      {config.showDoctrine && creator.doctrine && (
+      {config.showDoctrine && creator.creativeDoctrine && (
         <div>
           <h4 className="text-xs tracking-widest uppercase text-white/30 mb-2"
             style={{ fontFamily: "var(--font-display)", letterSpacing: "0.14em" }}>
             Doctrine
           </h4>
-          <p className="break-words text-sm text-white/60 leading-relaxed">{creator.doctrine}</p>
+          <p className="break-words text-sm text-white/60 leading-relaxed">{creator.creativeDoctrine}</p>
         </div>
       )}
     </div>
@@ -184,12 +184,9 @@ function DistributionLinksBlock({ userId, config }: { userId: number; config: Di
 
   const links: Array<{ label: string; url: string; icon?: string }> = [];
 
-  if (config.showSpotify && creator?.spotifyUrl) links.push({ label: "Spotify", url: creator.spotifyUrl });
-  if (config.showAppleMusic && creator?.appleMusicUrl) links.push({ label: "Apple Music", url: creator.appleMusicUrl });
-  if (config.showBandcamp && creator?.bandcampUrl) links.push({ label: "Bandcamp", url: creator.bandcampUrl });
-  if (config.showSoundCloud && creator?.soundcloudUrl) links.push({ label: "SoundCloud", url: creator.soundcloudUrl });
-  if (config.showTidal && creator?.tidalUrl) links.push({ label: "Tidal", url: creator.tidalUrl });
-  if (config.showYouTube && creator?.youtubeUrl) links.push({ label: "YouTube", url: creator.youtubeUrl });
+  if (config.showSpotify && creator?.dspSpotifyUrl) links.push({ label: "Spotify", url: creator.dspSpotifyUrl });
+  if (config.showAppleMusic && creator?.dspAppleMusicUrl) links.push({ label: "Apple Music", url: creator.dspAppleMusicUrl });
+        if (config.showYouTube && creator?.youtubeHandle) links.push({ label: "YouTube", url: creator.youtubeHandle });
   if (config.customLinks) links.push(...config.customLinks);
 
   if (links.length === 0) return null;

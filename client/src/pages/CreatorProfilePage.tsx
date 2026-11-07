@@ -749,7 +749,7 @@ export default function CreatorProfilePage() {
         coverPositionY: s.coverPositionY ?? 50,
           visualReady: s.visualReady ?? false,
           autoVideoUrl: s.autoVideoUrl ?? undefined,
-          creatorRole: (data?.creator as any)?.role ?? undefined,
+          creatorRole: data?.creator?.founderWid ? "founder" : undefined,
           contentType: (s.contentType ?? "audio") as "audio" | "lyrics" | "manuscript" | "comic",
       }));
       const startIdx = queue.findIndex((t: any) => t.id === String(song.id));
@@ -768,7 +768,7 @@ export default function CreatorProfilePage() {
         coverPositionY: song.coverPositionY ?? 50,
         visualReady: song.visualReady ?? false,
         autoVideoUrl: song.autoVideoUrl ?? undefined,
-        creatorRole: (data?.creator as any)?.role ?? undefined,
+        creatorRole: data?.creator?.founderWid ? "founder" : undefined,
         contentType: (song.contentType ?? "audio") as "audio" | "lyrics" | "manuscript" | "comic",
       });
     }
@@ -797,7 +797,7 @@ export default function CreatorProfilePage() {
         coverPositionY: t.coverPositionY ?? 50,
         visualReady: false,
         autoVideoUrl: undefined,
-        creatorRole: (data?.creator as any)?.role ?? undefined,
+        creatorRole: data?.creator?.founderWid ? "founder" : undefined,
         contentType: ((t.contentType ?? "audio") as "audio" | "lyrics" | "manuscript" | "comic"),
       }));
       const startIdx = queue.findIndex((q) => q.id === String(track.id));
@@ -816,7 +816,7 @@ export default function CreatorProfilePage() {
         coverPositionY: track.coverPositionY ?? 50,
         visualReady: false,
         autoVideoUrl: undefined,
-        creatorRole: (data?.creator as any)?.role ?? undefined,
+        creatorRole: data?.creator?.founderWid ? "founder" : undefined,
         contentType: ((track.contentType ?? "audio") as "audio" | "lyrics" | "manuscript" | "comic"),
       });
     }
@@ -843,7 +843,7 @@ export default function CreatorProfilePage() {
       coverPositionY: t.coverPositionY ?? 50,
       visualReady: false,
       autoVideoUrl: undefined,
-      creatorRole: (data?.creator as any)?.role ?? undefined,
+      creatorRole: data?.creator?.founderWid ? "founder" : undefined,
       contentType: ((t.contentType ?? "audio") as "audio" | "lyrics" | "manuscript" | "comic"),
     }));
     playQueueAt(queue, 0, "CREATOR_PAGE");
@@ -904,7 +904,7 @@ export default function CreatorProfilePage() {
   const featuredSongs = songs.slice(0, 8);
   const totalPlays = songs.reduce((acc: number, s: any) => acc + (s.playCount || 0), 0);
   const totalTips = songs.reduce((acc: number, s: any) => acc + (s.tipCount || 0), 0);
-  const tipsEnabled = creator.stripeAccountStatus === "enabled";
+  const tipsEnabled = creator.tipsEnabled;
   const witnessedWorksCount = songs.filter((s: any) => !!s.witnessId).length;
 
   const profileTitle = `${creator.artistHandle || creator.name || "Artist"} — Living Nexus`;
@@ -1151,9 +1151,9 @@ export default function CreatorProfilePage() {
                   {creator.name || creator.artistHandle}
                 </h1>
                 {/* Badges row — always below the name, never inline with it */}
-                {((creator as any).role === "founder" || creator.licenseStatus === "licensed") && (
+                {!!creator.founderWid && (
                   <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
-                    {(creator as any).role === "founder" && (
+                    {!!creator.founderWid && (
                       <span
                         title="Founding Creator"
                         className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold tracking-widest"
@@ -1163,7 +1163,7 @@ export default function CreatorProfilePage() {
                         FOUNDER
                       </span>
                     )}
-                    {creator.licenseStatus === "licensed" && (
+                    {false && (
                       <span
                         className="text-[10px] px-2 py-0.5 rounded tracking-widest font-mono"
                         style={{ background: "rgba(196,154,40,0.08)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.2)" }}
@@ -1339,9 +1339,6 @@ export default function CreatorProfilePage() {
 
                 {/* Signals — stats row */}
                 <div className="flex items-center gap-2.5 flex-wrap justify-end">
-                  {creator.supporterTier && (
-                    <SupporterBadge tier={creator.supporterTier as "covenant" | "patron" | "supporter"} linkToFounders />
-                  )}
                   {/* WITNESSED testimony pill */}
                   {witnessedWorksCount > 0 && (
                     <span
@@ -1528,9 +1525,9 @@ export default function CreatorProfilePage() {
                   {creator.name || creator.artistHandle}
                 </h1>
                 {/* Badges row */}
-                {((creator as any).role === "founder" || creator.licenseStatus === "licensed") && (
+                {!!creator.founderWid && (
                   <div className="flex items-center gap-1.5 flex-wrap">
-                    {(creator as any).role === "founder" && (
+                    {!!creator.founderWid && (
                       <span
                         title="Founding Creator"
                         className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold tracking-widest"
@@ -1540,7 +1537,7 @@ export default function CreatorProfilePage() {
                         FOUNDER
                       </span>
                     )}
-                    {creator.licenseStatus === "licensed" && (
+                    {false && (
                       <span
                         className="text-[10px] px-2 py-0.5 rounded tracking-widest font-mono"
                         style={{ background: "rgba(196,154,40,0.08)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.2)" }}
@@ -1568,9 +1565,6 @@ export default function CreatorProfilePage() {
                 )}
                 {/* Stats row */}
                 <div className="flex items-center gap-3 flex-wrap">
-                  {creator.supporterTier && (
-                    <SupporterBadge tier={creator.supporterTier as "covenant" | "patron" | "supporter"} linkToFounders />
-                  )}
                   {witnessedWorksCount > 0 && (
                     <span
                       className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-mono tracking-widest"
@@ -2348,7 +2342,7 @@ export default function CreatorProfilePage() {
           creatorHandle: creator.artistHandle || undefined,
           coverArtUrl: creator.profilePhotoUrl || undefined,
           contentType: "audio",
-          stripeAccountStatus: creator.stripeAccountStatus,
+          stripeAccountStatus: creator.tipsEnabled ? "enabled" : undefined,
         } : null}
         onClose={() => setProfileSupportOpen(false)}
       />

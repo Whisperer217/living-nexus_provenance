@@ -71,7 +71,7 @@ import {
   trackDownloadGrants,
 } from "../../drizzle/schema";
 import { ENV } from "../_core/env";
-import type { PublicCreatorCard, PublicCreatorIdentity } from "../../shared/publicCreatorProfile";
+import { publicCreatorAttributionSchema, publicCreatorCardSchema, publicCreatorDirectoryCardSchema, publicCreatorIdentitySchema, type PublicCreatorAttribution, type PublicCreatorCard, type PublicCreatorDirectoryCard, type PublicCreatorIdentity } from "../../shared/publicCreatorProfile";
 import {
   serializeOnboardingProgressPatch,
   type OnboardingProgressPatch,
@@ -250,6 +250,64 @@ function toPublicCreatorIdentity(row: Record<string, unknown>): PublicCreatorIde
     activeMediums: normalizePublicActiveMediums(row.activeMediums),
     publishedWorkCount: Number(row.publishedWorkCount ?? 0),
   };
+}
+
+
+/**
+ * Public Work boundary for legacy joins. The catalog deliberately keeps established
+ * playback/presentation fields but never serializes storage keys, raw signatures,
+ * account gates, editor ordering, moderation, or companion authorization state.
+ */
+export function toPublicWork(row: Record<string, unknown> | null | undefined): Record<string, unknown> | null {
+  if (!row) return null;
+  const {
+    fileKey, waveformKey, videoKey, autoVideoKey, certificateKey,
+    ecdsaPrivateKey, ecdsaPublicKey, ecdsaSignature, fileHash, lyricsHash,
+    harmonicSignature, isFlagged, flaggedReason, flagReviewedAt, flagReviewedBy,
+    collectionId, trackOrder, displayOrder, externalDisplayRevokedAt,
+    externalDisplayApprovedAt, externalDisplayApprovalId, ownerId,
+    ...publicWork
+  } = row as Record<string, unknown>;
+  return publicWork;
+}
+
+/** Public playlist membership never identifies the member who added a Work. */
+export function toPublicPlaylistMembership(row: Record<string, unknown>): Record<string, unknown> {
+  const { addedByUserId, addedAt, updatedAt, ...publicMembership } = row;
+  return publicMembership;
+}
+
+/** Strip any raw user-row fields not approved for public work attribution. */
+export function toPublicCreatorAttribution(row: Record<string, unknown> | null | undefined): PublicCreatorAttribution | null {
+  if (!row || typeof row.id !== "number") return null;
+  return publicCreatorAttributionSchema.parse({
+    id: row.id,
+    name: typeof row.name === "string" ? row.name : null,
+    artistHandle: typeof row.artistHandle === "string" ? row.artistHandle : null,
+    profilePhotoUrl: typeof row.profilePhotoUrl === "string" ? row.profilePhotoUrl : null,
+    primaryGenre: typeof row.primaryGenre === "string" ? row.primaryGenre : null,
+    aiDisclosure: ["original", "ai_assisted", "ai_generated", "human_authored_ai_instrument"].includes(String(row.aiDisclosure)) ? row.aiDisclosure : null,
+    founderWid: typeof row.founderWid === "string" ? row.founderWid : null,
+  });
+}
+
+/** Strip account/editorial ranking state from public creator-directory rows. */
+export function toPublicCreatorDirectoryCard(row: Record<string, unknown>): PublicCreatorDirectoryCard {
+  return publicCreatorDirectoryCardSchema.parse({
+    id: row.id,
+    name: typeof row.name === "string" ? row.name : null,
+    artistHandle: typeof row.artistHandle === "string" ? row.artistHandle : null,
+    bio: typeof row.bio === "string" ? row.bio : null,
+    profilePhotoUrl: typeof row.profilePhotoUrl === "string" ? row.profilePhotoUrl : null,
+    primaryGenre: typeof row.primaryGenre === "string" ? row.primaryGenre : null,
+    originStatement: typeof row.originStatement === "string" ? row.originStatement : null,
+    activeMediums: normalizePublicActiveMediums(row.activeMediums),
+    sigilUrl: typeof row.sigilUrl === "string" ? row.sigilUrl : null,
+    founderWid: typeof row.founderWid === "string" ? row.founderWid : null,
+    publishedWorkCount: Number(row.publishedWorkCount ?? row.publishedCount ?? 0),
+    publishedCount: Number(row.publishedCount ?? row.publishedWorkCount ?? 0),
+    bannerUrl: typeof row.bannerUrl === "string" ? row.bannerUrl : null,
+  });
 }
 
 export async function getPublicCreatorCardById(userId: number): Promise<PublicCreatorCard | null> {
@@ -448,10 +506,10 @@ export async function getAllCreators() {
     .select({
       id: users.id, name: users.name, artistHandle: users.artistHandle,
       bio: users.bio, profilePhotoUrl: users.profilePhotoUrl, bannerUrl: users.bannerUrl,
-      licenseStatus: users.licenseStatus, songSlotsUsed: users.songSlotsUsed,
-      stripeAccountStatus: users.stripeAccountStatus,
+      primaryGenre: users.primaryGenre, originStatement: users.originStatement,
+      activeMediums: users.activeMediums, sigilUrl: users.sigilUrl, founderWid: users.founderWid,
+      // Pinned remains internal-only for ranking; mapper removes it before any public return.
       isPinned: users.isPinned,
-      role: users.role,
       publishedCount: sql<number>`count(${songs.id})`,
     })
     .from(users)
@@ -487,7 +545,7 @@ export async function getAllCreators() {
     ))
     .groupBy(songs.userId);
   const widMap = new Map(widCounts.map((r: { userId: number | null; count: number }) => [r.userId, Number(r.count)]));
-  return results.map((r: typeof results[number]) => ({ ...r, widCount: widMap.get(r.id) ?? 0 }));
+  return results.map((r: typeof results[number]) => ({ ...toPublicCreatorDirectoryCard(r), widCount: widMap.get(r.id) ?? 0 }));
 }
 
 // ─── Songs ────────────────────────────────────────────────────────────────────
@@ -548,15 +606,14 @@ export async function getSongWithCreator(id: number) {
     song: songs,
     creator: {
       id: users.id, name: users.name, artistHandle: users.artistHandle,
-      profilePhotoUrl: users.profilePhotoUrl, stripeAccountStatus: users.stripeAccountStatus,
-      stripeAccountId: users.stripeAccountId, aiDisclosure: users.aiDisclosure, primaryGenre: users.primaryGenre,
-      // canonical CreatorSummary field — must match FeedRow.creator shape (coreDataTypes.ts)
-      role: users.role,
+      profilePhotoUrl: users.profilePhotoUrl, aiDisclosure: users.aiDisclosure,
+      primaryGenre: users.primaryGenre, founderWid: users.founderWid,
     },
   }).from(songs).leftJoin(users, eq(songs.userId, users.id))
     // Allow published OR public songs — OG tags should work for any accessible song
     .where(and(eq(songs.id, id), eq(songs.isPublic, true))).limit(1);
-  return result.length > 0 ? result[0] : undefined;
+  const record = result[0];
+  return record ? { song: toPublicWork(record.song) as any, creator: toPublicCreatorAttribution(record.creator) } : undefined;
 }
 
 /**
@@ -571,9 +628,8 @@ export async function getSongWithCreatorForOwner(id: number, ownerId: number) {
     song: songs,
     creator: {
       id: users.id, name: users.name, artistHandle: users.artistHandle,
-      profilePhotoUrl: users.profilePhotoUrl, stripeAccountStatus: users.stripeAccountStatus,
-      stripeAccountId: users.stripeAccountId, aiDisclosure: users.aiDisclosure, primaryGenre: users.primaryGenre,
-      role: users.role,
+      profilePhotoUrl: users.profilePhotoUrl, aiDisclosure: users.aiDisclosure,
+      primaryGenre: users.primaryGenre, founderWid: users.founderWid,
     },
   }).from(songs).leftJoin(users, eq(songs.userId, users.id))
     .where(and(eq(songs.id, id), eq(songs.userId, ownerId))).limit(1);
@@ -636,11 +692,12 @@ export async function getPublicSongs(opts?: { genre?: string; search?: string; l
         : opts?.creatorId
           ? sql`${songs.displayOrder} ASC, ${songs.createdAt} ASC`
           : sql`COALESCE(${songs.releaseDate}, DATE(${songs.createdAt})) DESC, ${songs.createdAt} DESC`;
-  return db.select({
+  const rows = await db.select({
     song: songs,
-    creator: { id: users.id, name: users.name, artistHandle: users.artistHandle, profilePhotoUrl: users.profilePhotoUrl, aiDisclosure: users.aiDisclosure, primaryGenre: users.primaryGenre, stripeAccountStatus: users.stripeAccountStatus, role: users.role },
+    creator: { id: users.id, name: users.name, artistHandle: users.artistHandle, profilePhotoUrl: users.profilePhotoUrl, aiDisclosure: users.aiDisclosure, primaryGenre: users.primaryGenre, founderWid: users.founderWid },
   }).from(songs).leftJoin(users, eq(songs.userId, users.id))
     .where(and(...conditions)).orderBy(orderExpr).limit(limit).offset(offset);
+  return rows.map((row: any) => ({ song: toPublicWork(row.song) as any, creator: toPublicCreatorAttribution(row.creator) })) as any[];
 }
 
 export async function incrementPlayCount(songId: number) {
@@ -4629,8 +4686,7 @@ export async function getNewThisWeek(opts?: { genre?: string; contentType?: "aud
   const creatorFields = {
     id: users.id, name: users.name, artistHandle: users.artistHandle,
     profilePhotoUrl: users.profilePhotoUrl, aiDisclosure: users.aiDisclosure,
-    primaryGenre: users.primaryGenre, stripeAccountStatus: users.stripeAccountStatus,
-    role: users.role,
+    primaryGenre: users.primaryGenre, founderWid: users.founderWid,
   };
   const baseConditions: ReturnType<typeof eq>[] = [
     eq(songs.isPublic, true) as ReturnType<typeof eq>,
@@ -5748,7 +5804,6 @@ export async function globalSearch(query: string, limit = 8): Promise<SearchResu
       artistHandle: users.artistHandle,
       bio: users.bio,
       profilePhotoUrl: users.profilePhotoUrl,
-      role: users.role,
       publishedCount: sql<number>`count(${songs.id})`,
     })
     .from(users)
@@ -6132,7 +6187,14 @@ export async function getCollectionTracksWithSongs(collectionId: number) {
     .leftJoin(songs, eq(collectionTracks.songId, songs.id))
     .leftJoin(users, eq(songs.userId, users.id))
     .where(eq(collectionTracks.collectionId, collectionId))
-    .orderBy(asc(collectionTracks.position));
+    .orderBy(asc(collectionTracks.position)
+    ).then((rows: any[]) => rows
+      .filter((row: any) => row.song?.status === "Published")
+      .map((row: any) => ({
+        track: toPublicPlaylistMembership(row.track as any),
+        song: toPublicWork(row.song as any),
+        creator: toPublicCreatorAttribution(row.creator as any),
+      })) as any);
 }
 
 export async function addTrackToManifestedCollection(collectionId: number, songId: number, addedByUserId: number, note?: string | null) {

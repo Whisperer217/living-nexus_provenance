@@ -31,7 +31,7 @@ import {
   addComment, createSong, deleteSong, hardDeleteSong, getAllCreators,
   getCommentsBySong, getPublicSongs, getSongById,
   getSongsByUser, getSongWithCreator, getSongWithCreatorForOwner, getTipsBySong, reorderSongs, getNextDisplayOrder,
-  getUserById, incrementPlayCount, recordDownload,
+  getUserById, getPublicCreatorCardById, incrementPlayCount, recordDownload,
   recordLicense, recordSlotPurchase, recordTip,
   updateSongLyrics, updateSongLyricsWithWid, updateSongStatus, getRelatedSongs, updateSongVideo,
   updateUserProfile, updateUserStripeAccount,
@@ -57,7 +57,7 @@ import {
   createPromoCode, listPromoCodes, deactivatePromoCode, reactivatePromoCode, redeemPromoCode,
   recordNameChange, getNameHistory, getOriginalName,
   createCollection, updateCollectionPdf, linkSongsToCollection,
-  getCollectionByWid, getSongsByCollectionId, getPublicSongsByCollectionId, getCollectionForSong, getProvenancePlayerAlbumTrackSources, getProvenancePlayerTrackSourceById, hasAmbiguousProvenancePlayerWids,
+  getCollectionByWid, getSongsByCollectionId, getPublicSongsByCollectionId, toPublicWork, getCollectionForSong, getProvenancePlayerAlbumTrackSources, getProvenancePlayerTrackSourceById, hasAmbiguousProvenancePlayerWids,
   getCollectionsByCreator, getPublicCollectionsByCreator, updateCollectionCover, updateCollectionDefaultView,
   getAllSupporters, getSupporterByUserId, recordPlatformGift, getPublishedCountByUser,
   getNewEventCountForCreator, touchActivityVisit, touchDashboardVisit, getDashboardDeltas,
@@ -1995,8 +1995,8 @@ ${workType === "manuscript" || workType === "comic" ? "Category" : "Genre"}: ${i
         if (!collectionCompositionSealMatches(collection, currentMembership)) {
           throw new TRPCError({ code: "NOT_FOUND", message: "Album not found." });
         }
-        const tracks = await getPublicSongsByCollectionId(collection.id);
-        const creator = await getUserById(collection.creatorId);
+        const tracks = (await getPublicSongsByCollectionId(collection.id)).map((track: any) => toPublicWork(track));
+        const creator = await getPublicCreatorCardById(collection.creatorId);
         const projectId = await getProjectIdByCollectionId(collection.id);
         return { collection, tracks, creator, projectId };
       }),

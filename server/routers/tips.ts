@@ -300,16 +300,17 @@ export const tipsRouter = router({
       const songData = await getSongWithCreator(input.songId);
       if (!songData) throw new Error("Song not found");
       const { song, creator } = songData;
+      const paymentCreator = creator ? await getUserById(creator.id) : null;
       if ((song as any).downloadPermission !== "tipped") {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "This work is not configured for paid download.",
         });
       }
-      if (!creator?.stripeAccountId) throw new Error("This creator has not enabled tips yet. Ask them to connect Stripe in their Dashboard.");
+      if (!paymentCreator?.stripeAccountId) throw new Error("This creator has not enabled tips yet. Ask them to connect Stripe in their Dashboard.");
       // Verify the connected account is ready to receive transfers
       try {
-        const acct = await stripe.accounts.retrieve(creator.stripeAccountId);
+        const acct = await stripe.accounts.retrieve(paymentCreator!.stripeAccountId);
         if (!acct.charges_enabled) throw new TRPCError({ code: "BAD_REQUEST", message: "This creator's Stripe account is still being verified. Tips will be available once their onboarding is complete." });
       } catch (e: any) {
         if (e instanceof TRPCError) throw e;
@@ -319,9 +320,9 @@ export const tipsRouter = router({
       const feeAmount = Math.round(thresholdCents * PLATFORM_FEE_PERCENT / 100);
       const session = await stripe.checkout.sessions.create({
         mode: "payment", payment_method_types: ["card"],
-        line_items: [{ price_data: { currency: "usd", product_data: { name: `Download: "${song.title}"`, description: `Tip-to-download — supporting ${creator.artistHandle || creator.name || "this creator"} on Living Nexus` }, unit_amount: thresholdCents }, quantity: 1 }],
+        line_items: [{ price_data: { currency: "usd", product_data: { name: `Download: "${song.title}"`, description: `Tip-to-download — supporting ${creator?.artistHandle || creator?.name || "this creator"} on Living Nexus` }, unit_amount: thresholdCents }, quantity: 1 }],
         metadata: { type: "tip_download", songId: input.songId.toString(), userId: ctx.user.id.toString(), tipperName: ctx.user.name || "" },
-        payment_intent_data: { application_fee_amount: feeAmount, transfer_data: { destination: creator.stripeAccountId } },
+        payment_intent_data: { application_fee_amount: feeAmount, transfer_data: { destination: paymentCreator!.stripeAccountId } },
         success_url: `${CANONICAL_TIP_DOWNLOAD_ORIGIN}/song/${input.songId}?download=unlocked`,
         cancel_url: `${CANONICAL_TIP_DOWNLOAD_ORIGIN}/song/${input.songId}`,
         allow_promotion_codes: false,
@@ -342,7 +343,7 @@ export const tipsRouter = router({
         throw new TRPCError({ code: "BAD_REQUEST", message: "This creator's payment account is not yet active. Please try again later." });
       }
       const feeAmount = Math.round(input.amountCents * PLATFORM_FEE_PERCENT / 100);
-      const creatorHandle = creator.artistHandle || creator.name || "this creator";
+      const creatorHandle = creator?.artistHandle || creator?.name || "this creator";
       const session = await stripe.checkout.sessions.create({
         mode: "payment", payment_method_types: ["card"],
         line_items: [{ price_data: { currency: "usd", product_data: { name: `Gift for ${creatorHandle}`, description: `Supporting ${creatorHandle} on Living Nexus` }, unit_amount: input.amountCents }, quantity: 1 }],
@@ -358,10 +359,11 @@ export const tipsRouter = router({
       const songData = await getSongWithCreator(input.songId);
       if (!songData) throw new Error("Song not found");
       const { song, creator } = songData;
-      if (!creator?.stripeAccountId) throw new Error("This creator has not enabled tips yet.");
+      const paymentCreator = creator ? await getUserById(creator.id) : null;
+      if (!paymentCreator?.stripeAccountId) throw new Error("This creator has not enabled tips yet.");
       // Verify the connected account is ready to receive transfers
       try {
-        const acct = await stripe.accounts.retrieve(creator.stripeAccountId);
+        const acct = await stripe.accounts.retrieve(paymentCreator!.stripeAccountId);
         if (!acct.charges_enabled) throw new TRPCError({ code: "BAD_REQUEST", message: "This creator's Stripe account is still being verified. Tips will be available once their onboarding is complete." });
       } catch (e: any) {
         if (e instanceof TRPCError) throw e;
@@ -370,9 +372,9 @@ export const tipsRouter = router({
       const feeAmount = Math.round(input.amountCents * PLATFORM_FEE_PERCENT / 100);
       const session = await stripe.checkout.sessions.create({
         mode: "payment", payment_method_types: ["card"],
-        line_items: [{ price_data: { currency: "usd", product_data: { name: `Tip for "${song.title}"`, description: `Supporting ${creator.artistHandle || creator.name || "this creator"} on Living Nexus` }, unit_amount: input.amountCents }, quantity: 1 }],
+        line_items: [{ price_data: { currency: "usd", product_data: { name: `Tip for "${song.title}"`, description: `Supporting ${creator?.artistHandle || creator?.name || "this creator"} on Living Nexus` }, unit_amount: input.amountCents }, quantity: 1 }],
         metadata: { type: "tip", songId: input.songId.toString(), userId: ctx.user?.id?.toString() || "", tipperName: ctx.user?.name || "" },
-        payment_intent_data: { application_fee_amount: feeAmount, transfer_data: { destination: creator.stripeAccountId } },
+        payment_intent_data: { application_fee_amount: feeAmount, transfer_data: { destination: paymentCreator!.stripeAccountId } },
         success_url: `${input.origin}/song/${input.songId}?tip=success`,
         cancel_url: `${input.origin}/song/${input.songId}`,
         allow_promotion_codes: false,

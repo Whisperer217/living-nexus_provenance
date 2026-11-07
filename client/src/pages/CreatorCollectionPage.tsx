@@ -426,7 +426,7 @@ export default function CreatorCollectionPage() {
         witnessId: w.witnessId ?? undefined,
         contentType: w.contentType ?? "audio",
         creatorId: w.userId,
-        creatorRole: creator?.role ?? undefined,
+        creatorRole: creator?.founderWid ? "founder" : undefined,
         creatorHandle: creator?.artistHandle ?? undefined,
       }));
     if (queue.length) playQueueAt(queue, 0, "CREATOR_PAGE");
@@ -704,7 +704,7 @@ export default function CreatorCollectionPage() {
                     witnessId: w.witnessId ?? undefined,
                     contentType: w.contentType ?? "audio",
                     creatorId: w.userId,
-                    creatorRole: creator?.role ?? undefined,
+                    creatorRole: creator?.founderWid ? "founder" : undefined,
                     creatorHandle: creator?.artistHandle ?? undefined,
                   };
                   playQueueAt([t], 0, "CREATOR_PAGE");

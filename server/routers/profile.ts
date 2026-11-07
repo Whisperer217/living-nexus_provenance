@@ -14,7 +14,7 @@ import { invokeLLM } from "../_core/llm";
 import {
   addComment, createSong, deleteSong, getAllCreators,
   getCommentsBySong, getPublicSongs, getSongById,
-  getSongsByUser, getSongWithCreator, getTipsBySong, reorderSongs, getNextDisplayOrder,
+  getSongsByUser, getSongWithCreator, toPublicWork, getTipsBySong, reorderSongs, getNextDisplayOrder,
   getUserById, getUserByHandle, getPublicCreatorCardById, getPublicCreatorIdentityById, getPublicCreatorIdentityByHandle, incrementPlayCount, recordDownload,
   recordLicense, recordSlotPurchase, recordTip,
   updateSongLyrics, updateSongLyricsWithWid, updateSongStatus, getRelatedSongs, updateSongVideo,
@@ -166,6 +166,22 @@ import { getOrGenerateEmbedVideo } from "../services/embedVideo";
 import { enqueueVisualJob } from "../workers/visualQueue";
 import { notifyOwner } from "../_core/notification";
 import { publicCreatorCardSchema, publicCreatorIdentitySchema } from "@shared/publicCreatorProfile";
+
+const publicRecordSchema = z.record(z.string(), z.unknown());
+const publicCreatorDetailOutputSchema = z.object({
+  creator: publicCreatorIdentitySchema,
+  songs: z.array(z.any()),
+  playlists: z.array(publicRecordSchema),
+  albums: z.array(publicRecordSchema),
+  witnessCount: z.number().int().nonnegative(),
+}).nullable();
+const publicCreatorCollectionOutputSchema = z.object({
+  creator: publicCreatorIdentitySchema,
+  works: z.array(z.any()),
+  collections: z.array(publicRecordSchema),
+  playlists: z.array(publicRecordSchema),
+  totalCount: z.number().int().nonnegative().optional(),
+}).nullable();
 
 const stripe = process.env.STRIPE_SECRET_KEY
   ? new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: "2024-06-20" as any })
@@ -345,14 +361,14 @@ export const profileRouter = router({
     recentCreators: publicProcedure.input(z.object({ limit: z.number().max(20).optional() }).optional()).query(async ({ input }) => {
       return getRecentCreators(input?.limit ?? 8);
     }),
-    getCreator: publicProcedure.input(z.object({ creatorId: z.number() })).query(async ({ input }) => {
-      const creator = await getUserById(input.creatorId);
+    getCreator: publicProcedure.input(z.object({ creatorId: z.number() })).output(publicCreatorDetailOutputSchema).query(async ({ input }) => {
+      const creator = await getPublicCreatorIdentityById(input.creatorId);
       if (!creator) return null;
       const songs = await getSongsByUser(input.creatorId);
       // Only expose currently Published works in the public domain snapshot.
       // Deleted, Draft, and Unlisted works are excluded from public statistics.
       // The provenance record (WID) is never erased — only the public visibility changes.
-      const publicSongs = songs.filter((s: any) => s.isPublic && s.status === 'Published');
+      const publicSongs = songs.filter((s: any) => s.isPublic && s.status === 'Published').map((song: any) => toPublicWork(song));
 
       // Public sanctuary extras — playlists + witness count for creator/visitor stage
       const playlistRows = await getPublicPlaylistsByOwner(input.creatorId, 24);
@@ -695,21 +711,26 @@ Rules:
         limit: z.number().int().min(1).max(500).default(200),
         offset: z.number().int().min(0).default(0),
       }))
+      .output(publicCreatorCollectionOutputSchema)
       .query(async ({ input }) => {
         const { medium, limit, offset } = input;
         // Resolve creator from handle (string) or creatorId (number)
-        let creator: Awaited<ReturnType<typeof getUserById>> | undefined;
-        if (input.handle) {
-          creator = await getUserByHandle(input.handle) ?? undefined;
-        } else if (input.creatorId) {
-          creator = await getUserById(input.creatorId) ?? undefined;
-        }
+        const creator = input.handle
+          ? await getPublicCreatorIdentityByHandle(input.handle)
+          : input.creatorId
+            ? await getPublicCreatorIdentityById(input.creatorId)
+            : null;
         if (!creator) return null;
         const creatorId = creator.id;
 
         if (medium === 'albums') {
           const cols = await getPublicCollectionsByCreator(creatorId);
-          return { creator, works: [] as any[], collections: cols as any[], playlists: [] as any[] };
+          return { creator, works: [] as any[], collections: cols.map((collection: any) => ({
+            id: collection.id, creatorId: collection.creatorId, name: collection.name,
+            collectionWid: collection.collectionWid, description: collection.description ?? null,
+            coverArtUrl: collection.coverArtUrl ?? null, trackCount: collection.trackCount ?? 0,
+            visibility: "public", createdAt: collection.createdAt ?? null,
+          })), playlists: [] as any[] };
         }
 
         if (medium === 'playlists') {
@@ -723,7 +744,11 @@ Rules:
             .where(andOp(eqOp(playlistsTable.ownerId, creatorId), eqOp(playlistsTable.isPublic, true)))
             .orderBy(descOp((playlistsTable as any).updatedAt))
             .limit(limit);
-          return { creator, works: [] as any[], collections: [] as any[], playlists: rows as any[] };
+          return { creator, works: [] as any[], collections: [] as any[], playlists: rows.map((playlist: any) => ({
+            id: playlist.id, name: playlist.name, description: playlist.description ?? null,
+            coverArtUrl: playlist.coverArtUrl ?? null, shareSlug: playlist.shareSlug ?? null,
+            playCount: playlist.playCount ?? 0, updatedAt: playlist.updatedAt ?? null,
+          })) };
         }
 
         if (medium === 'visual') {
@@ -745,7 +770,7 @@ Rules:
         const allFiltered = (allSongs as any[])
           .filter((s: any) => s.isPublic && s.status === 'Published' && types.includes(s.contentType ?? 'audio'));
         const totalCount = allFiltered.length;
-        const filtered = allFiltered.slice(offset, offset + limit);
+        const filtered = allFiltered.slice(offset, offset + limit).map((song: any) => toPublicWork(song));
         return { creator, works: filtered, collections: [] as any[], playlists: [] as any[], totalCount };
       }),
   });

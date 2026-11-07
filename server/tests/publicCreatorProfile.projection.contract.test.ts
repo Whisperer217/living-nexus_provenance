@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { publicCreatorCardSchema, publicCreatorIdentitySchema } from "../../shared/publicCreatorProfile";
+import { toPublicPlaylistMembership, toPublicWork } from "../utils/db";
 
 const read = (file: string) => fs.readFileSync(path.resolve(process.cwd(), file), "utf8");
 const privateKeys = ["email", "openId", "loginMethod", "role", "songSlotsUsed", "stripeAccountId", "stripeCustomerId", "licenseStatus", "publicKey"];
@@ -50,6 +51,7 @@ describe("P0 public Creator profile privacy", () => {
       twitterHandle: null,
       instagramHandle: null,
       youtubeHandle: null,
+      tipsEnabled: false,
       email: "private@example.test",
       openId: "private-open-id",
       role: "admin",
@@ -59,6 +61,35 @@ describe("P0 public Creator profile privacy", () => {
     expect(parsed).not.toHaveProperty("openId");
     expect(parsed).not.toHaveProperty("role");
     expect(parsed).not.toHaveProperty("stripeAccountId");
+  });
+
+  it("strips private Work storage, signature, moderation, and membership-actor sentinels", () => {
+    const work = toPublicWork({
+      id: 101,
+      title: "Public Work",
+      fileUrl: "https://gateway.example.test/stream/101",
+      witnessId: "WID-MUS-TEST",
+      fileKey: "private/audio/101.mp3",
+      ecdsaPrivateKey: "private-key",
+      ecdsaSignature: "signature",
+      fileHash: "internal-hash",
+      isFlagged: false,
+      externalDisplayRevokedAt: new Date(),
+    });
+    const membership = toPublicPlaylistMembership({
+      id: 55,
+      playlistId: 3,
+      songId: 101,
+      position: 0,
+      addedByUserId: 999,
+      addedAt: new Date(),
+    });
+    for (const forbidden of ["fileKey", "ecdsaPrivateKey", "ecdsaSignature", "fileHash", "isFlagged", "externalDisplayRevokedAt"]) {
+      expect(work).not.toHaveProperty(forbidden);
+    }
+    expect(membership).not.toHaveProperty("addedByUserId");
+    expect(work).toMatchObject({ id: 101, title: "Public Work", witnessId: "WID-MUS-TEST" });
+    expect(membership).toMatchObject({ id: 55, playlistId: 3, songId: 101, position: 0 });
   });
 
   it("uses a positive public selection and counts only Published public Works", () => {
@@ -90,4 +121,45 @@ describe("P0 public Creator profile privacy", () => {
     expect(mini).not.toContain("role:");
     expect(mini).not.toContain("songSlotsUsed");
   });
+
+  it("routes every P0 legacy public creator surface through allowlisted projections", () => {
+    const profile = read("server/routers/profile.ts");
+    const playlists = read("server/routers/playlists.ts");
+    const songs = read("server/routers/songs.ts");
+    const collections = read("server/routers/collections.ts");
+    const db = read("server/utils/db.ts");
+    const creatorDetail = profile.slice(profile.indexOf("getCreator: publicProcedure"), profile.indexOf("generateTagline: publicProcedure"));
+    const creatorCollection = profile.slice(profile.indexOf("getCreatorCollection: publicProcedure"));
+    const publicAlbum = songs.slice(songs.indexOf("getPublicAlbum: publicProcedure"), songs.indexOf("copyProvenancePlayerAlbumManifest:"));
+    const publicPlaylist = playlists.slice(playlists.indexOf("getBySlug: publicProcedure"));
+    expect(creatorDetail).toContain("getPublicCreatorIdentityById");
+    expect(creatorDetail).not.toContain("getUserById(input.creatorId)");
+    expect(creatorCollection).toContain("getPublicCreatorIdentityByHandle");
+    expect(creatorCollection).toContain("getPublicCreatorIdentityById");
+    expect(creatorCollection).not.toContain("Awaited<ReturnType<typeof getUserById>>");
+    expect(publicAlbum).toContain("getPublicCreatorCardById");
+    expect(publicAlbum).not.toContain("getUserById(collection.creatorId)");
+    expect(publicPlaylist).toContain("getPublicCreatorCardById");
+    expect(publicPlaylist).toContain("toPublicCreatorAttribution");
+    expect(publicPlaylist).not.toContain("return { playlist, tracks, owner };");
+    const publicCollection = collections.slice(collections.indexOf("getBySlug: publicProcedure"), collections.indexOf("listPublic: publicProcedure"));
+    expect(publicCollection).toContain("toPublicPlaylistMembership");
+    expect(publicCollection).toContain("toPublicWork");
+    expect(publicCollection).not.toContain("return { ...row, tracks, following };");
+    expect(db).not.toContain("stripeAccountId: users.stripeAccountId, aiDisclosure: users.aiDisclosure");
+    expect(db).not.toContain("stripeAccountStatus: users.stripeAccountStatus, role: users.role");
+    expect(db).toContain("export function toPublicWork");
+    expect(db).toContain("toPublicWork(row.song)");
+  });
+
+  it("keeps public directories and search free of account role, licensing, payout, slot, and pin fields", () => {
+    const db = read("server/utils/db.ts");
+    const directories = db.slice(db.indexOf("export async function getAllCreators"), db.indexOf("// ─── Songs"));
+    const search = db.slice(db.indexOf("// ── Creators"), db.indexOf("// ── Songs / Artifacts"));
+    for (const forbidden of ["licenseStatus: users.licenseStatus", "songSlotsUsed: users.songSlotsUsed", "stripeAccountStatus: users.stripeAccountStatus", "role: users.role"]) {
+      expect(directories).not.toContain(forbidden);
+    }
+    expect(search).not.toContain("role: users.role");
+  });
+
 });

@@ -39,7 +39,28 @@ export const publicCreatorIdentitySchema = publicCreatorCardSchema.extend({
   twitterHandle: z.string().nullable(),
   instagramHandle: z.string().nullable(),
   youtubeHandle: z.string().nullable(),
+  /** Whether the public Support Creator flow may be offered; no payout state is disclosed. */
+  tipsEnabled: z.boolean(),
+});
+
+/** Public feed/playlist/work attribution: never carries role, payout, license, or slot state. */
+export const publicCreatorAttributionSchema = z.object({
+  id: z.number().int().positive(),
+  name: z.string().nullable(),
+  artistHandle: z.string().nullable(),
+  profilePhotoUrl: z.string().nullable(),
+  primaryGenre: z.string().nullable(),
+  aiDisclosure: z.enum(["original", "ai_assisted", "ai_generated", "human_authored_ai_instrument"]).nullable(),
+  founderWid: z.string().nullable(),
+});
+
+/** Public directory card. Internal ranking/pinning state is intentionally absent. */
+export const publicCreatorDirectoryCardSchema = publicCreatorCardSchema.extend({
+  bannerUrl: z.string().nullable(),
+  publishedCount: z.number().int().nonnegative(),
 });
 
 export type PublicCreatorCard = z.infer<typeof publicCreatorCardSchema>;
 export type PublicCreatorIdentity = z.infer<typeof publicCreatorIdentitySchema>;
+export type PublicCreatorAttribution = z.infer<typeof publicCreatorAttributionSchema>;
+export type PublicCreatorDirectoryCard = z.infer<typeof publicCreatorDirectoryCardSchema>;

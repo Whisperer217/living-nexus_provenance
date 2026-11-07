@@ -7,6 +7,8 @@ import { systemRouter } from "../_core/systemRouter";
 import { normalizationRouter } from "./normalization";
 import { qrRouter } from "./qr";
 import { TRPCError } from "@trpc/server";
+import { publicCreatorCardSchema } from "@shared/publicCreatorProfile";
+import { toPublicCreatorAttribution, toPublicPlaylistMembership, toPublicWork } from "../utils/db";
 import { adminProcedure, protectedProcedure, publicProcedure, router } from "../_core/trpc";
 import { storagePut } from "../utils/storage";
 import { micronize } from "../services/imageProcessing";
@@ -16,7 +18,7 @@ import {
   addComment, createSong, deleteSong, getAllCreators,
   getCommentsBySong, getPublicSongs, getSongById,
   getSongsByUser, getSongWithCreator, getTipsBySong, reorderSongs, getNextDisplayOrder,
-  getUserById, incrementPlayCount, recordDownload,
+  getUserById, getPublicCreatorCardById, incrementPlayCount, recordDownload,
   recordLicense, recordSlotPurchase, recordTip,
   updateSongLyrics, updateSongLyricsWithWid, updateSongStatus, getRelatedSongs, updateSongVideo,
   updateUserProfile, updateUserStripeAccount,
@@ -504,14 +506,21 @@ export const playlistsRouter = router({
         const db = await getDb();
         const [playlist] = await db.select().from(plTbl).where(andOp(eqOp(plTbl.shareSlug, input.slug), eqOp(plTbl.isPublic, true))).limit(1);
         if (!playlist) throw new TRPCError({ code: "NOT_FOUND" });
-        const tracks = await db
+        const rawTracks = await db
           .select({ pt: ptTbl, song: songsTbl, creator: usersTbl })
           .from(ptTbl)
           .leftJoin(songsTbl, eqOp(ptTbl.songId, songsTbl.id))
           .leftJoin(usersTbl, eqOp(songsTbl.userId, usersTbl.id))
           .where(eqOp(ptTbl.playlistId, playlist.id))
           .orderBy(ptTbl.position);
-        const owner = await getUserById(playlist.ownerId);
-        return { playlist, tracks, owner };
+        const owner = await getPublicCreatorCardById(playlist.ownerId);
+        const tracks = rawTracks
+          .filter((track: any) => track.song?.isPublic && track.song?.status === "Published")
+          .map((track: any) => ({
+            pt: toPublicPlaylistMembership(track.pt),
+            song: toPublicWork(track.song),
+            creator: toPublicCreatorAttribution(track.creator),
+          }));
+        return { playlist, tracks, owner: owner ? publicCreatorCardSchema.parse(owner) : null };
       }),
   });

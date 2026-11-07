@@ -367,7 +367,7 @@ export default function SearchResultsPage() {
                           )}
                           <p className="text-[10px]" style={{ color: "rgba(255,255,255,0.25)" }}>
                             {c.publishedCount} work{c.publishedCount !== 1 ? "s" : ""}
-                            {c.role === "founder" && <span className="ml-2 text-[9px] px-1.5 py-0.5 rounded" style={{ background: "rgba(196,154,40,0.15)", color: "var(--ln-gold)" }}>Founder</span>}
+
                           </p>
                         </div>
                         <ChevronRight size={14} style={{ color: "rgba(255,255,255,0.2)", flexShrink: 0 }} />

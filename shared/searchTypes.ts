@@ -8,7 +8,6 @@ export interface SearchResults {
     artistHandle: string | null;
     bio: string | null;
     profilePhotoUrl: string | null;
-    role: string;
     publishedCount: number;
   }[];
   songs: {

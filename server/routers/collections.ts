@@ -126,7 +126,7 @@ import {
   getManifestedCollectionsByOwner,
   updateManifestedCollection,
   deleteManifestedCollection,
-  getCollectionTracksWithSongs,
+  getCollectionTracksWithSongs, toPublicCreatorAttribution, toPublicPlaylistMembership, toPublicWork,
   addTrackToManifestedCollection,
   removeTrackFromManifestedCollection,
   toggleCollectionFollow,
@@ -165,6 +165,7 @@ import { ENV } from "../_core/env";
 import { getOrGenerateEmbedVideo } from "../services/embedVideo";
 import { enqueueVisualJob } from "../workers/visualQueue";
 import { notifyOwner } from "../_core/notification";
+import { publicCreatorCardSchema } from "@shared/publicCreatorProfile";
 
 const stripe = process.env.STRIPE_SECRET_KEY
   ? new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: "2024-06-20" as any })
@@ -194,9 +195,37 @@ export const collectionsRouter = router({
         if (!row.collection.isPublic && row.collection.ownerId !== ctx.user?.id) {
           throw new TRPCError({ code: "FORBIDDEN" });
         }
-        const tracks = await getCollectionTracksWithSongs(row.collection.id);
+        const tracks = (await getCollectionTracksWithSongs(row.collection.id))
+          .filter((track: any) => track.song?.status === "Published")
+          .map((track: any) => ({
+            track: toPublicPlaylistMembership(track.track),
+            song: toPublicWork(track.song),
+            creator: toPublicCreatorAttribution(track.creator),
+          }));
         const following = ctx.user ? await isFollowingCollection(row.collection.id, ctx.user.id) : false;
-        return { ...row, tracks, following };
+        const collection = {
+          id: row.collection.id,
+          name: row.collection.name,
+          description: row.collection.description ?? null,
+          purpose: row.collection.purpose ?? null,
+          coverArtUrl: row.collection.coverArtUrl ?? null,
+          isPublic: true,
+          ownerId: row.collection.ownerId,
+          wid: row.collection.wid ?? null,
+          slug: row.collection.slug,
+          trackCount: row.collection.trackCount ?? tracks.length,
+          followerCount: row.collection.followerCount ?? 0,
+          forkCount: row.collection.forkCount ?? 0,
+          forkedFromWid: row.collection.forkedFromWid ?? null,
+          forkedFromOwnerName: row.collection.forkedFromOwnerName ?? null,
+          createdAt: row.collection.createdAt,
+          updatedAt: row.collection.updatedAt,
+        };
+        const owner = row.owner ? publicCreatorCardSchema.parse({
+          ...row.owner, bio: null, primaryGenre: null, originStatement: null,
+          activeMediums: null, sigilUrl: null, founderWid: null, publishedWorkCount: 0,
+        }) : null;
+        return { collection, owner, tracks, following };
       }),
 
     /** List all public collections (discovery feed). */
