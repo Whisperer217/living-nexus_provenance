@@ -15,3 +15,8 @@ The stateful preview captures below are actual application captures from the sam
 | After — isolated capture | 360px | [after-360.png](./after-360.png) |
 
 The isolated captures cover all requested widths. The stateful browser geometry check at 1280px measured header 86.6px, toolbar 74.4px, Creator Gallery top 142.6px, and `document.documentElement.scrollWidth > innerWidth === false`. The six isolated captures were additionally used to inspect initial viewport composition, overflow, and bottom-player clearance; their runner's unrelated first-visit modal is not part of the application surface under review.
+
+Direct review artifacts:
+
+- [Side-by-side actual application comparison](./before-after-1280.webp)
+- [Verification report](./VERIFICATION.md)
