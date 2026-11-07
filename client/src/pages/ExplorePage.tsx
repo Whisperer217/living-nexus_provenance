@@ -288,9 +288,10 @@ function CreatorFilter({ creators, selected, onSelect }: { creators: CreatorSumm
   return (
     <div ref={ref} className="relative flex-shrink-0">
       <button onClick={() => setOpen(!open)}
+        aria-label={sel ? `Filter by creator: ${sel.artistHandle ?? sel.name ?? "Creator"}` : "Filter by creator"}
         className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${selected ? "bg-[var(--gold)]/15 border-[var(--gold)]/40 text-[var(--gold)]" : "bg-transparent border-white/10 text-[var(--stone-shadow)] hover:border-[var(--gold)]/30 hover:text-[var(--stone-mid)]"}`}>
         {sel?.profilePhotoUrl ? <img src={sel.profilePhotoUrl} className="w-4 h-4 rounded-full object-cover" alt="" loading="lazy" decoding="async" /> : <Users className="w-3 h-3" />}
-        <span className="hidden sm:inline max-w-[80px] truncate">{sel ? (sel.artistHandle ?? sel.name ?? "Creator") : "Creator"}</span>
+        <span className="max-w-[80px] truncate">{sel ? (sel.artistHandle ?? sel.name ?? "Creator") : "Creator"}</span>
         {selected && <X className="w-3 h-3 ml-0.5 hover:text-white" onClick={(e) => { e.stopPropagation(); onSelect(null); setOpen(false); }} />}
       </button>
       {open && (
@@ -1126,7 +1127,7 @@ export default function ExplorePage() {
                   <X className="w-3 h-3" /> Clear
                 </button>
               )}
-              {creators.length > 0 && <CreatorFilter creators={creators} selected={selectedCreatorId} onSelect={setSelectedCreatorId} />}
+              {creators.length > 0 && <span className="ln-explore-desktop-filter"><CreatorFilter creators={creators} selected={selectedCreatorId} onSelect={setSelectedCreatorId} /></span>}
             </div>
 
             <div className={`ln-explore-header-controls ${viewMode === "creators" ? "ln-explore-header-controls--creators" : ""}`}>
@@ -1156,6 +1157,12 @@ export default function ExplorePage() {
             </button>
           </div>
           <div id="explore-mobile-settings" className={`ln-explore-mobile-settings ${mobileSettingsOpen ? "is-open" : ""}`}>
+            {creators.length > 0 && (
+              <div className="ln-explore-mobile-settings__creator">
+                <span className="ln-mono text-[var(--stone-shadow)]">Creator scope</span>
+                <CreatorFilter creators={creators} selected={selectedCreatorId} onSelect={setSelectedCreatorId} />
+              </div>
+            )}
             {viewMode === "list" && (
               <div className="flex items-center justify-between gap-3">
                 <span className="ln-mono text-[var(--stone-shadow)]">{randomize ? "Random order" : "Newest first"}</span>

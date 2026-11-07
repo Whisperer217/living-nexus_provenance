@@ -96,4 +96,15 @@ describe("Explore creator directory", () => {
     expect(explore).toContain("WorkListRow");
     expect(explore).not.toContain("audioTracks.slice");
   });
+
+  it("keeps mobile creator scope and discovery controls in the one Settings surface", () => {
+    expect(explore).toContain('className="ln-explore-desktop-filter"');
+    expect(explore).toContain('className="ln-explore-mobile-settings__creator"');
+    expect(explore).toContain('aria-controls="explore-mobile-settings"');
+    expect(explore).toContain("<WorkSortControl value={workSort} onChange={setWorkSort} />");
+    expect(explore).toContain("<CreatorSortControl value={creatorSort} onChange={setCreatorSort} />");
+    expect(explore).toContain("<ViewToggle value={viewMode} onChange={handleViewChange} />");
+    expect(explore).toContain("title=\"Refresh discovery\"");
+    expect(explore).toContain("onSelect={setSelectedCreatorId}");
+  });
 });

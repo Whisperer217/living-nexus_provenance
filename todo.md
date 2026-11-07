@@ -201,6 +201,14 @@
 - [x] Validate focused Explore/activity contracts (29/29), full suite (949 passed, 1 skipped), TypeScript, production build, and whitespace.
 - [x] Package before/after evidence under `docs/evidence/explore-density/`; keep the checkpoint unpublished.
 
+### P3.0.4 Explore mobile control consolidation — DONE
+
+- [x] Keep mobile Explore search directly beneath the compact identity heading and move creator scope into the single Settings surface.
+- [x] Preserve randomization, sorting, view mode, refresh, creator selection, snap gallery behavior, Work discovery, and Global Player clearance.
+- [x] Add tablet containment at 768–1024px so controls remain reachable without clipping; keep the wide desktop toolbar unchanged.
+- [x] Validate 360, 375, 390, 768, and 1024px captures with zero document overflow; focused contracts 30/30 and full suite 950 passed/1 skipped.
+- [x] Package true before/after captures and the preservation report; remain unpublished and undeployed.
+
 ### P3.1 Four image treatments — NEXT
 
 - [ ] Define Artifact treatment for Registry and archival views.
