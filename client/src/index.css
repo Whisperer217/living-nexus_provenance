@@ -2053,6 +2053,7 @@ body.overlay-active-full:has([data-slot="dialog-content"]) {
     .ln-explore-spatial-shell--expanded { grid-template-columns: clamp(17rem, 22vw, 19rem) minmax(0, 1fr); }
     .ln-explore-spatial-shell--compact { grid-template-columns: 5.5rem minmax(0, 1fr); }
     .ln-explore-spatial-shell--hidden { grid-template-columns: 3rem minmax(0, 1fr); }
+    .ln-explore-page .ln-explore-gallery__scroller { padding-left: 0.125rem; padding-right: 0.125rem; }
     .ln-explore-gallery--compact .ln-explore-gallery__header > div:first-child { display: none; }
     .ln-explore-gallery--hidden .ln-explore-gallery__header { padding: 0.35rem; }
     .ln-explore-gallery--hidden .ln-explore-gallery__header > div:first-child { display: none; }

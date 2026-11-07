@@ -218,6 +218,14 @@
 - [x] Validate expanded, compact, and hidden states at 1440px and 1024px plus the 768px tablet composition; focused contracts 31/31, full suite 951 passed/1 skipped, `pnpm check`, build, refine, and whitespace all passed.
 - [x] Package measured before/after evidence under `docs/evidence/explore-desktop-spatial/`; checkpoint remains unpublished.
 
+### P3.0.6 Explore final spatial boundary audit — DONE
+
+- [x] Measure viewport-relative bounds and parent chains for LeftRail, Explore root, content, header, gallery, visible gallery card, and Works panel before editing.
+- [x] Confirm the outer shell already starts 16px after LeftRail; identify the remaining 13.6px visible gap as gallery scroller padding rather than a centered max-width wrapper.
+- [x] Reduce only the desktop Explore gallery scroller horizontal inset to 0.125rem; preserve mobile snap padding, gallery widths, Works geometry, RightRail reservation, navigation, and playback.
+- [x] Validate 1440, 1280, 1024, and 768px before/after captures; visible artwork moves from 30.6px to 19px after LeftRail with zero horizontal overflow.
+- [x] Validate focused contracts 31/31, full suite 951 passed/1 skipped, TypeScript, build, refine 71/100 C baseline, and whitespace; save unpublished checkpoint.
+
 ### P3.1 Four image treatments — NEXT
 
 - [ ] Define Artifact treatment for Registry and archival views.

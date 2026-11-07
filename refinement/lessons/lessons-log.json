@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-11-06T19:17:00Z",
-  "totalLessons": 86,
+  "lastUpdated": "2026-11-06T19:30:00Z",
+  "totalLessons": 87,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -2171,6 +2171,30 @@
         "no-data-change",
         "no-player-change",
         "no-deployment"
+      ]
+    },
+    {
+      "id": "LESSON-087",
+      "date": "2026-11-06",
+      "checkpointVersion": "pending",
+      "category": "architecture",
+      "problem": "The Explore outer shell already began 16px after the fixed LeftRail, but the first visible creator artwork began 30.6px after it because the gallery scroller added 13.6px horizontal padding. Treating the issue as a centered max-width defect would have changed unrelated global layout.",
+      "solution": "Measure both outer layout boundaries and visible content boundaries. Preserve MainLayout, LeftRail, RightRail, shell columns, and Work panel; reduce only the desktop Explore gallery scroller horizontal inset to 0.125rem, preserving mobile snap padding and gallery state widths.",
+      "files": [
+        "client/src/index.css",
+        "server/tests/exploreCreatorDirectory.contract.test.ts",
+        "docs/evidence/explore-boundary-audit/VERIFICATION.md"
+      ],
+      "score": 0,
+      "tags": [
+        "explore",
+        "boundary-audit",
+        "computed-geometry",
+        "gallery-inset",
+        "route-scoped-css",
+        "preserve-global-layout",
+        "no-player-change",
+        "no-data-change"
       ]
     }
   ]
