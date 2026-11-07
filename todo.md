@@ -226,6 +226,14 @@
 - [x] Validate 1440, 1280, 1024, and 768px before/after captures; visible artwork moves from 30.6px to 19px after LeftRail with zero horizontal overflow.
 - [x] Validate focused contracts 31/31, full suite 951 passed/1 skipped, TypeScript, build, refine 71/100 C baseline, and whitespace; save unpublished checkpoint.
 
+### P3.0.7 Explore subtitle contrast and final layout verification — DONE
+
+- [x] Correct “Choose a world to explore” from the failing `--stone-shadow` foreground to the cathedral `--ln-bone` token with a route-scoped authoritative selector.
+- [x] Confirm live rendered color `rgb(201, 192, 168)` and approximately 9.33:1 contrast against the documented dark gallery surface.
+- [x] Verify expanded gallery and Works geometry at 1440, 1024, and 768px with document widths equal to viewport widths and no horizontal overflow.
+- [x] Preserve creator artwork, relationships, Work/WID records, filtering, navigation, Global Player, and all gallery state behavior.
+- [x] Validate 31/31 focused contracts, 951/951 full tests with one skip, `pnpm check`, `pnpm build`, `pnpm refine`, and `git diff --check`; checkpoint remains unpublished.
+
 ### P3.1 Four image treatments — NEXT
 
 - [ ] Define Artifact treatment for Registry and archival views.

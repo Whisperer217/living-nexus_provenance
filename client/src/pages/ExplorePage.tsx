@@ -828,7 +828,7 @@ function CreatorGalleryRail({
       <div className="ln-explore-gallery__header">
         <div className="min-w-0">
           <p className="ln-overline">Creator domains</p>
-          {!isHidden && <p className="ln-caption mt-1 text-[var(--stone-shadow)]">Choose a world to explore</p>}
+          {!isHidden && <p className="ln-caption ln-explore-gallery__subtitle mt-1 text-[var(--stone-shadow)]">Choose a world to explore</p>}
         </div>
         <div className="flex items-center gap-1">
           {galleryState !== "expanded" && (

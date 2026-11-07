@@ -1828,6 +1828,7 @@ body.overlay-active-full:has([data-slot="dialog-content"]) {
     box-shadow: 0 16px 34px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 228, 168, 0.04);
   }
   .ln-explore-gallery__header { border-bottom-color: rgba(214, 168, 76, 0.12); }
+  .ln-explore-page .ln-explore-gallery__subtitle { color: var(--ln-bone, #c9c0a8) !important; }
   .ln-explore-gallery__scroller { scrollbar-color: rgba(214, 168, 76, 0.35) transparent; }
   .ln-creator-card__footer { border-top-color: rgba(214, 168, 76, 0.12); }
   .ln-explore-registry {

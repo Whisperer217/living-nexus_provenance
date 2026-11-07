@@ -1,0 +1,34 @@
+{
+  "width": 1440,
+  "height": 900,
+  "scrollWidth": 1440,
+  "subtitleColor": "rgb(201, 192, 168)",
+  "subtitleFontSize": "13.68px",
+  "geometry": {
+    "shell": {
+      "x": 88,
+      "y": 142.6,
+      "w": 1036,
+      "h": 5117.4
+    },
+    "gallery": {
+      "x": 88,
+      "y": 142.6,
+      "w": 304,
+      "h": 791.4
+    },
+    "works": {
+      "x": 408,
+      "y": 1619.8,
+      "w": 716,
+      "h": 3363.4
+    },
+    "firstCard": {
+      "x": 91,
+      "y": 254.5,
+      "w": 298,
+      "h": 289.6
+    }
+  },
+  "player": false
+}

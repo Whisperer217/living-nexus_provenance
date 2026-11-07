@@ -118,5 +118,7 @@ describe("Explore creator directory", () => {
     expect(css).toContain(".ln-explore-spatial-shell--compact { grid-template-columns: 5.5rem minmax(0, 1fr); }");
     expect(css).toContain(".ln-explore-spatial-shell--hidden { grid-template-columns: 3rem minmax(0, 1fr); }");
     expect(css).toContain(".ln-explore-page .ln-explore-gallery__scroller { padding-left: 0.125rem; padding-right: 0.125rem; }");
+    expect(explore).toContain('ln-explore-gallery__subtitle');
+    expect(css).toContain('.ln-explore-page .ln-explore-gallery__subtitle { color: var(--ln-bone, #c9c0a8) !important; }');
   });
 });
