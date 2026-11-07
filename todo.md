@@ -192,6 +192,15 @@
 - [x] Validate focused Explore/activity contracts (29/29), full suite (949 passed, 1 skipped), TypeScript, production build, and whitespace.
 - [x] Save unpublished checkpoint `58198e73`; deployment and publication remain unperformed.
 
+### P3.0.3 Explore header density correction — DONE
+
+- [x] Replace the oversized Explore hero composition with a compact discovery toolbar targeting approximately 72–100px desktop height.
+- [x] Consolidate identity, title, search, creator context, sorting, display controls, refresh, and mobile Settings disclosure without changing their behavior.
+- [x] Preserve the dedicated desktop Creator Gallery rail, horizontal mobile snap strategy, creator artwork, Work/WID relationships, filters, and Global Player authority.
+- [x] Validate 1440, 1024, 768, 390, 375, and 360px captures; confirm clean desktop geometry at 86.6px header height, 74.4px toolbar height, and no horizontal overflow.
+- [x] Validate focused Explore/activity contracts (29/29), full suite (949 passed, 1 skipped), TypeScript, production build, and whitespace.
+- [x] Package before/after evidence under `docs/evidence/explore-density/`; keep the checkpoint unpublished.
+
 ### P3.1 Four image treatments — NEXT
 
 - [ ] Define Artifact treatment for Registry and archival views.

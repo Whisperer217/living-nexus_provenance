@@ -1108,18 +1108,42 @@ export default function ExplorePage() {
         }}
       >
         <div className="ln-explore-header__inner mx-auto max-w-[1360px] px-4 sm:px-6">
-          {/* Row 1: Title + controls */}
-          <div className="ln-explore-header__top flex items-center justify-between gap-3 flex-wrap">
-            <div className="ln-explore-header__identity min-w-0 flex-shrink-0">
-              <p
-                className="ln-overline mb-1"
-                style={{ color: "var(--ln-gold)" }}
-              >
-                Living Nexus · Square
-              </p>
+          <div className="ln-explore-toolbar">
+            <div className="ln-explore-header__identity min-w-0">
+              <p className="ln-overline mb-1" style={{ color: "var(--ln-gold)" }}>Living Nexus · Square</p>
               <h1 className="ln-page-title">Explore</h1>
-              <p className="ln-editorial mt-1 hidden sm:block">Songs & artists — music provenance discovery</p>
+              <p className="ln-editorial hidden sm:block">Songs & artists — music provenance discovery</p>
             </div>
+
+            <div className="ln-explore-header__search-row">
+              <div className={`ln-explore-search relative ${viewMode === "creators" ? "ln-explore-search--creators" : ""}`}>
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[var(--stone-shadow)]" />
+                <input type="text" aria-label={viewMode === "creators" ? "Search public creators" : "Search works, creators, or genres"} placeholder={viewMode === "creators" ? "Find creators, handles, statements…" : "Search works, creators, genres…"} value={search} onChange={(e) => setSearch(e.target.value)}
+                  className="w-full bg-[var(--void-3)] border border-white/10 rounded-xl pl-9 pr-4 py-2 text-sm text-[var(--stone-light)] placeholder:text-[var(--stone-shadow)] focus:outline-none focus:border-[var(--gold)]/40 transition-colors" />
+              </div>
+              {search && (
+                <button onClick={() => setSearch("")} className="flex items-center gap-1 text-xs text-[var(--stone-shadow)] hover:text-[var(--gold)] transition-colors">
+                  <X className="w-3 h-3" /> Clear
+                </button>
+              )}
+              {creators.length > 0 && <CreatorFilter creators={creators} selected={selectedCreatorId} onSelect={setSelectedCreatorId} />}
+            </div>
+
+            <div className={`ln-explore-header-controls ${viewMode === "creators" ? "ln-explore-header-controls--creators" : ""}`}>
+              {viewMode === "list" && (
+                <div className="flex items-center gap-1.5">
+                  <span className="ln-mono hidden text-[var(--stone-shadow)] sm:inline">{randomize ? "Random" : "Newest"}</span>
+                  <RandomizeSwitch value={randomize} onChange={handleRandomizeToggle} />
+                </div>
+              )}
+              {viewMode === "list" && <WorkSortControl value={workSort} onChange={setWorkSort} />}
+              {viewMode === "creators" && <CreatorSortControl value={creatorSort} onChange={setCreatorSort} />}
+              <ViewToggle value={viewMode} onChange={handleViewChange} />
+              <button onClick={handleRefresh} disabled={isRefreshing} title="Refresh discovery" className="flex items-center gap-1.5 px-2.5 py-2 rounded-xl border border-white/10 text-[var(--stone-shadow)] hover:text-[var(--gold)] hover:border-[var(--gold)]/30 transition-all text-xs flex-shrink-0 disabled:cursor-wait disabled:opacity-60">
+                <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? "animate-spin" : ""}`} /><span className="hidden sm:inline">{isRefreshing ? "Refreshing" : "Refresh"}</span>
+              </button>
+            </div>
+
             <button
               type="button"
               className="ln-explore-mobile-settings-toggle"
@@ -1130,35 +1154,6 @@ export default function ExplorePage() {
               <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
               <span>Settings</span>
             </button>
-            <div className={`ln-explore-header-controls flex items-center gap-2 sm:gap-3 flex-wrap justify-end ${viewMode === "creators" ? "ln-explore-header-controls--creators" : ""}`}>
-              {viewMode === "list" && (
-                <div className="flex items-center gap-1.5">
-                <span className="ln-mono hidden text-[var(--stone-shadow)] sm:inline">{randomize ? "Random" : "Newest"}</span>
-                <RandomizeSwitch value={randomize} onChange={handleRandomizeToggle} />
-                </div>
-              )}
-              {viewMode === "list" && <WorkSortControl value={workSort} onChange={setWorkSort} />}
-              {viewMode === "creators" && <CreatorSortControl value={creatorSort} onChange={setCreatorSort} />}
-              <ViewToggle value={viewMode} onChange={handleViewChange} />
-              <button onClick={handleRefresh} disabled={isRefreshing} title="Refresh discovery" className="flex items-center gap-1.5 px-2.5 py-2 rounded-xl border border-white/10 text-[var(--stone-shadow)] hover:text-[var(--gold)] hover:border-[var(--gold)]/30 transition-all text-xs flex-shrink-0 disabled:cursor-wait disabled:opacity-60">
-                <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? "animate-spin" : ""}`} /><span className="hidden sm:inline">{isRefreshing ? "Refreshing" : "Refresh"}</span>
-              </button>
-            </div>
-          </div>
-          {/* Row 2: contextual discovery search + creator filter */}
-          <div className="ln-explore-header__search-row flex items-center gap-2">
-            <div className={`ln-explore-search relative flex-shrink-0 w-40 sm:w-64 ${viewMode === "creators" ? "ln-explore-search--creators" : ""}`}>
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[var(--stone-shadow)]" />
-              <input type="text" aria-label={viewMode === "creators" ? "Search public creators" : "Search works, creators, or genres"} placeholder={viewMode === "creators" ? "Find creators, handles, statements…" : "Search works, creators, genres…"} value={search} onChange={(e) => setSearch(e.target.value)}
-                className="w-full bg-[var(--void-3)] border border-white/10 rounded-xl pl-9 pr-4 py-2 text-sm text-[var(--stone-light)] placeholder:text-[var(--stone-shadow)] focus:outline-none focus:border-[var(--gold)]/40 transition-colors" />
-            </div>
-            {search && (
-              <button onClick={() => setSearch("")} className="flex items-center gap-1 text-xs text-[var(--stone-shadow)] hover:text-[var(--gold)] transition-colors">
-                <X className="w-3 h-3" /> Clear
-              </button>
-            )}
-            <div className="flex-1" />
-            {creators.length > 0 && <CreatorFilter creators={creators} selected={selectedCreatorId} onSelect={setSelectedCreatorId} />}
           </div>
           <div id="explore-mobile-settings" className={`ln-explore-mobile-settings ${mobileSettingsOpen ? "is-open" : ""}`}>
             {viewMode === "list" && (
