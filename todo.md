@@ -346,3 +346,14 @@ The retired ledgers are preserved at:
 `docs/lnls/archives/work-ledger/2026-11-02/`
 
 They remain historical records, not active instructions.
+
+
+### P2.4 Information architecture — cognitive separation assessment — REVIEW
+
+- [x] Map the current navigation, Creator Domain, Work Desk, Archive, Collections, Studio, Profile, and Account surfaces.
+- [x] Identify the overlapping mental models: public identity vs account identity, Work Desk vs Studio, Archive vs editing, and Collections as a relationship rather than a separate media system.
+- [x] Define the proposed model: one public Creator Domain, one owner Work Desk, Collections nested under Work Desk, and a separate Account context.
+- [x] Define a dual-path creator experience: Quick Path task chooser plus Deep Path Work Desk modes.
+- [x] Preserve existing routes, data authorities, WIDs, registry history, media, and playback; no application code or production state changed.
+- [ ] Review and approve Phase A wording/context-label implementation before changing visible navigation.
+- [ ] Validate the proposed hierarchy with new and experienced creators before retiring any legacy visible entry points.
