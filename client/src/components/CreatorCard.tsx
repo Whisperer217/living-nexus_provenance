@@ -144,7 +144,7 @@ export function CreatorCard({
     : [];
 
   const isFounder = !!creator?.founderWid;
-  const publishedCount = creator?.publishedCount ?? 0;
+  const publishedCount = creator?.publishedWorkCount ?? 0;
 
   // ── Inline mode ───────────────────────────────────────────────────
   if (inline) {
@@ -223,9 +223,6 @@ export function CreatorCard({
               {creator.artistHandle && creator.name && (
                 <div className="text-[10px] font-body text-white/40 mt-0.5">@{creator.artistHandle}</div>
               )}
-              {creator.role && (
-                <div className="text-[10px] font-body text-white/28 italic mt-0.5">{creator.role}</div>
-              )}
             </div>
 
             <div className="flex flex-col items-end gap-1 flex-shrink-0">
@@ -248,10 +245,10 @@ export function CreatorCard({
           </div>
 
           {/* ── Bio — 2–3 lines ── */}
-          {(creator.bio || creator.witnessEpitaph || creator.witnessPhilosophy) && (
+          {(creator.bio || creator.originStatement) && (
             <div className="px-4 py-3" style={{ borderBottom: "1px solid rgba(196,154,40,0.08)" }}>
               <p className="text-[11.5px] font-body text-white/58 leading-relaxed line-clamp-3">
-                {creator.bio || creator.witnessEpitaph || creator.witnessPhilosophy}
+                {creator.bio || creator.originStatement}
               </p>
             </div>
           )}

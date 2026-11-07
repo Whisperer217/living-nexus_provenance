@@ -71,6 +71,7 @@ import {
   trackDownloadGrants,
 } from "../../drizzle/schema";
 import { ENV } from "../_core/env";
+import type { PublicCreatorCard, PublicCreatorIdentity } from "../../shared/publicCreatorProfile";
 import {
   serializeOnboardingProgressPatch,
   type OnboardingProgressPatch,
@@ -177,6 +178,105 @@ export async function getUserByHandle(handle: string) {
   const lower = handle.toLowerCase();
   const ci = await db.select().from(users).where(sql`LOWER(${users.artistHandle}) = ${lower}`).limit(1);
   return ci.length > 0 ? ci[0] : undefined;
+}
+
+/**
+ * Public creator projections deliberately select only approved identity fields.
+ * Do not replace either helper with a raw `users` select.
+ */
+function getPublicCreatorSelections() {
+  const publicPublishedWorkCount = sql<number>`(
+    SELECT COUNT(*)
+    FROM ${songs}
+    WHERE ${songs.userId} = ${users.id}
+      AND ${songs.status} = 'Published'
+      AND ${songs.isPublic} = true
+  )`.mapWith(Number);
+
+  const publicCreatorCardSelection = {
+    id: users.id,
+    name: users.name,
+    artistHandle: users.artistHandle,
+    bio: users.bio,
+    profilePhotoUrl: users.profilePhotoUrl,
+    primaryGenre: users.primaryGenre,
+    originStatement: users.originStatement,
+    activeMediums: users.activeMediums,
+    sigilUrl: users.sigilUrl,
+    founderWid: users.founderWid,
+    publishedWorkCount: publicPublishedWorkCount,
+  } as const;
+
+  const publicCreatorIdentitySelection = {
+    ...publicCreatorCardSelection,
+    bannerUrl: users.bannerUrl,
+    bannerPositionX: users.bannerPositionX,
+    bannerPositionY: users.bannerPositionY,
+    creativeMission: users.creativeMission,
+    creativePhilosophy: users.creativePhilosophy,
+    creativeDoctrine: users.creativeDoctrine,
+    archiveContinuity: users.archiveContinuity,
+    officialArtistName: users.officialArtistName,
+    localizedName: users.localizedName,
+    labelName: users.labelName,
+    producerCredits: users.producerCredits,
+    dspSpotifyUrl: users.dspSpotifyUrl,
+    dspAppleMusicUrl: users.dspAppleMusicUrl,
+    dspTikTokHandle: users.dspTikTokHandle,
+    website: users.website,
+    location: users.location,
+    twitterHandle: users.twitterHandle,
+    instagramHandle: users.instagramHandle,
+    youtubeHandle: users.youtubeHandle,
+  } as const;
+  return { publicCreatorCardSelection, publicCreatorIdentitySelection };
+}
+
+function normalizePublicActiveMediums(value: unknown): string[] | null {
+  return Array.isArray(value) && value.every((item) => typeof item === "string") ? value : null;
+}
+
+function toPublicCreatorCard(row: Record<string, unknown>): PublicCreatorCard {
+  return {
+    ...(row as Omit<PublicCreatorCard, "activeMediums" | "publishedWorkCount">),
+    activeMediums: normalizePublicActiveMediums(row.activeMediums),
+    publishedWorkCount: Number(row.publishedWorkCount ?? 0),
+  };
+}
+
+function toPublicCreatorIdentity(row: Record<string, unknown>): PublicCreatorIdentity {
+  return {
+    ...(row as Omit<PublicCreatorIdentity, "activeMediums" | "publishedWorkCount">),
+    activeMediums: normalizePublicActiveMediums(row.activeMediums),
+    publishedWorkCount: Number(row.publishedWorkCount ?? 0),
+  };
+}
+
+export async function getPublicCreatorCardById(userId: number): Promise<PublicCreatorCard | null> {
+  const db = await getDb();
+  if (!db) return null;
+  const { publicCreatorCardSelection } = getPublicCreatorSelections();
+  const rows = await db.select(publicCreatorCardSelection).from(users).where(eq(users.id, userId)).limit(1);
+  return rows[0] ? toPublicCreatorCard(rows[0]) : null;
+}
+
+export async function getPublicCreatorIdentityById(userId: number): Promise<PublicCreatorIdentity | null> {
+  const db = await getDb();
+  if (!db) return null;
+  const { publicCreatorIdentitySelection } = getPublicCreatorSelections();
+  const rows = await db.select(publicCreatorIdentitySelection).from(users).where(eq(users.id, userId)).limit(1);
+  return rows[0] ? toPublicCreatorIdentity(rows[0]) : null;
+}
+
+export async function getPublicCreatorIdentityByHandle(handle: string): Promise<PublicCreatorIdentity | null> {
+  const db = await getDb();
+  if (!db) return null;
+  const normalized = handle.trim().toLocaleLowerCase();
+  if (!normalized) return null;
+  const { publicCreatorIdentitySelection } = getPublicCreatorSelections();
+  const rows = await db.select(publicCreatorIdentitySelection).from(users)
+    .where(sql`LOWER(${users.artistHandle}) = ${normalized}`).limit(1);
+  return rows[0] ? toPublicCreatorIdentity(rows[0]) : null;
 }
 
 /** Bounded creator-handle lookup used only for public Work Signal composition. */
@@ -5797,6 +5897,23 @@ export async function getDomainBlocks(userId: number) {
     .select()
     .from(domainBlocks)
     .where(eq(domainBlocks.userId, userId))
+    .orderBy(asc(domainBlocks.position));
+}
+
+/** Public Domain composition excludes hidden editor blocks. */
+export async function getPublicDomainBlocks(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db
+    .select({
+      id: domainBlocks.id,
+      blockType: domainBlocks.blockType,
+      position: domainBlocks.position,
+      size: domainBlocks.size,
+      config: domainBlocks.config,
+    })
+    .from(domainBlocks)
+    .where(and(eq(domainBlocks.userId, userId), eq(domainBlocks.visible, true)))
     .orderBy(asc(domainBlocks.position));
 }
 

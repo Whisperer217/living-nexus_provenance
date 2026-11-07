@@ -228,9 +228,9 @@ function ProvenanceTrailBlock({ userId, config, isOwner }: { userId: number; con
   if (!isOwner) return null;
 
   const maxItems = config.maxItems ?? 10;
-  const { data: versions = [] } = trpc.domain.getPublicVersionHistory.useQuery(
-    { userId, limit: maxItems },
-    { enabled: !!userId }
+  const { data: versions = [] } = trpc.domain.getVersionHistory.useQuery(
+    { limit: maxItems },
+    { enabled: !!userId && isOwner }
   );
   // events not used in this block — removed to avoid type error
 

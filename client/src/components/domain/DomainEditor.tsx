@@ -268,8 +268,8 @@ export function DomainEditor({
   defaultLayout = DEFAULT_DOMAIN_LAYOUT,
 }: DomainEditorProps) {
   const utils = trpc.useUtils();
-  const { data: savedBlocks = [] } = trpc.domain.getLayout.useQuery(
-    { userId },
+  const { data: savedBlocks = [] } = trpc.domain.getMyLayout.useQuery(
+    undefined,
     { enabled: userId > 0 },
   );
 
@@ -321,7 +321,7 @@ export function DomainEditor({
 
   const saveLayout = trpc.domain.saveLayout.useMutation({
     onSuccess: () => {
-      utils.domain.getLayout.invalidate({ userId });
+      utils.domain.getMyLayout.invalidate();
       utils.domain.getVersionHistory.invalidate({});
       toast.success("Domain layout saved — manifestation recorded");
       setIsDirty(false);

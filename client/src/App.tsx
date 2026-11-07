@@ -150,6 +150,7 @@ const GuideDetailPage = lazy(() => import("./pages/GuideDetailPage"));
 const SearchResultsPage = lazy(() => import("./pages/SearchResultsPage"));
 const DistributionPage = lazy(() => import("./pages/DistributionPage"));
 const CreatorIdentityPage = lazy(() => import("./pages/CreatorIdentityPage"));
+const P0ProfilePrivacyReviewPage = lazy(() => import("./pages/review/P0ProfilePrivacyReviewPage"));
 const CreatorDomainPage = lazy(() => import("./pages/CreatorDomainPage"));
 const CollectionPage = lazy(() => import("./pages/CollectionPage"));
 const ConstellationPage = lazy(() => import("./pages/ConstellationPage"));
@@ -430,6 +431,7 @@ function Router() {
                 <Route path="/avatar-registry" component={AvatarMarketplacePage} />
                 <Route path="/distribute" component={DistributionPage} />
                 <Route path="/identity/:id" component={CreatorIdentityPage} />
+                {import.meta.env.DEV && <Route path="/review/p0-profile-privacy" component={P0ProfilePrivacyReviewPage} />}
                 <Route path="/domain"><Redirect to="/manage" /></Route>
                 <Route path="/creator-surface"><Redirect to="/pna" /></Route>
                 <Route path="/onboarding" component={OnboardingManifest} />

@@ -1,0 +1,50 @@
+name: P0 Profile Privacy
+
+on:
+  pull_request:
+    paths:
+      - "client/src/pages/CreatorIdentityPage.tsx"
+      - "client/src/components/CreatorCard.tsx"
+      - "client/src/components/CreatorHandle.tsx"
+      - "client/src/components/domain/**"
+      - "server/routers/profile.ts"
+      - "server/routers/domain.ts"
+      - "server/utils/db.ts"
+      - "shared/publicCreatorProfile.ts"
+      - "server/tests/*Privacy*.test.ts"
+      - "server/tests/*Projection*.test.ts"
+      - ".github/workflows/p0-profile-privacy.yml"
+  push:
+    branches: [app/main]
+
+permissions:
+  contents: read
+
+jobs:
+  public-profile-boundary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: P0 public projection and negative-permission contracts
+        run: pnpm vitest run server/tests/publicCreatorProfile.projection.contract.test.ts server/tests/domainPrivacy.contract.test.ts server/tests/creatorIdentityPublicProjection.contract.test.ts
+      - name: Typecheck
+        run: pnpm check
+      - name: Production build
+        run: pnpm build
+      - name: Redacted evidence summary
+        if: always()
+        run: |
+          echo "## P0 Profile Privacy" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Contract tests inspect public projection boundaries only." >> "$GITHUB_STEP_SUMMARY"
+          echo "- No database credentials, user fixtures, or production writes are used." >> "$GITHUB_STEP_SUMMARY"
+          echo "- Deployment remains separately authorized." >> "$GITHUB_STEP_SUMMARY"

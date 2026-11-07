@@ -15,7 +15,7 @@ import {
   addComment, createSong, deleteSong, getAllCreators,
   getCommentsBySong, getPublicSongs, getSongById,
   getSongsByUser, getSongWithCreator, getTipsBySong, reorderSongs, getNextDisplayOrder,
-  getUserById, getUserByHandle, incrementPlayCount, recordDownload,
+  getUserById, getUserByHandle, getPublicCreatorCardById, getPublicCreatorIdentityById, getPublicCreatorIdentityByHandle, incrementPlayCount, recordDownload,
   recordLicense, recordSlotPurchase, recordTip,
   updateSongLyrics, updateSongLyricsWithWid, updateSongStatus, getRelatedSongs, updateSongVideo,
   updateUserProfile, updateUserStripeAccount,
@@ -165,6 +165,7 @@ import { ENV } from "../_core/env";
 import { getOrGenerateEmbedVideo } from "../services/embedVideo";
 import { enqueueVisualJob } from "../workers/visualQueue";
 import { notifyOwner } from "../_core/notification";
+import { publicCreatorCardSchema, publicCreatorIdentitySchema } from "@shared/publicCreatorProfile";
 
 const stripe = process.env.STRIPE_SECRET_KEY
   ? new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: "2024-06-20" as any })
@@ -186,39 +187,27 @@ const KEEPER_PRESETS = [
 
 export const profileRouter = router({
     me: protectedProcedure.query(async ({ ctx }) => getUserById(ctx.user.id)),
-    getById: publicProcedure.input(z.object({ userId: z.number() })).query(async ({ input }) => getUserById(input.userId)),
+    /** @deprecated Public callers must use getPublicById; this compatibility alias is safe. */
+    getById: publicProcedure.input(z.object({ userId: z.number().int().positive() }))
+      .output(publicCreatorIdentitySchema.nullable())
+      .query(async ({ input }) => getPublicCreatorIdentityById(input.userId)),
+    /** Canonical anonymous public Creator identity record. */
+    getPublicById: publicProcedure.input(z.object({ userId: z.number().int().positive() }))
+      .output(publicCreatorIdentitySchema.nullable())
+      .query(async ({ input }) => getPublicCreatorIdentityById(input.userId)),
+    getPublicByHandle: publicProcedure.input(z.object({ handle: z.string().trim().min(1).max(64) }))
+      .output(publicCreatorIdentitySchema.nullable())
+      .query(async ({ input }) => getPublicCreatorIdentityByHandle(input.handle)),
     /** Resolve a creator by artistHandle — used for human-readable share URLs */
     getByHandle: publicProcedure.input(z.object({ handle: z.string() })).query(async ({ input }) => {
       const user = await getUserByHandle(input.handle);
       if (!user) return null;
       return { id: user.id, name: user.name, artistHandle: user.artistHandle };
     }),
-    /** Lightweight creator card data for handle pop-ups — returns only public fields */
-    getCreatorMini: publicProcedure.input(z.object({ userId: z.number().int().positive() })).query(async ({ input }) => {
-      const user = await getUserById(input.userId);
-      if (!user) return null;
-      const publishedCount = await getPublishedCountByUser(input.userId);
-      return {
-        id: user.id,
-        name: user.name,
-        artistHandle: user.artistHandle,
-        bio: user.bio,
-        profilePhotoUrl: user.profilePhotoUrl,
-        role: user.role,
-        primaryGenre: user.primaryGenre,
-        songSlotsUsed: user.songSlotsUsed,
-        publishedCount,
-        // Witness Identity fields for creator card
-        originStatement: user.originStatement,
-        activeMediums: user.activeMediums as string[] | null,
-        sigilUrl: user.sigilUrl,
-        founderWid: user.founderWid,
-        witnessPhilosophy: user.witnessPhilosophy,
-        witnessEpitaph: user.witnessEpitaph,
-        witnessOriginStory: user.witnessOriginStory,
-        witnessDoctrine: user.witnessDoctrine,
-      };
-    }),
+    /** Lightweight creator card data — explicit public allowlist only. */
+    getCreatorMini: publicProcedure.input(z.object({ userId: z.number().int().positive() }))
+      .output(publicCreatorCardSchema.nullable())
+      .query(async ({ input }) => getPublicCreatorCardById(input.userId)),
     update: protectedProcedure.input(z.object({
       name: z.string().max(128).optional(),
       artistHandle: z.string().max(64).optional(),

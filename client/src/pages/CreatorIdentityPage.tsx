@@ -14,7 +14,7 @@ import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import {
   Fingerprint, Shield, BookOpen, Music, Film, PenTool,
-  Globe, ExternalLink, Crown, Sparkles, Archive, Scroll,
+  Globe, ExternalLink, Sparkles, Archive, Scroll,
   ChevronRight, Copy, Check, MapPin
 } from "lucide-react";
 import { toast } from "sonner";
@@ -78,13 +78,8 @@ export default function CreatorIdentityPage() {
   const { user } = useAuth();
   const [copied, setCopied] = useState(false);
 
-  const { data: creator, isLoading } = trpc.profile.getById.useQuery(
+  const { data: creator, isLoading } = trpc.profile.getPublicById.useQuery(
     { userId: creatorId },
-    { enabled: creatorId > 0 }
-  );
-
-  const { data: songCount } = trpc.songs.countByCreator.useQuery(
-    { creatorId },
     { enabled: creatorId > 0 }
   );
 
@@ -115,14 +110,9 @@ export default function CreatorIdentityPage() {
     );
   }
 
-  const activeMediums = (() => {
-    const raw = creator.activeMediums;
-    if (!raw) return [];
-    if (Array.isArray(raw)) return raw as string[];
-    try { const parsed = JSON.parse(raw as unknown as string); return Array.isArray(parsed) ? parsed : []; } catch { return []; }
-  })();
+  const activeMediums = creator.activeMediums ?? [];
   const isOwner = user?.id === creator.id;
-  const manifestationCount = (typeof songCount === 'object' && songCount !== null ? (songCount as any).count : songCount) ?? creator.songSlotsUsed ?? 0;
+  const manifestationCount = creator.publishedWorkCount;
 
   const handleCopyLink = () => {
     const url = `${window.location.origin}/identity/${creator.id}`;
@@ -200,25 +190,6 @@ export default function CreatorIdentityPage() {
                 @{creator.artistHandle}
               </p>
             )}
-            {/* Role badges */}
-            <div className="flex items-center gap-2 mt-2 flex-wrap">
-              {(creator as any).role === "founder" && (
-                <span
-                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-bold tracking-widest"
-                  style={{ background: "rgba(196,154,40,0.08)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.3)" }}
-                >
-                  <Crown className="w-3 h-3" /> FOUNDER
-                </span>
-              )}
-              {creator.licenseStatus === "licensed" && (
-                <span
-                  className="text-[9px] px-2 py-0.5 rounded tracking-widest font-mono"
-                  style={{ background: "rgba(196,154,40,0.08)", color: "var(--ln-gold)", border: "1px solid rgba(196,154,40,0.2)" }}
-                >
-                  LICENSED
-                </span>
-              )}
-            </div>
           </div>
         </div>
 

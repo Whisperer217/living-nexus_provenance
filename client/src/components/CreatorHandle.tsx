@@ -115,11 +115,10 @@ function CreatorMiniCard({
     overflow: "hidden",
   };
 
-  const isFounder = data?.role === "founder";
-  const isAdmin = data?.role === "admin";
+  const isFounder = !!data?.founderWid;
 
   const genres = parseGenres(data?.primaryGenre).slice(0, 3);
-  const publishedCount = data?.publishedCount ?? 0;
+  const publishedCount = data?.publishedWorkCount ?? 0;
 
   return createPortal(
     <div
@@ -197,18 +196,6 @@ function CreatorMiniCard({
                     FOUNDER
                   </span>
                 )}
-                {isAdmin && !isFounder && (
-                  <span
-                    className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold tracking-widest flex-shrink-0"
-                    style={{
-                      background: "rgba(239,68,68,0.14)",
-                      color: "#F87171",
-                      border: "1px solid rgba(239,68,68,0.3)",
-                    }}
-                  >
-                    ADMIN
-                  </span>
-                )}
               </div>
 
               {/* Row 2: handle + works count */}
@@ -250,7 +237,7 @@ function CreatorMiniCard({
           )}
 
           {/* ── 3. WITNESS IDENTITY glimpse (optional) ── */}
-          {(data.witnessEpitaph || data.witnessPhilosophy) && (
+          {data.originStatement && (
             <div
               className="mx-4 mb-3 px-3 py-2 rounded-lg"
               style={{
@@ -271,9 +258,7 @@ function CreatorMiniCard({
                 className="text-[11px] leading-relaxed line-clamp-2 italic"
                 style={{ color: "rgba(196,154,40,0.65)" }}
               >
-                {data.witnessEpitaph
-                  ? `"${data.witnessEpitaph}"`
-                  : data.witnessPhilosophy}
+                {data.originStatement}
               </p>
             </div>
           )}

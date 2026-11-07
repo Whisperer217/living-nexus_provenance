@@ -117,7 +117,7 @@ import {
   deleteGuide,
   globalSearch,
   type SearchResults,
-  getDomainBlocks,
+  getDomainBlocks, getPublicDomainBlocks,
   saveDomainLayout,
   getDomainVersions,
   createManifestedCollection,
@@ -192,8 +192,7 @@ export const domainRouter = router({
     getLayout: publicProcedure
       .input(z.object({ userId: z.number().int().positive() }))
       .query(async ({ input }) => {
-        const blocks = await getDomainBlocks(input.userId);
-        return blocks;
+        return getPublicDomainBlocks(input.userId);
       }),
 
     /**
@@ -237,14 +236,5 @@ export const domainRouter = router({
         return getDomainVersions(ctx.user.id, input.limit);
       }),
 
-    /**
-     * Get the version history for a creator's domain (public — for the provenance trail block).
-     */
-    getPublicVersionHistory: publicProcedure
-      .input(z.object({ userId: z.number().int().positive(), limit: z.number().int().min(1).max(20).default(10) }))
-      .query(async ({ input }) => {
-        return getDomainVersions(input.userId, input.limit);
-      }),
   });
-
 

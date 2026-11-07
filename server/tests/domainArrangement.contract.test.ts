@@ -19,11 +19,11 @@ describe("Arrange domain reflection contract", () => {
   it("refreshes the persisted layout and its version history after an owner save", () => {
     const editor = read("client/src/components/domain/DomainEditor.tsx");
 
-    expect(editor).toContain("trpc.domain.getLayout.useQuery(");
-    expect(editor).toContain("{ userId },");
+    expect(editor).toContain("trpc.domain.getMyLayout.useQuery(");
+    expect(editor).toContain("undefined,");
     expect(editor).toContain("{ enabled: userId > 0 }");
     expect(editor).toContain("trpc.domain.saveLayout.useMutation");
-    expect(editor).toContain("utils.domain.getLayout.invalidate({ userId })");
+    expect(editor).toContain("utils.domain.getMyLayout.invalidate()");
     expect(editor).toContain("utils.domain.getVersionHistory.invalidate({})");
     expect(editor).toContain("const hydratedLayoutRef = useRef<string | null>(null)");
     expect(editor).toContain("hydratedLayoutRef.current === hydratedLayoutSignature");
