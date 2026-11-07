@@ -1,0 +1,153 @@
+{
+  "viewport": {
+    "width": 768,
+    "height": 900,
+    "scrollWidth": 768
+  },
+  "galleryState": "expanded",
+  "main": {
+    "selector": "#main-scroll",
+    "x": 0,
+    "y": 56,
+    "width": 768,
+    "height": 844,
+    "right": 768,
+    "bottom": 900,
+    "display": "block",
+    "gridTemplateColumns": "none",
+    "gap": "normal",
+    "padding": "0px 0px 72px",
+    "margin": "0px"
+  },
+  "page": {
+    "selector": "#main-scroll > div",
+    "x": 0,
+    "y": 56,
+    "width": 768,
+    "height": 5512.421875,
+    "right": 768,
+    "bottom": 5568.421875,
+    "display": "block",
+    "gridTemplateColumns": "none",
+    "gap": "normal",
+    "padding": "0px",
+    "margin": "0px"
+  },
+  "header": {
+    "selector": ".ln-explore-header",
+    "x": 0,
+    "y": 56,
+    "width": 768,
+    "height": 95.375,
+    "right": 768,
+    "bottom": 151.375,
+    "display": "block",
+    "gridTemplateColumns": "none",
+    "gap": "normal",
+    "padding": "0px",
+    "margin": "0px"
+  },
+  "shell": {
+    "selector": ".ln-explore-spatial-shell",
+    "x": 24,
+    "y": 151.375,
+    "width": 720,
+    "height": 5289.046875,
+    "right": 744,
+    "bottom": 5440.421875,
+    "display": "grid",
+    "gridTemplateColumns": "720px",
+    "gap": "16px",
+    "padding": "0px",
+    "margin": "0px"
+  },
+  "gallery": {
+    "selector": ".ln-explore-gallery",
+    "x": 24,
+    "y": 151.375,
+    "width": 720,
+    "height": 334.734375,
+    "right": 744,
+    "bottom": 486.109375,
+    "display": "block",
+    "gridTemplateColumns": "none",
+    "gap": "normal",
+    "padding": "0px",
+    "margin": "0px"
+  },
+  "scroller": {
+    "selector": ".ln-explore-gallery__scroller",
+    "x": 25,
+    "y": 247.53125,
+    "width": 718,
+    "height": 237.578125,
+    "right": 743,
+    "bottom": 485.109375,
+    "display": "flex",
+    "gridTemplateColumns": "none",
+    "gap": "12px",
+    "padding": "13.6px",
+    "margin": "0px"
+  },
+  "registry": {
+    "selector": ".ln-explore-registry",
+    "x": 24,
+    "y": 1901.984375,
+    "width": 720,
+    "height": 3287.765625,
+    "right": 744,
+    "bottom": 5189.75,
+    "display": "block",
+    "gridTemplateColumns": "none",
+    "gap": "normal",
+    "padding": "24px 12px 0px",
+    "margin": "0px"
+  },
+  "ancestors": [
+    {
+      "tag": "DIV",
+      "id": "",
+      "cls": "ln-explore-spatial-shell ln-explore-spatial-shell--expanded",
+      "x": 24,
+      "y": 151.375,
+      "width": 720,
+      "height": 5289.046875
+    },
+    {
+      "tag": "DIV",
+      "id": "",
+      "cls": "mx-auto max-w-[1480px] px-4 pb-32 sm:px-6",
+      "x": 0,
+      "y": 151.375,
+      "width": 768,
+      "height": 5417.046875
+    },
+    {
+      "tag": "DIV",
+      "id": "",
+      "cls": "relative z-10",
+      "x": 0,
+      "y": 56,
+      "width": 768,
+      "height": 5512.421875
+    },
+    {
+      "tag": "DIV",
+      "id": "",
+      "cls": "relative overflow-x-clip min-h-screen",
+      "x": 0,
+      "y": 56,
+      "width": 768,
+      "height": 5512.421875
+    },
+    {
+      "tag": "DIV",
+      "id": "main-scroll",
+      "cls": "min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden player-scroll-area lg:pr-[300px]",
+      "x": 0,
+      "y": 56,
+      "width": 768,
+      "height": 844
+    }
+  ]
+}

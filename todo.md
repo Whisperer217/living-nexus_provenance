@@ -209,6 +209,15 @@
 - [x] Validate 360, 375, 390, 768, and 1024px captures with zero document overflow; focused contracts 30/30 and full suite 950 passed/1 skipped.
 - [x] Package true before/after captures and the preservation report; remain unpublished and undeployed.
 
+### P3.0.5 Explore desktop spatial correction — DONE
+
+- [x] Audit the actual MainLayout, LeftRail, RightRail, content shell, gallery, and Works geometry before editing.
+- [x] Keep LeftRail and RightRail global authorities unchanged; add only route-owned Explore hooks and CSS.
+- [x] Align the expanded gallery 16px beside LeftRail, widen it to a bounded 272–304px column, and give Works the remaining width.
+- [x] Preserve compact and hidden gallery widths, mobile single-column snap behavior, creator selection, filtering, Work/WID links, and Global Player continuity.
+- [x] Validate expanded, compact, and hidden states at 1440px and 1024px plus the 768px tablet composition; focused contracts 31/31, full suite 951 passed/1 skipped, `pnpm check`, build, refine, and whitespace all passed.
+- [x] Package measured before/after evidence under `docs/evidence/explore-desktop-spatial/`; checkpoint remains unpublished.
+
 ### P3.1 Four image treatments — NEXT
 
 - [ ] Define Artifact treatment for Registry and archival views.

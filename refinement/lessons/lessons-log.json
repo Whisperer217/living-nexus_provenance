@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-11-06T19:05:00Z",
-  "totalLessons": 85,
+  "lastUpdated": "2026-11-06T19:17:00Z",
+  "totalLessons": 86,
   "lessons": [
     {
       "id": "LESSON-001",
@@ -2141,6 +2141,33 @@
         "tablet-containment",
         "horizontal-snap",
         "bottom-stack",
+        "no-data-change",
+        "no-player-change",
+        "no-deployment"
+      ]
+    },
+    {
+      "id": "LESSON-086",
+      "date": "2026-11-06",
+      "checkpointVersion": "pending",
+      "category": "architecture",
+      "problem": "Explore desktop inherited a generic 24px gutter and fixed 17rem expanded gallery inside the content area already narrowed by the intentional RightRail reservation, leaving the gallery farther from the LeftRail and constraining Works at tablet widths.",
+      "solution": "Keep MainLayout, LeftRail, and RightRail unchanged; add route-owned Explore hooks, use a 16px desktop gutter, widen only the expanded gallery with a bounded clamp, and preserve compact/hidden widths plus the existing mobile single-column snap composition. Measure the actual rendered shell rather than inferring layout from a conceptual mockup.",
+      "files": [
+        "client/src/pages/ExplorePage.tsx",
+        "client/src/index.css",
+        "server/tests/exploreCreatorDirectory.contract.test.ts",
+        "docs/evidence/explore-desktop-spatial/VERIFICATION.md"
+      ],
+      "score": 0,
+      "tags": [
+        "explore",
+        "desktop-spatial",
+        "creator-gallery",
+        "left-rail-alignment",
+        "right-rail-preserved",
+        "works-surface",
+        "route-scoped-css",
         "no-data-change",
         "no-player-change",
         "no-deployment"

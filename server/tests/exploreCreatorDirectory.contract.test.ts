@@ -107,4 +107,15 @@ describe("Explore creator directory", () => {
     expect(explore).toContain("title=\"Refresh discovery\"");
     expect(explore).toContain("onSelect={setSelectedCreatorId}");
   });
+
+  it("keeps the desktop spatial correction route-scoped and preserves gallery modes", () => {
+    expect(explore).toContain('className="ln-explore-page min-h-screen"');
+    expect(explore).toContain('className="ln-explore-content mx-auto max-w-[1480px] px-4 pb-32 sm:px-6"');
+    expect(explore).toContain('ln-explore-spatial-shell--${galleryState}');
+    const css = read("client/src/index.css");
+    expect(css).toContain(".ln-explore-page .ln-explore-header__inner");
+    expect(css).toContain(".ln-explore-spatial-shell--expanded { grid-template-columns: clamp(17rem, 22vw, 19rem) minmax(0, 1fr); }");
+    expect(css).toContain(".ln-explore-spatial-shell--compact { grid-template-columns: 5.5rem minmax(0, 1fr); }");
+    expect(css).toContain(".ln-explore-spatial-shell--hidden { grid-template-columns: 3rem minmax(0, 1fr); }");
+  });
 });

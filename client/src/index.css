@@ -2042,7 +2042,15 @@ body.overlay-active-full:has([data-slot="dialog-content"]) {
   .ln-explore-gallery--hidden .ln-explore-gallery__header { justify-content: flex-end; border-bottom: 0; padding: 0; }
 
   @media (min-width: 900px) {
-    .ln-explore-spatial-shell { grid-template-columns: minmax(0, 17rem) minmax(0, 1fr); }
+    .ln-explore-page .ln-explore-header__inner,
+    .ln-explore-page .ln-explore-content { padding-inline: 1rem; }
+    .ln-explore-page .ln-explore-header__inner,
+    .ln-explore-page .ln-explore-content {
+      padding-left: 1rem !important;
+      padding-right: 1rem !important;
+    }
+    .ln-explore-page .ln-explore-content { max-width: none; }
+    .ln-explore-spatial-shell--expanded { grid-template-columns: clamp(17rem, 22vw, 19rem) minmax(0, 1fr); }
     .ln-explore-spatial-shell--compact { grid-template-columns: 5.5rem minmax(0, 1fr); }
     .ln-explore-spatial-shell--hidden { grid-template-columns: 3rem minmax(0, 1fr); }
     .ln-explore-gallery--compact .ln-explore-gallery__header > div:first-child { display: none; }

@@ -1,0 +1,63 @@
+{
+  "viewport": {
+    "width": 768,
+    "height": 900,
+    "scrollWidth": 768
+  },
+  "state": "expanded",
+  "shell": {
+    "x": 24,
+    "y": 151.375,
+    "width": 720,
+    "height": 5289.046875,
+    "right": 744,
+    "bottom": 5440.421875,
+    "gridTemplateColumns": "720px",
+    "gap": "16px",
+    "padding": "0px"
+  },
+  "header": {
+    "x": 0,
+    "y": 56,
+    "width": 768,
+    "height": 95.375,
+    "right": 768,
+    "bottom": 151.375,
+    "gridTemplateColumns": "none",
+    "gap": "normal",
+    "padding": "0px"
+  },
+  "gallery": {
+    "x": 24,
+    "y": 151.375,
+    "width": 720,
+    "height": 334.734375,
+    "right": 744,
+    "bottom": 486.109375,
+    "gridTemplateColumns": "none",
+    "gap": "normal",
+    "padding": "0px"
+  },
+  "registry": {
+    "x": 24,
+    "y": 1901.984375,
+    "width": 720,
+    "height": 3287.765625,
+    "right": 744,
+    "bottom": 5189.75,
+    "gridTemplateColumns": "none",
+    "gap": "normal",
+    "padding": "24px 12px 0px"
+  },
+  "main": {
+    "x": 0,
+    "y": 56,
+    "width": 768,
+    "height": 844,
+    "right": 768,
+    "bottom": 900,
+    "gridTemplateColumns": "none",
+    "gap": "normal",
+    "padding": "0px 0px 72px"
+  }
+}

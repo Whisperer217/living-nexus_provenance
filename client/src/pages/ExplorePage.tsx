@@ -1098,7 +1098,7 @@ export default function ExplorePage() {
   }, []);
 
   return (
-    <DepthAtmosphere className="min-h-screen" hue={43} variant="page">
+    <DepthAtmosphere className="ln-explore-page min-h-screen" hue={43} variant="page">
       {/* ── Sticky header ─────────────────────────────────────────── */}
       <div
         className="ln-explore-header sticky top-0 z-30 border-b"
@@ -1182,7 +1182,7 @@ export default function ExplorePage() {
       </div>
 
       {/* ── Main content ──────────────────────────────────────────── */}
-      <div className="mx-auto max-w-[1480px] px-4 pb-32 sm:px-6">
+      <div className="ln-explore-content mx-auto max-w-[1480px] px-4 pb-32 sm:px-6">
         <div className={`ln-explore-spatial-shell ln-explore-spatial-shell--${galleryState}`}>
           <CreatorGalleryRail
             creators={creators}
